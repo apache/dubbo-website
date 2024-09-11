@@ -1,0 +1,149 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 流量管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/traffic/</link><description>Recent content in 流量管理 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/traffic/mesh_router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/traffic/mesh_router/</guid><description>
+&lt;h2 id="路由规则介绍">路由规则介绍&lt;/h2>
+&lt;p>&lt;a href="https://www.yuque.com/docs/share/c132d5db-0dcb-487f-8833-7c7732964bd4?#">《微服务Mesh路由方案草案V2》&lt;/a>&lt;/p>
+&lt;h2 id="简介">简介&lt;/h2>
+&lt;p>路由规则，简单来说就是根据&lt;strong>特定的条件&lt;/strong>，将&lt;strong>特定的请求&lt;/strong>流量发送到&lt;strong>特定的服务提供者&lt;/strong>。从而实现流量的分配。&lt;/p>
+&lt;p>在 Dubbo3 统一路由规则的定义中，需要提供两个yaml格式的资源：virtual service 和 destination rule。其格式和 service mesh 定义的路由规则非常相似。&lt;/p>
+&lt;ul>
+&lt;li>virtual service&lt;/li>
+&lt;/ul>
+&lt;p>定义host，用于和destination rule建立联系。&lt;br>
+定义 service 匹配规则&lt;br>
+定义 match 匹配规则&lt;br>
+匹配到特定请求后，进行目标集群的查找和验证，对于为空情况，使用 fallback 机制。&lt;/p>
+&lt;ul>
+&lt;li>destination rule&lt;/li>
+&lt;/ul>
+&lt;p>定义特定集群子集，以及子集所适配的标签，标签从 provider 端暴露的 url 中获取，并尝试匹配。&lt;/p>
+&lt;h2 id="提供能力">提供能力&lt;/h2>
+&lt;h3 id="基于配置中心的路由配置">基于配置中心的路由配置&lt;/h3>
+&lt;p>sample示例参见&lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/route/meshroute">Mesh Router&lt;/a>&lt;/p>
+&lt;h4 id="1-路由规则文件注解">1. 路由规则文件注解&lt;/h4>
+&lt;p>路由规则只针对客户端，对于服务端，只需要在服务提供时打好特定的参数标签即可。&lt;/p>
+&lt;h5 id="11-virtual-service">1.1 virtual-service&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>: {&lt;span style="color:#268bd2">name&lt;/span>: demo-route}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># 使用正则表达式匹配service名，只有个满足该service名的请求才能路由。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># 就此例子来说，不满足service名的请求会直接找不到provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># - services:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># - { regex: org.apache.dubbo.UserProvider* }&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">routedetail&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># 匹配规则，如果（sourceLabel）客户端url满足存在参数 `trafficLabel: xxx` 的才能匹配成功&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">sourceLabels&lt;/span>: {&lt;span style="color:#268bd2">trafficLabel&lt;/span>: xxx}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: xxx-project
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>: &lt;span style="color:#586e75"># 一旦匹配上述match规则，将选择 dest_rule 里定义的名为 isolation 的子集&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>: {&lt;span style="color:#268bd2">host: demo, subset&lt;/span>: isolation}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">sourceLabels&lt;/span>: {&lt;span style="color:#268bd2">trafficLabel&lt;/span>: testing-trunk}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: testing-trunk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>: &lt;span style="color:#586e75"># 一旦匹配上述match规则，将选择 dest_rule 里定义的名为 testing-trunk 的子集&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>: {&lt;span style="color:#268bd2">host: demo, subset&lt;/span>: testing-trunk}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: testing &lt;span style="color:#586e75"># 没有match，兜底逻辑，上述不满足后一定会被匹配到。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>: {&lt;span style="color:#268bd2">host: demo, subset&lt;/span>: testing}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - {&lt;span style="color:#268bd2">exact&lt;/span>: com.apache.dubbo.sample.basic.IGreeter}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>: [demo] &lt;span style="color:#586e75"># 匹配dest_rule.yml里面的 host 为demo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="12-destination-rule">1.2 destination-rule&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DestinationRule
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>: { &lt;span style="color:#268bd2">name&lt;/span>: demo-route }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subsets&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">labels&lt;/span>: { &lt;span style="color:#268bd2">env-sign: xxx, tag1&lt;/span>: hello }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: isolation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">labels&lt;/span>: { &lt;span style="color:#268bd2">env-sign&lt;/span>: yyy }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: testing-trunk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">labels&lt;/span>: { &lt;span style="color:#268bd2">env-sign&lt;/span>: zzz }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: testing
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">trafficPolicy&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadBalancer&lt;/span>: { &lt;span style="color:#268bd2">simple&lt;/span>: ROUND_ROBIN }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-clientserver-路由参数设置">2. client、server 路由参数设置&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>client 端&lt;/p>
+&lt;p>dubbogo.yml&lt;/p>
+&lt;p>定义配置中心&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">data-id&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo-go-samples-configcenter-zookeeper-client&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在代码中通过 API 将配置发布至配置中心，也可预先手动配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>dynamicConfiguration, err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">GetRootConfig&lt;/span>().ConfigCenter.&lt;span style="color:#268bd2">GetDynamicConfiguration&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// publish mesh route config
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>err = dynamicConfiguration.&lt;span style="color:#268bd2">PublishConfig&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;dubbo.io.MESHAPPRULE&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>, MeshRouteConf)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>server 端&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">params&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env-sign&lt;/span>: zzz &lt;span style="color:#586e75"># server label, 对应 destination Rule中的testing，即兜底逻辑&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="3-运行方法">3. 运行方法&lt;/h4>
+&lt;p>直接使用goland运行本示例&lt;/p>
+&lt;p>运行后，可观测到所有客户端流量都路由至 server，根据source label，没有命中的virtualService，因此路由至兜底testing。&lt;/p></description></item><item><title>Overview: 优雅下线</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</guid><description>
+&lt;h1 id="优雅下线">优雅下线&lt;/h1>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者扩缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。
+因此，优雅下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力、传统服务治理能力的基础之上，应当提供服务下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。&lt;/p>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>在一次完整的RPC调用过程中，中间服务往往充当服务提供者和服务消费者两个角色。中间服务在接收到来自上游服务的请求之后，处理请求得到结果返回给上游服务，然后根据需要调用下游服务提供的接口使用下游服务。因此优雅下线功能需要兼顾服务作为服务提供者和服务消费者两侧的稳定性，具体可以分为以下几步：&lt;/p>
+&lt;ol>
+&lt;li>向注册中心进行反注册，销毁在注册中心注册的服务信息&lt;/li>
+&lt;li>作为服务提供者，要等待一段时间，保证客户端成功更新服务信息以及上游任务请求处理完毕，然后拒绝接收新的请求&lt;/li>
+&lt;li>作为服务消费者，要等待一段时间，保证使用下游服务的请求得到响应，然后取消对注册中心的订阅&lt;/li>
+&lt;li>销毁对下游任务的引用，销毁对外提供服务暴露的端口&lt;/li>
+&lt;li>执行用户的自定义回调操作&lt;/li>
+&lt;/ol>
+&lt;p>通过以上步骤，可以保证dubbo-go服务实例安全平稳停止，不对进行中的业务产生影响。&lt;/p>
+&lt;blockquote>
+&lt;p>注意：取消对注册中心的订阅不能在步骤1中执行，这是因为中间服务对下游服务发送请求的时候可能存在下游服务信息的变动&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>对dubbo-go实例使用&lt;code>kill pid&lt;/code>命令停止实例&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>以下是在yaml配置文件中，用户可以自定义的配置&lt;/p>
+&lt;ul>
+&lt;li>作为服务提供者，dubbo-go实例下线时需要等待客户端成功更新服务信息，这段时间在配置中对应的字段为consumer-update-wait-time，默认3s&lt;/li>
+&lt;li>作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求暂未处理完毕，需要等待上游任务请求处理完毕。作为服务消费者，dubbo-go实例需要等待对下游的请求收到回复。这段时间在配置中对应的字段为step-timeout，默认3s&lt;/li>
+&lt;li>作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求已经处理完毕，需要等待一段窗口时间，如果在窗口时间内没有接收到新的请求，再执行后续步骤。这段时间在配置中对应的字段为offline-request-window-timeout，默认0s&lt;/li>
+&lt;li>用户可以自定义是否开启优雅下线功能，在配置中对应的字段为internal-signal，默认开启。&lt;/li>
+&lt;li>dubbo-go实例在优雅下线过程中可能因为异常导致卡死，在配置中可以配置超时时间，实例在超时之后强制关闭。这在配置中对应的字段为timeout，默认60s&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout:60
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> step-timeout:3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> consumer-update-wait-time:3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> internal-signal:true
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> offline-request-window-timeout:0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>此外，如果用户希望在下线逻辑彻底结束后，执行一些自定义的回调操作，可以使用如下代码&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>extension.&lt;span style="color:#268bd2">AddCustomShutdownCallback&lt;/span>(&lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 用户自定义操作
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> })
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;p>&lt;a href="https://developer.aliyun.com/article/860775">【Dubbo-go 优雅上下线的设计与实践】&lt;/a>&lt;/p></description></item></channel></rss>

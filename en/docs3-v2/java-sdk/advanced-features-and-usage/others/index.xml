@@ -1,0 +1,470 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Others</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/</link><description>Recent content in Others on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Custom Service Container</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/service-container/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/service-container/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>The service container of Dubbo 3 is a standalone startup program, because the background service does not need the functions of web containers such as Tomcat or JBoss. If you insist on using the web container to load the service provider, it will increase complexity and waste resources. Therefore, services usually do not require the features of web containers such as Tomcat/JBoss, and there is no need to use web containers to load services.&lt;/p>
+&lt;p>The Dubbo3 service container is just a simple Main method and loads a simple Spring container for exposing services.&lt;/p>
+&lt;p>The loading content of the service container can be extended, and spring, jetty, log4j, etc. are built-in, and can be extended through &lt;a href="../../../reference-manual/spi/description/container">container extension point&lt;/a>. The configuration is configured in the -D parameter of the java command or &lt;code>dubbo.properties&lt;/code>.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>The web container is mainly used to respond to http requests and static pages. The Dubbo service provider only provides dubbo services externally. It is not suitable to use the web container. As a dubbo service provider alone, it only needs to load a simple spring container through a main method Expose the service.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="spring-container">Spring Container&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>Autoload all Spring configurations under the &lt;code>META-INF/spring&lt;/code> directory.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Configure the spring configuration loading location:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.spring.config=classpath*:META-INF/spring/*.xml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h3 id="jetty-container">Jetty Container&lt;/h3>
+&lt;ul>
+&lt;li>Starts an embedded Jetty for reporting status.&lt;/li>
+&lt;li>configuration:
+&lt;ul>
+&lt;li>&lt;code>dubbo.jetty.port=8080&lt;/code>: configure jetty startup port&lt;/li>
+&lt;li>&lt;code>dubbo.jetty.directory=/foo/bar&lt;/code>: Configure a directory that can be directly accessed through jetty to store static files&lt;/li>
+&lt;li>&lt;code>dubbo.jetty.page=log,status,system&lt;/code>: configure the displayed pages, all pages are loaded by default&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="log4j-container">Log4j Container&lt;/h3>
+&lt;ul>
+&lt;li>Automatically configure the configuration of log4j. When multiple processes are started, the log files are automatically divided into directories by process.&lt;/li>
+&lt;li>configuration:
+&lt;ul>
+&lt;li>&lt;code>dubbo.log4j.file=/foo/bar.log&lt;/code>: configure log file path&lt;/li>
+&lt;li>&lt;code>dubbo.log4j.level=WARN&lt;/code>: configure log level&lt;/li>
+&lt;li>&lt;code>dubbo.log4j.subdirectory=20880&lt;/code>: Configure the log subdirectory for multi-process startup to avoid conflicts&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="container-loading-instructions">Container loading instructions&lt;/h3>
+&lt;p>Only spring is loaded by default&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java org.apache.dubbo.container.Main
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Pass in the container to be loaded through the main function parameter&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java org.apache.dubbo.container.Main spring jetty log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Pass in the container to be loaded through the JVM startup parameters&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java org.apache.dubbo.container.Main -Ddubbo.container&lt;span style="color:#719e07">=&lt;/span>spring,jetty,log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Pass in the container to be loaded through &lt;code>dubbo.properties&lt;/code> configuration under the classpath&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.container=spring,jetty,log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Graceful shutdown</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/graceful-shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/graceful-shutdown/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>Graceful shutdown means that the service instance can be stopped safely and smoothly without affecting the ongoing business.
+A Dubbo service may be both a service provider and a service consumer. When the service is stopped:&lt;/p>
+&lt;ol>
+&lt;li>Consumers will no longer request stopped service instances&lt;/li>
+&lt;li>The request being processed by the service instance can be processed normally&lt;/li>
+&lt;/ol>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;ol>
+&lt;li>Stop the service with &lt;code>kill PID&lt;/code>&lt;/li>
+&lt;li>Stop the service through &lt;code>/shutdown&lt;/code> of SpringBoot Actuator&lt;/li>
+&lt;/ol>
+&lt;p>Dubbo 3.0 and above supports different types of Java applications, including SpringBoot applications, Spring applications, and non-Spring applications.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;p>Set the graceful shutdown timeout, the default timeout is 10 seconds, if it times out, it will be forced to shut down.
+This parameter can be configured in the dubbo.properties file, for example: 30 seconds.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Stop service waiting time, unit: milliseconds&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.service.shutdown.wait&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">30000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="precautions">Precautions&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>Dubbo uses JDK&amp;rsquo;s ShutdownHook to complete graceful shutdown, so if the user uses &lt;code>kill -9 PID&lt;/code> and other forced shutdown commands, it will not execute graceful shutdown, and will only execute when &lt;code>kill PID&lt;/code> is passed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Verify that Dubbo&amp;rsquo;s ShutdownHook is executed. You can find the keyword in the log file: &lt;code>Run shutdown hook now.&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>If Spring is used, please upgrade to version 4.2 and above, it is recommended to use version 5 or above&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>If SpringBoot is used, Dubbo&amp;rsquo;s ShutdownHook will be executed before SpringBoot&amp;rsquo;s ShutdownHook,
+If you use SpringBoot 2.3 and above, it is recommended to use it with SpringBoot&amp;rsquo;s graceful shutdown, and configure it in the configuration file application.yml:&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">server&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown&lt;/span>: graceful
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>If the ShutdownHook does not take effect, you can call it yourself according to the specific scenario:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ApplicationModel.defaultModel().destroy();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Host Address Custom Exposure</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/set-host/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/set-host/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>In Dubbo, Provider mainly does two things when it starts&lt;/p>
+&lt;ul>
+&lt;li>One is to start the server&lt;/li>
+&lt;li>The second is to register the service with the registration center. When starting the server, the socket needs to be bound, and when the service is registered with the registration center, the unique service address of the socket needs to be sent.&lt;/li>
+&lt;/ul>
+&lt;ol>
+&lt;li>What is the default &lt;code>host&lt;/code> when &lt;code>host&lt;/code> is not set in &lt;code>dubbo&lt;/code>?&lt;/li>
+&lt;li>How to specify the &lt;code>host&lt;/code> of the service in &lt;code>dubbo&lt;/code>, can we use hostname or domain instead of IP address as &lt;code>host&lt;/code>?&lt;/li>
+&lt;li>When using docker, sometimes it is necessary to set port mapping. At this time, the socket bound when starting the server and the socket registered with the registration center use different port numbers. How to set it at this time?&lt;/li>
+&lt;/ol>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="default-host-when-no-host-is-set">Default host when no host is set&lt;/h3>
+&lt;p>The general dubbo protocol configuration is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20890&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen that only the port number is configured, and the host is not configured. What is the host set at this time?&lt;/p>
+&lt;p>Looking at the code, it is found that in &lt;code>org.apache.dubbo.config.ServiceConfig#findConfigedHosts()&lt;/code>, the default host is obtained through &lt;code>InetAddress.getLocalHost().getHostAddress()&lt;/code>. Its return value is as follows:&lt;/p>
+&lt;ol>
+&lt;li>When not connected to the Internet, return 127.0.0.1&lt;/li>
+&lt;li>In the Alibaba Cloud server, return the private address, such as: 172.18.46.234&lt;/li>
+&lt;li>When testing locally, return the public address, such as: 30.5.10.11&lt;/li>
+&lt;/ol>
+&lt;h3 id="specify-the-socket-of-the-service">Specify the socket of the service&lt;/h3>
+&lt;p>Besides, you can configure &lt;code>host&lt;/code> through &lt;code>dubbo.protocol&lt;/code> or &lt;code>dubbo.provider&lt;/code>’s &lt;code>host&lt;/code> property, which supports IP address and domain name, as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20890&amp;#34;&lt;/span> host=&lt;span style="color:#2aa198">&amp;#34;www.example.com&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="socket-uses-a-different-port-number">socket uses a different port number&lt;/h3>
+&lt;p>See &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo set host by environment variable&lt;/a>&lt;/p>
+&lt;p>Some deployment scenarios need to dynamically specify the address of the service registration, such as the docker bridge network mode to specify the registration host ip to achieve external network communication. dubbo provides two pairs of system properties in the startup phase, which are used to set the ip and port addresses for external communication.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>DUBBO_IP_TO_REGISTRY&lt;/strong>: Register to the ip address of the registration center&lt;/li>
+&lt;li>&lt;strong>DUBBO_PORT_TO_REGISTRY&lt;/strong>: Register to the port of the registry center&lt;/li>
+&lt;li>&lt;strong>DUBBO_IP_TO_BIND&lt;/strong>: Listening ip address&lt;/li>
+&lt;li>&lt;strong>DUBBO_PORT_TO_BIND&lt;/strong>: Listening port&lt;/li>
+&lt;/ul>
+&lt;p>The above four configuration items are optional. If you do not configure dubbo, it will automatically obtain the ip and port. Please choose the configuration flexibly according to the specific deployment scenario.
+dubbo supports multiple protocols. If an application exposes multiple different protocol services at the same time, and you need to specify an ip or port for each service separately, please add a protocol prefix before the above attributes. Such as:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>HESSIAN_DUBBO_PORT_TO_BIND&lt;/strong>: port bound by hessian protocol&lt;/li>
+&lt;li>&lt;strong>DUBBO_DUBBO_PORT_TO_BIND&lt;/strong>: port bound by dubbo protocol&lt;/li>
+&lt;li>&lt;strong>HESSIAN_DUBBO_IP_TO_REGISTRY&lt;/strong>: ip registered by hessian protocol&lt;/li>
+&lt;li>&lt;strong>DUBBO_DUBBO_IP_TO_REGISTRY&lt;/strong>: ip registered by dubbo protocol&lt;/li>
+&lt;/ul>
+&lt;p>PORT_TO_REGISTRY or IP_TO_REGISTRY will not be used as default PORT_TO_BIND or IP_TO_BIND, but the reverse is true. Such as:&lt;/p>
+&lt;ul>
+&lt;li>Set &lt;code>PORT_TO_REGISTRY=20881&lt;/code> and &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>, then &lt;code>PORT_TO_BIND&lt;/code> and &lt;code>IP_TO_BIND&lt;/code> will not be affected&lt;/li>
+&lt;li>Set &lt;code>PORT_TO_BIND=20881&lt;/code> and &lt;code>IP_TO_BIND=30.5.97.6&lt;/code>, then default &lt;code>PORT_TO_REGISTRY=20881&lt;/code> and &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h3 id="summarize">Summarize&lt;/h3>
+&lt;ol>
+&lt;li>You can configure &lt;code>host&lt;/code> through the &lt;code>host&lt;/code> attribute of &lt;code>dubbo.protocol&lt;/code> or &lt;code>dubbo.provider&lt;/code>, and support IP addresses and domain names. But at this time, the IP address registered to the registration center and the listening IP address are the same value&lt;/li>
+&lt;li>In order to solve the problem that the consumer cannot communicate with the provider in the virtual environment or LAN, you can set the IP address registered to the registration center and the listening IP address respectively through environment variables, and its priority is higher than &lt;code>dubbo.protocol&lt;/code> or &lt;code>dubbo. provider&lt;/code>s &lt;code>host&lt;/code> configuration&lt;/li>
+&lt;/ol>
+&lt;h3 id="refer-to">refer to&lt;/h3>
+&lt;ol>
+&lt;li>&lt;a href="https://github.com/apache/dubbo/issues/2043">Proposal: support hostname or domain in service discovery.&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo sets host through environment variables&lt;/a>&lt;/li>
+&lt;/ol></description></item><item><title>Docs3-V2: Log Framework Adaptation and Runtime Management</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-management/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>Adaptation of log frameworks. Since &lt;code>2.2.1&lt;/code>, dubbo has built-in adaptation of log4j, slf4j, jcl, and jdk log frameworks.&lt;/p>
+&lt;p>Log framework runtime management, starting from &lt;code>3.0.10&lt;/code>, dubbo-qos runtime management supports query log configuration and dynamically modify the used log framework and log level.&lt;/p>
+&lt;blockquote>
+&lt;p>The log configuration modified by dubbo-qos is not stored persistently, and will become invalid after the application is restarted.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h2 id="log-framework-adaptation">Log framework adaptation&lt;/h2>
+&lt;p>The logging output policy can be explicitly configured in the following ways&lt;/p>
+&lt;h3 id="1-command-line">1. Command line&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java -Ddubbo.application.logger&lt;span style="color:#719e07">=&lt;/span>log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-specify-in-dubboproperties">2. Specify in &lt;code>dubbo.properties&lt;/code>&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.logger=log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-configuration-in-dubboxml">3. Configuration in &lt;code>dubbo.xml&lt;/code>&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> logger=&lt;span style="color:#2aa198">&amp;#34;log4j&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For custom extensions, please refer to &lt;a href="../../../reference-manual/spi/description/logger-adapter">Log Adapter Extension&lt;/a>&lt;/p>
+&lt;h2 id="logging-framework-runtime-management">Logging framework runtime management&lt;/h2>
+&lt;h3 id="1-query-log-configuration">1. Query log configuration&lt;/h3>
+&lt;p>Command: &lt;code>loggerInfo&lt;/code>&lt;/p>
+&lt;p>&lt;strong>example&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; loggerInfo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>output&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-modify-log-level">2. Modify log level&lt;/h3>
+&lt;p>Command: &lt;code>switchLogLevel {level}&lt;/code>&lt;/p>
+&lt;p>level: &lt;code>ALL&lt;/code>, &lt;code>TRACE&lt;/code>, &lt;code>DEBUG&lt;/code>, &lt;code>INFO&lt;/code>, &lt;code>WARN&lt;/code>, &lt;code>ERROR&lt;/code>, &lt;code>OFF&lt;/code>&lt;/p>
+&lt;p>&lt;strong>example&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; switchLogLevel WARN
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>output&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;switchLogLevel WARN
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: WARN```
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-modify-the-log-output-framework">3. Modify the log output framework&lt;/h3>
+&lt;p>Command: &lt;code>switchLogger {loggerAdapterName}&lt;/code>&lt;/p>
+&lt;p>loggerAdapterName: &lt;code>slf4j&lt;/code>, &lt;code>jcl&lt;/code>, &lt;code>log4j&lt;/code>, &lt;code>jdk&lt;/code>, &lt;code>log4j2&lt;/code>&lt;/p>
+&lt;p>&lt;strong>example&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; switchLogger slf4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>output&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;switchLogger slf4j
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [slf4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Kubernetes Probe</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>&lt;a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/">Pod lifecycle&lt;/a> is closely related to service scheduling. Through the implementation of official Kubernetes probes, Dubbo3 and even the entire application can The life cycle of the Pod and the life cycle of the Pod. In the entire life cycle of the Pod, only the health check part of the Pod is affected. We can configure the liveness probe (survival probe) and readiness probe (readability probe) to Affects the life cycle of the container.&lt;/p>
+&lt;p>Through the SPI mechanism of Dubbo3, various &amp;ldquo;probes&amp;rdquo; are implemented internally, based on the HTTP service of the Dubbo3 QOS operation and maintenance module, so that the container probe can obtain the status of the corresponding probe in the application. In addition, the implementation mechanism of SPI is also conducive to users&amp;rsquo; self-expanding of internal &amp;ldquo;probes&amp;rdquo;, so that the entire application life cycle can be more effectively controlled.&lt;/p>
+&lt;p>&lt;strong>SPI interfaces corresponding to the three probes&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>livenessProbe: &lt;code>org.apache.dubbo.qos.probe.LivenessProbe&lt;/code>&lt;/li>
+&lt;li>readinessProbe: &lt;code>org.apache.dubbo.qos.probe.ReadinessProbe&lt;/code>&lt;/li>
+&lt;li>startupProbe: &lt;code>org.apache.dubbo.qos.probe.StartupProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>The interface will automatically obtain the implementation of all SPIs of the current application, and the interface will return success if the SPI implementations of the corresponding interface are successfully ready.&lt;/p>
+&lt;p>For an introduction to more extensions of Dubbo3 SPI, see &lt;a href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/spi/description/">Dubbo SPI Extensions&lt;/a>&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;ul>
+&lt;li>kubelet uses &lt;code>liveness probe&lt;/code> to determine if your application is running, to see if it is alive. Generally speaking, if your program crashes, Kubernetes will immediately know that the program has terminated, and then restart the program. The purpose of our liveness probe is to capture that the current application has not terminated or crashed. If these situations occur, restart the container in this state so that the application can still continue in the presence of bugs run down.&lt;/li>
+&lt;li>The kubelet uses &lt;code>readiness probe&lt;/code> to determine if the container is ready to receive traffic. Is it ready and ready to work now. Only when the containers in the Pod are all in the ready state, the kubelet will consider the Pod to be in the ready state, because there may be multiple containers under a Pod. If the Pod is not ready, we will remove it from the Service&amp;rsquo;s Endpoints list, so that our traffic will not be routed to the Pod.&lt;/li>
+&lt;/ul>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="survival-detection">Survival detection&lt;/h3>
+&lt;p>For the livenessProbe liveness detection, since the Dubbo3 framework itself cannot obtain the liveness status of the application, this interface has no default implementation and returns success by default. Developers can expand this SPI interface according to the SPI definition, and judge whether it is alive or not from the application level.&lt;/p>
+&lt;p>About &lt;a href="../../../reference-manual/spi/description/liveness/">liveness liveness probe&lt;/a> extension example&lt;/p>
+&lt;h3 id="readiness-check">Readiness check&lt;/h3>
+&lt;p>For the readinessProbe readiness detection, Dubbo3 currently provides two detection dimensions by default. One is to judge whether the Dubbo3 service itself is started or stopped, and the other is to check whether all services have registered interfaces. If all services have been offline from the registration center (you can Operate via QOS Operations) will return Not Ready.&lt;/p>
+&lt;p>About the &lt;a href="../../../reference-manual/spi/description/readiness/">readiness readiness probe&lt;/a> extended example&lt;/p>
+&lt;h3 id="start-detection">Start detection&lt;/h3>
+&lt;p>For startupProbe startup detection, Dubbo3 currently provides a detection dimension by default, which is to return to the ready state after all startup processes (interface exposure, registration center writing, etc.) are completed.&lt;/p>
+&lt;p>About the &lt;a href="../../../reference-manual/spi/description/startup/">startup startup probe&lt;/a> extended example&lt;/p>
+&lt;h3 id="reference-example">Reference example&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">livenessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /live
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">readinessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /ready
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">startupProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /startup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">failureThreshold&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>QOS When the computing node detects memory pressure, kuberentes will BestEffort -&amp;gt; Burstable -&amp;gt; Guaranteed to evict Pods in sequence.&lt;/p>
+&lt;/blockquote>
+&lt;p>At present, all three probes have corresponding interfaces, and the path is the command in QOS. Please modify the port information according to the QOS configuration (the default port is 22222). For other parameters, please refer to &lt;a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes official documentation&lt;/a>.&lt;/p></description></item><item><title>Docs3-V2: Dubbo deploy to Docker environment</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/docker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/docker/</guid><description>
+&lt;p>Some deployment scenarios need to dynamically specify the address of service registration. For example, docker bridge network mode need to specify a registered host IP for external network communication. Dubbo provides two pairs of system attributes in the startup phase, which are used to set the IP and port addresses of external communication.&lt;/p>
+&lt;ul>
+&lt;li>DUBBO_IP_TO_REGISTRY &amp;mdash; Registering to the IP address of the registration center&lt;/li>
+&lt;li>DUBBO_PORT_TO_REGISTRY &amp;mdash; Registering to the port of the registration center&lt;/li>
+&lt;li>DUBBO_IP_TO_BIND &amp;mdash; Listening IP addresses  &lt;/li>
+&lt;li>DUBBO_PORT_TO_BIND &amp;mdash; Listening ports&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;ol>
+&lt;li>The above four configurations are optional. Dubbo will automatically get IP and port if there is no configuration. Please choose them flexibly according to deployment scenarios.&lt;/li>
+&lt;li>Dubbo supports multi-protocol. &lt;strong>If an application exposes multiple different protocol services simultaneously and need to specify IP or port separately for each service. Please add the protocol prefix before the above attributes separately.&lt;/strong> For example:&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>HESSIAN_DUBBO_PORT_TO_BIND hessian protocol bound port&lt;/li>
+&lt;li>DUBBO_DUBBO_PORT_TO_BIND   dubbo protocol bound port&lt;/li>
+&lt;li>HESSIAN_DUBBO_IP_TO_REGISTRY hessian protocol registered IP&lt;/li>
+&lt;li>DUBBO_DUBBO_IP_TO_REGISTRY     dubbo protocol registered IP&lt;/li>
+&lt;/ul>
+&lt;ol start="3">
+&lt;li>&lt;code>PORT_TO_REGISTRY&lt;/code> or &lt;code>IP_TO_REGISTRY&lt;/code>won’t be used as default &lt;code>PORT_TO_BIND&lt;/code> or &lt;code>IP_TO_BIND&lt;/code>，But the reverse is true.&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>If set&lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>，then &lt;code>PORT_TO_BIND&lt;/code> &lt;code>IP_TO_BIND&lt;/code>won’t be affected.&lt;/li>
+&lt;li>If set&lt;code>PORT_TO_BIND=20881&lt;/code> &lt;code>IP_TO_BIND=30.5.97.6&lt;/code>，then &lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code> by default.&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo-docker-sample&lt;/a> local operation process：&lt;/p>
+&lt;ol>
+&lt;li>clone project to local&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>git clone git@github.com:dubbo/dubbo-docker-sample.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>package local maven&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>mvn clean install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>build a mirror by docker build&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-docker-sample .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dockerfile&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD target/dubbo-docker-sample-0.0.1-SNAPSHOT.jar app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENV &lt;span style="color:#268bd2">JAVA_OPTS&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT &lt;span style="color:#b58900">exec&lt;/span> java &lt;span style="color:#268bd2">$JAVA_OPTS&lt;/span> -jar /app.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>Create and run containers from mirroring&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Since we use the zk registration center, we start zk container first&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --name zkserver --restart always -d zookeeper:3.4.9
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker run -e &lt;span style="color:#268bd2">DUBBO_IP_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>30.5.97.6 -e &lt;span style="color:#268bd2">DUBBO_PORT_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span> -p 30.5.97.6:20881:20880 --link zkserver:zkserver -it --rm dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Suppose the host IP is 30.5.97.6.
+set the provider to register the IP address and port of the registration center by environment variables &lt;code>DUBBO_IP_TO_REGISTRY=30.5.97.6&lt;/code> &lt;code>DUBBO_PORT_TO_REGISTRY=20881&lt;/code>  
+Implement the port mapping by&lt;code>-p 30.5.97.6:20881:20880&lt;/code>, where 20880 is the listening port automatically selected by dubbo. There is no monitoring IP configuration, so it will listen 0.0.0.0 (all IP).
+After startup, the registered address of provider is 30.5.97.6:20881, and the listening address of the container is: 0.0.0.0:20880 &lt;/p>
+&lt;/blockquote>
+&lt;ol start="5">
+&lt;li>Test
+Execute from another host or container&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>telnet 30.5.97.6 &lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invoke org.apache.dubbo.test.docker.DemoService.hello&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Logging Framework Configuration and Usage</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-howto/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/others/logger-howto/</guid><description>
+&lt;h2 id="feature-description">Feature Description&lt;/h2>
+&lt;p>Prior to dubbo 3.3.0-beta.3, dubbo and dubbo-samples were using a mix of log4j and logback, leading to frequent conflicts and errors due to some modules lacking log configuration. Therefore, after 3.3.0-beta.3, the logging components have been upgraded to log4j2 for simplicity and reduced maintenance costs. This document explains how to configure and use the logging framework to avoid conflicts caused by indirectly introducing multiple logging frameworks.&lt;/p>
+&lt;h2 id="how-to-use">How To Use&lt;/h2>
+&lt;h3 id="usage-conventions">Usage Conventions&lt;/h3>
+&lt;ul>
+&lt;li>Please use log4j2 as the logging framework, and avoid using log4j and logback. Except for some legacy scenarios, using a single logging framework can reduce usage cost and prevent conflicts.&lt;/li>
+&lt;li>Avoid passing logging framework dependencies upstream, which can be resolved by setting scope to &lt;code>test&lt;/code> or &lt;code>provider&lt;/code> in maven, or by setting &lt;code>&amp;lt;optional&amp;gt;true&amp;lt;/optional&amp;gt;&lt;/code>. As a service framework, dubbo should ideally avoid passing non-essential dependencies and leave the choice of logging framework to the user.&lt;/li>
+&lt;/ul>
+&lt;h3 id="usage-scenarios">Usage Scenarios&lt;/h3>
+&lt;h4 id="1-general-dubbo-module">1. General dubbo Module&lt;/h4>
+&lt;p>Most modules are of this type, generally requiring logging frameworks for unit testing.&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Include Maven dependency, note if parent has already included it, then there&amp;rsquo;s no need to add it again:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>test&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Add log4j2 logging configuration &lt;code>src/test/resources/log4j2-test.xml&lt;/code>, the reason for using this name is to ensure the highest priority.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%d{HH:mm:ss.SSS} |-%highlight{%-5p} [%t] %40.40c:%-3L -| %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect,org.junit,org.mockito)}&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="2-non-spring-boot-demo-module">2. Non spring-boot Demo Module&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>Include Maven dependency, note if parent has already included it, then there&amp;rsquo;s no need to add it again&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Add log4j2 logging configuration &lt;code>src/test/resources/log4j2-test.xml&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%style{%d{HH:mm:ss.SSS}}{Magenta} %style{|-}{White}%highlight{%-5p} [%t] %style{%40.40c}{Cyan}:%style{%-3L}{Blue} %style{-|}{White} %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect)}&amp;#34;&lt;/span> disableAnsi=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="3-spring-boot-demo-module">3. Spring-boot Demo Module&lt;/h4>
+&lt;p>Spring-boot supports introducing log4j2 dependencies via a starter, but note that spring-boot defaults to using logback, so it needs to be excluded in &lt;code>&amp;lt;dependencyManagement&amp;gt;&lt;/code>&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Exclude spring-boot-starter-logging&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-dependencies&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>import&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-logging&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Include Maven dependency:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-log4j2&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Add log4j2 logging configuration &lt;code>src/main/resources/log4j2.xml&lt;/code>&lt;/p>
+&lt;p>Optional, as spring-boot comes with a default logging configuration.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="4-spring-boot-native-demo-module">4. Spring-boot native Demo Module&lt;/h4>
+&lt;p>Since log4j2 does not yet support native, use logback as the logging framework. No changes are necessary, retain the existing approach and ensure not to indirectly introduce log4j or slf4j-log4j12.&lt;/p>
+&lt;h2 id="common-logging-framework-issues">Common Logging Framework Issues&lt;/h2>
+&lt;h4 id="1-missing-logging-framework">1. Missing Logging Framework&lt;/h4>
+&lt;p>Console output:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: No SLF4J providers were found.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Defaulting to no-operation (NOP) logger implementation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See SLF4J Error Codes for further details.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Solution: Add log4j2 dependency&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-logging-framework-conflict">2. Logging Framework Conflict&lt;/h4>
+&lt;p>Console output:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: Class path contains multiple SLF4J bindings.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../slf4j-log4j12-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../logback-classic-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../log4j-slf4j-impl-2.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Exception in thread &amp;#34;main&amp;#34; java.lang.IllegalArgumentException: LoggerFactory is not a Logback LoggerContext but Logback is on the classpath
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Solution: Exclude all dependencies except for log4j-slf4j-impl. It&amp;rsquo;s highly recommended to use &lt;a href="https://plugins.jetbrains.com/plugin/7179-maven-helper">Maven Helper - IntelliJ IDEs Plugin&lt;/a> for dependency analysis and exclusion.&lt;/p>
+&lt;h4 id="3-other-issues">3. Other Issues&lt;/h4>
+&lt;p>Refer to: &lt;a href="https://www.slf4j.org/codes.html">SLF4J Error Codes&lt;/a>&lt;/p></description></item></channel></rss>

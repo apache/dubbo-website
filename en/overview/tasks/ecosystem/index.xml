@@ -1,0 +1,269 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Microservice Governance</title><link>https://dubbo.apache.org/en/overview/tasks/ecosystem/</link><description>Recent content in Microservice Governance on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/tasks/ecosystem/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Transaction Management</title><link>https://dubbo.apache.org/en/overview/tasks/ecosystem/transaction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/tasks/ecosystem/transaction/</guid><description>
+&lt;h2 id="what-is-seata">What is Seata&lt;/h2>
+&lt;p>Seata is an open source distributed transaction solution dedicated to providing high-performance and easy-to-use distributed transaction services. Seata will provide users with AT, TCC, SAGA and XA transaction modes to create a one-stop distributed solution for users.&lt;/p>
+&lt;h2 id="1-example-architecture-description">1. Example architecture description&lt;/h2>
+&lt;p>The user purchases commodity business, and the whole business includes 3 microservices:&lt;/p>
+&lt;ul>
+&lt;li>Inventory service: deduction of the inventory quantity of a given item.&lt;/li>
+&lt;li>Order service: Generate orders based on purchase requests.&lt;/li>
+&lt;li>Account Services: deduction of the user account amount.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/seata/transaction-1.png" alt="image.png">&lt;/p>
+&lt;h3 id="storageservice">StorageService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">StorageService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Deducted storage quantity
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deduct&lt;/span>(String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> count);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="orderservice">OrderService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">OrderService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Create Order
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Order &lt;span style="color:#268bd2">create&lt;/span>(String userId, String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> orderCount);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="accountservice">AccountService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">AccountService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Borrow from user account
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">debit&lt;/span>(String userId, &lt;span style="color:#dc322f">int&lt;/span> money);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="two-the-main-business-logic">Two, the main business logic&lt;/h2>
+&lt;h3 id="businessservice">BusinessService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">BusinessServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> BusinessService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> StorageService storageService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> OrderService orderService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Purchasing
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">purchase&lt;/span>(String userId, String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> orderCount) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Deduct storage amount&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> storageService.deduct(commodityCode, orderCount);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Create Order&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> orderService.create(userId, commodityCode, orderCount);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="storageservice-1">StorageService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StorageServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> StorageService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> JdbcTemplate jdbcTemplate;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deduct&lt;/span>(String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> count) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Modify the database: deduct the amount of storage&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> jdbcTemplate.update(&lt;span style="color:#2aa198">&amp;#34;update storage_tbl set count = count - ? where commodity_code = ?&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{count, commodityCode});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="orderservice-1">OrderService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">OrderServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> OrderService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> AccountService accountService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> JdbcTemplate jdbcTemplate;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Order &lt;span style="color:#268bd2">create&lt;/span>(String userId, String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> orderCount) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// calculate the amount&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> orderMoney &lt;span style="color:#719e07">=&lt;/span> calculate(commodityCode, orderCount);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// The amount deducted from the user account&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> accountService.debit(userId, orderMoney);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Modify the database: create a new order&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">final&lt;/span> Order order &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Order();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.userId &lt;span style="color:#719e07">=&lt;/span> userId;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.commodityCode &lt;span style="color:#719e07">=&lt;/span> commodityCode;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.count &lt;span style="color:#719e07">=&lt;/span> orderCount;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.money &lt;span style="color:#719e07">=&lt;/span> orderMoney;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> KeyHolder keyHolder &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> GeneratedKeyHolder();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> jdbcTemplate. &lt;span style="color:#268bd2">update&lt;/span>(con &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PreparedStatement pst &lt;span style="color:#719e07">=&lt;/span> con. &lt;span style="color:#268bd2">prepareStatement&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;insert into order_tbl (user_id, commodity_code, count, money) values (?, ?, ?, ?)&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PreparedStatement. RETURN_GENERATED_KEYS);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pst.setObject(1, order.userId);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pst.setObject(2, order.commodityCode);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pst.setObject(3, order.count);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pst.setObject(4, order.money);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> pst;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }, keyHolder);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.id &lt;span style="color:#719e07">=&lt;/span> keyHolder.getKey().longValue();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> order;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="accountservice-1">AccountService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AccountServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> AccountService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> JdbcTemplate jdbcTemplate;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">debit&lt;/span>(String userId, &lt;span style="color:#dc322f">int&lt;/span> money) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Modify the database: deduct the amount from the user account&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> jdbcTemplate.update(&lt;span style="color:#2aa198">&amp;#34;update account_tbl set money = money - ? where user_id = ?&amp;#34;&lt;/span>, &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{money, userId});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-quick-start-example">3. Quick start example&lt;/h2>
+&lt;h3 id="step-1-download-the-source-code">Step 1: Download the source code&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone -b master https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ./dubbo-samples-transaction/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-start-seata-server-and-mysql-through-docker-compose">Step 2: Start Seata-Server and MySQL through docker-compose&lt;/h3>
+&lt;p>In this example, we use docker-compose to quickly pull up services like seata-server and mysql.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> src/main/resources/docker
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker-compose up
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-build-use-cases">Step 3: Build use cases&lt;/h3>
+&lt;p>Execute the maven command to package the demo project&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-4-start-accountservice">Step 4: Start AccountService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>transaction&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.dubbo.samples.starter.DubboAccountServiceStarter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-5-start-orderservice">Step 5: Start OrderService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>transaction&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.dubbo.samples.starter.DubboOrderServiceStarter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-6-start-storageservice">Step 6: Start StorageService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>transaction&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.dubbo.samples.starter.DubboStorageServiceStarter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-7-start-businessservice">Step 7: Start BusinessService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>transaction&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.dubbo.samples.starter.DubboBusinessTester
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-example-core-process">4. Example core process&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/seata/transaction-2.png" alt="image.png">&lt;/p>
+&lt;h3 id="step-1-modify-the-business-code">Step 1: Modify the business code&lt;/h3>
+&lt;p>Here only one line of annotation &lt;code>@GlobalTransactional&lt;/code> is required to be written on the method of the business initiator:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GlobalTransactional&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">purchase&lt;/span>(String userId, String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> orderCount) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>  …
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-install-the-database">Step 2: Install the database&lt;/h3>
+&lt;ul>
+&lt;li>Requirements: MySQL (InnoDB storage engine).&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Tips:&lt;/strong> In fact, the 3 microservices in the example require 3 independent databases, but for convenience we use the same physical database and configure 3 logical connection strings.&lt;/p>
+&lt;p>Change the database url, username and password in the following xml files&lt;/p>
+&lt;p>dubbo-account-service.xml
+dubbo-order-service.xml
+dubbo-storage-service.xml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;property&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;url&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;jdbc:mysql://x.x.x.x:3306/xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;property&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;username&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;property&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;password&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-create-undo_log-table-for-seata">Step 3: Create undo_log table for Seata&lt;/h3>
+&lt;p>&lt;code>UNDO_LOG&lt;/code> This table is used in Seata&amp;rsquo;s AT mode.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">-- Note that when the Seata version is upgraded to 0.3.0+, the normal index will be changed to a unique index.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>undo_log&lt;span style="color:#719e07">`&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">bigint&lt;/span>(&lt;span style="color:#2aa198">20&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">bigint&lt;/span>(&lt;span style="color:#2aa198">20&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">100&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>context&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">128&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>rollback_info&lt;span style="color:#719e07">`&lt;/span> longblob &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>log_status&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>log_created&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>log_modified&lt;span style="color:#719e07">`&lt;/span> datetime &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>ext&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">100&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">UNIQUE&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> &lt;span style="color:#719e07">`&lt;/span>ux_undo_log&lt;span style="color:#719e07">`&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>xid&lt;span style="color:#719e07">`&lt;/span>,&lt;span style="color:#719e07">`&lt;/span>branch_id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB AUTO_INCREMENT&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-4-create-related-business-tables">Step 4: Create related business tables&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">DROP&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>storage_tbl&lt;span style="color:#719e07">`&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>storage_tbl&lt;span style="color:#719e07">`&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>commodity_code&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>&lt;span style="color:#719e07">count&lt;/span>&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">UNIQUE&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>commodity_code&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">DROP&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>order_tbl&lt;span style="color:#719e07">`&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>order_tbl&lt;span style="color:#719e07">`&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>user_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>commodity_code&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>&lt;span style="color:#719e07">count&lt;/span>&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>money&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">DROP&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">IF&lt;/span> &lt;span style="color:#719e07">EXISTS&lt;/span> &lt;span style="color:#719e07">`&lt;/span>account_tbl&lt;span style="color:#719e07">`&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">CREATE&lt;/span> &lt;span style="color:#719e07">TABLE&lt;/span> &lt;span style="color:#719e07">`&lt;/span>account_tbl&lt;span style="color:#719e07">`&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">NOT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span> AUTO_INCREMENT,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>user_id&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">varchar&lt;/span>(&lt;span style="color:#2aa198">255&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#719e07">NULL&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">`&lt;/span>money&lt;span style="color:#719e07">`&lt;/span> &lt;span style="color:#b58900">int&lt;/span>(&lt;span style="color:#2aa198">11&lt;/span>) &lt;span style="color:#719e07">DEFAULT&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">PRIMARY&lt;/span> &lt;span style="color:#719e07">KEY&lt;/span> (&lt;span style="color:#719e07">`&lt;/span>id&lt;span style="color:#719e07">`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) ENGINE&lt;span style="color:#719e07">=&lt;/span>InnoDB &lt;span style="color:#719e07">DEFAULT&lt;/span> CHARSET&lt;span style="color:#719e07">=&lt;/span>utf8;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-5-start-the-seata-server-service">Step 5: Start the Seata-Server service&lt;/h3>
+&lt;ul>
+&lt;li>Download the &lt;a href="https://github.com/seata/seata/releases">server package&lt;/a>, unzip it.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>Usage: sh seata-server.sh&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">for&lt;/span> linux and mac&lt;span style="color:#719e07">)&lt;/span> or cmd seata-server.bat&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#719e07">for&lt;/span> windows&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#719e07">[&lt;/span>options&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Options:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --host, -h
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> The host to bind.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Default: 0.0.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --port, -p
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> The port to listen.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Default: &lt;span style="color:#2aa198">8091&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --storeMode, -m
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> log store mode: file, db
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Default: file
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> --help
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>e.g.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sh seata-server.sh -p &lt;span style="color:#2aa198">8091&lt;/span> -h 127.0.0.1 -m file
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Current Limit Downgrade</title><link>https://dubbo.apache.org/en/overview/tasks/ecosystem/rate-limit/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/tasks/ecosystem/rate-limit/</guid><description>
+&lt;h2 id="what-is-sentinel">What is Sentinel&lt;/h2>
+&lt;p>With the popularity of microservices, the stability between services and services has become more and more important. Sentinel is a traffic management component for distributed, multilingual and heterogeneous service architectures. It mainly uses traffic as the entry point, from traffic routing, traffic control, traffic shaping, fuse downgrade, system adaptive overload protection, hotspot traffic protection, etc. dimensions to help developers ensure the stability of microservices.&lt;/p>
+&lt;h2 id="1-example-architecture-description">1. Example architecture description&lt;/h2>
+&lt;p>Interface definition:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">FooService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Interface implementation:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(timeout &lt;span style="color:#719e07">=&lt;/span> 3000)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">FooServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> FooService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> String. &lt;span style="color:#268bd2">format&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Hello, %s at %s&amp;#34;&lt;/span>, name, LocalDateTime. &lt;span style="color:#268bd2">now&lt;/span>());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Current limiting configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>FlowRule flowRule &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> FlowRule(FooService. &lt;span style="color:#268bd2">class&lt;/span>. &lt;span style="color:#268bd2">getName&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .setCount(10)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .setGrade(RuleConstant.FLOW_GRADE_QPS);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FlowRuleManager. &lt;span style="color:#268bd2">loadRules&lt;/span>(Collections. &lt;span style="color:#268bd2">singletonList&lt;/span>(flowRule));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-quick-start-example">2. Quick start example&lt;/h2>
+&lt;h3 id="step-1-download-the-source-code">Step 1: Download the source code&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone -b master https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ./dubbo-samples-sentinel/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-build-use-cases">Step 2: Build use cases&lt;/h3>
+&lt;p>Execute the maven command to package the demo project&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-start-provider">Step 3: Start Provider&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>sentinel&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.samples.sentinel.FooProviderBootstrap
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-4-start-orderservice">Step 4: Start OrderService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>sentinel&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.samples.sentinel.FooConsumerBootstrap
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see that in the console output, &lt;code>Blocked&lt;/code> means that blocking has started.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.809
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.812
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.815
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.818
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.821
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.823
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.826
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.828
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.830
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.834
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>For more usage methods of Sentinel, please refer to: &lt;a href="https://dubbo.apache.org/zh-cn/blog/2018/07/27/sentinel-%E4%B8%BA-dubbo-%E6%9C%8D%E5%8A%A1%E4%BF%9D%E9%A9%BE%E6%8A%A4%E8%88%AA/">Sentinel escorts Dubbo services&lt;/a>, &lt;a href="https://sentinelguard.io/zh-cn/index.html">Sentinel official website&lt;/a>&lt;/p>
+&lt;/blockquote></description></item></channel></rss>

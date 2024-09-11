@@ -1,0 +1,37 @@
+# no cahce for root index redirection
+<IfModule mod_expires.c>
+    ExpiresActive off
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set Cache-Control "no-store, no-cache, must-revalidate"
+    Header always set Expires "Thu, 01 Dec 1994 16:00:00 GMT"
+    Header always merge Vary "Accept-Language"
+    Header set Content-Security-Policy "frame-src *"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  RewriteCond "%{HTTP:Accept-Language}" ^zh
+  RewriteCond %{HTTP_HOST} !cn
+  RewriteCond %{HTTP_HOST} !static
+  RewriteCond %{HTTP_HOST} !dubbo-
+  RewriteRule ^(.*)$ https://cn.dubbo.apache.org/$1 [L,R=302]
+
+  RewriteCond %{SERVER_PORT} !^443$
+  RewriteCond %{HTTP_HOST} !static
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  RewriteCond "%{HTTP:Accept-Language}" ^zh [NC]
+  RewriteRule ^/?(index\.html)?$ "/zh-cn/index.html" [L,R=302]
+
+  RewriteRule ^/?(index\.html)?$ "/en/index.html" [L,R=302]
+
+  RewriteCond "%{HTTP:Accept-Language}" ^zh [NC]
+  RewriteRule ^/?faq/?([\w\-/]+)?$ "/zh-cn/overview/mannual/java-sdk/faq/$1" [L,R=302]
+
+  RewriteRule ^/?faq/?([\w\-/]+)?$ "/en/docs3-v2/java-sdk/faq/$1" [L,R=302]
+
+  RewriteRule ^/?zh/([\s\S]*)?$ "/zh-cn/$1" [L,R=302]
+</IfModule>

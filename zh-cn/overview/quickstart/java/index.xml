@@ -1,0 +1,617 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Java 微服务开发入门</title><link>https://dubbo.apache.org/zh-cn/overview/quickstart/java/</link><description>Recent content in Java 微服务开发入门 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/quickstart/java/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 1 - 零基础快速部署一个微服务应用</title><link>https://dubbo.apache.org/zh-cn/overview/quickstart/java/brief/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/quickstart/java/brief/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/architecture.png" alt="arch-service-discovery">&lt;/p>
+&lt;p>Dubbo 作为一款微服务框架，最重要的是向用户提供跨进程的 RPC 远程调用能力。如上图所示，Dubbo 的服务消费者（Consumer）通过一系列的工作将请求发送给服务提供者（Provider）。&lt;/p>
+&lt;p>为了实现这样一个目标，Dubbo 引入了注册中心（Registry）组件，通过注册中心，服务消费者可以感知到服务提供者的连接方式，从而将请求发送给正确的服务提供者。&lt;/p>
+&lt;h2 id="目标">目标&lt;/h2>
+&lt;p>了解微服务调用的方式以及 Dubbo 的能力&lt;/p>
+&lt;h2 id="难度">难度&lt;/h2>
+&lt;p>低&lt;/p>
+&lt;h2 id="环境要求">环境要求&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>系统：Windows、Linux、MacOS&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>JDK 8 及以上（推荐使用 JDK17）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Git&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Docker （可选）&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="动手实践">动手实践&lt;/h2>
+&lt;p>本章将通过几个简单的命令，一步一步教你如何部署并运行一个最简单的 Dubbo 用例。&lt;/p>
+&lt;h3 id="1-获取测试工程">1. 获取测试工程&lt;/h3>
+&lt;p>在开始整个教程之前，我们需要先获取测试工程的代码。Dubbo 的所有测试用例代码都存储在 &lt;a href="https://github.com/apache/dubbo-samples">apache/dubbo-samples&lt;/a> 这个仓库中，以下这个命令可以帮你获取 Samples 仓库的所有代码。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> --branch master git@github.com:apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-认识-dubbo-samples-项目结构">2. 认识 Dubbo Samples 项目结构&lt;/h3>
+&lt;p>在将 &lt;a href="https://github.com/apache/dubbo-samples">apache/dubbo-samples&lt;/a> 这个仓库 clone 到本地以后，本小节将就仓库的具体组织方式做说明。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── codestyle &lt;span style="color:#719e07">//&lt;/span> 开发使用的 style 配置文件
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── &lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">-&lt;/span>basic &lt;span style="color:#719e07">//&lt;/span> 基础的入门用例
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── &lt;span style="color:#2aa198">2&lt;/span>&lt;span style="color:#719e07">-&lt;/span>advanced &lt;span style="color:#719e07">//&lt;/span> 高级用法
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── &lt;span style="color:#2aa198">3&lt;/span>&lt;span style="color:#719e07">-&lt;/span>extensions &lt;span style="color:#719e07">//&lt;/span> 扩展使用示例
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── &lt;span style="color:#2aa198">4&lt;/span>&lt;span style="color:#719e07">-&lt;/span>governance &lt;span style="color:#719e07">//&lt;/span> 服务治理用例
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── &lt;span style="color:#2aa198">10&lt;/span>&lt;span style="color:#719e07">-&lt;/span>task &lt;span style="color:#719e07">//&lt;/span> Dubbo 学习系列示例
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── &lt;span style="color:#2aa198">99&lt;/span>&lt;span style="color:#719e07">-&lt;/span>integration &lt;span style="color:#719e07">//&lt;/span> 集成测试使用
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── test &lt;span style="color:#719e07">//&lt;/span> 集成测试使用
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── tools &lt;span style="color:#719e07">//&lt;/span> 三方组件快速启动工具
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上表所示，&lt;a href="https://github.com/apache/dubbo-samples">apache/dubbo-samples&lt;/a> 主要由三个部分组成：代码风格文件、测试代码、集成测试。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>代码风格文件是开发 Dubbo 代码的时候可以使用，其中包括了 IntelliJ IDEA 的配置文件。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>测试代码即本教材所需要的核心内容。目前包括了 5 个部分的内容：面向初学者的 basic 入门用例、面向开发人员的 advanced 高级用法、面向中间件维护者的 extensions Dubbo 周边扩展使用示例、面向生产的 governance 服务治理用例以及 Dubbo 学习系列。本文将基于 basic 入门用例中最简单的 Dubbo API 使用方式进行讲解。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>集成测试是 Dubbo 的质量保证体系中重要的一环，Dubbo 的每个版本都会对所有的 samples 进行回归验证，保证 Dubbo 的所有变更都不会影响 samples 的使用。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="3-启动一个简易的注册中心">3. 启动一个简易的注册中心&lt;/h3>
+&lt;p>从这一小节开始，将正式通过三个命令部署一个微服务应用。&lt;/p>
+&lt;p>从 &lt;a href="#%E8%83%8C%E6%99%AF">背景&lt;/a> 一节中可知，运行起 Dubbo 应用的一个大前提是部署一个注册中心，为了让本教程更易于上手，我们提供了一个基于 Apache Zookeeper 注册中心的简易启动器，如果您需要在生产环境部署注册中心，请参考&lt;a href="https://dubbo.apache.org/">生产环境初始化&lt;/a>一文部署高可用的注册中心。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl tools/embedded-zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl tools/embedded-zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>注：需要开一个独立的 terminal 运行，命令将会保持一直执行的状态。
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Docker:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在执行完上述命令以后，等待一会出现如下图所示的日志即代表注册中心启动完毕，可以继续执行后续任务。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-01-19-15-55-23-image.png" alt="registry">&lt;/p>
+&lt;h3 id="4-启动服务提供者">4. 启动服务提供者&lt;/h3>
+&lt;p>在启动了注册中心之后，下一步是启动一个对外提供服务的服务提供者。在 dubbo-samples 中也提供了对应的示例，可以通过以下命令快速拉起。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api &lt;span style="color:#2aa198">&amp;#34;-Dexec.mainClass=org.apache.dubbo.samples.provider.Application&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.provider.Application&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>注：需要开一个独立的 terminal 运行，命令将会保持一直执行的状态。
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在执行完上述命令以后，等待一会出现如下图所示的日志（&lt;code>DubboBootstrap awaiting&lt;/code>）即代表服务提供者启动完毕，标志着该服务提供者可以对外提供服务了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-01-19-15-56-09-image.png" alt="provider">&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[19/01/23 03:55:49:049 CST] org.apache.dubbo.samples.provider.Application.main() INFO bootstrap.DubboBootstrap: [DUBBO] DubboBootstrap awaiting ..., dubbo version: 3.2.0-beta.3, current host: 169.254.44.42
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="5-启动服务消费者">5. 启动服务消费者&lt;/h3>
+&lt;p>最后一步是启动一个服务消费者来调用服务提供者，也即是 RPC 调用的核心，为服务消费者提供调用服务提供者的桥梁。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api &lt;span style="color:#2aa198">&amp;#34;-Dexec.mainClass=org.apache.dubbo.samples.client.Application&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.client.Application&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在执行完上述命令以后，等待一会出现如下图所示的日志（&lt;code>hi, dubbo&lt;/code>），打印出的数据就是服务提供者处理之后返回的，标志着一次服务调用的成功。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-01-19-16-30-14-image.png" alt="consumer">&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Receive result ======&amp;gt; hi, dubbo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="延伸阅读">延伸阅读&lt;/h2>
+&lt;h3 id="1-消费端是怎么找到服务端的">1. 消费端是怎么找到服务端的？&lt;/h3>
+&lt;p>在本用例中的步骤 3 启动了一个 Zookeeper 的注册中心，服务提供者会向注册中心中写入自己的地址，供服务消费者获取。&lt;/p>
+&lt;p>Dubbo 会在 Zookeeper 的 &lt;code>/dubbo/interfaceName&lt;/code> 和 &lt;code>/services/appName&lt;/code> 下写入服务提供者的连接信息。&lt;/p>
+&lt;p>如下所示是 Zookeeper 上的数据示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>[zk: localhost:&lt;span style="color:#2aa198">2181&lt;/span>(CONNECTED) &lt;span style="color:#2aa198">5&lt;/span>] ls &lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">/&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>samples&lt;span style="color:#719e07">.&lt;/span>api&lt;span style="color:#719e07">.&lt;/span>GreetingsService&lt;span style="color:#719e07">/&lt;/span>providers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[dubbo&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>F&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>F30&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">221.146&lt;/span>&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">35&lt;/span>&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A20880&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>Forg&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>samples&lt;span style="color:#719e07">.&lt;/span>api&lt;span style="color:#719e07">.&lt;/span>GreetingsService&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Fanyhost&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dtrue&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>application&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfirst&lt;span style="color:#719e07">-&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>provider&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>background&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfalse&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>deprecated&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfalse&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>dubbo&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D2&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">0.2&lt;/span>&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>dynamic&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dtrue&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>environment&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dproduct&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>generic&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfalse&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>interface&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dorg&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>samples&lt;span style="color:#719e07">.&lt;/span>api&lt;span style="color:#719e07">.&lt;/span>GreetingsService&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>ipv6&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfd00&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A1&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A5&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A5200&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A3218&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A774a&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A4f67&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A2341&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>methods&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>DsayHi&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>pid&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D85639&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>release&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D3&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">1.4&lt;/span>&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>service&lt;span style="color:#719e07">-&lt;/span>name&lt;span style="color:#719e07">-&lt;/span>mapping&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dtrue&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>side&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dprovider&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>timestamp&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D1674960780647]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[zk: localhost:&lt;span style="color:#2aa198">2181&lt;/span>(CONNECTED) &lt;span style="color:#2aa198">2&lt;/span>] ls &lt;span style="color:#719e07">/&lt;/span>services&lt;span style="color:#719e07">/&lt;/span>first&lt;span style="color:#719e07">-&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[&lt;span style="color:#2aa198">30.221&lt;/span>&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">146.35&lt;/span>:&lt;span style="color:#2aa198">20880&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[zk: localhost:&lt;span style="color:#2aa198">2181&lt;/span>(CONNECTED) &lt;span style="color:#2aa198">3&lt;/span>] get &lt;span style="color:#719e07">/&lt;/span>services&lt;span style="color:#719e07">/&lt;/span>first&lt;span style="color:#719e07">-&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>provider&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">30.221&lt;/span>&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">146.35&lt;/span>:&lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;first-dubbo-provider&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;30.221.146.35:20880&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;address&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;30.221.146.35&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;port&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">20880&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;sslPort&amp;#34;&lt;/span>:null,&lt;span style="color:#2aa198">&amp;#34;payload&amp;#34;&lt;/span>:{&lt;span style="color:#2aa198">&amp;#34;@class&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.registry.zookeeper.ZookeeperInstance&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;30.221.146.35:20880&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;first-dubbo-provider&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;metadata&amp;#34;&lt;/span>:{&lt;span style="color:#2aa198">&amp;#34;dubbo.endpoints&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;[{&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">port&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:20880,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">protocol&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">dubbo&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">}]&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dubbo.metadata-service.url-params&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;{&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">connections&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">version&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">1.0.0&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">dubbo&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">2.0.2&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">release&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">3.1.4&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">side&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">provider&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">ipv6&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">fd00:1:5:5200:3218:774a:4f67:2341&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">port&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">20880&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">,&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">protocol&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">dubbo&lt;/span>&lt;span style="color:#cb4b16">\&amp;#34;&lt;/span>&lt;span style="color:#2aa198">}&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dubbo.metadata.revision&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;871fbc9cb2730caea9b0d858852d5ede&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;dubbo.metadata.storage-type&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;local&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;ipv6&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;fd00:1:5:5200:3218:774a:4f67:2341&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;timestamp&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;1674960780647&amp;#34;&lt;/span>}},&lt;span style="color:#2aa198">&amp;#34;registrationTimeUTC&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">1674960781893&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;serviceType&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;DYNAMIC&amp;#34;&lt;/span>,&lt;span style="color:#2aa198">&amp;#34;uriSpec&amp;#34;&lt;/span>:null}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>更多关于 Dubbo 服务发现模型的细节，可以参考&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/">服务发现&lt;/a>一文。&lt;/p>
+&lt;h3 id="2-消费端是如何发起请求的">2. 消费端是如何发起请求的？&lt;/h3>
+&lt;p>在 Dubbo 的调用模型中，起到连接服务消费者和服务提供者的桥梁是接口。&lt;/p>
+&lt;p>服务提供者通过对指定接口进行实现，服务消费者通过 Dubbo 去订阅这个接口。服务消费者调用接口的过程中 Dubbo 会将请求封装成网络请求，然后发送到服务提供者进行实际的调用。&lt;/p>
+&lt;p>在本用例中，定义了一个 &lt;code>GreetingsService&lt;/code> 的接口，这个接口有一个名为 &lt;code>sayHi&lt;/code> 的方法。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/api/GreetingsService.java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.api;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">GreetingsService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHi&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务消费者通过 Dubbo 的 API 可以获取这个 &lt;code>GreetingsService&lt;/code> 接口的代理，然后就可以按照普通的接口调用方式进行调用。&lt;strong>得益于 Dubbo 的动态代理机制，这一切都像本地调用一样。&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/client/Application.java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 获取订阅到的 Stub&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GreetingsService service &lt;span style="color:#719e07">=&lt;/span> reference.get();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 像普通的 java 接口一样调用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String message &lt;span style="color:#719e07">=&lt;/span> service.sayHi(&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-服务端可以部署多个吗">3. 服务端可以部署多个吗？&lt;/h3>
+&lt;p>可以，本小节将演示如何启动一个服务端&lt;strong>集群&lt;/strong>。&lt;/p>
+&lt;p>1）启动一个注册中心，可以参考动手实践中第 3 小节的&lt;a href="#3-%E5%90%AF%E5%8A%A8%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%9A%84%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83">教程&lt;/a>&lt;/p>
+&lt;p>2）修改服务提供者返回的数据，让第一个启动的服务提供者返回 &lt;code>hi, dubbo. I am provider 1.&lt;/code>&lt;/p>
+&lt;p>修改 &lt;code>1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java&lt;/code> 文件的第 25 行如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.provider;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GreetingsServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> GreetingsService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHi&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hi, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;. I am provider 1.&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>3）启动第一个服务提供者，可以参考动手实践中第 4 小节的&lt;a href="#4-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E8%80%85">教程&lt;/a>&lt;/p>
+&lt;p>4）修改服务提供者返回的数据，让第二个启动的服务提供者返回 &lt;code>hi, dubbo. I am provider 2.&lt;/code>&lt;/p>
+&lt;p>修改 &lt;code>1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java&lt;/code> 文件的第 25 行如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.provider;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.samples.api.GreetingsService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GreetingsServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> GreetingsService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHi&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hi, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;. I am provider 2.&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>4）启动第二个服务提供者，可以参考动手实践中第 4 小节的&lt;a href="#4-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E8%80%85">教程&lt;/a>&lt;/p>
+&lt;p>5）启动服务消费者，可以参考动手实践中第 5 小节的&lt;a href="#5-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1%E6%B6%88%E8%B4%B9%E8%80%85">教程&lt;/a>。多次启动消费者可以看到返回的结果是不一样的。&lt;/p>
+&lt;p>在 dubbo-samples 中也提供了一个会定时发起调用的消费端应用&lt;code>org.apache.dubbo.samples.client.AlwaysApplication&lt;/code>，可以通过以下命令启动。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-api &lt;span style="color:#2aa198">&amp;#34;-Dexec.mainClass=org.apache.dubbo.samples.client.AlwaysApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-api -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.client.AlwaysApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动后可以看到类似以下的日志，消费端会随机调用到不同的服务提供者，返回的结果也是远端的服务提供者觉得其结果。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Sun Jan 29 11:23:37 CST 2023 Receive result ======&amp;gt; hi, dubbo. I am provider 1.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Sun Jan 29 11:23:38 CST 2023 Receive result ======&amp;gt; hi, dubbo. I am provider 2.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Sun Jan 29 11:23:39 CST 2023 Receive result ======&amp;gt; hi, dubbo. I am provider 2.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Sun Jan 29 11:23:40 CST 2023 Receive result ======&amp;gt; hi, dubbo. I am provider 1.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Sun Jan 29 11:23:41 CST 2023 Receive result ======&amp;gt; hi, dubbo. I am provider 1.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4-这个用例复杂吗">4. 这个用例复杂吗？&lt;/h3>
+&lt;p>不，Dubbo 只需要简单的配置就可以实现稳定、高效的远程调用。&lt;/p>
+&lt;p>以下是一个服务提供者的简单示例，通过定义若干个配置就可以启动。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/Application.java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 定义所有的服务&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GreetingsService&lt;span style="color:#719e07">&amp;gt;&lt;/span> service &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service.setInterface(GreetingsService.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service.setRef(&lt;span style="color:#719e07">new&lt;/span> GreetingsServiceImpl());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 启动 Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DubboBootstrap.getInstance()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .application(&lt;span style="color:#2aa198">&amp;#34;first-dubbo-provider&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .registry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(ZOOKEEPER_ADDRESS))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .protocol(&lt;span style="color:#719e07">new&lt;/span> ProtocolConfig(&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>, &lt;span style="color:#719e07">-&lt;/span>1))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .service(service)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .start();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下是一个服务消费者的简单示例，通过定义若干个配置启动后就可以获取到对应的代理对象，之后用户完全不需要感知这个对象背后的复杂实现，&lt;strong>一切只需要和本地调用一样就行了&lt;/strong>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 1-basic/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/client/Application.java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 定义所有的订阅&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>GreetingsService&lt;span style="color:#719e07">&amp;gt;&lt;/span> reference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reference.setInterface(GreetingsService.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 启动 Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DubboBootstrap.getInstance()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .application(&lt;span style="color:#2aa198">&amp;#34;first-dubbo-consumer&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .registry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(ZOOKEEPER_ADDRESS))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .reference(reference)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 获取订阅到的 Stub&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GreetingsService service &lt;span style="color:#719e07">=&lt;/span> reference.get();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 像普通的 java 接口一样调用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String message &lt;span style="color:#719e07">=&lt;/span> service.sayHi(&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="更多">更多&lt;/h2>
+&lt;p>本用例介绍了一个 RPC 远程调用的基础流程，通过启动注册中心、服务提供者、服务消费者三个节点来模拟一个微服务的部署架构。&lt;/p>
+&lt;p>下一个教程中，将就服务提供者和服务消费者分别都做了什么配置进行讲解，&lt;a href="../api/">从零告诉你如何搭建一个微服务应用&lt;/a>。&lt;/p></description></item><item><title>Overview: 2 - Dubbo Spring Boot Starter 开发微服务应用</title><link>https://dubbo.apache.org/zh-cn/overview/quickstart/java/spring-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/quickstart/java/spring-boot/</guid><description>
+&lt;h2 id="目标">目标&lt;/h2>
+&lt;p>从零上手开发基于 Dubbo x Spring Boot 的微服务开发，了解 Dubbo x Spring Boot 配置方式。&lt;/p>
+&lt;h2 id="难度">难度&lt;/h2>
+&lt;p>低&lt;/p>
+&lt;h2 id="环境要求">环境要求&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>系统：Windows、Linux、MacOS&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>JDK 8 及以上（推荐使用 JDK17）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Git&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>IntelliJ IDEA（可选）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Docker （可选）&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="项目介绍">项目介绍&lt;/h2>
+&lt;p>在本任务中，将分为 3 个子模块进行独立开发，模拟生产环境下的部署架构。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>. // apache/dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── dubbo-samples-spring-boot-interface // 共享 API 模块
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── dubbo-samples-spring-boot-consumer // 消费端模块
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── dubbo-samples-spring-boot-provider // 服务端模块
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上所示，共有 3 个模块，其中 &lt;code>interface&lt;/code> 模块被 &lt;code>consumer&lt;/code> 和 &lt;code>provider&lt;/code> 两个模块共同依赖，存储 RPC 通信使用的 API 接口。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>. // apache/dubbo-samples/1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── dubbo-samples-spring-boot-interface // 共享 API 模块
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── pom.xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── springboot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── DemoService.java // API 接口
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── dubbo-samples-spring-boot-consumer // 消费端模块
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── pom.xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── springboot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   ├── ConsumerApplication.java // 消费端启动类
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── Task.java // 消费端模拟调用任务
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── application.yml // Spring Boot 配置文件
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── dubbo-samples-spring-boot-provider // 服务端模块
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── pom.xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── springboot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── DemoServiceImpl.java // 服务端实现类
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── ProviderApplication.java // 服务端启动类
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── application.yml // Spring Boot 配置文件
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── pom.xml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上为本教程接下来会使用到的项目的文件结构。&lt;/p>
+&lt;h2 id="快速部署基于-samples-直接启动">快速部署（基于 Samples 直接启动）&lt;/h2>
+&lt;p>本章将通过几个简单的命令，一步一步教你如何部署并运行一个基于 Dubbo x Spring Boot 的用例。&lt;/p>
+&lt;p>注：本章部署的代码细节可以在 &lt;a href="https://github.com/apache/dubbo-samples">apache/dubbo-samples&lt;/a> 这个仓库中 &lt;code>1-basic/dubbo-samples-spring-boot&lt;/code> 中找到，在下一章中也将展开进行讲解。&lt;/p>
+&lt;h3 id="1-获取测试工程">1. 获取测试工程&lt;/h3>
+&lt;p>在开始整个教程之前，我们需要先获取测试工程的代码。Dubbo 的所有测试用例代码都存储在 &lt;a href="https://github.com/apache/dubbo-samples">apache/dubbo-samples&lt;/a> 这个仓库中，以下这个命令可以帮你获取 Samples 仓库的所有代码。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> --branch master git@github.com:apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-启动一个简易的注册中心">2. 启动一个简易的注册中心&lt;/h3>
+&lt;p>对于一个微服务化的应用来说，注册中心是不可或缺的一个组件。只有通过注册中心，消费端才可以成功发现服务端的地址信息，进而进行调用。&lt;/p>
+&lt;p>为了让本教程更易于上手，我们提供了一个基于 Apache Zookeeper 注册中心的简易启动器，如果您需要在生产环境部署注册中心，请参考&lt;a href="https://dubbo.apache.org/">生产环境初始化&lt;/a>一文部署高可用的注册中心。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl tools/embedded-zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl tools/embedded-zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Docker:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-本地打包-api-模块">3. 本地打包 API 模块&lt;/h3>
+&lt;p>为了成功编译服务端、消费端模块，需要先在本地打包安装 &lt;code>dubbo-samples-spring-boot-interface&lt;/code> 模块。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>./mvnw clean install -pl 1-basic/dubbo-samples-spring-boot
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean install -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-interface
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4-启动服务提供者">4. 启动服务提供者&lt;/h3>
+&lt;p>在启动了注册中心之后，下一步是启动一个对外提供服务的服务提供者。在 dubbo-samples 中也提供了对应的示例，可以通过以下命令快速拉起。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.springboot.demo.provider.ProviderApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-provider -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.springboot.demo.provider.ProviderApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>注：需要开一个独立的 terminal 运行，命令将会保持一直执行的状态。
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在执行完上述命令以后，等待一会出现如下所示的日志（&lt;code>Current Spring Boot Application is await&lt;/code>）即代表服务提供者启动完毕，标志着该服务提供者可以对外提供服务了。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2023-02-08 17:13:00.357 INFO 80600 --- [lication.main()] o.a.d.c.d.DefaultApplicationDeployer : [DUBBO] Dubbo Application[1.1](dubbo-springboot-demo-provider) is ready., dubbo version: 3.2.0-beta.4, current host: 30.221.128.96
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2023-02-08 17:13:00.369 INFO 80600 --- [lication.main()] o.a.d.s.d.provider.ProviderApplication : Started ProviderApplication in 9.114 seconds (JVM running for 26.522)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2023-02-08 17:13:00.387 INFO 80600 --- [pool-1-thread-1] .b.c.e.AwaitingNonWebApplicationListener : [Dubbo] Current Spring Boot Application is await...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="5-启动服务消费者">5. 启动服务消费者&lt;/h3>
+&lt;p>最后一步是启动一个服务消费者来调用服务提供者，也即是 RPC 调用的核心，为服务消费者提供调用服务提供者的桥梁。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.springboot.demo.consumer.ConsumerApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl 1-basic/dubbo-samples-spring-boot/dubbo-samples-spring-boot-consumer -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.springboot.demo.consumer.ConsumerApplication&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在执行完上述命令以后，等待一会出现如下所示的日志（&lt;code>Hello world&lt;/code>），打印出的数据就是服务提供者处理之后返回的，标志着一次服务调用的成功。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2023-02-08 17:14:33.045 INFO 80740 --- [lication.main()] o.a.d.s.d.consumer.ConsumerApplication : Started ConsumerApplication in 11.052 seconds (JVM running for 31.62)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Receive result ======&amp;gt; Hello world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2023-02-08 17:14:33.146 INFO 80740 --- [pool-1-thread-1] .b.c.e.AwaitingNonWebApplicationListener : [Dubbo] Current Spring Boot Application is await...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Wed Feb 08 17:14:34 CST 2023 Receive result ======&amp;gt; Hello world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Wed Feb 08 17:14:35 CST 2023 Receive result ======&amp;gt; Hello world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Wed Feb 08 17:14:36 CST 2023 Receive result ======&amp;gt; Hello world
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Wed Feb 08 17:14:37 CST 2023 Receive result ======&amp;gt; Hello world
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="动手实践从零代码开发版">动手实践（从零代码开发版）&lt;/h2>
+&lt;p>本章将通过手把手的教程一步一步教你如何从零开发一个微服务应用。&lt;/p>
+&lt;h3 id="1-启动注册中心">1. 启动注册中心&lt;/h3>
+&lt;p>对于一个微服务化的应用来说，注册中心是不可或缺的一个组件。只有通过注册中心，消费端才可以成功发现服务端的地址信息，进而进行调用。&lt;/p>
+&lt;p>为了让本教程更易于上手，我们提供了一个基于 Apache Zookeeper 注册中心的简易启动器，如果您需要在生产环境部署注册中心，请参考&lt;a href="https://dubbo.apache.org/">生产环境初始化&lt;/a>一文部署高可用的注册中心。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>Windows:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> --branch master git@github.com:apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw.cmd clean compile exec:java -pl tools/embedded-zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Linux / MacOS:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> --branch master git@github.com:apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>./mvnw clean compile exec:java -pl tools/embedded-zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Docker:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --name some-zookeeper -p 2181:2181 --restart always -d zookeeper
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-初始化项目">2. 初始化项目&lt;/h3>
+&lt;p>从本小节开始，将基于 IntelliJ IDEA 进行工程的搭建以及测试。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-25-27-image.png" alt="img">&lt;/p>
+&lt;p>如上图所示，可以建立一个基础的项目。&lt;/p>
+&lt;p>搭建了基础项目之后，我们还需要创建 &lt;code>dubbo-spring-boot-demo-interface&lt;/code> 、&lt;code>dubbo-spring-boot-demo-provider&lt;/code> 和 &lt;code>dubbo-spring-boot-demo-consumer&lt;/code> 三个子模块。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-17-image.png" alt="img">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-26-57-image.png" alt="img">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-27-45-image.png" alt="img">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-28-26-image.png" alt="img">&lt;/p>
+&lt;p>创建了三个子模块之后，需要创建一下几个文件夹：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-consumer/src/main/java&lt;/code> 下创建 &lt;code>org.apache.dubbo.springboot.demo.consumer&lt;/code> package&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-interface/src/main/java&lt;/code> 下创建 &lt;code>org.apache.dubbo.springboot.demo&lt;/code> package&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-provider/src/main/java&lt;/code> 下创建 &lt;code>org.apache.dubbo.springboot.demo.provider&lt;/code> package&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-32-50-image.png" alt="img">&lt;/p>
+&lt;p>最终的文件夹参考如上图所示。&lt;/p>
+&lt;h3 id="3-添加-maven-依赖">3. 添加 Maven 依赖&lt;/h3>
+&lt;p>在初始化完项目以后，我们需要先添加 Dubbo 相关的 maven 依赖。&lt;/p>
+&lt;p>对于多模块项目，首先需要在父项目的 &lt;code>pom.xml&lt;/code> 里面配置依赖信息。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-53-18-image.png" alt="img">&lt;/p>
+&lt;p>编辑 &lt;code>./pom.xml&lt;/code> 这个文件，添加下列配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-demo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0-SNAPSHOT&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;packaging&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/packaging&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;modules&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;module&amp;gt;&lt;/span>dubbo-spring-boot-demo-interface&lt;span style="color:#268bd2">&amp;lt;/module&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;module&amp;gt;&lt;/span>dubbo-spring-boot-demo-provider&lt;span style="color:#268bd2">&amp;lt;/module&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;module&amp;gt;&lt;/span>dubbo-spring-boot-demo-consumer&lt;span style="color:#268bd2">&amp;lt;/module&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/modules&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo.version&amp;gt;&lt;/span>3.2.0-beta.4&lt;span style="color:#268bd2">&amp;lt;/dubbo.version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;spring-boot.version&amp;gt;&lt;/span>2.7.8&lt;span style="color:#268bd2">&amp;lt;/spring-boot.version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;maven.compiler.source&amp;gt;&lt;/span>17&lt;span style="color:#268bd2">&amp;lt;/maven.compiler.source&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;maven.compiler.target&amp;gt;&lt;/span>17&lt;span style="color:#268bd2">&amp;lt;/maven.compiler.target&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;project.build.sourceEncoding&amp;gt;&lt;/span>UTF-8&lt;span style="color:#268bd2">&amp;lt;/project.build.sourceEncoding&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/properties&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Spring Boot --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-dependencies&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>import&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Dubbo --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-bom&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>import&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-dependencies-zookeeper-curator5&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;build&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;pluginManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;plugins&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/plugins&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/pluginManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/build&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在 &lt;code>dubbo-spring-boot-consumer&lt;/code> 和 &lt;code>dubbo-spring-boot-provider&lt;/code> 两个模块 &lt;code>pom.xml&lt;/code> 中进行具体依赖的配置。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-52-53-image.png" alt="img">&lt;/p>
+&lt;p>编辑 &lt;code>./dubbo-spring-boot-consumer/pom.xml&lt;/code> 和 &lt;code>./dubbo-spring-boot-provider/pom.xml&lt;/code> 这两文件，都添加下列配置。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-demo-interface&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${project.parent.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- dubbo --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-dependencies-zookeeper-curator5&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>slf4j-reload4j&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.slf4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- spring boot starter --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在这份配置中，定义了 dubbo 和 zookeeper（以及对应的连接器 curator）的依赖。&lt;/p>
+&lt;p>添加了上述的配置以后，可以通过 IDEA 的 &lt;code>Maven - Reload All Maven Projects&lt;/code> 刷新依赖。&lt;/p>
+&lt;h3 id="4-定义服务接口">4. 定义服务接口&lt;/h3>
+&lt;p>服务接口 Dubbo 中沟通消费端和服务端的桥梁。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-57-29-image.png" alt="img">&lt;/p>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-interface&lt;/code> 模块的 &lt;code>org.apache.dubbo.samples.api&lt;/code> 下建立 &lt;code>DemoService&lt;/code> 接口，定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.springboot.demo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>DemoService&lt;/code> 中，定义了 &lt;code>sayHello&lt;/code> 这个方法。后续服务端发布的服务，消费端订阅的服务都是围绕着 &lt;code>DemoService&lt;/code> 接口展开的。&lt;/p>
+&lt;h3 id="5-定义服务端的实现">5. 定义服务端的实现&lt;/h3>
+&lt;p>定义了服务接口之后，可以在服务端这一侧定义对应的实现，这部分的实现相对于消费端来说是远端的实现，本地没有相关的信息。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-17-59-46-image.png" alt="img">&lt;/p>
+&lt;p>在&lt;code>dubbo-spring-boot-demo-provider&lt;/code> 模块的 &lt;code>org.apache.dubbo.samples.provider&lt;/code> 下建立 &lt;code>DemoServiceImpl&lt;/code> 类，定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.springboot.demo.provider;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.annotation.DubboService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.springboot.demo.DemoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>DemoServiceImpl&lt;/code> 中，实现了 &lt;code>DemoService&lt;/code> 接口，对于 &lt;code>sayHello&lt;/code> 方法返回 &lt;code>Hello name&lt;/code>。&lt;/p>
+&lt;p>注：在&lt;code>DemoServiceImpl&lt;/code> 类中添加了 &lt;code>@DubboService&lt;/code> 注解，通过这个配置可以基于 Spring Boot 去发布 Dubbo 服务。&lt;/p>
+&lt;h3 id="6-配置服务端-yaml-配置文件">6. 配置服务端 Yaml 配置文件&lt;/h3>
+&lt;p>从本步骤开始至第 7 步，将会通过 Spring Boot 的方式配置 Dubbo 的一些基础信息。&lt;/p>
+&lt;p>首先，我们先创建服务端的配置文件。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-00-24-image.png" alt="img">&lt;/p>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-provider&lt;/code> 模块的 &lt;code>resources&lt;/code> 资源文件夹下建立 &lt;code>application.yml&lt;/code> 文件，定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: -&lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://${zookeeper.address:127.0.0.1}:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在这个配置文件中，定义了 Dubbo 的应用名、Dubbo 协议信息、Dubbo 使用的注册中心地址。&lt;/p>
+&lt;h3 id="7-配置消费端-yaml-配置文件">7. 配置消费端 YAML 配置文件&lt;/h3>
+&lt;p>同样的，我们需要创建消费端的配置文件。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-03-image.png" alt="img">&lt;/p>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-consumer&lt;/code> 模块的 &lt;code>resources&lt;/code> 资源文件夹下建立 &lt;code>application.yml&lt;/code> 文件，定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-springboot-demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: -&lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://${zookeeper.address:127.0.0.1}:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在这个配置文件中，定义了 Dubbo 的应用名、Dubbo 协议信息、Dubbo 使用的注册中心地址。&lt;/p>
+&lt;h3 id="8-基于-spring-配置服务端启动类">8. 基于 Spring 配置服务端启动类&lt;/h3>
+&lt;p>除了配置 Yaml 配置文件之外，我们还需要创建基于 Spring Boot 的启动类。&lt;/p>
+&lt;p>首先，我们先创建服务端的启动类。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-01-38-image.png" alt="img">&lt;/p>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-provider&lt;/code> 模块的 &lt;code>org.apache.dubbo.springboot.demo.provider&lt;/code> 下建立 &lt;code>Application&lt;/code> 类，定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.springboot.demo.provider;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.boot.SpringApplication;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.boot.autoconfigure.SpringBootApplication;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableDubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderApplication&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpringApplication.run(ProviderApplication.class, args);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在这个启动类中，配置了一个 &lt;code>ProviderApplication&lt;/code> 去读取我们前面第 6 步中定义的 &lt;code>application.yml&lt;/code> 配置文件并启动应用。&lt;/p>
+&lt;h3 id="9-基于-spring-配置消费端启动类">9. 基于 Spring 配置消费端启动类&lt;/h3>
+&lt;p>同样的，我们需要创建消费端的启动类。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-11-image.png" alt="img">&lt;/p>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-consumer&lt;/code> 模块的 &lt;code>org.apache.dubbo.springboot.demo.consumer&lt;/code> 下建立 &lt;code>Application&lt;/code> 类，定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.springboot.demo.consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.boot.SpringApplication;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.boot.autoconfigure.SpringBootApplication;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableDubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ConsumerApplication&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpringApplication.run(ConsumerApplication.class, args);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在这个启动类中，配置了一个 &lt;code>ConsumerApplication&lt;/code> 去读取我们前面第 7 步中定义的 &lt;code>application.yml&lt;/code> 配置文件并启动应用。&lt;/p>
+&lt;h3 id="10-配置消费端请求任务">10. 配置消费端请求任务&lt;/h3>
+&lt;p>除了配置消费端的启动类，我们在 Spring Boot 模式下还可以基于 &lt;code>CommandLineRunner&lt;/code>去创建&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-02-33-image.png" alt="img">&lt;/p>
+&lt;p>在 &lt;code>dubbo-spring-boot-demo-consumer&lt;/code> 模块的 &lt;code>org.apache.dubbo.springboot.demo.consumer&lt;/code> 下建立 &lt;code>Task&lt;/code> 类，定义如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.springboot.demo.consumer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Date;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.annotation.DubboReference;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.springboot.demo.DemoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.boot.CommandLineRunner;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.springframework.stereotype.Component;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Task&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> CommandLineRunner {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboReference&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> DemoService demoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">run&lt;/span>(String... args) &lt;span style="color:#268bd2">throws&lt;/span> Exception {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String result &lt;span style="color:#719e07">=&lt;/span> demoService.sayHello(&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Receive result ======&amp;gt; &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> result);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> Thread(()&lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">while&lt;/span> (&lt;span style="color:#cb4b16">true&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.sleep(1000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#719e07">new&lt;/span> Date() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; Receive result ======&amp;gt; &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> demoService.sayHello(&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (InterruptedException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.currentThread().interrupt();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }).start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>Task&lt;/code> 类中，通过&lt;code>@DubboReference&lt;/code> 从 Dubbo 获取了一个 RPC 订阅，这个 &lt;code>demoService&lt;/code> 可以像本地调用一样直接调用。在 &lt;code>run&lt;/code>方法中创建了一个线程进行调用。&lt;/p>
+&lt;h3 id="11-启动应用">11. 启动应用&lt;/h3>
+&lt;p>截止第 10 步，代码就已经开发完成了，本小节将启动整个项目并进行验证。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-03-59-image.png" alt="img">&lt;/p>
+&lt;p>首先是启动 &lt;code>org.apache.dubbo.samples.provider.Application&lt;/code> ，等待一会出现如下图所示的日志（&lt;code>Current Spring Boot Application is await&lt;/code>）即代表服务提供者启动完毕，标志着该服务提供者可以对外提供服务了。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[Dubbo] Current Spring Boot Application is await...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后是启动&lt;code>org.apache.dubbo.samples.client.Application&lt;/code> ，等待一会出现如下图所示的日志（&lt;code>Hello world&lt;/code> ）即代表服务消费端启动完毕并调用到服务端成功获取结果。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/quickstart/2023-02-08-18-05-02-image.png" alt="img">&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Receive result ======&amp;gt; Hello world
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="延伸阅读">延伸阅读&lt;/h2>
+&lt;h3 id="1-dubbo-的-spring-配置介绍">1. Dubbo 的 Spring 配置介绍&lt;/h3>
+&lt;p>Dubbo 的主要配置入口有 yaml 的配置内容、&lt;code>@DubboReference&lt;/code> 和&lt;code>@DubboService&lt;/code> 等，更多的细节可以参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/annotation/">Annotation 配置 | Apache Dubbo&lt;/a> 一文。&lt;/p>
+&lt;h2 id="更多">更多&lt;/h2>
+&lt;p>本教程介绍了如何基于 Dubbo x Spring Boot 开发一个微服务应用。在下一节中，将介绍&lt;a href="../spring-xml/">另外一种 Dubbo 的配置方式 —— Dubbo x Spring XML&lt;/a>。&lt;/p></description></item></channel></rss>

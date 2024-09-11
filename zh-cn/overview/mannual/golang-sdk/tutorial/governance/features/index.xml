@@ -1,0 +1,169 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 高级特性</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/</link><description>Recent content in 高级特性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 配置调用的超时</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/timeout/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/timeout/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-通过配置项修改-rpc-调用相关参数">2. 通过配置项修改 RPC 调用相关参数&lt;/h2>
+&lt;h3 id="21-修改调用的超时并验证">2.1 修改调用的超时，并验证&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">request-timeout&lt;/span>: 15s &lt;span style="color:#586e75"># 配置客户端超时&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo-go 应用默认 RPC 超时为 3s，请求超时后，客户端将会返回error 为 context deadline exceeded 的错误。在本任务中，您需要首先修改 demo 应用的 server 函数为较长耗时，然后查看客户端的超时报错；再通过配置客户端超时，使得耗时函数可以正常调用。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>go-server/cmd/server.go: 修改 demo 应用 server 的函数为耗时 10s 的函数&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterProvider) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Dubbo3 GreeterProvider get user name = %s\n&amp;#34;&lt;/span>, in.Name)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Second&lt;span style="color:#719e07">*&lt;/span>&lt;span style="color:#2aa198">10&lt;/span>) &lt;span style="color:#586e75">// sleep 10s
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>, Age: &lt;span style="color:#2aa198">21&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>客户端发起调用，观察错误日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>ERROR cmd/client.go:47 context deadline exceeded
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>go-client/conf/dubbogo.yaml: 客户端修改超时&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">request-timeout&lt;/span>: 15s &lt;span style="color:#586e75"># 配置客户端超时&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;tri://localhost:20000&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>再次通过客户端发起调用，观察日志，正常返回：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>client response result: name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span> age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol></description></item><item><title>Overview: 自定义服务调用中间件</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/aop/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/aop/</guid><description>
+&lt;p>参考samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/filter">dubbo-go-samples/filter&lt;/a>&lt;/p>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>阅读&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/design/aop_and_extension/">【组件加载与可扩展性】&lt;/a>&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-配置指定-filter">2. 配置指定 Filter&lt;/h2>
+&lt;p>指定filter时可用&amp;rsquo;,&amp;lsquo;分隔&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Consumer 端&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: echo,token,tps,myCustomFilter &lt;span style="color:#586e75"># 可指定自定义filter&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Provider 端&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: myCustomFilter,echo,tps
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-自定义filter">3. 自定义Filter&lt;/h2>
+&lt;p>用户可在代码中自定义 Filter，注册到框架上，并在配置中选择使用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> extension.&lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myCustomFilter&amp;#34;&lt;/span>, NewMyClientFilter)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewMyClientFilter&lt;/span>() filter.Filter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>MyClientFilter{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> MyClientFilter &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx context.Context, invoker protocol.Invoker, invocation protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter Invoke is called, method Name = &amp;#34;&lt;/span>, invocation.&lt;span style="color:#268bd2">MethodName&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invoker.&lt;span style="color:#268bd2">Invoke&lt;/span>(ctx, invocation)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">OnResponse&lt;/span>(ctx context.Context, result protocol.Result, invoker protocol.Invoker, protocol protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter OnResponse is called&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 自定义Filter组件</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/custom-filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/custom-filter/</guid><description>
+&lt;p>参考samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/filter">dubbo-go-samples/filter&lt;/a>&lt;/p>
+&lt;h2 id="1-filter-概念">1. Filter 概念&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Filter interface defines the functions of a filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Extension - Filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Filter &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Invoke is the core function of a filter, it determines the process of the filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Invoke&lt;/span>(context.Context, protocol.Invoker, protocol.Invocation) protocol.Result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// OnResponse updates the results from Invoke and then returns the modified results.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">OnResponse&lt;/span>(context.Context, protocol.Result, protocol.Invoker, protocol.Invocation) protocol.Result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Filter 可以加载在 Consumer 端或者 Provider端。当加载在 Consumer 端，其Invoke函数调用的下游为网络层，OnResponse 为请求结束从网络层获取到返回结果后被调用。当加载在 Provider 端，其 Invoke 函数调用的下游为用户代码，OnResponse 为用户代码执行结束后向下传递至网络层前被调用。&lt;/p>
+&lt;p>Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，可以记录日志、设置数据打点，记录 invoker 所对应服务端性能，限流等等工作。&lt;/p>
+&lt;h2 id="2-框架预定义-filter">2. 框架预定义 Filter&lt;/h2>
+&lt;p>框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于&lt;a href="https://github.com/apache/dubbo-go/tree/release-3.0/filter">filter&lt;/a>&lt;/p>
+&lt;ul>
+&lt;li>accesslog&lt;/li>
+&lt;li>active&lt;/li>
+&lt;li>sign: AuthConsumerFilter&lt;/li>
+&lt;li>auth: AuthProviderFilter&lt;/li>
+&lt;li>echo&lt;/li>
+&lt;li>execute: ExecuteLimitFilter&lt;/li>
+&lt;li>generic: GenericFilter&lt;/li>
+&lt;li>generic_service: GenericServiceFilter&lt;/li>
+&lt;li>pshutdown: GracefulShutdownProviderFilter&lt;/li>
+&lt;li>cshutdown: GracefulShutdownConsumerFilter&lt;/li>
+&lt;li>hystrix_consumer: HystrixConsumerFilter&lt;/li>
+&lt;li>hystrix_provider: HystrixProviderFilter&lt;/li>
+&lt;li>metrics&lt;/li>
+&lt;li>seata&lt;/li>
+&lt;li>sentinel-provider&lt;/li>
+&lt;li>sentinel-consumer&lt;/li>
+&lt;li>token&lt;/li>
+&lt;li>tps&lt;/li>
+&lt;li>tracing&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-默认加载filter">3. 默认加载Filter&lt;/h2>
+&lt;p>用户在配置文件中配置了将要使用的 Filters 时，框架使用用户配置的 Filters 和默认 Filters，否则仅加载默认 Filters：&lt;/p>
+&lt;ul>
+&lt;li>Consumer: cshutdown&lt;/li>
+&lt;li>Provider: echo, metrics, token, accesslog, tps, generic_service, executivete, pshutdown&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-用户指定-filter">4. 用户指定 Filter&lt;/h2>
+&lt;p>指定filter时可用&amp;rsquo;,&amp;lsquo;分隔&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Consumer 端&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: echo,token,tps,myCustomFilter &lt;span style="color:#586e75"># 可指定自定义filter&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Provider 端&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: myCustomFilter,echo,tps
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="5-自定义filter">5. 自定义Filter&lt;/h2>
+&lt;p>用户可在代码中自定义 Filter，注册到框架上，并在配置中选择使用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> extension.&lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myCustomFilter&amp;#34;&lt;/span>, NewMyClientFilter)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewMyClientFilter&lt;/span>() filter.Filter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>MyClientFilter{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> MyClientFilter &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx context.Context, invoker protocol.Invoker, invocation protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter Invoke is called, method Name = &amp;#34;&lt;/span>, invocation.&lt;span style="color:#268bd2">MethodName&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invoker.&lt;span style="color:#268bd2">Invoke&lt;/span>(ctx, invocation)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">OnResponse&lt;/span>(ctx context.Context, result protocol.Result, invoker protocol.Invoker, protocol protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter OnResponse is called&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

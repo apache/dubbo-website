@@ -1,0 +1,970 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Dubbo 核心特性</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/</link><description>Recent content in Dubbo 核心特性 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/core-features/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 微服务开发</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/service-definition/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/service-definition/</guid><description>
+&lt;p>Dubbo 解决企业微服务从开发、部署到治理运维的一系列挑战，Dubbo 为开发者提供从项目创建、开发测试，到部署、可视化监测、流量治理，再到生态集成的全套服务。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>开发层面&lt;/strong>，Dubbo 提供了 Java、Go、Rust、Node.js 等语言实现并定义了一套微服务开发范式，配套脚手架可用于快速创建微服务项目骨架&lt;/li>
+&lt;li>&lt;strong>部署层面&lt;/strong>，Dubbo 应用支持虚拟机、Docker 容器、Kubernetes、服务网格架构部署&lt;/li>
+&lt;li>&lt;strong>服务治理层面&lt;/strong>，Dubbo 提供了地址发现、负载均衡、流量管控等治理能力，官方还提供 Admin 可视化控制台、丰富的微服务生态集成&lt;/li>
+&lt;/ul>
+&lt;h2 id="开发">开发&lt;/h2>
+&lt;p>接下来以 Java 体系 Spring Boot 项目为例讲解 Dubbo 应用开发的基本步骤，整个过程非常直观简单，其他语言开发过程类似。&lt;/p>
+&lt;h3 id="创建项目">创建项目&lt;/h3>
+&lt;p>&lt;a href="https://start.dubbo.apache.org/bootstrap.html" target="_blank">Dubbo 微服务项目脚手架&lt;/a>（支持浏览器页面、命令行和 IDE）可用于快速创建微服务项目，只需要告诉脚手架期望包含的功能或组件，脚手架最终可以帮助开发者生成具有必要依赖的微服务工程。更多脚手架使用方式的讲解，请参见任务模块的 &lt;a href="../../tasks/develop/template/">通过模板生成项目脚手架&lt;/a>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/advantages/initializer.png" alt="脚手架示例图">&lt;/p>
+&lt;h3 id="开发服务">开发服务&lt;/h3>
+&lt;p>&lt;strong>1. 定义服务&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">hello&lt;/span>(String arg);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>2. 提供业务逻辑实现&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">hello&lt;/span>(String arg) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// put your microservice logic here&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="发布服务">发布服务&lt;/h3>
+&lt;p>&lt;strong>1. 发布服务定义&lt;/strong>&lt;/p>
+&lt;p>为使消费方顺利调用服务，服务提供者首先要将服务定义以 Jar 包形式发布到 Maven 中央仓库。&lt;/p>
+&lt;p>&lt;strong>2. 对外暴露服务&lt;/strong>&lt;/p>
+&lt;p>补充 Dubbo 配置并启动 Dubbo Server&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: -&lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="调用服务">调用服务&lt;/h3>
+&lt;p>首先，消费方通过 Maven/Gradle 引入 &lt;code>DemoService&lt;/code> 服务定义依赖。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-demo-interface&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.2.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编程注入远程 Dubbo 服务实例&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Consumer&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboReference&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> DemoService demoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上是 Dubbo 微服务开发的流程性说明，实际开发的详细指导步骤请参见：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../quickstart/java">Java 微服务开发入门&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../quickstart/go">Go 微服务开发入门&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../quickstart/rust">Rust 微服务开发入门&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-js">Node.js 微服务开发入门&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="部署">部署&lt;/h2>
+&lt;p>Dubbo 原生服务可打包部署到 Docker 容器、Kubernetes、服务网格 等云原生基础设施和微服务架构。&lt;/p>
+&lt;p>关于不同环境的部署示例，可参考：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/deploy/deploy-on-docker">部署 Dubbo 服务到 Docker 容器&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/deploy/deploy-on-k8s-docker">部署 Dubbo 服务到 Kubernetes&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="治理">治理&lt;/h2>
+&lt;p>对于服务治理，绝大多数应用只需要增加以下配置即可，Dubbo 应用将具备地址发现和负载均衡能力。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>部署并打开 &lt;a href="../../tasks/deploy">Dubbo Admin 控制台&lt;/a>，可以看到集群的服务部署和调用数据&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/what/admin.png" alt="Admin">&lt;/p>
+&lt;p>除此之外，Dubbo Amin 还可以通过以下能力提升研发测试效率&lt;/p>
+&lt;ul>
+&lt;li>文档管理，提供普通服务、IDL 文档管理&lt;/li>
+&lt;li>服务测试 &amp;amp; 服务 Mock&lt;/li>
+&lt;li>服务状态查询&lt;/li>
+&lt;/ul>
+&lt;p>对于更复杂的微服务实践场景，Dubbo 还提供了更多高级服务治理特性，具体请参见文档了解更多。包括：&lt;/p>
+&lt;ul>
+&lt;li>流量治理&lt;/li>
+&lt;li>动态配置&lt;/li>
+&lt;li>限流降级&lt;/li>
+&lt;li>数据一致性&lt;/li>
+&lt;li>可观测性&lt;/li>
+&lt;li>多协议&lt;/li>
+&lt;li>多注册中心&lt;/li>
+&lt;li>服务网格&lt;/li>
+&lt;/ul></description></item><item><title>Overview: 服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/service-discovery/</guid><description>
+&lt;p>Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注册中心组件来协调服务发现过程，支持常用的注册中心如 Nacos、Consul、Zookeeper 等。&lt;/p>
+&lt;p>以下是 Dubbo 服务发现机制的基本工作原理图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/service-discovery/arc.png" alt="service-discovery">&lt;/p>
+&lt;p>服务发现包含提供者、消费者和注册中心三个参与角色，其中，Dubbo 提供者实例注册 URL 地址到注册中心，注册中心负责对数据进行聚合，Dubbo 消费者从注册中心读取地址列表并订阅变更，每当地址列表发生变化，注册中心将最新的列表通知到所有订阅的消费者实例。&lt;/p>
+&lt;h2 id="面向百万实例集群的服务发现机制">面向百万实例集群的服务发现机制&lt;/h2>
+&lt;p>区别于其他很多微服务框架的是，&lt;strong>Dubbo3 的服务发现机制诞生于阿里巴巴超大规模微服务电商集群实践场景，因此，其在性能、可伸缩性、易用性等方面的表现大幅领先于业界大多数主流开源产品&lt;/strong>。是企业面向未来构建可伸缩的微服务集群的最佳选择。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/service-discovery/arc2.png" alt="service-discovery">&lt;/p>
+&lt;ul>
+&lt;li>首先，Dubbo 注册中心以应用粒度聚合实例数据，消费者按消费需求精准订阅，避免了大多数开源框架如 Istio、Spring Cloud 等全量订阅带来的性能瓶颈。&lt;/li>
+&lt;li>其次，Dubbo SDK 在实现上对消费端地址列表处理过程做了大量优化，地址通知增加了异步、缓存、bitmap 等多种解析优化，避免了地址更新常出现的消费端进程资源波动。&lt;/li>
+&lt;li>最后，在功能丰富度和易用性上，服务发现除了同步 ip、port 等端点基本信息到消费者外，Dubbo 还将服务端的 RPC/HTTP 服务及其配置的元数据信息同步到消费端，这让消费者、提供者两端的更细粒度的协作成为可能，Dubbo 基于此机制提供了很多差异化的治理能力。&lt;/li>
+&lt;/ul>
+&lt;h3 id="高效地址推送实现">高效地址推送实现&lt;/h3>
+&lt;p>从注册中心视角来看，它负责以应用名 (dubbo.application.name) 对整个集群的实例地址进行聚合，每个对外提供服务的实例将自身的应用名、实例ip:port 地址信息 (通常还包含少量的实例元数据，如机器所在区域、环境等) 注册到注册中心。&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo2 版本注册中心以服务粒度聚合实例地址，比应用粒度更细，也就意味着传输的数据量更大，因此在大规模集群下也遇到一些性能问题。
+针对 Dubbo2 与 Dubbo3 跨版本数据模型不统一的问题，Dubbo3 给出了&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/">平滑迁移方案&lt;/a>，可做到模型变更对用户无感。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/service-discovery/registry-data.png" alt="service-discovery">&lt;/p>
+&lt;br/>
+每个消费服务的实例从注册中心订阅实例地址列表，相比于一些产品直接将注册中心的全量数据 (应用 + 实例地址) 加载到本地进程，Dubbo 实现了按需精准订阅地址信息。比如一个消费者应用依赖 app1、app2，则只会订阅 app1、app2 的地址列表更新，大幅减轻了冗余数据推送和解析的负担。
+&lt;p> &lt;/p>
+&lt;br/>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/service-discovery/subscription2.png" alt="service-discovery">&lt;/p>
+&lt;h3 id="丰富元数据配置">丰富元数据配置&lt;/h3>
+&lt;p>除了与注册中心的交互，Dubbo3 的完整地址发现过程还有一条额外的元数据通路，我们称之为元数据服务 (MetadataService)，实例地址与元数据共同组成了消费者端有效的地址列表。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/service-discovery/metadata.png" alt="service-discovery">&lt;/p>
+&lt;p>完整工作流程如上图所示，首先，消费者从注册中心接收到地址 (ip:port) 信息，然后与提供者建立连接并通过元数据服务读取到对端的元数据配置信息，两部分信息共同组装成 Dubbo 消费端有效的面向服务的地址列表。以上两个步骤都是在实际的 RPC 服务调用发生之前。&lt;/p>
+&lt;blockquote>
+&lt;p>关于 MetadataService 的定义及完整服务发现流程分析，请查看 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/">应用级服务发现详解&lt;/a>。&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>对于微服务间服务发现模型的数据同步，REST 定义了一套非常有意思的成熟度模型，感兴趣的朋友可以参考这里的链接 &lt;a href="https://www.martinfowler.com/articles/richardsonMaturityModel.html">https://www.martinfowler.com/articles/richardsonMaturityModel.html&lt;/a>， 按照文章中的 4 级成熟度定义，Dubbo 当前基于接口粒度的模型可以对应到最高的 L4 级别。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="配置方式">配置方式&lt;/h2>
+&lt;p>Dubbo 服务发现扩展了多种注册中心组件支持，如 Nacos、Zookeeper、Consul、Redis、kubernetes 等，可以通过配置切换不同实现，同时还支持鉴权、命名空间隔离等配置。具体配置方式请查看 SDK 文档&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../mannual/java-sdk/reference-manual/registry">Java&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/golang-sdk/tutorial/develop/registry">Golang&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/rust-sdk/">Rust&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo 还支持一个应用内配置多注册中心的情形如双注册、双订阅等，这对于实现不同集群地址数据互通、集群迁移等场景非常有用处，我们将在未来文档中添加 &lt;code>最佳实践&lt;/code> 对这部分内容进行示例说明。&lt;/p>
+&lt;h2 id="自定义扩展">自定义扩展&lt;/h2>
+&lt;p>注册中心适配支持自定义扩展实现，具体请参见 &lt;a href="../extensibility">Dubbo 可扩展性&lt;/a>&lt;/p></description></item><item><title>Overview: 负载均衡</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/load-balance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/load-balance/</guid><description>
+&lt;p>在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 &lt;code>weighted random&lt;/code> 基于权重的随机负载均衡策略。&lt;/p>
+&lt;p>具体实现上，Dubbo 提供的是客户端负载均衡，即由 Consumer 通过负载均衡算法得出需要将请求提交到哪个 Provider 实例。&lt;/p>
+&lt;h2 id="负载均衡策略">负载均衡策略&lt;/h2>
+&lt;p>目前 Dubbo 内置了如下负载均衡算法，可通过调整配置项启用。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">算法&lt;/th>
+&lt;th style="text-align:left">特性&lt;/th>
+&lt;th style="text-align:left">备注&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">Weighted Random LoadBalance&lt;/td>
+&lt;td style="text-align:left">加权随机&lt;/td>
+&lt;td style="text-align:left">默认算法，默认权重相同&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">RoundRobin LoadBalance&lt;/td>
+&lt;td style="text-align:left">加权轮询&lt;/td>
+&lt;td style="text-align:left">借鉴于 Nginx 的平滑加权轮询算法，默认权重相同，&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">LeastActive LoadBalance&lt;/td>
+&lt;td style="text-align:left">最少活跃优先 + 加权随机&lt;/td>
+&lt;td style="text-align:left">背后是能者多劳的思想&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">Shortest-Response LoadBalance&lt;/td>
+&lt;td style="text-align:left">最短响应优先 + 加权随机&lt;/td>
+&lt;td style="text-align:left">更加关注响应速度&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">ConsistentHash LoadBalance&lt;/td>
+&lt;td style="text-align:left">一致性哈希&lt;/td>
+&lt;td style="text-align:left">确定的入参，确定的提供者，适用于有状态请求&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">P2C LoadBalance&lt;/td>
+&lt;td style="text-align:left">Power of Two Choice&lt;/td>
+&lt;td style="text-align:left">随机选择两个节点后，继续选择“连接数”较小的那个节点。&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">Adaptive LoadBalance&lt;/td>
+&lt;td style="text-align:left">自适应负载均衡&lt;/td>
+&lt;td style="text-align:left">在 P2C 算法基础上，选择二者中 load 最小的那个节点&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="weighted-random">Weighted Random&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>加权随机&lt;/strong>，按权重设置随机概率。&lt;/li>
+&lt;li>在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。&lt;/li>
+&lt;li>缺点：存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。&lt;/li>
+&lt;/ul>
+&lt;h3 id="roundrobin">RoundRobin&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>加权轮询&lt;/strong>，按公约后的权重设置轮询比率，循环调用节点&lt;/li>
+&lt;li>缺点：同样存在慢的提供者累积请求的问题。&lt;/li>
+&lt;/ul>
+&lt;p>加权轮询过程中，如果某节点权重过大，会存在某段时间内调用过于集中的问题。
+例如 ABC 三节点有如下权重：&lt;code>{A: 3, B: 2, C: 1}&lt;/code>
+那么按照最原始的轮询算法，调用过程将变成：&lt;code>A A A B B C&lt;/code>&lt;/p>
+&lt;p>对此，Dubbo 借鉴 Nginx 的平滑加权轮询算法，对此做了优化，调用过程可抽象成下表:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">轮前加和权重&lt;/th>
+&lt;th style="text-align:left">本轮胜者&lt;/th>
+&lt;th style="text-align:left">合计权重&lt;/th>
+&lt;th style="text-align:left">轮后权重（胜者减去合计权重）&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">起始轮&lt;/td>
+&lt;td style="text-align:left">\&lt;/td>
+&lt;td style="text-align:left">\&lt;/td>
+&lt;td style="text-align:left">&lt;code>A(0), B(0), C(0)&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>A(3), B(2), C(1)&lt;/code>&lt;/td>
+&lt;td style="text-align:left">A&lt;/td>
+&lt;td style="text-align:left">6&lt;/td>
+&lt;td style="text-align:left">&lt;code>A(-3), B(2), C(1)&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>A(0), B(4), C(2)&lt;/code>&lt;/td>
+&lt;td style="text-align:left">B&lt;/td>
+&lt;td style="text-align:left">6&lt;/td>
+&lt;td style="text-align:left">&lt;code>A(0), B(-2), C(2)&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>A(3), B(0), C(3)&lt;/code>&lt;/td>
+&lt;td style="text-align:left">A&lt;/td>
+&lt;td style="text-align:left">6&lt;/td>
+&lt;td style="text-align:left">&lt;code>A(-3), B(0), C(3)&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>A(0), B(2), C(4)&lt;/code>&lt;/td>
+&lt;td style="text-align:left">C&lt;/td>
+&lt;td style="text-align:left">6&lt;/td>
+&lt;td style="text-align:left">&lt;code>A(0), B(2), C(-2)&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>A(3), B(4), C(-1)&lt;/code>&lt;/td>
+&lt;td style="text-align:left">B&lt;/td>
+&lt;td style="text-align:left">6&lt;/td>
+&lt;td style="text-align:left">&lt;code>A(3), B(-2), C(-1)&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>A(6), B(0), C(0)&lt;/code>&lt;/td>
+&lt;td style="text-align:left">A&lt;/td>
+&lt;td style="text-align:left">6&lt;/td>
+&lt;td style="text-align:left">&lt;code>A(0), B(0), C(0)&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>我们发现经过合计权重（3+2+1）轮次后，循环又回到了起点，整个过程中节点流量是平滑的，且哪怕在很短的时间周期内，概率都是按期望分布的。&lt;/p>
+&lt;p>如果用户有加权轮询的需求，可放心使用该算法。&lt;/p>
+&lt;h3 id="leastactive">LeastActive&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>加权最少活跃调用优先&lt;/strong>，活跃数越低，越优先调用，相同活跃数的进行加权随机。活跃数指调用前后计数差（针对特定提供者：请求发送数 - 响应返回数），表示特定提供者的任务堆积量，活跃数越低，代表该提供者处理能力越强。&lt;/li>
+&lt;li>使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大；相对的，处理能力越强的节点，处理更多的请求。&lt;/li>
+&lt;/ul>
+&lt;h3 id="shortestresponse">ShortestResponse&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>加权最短响应优先&lt;/strong>，在最近一个滑动窗口中，响应时间越短，越优先调用。相同响应时间的进行加权随机。&lt;/li>
+&lt;li>使得响应时间越快的提供者，处理更多的请求。&lt;/li>
+&lt;li>缺点：可能会造成流量过于集中于高性能节点的问题。&lt;/li>
+&lt;/ul>
+&lt;p>这里的响应时间 = 某个提供者在窗口时间内的平均响应时间，窗口时间默认是 30s。&lt;/p>
+&lt;h3 id="consistenthash">ConsistentHash&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>一致性 Hash&lt;/strong>，相同参数的请求总是发到同一提供者。&lt;/li>
+&lt;li>当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。&lt;/li>
+&lt;li>算法参见：&lt;a href="http://en.wikipedia.org/wiki/Consistent_hashing">Consistent Hashing | WIKIPEDIA&lt;/a>&lt;/li>
+&lt;li>缺省只对第一个参数 Hash，如果要修改，请配置 &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.arguments&amp;quot; value=&amp;quot;0,1&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
+&lt;li>缺省用 160 份虚拟节点，如果要修改，请配置 &lt;code>&amp;lt;dubbo:parameter key=&amp;quot;hash.nodes&amp;quot; value=&amp;quot;320&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h3 id="p2c-load-balance">P2C Load Balance&lt;/h3>
+&lt;p>Power of Two Choice 算法简单但是经典，主要思路如下：&lt;/p>
+&lt;ol>
+&lt;li>对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。&lt;/li>
+&lt;li>比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。&lt;/li>
+&lt;/ol>
+&lt;p>以下是 &lt;a href="../../reference/proposals/heuristic-flow-control/#p2c%E7%AE%97%E6%B3%95">Dubbo P2C 算法实现提案&lt;/a>&lt;/p>
+&lt;h3 id="adaptive-load-balance">Adaptive Load Balance&lt;/h3>
+&lt;p>Adaptive 即自适应负载均衡，是一种能根据后端实例负载自动调整流量分布的算法实现，它总是尝试将请求转发到负载最小的节点。&lt;/p>
+&lt;p>以下是 &lt;a href="../../reference/proposals/heuristic-flow-control/#adaptive%E7%AE%97%E6%B3%95">Dubbo Adaptive 算法实现提案&lt;/a>&lt;/p>
+&lt;h2 id="配置方式">配置方式&lt;/h2>
+&lt;p>Dubbo 支持在服务提供者一侧配置默认的负载均衡策略，这样所有的消费者都将默认使用提供者指定的负载均衡策略，消费者可以自己配置要使用的负载均衡策略，如果都没有任何配置，
+则默认使用随机负载均衡策略。&lt;/p>
+&lt;p>同一个应用内支持配置不同的服务使用不同的负载均衡策略，支持为同一服务的不同方法配置不同的负载均衡策略。&lt;/p>
+&lt;p>具体配置方式参加以下多语言实现&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F">Java&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/golang-sdk/">Golang&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="自定义扩展">自定义扩展&lt;/h2>
+&lt;p>负载均衡策略支持自定义扩展实现，具体请参见 &lt;a href="../extensibility">Dubbo 可扩展性&lt;/a>&lt;/p></description></item><item><title>Overview: 流量管控</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/</guid><description>
+&lt;p>Dubbo 提供了丰富的流量管控策略&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>地址发现与负载均衡&lt;/strong>，地址发现支持服务实例动态上下线，负载均衡确保流量均匀的分布到每个实例上。&lt;/li>
+&lt;li>&lt;strong>基于路由规则的流量管控&lt;/strong>，路由规则对每次请求进行条件匹配，并将符合条件的请求路由到特定的地址子集。&lt;/li>
+&lt;/ul>
+&lt;p>服务发现保证调用方看到最新的提供方实例地址，服务发现机制依赖注册中心 (Zookeeper、Nacos、Istio 等) 实现。在消费端，Dubbo 提供了多种负载均衡策略，如随机负载均衡策略、一致性哈希负载、基于权重的轮询、最小活跃度优先、P2C 等。&lt;/p>
+&lt;p>Dubbo 的流量管控规则可以基于应用、服务、方法、参数等粒度精准的控制流量走向，根据请求的目标服务、方法以及请求体中的其他附加参数进行匹配，符合匹配条件的流量会进一步的按照特定规则转发到一个地址子集。流量管控规则有以下几种：&lt;/p>
+&lt;ul>
+&lt;li>条件路由规则&lt;/li>
+&lt;li>标签路由规则&lt;/li>
+&lt;li>脚本路由规则&lt;/li>
+&lt;li>动态配置规则&lt;/li>
+&lt;/ul>
+&lt;p>如果底层用的是基于 HTTP 的 RPC 协议 (如 REST、gRPC、Triple 等)，则服务和方法等就统一映射为 HTTP 路径 (path)，此时 Dubbo 路由规则相当于是基于 HTTP path 和 headers 的流量分发机制。&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo 中有应用、服务和方法的概念，一个应用可以发布多个服务，一个服务包含多个可被调用的方法，从抽象的视角来看，一次 Dubbo 调用就是某个消费方应用发起了对某个提供方应用内的某个服务特定方法的调用，Dubbo 的流量管控规则可以基于应用、服务、方法、参数等粒度精准的控制流量走向。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="工作原理">工作原理&lt;/h2>
+&lt;p>以下是 Dubbo 单个路由器的工作过程，路由器接收一个服务的实例地址集合作为输入，基于请求上下文 (Request Context) 和 (Router Rule) 实际的路由规则定义对输入地址进行匹配，所有匹配成功的实例组成一个地址子集，最终地址子集作为输出结果继续交给下一个路由器或者负载均衡组件处理。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/router1.png" alt="Router">&lt;/p>
+&lt;p>通常，在 Dubbo 中，多个路由器组成一条路由链共同协作，前一个路由器的输出作为另一个路由器的输入，经过层层路由规则筛选后，最终生成有效的地址集合。&lt;/p>
+&lt;ul>
+&lt;li>Dubbo 中的每个服务都有一条完全独立的路由链，每个服务的路由链组成可能不同，处理的规则各异，各个服务间互不影响。&lt;/li>
+&lt;li>对单条路由链而言，即使每次输入的地址集合相同，根据每次请求上下文的不同，生成的地址子集结果也可能不同。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/router2.png" alt="Router">&lt;/p>
+&lt;h2 id="路由规则分类">路由规则分类&lt;/h2>
+&lt;h3 id="标签路由规则">标签路由规则&lt;/h3>
+&lt;p>标签路由通过将某一个服务的实例划分到不同的分组，约束具有特定标签的流量只能在指定分组中流转，不同分组为不同的流量场景服务，从而实现流量隔离的目的。标签路由可以作为蓝绿发布、灰度发布等场景能力的基础。&lt;/p>
+&lt;p>标签路由规则是一个非此即彼的流量隔离方案，也就是匹配&lt;code>标签&lt;/code>的请求会 100% 转发到有相同&lt;code>标签&lt;/code>的实例，没有匹配&lt;code>标签&lt;/code>的请求会 100% 转发到其余未匹配的实例。如果您需要按比例的流量调度方案，请参考示例 &lt;a href="../../tasks/traffic-management/weight/">基于权重的按比例流量路由&lt;/a>。&lt;/p>
+&lt;p>&lt;code>标签&lt;/code>主要是指对 Provider 端应用实例的分组，目前有两种方式可以完成实例分组，分别是&lt;code>动态规则打标&lt;/code>和&lt;code>静态规则打标&lt;/code>。&lt;code>动态规则打标&lt;/code> 可以在运行时动态的圈住一组机器实例，而 &lt;code>静态规则打标&lt;/code> 则需要实例重启后才能生效，其中，动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。&lt;/p>
+&lt;h4 id="标签规则示例---静态打标">标签规则示例 - 静态打标&lt;/h4>
+&lt;p>静态打标需要在服务提供者实例启动前确定，并且必须通过特定的参数 &lt;code>tag&lt;/code> 指定。&lt;/p>
+&lt;h5 id="provider">Provider&lt;/h5>
+&lt;p>在 Dubbo 实例启动前，指定当前实例的标签，如部署在杭州区域的实例，指定 &lt;code>tag=gray&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> tag=&lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> tag=&lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#2aa198">-jar xxx-provider.jar -Ddubbo.provider.tag=gray&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer">Consumer&lt;/h5>
+&lt;p>发起调用的一方，在每次请求前通过 &lt;code>tag&lt;/code> 设置流量标签，确保流量被调度到带有同样标签的服务提供方。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RpcContext.getContext().setAttachment(Constants.TAG_KEY, &lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="标签规则示例---动态打标">标签规则示例 - 动态打标&lt;/h4>
+&lt;p>相比于静态打标只能通过 &lt;code>tag&lt;/code> 属性设置，且在启动阶段就已经固定下来，动态标签可以匹配任意多个属性，根据指定的匹配条件将 Provider 实例动态的划分到不同的流量分组中。&lt;/p>
+&lt;h5 id="provider-1">Provider&lt;/h5>
+&lt;p>以下规则对 &lt;code>shop-detail&lt;/code> 应用进行了动态归组，匹配 &lt;code>env: gray&lt;/code> 的实例被划分到 &lt;code>gray&lt;/code> 分组，其余不匹配 &lt;code>env: gray&lt;/code> 继续留在默认分组 (无 tag)。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: shop-detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">tags&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: gray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">key&lt;/span>: env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: gray
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>这里牵涉到如何给您的实例打各种原始 label 的问题，即上面示例中的 &lt;code>env&lt;/code>，一种方式是直接写在配置文件中，如上面静态规则实例 provider 部分的配置所示，另一种方式是通过预设环境变量指定，关于这点请参考下文的 &lt;a href="#%E5%A6%82%E4%BD%95%E7%BB%99%E5%AE%9E%E4%BE%8B%E6%89%93%E6%A0%87">如何给实例打标&lt;/a> 一节。&lt;/p>
+&lt;/blockquote>
+&lt;h5 id="consumer-1">Consumer&lt;/h5>
+&lt;p>服务发起方的设置方式和之前静态打标规则保持一致，只需要在每次请求前通过 &lt;code>tag&lt;/code> 设置流量标签，确保流量被调度到带有同样标签的服务提供方。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RpcContext.getContext().setAttachment(Constants.TAG_KEY, &lt;span style="color:#2aa198">&amp;#34;Hangzhou&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>设置了以上标签的流量，将全部导流到 &lt;code>hangzhou-region&lt;/code> 划分的实例上。&lt;/p>
+&lt;blockquote>
+&lt;p>请求标签的作用域仅为一次点对点的 RPC 请求。比如，在一个 A -&amp;gt; B -&amp;gt; C 调用链路上，如果 A -&amp;gt; B 调用通过 &lt;code>setAttachment&lt;/code> 设置了 &lt;code>tag&lt;/code> 参数，则该参数不会在 B -&amp;gt; C 的调用中生效，同样的，在完成了 A -&amp;gt; B -&amp;gt; C 的整个调用同时 A 收到调用结果后，如果想要相同的 &lt;code>tag&lt;/code> 参数，则在发起其他调用前仍需要单独设置 &lt;code>setAttachment&lt;/code>。可以参考 &lt;a href="../../tasks/traffic-management/isolation/">示例任务 - 环境隔离&lt;/a> 了解更多 &lt;code>tag&lt;/code> 全链路传递解决方案。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="条件路由规则">条件路由规则&lt;/h3>
+&lt;p>条件路由与标签路由的工作模式非常相似，也是首先对请求中的参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。相比于标签路由，条件路由的匹配方式更灵活：&lt;/p>
+&lt;ul>
+&lt;li>在标签路由中，一旦给某一台或几台机器实例打了标签，则这部分实例就会被立马从通用流量集合中移除，不同标签之间不会再有交集。有点类似下图，地址集合在输入阶段就已经划分明确。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/tag-condition-compare1.png" alt="tag-condition-compare">&lt;/p>
+&lt;ul>
+&lt;li>而从条件路由的视角，所有的实例都是一致的，路由过程中不存在分组隔离的问题，每次路由过滤都是基于全量地址中执行&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/traffic/tag-condition-compare2.png" alt="tag-condition-compare">&lt;/p>
+&lt;p>条件路由规则的主体 &lt;code>conditions&lt;/code> 主要包含两部分内容：&lt;/p>
+&lt;ul>
+&lt;li>=&amp;gt; 之前的为请求参数匹配条件，指定的 &lt;code>匹配条件指定的参数&lt;/code> 将与 &lt;code>消费者的请求上下文 (URL)、甚至方法参数&lt;/code> 进行对比，当消费者满足匹配条件时，对该消费者执行后面的地址子集过滤规则。&lt;/li>
+&lt;li>=&amp;gt; 之后的为地址子集过滤条件，指定的 &lt;code>过滤条件指定的参数&lt;/code> 将与 &lt;code>提供者实例地址 (URL)&lt;/code> 进行对比，消费者最终只能拿到符合过滤条件的实例列表，从而确保流量只会发送到符合条件的地址子集。
+&lt;ul>
+&lt;li>如果匹配条件为空，表示对所有请求生效，如：&lt;code>=&amp;gt; status != staging&lt;/code>&lt;/li>
+&lt;li>如果过滤条件为空，表示禁止来自相应请求的访问，如：&lt;code>application = product =&amp;gt;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="条件路由规则示例">条件路由规则示例&lt;/h4>
+&lt;p>基于以下示例规则，所有 &lt;code>org.apache.dubbo.demo.CommentService&lt;/code> 服务调用都将被转发到与当前消费端机器具有相同 &lt;code>region&lt;/code> 标记的地址子集。&lt;code>$region&lt;/code> 是特殊引用符号，执行过程中将读取消费端机器的实际的 &lt;code>region&lt;/code> 值替代。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.CommentService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#39;=&amp;gt; region = $region&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>针对条件路由，我们通常推荐配置 &lt;code>scope: service&lt;/code> 的规则，因为它可以跨消费端应用对所有消费特定服务 (service) 的应用生效。关于 Dubbo 规则中的 &lt;code>scope&lt;/code> 以及 &lt;code>service&lt;/code>、&lt;code>application&lt;/code> 的说明请阅读 &lt;a href="./condition-rule">条件路由规则手册&lt;/a>。&lt;/p>
+&lt;/blockquote>
+&lt;p>条件路由规则还支持设置具体的机器地址如 ip 或 port，这种情况下使用条件路由可以处理一些开发或线上机器的临时状况，实现&lt;strong>黑名单、白名单、实例临时摘除&lt;/strong>等运维效果，如以下规则可以将机器 &lt;code>172.22.3.91&lt;/code> 从服务的可用列表中排除。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>=&amp;gt; host != 172.22.3.91
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>条件路由还支持基于请求参数的匹配，示例如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=getDetail&amp;amp;arguments[0]=dubbo =&amp;gt; port=20880
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="动态配置规则">动态配置规则&lt;/h3>
+&lt;p>通过 Dubbo 提供的动态配置规则，您可以动态的修改 Dubbo 服务进程的运行时行为，整个过程不需要重启，配置参数实时生效。基于这个强大的功能，基本上所有运行期参数都可以动态调整，比如超时时间、临时开启 Access Log、修改 Tracing 采样率、调整限流降级参数、负载均衡、线程池配置、日志等级、给机器实例动态打标签等。与上文讲到的流量管控规则类似，动态配置规则支持应用、服务两个粒度，也就是说您一次可以选择只调整应用中的某一个或几个服务的参数配置。&lt;/p>
+&lt;p>当然，出于系统稳定性、安全性的考量，有些特定的参数是不允许动态修改的，但除此之外，基本上所有参数都允许动态修改，很多强大的运行态能力都可以通过这个规则实现，您可以找个示例应用去尝试一下。通常 URL 地址中的参数均可以修改，这在每个语言实现的参考手册里也记录了一些更详细的说明。&lt;/p>
+&lt;h4 id="动态配置规则示例---修改超时时间">动态配置规则示例 - 修改超时时间&lt;/h4>
+&lt;p>以下示例将 &lt;code>org.apache.dubbo.samples.UserService&lt;/code> 服务的超时参数调整为 2000ms&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.UserService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">2000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下部分指定这个配置是服务粒度，具体变更的服务名为 &lt;code>org.apache.dubbo.samples.UserService&lt;/code>。&lt;code>scope&lt;/code> 支持 &lt;code>service&lt;/code>、&lt;code>application&lt;/code> 两个可选值，如果 &lt;code>scope: service&lt;/code>，则 &lt;code>key&lt;/code> 应该配置为 &lt;code>version/service:group&lt;/code> 格式。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.UserService
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>关于 Dubbo 规则中的 &lt;code>scope&lt;/code> 以及 &lt;code>service&lt;/code>、&lt;code>application&lt;/code> 的说明请参考 &lt;a href="./configuration-rule/">动态配置参考手册&lt;/a> 或 &lt;a href="../../tasks/traffic-management/timeout/">动态配置示例&lt;/a>。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;code>parameters&lt;/code> 参数指定了新的修改值，这里将通过 &lt;code>timeout: 2000&lt;/code> 将超时时间设置为 2000ms。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">2000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="脚本路由规则">脚本路由规则&lt;/h3>
+&lt;p>脚本路由是最直观的路由方式，同时它也是当前最灵活的路由规则，因为你可以在脚本中定义任意的地址筛选规则。如果我们为某个服务定义一条脚本规则，则后续所有请求都会先执行一遍这个脚本，脚本过滤出来的地址即为请求允许发送到的、有效的地址集合。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span>: javascript
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">script&lt;/span>: |&lt;span style="color:#2aa198">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> (function route(invokers,invocation,context) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> var result = new java.util.ArrayList(invokers.size());
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> for (i = 0; i &amp;lt; invokers.size(); i ++) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> if (&amp;#34;10.20.3.3&amp;#34;.equals(invokers.get(i).getUrl().getHost())) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> result.add(invokers.get(i));
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> return result;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> } (invokers, invocation, context)); // 表示立即执行方法&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="如何给实例打标">如何给实例打标&lt;/h2>
+&lt;p>当前，有两种方式可以在启动阶段为 Dubbo 实例指定标签，一种是之前提到的应用内配置的方式，如在 xml 文件中设置 &lt;code>&amp;lt;dubbo:provider tag=&amp;quot;gray&amp;quot;/&amp;gt;&lt;/code>，应用打包部署后即自动被打标。&lt;/p>
+&lt;p>还有一种更灵活的方式，那就是通过读取所部署机器上的环境信息给应用打标，这样应用的标签就可以跟随实例动态的自动填充，避免每次更换部署环境就重新打包应用镜像的问题。当前 Dubbo 能自动读取以下环境变量配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: apache/demo-detail:latest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: DUBBO_LABELS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;region=hangzhou; env=gray&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: apache/demo-detail:latest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: DUBBO_ENV_KEYS
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;REGION, ENV&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: REGION
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;hangzhou&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: ENV
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;gray&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果您有不同的实例环境保存机制，可以通过扩展 &lt;code>InfraAdapter 扩展点&lt;/code> 来自定义自己的标签加载方式。如果您的应用是部署在 Kubernetes 环境下，并且已经接入了服务网格体系，则也可以使用标准 deployment 标签的方式打标，具体请跟随 &lt;a href="../../tasks/mesh/">服务网格任务示例&lt;/a> 学习。&lt;/p>
+&lt;h2 id="如何配置流量规则">如何配置流量规则&lt;/h2>
+&lt;p>Dubbo 提供了控制台 Dubbo Admin，帮助您可视化的下发流量管控规则，并实时监控规则生效情况。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/what/admin.png" alt="Admin">&lt;/p>
+&lt;p>Dubbo 还提供了 &lt;code>dubboctl&lt;/code> 命令行工具，需要有 Dubbo Admin 提前部署就绪，因为 dubboctl 是通过与 Admin 进行 http 通信完成规则下发的。&lt;/p>
+&lt;p>如果您使用的是如 Istio 的服务网格架构，还可以使用 Istioctl、kubectl 等下发 Istio 标准规则。&lt;/p>
+&lt;h2 id="接入服务网格">接入服务网格&lt;/h2>
+&lt;p>以上介绍的都是 Dubbo 体系内的流量治理规则，如果您对服务网格架构感兴趣，则可以将 Dubbo 服务接入服务网格体系，这样，您就可以使用服务网格提供的流量治理能力，如 Istio 体系的 VirtualService 等。&lt;/p>
+&lt;p>具体请参见 &lt;a href="../service-mesh">Dubbo 中的服务网格架构&lt;/a>。&lt;/p>
+&lt;h2 id="跟随示例学习">跟随示例学习&lt;/h2>
+&lt;p>我们搭建了一个 &lt;a href="../../tasks/traffic-management/">线上商城系统&lt;/a> 供您学习流量规则的具体使用。&lt;/p></description></item><item><title>Overview: 通信协议</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/protocols/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/protocols/</guid><description>
+&lt;p>Dubbo 框架提供了自定义的高性能 RPC 通信协议：基于 HTTP/2 的 Triple 协议 和 基于 TCP 的 Dubbo2 协议。除此之外，Dubbo 框架支持任意第三方通信协议，如官方支持的 gRPC、Thrift、REST、JsonRPC、Hessian2 等，更多协议可以通过自定义扩展实现。这对于微服务实践中经常要处理的多协议通信场景非常有用。&lt;/p>
+&lt;p>&lt;strong>Dubbo 框架不绑定任何通信协议，在实现上 Dubbo 对多协议的支持也非常灵活，它可以让你在一个应用内发布多个使用不同协议的服务，并且支持用同一个 port 端口对外发布所有协议。&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/protocols/protocol1.png" alt="protocols">&lt;/p>
+&lt;p>通过 Dubbo 框架的多协议支持，你可以做到：&lt;/p>
+&lt;ul>
+&lt;li>将任意通信协议无缝地接入 Dubbo 服务治理体系。Dubbo 体系下的所有通信协议，都可以享受到 Dubbo 的编程模型、服务发现、流量管控等优势。比如 gRPC over Dubbo 的模式，服务治理、编程 API 都能够零成本接入 Dubbo 体系。&lt;/li>
+&lt;li>兼容不同技术栈，业务系统混合使用不同的服务框架、RPC 框架。比如有些服务使用 gRPC 或者 Spring Cloud 开发，有些服务使用 Dubbo 框架开发，通过 Dubbo 的多协议支持可以很好的实现互通。&lt;/li>
+&lt;li>让协议迁移变的更简单。通过多协议、注册中心的协调，可以快速满足公司内协议迁移的需求。比如如从自研协议升级到 Dubbo 协议，Dubbo 协议自身升级，从 Dubbo 协议迁移到 gRPC，从 HTTP 迁移到 Dubbo 协议等。&lt;/li>
+&lt;/ul>
+&lt;h2 id="http2-triple">HTTP/2 (Triple)&lt;/h2>
+&lt;p>Triple 协议是 Dubbo3 发布的面向云原生时代的通信协议，它基于 HTTP/2 并且完全兼容 gRPC 协议，原生支持 Streaming 通信语义，Triple 可同时运行在 HTTP/1 和 HTTP/2 传输协议之上，让你可以直接使用 curl、浏览器访问后端 Dubbo 服务。&lt;/p>
+&lt;p>自 Triple 协议开始，Dubbo 还支持基于 Protocol Buffers 的服务定义与数据传输，但 Triple 实现并不绑定 IDL，比如你可以直接使用 Java Interface 定义和发布 Triple 服务。Triple 具备更好的网关、代理穿透性，因此非常适合于跨网关、代理通信的部署架构，如服务网格等。&lt;/p>
+&lt;p>Triple 协议的核心特性如下：&lt;/p>
+&lt;ul>
+&lt;li>支持 TLS 加密、Plaintext 明文数据传输&lt;/li>
+&lt;li>支持反压与限流&lt;/li>
+&lt;li>支持 Streaming 流式通信&lt;/li>
+&lt;li>同时支持 HTTP/1 和 HTTP/2 传输协议&lt;/li>
+&lt;/ul>
+&lt;p>在编程与通信模型上，Triple 协议支持如下模式：&lt;/p>
+&lt;ul>
+&lt;li>消费端异步请求(Client Side Asynchronous Request-Response)&lt;/li>
+&lt;li>提供端异步执行（Server Side Asynchronous Request-Response）&lt;/li>
+&lt;li>消费端请求流（Request Streaming）&lt;/li>
+&lt;li>提供端响应流（Response Streaming）&lt;/li>
+&lt;li>双向流式通信（Bidirectional Streaming）&lt;/li>
+&lt;/ul>
+&lt;p>开发实践&lt;/p>
+&lt;ul>
+&lt;li>Triple 协议使用请参见 &lt;a href="../../tasks/protocols/triple/">Triple 协议开发任务&lt;/a> 或 &lt;a href="../../mannual/java-sdk/reference-manual/protocol/triple/">java sdk 示例文档&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../reference/protocols/triple/">Triple 设计思路与协议规范&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="dubbo2">Dubbo2&lt;/h2>
+&lt;p>Dubbo2 协议是基于 TCP 传输层协议之上构建的一套 RPC 通信协议，由于其紧凑、灵活、高性能的特点，在 Dubbo2 时代取得了非常广泛的应用，是企业构建高性能、大规模微服务集群的关键通信方案。在云原生时代，我们更推荐使用通用性、穿透性更好的 Triple 协议。&lt;/p>
+&lt;p>Dubbo2 协议也内置 HTTP 支持，因此你可以使用 curl 在开发阶段快速验证或调试服务。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/protocols/dubbo/">Dubbo2 协议开发任务&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../reference/protocols/tcp/">Dubbo2 设计思路与协议规范&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="grpc">gRPC&lt;/h2>
+&lt;p>你可以用 Dubbo 开发和治理微服务，然后设置使用 gRPC 协议进行底层通信。但为什么要这么做呢，与直接使用 gRPC 框架对比有什么优势？简单的答案是，这是使用 gRPC 进行微服务开发的常用模式，具体请往下看。&lt;/p>
+&lt;p>gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 &lt;a href="../../what/xyz-difference">产品对比&lt;/a> 文档中提到的，gRPC 的定位是通信协议与实现，是一款纯粹的 RPC 框架，而 Dubbo 定位是一款微服务框架，为微服务实践提供解决方案。因此，相比于 Dubbo，gRPC 相对欠缺了微服务编程模型、服务治理等能力的抽象。&lt;/p>
+&lt;p>在 Dubbo 体系下使用 gRPC 协议 (gRPC over Dubbo Framework) 是一个非常高效和轻量的选择，它让你既能使用原生的 gRPC 协议通信，又避免了基于 gRPC 进行二次定制与开发的复杂度 (二次开发与定制 gRPC，是很多企业规模化实践后证实不可避免的环节，Dubbo 框架替开发者完成了这一步，让开发者可以直接以最简单的方式使用 gRPC)。&lt;/p>
+&lt;p>&lt;a href="../../tasks/protocols/grpc/">gRPC over Dubbo 示例&lt;/a>&lt;/p>
+&lt;h2 id="rest">REST&lt;/h2>
+&lt;p>微服务领域常用的一种通信模式是 HTTP + JSON，包括 Spring Cloud、Microprofile 等一些主流的微服务框架都默认使用的这种通信模式，Dubbo 同样提供了对基于 HTTP 的编程、通信模式的支持。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/protocols/web/">HTTP over Dubbo 示例&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/protocols/springcloud/">Dubbo 与 Spring Cloud 体系互通&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="其他通信协议">其他通信协议&lt;/h2>
+&lt;p>除了以上介绍的几种协议之外，你还可以将以下协议运行在 Dubbo 之上。对 Dubbo 而言，只需要修改一行简单的配置，就可以切换底层服务的通信协议，其他外围 API 和治理能力不受影响。&lt;/p>
+&lt;ul>
+&lt;li>Hessian2&lt;/li>
+&lt;li>Thrift&lt;/li>
+&lt;li>JsonRPC&lt;/li>
+&lt;/ul>
+&lt;h2 id="异构微服务体系互通">异构微服务体系互通&lt;/h2>
+&lt;p>关于协议迁移、多协议技术栈共存的实践方案，请参考本篇&lt;a href="https://dubbo.apache.org/zh-cn/blog/2023/01/05/dubbo-%E8%BF%9E%E6%8E%A5%E5%BC%82%E6%9E%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BD%93%E7%B3%BB-%E5%A4%9A%E5%8D%8F%E8%AE%AE%E5%A4%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/">博客文章&lt;/a>。&lt;/p>
+&lt;h2 id="配置方式">配置方式&lt;/h2>
+&lt;p>以上协议的配置和使用方式，包括如何配置 &lt;code>单端口多协议&lt;/code> 支持等，请参照以下 sdk 示例文档：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../mannual/java-sdk/reference-manual/protocol/">Java&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/golang-sdk/tutorial/develop/protocol/">Golang&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/rust-sdk/">Rust&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="自定义扩展">自定义扩展&lt;/h2>
+&lt;p>除了以上官方版本支持的通信协议，Dubbo 支持扩展新协议支持，具体请参见 &lt;a href="../../tasks/extensibility/protocol/">【任务】-【可扩展性】-【protocol】&lt;/a>&lt;/p></description></item><item><title>Overview: 扩展适配</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/extensibility/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/extensibility/</guid><description>
+&lt;p>Dubbo 从设计上是高度可扩展的，通过这些扩展点你可以做到：&lt;/p>
+&lt;ul>
+&lt;li>拦截流量并控制流量行为&lt;/li>
+&lt;li>按需调优 Dubbo 的一些默认策略与实现&lt;/li>
+&lt;li>将 Dubbo 服务适配到公司内部微服务集群或其他主流的开源组件&lt;/li>
+&lt;/ul>
+&lt;h2 id="一切皆可扩展">一切皆可扩展&lt;/h2>
+&lt;p>Dubbo 扩展能力使得 Dubbo 项目很方便的切分成一个一个的子模块，实现热插拔特性。用户完全可以基于自身需求，替换 Dubbo 原生实现，来满足自身业务需求。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/advantages/extensibility.png" alt="Admin 效果图">&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>协议与编码扩展&lt;/strong>。通信协议、序列化编码协议等&lt;/li>
+&lt;li>&lt;strong>流量管控扩展&lt;/strong>。集群容错策略、路由规则、负载均衡、限流降级、熔断策略等&lt;/li>
+&lt;li>&lt;strong>服务治理扩展&lt;/strong>。注册中心、配置中心、元数据中心、分布式事务、全链路追踪、监控系统等&lt;/li>
+&lt;li>&lt;strong>诊断与调优扩展&lt;/strong>。流量统计、线程池策略、日志、QoS 运维命令、健康检查、配置加载等&lt;/li>
+&lt;/ul>
+&lt;h2 id="基于扩展点的微服务生态">基于扩展点的微服务生态&lt;/h2>
+&lt;p>众多的扩展点与抽象，是 Dubbo 与众多微服务生态组件对接、实现微服务治理能力的基础。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/observability/tracing/">全链路追踪&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/ecosystem/transaction/">数据一致性&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../core-features/traffic/circuit-breaking/">限流降级&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo 的各语言 sdk 实现都是采用的 &amp;ldquo;微内核+插件&amp;rdquo; 的设计模式，几乎所有流程中的核心节点都被定义为扩展点，官方发布的组件也是以扩展点的实现形式发布，因此 Dubbo 可以平等的对待所有官方与第三方组件扩展。&lt;/p>
+&lt;ul>
+&lt;li>扩展适配能力是实现 Dubbo 微服务生态的关键，Dubbo 生态组件如全链路追踪、注册中心实现等的适配都是基于 Filter、Registry、DynamicConfiguration 等扩展点实现。&lt;/li>
+&lt;li>扩展适配给用户带来最大的灵活性，开发者可以随时接入公司内部组件、按需定制核心能力等。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/extensibility/arc.png" alt="extensibility-echosystem.png">&lt;/p>
+&lt;p>以上是按架构层次划分的 Dubbo 内的一些核心扩展点定义及实现，从三个层次来展开：&lt;/p>
+&lt;ul>
+&lt;li>协议通信层&lt;/li>
+&lt;li>流量管控层&lt;/li>
+&lt;li>服务治理层&lt;/li>
+&lt;/ul>
+&lt;h2 id="协议通信层">协议通信层&lt;/h2>
+&lt;p>在通信协议一节我们强调过，Dubbo 不绑定任何协议，用户可以选择 Triple、gRPC、Dubbo2、REST、自定义协议等任一 RPC 远程通信协议，除此之外，RPC 协议之上的数据编码格式 (即序列化协议) 也是通过扩展点定义，用户可以灵活选择 RPC 与序列化的通信协议组合。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/extensibility/protocol.png" alt="协议与编码原理图">&lt;/p>
+&lt;h3 id="protocol">Protocol&lt;/h3>
+&lt;p>Protocol 扩展点定义对应的是 RPC 协议，利用这个扩展点可以让 Dubbo 作为统一的微服务开发和治理框架，而在下层通信协议上实现灵活切换。官方发布了对大多数主流 RPC 通信协议的适配，你可以通过几条简单的配置直接使用，如果你想使用公司自定义的 RPC 通信协议，请通过 Protocol 提供自定义扩展实现。&lt;/p>
+&lt;h3 id="serialization">Serialization&lt;/h3>
+&lt;p>Serialization 扩展点定义了序列化协议扩展，Dubbo 官方提供了 Fastjson、Protobuf、Hessian2、Kryo、FST 等序列化协议适配。&lt;/p>
+&lt;h2 id="流量管控层">流量管控层&lt;/h2>
+&lt;p>Dubbo 在服务调用链路上预置了大量扩展点，通过这些扩展点用户可以控制运行态的流量走向、改变运行时调用行为等，包括 Dubbo 内置的一些负载均衡策略、流量路由策略、超时等很多流量管控能力都是通过这类扩展点实现的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/extensibility/traffic.png" alt="协议与编码原理图">&lt;/p>
+&lt;h3 id="filter">Filter&lt;/h3>
+&lt;p>Filter 流量拦截器是 Dubbo 服务调用之上的 AOP 设计模式，Filter 用来对每次服务调用做一些预处理、后处理动作，使用 Filter 可以完成访问日志、加解密、流量统计、参数验证等任务，Dubbo 中的很多生态适配如限流降级 Sentinel、全链路追踪 Tracing 等都是通过 Fitler 扩展实现的。一次请求过程中可以植入多个 Filter，Filter 之间相互独立没有依赖。&lt;/p>
+&lt;ul>
+&lt;li>从消费端视角，它在请求发起前基于请求参数等做一些预处理工作，在接收到响应后，对响应结果做一些后置处理；&lt;/li>
+&lt;li>从提供者视角则，在接收到访问请求后，在返回响应结果前做一些预处理，&lt;/li>
+&lt;/ul>
+&lt;h3 id="router">Router&lt;/h3>
+&lt;p>Router 路由器是 Dubbo 中流量管控的关键组件，它将符合一定条件的流量转发到特定分组的地址子集，是 Dubbo 流量管控中一些关键能力如按比例流量转发、流量隔离等的基础。每次服务调用请求都会流经一组路由器 (路由链)，每个路由器根据预先设定好的规则、全量地址列表以及当前请求上下文计算出一个地址子集，再传给下一个路由器，重复这一过程直到最后得出一个有效的地址子集。&lt;/p>
+&lt;p>Dubbo 官方发布版本预置了丰富的流量管控规则与 router 实现，如 &lt;a href="../traffic/">流量管控&lt;/a> 一文中阐述的，用户通过下发规则即可实现各种模式的流量管控。如果有其他流量管控诉求，可以通过提供自定义的 router 扩展实现。&lt;/p>
+&lt;h3 id="load-balance">Load Balance&lt;/h3>
+&lt;p>在 Dubbo 中，Load Balance 负载均衡工作在 router 之后，对于每次服务调用，负载均衡负责在 router 链输出的地址子集中选择一台机器实例进行访问，保证一段时间内的调用都均匀的分布在地址子集的所有机器上。&lt;/p>
+&lt;p>Dubbo 官方提供了加权随机、加权轮询、一致性哈希、最小活跃度优先、最短响应时间优先等负载均衡策略，还提供了根据集群负载自适应调度的负载均衡算法。&lt;/p>
+&lt;h2 id="服务治理层">服务治理层&lt;/h2>
+&lt;p>以下是 Dubbo 部署的经典架构图，由注册中心 (服务发现)、配置中心和元数据中心构成了整个服务治理的核心。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/threecenters.png" alt="服务治理架构图">&lt;/p>
+&lt;p>这里我们主要从架构、实现的视角来分析了 Dubbo 服务治理，Dubbo 很多服务治理的核心能力都是通过上图描述的几个关键组件实现的，用户通过控制面或者 Admin 下发的各种规则与配置、各类微服务集群状态的展示等都是直接与注册中心、配置中心和元数据中心交互。&lt;/p>
+&lt;p>在具体实现或者部署上，注册中心、配置中心和元数据中心可以是同一组件，比如 Zookeeper 可同时作为注册、配置和元数据中心，Nacos 也是如此。因此，三个中心只是从架构职责上的划分，你甚至可以用同一个 Zookeeper 集群来承担所有三个职责，只需要在应用里将他们设置为同一个集群地址就可以了。&lt;/p>
+&lt;blockquote>
+&lt;p>在云原生部署架构下，随着 Kubernetes、Service Mesh 架构的流行，微服务基础设施呈现下沉趋势，注册、配置和元数据中心的职责正被 Kubernetes、Istio 等组件取代，具体可参见 &lt;a href="../service-mesh/">服务网格&lt;/a> 一节的描述。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="registry">Registry&lt;/h3>
+&lt;p>注册中心是 Dubbo 实现服务发现能力的基础，Dubbo 官方支持 Zookeeper、Nacos、Etcd、Consul、Eureka 等注册中心。&lt;/p>
+&lt;p>通过对 Consul、Eureka 的支持，Dubbo 也实现了与 Spring Cloud 体系在地址和通信层面的互通，让用户同时部署 Dubbo 与 Spring Cloud，或者从 Spring Cloud 迁移到 Dubbo 变得更容易。&lt;/p>
+&lt;h3 id="config-center">Config Center&lt;/h3>
+&lt;p>配置中心是用户实现动态控制 Dubbo 行为的关键组件，我们在 &lt;a href="../../tasks/traffic-management">流量管控&lt;/a> 任务中下发的所有规则，都是先下发到配置中心保存起来，进而 Dubbo 实例通过监听配置中心的变化，收到路由规则并达到控制流量的行为。&lt;/p>
+&lt;p>Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis、Apollo 等配置中心实现。&lt;/p>
+&lt;h3 id="metadata-center">Metadata Center&lt;/h3>
+&lt;p>与配置中心相反，从用户视角来看元数据中心是只读的，元数据中心唯一的写入方是 Dubbo 进程实例，Dubbo 实例会在启动之后将一些内部状态（如服务列表、服务配置、服务定义格式等）上报到元数据中心，供一些治理能力作为数据来源，如服务测试、文档管理、服务状态展示等。&lt;/p>
+&lt;p>Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis 等元数据中心实现。&lt;/p>
+&lt;h2 id="自定义扩展示例">自定义扩展示例&lt;/h2>
+&lt;p>以下示例演示了如何扩展 Dubbo 来解决实际问题，可以跟随示例学习。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/extensibility/protocol/">自定义 RPC 协议&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/extensibility/router/">自定义流量路由规则&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/extensibility/registry/">自定义注册中心&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/extensibility/filter/">自定义拦截器&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="更多扩展点">更多扩展点&lt;/h2>
+&lt;p>本文列出了 Dubbo 常用的一些扩展点，但还有大量的扩展点可供灵活定制，并且不同语言 sdk 的扩展定义和配置方式上也存在差异，以下是 Dubbo SDK 的扩展点手册。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../mannual/java-sdk/reference-manual/spi/description/">Java 扩展点手册&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/golang-sdk/preface/design/aop_and_extension/">Go 扩展点手册&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Overview: 观测服务</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/observability/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/observability/</guid><description>
+&lt;p>Dubbo 内部维护了多个纬度的可观测指标，并且支持多种方式的可视化监测。可观测性指标从总体上来说分为三个度量纬度：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Admin&lt;/strong> Admin 控制台可视化展示了集群中的应用、服务、实例及依赖关系，支持流量治理规则下发，同时还提供如服务测试、mock、文档管理等提升研发测试效率的工具。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Metrics&lt;/strong> Dubbo 统计了一系列的流量指标如 QPS、RT、成功请求数、失败请求数等，还包括一系列的内部组件状态如线程池数、服务健康状态等。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Tracing&lt;/strong> Dubbo 与业界主流的链路追踪工作做了适配，包括 Skywalking、Zipkin、Jaeger 都支持 Dubbo 服务的链路追踪。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Logging&lt;/strong> Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="admin">Admin&lt;/h2>
+&lt;p>Admin 控制台可视化展示了集群中的应用、服务、实例及依赖关系，支持流量治理规则下发，同时还提供如服务测试、mock、文档管理等提升研发测试效率的工具&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/observability/admin.jpg" alt="Admin 效果图">&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/observability/admin/">Admin 部署与效果演示&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="metrics">Metrics&lt;/h2>
+&lt;p>Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数，失败原因统计等在内的核心服务指标，同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如线程池数量、服务健康状态等。&lt;/p>
+&lt;p>可以通过 Grafana 可视化的查看 Metrics 指标&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/observability/provider-stat.png" alt="Grafana 效果图">&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/observability/grafana/">使用 Grafana 可视化展示 Metrics 指标&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/observability/prometheus/">如何从 Prometheus 查询特定 Metrics 指标&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="tracing">Tracing&lt;/h2>
+&lt;p>全链路追踪对于监测分布式系统运行状态具有非常重要的价值，Dubbo 通过 Filter 拦截器实现了请求运行时的埋点跟踪，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等，可以实现全链路跟踪数据的分析与可视化展示。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/observability/tracing.png" alt="Tracing 效果图">&lt;/p>
+&lt;blockquote>
+&lt;p>未来我们计划支持通过 Dubbo Admin 等治理平台动态调整 Dubbo 的链路追踪采样率。&lt;/p>
+&lt;/blockquote>
+&lt;ul>
+&lt;li>&lt;a href="../../tasks/observability/tracing/skywalking/">基于 Skywalking 实现全链路追踪&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/observability/tracing/zipkin/">基于 Zipkin 实现全链路追踪&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/java-sdk/advanced-features-and-usage/observability/tracing#%E5%85%B3%E8%81%94%E6%97%A5%E5%BF%97">通过链路追踪关联日志系统&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="logging">Logging&lt;/h2>
+&lt;p>访问日志可以帮助分析系统的流量情况，在有些场景下，开启访问日志对于排查问题也非常有帮助。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../mannual/java-sdk/advanced-features-and-usage/service/accesslog/">开启 Access Log&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../tasks/traffic-management/accesslog/">你还在运行态开启 Access Log&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Overview: 认证鉴权</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/security/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/security/</guid><description>
+&lt;p>Dubbo 提供了构建安全微服务通信体系 (零信任体系) 的完善机制，这包括：&lt;/p>
+&lt;ul>
+&lt;li>避免通信过程中的中间人攻击，Dubbo 提供了身份认证 (Authentication) 和基于 TLS 的通信链路加密能力&lt;/li>
+&lt;li>控制服务间的访问鉴权 (Authorization)，Dubbo 提供了 mTLS 和权限检查机制&lt;/li>
+&lt;/ul>
+&lt;p>通过这篇文档，你将了解如果使用 Dubbo 的安全机制构建微服务零信任体系，实现身份认证、透明链路加密、鉴权、审计等能力。由于构建零信任是一套系统的工作，而 Dubbo 只是其中数据通信层的一环，因此你可能需要一系列基础设施的配合，包括证书生成、分发、安全策略管控等。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>证书的生成和分发不在本文讨论范围，我们假设您已经有完善的基础设施解决了证书管理问题，因此，我们将更专注在讲解 Dubbo 体系的认证和鉴权机制与流程。&lt;/strong> 如果您并没有这些证书管理设施，我们推荐您使用服务网格架构 (具体请参见 &lt;a href="../service-mesh/">Dubbo Mesh 服务网格&lt;/a> 文档说明)，借助 &lt;a href="https://istio.io/latest/docs/concepts/security/">Istio&lt;/a> 等服务网格控制面的证书管理机制和安全策略，您可以很容易将 Dubbo 集群的认证和鉴权能力实施起来。&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>另外，以下默认讲的都是 Dubbo Proxyless Mesh 模式下的 Dubbo 数据面行为，对于部署 Envoy 的场景，由于 Dubbo 只是作为通信和编程 sdk，因此 Envoy 场景下认证鉴权能力请完全参考标准 Istio 文档即可。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="架构">架构&lt;/h2>
+&lt;p>一套完整的零信任体系包含多个组成部分：&lt;/p>
+&lt;ul>
+&lt;li>一个根证书机构 (CA) 来负责管理 key 和 certificate&lt;/li>
+&lt;li>一个安全策略的管理和分发中心，来负责将安全策略实时下发给数据面组件：
+&lt;ul>
+&lt;li>认证策略&lt;/li>
+&lt;li>鉴权策略&lt;/li>
+&lt;li>安全命名信息 (Secure Naming Information)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>数据面组件 (Dubbo) 负责识别和执行身份认证、加密、策略解析等动作&lt;/li>
+&lt;li>一系列的工具和生态，配合完成安全审计、数据链路监控等工作&lt;/li>
+&lt;/ul>
+&lt;p>在服务网格 (Istio) 部署模式下，控制面通常负责安全策略、证书等的管理，控制面负责与基础设施如 Kubernetes API Server 等交互，将配置数据下发给 Dubbo 或者 Envoy 等数据面组件。但如我们前面提到的，我们假设控制面产品已经就绪，因此不会涉及控制面如何签发证书、定义认证鉴权策略的讨论，我们将专注在 Dubbo 作为数据面的职责及与控制面的交互流程上。&lt;/p>
+&lt;p>以下是完整的 Dubbo 零信任架构图&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/security/arch.png" alt="Authentication">&lt;/p>
+&lt;h2 id="authentication-认证">Authentication 认证&lt;/h2>
+&lt;p>Dubbo 提供了两种认证模式：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>传输通道认证 (Channel Authentication)&lt;/strong>：Dubbo 支持基于 TLS 的 HTTP/2 和 TCP 通信，通过 Channel Authentication API 或者控制面认证策略可以开启 TLS，实现 Server 身份端认证以及数据链路加密。另外，还可以开启 mTLS 实现 Client、Server 双向认证。Channel Authentication 是 service-to-service 模式的认证，代表的是服务或实例的身份认证。&lt;/li>
+&lt;li>&lt;strong>请求认证 (Request Authentication)&lt;/strong>：Dubbo 提供了 API 用来在用户请求上下文中放入代表用户身份的 credential (如 JSON Web Token)，Dubbo 框架将自动识别请求中的身份信息并进行权限校验。另外，你也可以定制请求上下文中的身份，如放入 Access Token 的如 OAuth2 tokens。Request Authentication 是 end-user 模式的认证，代表登录系统的用户身份的认证。&lt;/li>
+&lt;/ul>
+&lt;h3 id="架构图">架构图&lt;/h3>
+&lt;p>你可以使用 Istio 控制面管理证书、认证策略等，不同的认证策略会影响 Dubbo 数据面的认证行为，如是否开启 mTLS、是否允许迁移阶段的 Plaintext 请求等。&lt;/p>
+&lt;p>在 Istio 模式下，Dubbo 认证机制通过 xDS 实现了和 Istio 控制面的自动对接，即 Istio 控制面生成的证书、认证策略配置会自动的下发到 Dubbo 数据面，Dubbo 数据面通过 Authentication API 接收配置并将它们应用到后续的所有数据通信环节，如启用新的证书、执行新的认证策略等。&lt;/p>
+&lt;p>如果认证策略开启了 Request Authentication，则 Dubbo 数据面要负责 JWT token 的读取与填充，即 token 要在请求发起前附加到请求上下文中。Request Authentication 使用的前提一定是开启了 Channel Authentication，否则 Request Authentication 无法生效。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/security/auth-1.png" alt="Authentication">&lt;/p>
+&lt;h4 id="dubbo-mtls-流程">Dubbo mTLS 流程&lt;/h4>
+&lt;p>在 Istio 部署架构下，可以通过控制面认证策略开启或关闭 Channel Authentication 的双向认证，双向认证的工作流程如下：&lt;/p>
+&lt;ol>
+&lt;li>通过 Istio 下发认证策略，开启双向认证&lt;/li>
+&lt;li>Dubbo 客户端同服务端开启双向 TLS 握手，在此期间，Dubbo 客户端会做 secure naming check 以检查服务端的身份（它被证实是有运行这个服务的合法身份）。&lt;/li>
+&lt;li>客户端和服务端之间建立一条双向的 mTLS 链接，随后发起正常的加密通信。&lt;/li>
+&lt;li>Dubbo 服务端收到请求后，识别客户端身份并检查其是否有权限访问响应的资源。&lt;/li>
+&lt;/ol>
+&lt;h3 id="认证策略">认证策略&lt;/h3>
+&lt;p>具体请查看 Istio 官方支持的认证规则，Dubbo 完全支持 Istio 定义的认证策略。&lt;/p>
+&lt;p>&lt;a href="https://istio.io/latest/docs/concepts/security/#authentication-policies">https://istio.io/latest/docs/concepts/security/#authentication-policies&lt;/a>&lt;/p>
+&lt;h2 id="authorization-鉴权">Authorization 鉴权&lt;/h2>
+&lt;p>Dubbo 抽象了一套鉴权的扩展机制，但当前在具体实现上只支持 Istio 体系，因此其鉴权能力与 Istio 官方描述对等。具体可参见
+&lt;a href="https://istio.io/latest/docs/concepts/security/#authorization">Istio 鉴权文档&lt;/a>&lt;/p>
+&lt;h3 id="架构图-1">架构图&lt;/h3>
+&lt;p>Dubbo 通过 xDS 与 Istio 控制面的数据通道，接收用户配置的鉴权策略，当一个请求到达 Dubbo 实例时，Dubbo SDK 使用内置的鉴权策略引擎将请求参数和用户身份与鉴权策略进行匹配，如果匹配成功则允许访问，否则拒绝访问。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/security/authz-1.png" alt="Authorization">&lt;/p>
+&lt;p>Dubbo 完整的鉴权工作流程如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/security/authz-2.png" alt="Authorization">&lt;/p>
+&lt;h3 id="鉴权策略">鉴权策略&lt;/h3>
+&lt;p>具体请查看 Istio 官方支持的鉴权规则，Dubbo 完全支持 Istio 定义的鉴权策略。&lt;/p>
+&lt;p>&lt;a href="https://istio.io/latest/docs/concepts/security/#authorization-policies">https://istio.io/latest/docs/concepts/security/#authorization-policies&lt;/a>&lt;/p>
+&lt;h2 id="dubbo-认证-api">Dubbo 认证 API&lt;/h2>
+&lt;p>Dubbo 定义了一套认证 API，对于常规使用的场景，开发者可以通过这套 API 启用 TLS/mTLS 通信；但对于 Istio 控制面部署的场景，Dubbo 会自动识别 Istio 控制面下发的证书和认证策略，因此只需要与 Istio 控制面交互即可，不需要 Dubbo 侧的特别配置。&lt;/p>
+&lt;p>不论是否使用 Istio 控制面，对于 Request Authentication，JWT token 仍需要在 Dubbo 侧编程指定。&lt;/p>
+&lt;p>每种语言实现的认证 API 定义略有差异，具体定义请参考各 SDK 文档：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://dubbo.apache.org/">Java&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/">Go&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/">Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dubbo.apache.org/">Node.js&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="示例任务">示例任务&lt;/h2>
+&lt;p>访问如下 &lt;a href="https://dubbo.apache.org/">Dubbo 任务示例&lt;/a> 进行安全策略动手实践。&lt;/p></description></item><item><title>Overview: 服务网格</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/service-mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/service-mesh/</guid><description>
+&lt;p>Dubbo Mesh 是 Dubbo 在云原生背景的微服务整体解决方案，它帮助开发者实现 Dubbo 服务与标准的 Kubernetes Native Service 体系的打通，让 Dubbo 应用能够无缝接入 Istio 等业界主流服务网格产品。&lt;/p>
+&lt;p>以下是 Dubbo Mesh 的部署架构图&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/mesh/mix-mesh.png" alt="Dubbo-Mesh">&lt;/p>
+&lt;ul>
+&lt;li>控制面。Istio 作为统一控制面，为集群提供 Kubernetes 适配、服务发现、证书管理、可观测性、流量治理等能力。&lt;/li>
+&lt;li>数据面。Dubbo 应用实例作为数据面组件，支持两种部署模式
+&lt;ul>
+&lt;li>Proxy 模式。Dubbo 进程与 Envoy 部署在同一 pod，进出 Dubbo 的流量都经 Envoy 代理拦截，由 Envoy 执行流量管控。&lt;/li>
+&lt;li>Proxyless 模式。Dubbo 进程独立部署，进程间直接通信，通过 xDS 协议与控制面直接交互。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>关于服务网格架构以及为何要接入 Istio 控制面，请参考 &lt;a href="https://istio.io/">Istio 官网&lt;/a>，本文不包含这部分通用内容的讲解，而是会侧重在 Dubbo Mesh 解决方案本身。&lt;/p>
+&lt;h2 id="dubbo-mesh">Dubbo Mesh&lt;/h2>
+&lt;h3 id="proxy-mesh">Proxy Mesh&lt;/h3>
+&lt;p>在 proxy 模式下，Dubbo 与 Envoy 等边车 (Proxy or Sidecar) 部署在一起&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/mesh/dubbo-proxy.png" alt="dubbo-sidecar">&lt;/p>
+&lt;p>以上是 Dubbo Proxy Mesh 部署架构图&lt;/p>
+&lt;ul>
+&lt;li>Dubbo 与 Envoy 部署在同一个 Pod 中，Istio 实现对流量和治理的统一管控。&lt;/li>
+&lt;li>Dubbo 只提供面向业务应用的编程 API、RPC 通信能力，其余流量管控能力如地址发现、负载均衡、路由寻址等都下沉到 Envoy，Envoy 拦截所有进出流量并完成路由寻址等服务治理工作。&lt;/li>
+&lt;li>控制面与 Envoy 之间通过图中虚线所示的 xDS 协议进行配置分发。&lt;/li>
+&lt;/ul>
+&lt;p>在 Proxy 模式下，Dubbo3 通信层选用 Triple、gRPC、REST 等基于 HTTP 的通信协议可以获得更好的网关穿透性与性能体验。&lt;/p>
+&lt;h3 id="proxyless-mesh">Proxyless Mesh&lt;/h3>
+&lt;p>在 Proxyless 模式下，没有 Envoy 等代理组件，Dubbo 进程保持独立部署并直接通信，Istio 控制面通过 xDS 与 Dubbo 进程进行治理能力交互。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/mesh/dubbo-proxyless.png" alt="dubbo-proxyless">&lt;/p>
+&lt;p>Proxyless 模式下 Dubbo 部署与服务网格之前基本一致，通过不同语言版本的 Dubbo3 SDK 直接实现 xDS 协议解析&lt;/p>
+&lt;h4 id="为什么需要-proxyless-mesh">为什么需要 Proxyless Mesh&lt;/h4>
+&lt;p>Proxy 模式很好的实现了治理能力与有很多优势，如平滑升级、多语言、业务侵入小等，但也带来了一些额外的问题，比如：&lt;/p>
+&lt;ul>
+&lt;li>Sidecar 通信带来了额外的性能损耗，这在复杂拓扑的网络调用中将变得尤其明显。&lt;/li>
+&lt;li>Sidecar 的存在让应用的声明周期管理变得更加复杂。&lt;/li>
+&lt;li>部署环境受限，并不是所有的环境都能满足 Sidecar 部署与请求拦截要求。&lt;/li>
+&lt;/ul>
+&lt;p>在 Proxyless 模式下，Dubbo 进程之间继续保持直连通信模式：&lt;/p>
+&lt;ul>
+&lt;li>没有额外的 Proxy 中转损耗，因此更适用于性能敏感应用&lt;/li>
+&lt;li>更有利于遗留系统的平滑迁移&lt;/li>
+&lt;li>架构简单，容易运维部署&lt;/li>
+&lt;li>适用于几乎所有的部署环境&lt;/li>
+&lt;/ul>
+&lt;h2 id="示例任务">示例任务&lt;/h2>
+&lt;p>了解了足够多的原理知识，我们推荐你访问如下 &lt;a href="../../tasks/mesh">示例&lt;/a> 进行动手实践。&lt;/p>
+&lt;h2 id="可视化">可视化&lt;/h2>
+&lt;p>推荐使用 &lt;a href="../../tasks/deploy">Dubbo Admin&lt;/a> 作为您 Dubbo 集群的可视化控制台，它兼容所有 Kubernetes、Mesh 和非 Mesh 架构的部署。&lt;/p>
+&lt;p>除此之外，你也可以使用 &lt;a href="https://istio.io/latest/docs/tasks/observability/kiali/">Istio 官方推荐的可视化工具&lt;/a> 来管理您的 Dubbo Mesh 集群。&lt;/p>
+&lt;h2 id="接入非-istio-控制面">接入非 Istio 控制面&lt;/h2>
+&lt;p>Dubbo Mesh 本身并不绑定任何控制面产品实现，你可以使用 Istio、Linkerd、Kuma 或者任一支持 xDS 协议的控制面产品，对于 Sidecar 亦是如此。&lt;/p>
+&lt;p>如果你已经完整的体验了 &lt;a href="https://dubbo.apache.org/">基于 Istio 的 Dubbo Mesh&lt;/a> 示例任务，并且发现 Istio 很好的满足了你的 Dubbo Mesh 治理诉求，那么采用 Istio 作为你的控制面是首选的解决方案。&lt;/p>
+&lt;p>如果你发现 Istio 模式下 Dubbo 部分能力受限，而这部分能力正好是你需要的，那么你需要考虑接入 Dubbo 控制面，用 Dubbo 控制面来替代 Istio，以获得更多 Dubbo 体系原生能力支持、更好的性能体验。具体请参见 &lt;a href="https://dubbo.apache.org/">基于 Dubbo 定制控制面的 Dubbo Mesh 示例任务&lt;/a>。&lt;/p>
+&lt;blockquote>
+&lt;p>简单来讲，这是 Dubbo 社区发布的一款基于 Istio 的定制版本控制面，Dubbo 控制面安装与能力差异请参见上面的示例任务链接。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="老系统迁移方案">老系统迁移方案&lt;/h2>
+&lt;h3 id="如何解决注册中心数据同步的问题">如何解决注册中心数据同步的问题？&lt;/h3>
+&lt;p>Address Synchronization&lt;/p>
+&lt;h3 id="如何解决-dubbo2-协议通信的问题">如何解决 Dubbo2 协议通信的问题？&lt;/h3>
+&lt;p>Aeraki Mesh&lt;/p></description></item><item><title>Overview: 微服务生态</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/ecosystem/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/ecosystem/</guid><description>
+&lt;p>Dubbo 社区和众多优秀的开源项目一起围绕 Dubbo 建立了丰富的微服务生态支持，这让开发者从选型 Dubbo 作为开发框架的第一天，就无需担心后续的服务治理诉求，Dubbo 对每一个常见问题均提供了生产级的解决方案。&lt;/p>
+&lt;p>以下表格为基于最新 Dubbo Java 3.2.x 版本统计的生态组件支持情况，后续将根据开发进展持续更新。同时每个语言支持的组件完善度会有一定差异，具体请参见各个 &lt;a href="../../mannual/">语言参考手册&lt;/a> 内的详细说明&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>功能&lt;/th>
+&lt;th>组件列表&lt;/th>
+&lt;th>组件列表&lt;/th>
+&lt;th>组件列表&lt;/th>
+&lt;th>组件列表&lt;/th>
+&lt;th>组件列表&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>服务发现&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/registry/zookeeper">Zookeeper&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/registry/nacos">Nacos&lt;/a>&lt;/td>
+&lt;td>&lt;a href="https://dubbo.apache.org/">Kubernetes Service&lt;/a>&lt;/td>
+&lt;td>DNS【开发中】&lt;/td>
+&lt;td>&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-registry-extensions" target="_blank">更多&lt;/a>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>动态配置&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/config-center/zookeeper">Zookeeper&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/config-center/nacos">Nacos&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/config-center/apollo">Apollo&lt;/a>&lt;/td>
+&lt;td>Kubernetes【开发中】&lt;/td>
+&lt;td>&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-configcenter-extensions" target="_blank">更多&lt;/a>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>元数据管理&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/metadata-center/zookeeper">Zookeeper&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/metadata-center/nacos">Nacos&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../mannual/java-sdk/reference-manual/metadata-center/redis">Redis&lt;/a>&lt;/td>
+&lt;td>Kubernetes【开发中】&lt;/td>
+&lt;td>&lt;a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-metadata-report-extensions" target="_blank">更多&lt;/a>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>RPC 协议&lt;/td>
+&lt;td>&lt;a href="../../reference/protocols/triple">HTTP/2 (Triple)&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../reference/protocols/tcp">TCP&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../reference/protocols/http">HTTP/REST【Alpha】&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../reference/protocols/triple">gRPC&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../reference/protocols/">更多&lt;/a>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>可视化观测平台&lt;/td>
+&lt;td>&lt;a href="../../tasks/observability/admin/">Admin&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../tasks/observability/grafana/">Grafana&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../tasks/observability/prometheus/">Prometheus&lt;/a>&lt;/td>
+&lt;td>-&lt;/td>
+&lt;td>-&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>全链路追踪&lt;/td>
+&lt;td>&lt;a href="../../tasks/observability/tracing/zipkin/">Zipkin&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../tasks/observability/tracing/skywalking/">Skywalking&lt;/a>&lt;/td>
+&lt;td>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot3-tracing#2-adding-micrometer-tracing-bridge-to-your-project" target="_blank">OpenTelemetry&lt;/a>&lt;/td>
+&lt;td>-&lt;/td>
+&lt;td>-&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>限流降级&lt;/td>
+&lt;td>&lt;a href="../../tasks/rate-limit/sentinel">Sentinel&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../tasks/rate-limit/resilience4j">Resilience4j&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../tasks/rate-limit/hystrix">Hystrix&lt;/a>&lt;/td>
+&lt;td>-&lt;/td>
+&lt;td>-&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>分布式事务&lt;/td>
+&lt;td>&lt;a href="../../tasks/ecosystem/transaction/">Seata&lt;/a>&lt;/td>
+&lt;td>-&lt;/td>
+&lt;td>-&lt;/td>
+&lt;td>-&lt;/td>
+&lt;td>-&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>网关&lt;/td>
+&lt;td>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2023/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/">Higress&lt;/a>&lt;/td>
+&lt;td>&lt;a href="../../tasks/ecosystem/gateway/">APISIX&lt;/a>&lt;/td>
+&lt;td>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/">Shenyu&lt;/a>&lt;/td>
+&lt;td>&lt;a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/network_filters/dubbo_proxy_filter">Envoy&lt;/a>&lt;/td>
+&lt;td>-&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>服务网格&lt;/td>
+&lt;td>Istio【开发中】&lt;/td>
+&lt;td>&lt;a href="https://www.aeraki.net/" target="_blank">Aeraka&lt;/a>&lt;/td>
+&lt;td>OpenSergo【开发中】&lt;/td>
+&lt;td>Proxyless【Alpha】&lt;/td>
+&lt;td>更多&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="微服务生态示例架构">微服务生态示例架构&lt;/h2>
+&lt;script src="https://g.alicdn.com/mamba/assets/0.0.19/mse-arc-ui.min.js">&lt;/script>
+&lt;link rel="stylesheet" href="https://g.alicdn.com/mamba/assets/0.0.19/mse-arc-ui.min.css" />
+&lt;section id="section-3" style="">
+&lt;div class="msemap-section">
+&lt;div class="msemap-container">
+&lt;div id="mse-arc-container">&lt;/div>
+&lt;/div>
+&lt;/div>
+&lt;/section></description></item><item><title>Overview: 更多高级功能</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/more/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/more/</guid><description>
+&lt;p>作为一款与应用开发紧密相关的微服务框架，同时旨在为微服务集群提供企业级服务治理能力，Dubbo 还提供了很多高级功能，涵盖服务调用行为控制、服务诊断与调优、服务治理等。&lt;/p>
+&lt;p>多种语言 sdk 在功能实现、配置方式上会略有差异，具体功能列表和使用方式可参考如下文档：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../mannual/java-sdk/advanced-features-and-usage/">Java&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../mannual/golang-sdk/tutorial/">Golang&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="控制服务调用行为">控制服务调用行为&lt;/h2>
+&lt;ul>
+&lt;li>服务版本&lt;/li>
+&lt;li>服务分组&lt;/li>
+&lt;li>分组聚合&lt;/li>
+&lt;li>异步调用&lt;/li>
+&lt;li>异步执行&lt;/li>
+&lt;li>流式通信&lt;/li>
+&lt;li>响应式编程&lt;/li>
+&lt;li>泛化调用&lt;/li>
+&lt;li>泛化实现&lt;/li>
+&lt;li>调用链路传递隐式参数&lt;/li>
+&lt;li>RPC调用上下文&lt;/li>
+&lt;li>调用触发事件通知&lt;/li>
+&lt;li>服务端对客户端进行回调&lt;/li>
+&lt;li>只订阅&lt;/li>
+&lt;li>只注册&lt;/li>
+&lt;li>运行时动态指定 IP 调用&lt;/li>
+&lt;li>直连提供者&lt;/li>
+&lt;li>启动时检查&lt;/li>
+&lt;li>本地调用&lt;/li>
+&lt;li>参数校验&lt;/li>
+&lt;li>本地伪装&lt;/li>
+&lt;li>本地存根&lt;/li>
+&lt;li>回声测试&lt;/li>
+&lt;li>调用信息记录&lt;/li>
+&lt;li>延迟暴露&lt;/li>
+&lt;li>集群容错&lt;/li>
+&lt;li>服务降级&lt;/li>
+&lt;/ul>
+&lt;h2 id="诊断与调优">诊断与调优&lt;/h2>
+&lt;ul>
+&lt;li>端口协议复用&lt;/li>
+&lt;li>线程池隔离&lt;/li>
+&lt;li>多协议&lt;/li>
+&lt;li>多注册中心&lt;/li>
+&lt;li>请求耗时采样&lt;/li>
+&lt;li>线程模型&lt;/li>
+&lt;li>服务引用配置对象缓存&lt;/li>
+&lt;li>路由状态采集&lt;/li>
+&lt;li>负载均衡&lt;/li>
+&lt;li>注册信息简化&lt;/li>
+&lt;li>调用结果缓存&lt;/li>
+&lt;li>并发控制&lt;/li>
+&lt;li>连接控制&lt;/li>
+&lt;li>延迟连接&lt;/li>
+&lt;li>粘滞连接&lt;/li>
+&lt;li>支持 Graal VM&lt;/li>
+&lt;li>导出线程堆栈&lt;/li>
+&lt;li>Kryo 和 FST 序列化&lt;/li>
+&lt;li>自定义服务容器&lt;/li>
+&lt;li>优雅停机&lt;/li>
+&lt;li>主机地址自定义暴露&lt;/li>
+&lt;li>一致性哈希选址&lt;/li>
+&lt;li>日志框架适配及运行时管理&lt;/li>
+&lt;li>Kubernetes 生命周期探针&lt;/li>
+&lt;/ul></description></item></channel></rss>

@@ -1,0 +1,1091 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – RPC protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/</link><description>Recent content in RPC protocol on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Protocol Overview</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/overview/</guid><description>
+&lt;p>Dubbo3 provides Triple (Dubbo3) and Dubbo2 protocols, which are native protocols of the Dubbo framework. In addition, Dubbo3 also integrates many third-party protocols and incorporates them into Dubbo&amp;rsquo;s programming and service governance system.
+Including gRPC, Thrift, JsonRPC, Hessian2, REST, etc. The following focuses on the Triple and Dubbo2 protocols.&lt;/p>
+&lt;h2 id="protocol-description">protocol description&lt;/h2>
+&lt;p>The Triple protocol is the main protocol launched by Dubbo3. Triple means the third generation. Through the evolution of the Dubbo1.0/Dubbo2.0 two-generation protocol and the wave of technology standardization brought by cloud native, the new Dubbo3 protocol Triple came into being.&lt;/p>
+&lt;h3 id="select-the-rpc-protocol">Select the RPC protocol&lt;/h3>
+&lt;p>The protocol is the core of RPC, which regulates the content and format of data transmission in the network. In addition to the necessary request and response data, it usually contains additional control data, such as the serialization method of a single request, timeout period, compression method, and authentication information.&lt;/p>
+&lt;p>The content of the agreement consists of three parts&lt;/p>
+&lt;ul>
+&lt;li>Data exchange format: Define the byte stream content of RPC request and response objects in network transmission, also known as serialization mode&lt;/li>
+&lt;li>Protocol structure: defines the list of fields, the semantics of each field, and the arrangement of different fields&lt;/li>
+&lt;li>Protocols define how data is transmitted across networks by defining rules, formats, and semantics. A successful RPC requires both ends of the communication to be able to read and write network byte streams and convert objects according to the protocol. If the two ends cannot reach an agreement on the protocol used, there will be chickens talking with ducks, which cannot meet the needs of long-distance communication.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/triple-protocol.png" alt="Protocol Selection">&lt;/p>
+&lt;p>The design of the RPC protocol needs to consider the following:&lt;/p>
+&lt;ul>
+&lt;li>Versatility: Unified binary format, cross-language, cross-platform, multi-transport layer protocol support&lt;/li>
+&lt;li>Extensibility: protocol adds fields, upgrades, supports user extensions and additional business metadata&lt;/li>
+&lt;li>Performance: As fast as it can be&lt;/li>
+&lt;li>Penetration: can be identified and forwarded by various terminal devices: gateways, proxy servers, etc.
+Generally, versatility and high performance cannot be achieved at the same time, and protocol designers need to make certain trade-offs.&lt;/li>
+&lt;/ul>
+&lt;h3 id="http11-protocol">HTTP/1.1 protocol&lt;/h3>
+&lt;p>Compared with the private RPC protocol directly built on the TCP transport layer, the remote call solution built on HTTP will have better versatility, such as WebServices or REST architecture, using HTTP + JSON can be said to be a de facto standard solution .&lt;/p>
+&lt;p>Choosing to build on top of HTTP has two biggest advantages:&lt;/p>
+&lt;ul>
+&lt;li>The semantics and scalability of HTTP well meet the requirements of RPC calls.&lt;/li>
+&lt;li>Versatility, the HTTP protocol is supported by almost all devices on the network, and has good protocol penetration.&lt;/li>
+&lt;/ul>
+&lt;p>But there are also obvious problems:&lt;/p>
+&lt;ul>
+&lt;li>In a typical Request-Response model, there can only be one waiting Request request on a link at a time. HOL will be generated.&lt;/li>
+&lt;li>Human Readable Headers, using a more general, human-readable header transfer format, but with considerably poorer performance&lt;/li>
+&lt;li>No direct Server Push support, need to use workarounds such as Polling Long-Polling&lt;/li>
+&lt;/ul>
+&lt;h3 id="grpc-protocol">gRPC protocol&lt;/h3>
+&lt;p>The above mentioned the advantages and disadvantages of building the RPC protocol on top of the HTTP and TCP protocols. Compared with Dubbo built on the TCP transport layer, Google chose to define gRPC directly on top of the HTTP/2 protocol.
+The advantages of gRPC are inherited from HTTP2 and Protobuf.&lt;/p>
+&lt;ul>
+&lt;li>The HTTP2-based protocol is simple enough, with low learning costs for users, and naturally has server push/multiplexing/flow control capabilities&lt;/li>
+&lt;li>Protobuf-based multi-language cross-platform binary compatibility, providing powerful unified cross-language capabilities&lt;/li>
+&lt;li>The ecology based on the protocol itself is relatively rich, the natural support protocol of components such as k8s/etcd, and the de facto protocol standard of cloud native&lt;/li>
+&lt;/ul>
+&lt;p>But there are also some problems&lt;/p>
+&lt;ul>
+&lt;li>The support for service governance is relatively basic, and it is more inclined to the basic RPC function. The protocol layer lacks the necessary unified definition, and it is not easy for users to use it directly.&lt;/li>
+&lt;li>The serialization method of strong binding protobuf requires high learning cost and transformation cost. For the existing monolingual users, the migration cost cannot be ignored&lt;/li>
+&lt;/ul>
+&lt;h3 id="finally-choose-the-triple-protocol">Finally choose the Triple protocol&lt;/h3>
+&lt;p>In the end, we chose to be compatible with gRPC and use HTTP2 as the transport layer to build a new protocol, which is Triple.&lt;/p>
+&lt;p>The rise of containerized applications and microservices has led to the development of techniques optimized for workload content. The traditional communication protocols (RESTFUL or other HTTP-based custom protocols) used in the client are difficult to meet the convenience requirements of the application in terms of performance, maintainability, scalability, and security. A cross-language, modular protocol will gradually become a new application development protocol standard. Since the gRPC protocol became a CNCF project in 2017, more and more infrastructure and businesses including k8s and etcd have begun to use the gRPC ecosystem. As a cloud-native microservice framework, Dubbo&amp;rsquo;s new protocol is also perfectly compatible with gRPC . Moreover, Triple will also enhance and supplement some imperfect parts of the gRPC protocol.&lt;/p>
+&lt;p>So, does the Triple protocol solve the series of problems we mentioned above?&lt;/p>
+&lt;ul>
+&lt;li>In terms of performance: The Triple protocol adopts the strategy of separating metadata and payload, so that intermediate devices, such as gateways, can be avoided to parse and deserialize payload, thereby reducing response time.&lt;/li>
+&lt;li>In terms of routing support, since metadata supports users to add custom headers, users can more conveniently divide clusters or perform routing according to headers, so that when publishing, there is more flexibility in switching grayscale or disaster recovery.&lt;/li>
+&lt;li>In terms of security, it supports encrypted transmission capabilities such as two-way TLS authentication (mTLS).&lt;/li>
+&lt;li>In terms of ease of use, in addition to supporting Protobuf serialization recommended by native gRPC, Triple supports other serializations such as Hessian/JSON in a general way, allowing users to upgrade to the Triple protocol more conveniently. For the original Dubbo service, modifying or adding the Triple protocol only needs to add a line of protocol configuration in the code block declaring the service, and the transformation cost is almost zero.&lt;/li>
+&lt;/ul>
+&lt;h2 id="triple-protocol">Triple protocol&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/triple.png" alt="Triple protocol communication method">&lt;/p>
+&lt;p>status quo&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;ol>
+&lt;li>Fully compatible with grpc, client/server can connect with native grpc client&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;ol start="2">
+&lt;li>At present, it has been verified by large-scale production practice and has reached the production level&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;p>Features and advantages&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;ol>
+&lt;li>Capable of cross-language intercommunication. Both the traditional multi-language multi-SDK mode and the Mesh cross-language mode require a more general and scalable data transmission format.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;ol start="2">
+&lt;li>Provide a more complete request model. In addition to the Request/Response model, it should also support Streaming and Bidirectional.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;ol start="3">
+&lt;li>Easy to expand, high penetration, including but not limited to Tracing / Monitoring and other support, should also be recognized by devices at all levels, gateway facilities, etc. can identify data packets, friendly to Service Mesh deployment, and reduce the difficulty of understanding for users.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;ol start="4">
+&lt;li>Multiple serialization methods support and smooth upgrade&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;ol start="5">
+&lt;li>Support Java users to upgrade without awareness, no need to define cumbersome IDL files, and only need to simply modify the protocol name to easily upgrade to the Triple protocol&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="triple-protocol-content-introduction">Triple protocol content introduction&lt;/h3>
+&lt;p>Further extension based on the grpc protocol&lt;/p>
+&lt;ul>
+&lt;li>Service-Version → &amp;ldquo;tri-service-version&amp;rdquo; {Dubbo service version}&lt;/li>
+&lt;li>Service-Group → &amp;ldquo;tri-service-group&amp;rdquo; {Dubbo service group}&lt;/li>
+&lt;li>Tracing-ID → &amp;ldquo;tri-trace-traceid&amp;rdquo; {tracing id}&lt;/li>
+&lt;li>Tracing-RPC-ID → &amp;ldquo;tri-trace-rpcid&amp;rdquo; {_span id _}&lt;/li>
+&lt;li>Cluster-Info → &amp;ldquo;tri-unit-info&amp;rdquo; {cluster infomation}&lt;/li>
+&lt;/ul>
+&lt;p>Among them, Service-Version and Service-Group respectively identify the version and group information of the Dubbo service, because the path of grpc declares the service name and method name, compared with the Dubbo protocol, it lacks version and group information; Tracing-ID, Tracing- RPC-ID is used for full-link tracking capabilities, which respectively represent tracing id and span id information; Cluster-Info represents cluster information, which can be used to build some flexible service management capabilities related to routing such as cluster division.&lt;/p>
+&lt;h3 id="triple-streaming">Triple Streaming&lt;/h3>
+&lt;p>Compared with the traditional unary method, the Triple protocol has more streaming RPC capabilities currently provided&lt;/p>
+&lt;ul>
+&lt;li>What scenario is Streaming used for?&lt;/li>
+&lt;/ul>
+&lt;p>In some application scenarios such as large file transmission and live broadcast, the consumer or provider needs to transmit a large amount of data with the peer. Since the amount of data in these cases is very large, there is no way to transmit it in one RPC packet. Transmission, so for these data packets, we need to fragment the data packets and transmit them through multiple RPC calls. If we transmit these split RPC data packets in parallel, then the relevant data packets after reaching the peer end It is unordered, and the received data needs to be sorted and spliced, and the related logic will be very complicated. But if we serially transmit the split RPC packets, the corresponding network transmission RTT and data processing delay will be very large.&lt;/p>
+&lt;p>In order to solve the above problems, and to transmit a large amount of data between the consumer and the provider in a pipelined manner, the Streaming RPC model came into being.&lt;/p>
+&lt;p>Through the Streaming RPC method of the Triple protocol, multiple user-mode long connections, Stream, will be established between the consumer and the provider. Multiple Streams can exist on the same TCP connection at the same time, and each Stream is identified by a StreamId, and the data packets on a Stream will be read and written sequentially.&lt;/p>
+&lt;h3 id="summarize">Summarize&lt;/h3>
+&lt;p>In the world of APIs, the most important trend is the rise of standardized technologies. The Triple protocol is the main protocol launched by Dubbo3. It adopts a layered design, and its data exchange format is developed based on the Protobuf (Protocol Buffers) protocol, which has excellent serialization/deserialization efficiency. Of course, it also supports multiple serialization methods and many development languages. In the transport layer protocol, Triple chose HTTP/2, which has greatly improved its transmission efficiency compared with HTTP/1.1. In addition, as a mature open standard, HTTP/2 has rich security and flow control capabilities, and has good interoperability. Triple can not only be used for server-side service calls, but also support the interaction between browsers, mobile apps, and IoT devices and back-end services. At the same time, the Triple protocol seamlessly supports all service management capabilities of Dubbo3.&lt;/p>
+&lt;p>Under the trend of Cloud Native, the interoperability requirements between cross-platform, cross-vendor, and cross-environment systems will inevitably give rise to RPC technology based on open standards, and gRPC conforms to the historical trend and has been more and more widely used. In the field of microservices, the proposal and implementation of the Triple protocol is a big step for Dubbo3 to move towards cloud-native microservices.&lt;/p>
+&lt;p>##Dubbo2&lt;/p>
+&lt;h3 id="protocol-spec">Protocol SPEC&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo_protocol_header.png" alt="/dev-guide/images/dubbo_protocol_header.jpg">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Magic - Magic High &amp;amp; Magic Low (16 bits)&lt;/p>
+&lt;p>Identifies dubbo protocol with value: 0xdabb&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Req/Res (1 bit)&lt;/p>
+&lt;p>Identifies this is a request or response. Request - 1; Response - 0.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>2 Way (1 bit)&lt;/p>
+&lt;p>Only useful when Req/Res is 1 (Request), expect for a return value from server or not. Set to 1 if need a return value from server.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>-Event (1 bit)&lt;/p>
+&lt;p>Identifies an event message or not, for example, heartbeat event. Set to 1 if this is an event.&lt;/p>
+&lt;p>-Serialization ID (5 bits)&lt;/p>
+&lt;p>Identifies serialization type: the value for fastjson is 6.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Status (8 bits)&lt;/p>
+&lt;p>Only useful when Req/Res is 0 (Response), identifies the status of response&lt;/p>
+&lt;ul>
+&lt;li>20 - OK&lt;/li>
+&lt;li>30 - CLIENT_TIMEOUT&lt;/li>
+&lt;li>31 - SERVER_TIMEOUT&lt;/li>
+&lt;li>40 - BAD_REQUEST&lt;/li>
+&lt;li>50 - BAD_RESPONSE&lt;/li>
+&lt;li>60 - SERVICE_NOT_FOUND&lt;/li>
+&lt;li>70 - SERVICE_ERROR&lt;/li>
+&lt;li>80 - SERVER_ERROR&lt;/li>
+&lt;li>90 - CLIENT_ERROR&lt;/li>
+&lt;li>100 - SERVER_THREADPOOL_EXHAUSTED_ERROR&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Request ID (64 bits)&lt;/p>
+&lt;p>Identifies an unique request. Numeric (long).&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Data Length (32)&lt;/p>
+&lt;p>Length of the content (the variable part) after serialization, counted by bytes. Numeric (integer).&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>-Variable Part&lt;/p>
+&lt;p>Each part is a byte[] after serialization with specific serialization type, identifies by Serialization ID.&lt;/p>
+&lt;p>Every part is a byte[] after serialization with specific serialization type, identifies by Serialization ID&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>If the content is a Request (Req/Res = 1), each part consists of the content, in turn is:&lt;/p>
+&lt;ul>
+&lt;li>Dubbo version&lt;/li>
+&lt;li>Service name&lt;/li>
+&lt;li>Service version
+-Method name
+-Method parameter types
+-Method arguments
+-Attachments&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>If the content is a Response (Req/Res = 0), each part consists of the content, in turn is:&lt;/p>
+&lt;ul>
+&lt;li>Return value type, identifies what kind of value returns from server side: RESPONSE_NULL_VALUE - 2, RESPONSE_VALUE - 1, RESPONSE_WITH_EXCEPTION - 0.&lt;/li>
+&lt;li>Return value, the real value returns from server.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>For the (Variable Part) variable length part, when the current version of the dubbo framework uses json serialization, an extra line break is added between each part of the content as a separator. Please add an extra line break after each part of the Variable Part, such as :&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Dubbo version bytes (line break)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Service name bytes (newline)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Dubbo protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/dubbo/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>Dubbo&amp;rsquo;s default protocol uses a single long connection and NIO asynchronous communication, which is suitable for small data volume and large concurrent service calls, and the situation where the number of service consumer machines is much larger than the number of service provider machines.&lt;/p>
+&lt;p>Conversely, Dubbo&amp;rsquo;s default protocol is not suitable for services that transmit large amounts of data, such as file transfers, video transfers, etc., unless the request volume is very low.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-protocol.jpg" alt="dubbo-protocol.jpg">&lt;/p>
+&lt;ul>
+&lt;li>Transporter: mina, netty, grizzy&lt;/li>
+&lt;li>Serialization: dubbo, hessian2, java, json&lt;/li>
+&lt;li>Dispatcher: all, direct, message, execution, connection&lt;/li>
+&lt;li>ThreadPool: fixed, cached&lt;/li>
+&lt;/ul>
+&lt;p>Default protocol, using tbremoting interaction based on netty &lt;code>3.2.5.Final&lt;/code> and hessian2 &lt;code>3.2.1-fixed-2(Alibaba embed version)&lt;/code>.&lt;/p>
+&lt;ul>
+&lt;li>Number of connections: single connection&lt;/li>
+&lt;li>Connection method: long connection&lt;/li>
+&lt;li>Transport protocol: TCP&lt;/li>
+&lt;li>Transmission method: NIO asynchronous transmission&lt;/li>
+&lt;li>Serialization: Hessian binary serialization&lt;/li>
+&lt;li>Scope of application: The incoming and outgoing parameter data packets are small (recommended to be less than 100K), the number of consumers is more than that of the provider, and a single consumer cannot fill the provider. Try not to use the dubbo protocol to transfer large files or very large strings.&lt;/li>
+&lt;li>Applicable scenario: regular remote service method call&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>constraint&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Parameters and return values need to implement &lt;code>Serializable&lt;/code> interface&lt;/li>
+&lt;li>Parameters and return values cannot be customized to implement &lt;code>List&lt;/code>, &lt;code>Map&lt;/code>, &lt;code>Number&lt;/code>, &lt;code>Date&lt;/code>, &lt;code>Calendar&lt;/code> and other interfaces, only the implementations that come with JDK can be used, because hessian will do special processing and customize the implementation All attribute values in the class are lost.&lt;/li>
+&lt;li>Hessian serialization, only pass member attribute values and value types, do not pass methods or static variables, compatibility &lt;strong>provided by Wu Yajun&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Data communication&lt;/th>
+&lt;th>Situation&lt;/th>
+&lt;th>Results&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>Class A has one more attribute (or class B has one less attribute)&lt;/td>
+&lt;td>No exception is thrown, the value of the attribute with more A, B does not, and the others are normal&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>enumeration A has one more enumeration (or B has one less enumeration)&lt;/td>
+&lt;td>A uses the extra enumeration for transmission&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>Enumeration A has one more enumeration (or B has one less enumeration)&lt;/td>
+&lt;td>A does not use the extra enumeration for transmission&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>The attributes of A and B have the same name but different types&lt;/td>
+&lt;td>Throw an exception&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>The serialId is different&lt;/td>
+&lt;td>Normal transmission&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>The method added to the interface has no impact on the client. If the method is not required by the client, the client does not need to redeploy. The addition of attributes in input parameters and result sets has no effect on the client. If the client does not need new attributes, there is no need to redeploy.&lt;/p>
+&lt;p>Changes in input parameters and result set attribute names have no impact on client serialization, but if the client is not redeployed, regardless of input or output, the attribute values with changed attribute names cannot be obtained.&lt;/p>
+&lt;p>&lt;strong>Summarize&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>The server and the client do not need to be completely consistent with the domain objects, but follow the principle of maximum matching.&lt;/li>
+&lt;li>An exception will be thrown: one more type of enumeration value and one less type, just use a different one, or the attribute name is the same, but the type is different.&lt;/li>
+&lt;/ul>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>It is suitable for service calls with large concurrent and small data volumes, and the service consumer is much larger than the service provider.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="configuration-protocol">Configuration protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="set-the-default-protocol">Set the default protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="set-the-protocol-of-a-service">Set the protocol of a service&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="multiport">Multiport&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;dubbo1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;dubbo2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20881&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-protocol-options">Configure protocol options&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;9090&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;netty&amp;#34;&lt;/span> client=&lt;span style="color:#2aa198">&amp;#34;netty&amp;#34;&lt;/span> codec=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span> threadpool=&lt;span style="color:#2aa198">&amp;#34;fixed&amp;#34;&lt;/span> threads=&lt;span style="color:#2aa198">&amp;#34;100 &amp;#34;&lt;/span> queues=&lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span> iothreads=&lt;span style="color:#2aa198">&amp;#34;9&amp;#34;&lt;/span> buffer=&lt;span style="color:#2aa198">&amp;#34;8192&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;1000&amp;#34;&lt;/span> payload=&lt;span style="color:#2aa198">&amp;#34;8388608&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="multi-connection-configuration">Multi-connection configuration&lt;/h3>
+&lt;p>By default, the Dubbo protocol uses a single long connection per service, per provider and per consumer. If the amount of data is large, multiple connections can be used.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;0&amp;quot;&amp;gt;&lt;/code> or &lt;code>&amp;lt;dubbo:reference connections=&amp;quot;0&amp;quot;&amp;gt;&lt;/code> means that the service uses JVM shared persistent connection. &lt;strong>default&lt;/strong>&lt;/li>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;1&amp;quot;&amp;gt;&lt;/code> or &lt;code>&amp;lt;dubbo:reference connections=&amp;quot;1&amp;quot;&amp;gt;&lt;/code> means that the service uses independent persistent connections.&lt;/li>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;2&amp;quot;&amp;gt;&lt;/code> or &lt;code>&amp;lt;dubbo:reference connections=&amp;quot;2&amp;quot;&amp;gt;&lt;/code> means that the service uses two independent persistent connections.&lt;/li>
+&lt;/ul>
+&lt;p>In order to prevent being hung up by a large number of connections, the maximum number of receiving connections can be limited on the service provider to achieve self-protection of the service provider.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;1000&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="common-problem">common problem&lt;/h2>
+&lt;h3 id="q1">Q1&lt;/h3>
+&lt;p>Why should there be more consumers than providers?&lt;/p>
+&lt;p>Because the dubbo protocol uses a single long connection, assuming that the network is a gigabit network card &lt;strong>1024Mbit=128MByte&lt;/strong>, according to the test experience data, each connection can only be filled up to 7MByte (different environments may be different, for reference), theoretically 1 A service provider needs 20 service consumers to fill up the network card.&lt;/p>
+&lt;h3 id="q2">Q2&lt;/h3>
+&lt;p>Why can&amp;rsquo;t I send large packets?&lt;/p>
+&lt;p>Because the dubbo protocol uses a single long connection, if the data packet size of each request is 500KByte, assuming that the network is a Gigabit network card&lt;strong>1024Mbit=128MByte&lt;/strong>, each connection can be up to 7MByte (different environments may be different), a single service provides The maximum TPS (transactions per second) of the latter is: 128MByte / 500KByte = 262. The maximum TPS (transactions per second) for a single consumer to call a single service provider is: 7MByte / 500KByte = 14. If acceptable, you can consider using it, otherwise the network will become a bottleneck.&lt;/p>
+&lt;h3 id="q3">Q3&lt;/h3>
+&lt;p>Why use asynchronous single long connection?&lt;/p>
+&lt;p>Because the current situation of the service is that there are few service providers, usually only a few machines, but many service consumers, the entire website may be accessing the service. For example, Morgan’s provider has only 6 providers, but there are hundreds of consumers. Or, there are 150 million calls per day. If the conventional Hessian service is used, the service provider is easily overwhelmed. Through a single connection, it is guaranteed that a single consumer will not overwhelm the provider, long-term connection, reducing connection handshake verification, etc. And use asynchronous IO, reuse thread pool, prevent C10K problem.&lt;/p></description></item><item><title>Docs3-V2: Triple Protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/triple/</guid><description/></item><item><title>Docs3-V2: Rest protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/rest/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/rest/</guid><description>
+&lt;p>Support for REST calls based on the standard Java REST API - JAX-RS 2.0 (short for Java API for RESTful Web Services)&lt;/p>
+&lt;h3 id="quick-start">Quick Start&lt;/h3>
+&lt;p>It is relatively simple to develop a REST-style service in dubbo. Let&amp;rsquo;s take a simple service for registered users as an example.&lt;/p>
+&lt;p>The function of this service is to provide the following URL (note: this URL is not fully in line with REST style, but it is simpler and more practical)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/register
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And any client can POST a JSON string containing user information to the above URL to complete user registration.&lt;/p>
+&lt;p>First, develop the interface of the service&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, develop the implementation of the service&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;register&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType. APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// save the user...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above implementation is very simple, but since the REST service is to be published to a specified URL for access by clients of any language or even browsers, several standard annotations of JAX-RS are added here for related configuration.&lt;/p>
+&lt;p>@Path(&amp;ldquo;users&amp;rdquo;): Specifies that the relative path of the URL to access UserService is /users, ie http://localhost:8080/users&lt;/p>
+&lt;p>@Path(&amp;ldquo;register&amp;rdquo;): Specifies that the relative path of the URL to access the registerUser() method is /register, combined with the path specified by the previous @Path for UserService, the full path to call UserService.register() is http://localhost :8080/users/register&lt;/p>
+&lt;p>@POST: Specifies to access registerUser() with the HTTP POST method&lt;/p>
+&lt;p>@Consumes({MediaType.APPLICATION_JSON}): Specifies that registerUser() receives data in JSON format. The REST framework will automatically deserialize the JSON data into a User object&lt;/p>
+&lt;p>Finally, add this service in the spring configuration file to complete all service development work&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Expose the service on port 8080 using the rest protocol --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Declare the service interface that needs to be exposed --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx.UserService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Implement services like local beans --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;xxx.UserServiceImpl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="detailed-explanation-of-rest-service-provider">Detailed explanation of REST service provider&lt;/h3>
+&lt;p>Next, we expand the UserService in the &amp;ldquo;Quick Start&amp;rdquo; to further demonstrate the development points of the REST service provider in dubbo.&lt;/p>
+&lt;h3 id="implementation-of-http-postget">Implementation of HTTP POST/GET&lt;/h3>
+&lt;p>In the REST service, although it is recommended to use the four standard methods POST, DELETE, PUT, and GET in the HTTP protocol to implement common &amp;ldquo;addition, deletion, modification and query&amp;rdquo; respectively, in practice, we generally use POST directly to implement &amp;ldquo;addition and modification&amp;rdquo;, and GET to implement Just implement &amp;ldquo;delete check&amp;rdquo; (DELETE and PUT will even be blocked by some firewalls).&lt;/p>
+&lt;p>The implementation of POST has been briefly demonstrated before. Here, we add a function of obtaining registered user information to UserService to demonstrate the implementation of GET.&lt;/p>
+&lt;p>This function is to enable the client to obtain user profiles with different IDs by accessing the following URLs&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/1001
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/1002
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/1003
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Of course, user profiles with different IDs can also be accessed through other forms of URLs, for example&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>http:&lt;span style="color:#719e07">//&lt;/span>localhost:&lt;span style="color:#2aa198">8080&lt;/span>&lt;span style="color:#719e07">/&lt;/span>users&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#b58900">load&lt;/span>?id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1001&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>JAX-RS natively supports all of these forms. But the above form of including query parameters in the URL path (http://localhost:8080/users/1001) is more in line with the general habits of REST, so it is recommended for everyone to use. Next, we will add a getUser() method to UserService to achieve this form of URL access&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;{id : \\d+}&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType. APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>@GET: Specifies to use the HTTP GET method to access&lt;/p>
+&lt;p>@Path(&amp;quot;{id : \d+}&amp;quot;): According to the functional requirements above, the URL to access getUser() should be &amp;ldquo;http://localhost:8080/users/ + any number&amp;rdquo;, and this number should be made Pass the getUser() method as a parameter. In the annotation configuration here, {id: xxx} in the middle of @Path specifies that the URL relative path contains a parameter named id, and its value will be automatically passed to the method parameter modified with @PathParam(&amp;ldquo;id&amp;rdquo;) below id. {id: followed by \d+ is a regular expression, specifying that the id parameter must be a number.&lt;/p>
+&lt;p>@Produces({MediaType.APPLICATION_JSON}): Specify getUser() to output data in JSON format. The framework will automatically serialize the User object into JSON data.&lt;/p>
+&lt;h3 id="annotation-is-placed-in-the-interface-class-or-the-implementation-class">Annotation is placed in the interface class or the implementation class&lt;/h3>
+&lt;p>The development of REST services in Dubbo is mainly configured through JAX-RS annotations. In the above examples, we put the annotations in the service implementation class. But in fact, we can also put the annotation on the interface of the service. The two methods are completely equivalent, for example:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;{id : \\d+}&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType. APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In general applications, we recommend placing the annotation in the service implementation class, so that the location of the annotation and the java implementation code are closer, making it easier to develop and maintain. In addition, more importantly, we generally tend to avoid pollution of the interface, and maintain the purity and wide applicability of the interface.&lt;/p>
+&lt;p>However, as mentioned later, if we want to use the consumer directly developed by dubbo to access this service, the annotation must be placed on the interface.&lt;/p>
+&lt;p>If annotations are added to both the interface and the implementation class, the annotation configuration of the implementation class will take effect, and the annotation on the interface will be ignored directly.&lt;/p>
+&lt;h3 id="support-for-multiple-data-formats-such-as-json-and-xml">Support for multiple data formats such as JSON and XML&lt;/h3>
+&lt;p>The REST service developed in dubbo can support the transmission of data in multiple formats at the same time to provide clients with maximum flexibility. Among them we currently have added extra functionality especially for the most commonly used formats JSON and XML.&lt;/p>
+&lt;p>For example, if we want the getUser() method in the above example to support returning data in JSON and XML formats, we only need to include both formats in the annotation&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType. APPLICATION_JSON, MediaType. TEXT_XML})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Or you can directly use strings (wildcards are also supported) to represent MediaType&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;application/json&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;text/xml&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If all methods support the same type of input and output data format, we don&amp;rsquo;t need to configure each method, just add annotation to the service class&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType. APPLICATION_JSON, MediaType. TEXT_XML})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType. APPLICATION_JSON, MediaType. TEXT_XML})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the case that a REST service supports multiple data formats at the same time, according to the JAX-RS standard, the MIME header (content-type and accept) in HTTP is generally used to specify which format data is currently wanted.&lt;/p>
+&lt;p>But in dubbo, we also automatically support the method commonly used in the industry at present, that is, use a URL suffix (.json and .xml) to specify the desired data format. For example, after adding the above annotation, direct access to http://localhost:8888/users/1001.json means to use json format, and direct access to http://localhost:8888/users/1002.xml means to use xml format, Simpler and more intuitive than using HTTP Header. The REST APIs of Twitter, Weibo, etc. all use this method.
+If you add neither HTTP header nor suffix, dubbo&amp;rsquo;s REST will give priority to the data format that ranks first in the above annotation definition.&lt;/p>
+&lt;blockquote>
+&lt;p>Note: To support XML format data here, you can use MediaType.TEXT_XML or MediaType.APPLICATION_XML in annotation, but TEXT_XML is more commonly used, and if you want to use the above URL suffix method to specify the data format, you can only use Only when it is configured as TEXT_XML can it take effect.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="chinese-character-support">Chinese character support&lt;/h3>
+&lt;p>In order to output Chinese characters normally in dubbo REST, like usual Java web applications, we need to set the contentType of the HTTP response to UTF-8 encoding.&lt;/p>
+&lt;p>Based on the standard usage of JAX-RS, we only need to do the following annotation configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;application/json; charset=UTF-8&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;text/xml; charset=UTF-8&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For the convenience of users, we directly added a support class in dubbo REST to define the above constants, which can be used directly to reduce the possibility of errors.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({ContentType. APPLICATION_JSON_UTF_8, ContentType. TEXT_XML_UTF_8})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="additional-requirements-for-xml-data-format">Additional requirements for XML data format&lt;/h3>
+&lt;p>Since the implementation of JAX-RS generally uses the standard JAXB (Java API for XML Binding) to serialize and deserialize XML format data, we need to add a class-level JAXB annotation for each object to be transmitted in XML, Otherwise serialization will report an error. For example, add the following to the User returned in getUser()&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlRootElement&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In addition, if the return values in the service method are Java primitive types (such as int, long, float, double, etc.), it is best to add a layer of wrapper objects for them, because JAXB cannot directly serialize primitive types.&lt;/p>
+&lt;p>For example, we want the aforementioned registerUser() method to return the ID number generated by the server for the user:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Since primitive types are not supported by JAXB serialization, add a wrapper object:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlRootElement&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RegistrationResult&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Long id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">RegistrationResult&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">RegistrationResult&lt;/span>(Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.id &lt;span style="color:#719e07">=&lt;/span> id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Long &lt;span style="color:#268bd2">getId&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setId&lt;/span>(Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.id &lt;span style="color:#719e07">=&lt;/span> id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And modify the service method:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RegistrationResult &lt;span style="color:#268bd2">registerUser&lt;/span>(User user);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This not only solves the problem of XML serialization, but also makes the returned data conform to the specifications of XML and JSON. For example, in JSON, the return would be of the form&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>{&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">1001&lt;/span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If no wrapper is added, the JSON return value will be directly&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>1001
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In XML, the return value after adding wrapper will be:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;registrationResult&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>1002&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/registrationResult&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This kind of wrapper object actually uses the so-called Data Transfer Object (DTO) pattern, and using DTO can also do more useful customizations for the transferred data.&lt;/p>
+&lt;h3 id="custom-serialization">Custom serialization&lt;/h3>
+&lt;p>As mentioned above, the underlying implementation of REST will automatically serialize/deserialize between service objects and JSON/XML data formats. However, in some scenarios, if you feel that this automatic conversion does not meet the requirements, you can customize it.&lt;/p>
+&lt;p>The REST implementation in Dubbo uses JAXB for XML serialization and Jackson for JSON serialization, so you can customize the mapping by adding JAXB or Jackson annotations to objects.&lt;/p>
+&lt;p>For example, custom object properties map to XML element names:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlRootElement&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlAccessorType&lt;/span>(XmlAccessType.FIELD)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@XmlElement&lt;/span>(name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;username&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Map custom object properties to JSON field names:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@JsonProperty&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;username&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For more information, please refer to the official documentation of JAXB and Jackson, or google yourself.&lt;/p>
+&lt;h3 id="configure-the-implementation-of-rest-server">Configure the implementation of REST Server&lt;/h3>
+&lt;p>Currently in dubbo, we support the implementation of 5 embedded rest servers, and at the same time support the implementation of the rest server using an external application server. The rest server can be implemented through the following configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above configuration uses the embedded jetty as the rest server. At the same time, if the server attribute is not configured, the rest protocol also uses jetty by default. jetty is a very mature java servlet container, and has been well integrated with dubbo (currently, among the five embedded servers, only jetty and tomcat and tjws described later have seamlessly integrated with dubbo monitoring system), Therefore, if your dubbo system is a separate startup process, you can directly use jetty by default.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tomcat&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above configuration uses the embedded tomcat as the rest server. On the embedded tomcat, the performance of REST is much better than that on jetty (see the benchmark test later), it is recommended to use tomcat in the scenario that requires high performance.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;netty&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above configuration uses embedded netty as the rest server. (TODO more contents to add)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tjws&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> (tjws is now deprecated)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;sunhttp&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above configuration uses the embedded tjws or Sun HTTP server as the rest server. These two server implementations are very lightweight, very convenient for quick start-up in integration tests, and of course they can also be used in production environments with low load. Note: tjws is currently deprecated because it doesn&amp;rsquo;t work well with the servlet 3.1 API.&lt;/p>
+&lt;p>If your dubbo system is not a separate startup process, but is deployed in a Java application server, it is recommended that you use the following configuration&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>By setting the server as a servlet, dubbo will use the servlet container of the external application server as the rest server. At the same time, add the following configuration to the web.xml of the dubbo system&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;web-app&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;context-param&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param-name&amp;gt;&lt;/span>contextConfigLocation&lt;span style="color:#268bd2">&amp;lt;/param-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param-value&amp;gt;&lt;/span>/WEB-INF/classes/META-INF/spring/dubbo-demo-provider.xml&lt;span style="color:#268bd2">&amp;lt;/param-value&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/context-param&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.BootstrapListener&lt;span style="color:#268bd2">&amp;lt;/listener-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener-class&amp;gt;&lt;/span>org.springframework.web.context.ContextLoaderListener&lt;span style="color:#268bd2">&amp;lt;/listener-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.DispatcherServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;load-on-startup&amp;gt;&lt;/span>1&lt;span style="color:#268bd2">&amp;lt;/load-on-startup&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/web-app&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>That is, dubbo&amp;rsquo;s BootstrapListener and DispatherServlet must be added to web.xml to complete the integration of dubbo&amp;rsquo;s REST function with the external servlet container.&lt;/p>
+&lt;blockquote>
+&lt;p>Note: If you use spring&amp;rsquo;s ContextLoaderListener to load spring, you must ensure that BootstrapListener is configured before ContextLoaderListener, otherwise dubbo initialization will fail.&lt;/p>
+&lt;/blockquote>
+&lt;p>In fact, you can still use the embedded server in this scenario, but the servlet container of the external application server is often more powerful than the embedded server (especially if you are deploying to a more robust and scalable WebLogic, WebSphere, etc.), and Sometimes it is also convenient for unified management, monitoring, etc. on the application server.&lt;/p>
+&lt;h3 id="get-context-information">Get context information&lt;/h3>
+&lt;p>In the remote call, there may be many kinds of context information worth obtaining. Here, the client IP is taken as an example.&lt;/p>
+&lt;p>In dubbo&amp;rsquo;s REST, we have two ways to get client IP.&lt;/p>
+&lt;p>The first way, using JAX-RS standard @Context annotation&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id, &lt;span style="color:#268bd2">@Context&lt;/span> HttpServletRequest request) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request.getRemoteAddr());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After modifying a method parameter of getUser() with Context, you can inject the current HttpServletRequest into it, and then directly call the servlet api to obtain the IP.&lt;/p>
+&lt;blockquote>
+&lt;p>Note: This method can only work when the server is set to tjws, tomcat, jetty or servlet, because only these server implementations provide a servlet container. In addition, the standard JAX-RS also supports using @Context to modify an instance field of the service class to obtain HttpServletRequest, but we do not support this in dubbo.&lt;/p>
+&lt;/blockquote>
+&lt;p>The second way, use RpcContext commonly used in dubbo&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getRemoteAddressString());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Note: This method can only work when setting server=&amp;ldquo;jetty&amp;rdquo; or server=&amp;ldquo;tomcat&amp;rdquo; or server=&amp;ldquo;servlet&amp;rdquo; or server=&amp;ldquo;tjws&amp;rdquo;. In addition, currently dubbo&amp;rsquo;s RpcContext is a relatively intrusive usage, and we are likely to refactor it in the future.&lt;/p>
+&lt;/blockquote>
+&lt;p>If you want to keep your project compatible with JAX-RS and run without dubbo in the future, please choose the first method. If you want a more elegant service interface definition, please choose the second way.&lt;/p>
+&lt;p>In addition, in the latest dubbo rest, it is also supported to obtain HttpServletRequest and HttpServletResponse through RpcContext to provide greater flexibility for users to implement some complex functions, such as accessing HTTP Header in dubbo standard filter. An example of usage is as follows&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext.getContext().getRequest() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> RpcContext.getContext().getRequest() &lt;span style="color:#719e07">instanceof&lt;/span> HttpServletRequest) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> ((HttpServletRequest) RpcContext.getContext().getRequest()).getRemoteAddr());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext.getContext().getResponse() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> RpcContext.getContext().getResponse() &lt;span style="color:#719e07">instanceof&lt;/span> HttpServletResponse) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Response object from RpcContext: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getResponse());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Note: In order to maintain the neutrality of the protocol, RpcContext.getRequest() and RpcContext.getResponse() return only an Object class, and may be null. So, you have to do null and type checking yourself.&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>Note: Only when server=&amp;ldquo;jetty&amp;rdquo; or server=&amp;ldquo;tomcat&amp;rdquo; or server=&amp;ldquo;servlet&amp;rdquo; is set, can you get HttpServletRequest and HttpServletResponse correctly through the above method, because only these servers implement the servlet container.&lt;/p>
+&lt;/blockquote>
+&lt;p>In order to simplify programming, you can also use generics to directly obtain specific types of request/response:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext. &lt;span style="color:#268bd2">getContext&lt;/span>(). getRequest(HttpServletRequest. &lt;span style="color:#268bd2">class&lt;/span>) != &lt;span style="color:#268bd2">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getRequest(HttpServletRequest.class).getRemoteAddr());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext. &lt;span style="color:#268bd2">getContext&lt;/span>(). getResponse(HttpServletResponse. &lt;span style="color:#268bd2">class&lt;/span>) != &lt;span style="color:#268bd2">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Response object from RpcContext: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getResponse(HttpServletResponse.class));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If the request/response does not conform to the specified type, null will also be returned here.&lt;/p>
+&lt;h3 id="configure-port-number-and-context-path">Configure port number and Context Path&lt;/h3>
+&lt;p>The rest protocol in dubbo will use port 80 by default. If you want to modify the port, configure it directly:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In addition, as mentioned earlier, we can use @Path to configure the URL relative path of a single rest service. But in fact, we can also set a basic relative path that is applicable to all rest services, that is, the context path that is often said in java web applications.&lt;/p>
+&lt;p>Just add the following contextpath attribute:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> contextpath=&lt;span style="color:#2aa198">&amp;#34;services&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Take the previous code as an example:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;register&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType. APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// save the user...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Now the full access path of registerUser()&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://localhost:8888/services/users/register
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note: If you choose an external application server as the rest server, that is, configure&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> contextpath=&lt;span style="color:#2aa198">&amp;#34;services&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You must ensure that the port and contextpath set here are consistent with the port of the external application server and the context path of DispatcherServlet (that is, webapp path plus servlet url pattern). For example, for an application deployed as the tomcat ROOT path, the contextpath here must be exactly the same as &lt;code>&amp;lt;url-pattern/&amp;gt;&lt;/code> of DispacherServlet in web.xml:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/services/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-the-number-of-threads-and-io-threads">Configure the number of threads and IO threads&lt;/h3>
+&lt;p>Thread pool size can be configured for rest services&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> threads=&lt;span style="color:#2aa198">&amp;#34;500&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Note: The current thread pool settings only take effect when server=&amp;ldquo;netty&amp;rdquo; or server=&amp;ldquo;jetty&amp;rdquo; or server=&amp;ldquo;tomcat&amp;rdquo;. In addition, if server=&amp;ldquo;servlet&amp;rdquo;, since the external application server is enabled as the rest server at this time, it is not controlled by dubbo, so the thread pool setting here is also invalid.&lt;/p>
+&lt;/blockquote>
+&lt;p>If you choose netty server, you can also configure the number of IO worker threads of Netty&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> iothreads=&lt;span style="color:#2aa198">&amp;#34;5&amp;#34;&lt;/span> threads=&lt;span style="color:#2aa198">&amp;#34;100&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-long-connection">Configure long connection&lt;/h3>
+&lt;p>The rest service in Dubbo is accessed by http long connection by default, if you want to switch to short connection, configure it directly&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> keepalive=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Note: This configuration is currently only valid for server=&amp;ldquo;netty&amp;rdquo; and server=&amp;ldquo;tomcat&amp;rdquo;.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="configure-the-maximum-number-of-http-connections">Configure the maximum number of HTTP connections&lt;/h3>
+&lt;p>The maximum number of HTTP connections that the server provider can receive at the same time can be configured to prevent the REST server from being overwhelmed by too many connections, as a basic self-protection mechanism&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;500&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tomcat/&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Note: This configuration is currently only valid for server=&amp;ldquo;tomcat&amp;rdquo;.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="configure-the-timeout-period-and-the-number-of-http-connections-for-each-consumer">Configure the timeout period and the number of HTTP connections for each consumer&lt;/h3>
+&lt;p>If the consumer of the rest service is also a dubbo system, you can configure the maximum timeout period for the consumer to call this rest service and the maximum number of HTTP connections each consumer can initiate like other dubbo RPC mechanisms.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Of course, since this configuration is effective for the consumer side, it can also be configured on the consumer side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>However, in general we recommend configuration to provide such configuration on the service provider side. According to dubbo&amp;rsquo;s official documentation: &amp;ldquo;Providers should be configured with as many properties as possible on the Consumer side, so that Provider implementers can think about Provider service characteristics and service quality issues from the very beginning.&amp;rdquo;&lt;/p>
+&lt;blockquote>
+&lt;p>Note: If dubbo&amp;rsquo;s REST service is published to non-dubbo clients, the configuration on &lt;code>&amp;lt;dubbo:service/&amp;gt;&lt;/code> here is completely invalid, because such clients are not controlled by dubbo.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="replace-part-of-spring-xml-configuration-with-annotation">Replace part of Spring XML configuration with Annotation&lt;/h3>
+&lt;p>All the above discussions are based on the xml configuration of dubbo in spring. However, dubbo/spring itself also supports the use of annotations for configuration, so we can also follow the steps in dubbo&amp;rsquo;s official documentation to add related annotations to the implementation of REST services to replace some xml configurations, for example&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Autowired&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> UserRepository userRepository;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;register&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType. APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// save the user&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> userRepository. &lt;span style="color:#268bd2">save&lt;/span>(user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The configuration of annotation is simpler and more precise, and it is usually easier to maintain (of course, modern IDEs can support such as class name refactoring in xml, so in terms of specific use cases here, xml is also very maintainable). And xml is less intrusive to the code, especially conducive to dynamic modification of configuration, especially if you want to configure connection timeout, maximum number of connections per client, cluster strategy, weight, etc. for a single service. In addition, especially for complex applications or modules, xml provides a central point to cover all components and configurations, which is more clear at a glance and generally more convenient for long-term project maintenance.&lt;/p>
+&lt;p>Of course, there is no absolute advantage or disadvantage in choosing which configuration method to choose, and it has nothing to do with personal preference.&lt;/p>
+&lt;h3 id="add-custom-filter-interceptor-etc">Add custom Filter, Interceptor, etc.&lt;/h3>
+&lt;p>Dubbo&amp;rsquo;s REST also supports JAX-RS standard Filter and Interceptor to facilitate customized interception of REST request and response processes.&lt;/p>
+&lt;p>Among them, Filter is mainly used to access and set HTTP request and response parameters, URI, etc. For example, to set the cache header of an HTTP response:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">CacheControlFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ContainerResponseFilter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">filter&lt;/span>(ContainerRequestContext req, ContainerResponseContext res) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (req. &lt;span style="color:#268bd2">getMethod&lt;/span>(). equals(&lt;span style="color:#2aa198">&amp;#34;GET&amp;#34;&lt;/span>)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res.getHeaders().add(&lt;span style="color:#2aa198">&amp;#34;Cache-Control&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;someValue&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Interceptor is mainly used to access and modify input and output byte streams, for example, manually add GZIP compression&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GZIPWriterInterceptor&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> WriterInterceptor {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">aroundWriteTo&lt;/span>(WriterInterceptorContext context)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">throws&lt;/span> IOException, WebApplicationException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> OutputStream outputStream &lt;span style="color:#719e07">=&lt;/span> context. &lt;span style="color:#268bd2">getOutputStream&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.setOutputStream(&lt;span style="color:#719e07">new&lt;/span> GZIPOutputStream(outputStream));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context. &lt;span style="color:#268bd2">proceed&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In standard JAX-RS applications, we generally add @Provider annotations for Filter and Interceptor, and then JAX-RS runtime will automatically discover and enable them. In dubbo, we register Filter and Interceptor by adding XML configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.TraceInterceptor, xxx.TraceFilter&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here, we can add all three types of objects, Filter, Interceptor and DynamicFeature, to the &lt;code>extension&lt;/code> attribute, and separate them with commas. (DynamicFeature is another interface, which can facilitate us to enable Filter and Interceptor more dynamically. If you are interested, please google yourself.)&lt;/p>
+&lt;p>Of course, dubbo itself also supports the concept of Filter, but the Filter and Interceptor we discuss here are closer to the bottom layer of the protocol implementation. Compared with Dubbo&amp;rsquo;s filter, it can be customized at a lower level.&lt;/p>
+&lt;blockquote>
+&lt;p>Note: The XML attribute here is called extension, not interceptor or filter, because in addition to Interceptor and Filter, we will add more extension types in the future.&lt;/p>
+&lt;/blockquote>
+&lt;p>If the consumer side of REST is also a dubbo system (see the discussion below), you can also configure Interceptor and Filter for the consumer side in a similar way. But note that the consumer-side Filter and the provider-side Filter in JAX-RS are two different interfaces. For example, in the previous example, the server is the ContainerResponseFilter interface, while the consumer corresponds to the ClientResponseFilter:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">LoggingFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ClientResponseFilter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">filter&lt;/span>(ClientRequestContext reqCtx, ClientResponseContext resCtx) &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;status: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getStatus());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>System.out.println(&lt;span style="color:#2aa198">&amp;#34;date: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getDate());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>System.out.println(&lt;span style="color:#2aa198">&amp;#34;last-modified: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getLastModified());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>System.out.println(&lt;span style="color:#2aa198">&amp;#34;location: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getLocation());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>System.out.println(&lt;span style="color:#2aa198">&amp;#34;headers:&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> (Entry&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> header : resCtx. &lt;span style="color:#268bd2">getHeaders&lt;/span>(). entrySet()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.print(&lt;span style="color:#2aa198">&amp;#34;\t&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> header.getKey() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; :&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> (String value : header. &lt;span style="color:#268bd2">getValue&lt;/span>()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>System.out.print(value &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, &amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>System.out.print(&lt;span style="color:#2aa198">&amp;#34;\n&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>System.out.println(&lt;span style="color:#2aa198">&amp;#34;media-type: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getMediaType().getType());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="add-custom-exception-handling">Add custom Exception handling&lt;/h3>
+&lt;p>Dubbo&amp;rsquo;s REST also supports JAX-RS standard ExceptionMapper, which can be used to customize the HTTP response that should be returned after a specific exception occurs.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">CustomExceptionMapper&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ExceptionMapper&lt;span style="color:#719e07">&amp;lt;&lt;/span>NotFoundException&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Response &lt;span style="color:#268bd2">toResponse&lt;/span>(NotFoundException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> Response.status(Response.Status.NOT_FOUND).entity(&lt;span style="color:#2aa198">&amp;#34;Oops! the requested resource is not found!&amp;#34;&lt;/span>).type(&lt;span style="color:#2aa198">&amp;#34;text/plain&amp;#34;&lt;/span>).build();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Similar to Interceptor and Filter, it can be enabled by adding it to the XML configuration file&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.CustomExceptionMapper&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-http-log-output">Configure HTTP log output&lt;/h3>
+&lt;p>Dubbo rest supports outputting header fields and body message bodies in all HTTP requests/responses.&lt;/p>
+&lt;p>Add the following built-in REST filter in the XML configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.rpc.protocol.rest.support.LoggingFilter&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then configure to turn on INFO level log output for at least org.apache.dubbo.rpc.protocol.rest.support in the logging configuration, for example, configure in log4j.xml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;logger&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.rpc.protocol.rest.support&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;level&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;INFO&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;CONSOLE&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/logger&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Of course, you can also directly open INFO level log output in ROOT logger&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;level&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;INFO&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;CONSOLE&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then something similar to the following will be output in the log&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>The HTTP headers are:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept: application/json;charset=UTF-8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept-encoding: gzip, deflate
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>connection: Keep-Alive
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-length: 22
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>host: 192.168.1.100:8888
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>user-agent: Apache-HttpClient/4.2.1 (java 1.5)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>The contents of request body are:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{&amp;#34;id&amp;#34;:1,&amp;#34;name&amp;#34;:&amp;#34;dang&amp;#34;}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After HTTP log output is enabled, in addition to the performance overhead of normal log output, additional overhead will be generated when parsing HTTP requests, for example, because additional memory buffers need to be established to prepare data for log output.&lt;/p>
+&lt;h3 id="validation-of-input-parameters">Validation of input parameters&lt;/h3>
+&lt;p>Dubbo&amp;rsquo;s rest supports Java standard bean validation annotation (JSR 303) for input validation &lt;a href="http://beanvalidation.org/">http://beanvalidation.org/&lt;/a>&lt;/p>
+&lt;p>In order to be consistent with other dubbo remote call protocols, the annotation for verification in rest must be placed on the service interface, for example&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@Min&lt;/span>(value&lt;span style="color:#719e07">=&lt;/span>1L, message&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;User ID must be greater than 1&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Of course, in many other bean validation application scenarios, the annotation is placed on the implementation class instead of the interface. At least one advantage of putting the annotation on the interface is that dubbo clients can share the information of this interface, and dubbo can complete the input verification locally without even making remote calls.&lt;/p>
+&lt;p>Then open the validation in the XML configuration according to dubbo&amp;rsquo;s standard way:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">xxx.UserService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> validation=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In many other remote call protocols of dubbo, if the input verification fails, &lt;code>RpcException&lt;/code> is directly thrown to the client, but in rest, since the client is often a non-dubbo or even non-java system, it is inconvenient to directly throw a Java exception . Therefore, currently we return validation errors as XML&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;violationReport&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;constraint&lt;/span> Violations&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;path&amp;gt;&lt;/span>getUserArgument0&lt;span style="color:#268bd2">&amp;lt;/path&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;message&amp;gt;&lt;/span>User ID must be greater than 1&lt;span style="color:#268bd2">&amp;lt;/message&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;value&amp;gt;&lt;/span>0&lt;span style="color:#268bd2">&amp;lt;/value&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/constraintViolations&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/violationReport&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Return values in other data formats will be supported later. As for how to internationalize the validation error message, just refer to the relevant documents of bean validation.&lt;/p>
+&lt;p>If you think that the default validation error return format does not meet your requirements, you can add a custom ExceptionMapper to freely customize the error return format as described in the above section. It should be noted that this ExceptionMapper must use a generic declaration to catch dubbo&amp;rsquo;s RpcException, in order to successfully override the default exception handling strategy of dubbo rest. In order to simplify the operation, in fact, the easiest way here is to directly inherit the RpcExceptionMapper of dubbo rest, and override the method of handling verification exceptions&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MyValidationExceptionMapper&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> RpcExceptionMapper {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> Response &lt;span style="color:#268bd2">handleConstraintViolationException&lt;/span>(ConstraintViolationException cve) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ViolationReport report &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ViolationReport();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (ConstraintViolation cv : cve. &lt;span style="color:#268bd2">getConstraintViolations&lt;/span>()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> report.addConstraintViolation(&lt;span style="color:#719e07">new&lt;/span> RestConstraintViolation(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cv.getPropertyPath().toString(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cv. &lt;span style="color:#268bd2">getMessage&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cv.getInvalidValue() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#2aa198">&amp;#34;null&amp;#34;&lt;/span> : cv.getInvalidValue().toString()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Use json output instead of xml output&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(report).type(ContentType.APPLICATION_JSON_UTF_8).build();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then add this ExceptionMapper to the XML configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.MyValidationExceptionMapper&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: gRPC Protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/grpc/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>Dubbo has supported the gRPC protocol since version 2.7.5. For developers who plan to use HTTP/2 communication, or want to take advantage of the capabilities of Stream, backpressure, and Reactive programming brought by gRPC,
+You can consider enabling the gRPC protocol.&lt;/p>
+&lt;h4 id="benefits-of-supporting-grpc">Benefits of supporting gRPC&lt;/h4>
+&lt;ul>
+&lt;li>Bring service governance capabilities to users who expect to use the gRPC protocol, and facilitate access to the Dubbo system&lt;/li>
+&lt;li>Users can use Dubbo-style, interface-based programming style to define and use remote services&lt;/li>
+&lt;/ul>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;ul>
+&lt;li>Synchronous backend microservice-to-microservice communication that requires an immediate response to continue processing.&lt;/li>
+&lt;li>Requires a Polyglot environment that supports mixed programming platforms.&lt;/li>
+&lt;li>Low latency and high throughput communications where performance is critical.&lt;/li>
+&lt;li>Peer-to-peer real-time communication - gRPC pushes messages in real time without polling and has excellent support for bidirectional streaming.&lt;/li>
+&lt;li>Network Constrained Environments - Binary gRPC messages are always smaller than equivalent text-based JSON messages.&lt;/li>
+&lt;/ul>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="using-grpc-in-dubbo">Using gRPC in Dubbo&lt;/h3>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc">Example&lt;/a>&lt;/p>
+&lt;h3 id="steps">steps&lt;/h3>
+&lt;ol>
+&lt;li>Define a service using IDL&lt;/li>
+&lt;li>Configure the compiler plug-in, precompile locally&lt;/li>
+&lt;li>Configure to expose/reference Dubbo service&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>In addition to the native StreamObserver interface type, Dubbo also supports &lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava">RxJava&lt;/a>, &lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-reactor">Reactor&lt;/a> programming style API.&lt;/p>
+&lt;/blockquote></description></item><item><title>Docs3-V2: HTTP protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/http/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>HTTP form-based remote invocation protocol, implemented by Spring&amp;rsquo;s HttpInvoker, supported by versions above &lt;code>2.3.0&lt;/code>.&lt;/p>
+&lt;ul>
+&lt;li>Number of connections: multiple connections&lt;/li>
+&lt;li>Connection method: short connection&lt;/li>
+&lt;li>Transmission protocol: HTTP&lt;/li>
+&lt;li>Transmission method: synchronous transmission&lt;/li>
+&lt;li>Serialization: form serialization&lt;/li>
+&lt;li>Scope of application: The size of incoming and outgoing parameter data packets is mixed, the number of providers is more than that of consumers, it can be viewed with a browser, and parameters can be passed in by form or URL, and file transfer is not supported for now.&lt;/li>
+&lt;li>Applicable scenarios: services that need to be used by both application and browser JS.&lt;/li>
+&lt;/ul>
+&lt;h4 id="constraints">Constraints&lt;/h4>
+&lt;ul>
+&lt;li>Parameters and return values must conform to the Bean specification&lt;/li>
+&lt;/ul>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>HTTP short connection, standardized and easy-to-read protocol, easy to connect to external systems, suitable for upper-level business modules.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;p>Starting from Dubbo 3, the Http protocol is no longer embedded in Dubbo, and an independent &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">module&lt;/a> needs to be introduced separately.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-http&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configuration-protocol">Configuration protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;http&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-jetty-server-default">Configure Jetty Server (default)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-servlet-bridge-server-recommended">Configure Servlet Bridge Server (recommended)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-dispatcherservlet">Configure DispatcherServlet&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.DispatcherServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;load-on-startup&amp;gt;&lt;/span>1&lt;span style="color:#268bd2">&amp;lt;/load-on-startup&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>If a servlet is used to dispatch the request&lt;/p>
+&lt;ul>
+&lt;li>The protocol port &lt;code>&amp;lt;dubbo:protocol port=&amp;quot;8080&amp;quot; /&amp;gt;&lt;/code> must be the same as the port of the servlet container,&lt;/li>
+&lt;li>The context path of the protocol &lt;code>&amp;lt;dubbo:protocol contextpath=&amp;quot;foo&amp;quot; /&amp;gt;&lt;/code> must be the same as the context path of the servlet application.&lt;/li>
+&lt;/ul>
+&lt;/blockquote></description></item><item><title>Docs3-V2: Thrift protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/thrift/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/thrift/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>The thrift protocol currently supported by dubbo is an extension of the thrift native protocol, adding some additional header information on the basis of the native protocol, such as service name, magic number, etc. &lt;code>2.3.0&lt;/code> and above are supported.&lt;/p>
+&lt;p>&lt;a href="http://thrift.apache.org">Thrift&lt;/a> is an RPC framework donated by Facebook to Apache.&lt;/p>
+&lt;p>Using the dubbo thrift protocol also needs to use thrift&amp;rsquo;s idl compiler to compile and generate the corresponding java code, and some enhancements will be made in this regard in subsequent versions.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>For SOA standard RPC framework.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="dependencies">Dependencies&lt;/h3>
+&lt;p>Starting from Dubbo 3, the Thrift protocol is no longer embedded in Dubbo, and an independent &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">module&lt;/a> needs to be introduced separately.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-native-thrift&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.thrift&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>libthrift&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.8.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="all-services-share-one-port">All services share one port&lt;/h3>
+&lt;p>Incompatible with native Thrift&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;thrift&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;3030&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>[Example code in dubbo project](&lt;a href="https://github.com/apache/dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol">https://github.com/apache/dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol&lt;/a> /thrift)&lt;/p>
+&lt;blockquote>
+&lt;p>Thrift does not support null values, ie: you cannot pass null values in the protocol&lt;/p>
+&lt;/blockquote></description></item><item><title>Docs3-V2: Rmi agreement</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/rmi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/rmi/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>The RMI protocol is implemented using the JDK standard &lt;code>java.rmi.*&lt;/code>, using blocking short connections and JDK standard serialization.&lt;/p>
+&lt;ul>
+&lt;li>Number of connections: multiple connections&lt;/li>
+&lt;li>Connection method: short connection&lt;/li>
+&lt;li>Transport protocol: TCP&lt;/li>
+&lt;li>Transmission method: synchronous transmission&lt;/li>
+&lt;li>Serialization: Java standard binary serialization&lt;/li>
+&lt;li>Scope of application: Incoming and outgoing parameter packets are mixed in size, the number of consumers and providers is similar, and files can be transferred.&lt;/li>
+&lt;li>Applicable scenarios: regular remote service method calls, interoperability with native RMI services&lt;/li>
+&lt;/ul>
+&lt;h4 id="constraints">Constraints&lt;/h4>
+&lt;ul>
+&lt;li>Parameters and return values need to implement &lt;code>Serializable&lt;/code> interface&lt;/li>
+&lt;li>The timeout in dubbo configuration is invalid for RMI, you need to use the java startup parameter setting: &lt;code>-Dsun.rmi.transport.tcp.responseTimeout=3000&lt;/code>, see the following RMI configuration&lt;/li>
+&lt;/ul>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>It is a set of Java APIs that supports the development of distributed applications, and realizes the method calling of programs between different operating systems.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="import-dependencies">Import dependencies&lt;/h3>
+&lt;p>Starting from Dubbo 3, the RMI protocol is no longer embedded in Dubbo, and an independent &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">module&lt;/a> needs to be introduced separately.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-rmi&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java -Dsun.rmi.transport.tcp.responseTimeout&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">3000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For more RMI optimization parameters, please see &lt;a href="https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html">JDK Documentation&lt;/a>&lt;/p>
+&lt;h3 id="interface-description">Interface Description&lt;/h3>
+&lt;p>If the service interface inherits the &lt;code>java.rmi.Remote&lt;/code> interface, it can interoperate with native RMI, namely:&lt;/p>
+&lt;ul>
+&lt;li>The provider uses Dubbo&amp;rsquo;s RMI protocol to expose the service, and the consumer directly uses the standard RMI interface to call,&lt;/li>
+&lt;li>Or the provider uses standard RMI to expose the service, and the consumer uses Dubbo&amp;rsquo;s RMI protocol to call.&lt;/li>
+&lt;/ul>
+&lt;p>If the service interface does not extend the &lt;code>java.rmi.Remote&lt;/code> interface:&lt;/p>
+&lt;ul>
+&lt;li>By default, Dubbo will automatically generate a &lt;code>com.xxx.XxxService$Remote&lt;/code> interface, inherit the &lt;code>java.rmi.Remote&lt;/code> interface, and expose the service through this interface,&lt;/li>
+&lt;li>But if &lt;code>&amp;lt;dubbo:protocol name=&amp;quot;rmi&amp;quot; codec=&amp;quot;spring&amp;quot; /&amp;gt;&lt;/code> is set, the &lt;code>$Remote&lt;/code> interface will not be generated, and the service will be exposed using Spring’s &lt;code>RmiInvocationHandler&lt;/code> interface, which is compatible with Spring.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Define the RMI protocol&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>SET DEFAULT PROTOCOL&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Set the protocol of a service&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Multiple ports&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;rmi1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;rmi2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;2099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rmi1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Spring Compatibility&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> codec=&lt;span style="color:#2aa198">&amp;#34;spring&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;ul>
+&lt;li>&lt;strong>If you are using RMI to provide services for external access,&lt;/strong> there should be no risk of attack in the company&amp;rsquo;s intranet environment.&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;ul>
+&lt;li>&lt;strong>At the same time, if the application relies on the old common-collections package,&lt;/strong> dubbo will not depend on this package. Please check whether your application has used it.&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;ul>
+&lt;li>** There is a deserialization security risk. ** Please check the application: Please upgrade commons-collections3 to &lt;a href="https://commons.apache.org/proper/commons-collections/release_3_2_2.html">3.2.2&lt;/a>; Please upgrade commons-collections4 to &lt;a href="https://commons.apache.org/proper/commons-collections/release_4_1.html">4.1&lt;/a>. The new version of commons-collections solves this problem.&lt;/li>
+&lt;/ul>
+&lt;/blockquote></description></item><item><title>Docs3-V2: Redis protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/redis/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>RPC protocol implemented based on Redis. &lt;code>2.3.0&lt;/code> and above are supported.&lt;/p>
+&lt;p>&lt;a href="http://redis.io">Redis&lt;/a> is an efficient KV storage server.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>Caching, current limiting, distributed locks, etc.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="import-dependencies">Import dependencies&lt;/h3>
+&lt;p>Starting from Dubbo 3, the Redis protocol is no longer embedded in Dubbo, and an independent &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">module&lt;/a> needs to be introduced separately.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-redis&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="register-the-address-of-the-redis-service">Register the address of the redis service&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RegistryFactory registryFactory &lt;span style="color:#719e07">=&lt;/span> ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Registry registry &lt;span style="color:#719e07">=&lt;/span> registryFactory.getRegistry(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;zookeeper://10.20.153.10:2181&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>registry.register(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.11/com.foo.BarService?category=providers&amp;amp;dynamic=false&amp;amp;application=foo&amp;amp;group=member&amp;amp;loadbalance=consistenthash&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="referenced-on-the-client-side">Referenced on the client side&lt;/h3>
+&lt;p>Does not need to be aware of Redis addresses&lt;/p>
+&lt;p>On the client side use:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;store&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;member&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Or point-to-point direct connection:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;store&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It is also possible to use a custom interface:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;store&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.StoreService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Where &amp;ldquo;p:xxx&amp;rdquo; is the standard p tag of spring&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.CacheService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> p:set=&lt;span style="color:#2aa198">&amp;#34;putFoo&amp;#34;&lt;/span> p:get=&lt;span style="color:#2aa198">&amp;#34;getFoo&amp;#34;&lt;/span> p:delete=&lt;span style="color:#2aa198">&amp;#34; removeFoo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The method name is suggested to be the same as the standard method name of redis, namely: get(key), set(key, value), delete(key).&lt;/p>
+&lt;p>If the method name is different from the standard method name of redis, you need to configure the mapping relationship:&lt;/p></description></item><item><title>Docs3-V2: Hessian Agreement</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/hessian/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/hessian/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>The Hessian protocol is used to integrate Hessian&amp;rsquo;s services. The bottom layer of Hessian uses Http communication and Servlet to expose services. Dubbo&amp;rsquo;s default embedded Jetty is implemented as a server.&lt;/p>
+&lt;p>&lt;a href="http://hessian.caucho.com">Hessian&lt;/a> is an open source RPC framework of Caucho, whose communication efficiency is higher than the serialization that comes with WebService and Java.&lt;/p>
+&lt;ul>
+&lt;li>Number of connections: multiple connections&lt;/li>
+&lt;li>Connection method: short connection&lt;/li>
+&lt;li>Transmission protocol: HTTP&lt;/li>
+&lt;li>Transmission method: synchronous transmission&lt;/li>
+&lt;li>Serialization: Hessian binary serialization&lt;/li>
+&lt;li>Scope of application: The incoming and outgoing parameter data packets are large, the number of providers is larger than that of consumers, the pressure on providers is high, and files can be transferred.&lt;/li>
+&lt;li>Applicable scenarios: page transfer, file transfer, or interoperability with native Hessian services.&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo&amp;rsquo;s Hessian protocol can interoperate with native Hessian services, namely:&lt;/p>
+&lt;ul>
+&lt;li>The provider uses Dubbo&amp;rsquo;s Hessian protocol to expose the service, and the consumer directly uses the standard Hessian interface to call,&lt;/li>
+&lt;li>Or the provider uses the standard Hessian to expose the service, and the consumer uses Dubbo&amp;rsquo;s Hessian protocol to call.&lt;/li>
+&lt;/ul>
+&lt;h4 id="constraints">Constraints&lt;/h4>
+&lt;ul>
+&lt;li>Parameters and return values need to implement &lt;code>Serializable&lt;/code> interface.&lt;/li>
+&lt;li>Parameters and return values cannot be customized to implement &lt;code>List&lt;/code>, &lt;code>Map&lt;/code>, &lt;code>Number&lt;/code>, &lt;code>Date&lt;/code>, &lt;code>Calendar&lt;/code> and other interfaces, only the implementations that come with JDK can be used, because hessian will do special processing and customize the implementation All attribute values in the class are lost.&lt;/li>
+&lt;/ul>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>Hessian is a lightweight RPC service implemented based on the Binary-RPC protocol, serializing and deserializing instances.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="dependencies">Dependencies&lt;/h3>
+&lt;p>Starting from Dubbo 3, the Hessian protocol is no longer embedded in Dubbo, and an independent &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">module&lt;/a> needs to be introduced separately.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-hessian&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.caucho&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>hessian&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>4.0.7&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="define-the-hessian-protocol">Define the hessian protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="set-the-default-protocol">Set the default protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="set-service-protocol">Set service protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="multiport">Multiport&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hessian1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8081&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="direct-connection">direct connection&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;HelloWorld&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;hessian://10.20.153.10:8080/helloWorld&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Webservice protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/webservice/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/webservice/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>WebService-based remote invocation protocol, implemented based on &lt;code>frontend-simple&lt;/code> and &lt;code>transports-http&lt;/code> of &lt;a href="http://cxf.apache.org">Apache CXF&lt;/a>. &lt;code>2.3.0&lt;/code> and above are supported.&lt;/p>
+&lt;p>CXF is an open source RPC framework of Apache, which is merged from Xfire and Celtix.&lt;/p>
+&lt;ul>
+&lt;li>Number of connections: multiple connections&lt;/li>
+&lt;li>Connection method: short connection&lt;/li>
+&lt;li>Transmission protocol: HTTP&lt;/li>
+&lt;li>Transmission method: synchronous transmission&lt;/li>
+&lt;li>Serialization: SOAP text serialization&lt;/li>
+&lt;li>Applicable scenarios: system integration, cross-language call&lt;/li>
+&lt;/ul>
+&lt;p>It can interoperate with native WebService services, namely:&lt;/p>
+&lt;ul>
+&lt;li>The provider uses Dubbo&amp;rsquo;s WebService protocol to expose the service, and the consumer directly uses the standard WebService interface to call,&lt;/li>
+&lt;li>Or the provider uses the standard WebService to expose the service, and the consumer uses Dubbo&amp;rsquo;s WebService protocol to call.&lt;/li>
+&lt;/ul>
+&lt;h4 id="constraints">Constraints&lt;/h4>
+&lt;ul>
+&lt;li>Parameters and return values need to implement &lt;code>Serializable&lt;/code> interface&lt;/li>
+&lt;li>Parameters try to use basic types and POJO&lt;/li>
+&lt;/ul>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>To publish a service (internal/external), regardless of client type or performance, it is recommended to use webservice. The server has determined to use webservice, the client cannot choose, and must use webservice.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="dependencies">Dependencies&lt;/h3>
+&lt;p>Starting from Dubbo 3, the Webservice protocol is no longer embedded in Dubbo, and an independent &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">module&lt;/a> needs to be introduced separately.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-webservice&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.cxf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>cxf-rt-frontend-simple&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.6.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.cxf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>cxf-rt-transports-http&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.6.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configuration-protocol">Configuration protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-the-default-protocol">Configure the default protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-service-protocol">Configure service protocol&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="multiport">Multiport&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;webservice1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;webservice2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8081&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="direct-connection">direct connection&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;HelloWorld&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;webservice://10.20.153.10:8080/com.foo.HelloWorld&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>###WSDL&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://10.20.153.10:8080/com.foo.HelloWorld?wsdl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="jetty-server-default">Jetty Server (default)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="servlet-bridge-server-recommended">Servlet Bridge Server (recommended)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="configure-dispatcherservlet">Configure DispatcherServlet&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.DispatcherServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;load-on-startup&amp;gt;&lt;/span>1&lt;span style="color:#268bd2">&amp;lt;/load-on-startup&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>If a servlet is used to dispatch the request&lt;/p>
+&lt;ul>
+&lt;li>The protocol port &lt;code>&amp;lt;dubbo:protocol port=&amp;quot;8080&amp;quot; /&amp;gt;&lt;/code> must be the same as the port of the servlet container.&lt;/li>
+&lt;li>The context path of the protocol &lt;code>&amp;lt;dubbo:protocol contextpath=&amp;quot;foo&amp;quot; /&amp;gt;&lt;/code> must be the same as the context path of the servlet application.&lt;/li>
+&lt;/ul>
+&lt;/blockquote></description></item><item><title>Docs3-V2: Memcached protocol</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/memcached/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/reference-manual/protocol/memcached/</guid><description>
+&lt;h2 id="feature-description">Feature description&lt;/h2>
+&lt;p>RPC protocol implemented based on memcached. &lt;code>2.3.0&lt;/code> and above are supported.&lt;/p>
+&lt;p>&lt;a href="http://memcached.org/">Memcached&lt;/a> is an efficient KV cache server.&lt;/p>
+&lt;h2 id="scenes-to-be-used">scenes to be used&lt;/h2>
+&lt;p>Relieve database pressure, improve interaction speed, etc.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;h3 id="import-dependencies">Import dependencies&lt;/h3>
+&lt;p>Starting from Dubbo 3, the Memcached protocol is no longer embedded in Dubbo, and an independent &lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">module&lt;/a> needs to be introduced separately.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-memcached&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="register-the-address-of-memcached-service">Register the address of memcached service&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RegistryFactory registryFactory &lt;span style="color:#719e07">=&lt;/span> ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Registry registry &lt;span style="color:#719e07">=&lt;/span> registryFactory.getRegistry(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;zookeeper://10.20.153.10:2181&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>registry.register(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.11/com.foo.BarService?category=providers&amp;amp;dynamic=false&amp;amp;application=foo&amp;amp;group=member&amp;amp;loadbalance=consistenthash&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="referenced-on-the-client-side">Referenced on the client side&lt;/h3>
+&lt;p>&lt;strong>Do not need to be aware of the address of Memcached&lt;/strong>&lt;/p>
+&lt;p>use on client side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;member&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Or point-to-point direct connection&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.10:11211&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can also use a custom interface&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.CacheService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.10:11211&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Where &amp;ldquo;p:xxx&amp;rdquo; is the standard p tag of spring&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.CacheService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.10:11211&amp;#34;&lt;/span> p:set=&lt;span style="color:#2aa198">&amp;#34;putFoo&amp;#34;&lt;/span> p:get=&lt;span style="color:#2aa198">&amp;#34;getFoo&amp;#34;&lt;/span> p:delete=&lt;span style="color:#2aa198">&amp;#34; removeFoo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If the method name is different from the standard method name of memcached, you need to configure the mapping relationship;&lt;/p>
+&lt;p>The method name is recommended to be the same as the standard method name of memcached, namely: get(key), set(key, value), delete(key).&lt;/p></description></item></channel></rss>

@@ -1,0 +1,432 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Registry</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/</link><description>Recent content in Registry on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Understanding the Registry</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/desc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/desc/</guid><description/></item><item><title>Docs3-V2: Application-Level Service Discovery</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/service-discovery/</guid><description>
+&lt;p>Reference article &lt;a href="https://baijiahao.baidu.com/s?id=1669266413887039723&amp;amp;wfr=spider&amp;amp;for=pc">&lt;strong>&amp;ldquo;Dubbo takes an important step towards cloud native application-level service discovery analysis&amp;rdquo;&lt;/strong>&lt;/a>&lt;/p>
+&lt;p>Reference repository: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/45a0d843b54e4922c240900e63516176cc7da4f6/registry/servicediscovery">dubbo-go-samples/registry/serivcediscovery&lt;/a>&lt;/p>
+&lt;h2 id="configuration">Configuration&lt;/h2>
+&lt;ul>
+&lt;li>Consumer side&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: service &lt;span style="color:#586e75"># Specify the registry as application-level service discovery, if not filled, it defaults to interface level&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>: &lt;span style="color:#586e75"># Define metadata center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos &lt;span style="color:#586e75"># The metadata center can choose nacos/zk&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Provider side&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: service &lt;span style="color:#586e75"># Specify the registry as application-level service discovery, if not filled, it defaults to interface level&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>: &lt;span style="color:#586e75"># Define metadata center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos &lt;span style="color:#586e75"># The metadata center can choose nacos/zk&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Compared with the conventional configuration, after defining registry-type: service and defining the metadata center, application-level service registration/service discovery will be used.&lt;/p></description></item><item><title>Docs3-V2: Registry Configuration</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/registry/</guid><description>
+&lt;p>Refer to samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry">dubbo-go-samples/registry&lt;/a>&lt;/p>
+&lt;h2 id="registry-registration-center-configuration">Registry registration center configuration&lt;/h2>
+&lt;ul>
+&lt;li>&lt;strong>Nacos Registration Center&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>: &lt;span style="color:#586e75"># Application information, after the service is started, the relevant information will be registered in the registration center, which can be identified by the client from the url&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: myApp &lt;span style="color:#586e75"># application=myApp; name=myApp&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">module&lt;/span>: opensource &lt;span style="color:#586e75"># module=opensource&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">organization&lt;/span>: dubbo &lt;span style="color:#586e75"># organization=dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">owner&lt;/span>: laurence &lt;span style="color:#586e75"># owner=laurence&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myversion &lt;span style="color:#586e75"># app.version=myversion&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">environment&lt;/span>: pro &lt;span style="color:#586e75"># environment=pro&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacosWithCustomGroup&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos &lt;span style="color:#586e75"># The registration center chooses nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span> &lt;span style="color:#586e75"># nacos ip&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup &lt;span style="color:#586e75"># nacos group, default DEFAULT_GROUP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: 9fb00abb-278d-42fc-96bf-e0151601e4a1 &lt;span style="color:#586e75"># nacos namespaceID, should be created before. Default public&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: abc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: abc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion: # Interface triplet&lt;/span>: interface name, version number, group. client and server need to be consistent.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: org.apache.dubbo.UserProvider.Test &lt;span style="color:#586e75"># interface name is required&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># Default is empty&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># Default is empty&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The group, namespace, username, and password configured in the registration center of dubbogo correspond to nacos-related concepts.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Zookeeper Registry&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># application: Consistent with nacos, no more details&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper &lt;span style="color:#586e75"># The registration center chooses nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span> &lt;span style="color:#586e75"># zookeeper ip&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup &lt;span style="color:#586e75"># nacos group, default dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion: # Interface triplet&lt;/span>: interface name, version number, group. client and server need to be consistent.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># interface name is required&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># Default is empty&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># Default is empty&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>When zookeeper is registered, the provider side registers the interface information in &lt;code>/$(group)/$(interface)/providers&lt;/code> node, taking the above configuration as an example, the registered zk path is &lt;code>/myGroup/com.apache.dubbo.sample. basic.IGreeter/providers/&lt;/code>&lt;/p>
+&lt;p>The consumer side is registered in /$(group)/$(interface)/consumers for statistics.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>ETCD Registration Center&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">etcd&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: etcdv3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2379&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: org.apache.dubbo.UserProvider
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;strong>Application-level service registration discovery&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper &lt;span style="color:#586e75"># nacos/zookeeper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: service &lt;span style="color:#586e75"># Use application-level service discovery&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>: &lt;span style="color:#586e75"># configure metadata center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Use Nacos as a registry</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-use-grpc_cli-tool-to-debug-dubbo-service">2. Use grpc_cli tool to debug Dubbo service&lt;/h2>
+&lt;h3 id="21-start-the-server">2.1 Start the server&lt;/h3>
+&lt;p>Example: user.go:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, userStruct &lt;span style="color:#719e07">*&lt;/span>CallUserStruct) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;=========================\nreq:%#v\n&amp;#34;&lt;/span>, userStruct)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rsp &lt;span style="color:#719e07">:=&lt;/span> User{&lt;span style="color:#2aa198">&amp;#34;A002&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;Alex Stocks&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">18&lt;/span>, userStruct.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;========================\nrsp:%#v\n&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>rsp, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The server opens a service named GetUser, passes in a CallUserStruct parameter, and returns a User parameter&lt;br>
+CallUserStruct parameter definition:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> CallUserStruct &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Male &lt;span style="color:#dc322f">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SubInfo SubInfo &lt;span style="color:#586e75">// nested substructure
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (cs CallUserStruct) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.CallUserStruct&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> SubInfo &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SubID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SubMale &lt;span style="color:#dc322f">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SubAge &lt;span style="color:#dc322f">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s SubInfo) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>User structure definition:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Id &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SubInfo SubInfo &lt;span style="color:#586e75">// Nest the above substructure SubInfo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Start the service:&lt;/p>
+&lt;p>&lt;code>cd server&lt;/code>&lt;br>
+&lt;code>source builddev.sh&lt;/code>&lt;br>
+&lt;code>go run.&lt;/code>&lt;/p>
+&lt;h3 id="22-define-the-request-body-unpacking-protocol">2.2 Define the request body (unpacking protocol)&lt;/h3>
+&lt;p>The request body is defined as a json file, and the agreed key value is string&lt;br>
+The key corresponds to the field name of the go language struct, such as &amp;ldquo;ID&amp;rdquo; and &amp;ldquo;Name&amp;rdquo;, and the value corresponds to &amp;ldquo;type@val&amp;rdquo;&lt;br>
+Among them, type supports string int bool time, and val is initialized with string. If only type is filled in, it will be initialized to a zero value.
+It is agreed that each struct must have a JavaClassName field, which must strictly correspond to the server side&lt;/p>
+&lt;p>See userCall.json:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;ID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@A000&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;Male&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool@true&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubInfo&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@A001&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubMale&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool@false&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubAge&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int@18&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.CallUserStruct&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>userCall.json defines the structure of the parameter CallUserStruct and the substructure SubInfo, and assigns values to the request parameters.&lt;/p>
+&lt;p>Similarly, user.json does not need to assign an initial value as the return value, but the JavaClassName field must strictly correspond to the server side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;ID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Age&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.User&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubInfo&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubMale&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubAge&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23-executing-the-request">2.3 Executing the request&lt;/h3>
+&lt;p>&lt;code>dubbogo-cli call --h=localhost --p 20001 --proto=dubbo --i=com.ikurento.user.UserProvider --method=GetUser --sendObj=&amp;quot;./userCall.json&amp;quot; --recvObj= &amp;quot;./user.json&amp;quot;&lt;/code>&lt;/p>
+&lt;p>The client prints the result:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 Created pkg:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID:A000 Male:true SubInfo:0xc00006ea20 JavaClassName:com.ikurento.user.CallUserStruct}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID:A001 SubMale:false SubAge:18 JavaClassName:com.ikurento.user.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 Created pkg:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID: Name: Age:0 JavaClassName:com.ikurento.user.User SubInfo:0xc00006ec90}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID: SubMale:false SubAge:0 JavaClassName:com.ikurento.user.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 connected to localhost:20001!
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 try calling interface: com.ikurento.user.UserProvider.GetUser
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 with protocol: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 After 3ms , Got Rsp:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID:A002 Name:Alex Stocks Age:18 JavaClassName: SubInfo:0xc0001241b0}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID:A001 SubMale:false SubAge:18 JavaClassName:}```
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see the detailed request body assignment, as well as the returned result and time-consuming. Supports nested structures&lt;/p>
+&lt;p>Print the result on the server side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>=========================
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req:&amp;amp;main.CallUserStruct{ID:&amp;#34;A000&amp;#34;, Male:true, SubInfo:main.SubInfo{SubID:&amp;#34;A001&amp;#34;, SubMale:false, SubAge:18}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>=========================
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen that the data from the cli has been received&lt;/p></description></item><item><title>Docs3-V2: 使用 Nacos 作为注册中心</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;li>启动一个 Nacos 实例，暴露 8848 端口&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-配置注册中心">2. 配置注册中心&lt;/h2>
+&lt;hr>
+&lt;h2 id="weight-10">title: Use Nacos as a registry
+type: docs
+weight: 10&lt;/h2>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;li>Start a Nacos instance and expose port 8848&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-configure-the-registration-center">2. Configure the registration center&lt;/h2>
+&lt;p>Modify the server configuration go-server/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>: &lt;span style="color:#586e75"># configure Nacos registration center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span> &lt;span style="color:#586e75"># Specify Nacos address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Modify client configuration go-client/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-use-nacos-for-service-discovery">3. Use Nacos for service discovery&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>Start go-server/cmd and check the log&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>Nacos Registry&lt;span style="color:#719e07">]&lt;/span> Registry instance with param ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The log contains Nacos registration information, and the current service interface is registered in Nacos.&lt;/p>
+&lt;p>You can log in to the console http://localhost:8848/nacos to view the registered services&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Start go-client/cmd to view logs&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> [Nacos Registry] Update begin, service event: ServiceEvent{Action{add}, Path{tri://xxx.xxx.xxx.xxx:20000/api.Greeter ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The log contains the subscription event information of the Nacos registration component, and the server IP and port number are obtained, indicating that the call is successful.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>client response result: name: &amp;#34;Hello laurence&amp;#34; id: &amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-more-supported-registries">4. More supported registries&lt;/h2>
+&lt;p>Reference &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry">dubbo-go-samples/registry&lt;/a>
+修改服务端配置 go-server/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>: &lt;span style="color:#586e75"># 配置 Nacos 注册中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span> &lt;span style="color:#586e75"># 指定 Nacos 地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改客户端配置 go-client/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-使用-nacos-进行服务发现">3. 使用 Nacos 进行服务发现&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>启动go-server/cmd，查看日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>Nacos Registry&lt;span style="color:#719e07">]&lt;/span> Registry instance with param ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>日志中包含 Nacos 注册信息，将当前服务接口注册在 Nacos。&lt;/p>
+&lt;p>可登陆控制台 http://localhost:8848/nacos 查看注册的服务&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>启动 go-client/cmd 查看日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> [Nacos Registry] Update begin, service event: ServiceEvent{Action{add}, Path{tri://xxx.xxx.xxx.xxx:20000/api.Greeter ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>日志中包含 Nacos 注册组件的订阅事件信息，获取到服务端 IP 和端口号，显示调用成功。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>client response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-更多支持的注册中心">4. 更多支持的注册中心&lt;/h2>
+&lt;p>参考 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry">dubbo-go-samples/registry&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: Using Zookeeper as a Registry</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/zookeeper/</guid><description>
+&lt;p>TBD&lt;/p></description></item><item><title>Docs3-V2: Using Polaris as a Registry</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/polaris/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/polaris/</guid><description>
+&lt;p>TBD&lt;/p></description></item><item><title>Docs3-V2: Multiple Registries</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/</guid><description>
+&lt;p>A registration center for multiple interface dimensions that can be configured by a Dubbo-go application.&lt;/p>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;li>Start Nacos and Zookeeper locally&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-using-multiple-registries">2. Using multiple registries&lt;/h2>
+&lt;p>Modify the server configuration go-server/conf/dubbogo.yaml, and register the service on two registration centers at the same time.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zookeeper&lt;/span>: &lt;span style="color:#586e75"># Specify the zookeeper registration center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>: &lt;span style="color:#586e75"># Specify the nacos registration center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-ids&lt;/span>: &lt;span style="color:#586e75"># Simultaneous registration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Modify client configuration go-client/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>: &lt;span style="color:#586e75"># Specify the nacos registration center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zookeeper&lt;/span>: &lt;span style="color:#586e75"># Specify the zookeeper registration center&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-ids&lt;/span>: &lt;span style="color:#586e75"># Discovered from the nacos registry service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl2&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-ids&lt;/span>: &lt;span style="color:#586e75"># service discovery from zookeeper registry&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Modify the client code and define a client stub class named GreeterClientImpl2:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> grpcGreeterImpl2 = &lt;span style="color:#b58900">new&lt;/span>(GreeterClientImpl2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> GreeterClientImpl2 &lt;span style="color:#268bd2">struct&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>api. GreeterClientImpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The client writes the calling code:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config. &lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;start to test dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name: &lt;span style="color:#2aa198">&amp;#34;Laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reply, err &lt;span style="color:#719e07">:=&lt;/span> grpcGreeterImpl.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger. &lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;nacos server response result: %v\n&amp;#34;&lt;/span>, reply)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reply, err = grpcGreeterImpl2. &lt;span style="color:#268bd2">SayHello&lt;/span>(context. &lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger. &lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk server response result: %v\n&amp;#34;&lt;/span>, reply)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-multi-registry-service-discovery-verification">3. Multi-registry service discovery verification&lt;/h2>
+&lt;p>Start go-server/cmd and go-client/cmd respectively to view two logs of successful calls:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:55 nacos server response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:61 zk server response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

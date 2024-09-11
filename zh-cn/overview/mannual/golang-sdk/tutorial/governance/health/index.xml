@@ -1,0 +1,107 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 健康检查</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/</link><description>Recent content in 健康检查 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 基于Grpc的健康检查</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/triple-health-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/triple-health-check/</guid><description>
+&lt;h2 id="1-grpc健康检查">1. Grpc健康检查&lt;/h2>
+&lt;p>Grpc健康检查是通过一个普通的用户rpc调用进行实现，Grpc的健康检查定义了如下的protobuf，这样就能实现所有的Grpc协议健康检查的互通。&lt;/p>
+&lt;blockquote>
+&lt;p>Firstly, since it is a GRPC service itself, doing a health check is in the same format as a normal rpc. Secondly, it has rich semantics such as per-service health status. Thirdly, as a GRPC service, it is able reuse all the existing billing, quota infrastructure, etc, and thus the server has full control over the access of the health checking service.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> grpc&lt;span style="color:#719e07">.&lt;/span>health.v1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HealthCheckRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">service&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HealthCheckResponse&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enum&lt;/span> ServingStatus {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UNKNOWN &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SERVING &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> NOT_SERVING &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SERVICE_UNKNOWN &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>; &lt;span style="color:#586e75">// Used only by the Watch method.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServingStatus status &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> Health {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Check(HealthCheckRequest) &lt;span style="color:#719e07">returns&lt;/span> (HealthCheckResponse);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Watch(HealthCheckRequest) &lt;span style="color:#719e07">returns&lt;/span> (stream HealthCheckResponse);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-triple健康检查服务">2 triple健康检查服务&lt;/h2>
+&lt;ul>
+&lt;li>Dubbo-go框架在启动后会自动向框架中注册健康检查服务，提供基于grpc health proto的健康检查服务，无需在配置文件中额外配置。&lt;/li>
+&lt;li>triple健康检查服务可以通过grpc-health-probe检查框架中服务的状态，也可以通过grpc调用该健康检查服务，但是不能通过triple客户端调用该健康检查服务(基于grpc的健康检查服务不通过注册中心注册)，调用的服务名为“grpc.health.v1.Health”，接口为check。&lt;/li>
+&lt;/ul>
+&lt;h3 id="21-通过gprc客户端调用健康检查服务">2.1 通过gprc客户端调用健康检查服务：&lt;/h3>
+&lt;ul>
+&lt;li>启动dubbo-go-samples中的&lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server">triple服务&lt;/a>，通过下面的grpc客户端便可以查看&amp;quot;org.apache.dubbogo.samples.api.Greeter&amp;quot;的状态。triple健康检查服务与grpc互通，所以可以通过grpc客户端查看基于triple协议服务的健康状态。&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;fmt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;log&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;google.golang.org/grpc&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;google.golang.org/grpc/credentials/insecure&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> healthpb &lt;span style="color:#2aa198">&amp;#34;google.golang.org/grpc/health/grpc_health_v1&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">const&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address = &lt;span style="color:#2aa198">&amp;#34;localhost:20000&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Set up a connection to the server
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> conn, err &lt;span style="color:#719e07">:=&lt;/span> grpc.&lt;span style="color:#268bd2">Dial&lt;/span>(address, grpc.&lt;span style="color:#268bd2">WithTransportCredentials&lt;/span>(insecure.&lt;span style="color:#268bd2">NewCredentials&lt;/span>()))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> log.&lt;span style="color:#268bd2">Fatalf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;did not connect: %v&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">defer&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ = conn.&lt;span style="color:#268bd2">Close&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">checkHealth&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbogo.samples.api.Greeter&amp;#34;&lt;/span>, conn)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">checkHealth&lt;/span>(service &lt;span style="color:#dc322f">string&lt;/span>, conn &lt;span style="color:#719e07">*&lt;/span>grpc.ClientConn) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; gRPC-go check %s status&amp;#34;&lt;/span>, service)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>healthpb.HealthCheckRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Service: service,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ctx &lt;span style="color:#719e07">:=&lt;/span> context.&lt;span style="color:#268bd2">Background&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rsp, err &lt;span style="color:#719e07">:=&lt;/span> healthpb.&lt;span style="color:#268bd2">NewHealthClient&lt;/span>(conn).&lt;span style="color:#268bd2">Check&lt;/span>(ctx, req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;get service status = %+v\n&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-grpc-health-probe调试健康检查服务">2.2 grpc-health-probe调试健康检查服务：&lt;/h3>
+&lt;ul>
+&lt;li>启动dubbo-go-samples中的&lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server">triple服务&lt;/a>，提供&lt;code>org.apache.dubbogo.samples.api.Greeter&lt;/code>服务。使用grpc-health-probe检查该服务的健康状态，&lt;code>grpc-health-probe -addr=localhost:20000 -service &amp;quot;org.apache.dubbogo.samples.api.Greeter&amp;quot;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/tasks/service_management/triple-health-check/health-check.png" alt="image-health-check">&lt;/p>
+&lt;h4 id="参考">参考：&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/grpc/grpc/blob/master/doc/health-checking.md">https://github.com/grpc/grpc/blob/master/doc/health-checking.md&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/grpc/grpc-go/tree/master/health">https://github.com/grpc/grpc-go/tree/master/health&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Overview: dubbogo 3.0 启动时检查</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/start-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/start-check/</guid><description>
+&lt;h1 id="启动时检查">启动时检查&lt;/h1>
+&lt;p>在启动时检查依赖的服务是否可用&lt;/p>
+&lt;p>Dubbo-go 缺省会在启动时检查依赖的服务是否可用，不可用时会抛出异常，阻止应用初始化完成，以便上线时，能及早发现问题，默认 check=&amp;ldquo;true&amp;rdquo;，并等待3s。&lt;/p>
+&lt;p>可以通过 check=&amp;ldquo;false&amp;rdquo; 关闭检查，比如，测试时，有些服务不关心，或者出现了循环依赖，必须有一方先启动。&lt;/p>
+&lt;p>关闭 check 后，请注意 provider数量比较多时， consumer 订阅 provider 生成服务字典可能会有一定延迟，如果 consumer 一启动就对外提供服务，
+可能会造成&amp;quot;冷启动&amp;quot;。所以在这个时候，请对服务进行预热。&lt;/p>
+&lt;p>示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">check &lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">reference&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">myserivce&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">check&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Kubernetes 探针</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/kubernetes/</guid><description/></item></channel></rss>

@@ -1,0 +1,703 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – apachecon2023</title><link>https://dubbo.apache.org/zh-cn/tags/apachecon2023/</link><description>Recent content in apachecon2023 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 07 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/apachecon2023/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Apache Dubbo 云原生可观测性的探索与实践</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E4%BA%91%E5%8E%9F%E7%94%9F%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7%E7%9A%84%E6%8E%A2%E7%B4%A2%E4%B8%8E%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/apache-dubbo-%E4%BA%91%E5%8E%9F%E7%94%9F%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7%E7%9A%84%E6%8E%A2%E7%B4%A2%E4%B8%8E%E5%AE%9E%E8%B7%B5/</guid><description>
+&lt;p>摘要：本文整理自平安壹钱包中间件资深工程师、Apache Dubbo committer宋小生在 Community Over Code 2023 大会上的分享。本篇内容主要分为五个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、可观测性建设&lt;/li>
+&lt;li>二、多维指标体系&lt;/li>
+&lt;li>三、链路追踪门面&lt;/li>
+&lt;li>四、日志管理分析&lt;/li>
+&lt;li>五、稳定性的实践&lt;/li>
+&lt;/ul>
+&lt;h2 id="一可观测性建设">一、可观测性建设&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>首先介绍一下云原生升级的挑战。目前大部分公司里基本上都有CICD、OPS来帮助开发、测试、运维提升开发的效率与质量，也会有容器化来帮助提升产线运维的效率与质量。但在云原生时代，大规模容器的频繁变更会带来很多稳定性的问题。这些稳定性问题，包含了很多我们可以提前规避掉的已知的异常，也包含了很多我们无法避免的异常，比如网络故障、机器宕机等系统无法提前测出来的问题。&lt;/p>
+&lt;p>如果我们能提前发现这些问题，其实是可以规避掉很多风险的。所以我们通过可观测系统及时的感知到了这些问题，高效的分析异常，快速的恢复系统。因此可以判定，在云原生时代，可观测系统的建设是非常重要的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_1.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Dubbo作为微服务RPG的框架，直接建设一个大而全的可观测性系统或者平台是不现实的，而且它的定位也不是很符合。可观测性系统更强调关联性，通过单维度或者多维度进行系统的观测与问题的诊断。&lt;/p>
+&lt;p>首先看一下可度量系统的健康状态的指标。Dubbo通过采集系统内部的Dubbo指标的同时，把指标内部的数据暴露给外部的监控系统。这些监控指标中间包含了很多的应用信息、主机信息、Dubbo服务标签信息等等。当我们发现问题的时候，可以通过这些标签信息关联到全链路系统。之后全链路系统可以做到请求级或者应用级的系统性能分析或者系统异常诊断。&lt;/p>
+&lt;p>Dubbo侧通过适配各大厂商门面的形式，只需进行非常简易的依赖就引入或者配置就可以直接把数据导出到各大全链路平台。无论企业使用哪个流行平台，在后期升级Dubbo后都可以直接把链路导出去。&lt;/p>
+&lt;p>另外，链路系统还包含全链路的Traceid或者局部的磁盘ID。通过全链路的ID，我们可以在链路系统直接跳转到日志平台。在日志平台里包含非常详细的日志上下文，这些日志上下文可以提供非常精确的异常问题诊断。&lt;/p>
+&lt;p>Dubbo也提供了非常详细的错误码机制和专家建议的形式，在官网上通过日志的形式可以直接通过错误码的形式直接导航到官网上的帮助文档。&lt;/p>
+&lt;h2 id="二多维指标体系">二、多维指标体系&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_2.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Dubbo在多维度指标体系实践的时候，我们主要从两个维度来看它。&lt;/p>
+&lt;p>第一个是纵向的维度。Dubbo指标在采集的时候有一个接入导出的流程。Dubbo为用户和开发者提供了简单易用的接入门面。接入后服务在运行过程中通过指标器进行指标的采集。Dubbo中提供了非常多的指标采集器，包括聚合和非聚合的指标采集等等。&lt;/p>
+&lt;p>然后采集的指标会通过变量值临时存储在内存里，之后会有部分指标（QPS等带有滑动窗口的最小值、最大值的聚合指标）进行聚合计算，最后这些指标会导出到外部系统。我们支持在Dubbo QPS服务质量中进行指标导出，或者把指标导出到Prometheus，或者http直接访问也可以进行指标的查询。&lt;/p>
+&lt;p>第二个是横向的维度。Dubbo指标采集覆盖了非常容易出现异常的地方。比如Dubbo 3提供了三大中心，包括注册中心、元数据中心、配置中心，存在外部网络交互的地方是非常容易出现问题的。&lt;/p>
+&lt;p>另外一个比较关键的是RPC电路上的采集，比如请求相应的时间、异常、nity网络、IO的指标等等。此外还有一些关于Dubbo线程池的指标采集。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_3.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>前面说的是比较大面上的指标采集，具体Dubbo的采集需要哪些指标我们也调研了很多比较流行的方法论。&lt;/p>
+&lt;ul>
+&lt;li>图中第一张图是谷歌SRE书的四大黄金指标。它是谷歌总结大规模的分布式服务监控总结出来的，它可以进行请求级别的服务质量的衡量，主要包含延迟、流量、错误以及饱和度。&lt;/li>
+&lt;li>图中第二张图是RED 方法。它更侧重于请求，从外部视角来查看服务的健康状态，主要包含速率、错误与持续时间。&lt;/li>
+&lt;li>图中第三张图是USE 方法。它更侧重于系统内部的资源使用情况，包含利用率、饱和度与错误。&lt;/li>
+&lt;/ul>
+&lt;p>可以看到，以上三个指标的方法论中都包含的指标是错误，错误也是每个开发者比较关注的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_4.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>然后我们进行了指标的系统完善。在Dubbo 3.2版本中，多维度指标体系已经完成，而且也在快速持续的版本迭代中。在这个版本中我们只需要引入一个快速集成的Spring Boot中的Starter包就可以实现指标的自动采集。之后我们通过Dubbo的QPS服务质量端口可以直接访问到。如果是本机可以通过浏览器，如果是服务器可以通过科尔命令访问52端口，后面加一个Metric路径，这样就可以看到非常详细的默认指标的导出。&lt;/p>
+&lt;p>可以看到这些指标有Dubbo前缀，类型是Dubbo的不同模块，比如消费者提供的请求级别，三大注册中心一起线程。&lt;/p>
+&lt;p>下面是Dubbo当前指标的行为，比如响应时间最后会加一些单位，这个格式参考的是Prometheus的官方格式。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_5.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>多维度指标体系有些人可能会直接复用Spring Boot默认的manager管理端口，Dubbo也适配了一下Spring Boot Actuator的扩展。&lt;/p>
+&lt;p>操作和刚刚一样，只是引入Spring Boot Starter包。后面也无需做任何其他的配置，就可以在Spring端口里看到详细的指标了。包括Spring Boot内置的jvm指标、Dubbo指标等等。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_6.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>指标体系接入之后，我们如果直接通过命令行访问只能看到一些瞬时的数据，但在监控指标体系我们其实更关注的是多维度的向量数据。如果我们把这些数据看作是一个点其实是比较难看出问题的，所以我们需要把这些数据存储起来，看作是一个实际化的向量数据。&lt;/p>
+&lt;p>Dubbo默认提供对Prometheus采集的介入。Prometheus作为指标存储与监控一体的监控系统，提供了很多的服务发现模型。比如我们直接把服务部署在K8s上，可以直接基于K8s标签的服务发现机制进行指标采集。如果公司有自建的cmdb系统，可以自己扩展http接口进行指标采集。此外,文件或者静态的服务发现机制只要能发现Dubbo服务的IP和服务接口，也可以进行指标采集。采集到的指标会自动存储在Prometheus的实际数据库里。&lt;/p>
+&lt;p>上图是我们通过Prometheus的查询框查询出来的响应时间的最新指标。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_7.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Prometheus的指标更侧重于存储与报警，如果我们想更直观的体现还需要接入Grafana。Grafana的目标是为企业提供简易接入的监控面板，上图是一个简易的全局大盘。&lt;/p>
+&lt;p>我们通过应用级别的筛选/机器IP维度的查询/服务接口的维度，查询服务的健康状态。可以看到，这些指标基本上都是基于前面总结的方法论实现的。比如QPS、请求数量、成功率、失败率、请求的时延等等。&lt;/p>
+&lt;p>此外，还有一些应用信息的指标，比如升级Dubbo 3时，想看到哪些应用已经升级到新的版本，就可以看到新的应用的版本号，也会有应用信息的实例IP分布，还有一些现成资源。&lt;/p>
+&lt;h2 id="三链路追踪门面">三、链路追踪门面&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_8.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>刚才说的指标比较抽象，它更利于帮助我们发现问题，接下来进行一些简单问题的诊断。微服务系统往往是多个系统之间有关联关系，所以服务之间的诊断更依赖于全链路系统。&lt;/p>
+&lt;p>全链路系统Dubbo，当时考虑使用Agent的方式，这种方式对于用户接入是非常方便的，在代理层直接注入一些指标采集的方式即可。如果用这种方式在企业里做全链路的覆盖是非常方便的，但如果Dubbo只做Dubbo的指标采集，风险会比较大。因为Agent接入后会进行字节码修改等不兼容的问题，有些时候很难在前期发现。&lt;/p>
+&lt;p>另外，Dubbo也调研了一些开源的链路追踪门面。Dubbo选择通过原生内置门面的形式，让专业的事情交给专业人做。Dubbo通过适配各大厂商的全链路追踪系统，快速适配接入的用户，只需增加少量的配置就可以实现链路数据的导出。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_9.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>在链路追踪门面的选型方面，我们参考了业界比较流行的几个链路，从中挑选了两个进行选型，分别是OpenTelemetry和Micrometer。&lt;/p>
+&lt;p>OpenTelemetry，大家应该非常熟悉，它支持多语言，规范标准统一的API，支持大部分流行的第三方厂商的全链路追踪系统，是CNCF孵化的项目之一，很多中间件应用都已经接入了这种规范。&lt;/p>
+&lt;p>Micrometer，大家可能对的印象是指标采集的接入。它的缺点是只能支持Java，但它在语言方面，它是Spring Boot 3默认的指标采集，链路采集默认支持micrometer-tracing的功能。此外，Micrometer它还可以通过桥接包直接转化为open的协议，间接也支持各种第三方的采集。并且Micrometer自身也通过调节机制调节了很多的全链路厂商。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_10.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>我们为了和前面使用到的指标采集进行统一，使用Micrometer后无需额外引入第三方的依赖，只需使用Micrometer Tracing的桥接包，就可以快速的接入。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_11.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>上图是链路追踪系统的简单结构。Dubbo的边路采集主要采集rpc请求的链路。在消费者发起请求的时候，如果存在链路ID就直接复用，没有的话会产生链路ID，然后把她们上报给采集器。同样消费者也会通过rpc的上下文把链路数据透传给提供端。提供端拿到这个链路数据后，会对它进行父子关系的关联。最后把这些链路数据上报采集器。&lt;/p>
+&lt;p>采集器在前面的时候主要是内存级别的操作，对系统的损耗比较小。后面将进行异步的导出，和前面指标体系是一样的。内存级的同步采集，异步的把数据导出到第三方的链路系统。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_12.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>链路系统接入也比较简单，主要是引入Spring Boot Starter的依赖包，进行一些比较简单的配置，包括不同厂商的导出地址等等。&lt;/p>
+&lt;p>链路系统可以帮助大家分析性能与异常，但一些系统问题原因的排查可能需要更详细的日志上下文来进行关联。这个时候这个链路系统会把数据放到mdc日志系统的上下文里面，然后在日志上下文里把链路系统编入的内容取出来，展示到日志的文件里。&lt;/p>
+&lt;p>日志文件可能也会接触到第三方的日志平台，如果你有二次开发能力，可以在这种系统平台里加上链接，让这些Traceid自动跳转，即全链路系统自动跳转到日志平台，日志平台也可以自动跳转到全链路系统，查询问题会非常高效。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_13.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>上图是接入Zipkin的展示页面。可以看到它可以进行应用级的性能分析和接口级的性能分析。还可以看到一些Dubbo元数据，它的标签可以和指标大盘指标体系进行关联关系。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_14.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>这是Skywalking的格式，包括列表形式、表格形式等等。它通过Traceid搜到全链路的请求链路，也可以进行性能和异常的诊断。&lt;/p>
+&lt;h2 id="四日志管理分析">四、日志管理分析&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_15.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>Dubbo通过日志里面的形式适配了各大日志组件。因为我们的日志组件在后期发展的体系是非常多的，可能是历史原因，Dubbo已经通过门面的形式适配了各大日志组件。&lt;/p>
+&lt;p>系统运行过程中，非常容易出现问题的地方包括，服务的注册与发现，注册服务发现模型，服务提供端的注册，服务消费端的订阅与通知，服务rpc请求链路。&lt;/p>
+&lt;p>当出现这些问题的时候，系统会出现异常。如果我们直接查看异常/网上检索/通过源码形式分析的话，不仅比较困难而且非常耗时。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_16.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>基于此，Dubbo做了一个专家建议帮助的文档手册。升级到Dubbo 3版本后，可以看到日志里有一个帮助文档的sq链接的形式。这个帮助手册套里提供了一些问题可能出现的原因和排查问题的解决思路。&lt;/p>
+&lt;p>对排查问题比较感兴趣的同学，可以直接打开官网看一下。里面包含了非常多资深专家提供的问题诊断的思路，希望社区里的用户和开发者和我们一起共同建设。&lt;/p>
+&lt;h2 id="五稳定性的实践">五、稳定性的实践&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_17.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>最后我们结合指标、链路、日志进行稳定性实践的介绍。主要分为两个部分：观测系统的异常和快速的恢复。&lt;/p>
+&lt;p>观测系统的异常，在整体全链路系统建设之后，我们有运营人员主动的盯监控大盘发现告警，也有通过邮件、短信、钉钉的形式被动的收到告警。无论通过哪种形式，收到告警之后可以尝试使用可观测的思维，通过一些常见的、和异常相关的指标进行排查。&lt;/p>
+&lt;p>通过这个方法，你可能会发现一些问题，但不一定是病因。这个时候你可以通过指标发生问题的地方找到全链路系统，之后分析哪个系统的哪一段有问题。如果排查不到问题，再通过链路系统的全链路ID关联到日志，通过日志里排查详细原因。如果日志也排查不到问题，可能就需要你在系统流量摘掉之后，通过工具进行详细的根因分析。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/observability/img_18.png" alt="dubbo-可观测性-metrics-and-tracing">&lt;/p>
+&lt;p>快速的恢复，有了前面的原因定位后，基本上就可以知道哪里有问题了。这个时候可以根据你的原因进行流量的治理。比如切换机房流量，对流量进行限流，或者你的系统有异常的时候进行系统的回滚。&lt;/p></description></item><item><title>Blog: OpenSergo &amp; Dubbo 微服务治理最佳实践</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/opensergo-dubbo-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/opensergo-dubbo-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</guid><description>
+&lt;p>摘要：本文整理自阿里云 MSE 研发工程师何家欢的分享。本篇内容主要分为四个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、Why 微服务治理？&lt;/li>
+&lt;li>二、OpenSergo：服务治理控制面与标准规范&lt;/li>
+&lt;li>三、OpenSergo &amp;amp; Dubbo 最佳实践&lt;/li>
+&lt;li>四、OpenSergo 的未来之路&lt;/li>
+&lt;/ul>
+&lt;h2 id="一why-微服务治理">一、Why 微服务治理？&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>现代的微服务架构里，我们通过将系统分解成一系列的服务并通过远程过程调用联接在一起，在带来一些优势的同时也为我们带来了一些挑战。&lt;/p>
+&lt;p>如上图所示，可以看到一个词云，这些都是目前微服务架构在生产上所遇到的挑战。比如，最常见的流量激增的场景，近一年内AIGC突然爆火，相关网站/服务都存在过因为激增流量导致服务不可用的情况，可能会让我们错过一个最佳的增长窗口。&lt;/p>
+&lt;p>再比如缺乏容错机制，某视频网站的某个服务异常，随调用链扩散，导致全站入口不可用，影响千万用户，产生实质性的经济损失。这些生产故障频频发生，也是在提醒我们稳定性是用好微服务的重大挑战之一。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_1.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>为了保障微服务的稳定性，我们就需要做一些架构的演进。&lt;/p>
+&lt;p>我们先看一下左侧的微服务3大件，这个大家已经很熟悉了，通过这三者的配合，我们的应用就能够正常使用了，但是距离生产可用其实还有很大一段距离，各个企业和社区为了消除这其中的gap都有一些探索和实践，比如Dubbo社区在Dubbo3中引入一系列诸如流量管理、高可用性的能力来保障微服务的稳定性，这些措施可以统称为微服务治理。&lt;/p>
+&lt;p>所以其实大家已经意识到，从把微服务跑起来到真的生产可用，微服务治理是必不可少的一环。但微服务治理要做些什么，如何去做其实都还比较模糊。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_2.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>从软件生命周期的角度，我们可以把微服务治理分成三个域，开发态与测试态、变更态、运行态。&lt;/p>
+&lt;p>在这三个域中都面临着很多挑战，对于这些挑战大家也有着一些探索和实践，比如对于发布有损的问题，我们可以通过无损上下线来解决，变更的影响面通过灰度来控制，对于不确定流量使用流控、热点防护，不稳定调用使用熔断与隔离。&lt;/p>
+&lt;p>可以看到在各个域中都有一些成熟的方案和效果很好的实践。但是不管是阿里还是其他公司，在体系化落地微服务治理时都会遇到很多问题。&lt;/p>
+&lt;h2 id="二opensergo服务治理控制面与标准规范">二、OpenSergo：服务治理控制面与标准规范&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_3.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>首先我们涉及的组件有很多，在微服务架构中，往往会涉及很多组件，它们需要有Dubbo这样的调用框架，nacos这样注册中心，snetinel、hystrix这样的稳定性中间件等等，因此也没办法进行统一治理，管控成本就非常高。&lt;/p>
+&lt;p>其次时概念不统一，比如在envoy中的隔离与 sentinel中的隔离完全不是一个意思，envoy的隔离是摘除不健康实例，sentinel的隔离是并发控制，这就会使开发者理解成本很高。&lt;/p>
+&lt;p>同时各个企业社区都有自己的最佳实践，这也就导致大家能力上是不对齐的，没有统一的标准。&lt;/p>
+&lt;p>还有配置不统一的问题相信大家都很有体感，比如sentinel、hystrix、istio都有熔断的能力，但是配置却各有差别，需要开发者分别学习，还要注意不混淆，不利于理解，也不利于统一管控。&lt;/p>
+&lt;p>可以发现由于这些问题，我们在落地体系化微服务治理时会有很大的阻力，我们需要的是一个统一的治理界面来让我们更好地做微服务治理，因此我们提出了OpenSergo这个项目。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_4.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>而OpenSergo期望提出一套开放通用的、面向云原生架构的微服务治理解决方案及标准规范，来助力保障微服务高可用，上图的四个部分就是OpenSergo社区的愿景。&lt;/p>
+&lt;p>OpenSergo社区会基于业界微服务治理场景与实践抽象成规范，通过这种方式去解决前面提到的概念、配置、能力不统一的问题，并用统一的管控面去承载，降低使用和维护成本。&lt;/p>
+&lt;p>同时在纵向上，我们针对链路上的每一环进行抽象，覆盖完整的场景，在横向上，无论是Java生态，Go生态或是其他语言，无论是传统微服务还是Mesh架构，都会纳入到这套统一的体系中。&lt;/p>
+&lt;p>但是OpenSergo作为一个开放标准，仅凭借阿里是不够的，所以我们联合了多家公司以及社区比如bilibili、中国移动、字节跳动的cloudwego社区等，共同建设这套开放标准，希望能够真正解决微服务稳定性的风险。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_5.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来简单介绍一下OpenSergo的架构体系，前面也介绍了OpenSergo社区会基于场景抽象出OpenSergo的Spec，但这只是第一步，为了承载这些标准规范我们就需要一个控制面，社区在一开始的演进中选择从0开始开发一个控制面来做治理规则的管控、监听与下发。&lt;/p>
+&lt;p>但是随着社区的演进，我们发现基于Istion去扩展，成本更低，也能够复用更多的能力，因此在后续的演进中我们会选择结合Istio扩展控制面与决策中心实现治理规则统一管控、治理策略预计算。&lt;/p>
+&lt;p>在有了控制面后我们还需要数据面来进行具体治理能力的实现，它可以是像sentinel这样的中间件，也可以是框架本身。控制面与数据面之间的通讯在初始的架构中是基于grpc构建的链路，但在确定了后续演进方向会基于istio扩展后，社区选择拥抱xds，尽可能服用它的链路，对于一些无法承载的我们再使用自身的grpc链路。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_6.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>前面也提到社区控制面的后续演进是基于Istio扩展的，Istio本身也有一些流量治能力，并有着一定的普及度。但是Istio主要关注流量管理，让流量到达该去的地方而不是微服务治理治理，所以在微服务稳定性的场景下，Istio所提供的这些能力是不足以满足我们的需求的。&lt;/p>
+&lt;p>因此我们在Istio的基础上，基于微服务稳定性的一些场景，比如前面提到的变更态稳定性、运行时稳定性去抽象、制定了满足需求的规范标准，希望能够更加贴合微服务场景。所以整体上我们在微服务治理领域会是Istio的超集，而不是互斥关系。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_7.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来我们一起看一下OpenSergo的标准规范是如何解决前面所提到的这些场景。&lt;/p>
+&lt;p>首先我们聊一下流量路由，它的主要作用是将符合一定特征的流量路由到指定的workload上，一般大家会用这种能力来实现灰度、同AZ路由等方案。&lt;/p>
+&lt;p>基于 Istio VirtualService/DestinationRule 的格式社区定义了流量路由spec，但我们在调研以及实践的过程中发现，它并不能很好的满足微服务场景下的需求。所以为了更贴近微服务的场景去扩展去做了扩展。比如我们增加了路由失败后的处理逻辑，这在微服务架构中是很常见的需求。&lt;/p>
+&lt;p>又由于Istio主要关注的是HTTP请求，它的CRD不能够很好地承载像Dubbo这样的RPC调用，所以我们为此增加了更多RPC模型的支持。后续我们也会探索与社区标准结合的方案，使我们的Spec更加通用与标准。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_8.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>前面所提到的灰度，在阿里集团内部数年的安全生产实践中，与可监控、可回滚一起被定义为安全变更的三板斧，其中灰度是控制变更影响面，保障变更稳定性的必不可少的能力。&lt;/p>
+&lt;p>为了实现灰度，我们通常有几种方案，第一种是物理隔离，我们通过部署两套一样的环境来实现灰度，但是这种方案的部署和维护成本都很高。&lt;/p>
+&lt;p>为了提高资源利用率，便产生了第二种方案，流量灰度。我们不部署独立的环境，而是在流量的每一跳进行流量的特征匹配，并且由此决定去往灰度实例还是base实例，这种方案相较与前者更加灵活高效，可以通过前面提到的流量路由能力来实现。但是需要我们在每一跳都配置路由规则，相对比较繁琐。&lt;/p>
+&lt;p>并且由于有些信息在后续链路是获取不到的，比如uid，导致这个方案的实施有一定的困难。于是便产生了第三种方案，全链路灰度，我们通过在流量入口处进行流量匹配并打上标签，标签会自动沿着调用链路透传，后续链路根据标签来进行路由。通过这种方式，我们就能够更简洁地去定义灰度。Opensergo针对这种场景抽象了对应的CRD。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_9.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>我们将这个CRD称之为TrafficLane也就是泳道，我觉得还是比较形象的，大家看一下上边的图片，橙色的是正常的流量走向，灰色的是灰度流量的走向，就像是将一个池子分成了多个泳道。&lt;/p>
+&lt;p>泳道的CRD有三个部分组成，也比较好理解，首先我们需要去匹配灰度流量，所以就要去定义匹配的条件，然后定义为这些流量打上什么标签，最后再定义这个标签以什么方式去透传。&lt;/p>
+&lt;p>通过这样的CRD我们就定义了一条灰度泳道。但是如果只是定义是不足以实现全路灰度的，我们还需要借助OpenSergo体系全链路全方位框架的一个支持，才能让标签在这些框架中自动的透传，这些框架也能通过标签进行路由。其中流量染色和标签透传会借助标准的trcae体系去实现，比如OT。&lt;/p>
+&lt;p>上图右侧是一个CRD的例子，大家可以简单看一下。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_10.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来我们一起看一下运行态稳定性的场景。&lt;/p>
+&lt;p>我们主要提两个场景，第一个是流量激增的场景，比如双十一的秒杀活动，一开始流量是稳定的情况下，系统也处于稳态。但是当流量激增的时候，系统就会开始往不稳定的方向发展，异常调用也会激增，最后就会变成不可用的状态。对于这类场景，我们可以用流量控制的能力拒绝超出容量的请求，或是通过流量平滑的能力削峰填谷，让流量处于比较平稳的状态，避免服务的不可用。&lt;/p>
+&lt;p>第二个是不稳定调用导致服务不可用的场景，比如我们调用一些第三方服务经常会出现不稳定的情况，这里的不稳定主要指异常或是慢调用。以dubbo为例，当服务提供方出现慢调用的时候，会导致服务消费方的线程堆积，影响到其他的正常调用甚至是整个服务的稳定性，并且这种风险会沿着调用链反向传递、扩散最终影响整个系统的稳定性。这时我们可以通过并发控制或是熔断保护来限制慢调用对资源的占用，保障系统的整体稳定性。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_11.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>针对前面提到的这些场景，OpenSergo也制定了相关的CRD。在业界的实践中sentinel是一个成熟的流量防护方案，在阿里内部积累了大量的流量防护相关的场景和实践，2018年开源依赖在业界进一步丰富了这些积累，我们从这些积累中抽象出了一套流量防护的规范标准。&lt;/p>
+&lt;p>那么一条流量防护的规则应该包含哪些内容，大家可以简单想一下。&lt;/p>
+&lt;p>首先我们要确定的是要针对怎样的流量，我们可以按接口去划，也可以按请求中的特征去划。确定了目标之后，我们就需要定义要采取怎样的治理策略。这里的策略包括了刚才提到的这些策略，以及更高阶的比如自身过载保护等策略。&lt;/p>
+&lt;p>最后由于限流本身是有损的，但是我们不希望这种有损传递到用户侧，因此我们需要为不同的规则配置不同行为，从而使得在用户侧的表现是比较友好的，比如最基本的对于抢购场景的限流，我们可以返回一个排队中，请稍后的提示。&lt;/p>
+&lt;p>上图右侧是一个CRD的示例，流量目标为接口名为/foo的请求，策略为阈值为10的全局限流，fallback为特定的返回体。&lt;/p>
+&lt;p>通过这样的CRD配置，不管是Dubbo框架还是其他框架，我们都能很方便的使用流量防护的能力。&lt;/p>
+&lt;h2 id="三opensergo--dubbo-最佳实践">三、OpenSergo &amp;amp; Dubbo 最佳实践&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_12.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>对于框架开发者来说想要接入到OpenSergo的体系中其实有两种方式&lt;/p>
+&lt;p>一种是通过对接OpenSergo体系的数据面来接入，框架开发者只需要实现对接Sentinel的适配模块就可以完成对接工作。而对于有特殊要求或是更贴近特定场景的框架，也可以自行对接OpenSergo的标准，来接入OpenSergo体系。&lt;/p>
+&lt;p>对于用户来说，不管是哪一种方式，都只需要简单地引入一些依赖，就可以无感地获取OpenSergo定义的微服务治理能力，并能在统一的控制面管控这些框架的微服务治理能力，大大提高使用微服务治理的体验与效率。讲完了接入的方式，我们再一起来看下实现的效果。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_13.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>第一个实践是全链路灰度控制消除变更态稳定性风险。这是一个简单的demo，我们只需要部署这样的一个CRD，定义/A/dubbo的请求，当它的参数里出现xiaoing的时候，我们就把它导向灰度的环境。可以看到现在的请求走向是符合我们预期的，有灰度环境的就是灰度环境了。对于不符合要求的流量，就还是走基线环境，我们只需要简单的CRD就可以实现。&lt;/p>
+&lt;p>但我们的生产环境会比demo复杂的多，会涉及各种框架，比如RokcetMQ、spring cloud alibabab。但只要这些框架对接了Opensergo的体系，就可以用这一个CRD来做到全链路，全框架的灰度。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_14.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>第二个实践是流量防护与容错保障运行时稳定性——不稳定调用场景。这里使用一个简单的Demo，应用A通过Dubbo调用应用B。右侧是一个正常接口和慢调用接口的流量图，蓝色的是总流量，黄色的是拒绝流量，橙色的异常流量。在一开始慢调用还没有发生，系统处于稳态，没有异常流量。&lt;/p>
+&lt;p>在第一个时间点，我手动调整了慢调用接口的RT，慢调用发生，异常流量出现，同时由于慢调用大量地占用了Dubbo的线程资源，导致正常调用的资源受到挤占，同样出现大量的异常流量，Dubbo侧也出现了线程池耗尽的异常。&lt;/p>
+&lt;p>大家可以想一下，这种场景下我们应该配置什么规则来解决这个问题，其实这个时候很多人会想要流量控制来做限流希望能解决这个问题，我们一起看下它的一个效果。&lt;/p>
+&lt;p>在第二个时间我配置了一条限流规则，可以看到情况虽然有所缓解，但是依旧有大量报错，这是因为在慢调用场景下，请求已经出现堆积，仅仅通过QPS限流还是会导致请求涌入进一步堆积。&lt;/p>
+&lt;p>所以我们真正需要的并发控制，在第三个时间点我配置并发控制规则来限制慢调用接口的并发数，也就是正在处理的请求数。可以看到通过这种限制，即便慢调用仍然存在，但是它所能占用的线程资源被限制，正常接口得以正常调用，从而避免稳定性风险的扩展，保障应用的稳定性。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_15.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>第三个实践是流量防护与容错保障运行时稳定性——自适应过载保护。可以看到我们的demo在持续的高负载下，异常流量开始逐渐上升，系统的稳态被破坏，这时我们可以通过配置自适应过载保护规则，来自适应地调节限流行为，达到消除异常请求，帮助系统重新回到稳态的效果。&lt;/p>
+&lt;p>目前的策略我们在开源已经支持了BBR，在内部的实践中我们也有用PID。这些策略我就不在这里详细介绍了，大家感兴趣可以去我们的开源社区一起参与讨论。&lt;/p>
+&lt;p>从这三个例子可以看到Dubbo通过对接Sentinel接入OpenSergo体系后就无感地具备了OpenSergo所定义的通用的治理能力，并且能够通过统一的控制平面来管控。&lt;/p>
+&lt;p>而对于其他框架也是一样，可以设想一下如果我们生产上所涉及的所有框架都对接了OpenSergo体系，那我们就可以在一个控制面上管控所有服务，所有框架的微服务治理能力，更好地保障系统的稳定性。&lt;/p>
+&lt;h2 id="四opensergo-的未来之路">四、OpenSergo 的未来之路&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_16.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>这是多语言服务治理的生态大图。在生态上，我们希望OpenSergo是全链路多语言异构化的，我们会主要关注Java/Go + Gateway + Mesh 生态，在生态上不断去覆盖更多的框架。&lt;/p>
+&lt;p>在能力上我们会不断抽象并落地更多的通用的微服务治理能力。包括流量防护、自愈、服务容错、健全、发现等等。&lt;/p>
+&lt;p>目前我们已经和很多社区建立了联系和合作，比如Dubbo、ShenYu、APISIX、Higress、RocketMQ、MOSN等等，其中也有不少已经有了一些实质性的进展。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_17.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>接下来分享一下我们近期的规划。&lt;/p>
+&lt;ul>
+&lt;li>控制面方面，我们会逐步推动控制面的生产可用，在明年3月份发布GA版本，让大家能够在生产上去验证微服务治理体系。&lt;/li>
+&lt;li>Spec方面，我们会去支持微服务安全治理、离群实例摘除，并持续地与社区标准集成。&lt;/li>
+&lt;li>治理能力的演进上，我们会重点完成Sentinel 2.0 流量治理的升级，并在安全和自适应方向上进行探索。&lt;/li>
+&lt;li>在社区合作上，我们会继续推进与社区间的交流与合作，推进各个微服务治理领域的生态落地，统一控制面、Spec 共建。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/opensergo/img_18.png" alt="dubbo-opensergo-服务治理最佳实践">&lt;/p>
+&lt;p>虽然阿里在集团以及云上积累了大量的经验和场景，但稳定性的问题是复杂的，场景是多样的，仅凭一方不足以覆盖所有稳定性的场景，也不足以成为标准，所以微服务治理技术、生态与标准化的演进还需要各个企业和社区的共同参与。&lt;/p>
+&lt;p>大家可以从以下三个方面入手来参与社区。&lt;/p>
+&lt;ul>
+&lt;li>微服务治理的spec，各个社区和企业都是各自领域中引领者，大家能从各自的场景和最佳实践出发，一起制定与完善标准规范。&lt;/li>
+&lt;li>微服务统一控制面的演进，这一块其实有很多的可能性，作为控制面其实它处在一个决策者的位置，一定程度上具备整个系统的上帝视角，在AI技术火爆的当下大有可为。&lt;/li>
+&lt;li>治理能力与社区生态的贡献，大家可以参与到服务治理能力的演进中，也可以贡献各个社区和OpenSergo体系的对接。&lt;/li>
+&lt;/ul>
+&lt;p>最后我想说，微服务治理其实是一个很广阔的平台，参与其中，你可以接触到各个领域的技术与场景，而不是被限制在单点技术范围内摸爬滚打。欢迎企业与社区同学加入开源贡献小组，一起主导下一代微服务技术体系的演进！&lt;/p></description></item><item><title>Blog: Seata 微服务架构下的一站式分布式事务解决方案</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/seata-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E4%B8%8B%E7%9A%84%E4%B8%80%E7%AB%99%E5%BC%8F%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/seata-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E4%B8%8B%E7%9A%84%E4%B8%80%E7%AB%99%E5%BC%8F%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/</guid><description>
+&lt;p>摘要：本文整理自阿里云分布式事务产品负责人、Seata 开源项目创始人、微服务开源治理负责人季敏的分享。本篇内容主要分为三个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、微服务架构下数据一致性的挑战&lt;/li>
+&lt;li>二、分布式事务Seata的架构演进&lt;/li>
+&lt;li>三、如何基于Seata扩展RPC和数据库&lt;/li>
+&lt;/ul>
+&lt;h2 id="一微服务架构下数据一致性的挑战">一、微服务架构下数据一致性的挑战&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>在2019年，我们基于Dubbo Ecosystem Meetup，收集了2000多份关于&amp;quot;在微服务架构，哪些核心问题是开发者最关注的？&amp;ldquo;的调研问卷。最终分布式事务占比最大，有54%。&lt;/p>
+&lt;p>但在Seata出现之前，大家都说分布式事务能避就避，因为消息最终一致性去解释了问题。但Seata开源之后，这些问题都迎刃而解。比如无损上下限，到底是说服务的可用性还是其他的。对于我来说，我觉得它最终关注的是数据的问题。因为无论前端的业务怎么去交互，最终都会沉淀到数据。如果业务的数据不一致，前面是什么架构，都意义不太大，所以我认为数据是企业的核心资产。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_1.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>那么到底哪些场景会遇到分布式事务的问题呢？&lt;/p>
+&lt;p>第一个场景，在拆分成微服务架构之后，不同的服务可能由不同的团队负责上下游的协调联动。比如C服务发布的时候，并不会通知A服务和B服务，这个时候就会遇到上下线带来的数据一致性的问题。&lt;/p>
+&lt;p>第二个场景，不可靠、不稳定的基础设施，会导致网络或者个别主机的宕机。&lt;/p>
+&lt;p>第三个场景，timeup是分布式架构里比较难解的状态，因为一旦出现服务调用的timeup，这个服务的业务逻辑到底是执行了，还是没有执行timeup的服务怎么实现数据的密度，都是比较尖锐的问题。&lt;/p>
+&lt;p>第四个场景，业务里除了会涉及到数据库，还会涉及第三方的组件。比如缓存、Redis，我们的库存会先经过Redis这样的组件，那么如何实现它的一致性也是个问题。&lt;/p>
+&lt;p>第五个场景，我们在上下游做业务的时候，你传给我一些参数，但这些参数本身可能是非法的。那么我就需要把你的下服务也回关掉，而不是只有我这一个服务去做拒绝。&lt;/p>
+&lt;p>所以分布式事务的场景主要包括了跨库、跨服务、资源的多样性。异常上主要包括业务异常、系统异常。&lt;/p>
+&lt;p>那么分布式事务是不是微服务架构独有的问题呢？其实不是，它在单体应用里也有类似的问题，只不过在微服务架构里它的问题更凸显。&lt;/p>
+&lt;p>在单体架构下存在哪些分布事务的场景呢？比如一个单体应用要去修改多个数据库或者多模块的，整体而言，单体数据库它完成的是ServerSission下边的一个本地事务。只要跨了这个本地事务，其他的都是分布式事务，即使微服务都去修改同一个数据库。这样其实你的数据库的本身也不是能反序列化传递到另外一个服务的，这些问题都会涉及到分布式事物的问题。&lt;/p>
+&lt;p>整体看起来，分布式事物涉及到了分布式架构和单体架构中非常广泛的应用。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_2.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>市面上的分布式事务方案有以下六类：&lt;/p>
+&lt;ul>
+&lt;li>XA模式，它的问题是吞吐量和性能要差一点，在一致性上是最高水准。&lt;/li>
+&lt;li>TCC模式和SAGA模式，可以归结为是一个业务层面的分布式事务，因为他不会拦截数据。比如TCC模式可能有cc接口，至于这个接口怎么回滚，怎么正向的，在框架层面完全不用管。这可能是你里边逻辑本身不是对等的，也不是框架已经参与的，所以更多的是把接口暴露给了业务实现。&lt;/li>
+&lt;li>消息最终一致性，它最大的优点是实现异步化的解耦，结合消息的削峰填补的特点。但它本身存在着一些问题，对消息来说，他更多的是做一个单项的通知。这个通知可能对于一些消息消费来说，即使业务失败了，它也没法去回滚。&lt;/li>
+&lt;/ul>
+&lt;p>比如现金红包的业务，我首先要将红包转到我的账户，然后再从我的账户转到我的银行卡。可能消息消费的时候我这个账户已经注销掉了，那么你的消息消费就会一直处在失败的状态。对于这类问题，不可能再把上游消息的发送给关掉，所以它更多的是单项通知的场景。&lt;/p>
+&lt;ul>
+&lt;li>定时任务补偿，它的学习成本低，但实践成本高。尤其是微服务的链路有多翘的节点，需要业务逻辑写的非常周全。&lt;/li>
+&lt;li>AT模式，它综合了一致性性能，主要的特点是简单无侵入，强一致，学习成本低。缺点是需要遵守一定的开发规约，并且它不是对所有的SQL类型都支持，它有一定限制。从业务场景上来说适应的是一个通用的场景，但它并不适应于热点数据类型的高并发场景，比如SKU的库存的部件。因为在这个模式它有一个应用层的分支锁，需要对相同的数据做一个排队的等待。&lt;/li>
+&lt;/ul>
+&lt;h2 id="二分布式事务seata的架构演进">二、分布式事务Seata的架构演进&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_3.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>Seata在阿里内部的代号叫TXC，在蚂蚁叫DTX。它起源于集团的五彩石项目，五彩石的项目是当初集团内在做去IOE，从单体架构引进到分布式架构。在分布式架构必然会涉及到很多的中间价，TXC承担的主要的角色做服务一致性的保证。&lt;/p>
+&lt;p>我们和集团内的三大件都做了深度的集成，包括服务调用框架HSF，也就是对外开源的Dubbo；数据库有分库分表的TDDL组件；异步消息的MetaQ组件。在集团内也有广泛的使用，日均百亿级别调用，标准3节点集群吞吐达近10w TPS。&lt;/p>
+&lt;p>我们的SLA会分为几个SLA，一个是可用性的SLA服务，另外一个是性能的SLA服务。因为对于分配事物来说，除了要保证一致性，也要保证性能的吞吐量。所以我们规定比如每一次的RT额外的开销不能超过XX。目前能达到毫秒级的事务处理，能保证在稳定性上全年无故障。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_4.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>最开始我们在做分布式事务实现的时候，我们也去考虑我们的分布式事务应该是在哪层面去实现？&lt;/p>
+&lt;p>从应用架构的视角，分为这么几层，一个是最上层的应用开发框架，可能每一套公司都有自己的开发框架，比如像ddt的开发框架或者club的体系等等。再下一层是服务调用框架，类似于Apache Dubbo主要承担，也在国内使用的非常广泛。再下一层是数据中间件，这层主要包括ORM框架、事务、同步、对账。再下一层是跟数据库连接，这一层类似于JDBC、Java去连数据库。&lt;/p>
+&lt;p>我们去做了一个简单的对比，到底是在哪层实现分布式事务，是在DB层、数据中间件层还是应用框架层？&lt;/p>
+&lt;p>在应用框架层，它去实现一致性相对来说比较弱，因为你会掺杂很多复杂的、不可控的因素，会把服务调用的因素给牵扯进去。比如服务调用的超时，这就是为什么我们现在有的像TCC模式它会有一些密等、放悬挂那些问题。都是因为融入了RPC的因素，持续的不确性导致的一些问题。&lt;/p>
+&lt;p>在数据中间件层，它的一致性比应用框架要好一些，它主要的问题是他不是在DB层实现的，所以我是有办法绕过中间件直接去修改DB的，这时候就会存在事物并发时序的问题。最好的一致性是在DB层去实现数据一致性，但这一层数据一致性主要是数据库的厂商，但是也是参差不齐。比如Msever，他在5.7.7版本才把差异完善起来，在之前的版本它对差异回滚一直是有问题的。&lt;/p>
+&lt;p>但它只能局限在数据库的scope，如果我要去更大的scope，从应用架构层可能要跨服务，跨服务这一层它就管不了，只能管我自己数据库。所以他最终还是需要有一个第三方的去协调跨服务的数据一致性。最终我们把这一层AT差异模式是把它做到了数据库中间件这层，JDBC server这层我们做到了应用开发框架这层。&lt;/p>
+&lt;p>所以它不仅实现了一整套的集团生产体系，还包括了我们对分布式事务编程模型的定义，运维安全。因为要涉及到数据，会有数据的敏感以及性能和观测高可用等等。&lt;/p>
+&lt;p>在理论模型上我们当时还是比较匮乏的，我们做了一些对差异以及Spring事物模型的延展。我们延展了已有的模型，而不是新造一条。这于开发者来说，学习成本会更低。&lt;/p>
+&lt;p>此外，我们还做了一些定义，包括怎么定义一致性，是定义多节点的一致性，还是业务应用架构数据的一致性，以及这套架构里的角色模型设计的事物动作和隔离。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_5.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>什么是分布式事务的模型定义？举个例子，我去做银行转账的时候，我给你转100块钱，恰好这个时候出现了网络超时，那么这100块钱到底有没有扣。如果不确定就可能出现资损的问题，甚至可能影响企业的商誉。&lt;/p>
+&lt;p>我们都在谈分布式架构，但从整个应用的视角，并不是所有东西都是分布式的。比如我们从一个应用的架构的层面去看数据库，包括今天称之为分布数据库。从整个应用层面，它我们看它是一个集成式的数据的存储。它的内部实现可能是分布式的，包括分布式的链路数据。&lt;/p>
+&lt;p>因为在分布式的应用架构里，每个业务的节点都只掌握了部分的信息。如果做一些问题的排查，必然需要一个集成式的东西。对于分布式事务它的核心工作是做分布式协调，所以他要掌握全局的信息。&lt;/p>
+&lt;p>这就是为什么我们有了Transaction Coordinator。对他来说，他要有一个上帝视角，充当第三方的协调器。而真正做事的是Resource Manager，你可以认为它是数据库的灵魂，我们需要把它作为Pro。&lt;/p>
+&lt;p>真正随着业务应用去做事务的动作是Transaction Manager，它会随着业务的执行链路进行，到底直接事务的边界是怎么样的，以及分布式事务的动作是怎么样的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_6.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>2019年1月Seata开始开源了，我们主打的特点特色是AT 模式，因为是组装，我们从0.1版本就把AT模式给开源出去了。0.4版本我们纳入了TCC的模式，因为AT模式它需要适配不同的数据库。而在现有阶段我们不能满足对所有数据库的支持以及缓存资源，这就需要应用TCC模式去做补充。你可以用TCC模式做一些我们没实现的数据库以及缓存的结构。&lt;/p>
+&lt;p>在0.9版本，我们纳入Saga的事务模式，它主要解决长事务方解决方案。比如一个事务非常长，且还有微服务的编排工作。在1.1版本，我们纳入了XA的事务模式，因为有的客户已经应用了Seata的AT模式，但他还有一些老的特别事务。他希望应用Seata统一的一套解决方案，解决不同业务常用的分支事务，所以我们把XA的事务模式也纳入进来了。&lt;/p>
+&lt;p>最终从整个架构上来说，我们是打造了一站式的分布式事务的解决方案。针对不同的业务场景，Seata都能做事务。如上图所示，目前市面上没有一只分布事务的模式，能解决不同业务场景的问题。主要强调几个问题，分布式事务可能有同步的分布式事物，有异步的分布式事务，以及对分布式事务的一致性的要求也不高。有强一致性，最终一致性，弱一致性。&lt;/p>
+&lt;p>另外，对于事物执行时间的长短也有要求。比如有长事务、短事务以及性能吞吐量等等。所以我们纳入了现在的四种事务模式，它们从改造成本、性能隔离性上各有所长，这里就不展开介绍了。&lt;/p>
+&lt;h2 id="三如何基于seata扩展rpc和数据库">三、如何基于Seata扩展RPC和数据库&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_7.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>首先看一下Seata开源社区这几年的发展。目前Seata已经具备了AT、TCC、Saga、XA四种事务模式，而且对于市面上主流的关系数据库，RPC框架做了广泛的支持，同时被许多第三方社区做了主动和被动集成。已经和三十多个社区做了集成，这些集成都放在我们的扩展机制里边。&lt;/p>
+&lt;p>目前多语言体系也做起来了，除了最开始的Java，Go语言支持的也非常成熟，欢迎大家去使用我们的Go版本，给我们提更多宝贵的建议。另外，我们还建建设了多语言版本，包括PHP、Python等等。&lt;/p>
+&lt;p>目前 Seata 开源产品已被上千家企业在业务系统中应用，金融企业纷纷试点。我们都知道金融类的业务对分布式事务是强需求，而且它的业务场景非常严苛。像中信银行、光大银行、农行我们也做了一些社区上的合作，改造一些他们的核心账务系统，用Seata保证他们账务体系的数据一致性。&lt;/p>
+&lt;p>目前Seata社区的Star数已经到达了24k，contributor有300+。并且Seata社区是非常开放的，现在整个Seata的框架代码有70%来自创始团队之外的外部贡献者，所以欢迎大家积极的参与到我们Seata社区里。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_8.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>接下来介绍一些Seata比较典型的企业案例。&lt;/p>
+&lt;p>第一个案例，中航信航旅纵横项目。中航信是Seata 最早的天使用户，用的是Seata 0.2版本。如果大家出差比较频繁，应该会用到它们的APP，航旅纵横。它解决机票和优惠券业务的数据一致性问题。虽然在早期的版本中陪我们踩了不少坑，但最终还是应用起来。&lt;/p>
+&lt;p>第二个案例，滴滴出行二轮车事业部。它在Seata 0.6.1版本就将 Seata 引入到了二轮车事业部的各个业务中，包括市面上大家看到青桔单车，还有他们内部的资产管理。&lt;/p>
+&lt;p>第三个案例，美团基础架构。美团基础架构团队基于开源 Seata 项目封装了内部分布式事务 Swan 项目，作为美团内部各业务解决分布式事务问题的组件。&lt;/p>
+&lt;p>第四个案例，盒马小镇。盒马小镇游戏互动中通过 Seata 控制偷花的流程，开发周期从20天下降至5天，大幅度减少了开发的成本。&lt;/p>
+&lt;p>综上可以发现分布式事务的两个价值。&lt;/p>
+&lt;ul>
+&lt;li>业务的正确性，因为只有数据一致了谈架构才有意义。&lt;/li>
+&lt;li>Seata大幅度提高了开发迭代的效率。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_9.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>上图是Seata生态的扩展点。最上层我们定义了API这一层，中间这一层包括注册、配置中心等等，下边是群的模式，包括基于关系数据库DB的，Redis的以及现在2.x里正在推广的rough模式，负载均衡也有各种模式，以及对于分布式锁扩展也是基于各种各样的模式。目前我们对于关系型数据库也支持的挺多的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_10.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>我们在做Seata机制的时候参考了Dubbo的机制，对我们的学习成长以及社区的成长还是非常有帮助意义的。我们把扩展点充分发挥到了极致，分为server侧的扩展点以及客户端的扩展点。客户端扩展点大概有30+个，server侧的扩展点包括锁的扩展、存储的扩展以及事务模式的处理。&lt;/p>
+&lt;p>从今天来看如果你去支持数据库、国产达梦、人大金仓，成本都比较低。只要按照我们的文档，按照API的扩展点去做简单的实践，就能把整个流程跑起来。另外，我们server不同的锁的存储，事务筛选的存储都是可以扩展的。这里我们也是借鉴了Dubbo去做了一些对开发者非常友好的扩展，让开发者更容易的扩展市面上的RPC框架以及数据库。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_11.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>目前我们支持了11中RPC框架，Dubbo是我们核心要支持的。我们类似于Dubbo，基于一般RPC都有fell或者ins。我们核心要做的是把Seata事物上下文通过服务调用链路给传递下去。并且把事物链路还原到服务里边去做事物的绑定、解除、清除等等，这个核心我们扩展起来还是比较容易的。&lt;/p>
+&lt;p>核心的话右边我们实现了一些接口，目前我们对Dubbo生态，包括老的阿里巴巴Dubbo以及Apache我们都做了充分的支持。欢迎大家在Dubbo的生态去适应一下Seata分布式事物去体验一下。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/seata/img_12.png" alt="dubbo-seata-分布式事务最佳实践">&lt;/p>
+&lt;p>目前Seata数据库支持MySQL、OceanBase、Oracle等等数据库，其中有一些PR还没有合并，比如达梦、IBMDB2。就像我刚才说的，我们只要基于当前的扩展点，我们就能做充分的扩展。&lt;/p>
+&lt;p>最近我们也是做仓库的编程之下，也是让我们眼前的同学感觉一下，它也做了一些PolarDB的支持，后边我们会对数据库的生态top 20完整的支持起来。&lt;/p></description></item><item><title>Blog: 基于 Triple 实现 Web 移动端后端全面打通</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%9F%BA%E4%BA%8E-triple-%E5%AE%9E%E7%8E%B0-web-%E7%A7%BB%E5%8A%A8%E7%AB%AF%E5%90%8E%E7%AB%AF%E5%85%A8%E9%9D%A2%E6%89%93%E9%80%9A/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%9F%BA%E4%BA%8E-triple-%E5%AE%9E%E7%8E%B0-web-%E7%A7%BB%E5%8A%A8%E7%AB%AF%E5%90%8E%E7%AB%AF%E5%85%A8%E9%9D%A2%E6%89%93%E9%80%9A/</guid><description>
+&lt;p>摘要：本文整理自陌陌研发工程师、Apache Dubbo PMC陈有为在 Community Over Code 2023 大会上的分享，本篇内容主要分为四个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、RPC 协议开发微服务&lt;/li>
+&lt;li>二、全新升级的 Triple 协议&lt;/li>
+&lt;li>三、Triple 协议开发微服务&lt;/li>
+&lt;li>四、Dubbo 为 Triple 协议带来治理能力&lt;/li>
+&lt;/ul>
+&lt;h2 id="一rpc-协议开发微服务">一、RPC 协议开发微服务&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说Apisix或者ShenYu等HTTP网关。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_1.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>上图展示的是我们的流程，但是存在一些问题。&lt;/p>
+&lt;p>如果我们的服务是非常轻的，我们只需要一个转发层，我们是不是很麻烦。无论是配网关还是起一个webserver去转发，肯定都很麻烦。&lt;/p>
+&lt;p>此外，RPC服务大部分都是基于二进制的，而二进制正常在本地是没法测试的。因此我们的公司内都可能就会开发一种后台或者中间的Process让我们去测试。但这个的前提是你至少得把它部署到测试环境，所以还是没法在本地测试。&lt;/p>
+&lt;p>总体来说，这两个问题的易用性比较低，且开发成本相对较高，因为要做一些重复劳动。&lt;/p>
+&lt;h2 id="二全新升级的-triple-协议">二、全新升级的 Triple 协议&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_2.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>基于上边的两个问题，我们来介绍一下Triple协议。&lt;/p>
+&lt;p>先来说一下上一代协议，它产出的原因是什么。我们应该都知道Dubbo原来是Dubbo协议，它是基于tcp的，它有一个包。因为它的包的设计，导致了网关无法做一些特殊规则判断、过滤等操作。但也不是绝对的，如果你愿意牺牲性能把包完全解出来，组装回去再透传还是可以做到的，但一般大家都不太能接受。&lt;/p>
+&lt;p>所以我们就在想能不能把原数据和真正的包分开。现在我们有现成的HTTP，又有一个业界主流的gRPC，所以我们的目标就是兼容gRPC。因为gRPC目前都是用IDL，而IDL有一个问题，尤其在Java侧。因为大家都是写一些接口，定义一些包去实现，这样就会非常麻烦。Go侧就还好，因为大家已经习惯了这种开发模式。&lt;/p>
+&lt;p>所以我们开发了Triple协议，首先它兼容了gRPC，所以我们能实现和gRPC的完全互通。其次，我们兼容了自己定义接口的方法。虽然会损失一定的性能，但提升了一些易用性。而且RPC一般不是业务的瓶颈，大多数瓶颈还是在DB。&lt;/p>
+&lt;p>但还有个问题，虽然我们兼容了gRPC，但gRPC是基于TPC的，所以如果前端或者其他第三方系统只有HTTP，它还是接受不了我们的系统。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_3.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>基于此，我们想推出一个全新的Triple协议。为了解决上述的所有问题，我们参考了gRPC、gRPC Web、通用HTTP等多种协议，做到浏览器访问，支持Streaming，还支持同时运行在 HTTP/1、HTTP/2 协议上。因为目前HTTP/3还没有大规模推广，未来也会支持HTTP/3。&lt;/p>
+&lt;p>最终的设计实现是完全基于HTTP的，且对人类、开发调试友好。我们可以通过简单的浏览器访问或者curl访问，尤其是对unary RPC。此外，我们和gRPC是完全互通的，用HTTP的业务不用担心兼容性的问题，也不用担心签协议的问题。为了稳定性，我们只会采用业界流行的网络库，比如Java的netty、Go的基础的net包。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_4.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>虽然Triple协议和gRPC协议都基于HTTP，但gRPC是基于HTTP/2的，而Triple是基于HTTP/1和HTTP/2的。&lt;/p>
+&lt;p>我们在进入gRPC的同时，我们为了易用性扩展了一些功能。比如请求里我们支持application Json，curl访问，此外上一版的协议，为了支持传统定义接口的方式，我们有一个二次序列化的过程。我们想在这里通过一个特殊的tag来决定我们的body的结构，解决二次序列化的问题。同时这个东西是可以扩展的，理论上HTTP的所有future我们在Triple协议上都可以实现，也可以拓展。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_5.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>用了Triple协议之后，我们的开发流程也发生了改变。如果你不需要进行组装，或者没有外层的代理，可能你的接入流程就是从外部的请求浏览器、对方的服务器、curl、自己测试等直接到了server。&lt;/p>
+&lt;p>和其他的gRPC的通信也是没有问题的，流程就相当于少了一层。对于大多数用户，如果你不需要这个场景，其实是有很大的好处。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_6.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>Triple协议因为最开始兼容gRPC，那个时候只基于HTTP/2，HTTP/2有Streaming的能力，所以它天然支持Streaming。但这里比较特殊的是，我们新版的协议在HTTP/1也支持了Stream，但仅支持了Server Stream。也就是客户端发一个，服务端发好几个回去，这个HTTP/1的Server Push实现的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_7.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>Client Stream和Bi Stream就没什么可说的了。但有一个特别的是，在Java侧没有Bi Stream，从编码上就没有，但从实现上是有的。&lt;/p>
+&lt;h2 id="三triple-协议开发微服务">三、Triple 协议开发微服务&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_8.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>目前Triple协议比较灵活的支持两种定义方式，分别是IDL定义和直接定义。直接定义支持同步、异步、手写。还有比较极端一点的，比如在自己定义接口的时候用IDL生成probuff的类，我们不定义它的service，只用它的接口也是没问题的，它会自动识别接口使用pb还是不使用pb。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_9.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>Server就是把它的务实现一下。上图是一个例子，我就直接拿了API的组装方式，真正的业务上可能是注解或者XML的方式。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_10.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>因为我们支持了HTTP这个标准的协议，理论上我们的测试就会变得很简单。&lt;/p>
+&lt;p>因为我们支持gRPC，所以我们可以用gRPC curl去调用我们的服务。但前提是你得有反射服务，然后手动开启一下，它不是默认开启的。然后它就可以通过反射拿到接口的源数据，通过Json转成pb格式发过去。或者我们直接用Application Json的方式直接调过去。这里有一点比较特别的是在HTTP/1下我们也可以用Sream。&lt;/p>
+&lt;p>另外，因为我们支持HTTP，理论上所有第三方的HTTP客户端都是可以调用的。然后我们的admin也可以进行测试，前提是你得把它注册上。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_11.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>调用端不管是POJO还是IDL，它们都没有本质的区别。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_12.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>现在我们有了Triple协议，但如果这个协议没有承载方也是行不通的。因此我们还得有一个框架，有一些服务治理才是我们的微服务。所以服务治理也是微服务中不可或缺的一部分。&lt;/p>
+&lt;h2 id="四dubbo-为-triple-协议带来治理能力">四、Dubbo 为 Triple 协议带来治理能力&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_13.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>Triple的定位只是Dubbo里的其中一个协议，当然你也可以为了兼容性，用原来的Dubbo协议或者其他的协议。而且我们支持在同一个端口上开多个协议，可以按需选择。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_14.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>同时Dubbo 为 Triple 提供了多语言的实现。目前会在Rust、Go、Java、JS、node、Python这几部分实现官方的实现。这样用户就不用自己根据实验协议的spec去实现了。如果你有一些定制需求，比如内部的一些框架，你根据spec实现也是可以的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_15.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>Dubbo和服务框架集成的很好，理论上在开发流程中，尤其是在Java侧服务定义、服务治理、服务注册发现等都不用客户来操心，是开箱即用的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_16.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>Dubbo 提供了丰富的生态，第三方的生态包括Nacos、Zookeeper等等，我们不用创新，直接引入相应的包即可。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_17.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>这是我们使用Triple协议服务注册的例子。上面你可以选Nacos、Zookeeper、K8s，左边是一个Client和一个Server，这么调用。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_18.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>我们在admin上看一下实现。这里提一句，我们的admin也在新版重构，是用Go实现的，大家可以期待一下。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/triple/img_19.png" alt="dubbo-triple-协议">&lt;/p>
+&lt;p>我们经常会遇到灰度发布或者流量染色的需求。我们可以从admin上发一个tag下去，把一些实例打上tag，然后这个流量从入口就会挨个下去。&lt;/p></description></item><item><title>Blog: 启动速度提升10倍：Apache Dubbo 静态化 GraalVM Native Image 深度解析</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E6%8F%90%E5%8D%8710%E5%80%8Dapache-dubbo-%E9%9D%99%E6%80%81%E5%8C%96-graalvm-native-image-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E6%8F%90%E5%8D%8710%E5%80%8Dapache-dubbo-%E9%9D%99%E6%80%81%E5%8C%96-graalvm-native-image-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid><description>
+&lt;p>摘要：本文整理自杭州有赞科技有限公司中间件技术专家、Apache Dubbo PMC华钟明在 Community Over Code 2023 大会上的分享。本篇内容主要分为五个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、GraalVM 直面Java应用在云时代的挑战&lt;/li>
+&lt;li>二、Dubbo 享受 AOT 带来的技术红利&lt;/li>
+&lt;li>三、Dubbo Native Image 的实践和示例&lt;/li>
+&lt;li>四、Dubbo 集成 Native Image 的原理和思考&lt;/li>
+&lt;li>五、Dubbo 在 Native Image 技术的未来规划&lt;/li>
+&lt;/ul>
+&lt;h2 id="一graalvm-直面java应用在云时代的挑战">一、GraalVM 直面Java应用在云时代的挑战&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>云计算时代比较显著的特点包括：&lt;/p>
+&lt;ul>
+&lt;li>基于云计算的基础设施，Java应用能够在云计算的基础设施上快速、轻松、高效的做到弹性。&lt;/li>
+&lt;li>基于容器化技术，系统资源切分的更加细，资源的利用率也更高了。&lt;/li>
+&lt;li>基于云计算的开发平台，让应用部署的更加容易，更加敏捷。&lt;/li>
+&lt;/ul>
+&lt;p>那么在云计算时代，Java应用存在哪些问题呢？&lt;/p>
+&lt;ul>
+&lt;li>冷启动速度较慢。&lt;/li>
+&lt;li>应用预热时间过长，无法立即达到性能峰值。&lt;/li>
+&lt;li>内存、CPU等系统资源占用高。&lt;/li>
+&lt;li>Java构建的应用程序繁重，执行还需要具备JDK环境。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_1.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>在Serverless场景上，Java的问题会尤为突出，因为Serverless不仅能简化开发场景和开发体验，还能做到极致的弹性，甚至是秒级的弹性。&lt;/p>
+&lt;p>上图是Datalog统计的Fast和AWS两个产品。Java语言虽然更流行，但相较于Python和Node.JS，它的占比还是比较低的。Java本身在Serverless层面，比如在做容器的调度、镜像的下载的时候，启动时间、冷启动的时间、预热时间等等，都会影响Serverless场景下它弹性扩容的时间。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_2.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>下面介绍一下GraalVM，它是可以把Java应用提前编译到独立的二进制包内，这些二进制包相对于跑在JVM上它可以更小，更快的启动，不需要预热就能够达到极限的峰值，还可以减少内存和CPU的占比。&lt;/p>
+&lt;p>可以看到它的介绍和Java语言的应用所涉及到的问题都一一对应。GraalVM应该算是JDK的&amp;quot;超集&amp;quot;，除了包含完整的JDK发行版本外，还有GraalVM Compiler、Native image、Truffle等，甚至还涉及到多语言汇编的能力。&lt;/p>
+&lt;p>总结一下，GraalVM本身涉及两部分，JIT和AOT。&lt;/p>
+&lt;ul>
+&lt;li>JIT，是在编译后的class文件、字节码文件，它会在运行时把它翻译成机器码。&lt;/li>
+&lt;li>AOT， 它和JIT的区别是，它在编译期就能把字节码直接转化为机器码，无需在运行时再去处理。所以它的CPU和内存会相对更低。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_3.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>上图左侧是一张Java生命周期的全景图。可以看到，它从JVM的启动，再到Java的main函数的启动，再到Java的应用预热，再到它的稳定期，最后到达效果，这是Java完整的生命周期的呈现。&lt;/p>
+&lt;p>而AOT的区别在于，它没有红色的VM。另外，JIT相对于AOT而言是没有的，也没有浅绿色的解释器。所以AOT对于JIT来说，只有内加载，GC以及它能够瞬间达到应用的稳定期。&lt;/p>
+&lt;p>根据右侧的图可以看出：&lt;/p>
+&lt;ul>
+&lt;li>AOT的启动耗时相对较低，内存损耗和它打出来的二进制包相对较小。&lt;/li>
+&lt;li>JIT因为有及时编译的效果，所以现在极限的分值比AOT要好，比如它的极限吞吐量比AOT好。&lt;/li>
+&lt;/ul>
+&lt;h2 id="二dubbo-享受-aot-带来的技术红利">二、Dubbo 享受 AOT 带来的技术红利&lt;/h2>
+&lt;ol>
+&lt;li>多产物形态&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_4.png" alt="dubbo-graalvm-native-image.png">&lt;/p>
+&lt;p>我们在编码之后，Soft Code的产物形态新增了。&lt;/p>
+&lt;p>第一种是我们传统认知上的Jar包形态，比如mvn、clean、package。第二种是Docker Image，它能轻松的帮我们直接打到镜像里面去，不用写dockerfile等文件。第三种是我们集成GraalVM后新产生的一种Native可执行文件的形态。这种形态无需JDK的环境就能启动，它能像GO一样把二进制文件直接启动。&lt;/p>
+&lt;ol start="2">
+&lt;li>启动耗时大幅降低&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_5.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>上图的跑分都是基于4c16g的micro24的系统上跑出来的。左边和右边的区别是，左边的Provider端提供了一个Dubbo服务跑出来的，右边是提供了一个调用者的身份跑分出来的。从左边这张图可以看到，Native的可视性文件比Jar包方式的启动耗时降低了12倍+，在客户端应用，它的启动耗时降低了11倍+。所以在刚刚提到的Serverless场景上，它能提供一个非常好的启动速度。在扩容的时候能够达到秒级，甚至达到毫秒级。&lt;/p>
+&lt;ol start="3">
+&lt;li>启动后立即达到性能峰值&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_6.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>上图也是跑分跑出来的数据，可以看到Consumer和Provider端通过静态化执行文件执行后，比都为Jar包的情况，第一次调用的耗时降低6倍。这第一次调用代表的是预热的时长，以及第一次需要解析的类，包括资源的情况等等。这让我们在Serverless场景下能够瞬间达到性能峰值。&lt;/p>
+&lt;ol start="4">
+&lt;li>内存损耗大幅降低&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_7.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>上面有左右两张图，在Dubbo应用的基础上，它的内存损耗也降低大概3.5倍。Native静态化执行文件可以做到60M的内存占比，在客户端它的内存损耗也大概降低了4倍。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_8.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>这是Dubbo在Native Image技术场景中做的努力：&lt;/p>
+&lt;ul>
+&lt;li>易用性增强：在注解和XML方式中自动识别服务接口，生成Reachability Metadata。&lt;/li>
+&lt;li>可维护性增强：自动生成Source code，减轻了Dubbo开发者维护Adaptive的维护成本。自动扫描生成Dubbo core 所需的Reachability Metadata。&lt;/li>
+&lt;li>多平台的支持：Linux、MacOS、Windows。&lt;/li>
+&lt;li>多功能的覆盖：Dubbo、Triple协议。&lt;/li>
+&lt;/ul>
+&lt;h2 id="三dubbo-native-image-的实践和示例">三、Dubbo Native Image 的实践和示例&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_9.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>首先需要安装Dubbo Native Image，这里就不过多介绍了，大家可以根据官方的文档进行下载。&lt;/p>
+&lt;p>然后安装插件，可以看到上图中有三个插件需要安装，但和Dubbo相关的只有一个，是Dubbo Maven Plugin。除此之外，还有Spring Boot 的Maven Plugin，它提供的是Spring的AOT的能力。如果是API的接入方式我们无需加这个插件，如果是XML和注解就还需要加这个插件。第三个是GraalVM提供的插件，可以看到这里加了一个reachabilitu-metadata的执行，这个后面会介绍到。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_10.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>然后配置依赖，现在Dubbo关于可达性元数据的扫描、执行，以及配置文件和Source code的生成都在Dubbo Native的依赖下面，我们需要引入这个依赖。&lt;/p>
+&lt;p>另外，注解和XML的还是需要接入一个Spring6的兼容的包。因为Dubbo现在还兼容JDK 8的版本，而Spring6发布后支持的最低版本是JDK 17，所以我们还是需要有这么一个模块做一下兼容。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_11.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>最后还需要加一个插件和依赖，然后就能轻松的把应用转化成Native Image的形式。&lt;/p>
+&lt;p>最下面是完整的代码示例，大家感兴趣的话，可以尝试一下编译打包，看一下执行的效果。&lt;/p>
+&lt;h2 id="四dubbo-集成-native-image-的原理和思考">四、Dubbo 集成 Native Image 的原理和思考&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_12.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>首先看一下Dubbo集成GraalVM Native Image技术的发展历程。2021年6月我们发布了Dubbo 3.0版本，初步探索了Native Image技术，提供了一个实验性的版本和Demo，涉及到的问题包括以下三个。&lt;/p>
+&lt;ul>
+&lt;li>维护繁重的Adaptive源码、维护Dubbo所需的全量Reachability Metadata。可能涉及到的问题是，比如要新增一个功能，我们需要考虑coding以及code review的时候是否要添加可达性的元数据，这也会造成维护成本非常高。&lt;/li>
+&lt;li>仅支持API方式，不支持注解和XML方式。&lt;/li>
+&lt;li>dubbo-native-plugin的插件，在后面3.1版本的时候，Native Image的发展并不多。&lt;/li>
+&lt;/ul>
+&lt;p>2022年11月Spring6+Spring Boot3正式发布了，它把Native Image技术作为发布的亮点展现给大家。但Dubbo社区认为我们应该对Native Image技术有一个新的跨越，所以在2023年4月发布了Dubbo 3.2版本，将Native Image技术进行了思考和重构。支持以下四个方面：&lt;/p>
+&lt;ul>
+&lt;li>编译阶段自动生成Adaptive源码，已经不需要开发者维护了。&lt;/li>
+&lt;li>支持编译阶段自动生成Dubbo所需的Reachability Metadata。减小了打在业务启动的可执行文件里包的大小。因为在之前的版本里，它是把Dubbo所涉及的全量的可达性的元数据都打在二进制包里。比如业务用jka作为注册中心，我们把nacos也打在那里面，这就会导致它的二进制包非常大。现在这个版本如果用到jka，我们在box上解析不到nacos相关的依赖。所以我们就不会再把相关的内容打进去了，而且现在都是自动识别的。&lt;/li>
+&lt;li>新增dubbo-maven-plugin，用于替代dubbo-native-plugin。因为dubbo-native-plugin的能力和内容是比较聚焦的，我们把它重新归名为dubbo-maven-plugin后，涉及到的是我们能够降低业务接入的心智负担。后面Dubbo相关的maven插件，都通过它来做就行了。&lt;/li>
+&lt;li>兼容了Spring6+Spring Boot3，这就是我们在下个版本把XML和注解支持上去的技术的基础。&lt;/li>
+&lt;/ul>
+&lt;p>2023年12月将会发布Dubbo 3.3x版本。它基于Spring6，完成对XML和注解方式的支持，还移除了dubbo-native-plugin。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_13.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>刚刚提到了非常多次Reachability Metadata可达性的元数据，到底是什么呢？&lt;/p>
+&lt;p>我们先来聊一聊AOT的局限性，它本身就有局限，它遵循封闭世界的一个假设。比如它只关注能看到的所有字节码的信息，这就会带来一个问题，Java动态语言的功能就不再支持了。也及时说JNI、Java反射、动态代理、ClassPath资源的获取等都不再支持。&lt;/p>
+&lt;p>我们知道，在组件/业务开发/使用产品上涉及到的这些功能是非常多的，既然GraalVM出了这个功能，当然也考虑到了这个问题，所以它利用Reachability Metadata的能力解决了这些问题。&lt;/p>
+&lt;p>右边的这张图分为了五类，它涉及到了JNI、反射、序列化、resource、proxy相关的元数据的配置信息。它可以让开发者在编译前就提供好这些元数据信息，提前打包到可执行的二进制文件中。还有第六种分类，是预定义的类型，他需要提供完整的字节码Hash值，所以就没列出来，它可能需要和Tracing的agent联合起来使用。&lt;/p>
+&lt;p>下面我们主要介绍一下这五类。&lt;/p>
+&lt;p>第一，GraalVM 提供了Tracing Agent来辅助应用采集Reachability Metadata，也就是说在运行期间它会去采集你的行为，比如你要用到反射，他会把反射的元素自动生成出来，然后生成出一个配置文件提供给你。但是并无法确保把所有都采集完整。&lt;/p>
+&lt;p>第二，GraalVM提供了Reachability Metadata Repository，用于管理三方组件的Reachability Metadata。我们在Java反射、动态代理这种纯业务的场景，用的相对较少，在运用到组件中相对多一点。举个例子，比如Native里用到反射，我们可以在仓库中直接找到Native反射的metadata。然后通过刚刚提到三个插件中的Native自身提供的插件,它会把仓库里的元数据直接打在二进制包里，我们也就不需要关心这些公共组件的元数据信息了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_14.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>和Dubbo相关的元数据信息包括以下五类：&lt;/p>
+&lt;p>第一，反射的元数据。&lt;/p>
+&lt;ul>
+&lt;li>内外部的service。我们知道Dubbo是rpc框架，所以定义服务接口是最通用的一种能力。内部提供的服务包括metric service、metadata service，用户服务就是业务定义的服务接口。&lt;/li>
+&lt;li>SPI扩展。Dubbo的扩展能力得益于自己建的一套SPI机制。&lt;/li>
+&lt;li>多实例。&lt;/li>
+&lt;li>配置相关的内容。&lt;/li>
+&lt;li>业务上自己用到的反射的行为。&lt;/li>
+&lt;/ul>
+&lt;p>第二，resource的元数据。如果业务上要做扩展，配置文件，resource的元数据主要涉及的就是META-INF下的三个路径。此外，还有一个是在Dubbo 3里支持对安全性的增强，序列化的黑白名单的resources的配置。&lt;/p>
+&lt;p>第三，序列化的元数据。作为rpc调用的框架，它的接口定义、方法定义、内外部分的服务、parameter、请求参数、返回类型等都需要用到序列化的接口。&lt;/p>
+&lt;p>第四，动态代理的元数据。在传统的rpc框架里动态代理是用的比较多的产品。内外部分服务的引用就是代理的元数据。&lt;/p>
+&lt;p>第五，JNI的元数据，暂时没有用到。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_15.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>这是Dubbo 相关的 Reachability Metadata 总结和处理策略，我们把它分为了四类。&lt;/p>
+&lt;ul>
+&lt;li>规律性的内容，是刚刚提到的Adaptive Source Code的生成。&lt;/li>
+&lt;li>确定性资源和行为，是Dubbo内部的扩展以及资源的配置。&lt;/li>
+&lt;li>不确定性的资源和行为，是业务自定义的扩展实现以及定义的服务。&lt;/li>
+&lt;li>集成和依赖的组件，比如刚刚提到jka是其他社区的生态，它涉及到注解的元数据信息，我们会提供官方的支持，还会提供内部的适配逻辑。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_16.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>这是AOT的执行流程。可以看到它的源码在编译之后，它的区别是它会从main函数开始启动Java应用进程，然后去找所有的source code和Bean的元数据信息。&lt;/p>
+&lt;p>下面是Spring Server自动生成的一个source code，它会把它生成一个Bean定义的获取的类。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_17.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>而Dubbo并不是从main函数启动的，它启动了一个扫描的进程，把确定性的、不确定性的元素以及规律性的内容扫描进来，自动帮大家生成元数据信息。&lt;/p>
+&lt;p>下面是用Dubbo service生成后的一些信息。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_18.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>上图是Spring本身提供的一个产物的内容以及Dubbo的AOT产物的内容。可以看到Dubbo下面是Adaptive的一些source code。最后Native在执行的时候会读取到这里所有的配置。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_19.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>这是Dubbo和AOT之间的边界，可以看到API的接入方式和注解、XML的接入方式是有所区别的。注解和XML借用了Spring AOT的能力，包括ServiceBean、ReferenceBean等等，而Dubbo AOT的能力主要是自身的元数据的生产。&lt;/p>
+&lt;h2 id="五dubbo-在-native-image-技术的未来规划">五、Dubbo 在 Native Image 技术的未来规划&lt;/h2>
+&lt;ol>
+&lt;li>提升开发者体验&amp;amp;开发效率&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_20.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>Dubbo在3.0之后提供了CTL、脚手架、IDEA插件，Dubbo Native Image目前还在建设中，之后也会加进去。此外，还有一些文档的建设。&lt;/p>
+&lt;ol start="2">
+&lt;li>性能优化与提升&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_21.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>刚刚已经分享了很多内容，但还是有很多可以做的事情。在GraalVM提供的能力上，我们还可以把一些类相关的可达性的配置加上去，产生作用之后能让最后打出来的二进制包更小，编译时间更短。&lt;/p>
+&lt;ol start="3">
+&lt;li>覆盖更多的组件&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_22.png" alt="dubbo-graalvm-native-image">&lt;/p>
+&lt;p>因为目前很多组件都还不支持，所以我们现在的主要思路是把Dubbo主仓库的扩展性支持完成，然后再往wpi的扩展上做相应的支持。&lt;/p>
+&lt;p>另外，内核所需要的可达性的元数据，我们会把它推到program的可达性的元数据的仓库上面去，让业务开发能够正常使用大陆内核里的元数据信息。&lt;/p>
+&lt;p>最后我们的思路还是优先考虑GraalVM官方的支持。&lt;/p></description></item><item><title>Blog: 手把手教你部署Dubbo应用到Kubernetes – Apache Dubbo Kubernetes 最佳实践</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E9%83%A8%E7%BD%B2dubbo%E5%BA%94%E7%94%A8%E5%88%B0kubernetes-apache-dubbo-kubernetes-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E9%83%A8%E7%BD%B2dubbo%E5%BA%94%E7%94%A8%E5%88%B0kubernetes-apache-dubbo-kubernetes-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</guid><description>
+&lt;p>精进云原生 – Dubbo Kubernetes 最佳实践&lt;/p>
+&lt;p>摘要：本文整理自阿里云研发工程师、Apache Dubbo PMC江河清的分享。本篇内容主要分为六个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、使用 Dubbo Starter 初始化项目&lt;/li>
+&lt;li>二、开发微服务之协议选型&lt;/li>
+&lt;li>三、基于 Kubernetes 快速初始化环境&lt;/li>
+&lt;li>四、快速部署应用到 Kubernetes 集群中&lt;/li>
+&lt;li>五、云原生微服务可观测最佳实践&lt;/li>
+&lt;li>六、在 Kubernetes 中管理微服务应用&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上图是从 Istio 借鉴的一个demo，它包含了四个组件，分别是Product Page、Reviews、Details、Ratings，它就是一个全链路的串联，实现了整体的微服务架构，它的功能可以实现我们简单的调用。&lt;/p>
+&lt;h2 id="一使用-dubbo-starter-初始化项目">一、使用 Dubbo Starter 初始化项目&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_1.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>首先介绍一下Starter的功能。对于很多开发来说，在Java体系下创建出新的应用，无外乎就是用IDE创建一个新的项目，或者用maven的artifact，或者基于Spring的Initializer。&lt;/p>
+&lt;p>上图使我们基于Spring的Initializer建立了我们自己的初始化项目的工程。我们点击最上面的网址就能直接看到这个页面了，你需要输入对应的group和artifact。然后选择你希望用到的组件，比如Nacos、Prometheus的组件等等。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_2.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>除此之外，我们在IDE里提供了一个Dubbo的插件。这个插件可以通过上图的方式进行安装，或者如果你的仓库里已经用到了Dubbo的配置，它会提示你可以直接安装。安装完成后在右边就会有一个对应的初始化的项目了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_3.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上图是一个示例，它在这里建立了一个Dubbo的项目，然后你需要在这里选中所需要的组件信息，最后点击创建，之后它就会帮你在本地直接创建出一个全新的项目，然后你就可以在这个模版上开发了。&lt;/p>
+&lt;h2 id="二开发微服务之协议选型">二、开发微服务之协议选型&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_4.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>我们会用到最新的Triple协议，它整体支持兼容gRPC、HTTP/1、HTTP/2。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_5.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这里主要想和大家分享的点是，我们基于curl访问的能力，比如POSTMAN、HttpClient都是支持的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_6.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>下面来看一下我们的项目，这是刚才建立的一个项目，我现在把应用启动起来，配置一些注册中心的地址，这就是一个标准的Spring的启动的流程。这里定义了一个接口，这个接口返回了一个&amp;quot;hello&amp;quot;的内容信息。然后我用一个简单的命令，就可以直接返回我的hello world的结果了。这样对我们本身的测试来说有很大的帮助，也就是本地启动之后，就可以直接测试接口。&lt;/p>
+&lt;h2 id="三基于-kubernetes-快速初始化环境">三、基于 Kubernetes 快速初始化环境&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_7.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>假设我们已经把前面四个应用的代码全部开发完成了，接下来我要把它部署到K8s环境上。部署之前有一个非常重要的步骤，需要先初始化环境。比如Nacos、ZK、Skywalking、Zipkin、Prometheus等组件，我们都需要将它们安装上去，因为它们是应用前置依赖的各种组件。这些组件的安装流程都很复杂，那么我们如何简化这个流程呢？&lt;/p>
+&lt;p>Dubbo提供了一个命令，这个命令可以一键帮你在K8s体系下拉起上图左边的所有组件。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_8.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这里有一个简单的例子，拉起来之后，它会把所有的组件都会帮你拉起来。这里埋一个点，这里的Prometheus我们后面还会继续使用。整个Nacos的地址，Zookeeper的地址都会直接提供给你。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_9.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这也是一个的例子。执行一个简单的命令，然后本地会把kubectl的配置都准备好，它就会自动的帮你把组件都创建起来。也就是我们一键就可以获取到所有service的部署。&lt;/p>
+&lt;h2 id="四快速部署应用到-kubernetes-集群中">四、快速部署应用到 Kubernetes 集群中&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_10.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>部署应用有三个重要的点，分别是应用容器化、无状态部署、生命周期对齐。&lt;/p>
+&lt;p>首先介绍一下应用容器化。想要将应用容器化，首先需要建一个dockerfile，引入一个jdk的包，把启动命令和启动脚本拉进去。然后还要写一个Java的编译的脚本，把Java编译的jar包结果拉进去。这个过程非常复杂，所以我们可以用一下Jib的插件。这个插件是maven的一个plugin，我只需要把这些配进去，指定成我的Image就足够了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_11.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>可以看到，我只需要把我的pom里添加一个对应的配置项依赖，通过一键maven的编译模式，它就可以在maven打包的过程中帮你构建完镜像，然后直接推送到远端仓库。这一切都只需要这一个命令就可以完成，而且一次性配置之后，未来你所有的镜像更新都可以自动化的去做，不需要再去写繁琐的dockerfile。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_12.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>其次介绍一下无状态部署。刚才我们把镜像打出来了，这只是第一步，紧接着我们要让镜像run起来。我们可以基于K8s的deployment的模式，它是从K8s的官网上直接拉下来的。拉下来之后我们可以指定对应的应用名、镜像信息等等，这是K8s无法绕过去的，相对于说它需要配置这样的一个demo，当然也会有云厂商平台提供一个可视化的界面给你，它的底层配置的就是这样的一个yarml。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_13.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这是一个简单的例子，把deployment配置完之后，指定了刚才的镜像。同时我声明了一个service，这个service非常重要，它后面会作为from_end应用入口的配置，但它是一个Ingress网关。可以看到apply镜像之后，我们就可以在K8s体系上把这个环境run起来了。&lt;/p>
+&lt;p>这里做一个简单的测试，我引入一个curl的容器，同样我们可以用刚才curl的命令访问我新部署好的容器节点，可以看到它返回了hello world的数据信息。&lt;/p>
+&lt;p>综上，我们通过deployment的部署，可以在K8s上把容器run起来，同时它还可以对外提供服务，对外提供的服务我可以通过下面curl的命令进行调用。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_14.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>最后介绍一下生命周期对齐。整体部署上了之后，大家都会进行多Pod部署，所以就会涉及到分批的行为。如果现在分了两批，且我希望我的业务中间是不中断的，这个时候就需要让K8s帮我们进行分批处理。因为K8s只知道进程起来了，所以我们需要让K8s感知到这个应用当前的状态是否startup了。然后还需要让K8s知道是否ready，以及是否存活。这是K8s提供的流程，那么怎么和Dubbo的流程相匹配呢？&lt;/p>
+&lt;p>上图右侧有一些Dubbo原生提供的ports信息，我们会对外发布这样的Dubbo的状态信息，可以让你和K8s的生命周期完整的对齐。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_15.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上图是一个例子。在整个应用启动的时候，这里sleep了20秒，然后配置了对应的Pro信息。&lt;/p>
+&lt;p>我们简单推测一下，我在前面设置了等待20秒，那么我的应用肯定要超过20秒才能起来。因为修改了代码，所以这里需要重新编译一下，用一键maven的编译模式直接推上去。接下来要把deployment apply进去，进去之后Pod的状态全都是not ready的，都是零的状态。&lt;/p>
+&lt;p>因为前面sleep了20秒的时候，Dubbo还没启动完，所以都是not ready的状态。我们等sleep的阶段过了，它就会变成ready的状态，然后再进行分批这就是生命周期对齐的过程。&lt;/p>
+&lt;p>所以K8s知道应用什么时候启动成功了，什么时候启动失败了，才能进行更好的调度。&lt;/p>
+&lt;h2 id="五云原生微服务可观测最佳实践">五、云原生微服务可观测最佳实践&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_16.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>部署上去之后，我们还会涉及到整个应用的可观测。因为我们的应用可能部署了非常多节点，我需要感知应用的状态。&lt;/p>
+&lt;p>可观测体系包括Metrics体系和Tracing体系。Metrics体系包括几个指标，比如谷歌的四个环境指标，延迟、流量等等。对应到Dubbo，会提供QPS、RT等等指标，它都是在这样体系下的Metrics的最佳实践。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_17.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>前面在部署初始化环境的时候，提了Prometheus的服务，现在就有用了。当我把Prometheus环境部署完之后，我们只需配置几行简单的Metrics采集信息。然后Prometheus就会帮你在你的节点上面采集很多的Metrics信息，然后得到右边的panel信息，这个panel也是Dubbo官方提供的，可以直接看到Dubbo的状态信息。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_18.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>上面是一个演示的例子。我们在前面的deployment的例子上加上Metrics的采集信息，然后把它apply进去之后，我们就可以用整个Grafana导出过来。跑了一段时间之后，就会有对应的流量信息，比如QPS信息、RT信息、成功率等等。&lt;/p>
+&lt;p>得到这些指标后，我们还可以做一个告警。比如QPS从100突然跌到了0，或者成功率突然跌了很多，这种情况我们需要做一个警示，让大家知道当前发生的问题。我们可以基于Prometheus采集，做一个主动的推送，这就是告警的过程。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_19.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>Tracing包括内置的Tracing、agent注入的方案。目前主流的Go语言和其他语言大多都会用sdk依赖一个open去做一个Tracing。因为Go构体系下的agent注入也不太完善，Dubbo本身也提供了默认Tracing的能力支持。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_20.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>大家可以看到，在这里你只需要依赖dependency里面加上Dubbo的starter，配置项里把Tracing能力打开，开启一个指标的上报，9411是我们Zipkin的一个后端。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_21.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这也是一个例子，我只需要配置这些配置，它的数据就会报到Zipkin上去，这里的dependency直接加上。&lt;/p>
+&lt;p>同样的，用刚才的命令进行打包，把镜像推送上去，然后我们等待一下。推送的过程中可以看一下Zipkin这个组件，它也是在最前面我们在K8s初始化环境的时候一起拉起的，所以这一切你只需要在前面一次性部署的时候就可以拥有了。&lt;/p>
+&lt;p>然后我们简单的执行一个curl命令，因为我需要让我的环境有流量。部署完之后，用curl命令还是执行一下我们的获取，这个其实已经把后端开发完了，它返回了真实的结果。&lt;/p>
+&lt;p>接下来我们去Zipkin上看看能不能找到这条Tracing。首先把9411映射过来，我们可以看到curry一下，这里就会有对应的指标信息。整个全链路的调用信息这里都可以看到，这就是全链路的接入的流程。相当于你只需要把前面的dependency加上，把上报的配置加上，之后的一切我都会帮你在后面完成以及上报。你看到对应的结果，就可以知道全链路上发生了什么事情。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_22.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>除此之外，还可以基于agent的方式。如果我们基于K8s部署，我们接入一个agent也是非常方便的。你可以基于一个initContainer把整个Java的配置项信息直接注入进去，这样在skywalking上就可以看到一个对应的全链路的信息。因为和前面是类似的，这里就不再赘述它的demo的工程了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_23.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>对于整个可观测来说，我们可以通过Metrics看到QPS、RT等信息，通过Tracing看到全链路的访问信息。这里提供给我们一个很好的方案，就是我们要先去做服务的观测，基于服务的观测更好的排查整体的问题，第一时间知道应用挂没挂。比如半夜两点，它的可用率跌到零了。这个时候可以通过一系列的自动化机制告诉你应用出了问题，快速的进行恢复。这里的快速恢复可以使用回滚，将流量隔离的方案他都可以快速的执行。&lt;/p>
+&lt;p>基于这样快速的从观测到排查，再到快速恢复的链条，可以构建整个生产环境下的安全稳定的体系。所以我们观测完之后的目标就是保证整个应用的稳定。&lt;/p>
+&lt;h2 id="六在-kubernetes-中管理微服务应用">六、在 Kubernetes 中管理微服务应用&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_24.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>K8s给我们带来的收益包括快速扩缩容，即我可以很快的基于K8s从一个Pod变成多个Pod。因为K8s是基于整个Image的部署的流程，当镜像打包出来后，你的环境就是固定的，只需要去横向的扩容即可。&lt;/p>
+&lt;p>横向的快速扩容也会涉及到几个瓶颈的点，如果我需要让我的应用能够快速扩容，比如我的应用提起来就要几十分钟，这种情况即使快速扩容了，等扩容完之后你的业务峰值也过去了，这里就会引入到Native Image。&lt;/p>
+&lt;p>基于Native Image，我们可以很好的实现整个Serverless的横向的扩容。如果可以实现毫秒级的启动，我可以在流量来的波峰，直接让我的Pod横向扩容好几倍，当它的流量下去的时候就直接下掉，这样就实现了成本的压缩。&lt;/p>
+&lt;p>另外还有一个问题是怎么知道什么时候要扩容？这就需要基于Metrics的观测，基于一些历史数据的分析，知道在某个时间点会有多少的流量，然后提前扩容，或者做一个自动化的扩容。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_25.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这里我举一个简单的例子，比如我的rating上出了一些问题，我需要把它的故障摘除掉，返回一个磨合的结果。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_26.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>这个时候你只需要在上面去配置一个上图的规则，它就会返回。这就是Admin的使用流程，这里就不再展开了，还有刚刚提到的我们在做Go版本的重构能力，后面也都会有更好的建设。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/kubernetes/img_27.png" alt="dubbo-kubernetes-最佳实践">&lt;/p>
+&lt;p>除此之外，基于 istio的Service Mesh治理，我们前面协议选型的时候选了Triple协议，它完全是based on HTTP标准的。因此我们使用istio的整个体系之后，你只需要挂上subcard它就会帮你去做流量治理。这一切的前提是你的协议一定是istio可见的。&lt;/p>
+&lt;p>比如你原来用是Dubbo 2的Dubbo的协议，它是一个私有的tcp协议，对于istio来说它很难分辨你的协议内容。如果你用了Triple协议，我们可以基于HTTP标准，你就可以知道你的header里有什么东西，可以去做一个流量的转发。所以它完全拥抱Mesh的体系，可以支持我们所有istio的治理能力。&lt;/p></description></item><item><title>Blog: 政采云基于Dubbo的混合云数据跨网实践</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E6%94%BF%E9%87%87%E4%BA%91%E5%9F%BA%E4%BA%8Edubbo%E7%9A%84%E6%B7%B7%E5%90%88%E4%BA%91%E6%95%B0%E6%8D%AE%E8%B7%A8%E7%BD%91%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E6%94%BF%E9%87%87%E4%BA%91%E5%9F%BA%E4%BA%8Edubbo%E7%9A%84%E6%B7%B7%E5%90%88%E4%BA%91%E6%95%B0%E6%8D%AE%E8%B7%A8%E7%BD%91%E5%AE%9E%E8%B7%B5/</guid><description>
+&lt;p>摘要：本文整理自政采云资深开发工程师王晓彬的分享。本篇内容主要分为四个部分：&lt;/p>
+&lt;ul>
+&lt;li>一、项目背景&lt;/li>
+&lt;li>二、为什么叫高速公路&lt;/li>
+&lt;li>三、修路实践&lt;/li>
+&lt;li>四、未来规划&lt;/li>
+&lt;/ul>
+&lt;h2 id="一项目背景">一、项目背景&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>我们有一个云岛业务叫政采云，它是政府的购物网站，类似于淘宝。政府采购会在政采云上做企业采购、政府采购的业务。&lt;/p>
+&lt;p>云岛中的&amp;quot;云&amp;quot;是指我们的云平台，云平台是我们公司自己部署的一套购物网站，它对应的是一套微服务框架。而&amp;quot;岛&amp;quot;是指，比如安徽或者山西它们都有自己的局域网，如果我们在它们那里也部署一套这个框架，就叫&amp;quot;岛&amp;quot;。我们的云主要是给浙江省和相关的区划用的。&lt;/p>
+&lt;p>我们的云和岛之间存在数据传输的问题，举个例子，比如我现在收到一个政府的公告，而这个公告肯定是全国性的。所以我可能会在云平台的管理平台上去录公告，再把它推送出去，这个时候云和岛之间就存在了一些数据的跨网。&lt;/p>
+&lt;ol>
+&lt;li>云岛网络&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_1.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>对我们云平台来说，这个局域网是我们公司内部完全可控的。比如你要开个端口，很快就能开起来。导端它可能是局域网或者是私有网络，比如我们之前做了一个浙商银行的项目，它是完全隔离的一个岛。他们的安全策略和开端口的东西都是他们自己定义的，这就是我们云岛的业务结构。&lt;/p>
+&lt;ol start="2">
+&lt;li>混合云岛网络&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_2.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>上图是大概的数据链路图。云平台下面有分支机构、分公司，它们会对应一套业务的系统。政务云是我刚才说的省级（安徽省）或者市级（无锡市）对应的区块，隔离的政务云。私有部署是银行、国企、军队、政企等典型的混合云的网络架构。&lt;/p>
+&lt;ol start="3">
+&lt;li>混合云岛网络的特点&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_3.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>我们混合云网络架构的特点包括：&lt;/p>
+&lt;ul>
+&lt;li>平台的一致性。我们部署在公有云、云平台、政务云、私有云上的那一套的代码是一样的。我们把一套代码部署在不同的地方就变成了多个平台。&lt;/li>
+&lt;li>网络连接与能力复用。我们会依赖一些第三方的能力，比如短信，但私有云上它的网络管控比较严，所以和第三方互通端口或者网络的流程就会比较复杂。这个时候我们希望去复用我们云平台的能力，这个时候他们之间又有一些数据的交互。&lt;/li>
+&lt;li>跨域访问迁移。&lt;/li>
+&lt;li>统一的平台管理。像我刚才举的例子，如果要发公告，我们希望可以在一个平台上就可以管理起来。而不是浙江发一条，安徽发一条，那样维护的成本也会比较高。&lt;/li>
+&lt;/ul>
+&lt;ol start="4">
+&lt;li>政企网络痛点&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_4.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>很多公司都会和政府打交道，政企网络有以下几个特点：&lt;/p>
+&lt;p>网络复杂。比如银行的网络，它们的安全性和内部的东西很复杂，流程的开通也比较多，需要你要经常去跑，跑完了之后发现有新的问题，又要去跑。&lt;/p>
+&lt;p>安全要求高。比如在开通端口的时候，我们需要去传数据，如果里面的那些序列化的协议不符合它们的规范，它们就会拿掉。这个时候给我们的业务其实是超时的，或者是那种通用的异常。而我们并不知道发生了什么，这就会带来未知的风险。&lt;/p>
+&lt;p>业务驱动运维。我们有了业务才会去部署，才会去做事情。我们就会多次、重复的投入，这就会导致人力、时间成本会比较高，私有部署的时候会更多。&lt;/p>
+&lt;ol start="5">
+&lt;li>现有方案&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_5.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>基于以上的痛点，我们做了两个方案。&lt;/p>
+&lt;p>第一个方案，基于Dubbo Filter的单向方案。这个方案的历史比较久一些，它有两个特点。&lt;/p>
+&lt;p>第一个特点，单向传输。它是从&amp;quot;岛&amp;quot;到&amp;quot;云&amp;quot;只有一个方向，它基于Dubbo Filter的原因是，我们公司内部的微服务都是通过Dubbo来调用的，所以我们是强依赖的来Dubbo的。所以做数据跨网的方案肯定会基于Dubbo的特性来做。&lt;/p>
+&lt;p>第二个特点，在本地部署业务的provider过滤器是运维上的负担。当导端需要把数据同步给云端的时候，也就是从岛端的业务Web传输到云端的业务provider。这个时候我必须在导端也部署一套业务的provider才可以。部署它的原因是它要拦截这个请求，然后把这个请求转发给部署在云平台的Dubbo网关。&lt;/p>
+&lt;p>但这个时候就会给我们带来负担。如果导端本来就有数据的入库就还好，因为provider本来就存在，但一些业务只是做跨网用的，没有本地的入库，那么这个时候业务的provider就是多余的了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_6.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>第二个方案，网状点对点方案。因为岛和岛之间需要网络互通，所以就会单独开通这个点和你需要传输的点之间的端口。开通之后我们就可以调用了，调用的形式可以用Dubbo。&lt;/p>
+&lt;p>这个方案有一个很明显的缺陷，线特别多，所以点和点之间开通的复杂度也很高，对后面的扩展可能也非常不利。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_7.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>以上方案存在的问题包括单向传输、白名单开通成本高、平台维护成本高、公共功能的缺失。&lt;/p>
+&lt;p>基于以上的问题，我们做了一个新的方案，叫高速公路。&lt;/p>
+&lt;h2 id="二为什么叫高速公路">二、为什么叫高速公路&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_8.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>为什么叫告诉公路呢？主要因为我们想要达到的效果是：&lt;/p>
+&lt;p>只建一次，可复用。比如北京到上海的高速公路，它只要够宽，一条就够了。如果你是从上海到北京或者从杭州到北京，是可以复用的，不用单独再修建一条。&lt;/p>
+&lt;p>隧道机制。因为高速公路修建的地方不一定都在平原，可能会在河、海、山等等附近。如果我们在高速公路下面搭建一条隧道，这个时候对于司机来说就是无感的。我们的目的是一样的，如果你觉得政企网络很复杂，那么我们就帮你把它屏蔽掉，这样你也是无感的了。&lt;/p>
+&lt;p>考虑传输性能。如果每个业务部门都自己搭建一套传输链路，那么传输性能只要能承载自己的业务就够了，因为不一定要给别人用，或者给别人用了也是小范围的。但如果搭建的是一条可复用的链路，就必须考虑传输的性能了。&lt;/p>
+&lt;h2 id="三修路实践">三、修路实践&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_9.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>接下来介绍一下我们在修建高速公路的时候遇到的一些问题以及具体的做法。我们在客户端接入上遇到了以下问题：&lt;/p>
+&lt;p>第一个问题，强依赖Dubbo。&lt;/p>
+&lt;p>第二个问题，透明传输，不改变使用Dubbo的方式。也就是我不需要自己写一些注解代替Dubbo，或者写一些API调用Dubbo。因为写了之后，一些新人可能并不能理解或者不能习惯，也不知道里面有什么坑。所以我们用原始的Dubbo来做可能会对用户更加无感。&lt;/p>
+&lt;p>第三个问题，接入灵活，支持多种形态。虽然我们强依赖Dubbo必须支持Dubbo，但我们也需要支持其他的形式，比如HTTP。但在接入之前，我们需要考虑接入灵活性的问题。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_10.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>下面我们先介绍一下Dubbo的方式。Dubbo的客观接入主要有以下三种方式：&lt;/p>
+&lt;p>第一种，注解方式。使用@DubboReference提供的通用parameters参数，设置路由目标，可以达到方法粒度的路由。路由信息写在中间parameters那里，parameters是Dubbo给我们提供的通用参数的传递。&lt;/p>
+&lt;p>如果是正常的，我写了这个信息，Dubbo是不做任何处理的，因为这个东西对它来说没有含义。但因为你引入了高速公路的SDK，所以在你写了这个东西之后，我们就会去解析，拦截Dubbo的请求，把parameters里的参数抓起来做一些路由处理，这种形式其实没有改变Dubbo的使用方式。&lt;/p>
+&lt;p>第二种，配置中心指定。比如我们用的是阿波罗的配置中心，它完全可以把接入方式替换掉，parameters的信息在配置中心配置也可以，只要SDK可以支持就好。这种方式其实代码是完全侵入的，就是跟跨网之前和跨网之后没有任何区别。但最后发现我们的业务并不喜欢这种方式，首先因为阿波罗大家不喜欢用，其次不好理解。如果是一个新人看这个代码，他就会认为是在调本地的接口。&lt;/p>
+&lt;p>第三种，线程指定。当你在线程里指定了路由信息，下面再去调用的时候，这次调用就会走你的路由。如果再调用一次，它就会调回本地。因为基于线程的形式，在Dubbo的扩展里，它会在调用完成之后把线程信息清理掉。所以需要注意一下，如果你想多次调用，就需要写多次。如果不想写多次，你可以用上面这种方式，你只要在当前的been里，都是路由到上海。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_11.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>接下来介绍一下高速公路的架构，刚才介绍点对点的方式，它的缺点是开通白名单比较复杂。现在我们的高速公路架构是一个新型的架构，所以它开通白名单的复杂度会低一点。&lt;/p>
+&lt;p>如上图所示，比如最左边的节点是上海，最上边的节点是安徽，我想从安徽到上海，这个时候中心网关就需要开通一个白名单。开完之后，这条链路就可以直接过去了。可以看到一共就六条线，所以它的复杂度也就下来了。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_12.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>18:30上图是高速公路里最核心的架构图。&lt;/p>
+&lt;p>比如山西集群的APP1调APP2的时候，我想去调上海APP2，如果你什么都不做，它默认调的就是山西集群的APP2。如果你在APP调用的时候加了一些路由信息，放在山西集群APP1里的SDK就会把它的流量切走，切到山西集群的Dubbo网关。&lt;/p>
+&lt;p>之后Dubbo网关会通过HTTP的协议走统一网关，再通过HTTP的协议到上海集群的Dubbo网关。在这里会把路由信息拿到，包括调用的Service、方法、版本号、参数等等。然后通过泛化的形式调上海集群的APP1，最后返回，完成这次跨网的调用。&lt;/p>
+&lt;p>那么为什么要有Dubbo Proxy这个角色呢？为什么不直接从APP1切到统一网关？少一个步骤不好么？涉及到的原因有以下三点：&lt;/p>
+&lt;p>虽然这个图上只画了一个APP1，但实际上山西集群里的调用非常多。如果几百个应用都直接到统一网关，网关就需要建立很多的长链接，而统一网关的资源是有限的。&lt;/p>
+&lt;p>因为安全性的问题，可能每次调用都要走一下白名单来保证安全。这个时候如果加了一个Dubbo Proxy，就可以去收敛IP。岛内不用和Dubbo Proxy交互，因为它们是同一个环境，不用考虑安全的问题。当Dubbo Proxy请求到网关之后，因为网关和统一网关之间只有一条链接，所以IP是收敛的。&lt;/p>
+&lt;p>还有一个是功能的收敛，当后面要做升级的时候，如果更新SDK，就需要每个应用都升级，这就需要推动业务做升级，做起来会比较痛苦。所以我们希望把升级功能全放在一个应用里，对业务功能无感，连升级SDK都不需要。当然因为SDK就做了一件事情，就是切换路由，基本不需要更新。&lt;/p>
+&lt;p>所以对于业务来说，它也解放了。我把它理解成是一个功能上的收益。这个模式叫分布式运行时，在现在也比较流行。我们可以把它理解成Dapper，把一些比较麻烦的操作放到公共的服务里，留给业务的SDK是很纯粹的。&lt;/p>
+&lt;p>另外，为什么要用HTTP协议呢？它也并不是很高效的协议。而Dubbo协议中的Dubbo2其实也是比较惊艳的，除了一些模糊全部都是数据。这样的话其实我们后面是可以考虑把HTTP升级掉，让它的性能更快一点。&lt;/p>
+&lt;p>现在用HTTP协议的原因是，它是一个标准的协议，中间可能会通过很多设备，虽然我们这里只画了一个。HTTP协议是没有任何障碍的，如果用Dubbo协议，还需要一个个打通。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_13.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>为了实现这个架构，Dubbo本身并不能直接用。因为Dubbo没有提供跨网的特性，所以我们需要从Dubbo层面解决我们碰到的问题。&lt;/p>
+&lt;p>在动态IP切换方面，其实Dubbo是支持的，但因为这个特性比较新，所以也会出现一些问题。它的支持程度是部分支持，比如在最开始的时候Dubbo2不支持，Dubbo3支持。此外，还会有一些bug。&lt;/p>
+&lt;p>在404扩展方面，对于HTTP来说，你要调一个接口，但这个接口不存在，就会返回给前端一个404的报错。比如当我们把流量从APP1切到Dubbo Proxy的时候，Dubbo Proxy其实是Dubbo的一个应用，它引入了一个Dubbo的jar包，它是Dubbo的一个空应用。这个流量到Dubbo的网关后，它不能识别，它的功能是要把它转发出去。这个时候我们就需要加入这个扩展。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_14.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>下面介绍一下隧道的机制。隧道机制的作用是屏蔽网络的复杂性，屏蔽中间的协议转换，给用户一个统一、透明的调用方式。&lt;/p>
+&lt;p>中间的HTTP协议里面的body带了一个原始的bodv。倒装之后再把它拆包拆出来，再通过泛化去调。这个时候隧道是可以匹配掉这些差异的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_15.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>另外，隧道机制对Dubbo协议的支持力度更高。比如APP1和本地的APP 3，最终调到APP2的时候，它看到了二进制流是一样的。因为我并没有去做什么，我只是把它分装起来，最后拆包。中间除了一点路由信息之外其他都一模一样。&lt;/p>
+&lt;p>这个机制的好处是，基本上Dubbo的所有特性都能支持。但也有一些个例，比如token和网络相关的机制。&lt;/p>
+&lt;h2 id="四未来规划">四、未来规划&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_16.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>借用网络分层的架构对高速公路做了一些规划：&lt;/p>
+&lt;p>第一层，物理网络层打通。它其实跟我们关系不大，因为我理解的是开通端口，你开通了那么多事，可以总结一些经验或者方法论去加快这个事情。&lt;/p>
+&lt;p>第二层，通讯协议层加速。中间的HTTP协议转发，我们是可以加速的。比如Tripple协议也是基于HTTP2对网络设备进行了识别，然后把问题解决了。所以我们也可以考虑去调研，在通讯协议层去做优化。&lt;/p>
+&lt;p>第三层，语言层编译加速。GraalVM之前我们也调研过，而且也真正的去试过。虽然没有落地，但编译加速是可以的。特别是网关层，它的特点是流量大，但是每个流量又特别小，对语言本身的性能要求比较高。如果把它用Go来实现，其实也是一个比较好的加速。&lt;/p>
+&lt;p>第四层，框架层功能升级。中间件层我们也做了很多事情。&lt;/p>
+&lt;p>第五层，通用任务调度与编排。调用其实会经过很多节点，比如a到b到c到d到e，随着业务越来越复杂，我们可能会有更多的路由。比如a到c，c和d汇合起来再到d，未来也将会规划进去。&lt;/p>
+&lt;p>第六层: 定制任务调度与编排。&lt;/p>
+&lt;p>第七层: 监控 &amp;amp; 告警 &amp;amp; 可观测性。&lt;/p>
+&lt;p>第八层: 规范 &amp;amp; 流程&amp;amp; 安全。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_17.png" alt="dubbo企业实践-政采云">&lt;/p>
+&lt;p>最后做一个总结。&lt;/p>
+&lt;p>为什么要做这个项目？之前的方案比较多，成本也比较高。所以我们需要有一个统一的方案考虑更多公共的测试把这个东西给推广起来。目前我们已经接入了非常多的应用，它已经成为了政法人员数据跨网的统一的标准方案。&lt;/p>
+&lt;p>我们要达到的效果，项目架构，未来规划刚才都介绍过了，就不再重复了。&lt;/p>
+&lt;p>重点说一下我们的开源与社区的合作。刚才的方案其实是我们公司内部使用的，也对Dubbo做了深度的定制。一般我们会选择私有版本进行开发，但因为想要开源，所以在最开始的时候，我们就和Dubbo社区沟通，看能不能在开源层实施掉。一方面社区可以帮我们review这些特性，做一些安全上的把控。另一方面我们也能把自己做的一些事情，特别是把公共的东西抽出来反馈给社区。&lt;/p></description></item></channel></rss>

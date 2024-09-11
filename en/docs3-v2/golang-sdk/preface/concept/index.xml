@@ -1,0 +1,272 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Concept</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/</link><description>Recent content in Concept on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: generalization call</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/generic/</guid><description>
+&lt;p>Generalized call is a special call method of Dubbo-Go, which allows intermediate nodes to pass call information without interface information, and is often used in test and gateway scenarios. Generalized calls support Dubbo and Triple protocols, but the current serialization scheme only supports Hessian.&lt;/p>
+&lt;h2 id="background">background&lt;/h2>
+&lt;p>For ease of understanding, this document uses gateway usage scenarios to introduce generalized calls. Let&amp;rsquo;s consider ordinary calls first (non-generic calls). The figure below contains two key roles of consumer and provider (endpoint is used to represent a consumer or a provider in the following), and each has a definition of the org.apache.dubbo.sample.User interface. Assume that the org.apache.dubbo.sample.User interface needs to be used in the calling behavior.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1631941941270-86ce9845-5a88-4cb5-8c8a-da8ae7eeb4d5.png" alt="img">&lt;/p>
+&lt;p>RPC needs to be transmitted through network media, so data cannot be transmitted in go struct form, but must be transmitted in binary form. This requires the consumer side to serialize the structure that implements the org.apache.dubbo.sample.User interface into a binary format before transmission. Similarly, for the provider side, binary data needs to be deserialized into structure information. &lt;strong>In short, common calls require that the interface information must have the same definition at each endpoint, so as to ensure that the results of data serialization and deserialization are consistent with expectations&lt;/strong>.&lt;/p>
+&lt;p>In the gateway scenario, it is impossible for the gateway to store all interface definitions. For example, a gateway needs to forward 100 service calls, and the number of interfaces required for each service is 10. Common calls require all 1000 (100 * 10) interface definitions to be stored in the gateway in advance, which is obviously difficult to achieve. So is there a way to forward calls correctly without storing interface definitions in advance? The answer is yes, which is why generic calls are used.&lt;/p>
+&lt;h2 id="principle">principle&lt;/h2>
+&lt;p>The essence of generalized calls is to transform complex structures into general structures. The general structures mentioned here refer to maps, strings, etc., and the gateway can smoothly parse and transfer these general structures.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1632207075184-25939db4-f384-452e-a0b8-e1deff7971de.png" alt="img">&lt;/p>
+&lt;p>Currently, Dubbo-go v3 only supports Map generalization (default). Let&amp;rsquo;s take the User interface as an example, and its definition is as follows.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// definition
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Assume that calling a service requires a user as an input parameter, and its definition is as follows.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// an instance of the User
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ID: &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;Zhangsan&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age: &lt;span style="color:#2aa198">20&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, when using Map generalization, user will be automatically converted to Map format, as shown below.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>usermap &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#268bd2">interface&lt;/span>{}]&lt;span style="color:#268bd2">interface&lt;/span>{} {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;iD&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;zhangsan&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;age&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">20&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;class&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.User&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>have to be aware of is:&lt;/p>
+&lt;ul>
+&lt;li>Map generalization will automatically lowercase the first letter, that is, ID will be converted to iD. If you need to align Dubbo-Java, please consider changing ID to Id;&lt;/li>
+&lt;li>A class field is automatically inserted in the Map to identify the original interface class.&lt;/li>
+&lt;/ul>
+&lt;h2 id="use">use&lt;/h2>
+&lt;p>The generalization call is transparent to the provider side, that is, the provider side can correctly handle the generalization request without any explicit configuration.&lt;/p>
+&lt;h3 id="generalized-call-based-on-dubbo-url">Generalized call based on Dubbo URL&lt;/h3>
+&lt;p>The call based on Filter generalization is transparent to the consumer, and the typical application scenario is a gateway. This method needs to require the Dubbo URL to include a generic call identifier, as shown below.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>dubbo://127.0.0.1:20000/org.apache.dubbo.sample.UserProvider?generic=true&amp;amp;...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The meaning expressed by this Dubbo URL is:&lt;/p>
+&lt;ul>
+&lt;li>The RPC protocol is dubbo;&lt;/li>
+&lt;li>org.apache.dubbo.sample.UserProvider interface at 127.0.0.1:20000;&lt;/li>
+&lt;li>Use generic calls (generic=true).&lt;/li>
+&lt;/ul>
+&lt;p>The Filter on the Consumer side will automatically convert ordinary calls into generalized calls according to the configuration carried by the Dubbo URL, but it should be noted that in this way, the response result is returned in a generalized format and will not be automatically converted into the corresponding object. For example, in the map generalization mode, if the User class needs to be returned, then the consumer will get a map corresponding to the User class.&lt;/p>
+&lt;h3 id="manual-generalization-call">Manual generalization call&lt;/h3>
+&lt;p>The request initiated by the manual generalization call does not pass through the filter, so the consumer side needs to initiate the generalization call explicitly. The typical application scenario is testing. In &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/generic">dubbo-go-samples&lt;/a>, manual calls are used for the convenience of testing.&lt;/p>
+&lt;p>The generalized call does not need to create a configuration file (dubbogo.yaml), but it needs to manually configure the registration center, reference and other information in the code. The initialization method is encapsulated into the newRefConf method, as shown below.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">newRefConf&lt;/span>(appName, iface, protocol &lt;span style="color:#dc322f">string&lt;/span>) config.ReferenceConfig {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>registryConfig &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>config.RegistryConfig{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Protocol: &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Address: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>refConf &lt;span style="color:#719e07">:=&lt;/span> config.ReferenceConfig{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>InterfaceName: iface,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Cluster: &lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Registry: []&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Protocol: protocol,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Generic: &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rootConfig &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">NewRootConfig&lt;/span>(config.&lt;span style="color:#268bd2">WithRootRegistryConfig&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>, registryConfig))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>_ = rootConfig.&lt;span style="color:#268bd2">Init&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>_ = refConf.&lt;span style="color:#268bd2">Init&lt;/span>(rootConfig)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>refConf. &lt;span style="color:#268bd2">GenericLoad&lt;/span>(appName)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> refConf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The newRefConf method receives three parameters, which are:&lt;/p>
+&lt;ul>
+&lt;li>appName: application name;&lt;/li>
+&lt;li>iface: service interface name;&lt;/li>
+&lt;li>protocol: RPC protocol, currently only supports dubbo and tri (triple protocol).&lt;/li>
+&lt;/ul>
+&lt;p>In the above method, in order to keep the function simple, the registration center is set to a fixed value, that is, ZooKeeper at 127.0.0.1:2181 is used as the registration center, which can be freely customized according to the actual situation in practice.&lt;/p>
+&lt;p>We can easily get a ReferenceConfig instance, temporarily named refConf.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>refConf &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">newRefConf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;example.dubbo.io&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.UserProvider&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;tri&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then we can initiate a generic call to the GetUser method of the org.apache.dubbo.sample.UserProvider service.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>resp, err &lt;span style="color:#719e07">:=&lt;/span> refConf.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">GetRPCService&lt;/span>().(&lt;span style="color:#719e07">*&lt;/span>generic.GenericService).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Invoke&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>context. &lt;span style="color:#268bd2">TODO&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;GetUser&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[]&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java. lang. String&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[]hessian. Object{&lt;span style="color:#2aa198">&amp;#34;A003&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The Invoke method of GenericService receives four parameters, which are:&lt;/p>
+&lt;ul>
+&lt;li>context;&lt;/li>
+&lt;li>Method name: In this example, it means calling the GetUser method;&lt;/li>
+&lt;li>Parameter type: GetUser method accepts a parameter of string type. If the target method accepts multiple parameters, it can be written as &lt;code>[]string{&amp;quot;type1&amp;quot;, &amp;quot;type2&amp;quot;, ...}&lt;/code>, if the current method has no parameters , you need to fill in an empty array &lt;code>[]string{}&lt;/code>;&lt;/li>
+&lt;li>Actual parameter: The writing method is the same as the parameter type. If it is a parameterless function, an empty array &lt;code>[]hessian.Object{}&lt;/code> should still be filled in.&lt;/li>
+&lt;/ul>
+&lt;p>Note: In the current version, there will be a crash problem when calling without parameters.&lt;/p>
+&lt;p>Related reading: &lt;a href="https://blog.csdn.net/weixin_39860915/article/details/122738548">[Dubbo-go service proxy model]&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: Multilingual RPC</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/multi_language/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/multi_language/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/multi_language/dubbogo-3.0-invocation.png" alt="img">&lt;/p>
+&lt;h3 id="cross-language-call">Cross-language call&lt;/h3>
+&lt;p>With the wide-scale application of microservice scenarios, multi-language scenarios are becoming more and more common, and developers are more willing to use more suitable languages to implement different modules of a complex system. For example, use C to write gateways, use Go to write K8S resource operators, and use Java to write business applications. Languages and scenarios are not bound. Enterprises can often choose the appropriate language by combining their own technology stack and the expertise of developers.&lt;/p>
+&lt;p>In multilingual scenarios, the ability to call across languages is very important.&lt;/p>
+&lt;p>Cross-language capability is essentially the capability provided by &lt;a href="../protocol/">[Network Protocol]&lt;/a>. How to conveniently allow users to use the required network protocols, develop for appropriate cross-language scenarios, and enjoy the service governance capabilities of the Dubbo ecosystem are the concerns of the Dubbo-go service framework.&lt;/p>
+&lt;h3 id="cross-ecology">Cross Ecology&lt;/h3>
+&lt;p>The Dubbo-go service framework provides cross-ecology capabilities. Developers can use Dubbo-go and its &lt;a href="../../../refer/ecology/">ecology project&lt;/a> to build HTTP/front-end services, Dubbo/Spring applications , The connection between gRPC ecological applications.&lt;/p></description></item><item><title>Docs3-V2: Network Protocol</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/protocol/</guid><description>
+&lt;h2 id="1-rpc-service-framework-and-network-protocol">1. RPC service framework and network protocol&lt;/h2>
+&lt;p>The network protocol is very important in the RPC scenario. In the microservice scenario, the communication between service processes depends on the network that can be connected, and the network protocol that is consistent between the client and the server. Network protocol is an abstract concept. From the perspective of Dubbo-go application development, we might as well divide the protocols we care about into three dimensions for discussion.&lt;/p>
+&lt;h3 id="11-unpacking-protocol">1.1 unpacking protocol&lt;/h3>
+&lt;p>The built-in packaging and unpacking protocols of the Dubbo-go service framework are all based on the TCP/IP protocol stack. On this basis, various protocols are encapsulated/introduced, such as Triple (dubbo3), Dubbo, and gRPC.&lt;/p>
+&lt;p>This type of protocol focuses on the encapsulation and disassembly process of TCP packets to ensure reliable point-to-point communication.&lt;/p>
+&lt;p>In the dubbo-go ecosystem, supporting multiple networks is often worth this type of protocol.&lt;/p>
+&lt;h3 id="12-serialization-protocol">1.2 Serialization protocol&lt;/h3>
+&lt;p>The serialization protocol is responsible for serializing objects in memory into a binary stream in a specific format. Some mainstream serialization libraries include: the json serialization method with good readability and wide application; the protobuf serialization method with high compression efficiency and better performance; the hessian2 serialization method adapted to the Java language, etc. Dubbo-go has these three built-in serialization methods&lt;/p>
+&lt;p>The serialization protocol needs to be paid attention to by developers during the business development process. The serialization protocol often requires specific object annotations:&lt;/p>
+&lt;p>An example of a protobuf sequence object generated by protoc-gen-go:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>type HelloRequest struct {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>state protoimpl.MessageState
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sizeCache protoimpl.SizeCache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>unknownFields protoimpl.UnknownFields
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name &lt;span style="color:#dc322f">string&lt;/span> `protobuf&lt;span style="color:#719e07">:&lt;/span>&lt;span style="color:#2aa198">&amp;#34;bytes,1,opt,name=name,proto3&amp;#34;&lt;/span> json&lt;span style="color:#719e07">:&lt;/span>&lt;span style="color:#2aa198">&amp;#34;name,omitempty&amp;#34;&lt;/span>`
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>A hessian2 serialized object that can communicate with java services&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> HelloRequest &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`hessian:&amp;#34;name&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>HelloRequest) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The relationship between the serialization protocol and the unpacking protocol&lt;/p>
+&lt;ul>
+&lt;li>A packaging and unpacking protocol can be adapted to support multiple serialization protocols: for example, you can use dubbogo&amp;rsquo;s triple protocol to pass hessian serialization parameters to communicate with the Dubbo-java service framework; pass pb serialization parameters to communicate with native gRPC services Interoperability; by implementing the interface to customize your desired serialization method, such as json, so as to pass parameters with strong readability.&lt;/li>
+&lt;/ul>
+&lt;h3 id="13-interface-protocol">1.3 Interface protocol&lt;/h3>
+&lt;p>The interface protocol is a protocol developed and maintained by business developers, which is used to describe the information of the service interface. Such as interface name, method, parameter type.&lt;/p>
+&lt;p>Taking Triple/gRPC as an example, developers can use plug-ins to generate a stub (.pb.go file) from the interface defined in the proto file. The stub file contains all the information of the interface and the interface protocol.&lt;/p>
+&lt;p>When writing a service, the client and the server introduce the same interface at the same time, which can ensure that the client initiates a call for a specific interface and method, which can be correctly identified and responded by the server.&lt;/p>
+&lt;p>An interface description file written by proto:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> api;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> go_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./;api&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The greeting service definition.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">service&lt;/span> Greeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Sends a greeting
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">rpc&lt;/span> SayHello (HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (User) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Sends a greeting via stream
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">rpc&lt;/span> SayHelloStream (stream HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (stream User) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The request message containing the user&amp;#39;s name.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The response message containing the greetings
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> id &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int32&lt;/span> age &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The relationship between interface protocol and serialization protocol&lt;/p>
+&lt;ul>
+&lt;li>Interface protocol is an abstract concept. An interface protocol can be written in multiple interface description languages, and can be converted into multiple serialized protocol objects.&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-network-protocols-supported-by-dubbo-go">2. Network protocols supported by Dubbo-go&lt;/h2>
+&lt;p>The network protocols and serialization methods supported by Dubbo-go are as follows:&lt;/p>
+&lt;p>| protocol | protocol name (for configuration) | serialization method | default serialization method |
+| &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash; | :&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- &amp;mdash;&amp;mdash;&amp;mdash;-: | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash; |
+| Triple 【Recommend】 | tri | pb/hessian2/msgpack/custom | pb |
+| Dubbo | dubbo | hessian2 | hessian2 |
+| gRPC | grpc | pb | pb |
+| jsonRPC | jsonrpc | json | json |&lt;/p>
+&lt;p>Related reading: &lt;a href="https://developer.aliyun.com/article/878252">[Dubbo-go Service Proxy Model]&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: Service Registration Discovery</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/concept/registry/</guid><description>
+&lt;h2 id="1-dubbos-registration-center">1. Dubbo&amp;rsquo;s registration center&lt;/h2>
+&lt;p>The registration center is responsible for saving the information of the server application in the RPC scenario.&lt;/p>
+&lt;p>The server registers the interface information and sends its own address to the registration center, and the client reads and subscribes to the list of addresses that need to be called from the registration center. The entire structure is shown in the figure:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/architecture.png" alt="img">&lt;/p>
+&lt;p>For details about Dubbo service discovery, please refer to &lt;a href="https://dubbo.apache.org/zh-cn/docs/concepts/service-discovery/">Dubbo Official Website Concept Introduction&lt;/a>&lt;/p>
+&lt;h2 id="2-service-discovery-concept">2. Service discovery concept&lt;/h2>
+&lt;p>In the Dubbo ecosystem, service discovery has the following main concepts:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Application Application&lt;/p>
+&lt;p>The application is a dubbo service process, corresponding to an application name.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>interface (service)&lt;/p>
+&lt;p>An interface is an RPC interface class, such as a Service defined by proto, or a Java Interface class. A dubbo process can contain multiple services/interfaces.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>method&lt;/p>
+&lt;p>Methods are defined in interfaces, and an interface can contain multiple methods.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>parameter list&lt;/p>
+&lt;p>The parameter list is defined in the method. Since Java supports overloading, a method can contain multiple parameter lists. For Go it is a one-to-one relationship.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>registration message&lt;/p>
+&lt;p>In the &amp;ldquo;interface-level service discovery&amp;rdquo; scenario, the registration information mainly includes the application name, interface list, metadata information, and the IP address of the server. It is stored in the registration center in the form of URL for the client to query before initiating a call.&lt;/p>
+&lt;p>In the &amp;ldquo;application-level service discovery&amp;rdquo; scenario, the registration information only includes a small amount of application-level information such as the application name and the mapping from the application name to the interface, and the interface-level information is stored as metadata in the metadata center.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>metadata&lt;/p>
+&lt;p>Metadata refers to interface information, such as interface name, contained methods, parameters corresponding to methods, serialization methods, protocols, and other information.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Registry&lt;/p>
+&lt;p>The registration center is used to save the information of the server.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Metadata center&lt;/p>
+&lt;p>The metadata center is used to save the metadata information of the server, and in the &amp;ldquo;application-level service discovery&amp;rdquo; scenario, it serves as the dependency of the &amp;ldquo;service introspection&amp;rdquo; stage.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo-go&amp;rsquo;s most advanced service grid capability introduces the following concepts&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>CPU name&lt;/p>
+&lt;p>The host name currently applies to the Service name registered on k8s. Other applications can access this application instance through the hostname.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>endpoint&lt;/p>
+&lt;p>Endpoints include the instance&amp;rsquo;s IP address, port.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>cluster&lt;/p>
+&lt;p>The cluster ID holds the data from {hostname, cluster_subset_name, port}&lt;/p>
+&lt;p>A cluster maintains a mapping of cluster IDs to all of its contained endpoints.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Service Mesh Metadata&lt;/p>
+&lt;p>The service mesh metadata is an interface name-to-hostname-to-map, which is used by clients to query the hostname information of the desired interface.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-dubbo-go-registration-center">3. Dubbo-go Registration Center&lt;/h2>
+&lt;p>The registry types supported by Dubbo-go are as follows:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>registry&lt;/th>
+&lt;th>registry name (for configuration)&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Zookeeper&lt;/td>
+&lt;td>zookeeper&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Nacos&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Etcd&lt;/td>
+&lt;td>etcd&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Consul&lt;/td>
+&lt;td>consul&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Related reading: &lt;a href="https://developer.aliyun.com/article/764173">[Analysis of application-level service discovery]&lt;/a>&lt;/p></description></item></channel></rss>

@@ -1,0 +1,874 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – dubbo-metrics 指标模块源码浅析</title><link>https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/</link><description>Recent content in dubbo-metrics 指标模块源码浅析 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: 引言</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</guid><description>
+&lt;h2 id="引言">引言&lt;/h2>
+&lt;p>服务指标统计体系是 Dubbo 可观测能力的重要组成部分。
+dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综合到一个单独的模块中，提供一套更加完善、全面、可拓展、解耦合的指标采样-统计-导出解决方案。&lt;/p>
+&lt;p>dubbo-metrics 模块包括：&lt;/p>
+&lt;ul>
+&lt;li>dubbo-metrics-api 公用接口包&lt;/li>
+&lt;li>dubbo-metrics-prometheus 普罗米修斯适配包&lt;/li>
+&lt;li>dubbo-metrics-metadata 元数据中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-registry 注册中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-config-center 配置中心指标监控包&lt;/li>
+&lt;li>dubbo-metrics-default 接口默认实现包，提供dubbo内部核心指标的监控功能&lt;/li>
+&lt;/ul>
+&lt;p>在设计上，dubbo-metrics 深入应用事件驱动编程思想，总体体现出下图的事件处理链路：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/metrics-event-struct.png" alt="metrics-event-struct">&lt;/p>
+&lt;p>在拓展上，dubbo-metrics 抽象了一套指标导出接口与抽象实现，可实现兼容多种指标统计监控中心，默认提供了普罗米修斯实现。&lt;/p></description></item><item><title>Blog: 1-指标样本的收集与存储</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/1-%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/1-%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</guid><description>
+&lt;h2 id="一指标样本的收集与存储">一、指标样本的收集与存储&lt;/h2>
+&lt;h3 id="指标样本收集">指标样本收集&lt;/h3>
+&lt;p>&lt;strong>指标收集器（Collector）是指标对外导出的入口&lt;/strong>。最终导出到指标统计中心的指标采样实际均直接来源于各个指标采样器。因此，我们将从各个收集器实现开始，分析 dubbo-metrics 模块是如何工作的。&lt;/p>
+&lt;p>指标收集操作定义在 MetricsCollector （指标采集器，SPI）接口中，可以通过它的实现收集某一类的指标样本（MetricSample）。它主要有以下实现，对应着不同类型的指标：&lt;/p>
+&lt;ul>
+&lt;li>ConfigCenterMetricsCollector &lt;strong>配置中心操作相关指标收集器&lt;/strong> ，收集配置信息的变化次数&lt;/li>
+&lt;li>MetadataMetricsCollector &lt;strong>元数据中心操作相关指标收集器&lt;/strong>，收集提供者、消费者对元数据中心操作（推送数据、拉取数据）情况的计数、耗时统计。&lt;/li>
+&lt;li>RegistryMetricsCollector &lt;strong>注册中心相关操作指标收集器&lt;/strong>，收集应用级、接口级服务注册成功、失败、耗时的相关计数。&lt;/li>
+&lt;li>DefaultMetricsCollector &lt;strong>默认指标收集器&lt;/strong>，内置多种采样器来完成不同类型的内部指标采样。&lt;/li>
+&lt;li>HistogramMetricsCollector &lt;strong>直方图指标收集器&lt;/strong>，利用 micrometer API 处理直方图类型的指标，它的实现较为特殊。&lt;/li>
+&lt;/ul>
+&lt;p>配置中心 、元数据、服务注册及默认指标收集器均实现自混合指标收集器（CombMetricsCollector）。混合指标收集器实现了 ApplicationMetricsCollector 、ServiceMetricsCollector 、MethodMetricsCollector 三个接口（定义按应用名收集、按应用名-服务名收集和按应用-方法名收集指标的操作），因此它们可以进行应用、服务和方法三个层面的指标收集工作。&lt;/p>
+&lt;p>默认指标收集器的特点是通过内部的指标采样器（MetricsSampler）完成指标事件的处理操作，而不是其它收集器的指标监听器（MetricsListener）&lt;/p>
+&lt;p>直方图指标收集器则负责收集直方图类型的指标。它利用直方图度量寄存器（HistogramMetricRegister）借助 micrometer API 完成直方图样本的采集。直方图类型包括百分位数、服务水平目标、最小预期值、最大预期值、统计数据分布有效期等。&lt;/p>
+&lt;p>&lt;strong>Collector的继承关系：&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/collectors.png" alt="collectors">&lt;/p>
+&lt;p>可以看出，每个指标收集器都具有来自 MetricsListener 的监听指标事件的能力。为什么指标收集器本身需要监听指标事件？ 在后文中，我们将讨论指标收集器是如何利用内置的子转发器（SubDispatcher）转发指标事件，并完成计数处理的。&lt;/p>
+&lt;h3 id="指标样本存储">指标样本存储&lt;/h3>
+&lt;p>前文中，我们了解了指标收集的入口是指标收集器（Collector）。那么各个收集器从哪里收集指标样本？&lt;/p>
+&lt;p>&lt;strong>对于配置中心、元数据中心、 注册中心的指标收集器：&lt;/strong>&lt;/p>
+&lt;p>它们分别负责采集三大中心模块的指标，均继承于&lt;strong>混合数据收集器（CombMetricsCollector）&lt;/strong>，而混合数据收集器中实现了 export 方法 。&lt;/p>
+&lt;p>混合数据收集器内部有一个&lt;strong>基本数据聚合器（BaseStatComposite）&lt;/strong>，它实现了 MetricsExport 接口，该接口定义了指标导出操作，混合数据收集器则利用它的 export 方法导出指标。&lt;/p>
+&lt;p>基本数据聚合器是一个抽象类，内有三个属性：ApplicationStatComposite 、ServiceStatComposite 和 RtStatComposite 。它们的作用：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>ApplicationStatComposite 应用数据聚合器&lt;/strong>，应用程序级别相关事件的计数 ，根据指标Key（ MetricsKey ）和应用名统计指标，提供计数递增操作&lt;/li>
+&lt;li>&lt;strong>ServiceStatComposite 服务数据聚合器&lt;/strong>，服务级别相关事件的计数，根据指标Key、应用名和服务名统计指标，提供计数递增操作&lt;/li>
+&lt;li>&lt;strong>MethodStatComposite 方法数据聚合器&lt;/strong>，方法级别相关事件的计数，存储各方法RPC调用相关计数。&lt;/li>
+&lt;li>&lt;strong>RtStatComposite，Rt（Response Time，响应时间）数据聚合器&lt;/strong>，包括应用级别和服务级别。根据应用名、服务名、注册的指标名及相应相应时间统计指标，提供添加操作。&lt;/li>
+&lt;/ul>
+&lt;p>对于以上四个聚合器，他们的职责就是存储某一类型的采样样本。&lt;/p>
+&lt;p>&lt;strong>基本数据聚合器 （BaseStatComposite）&lt;/strong> 对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p>
+&lt;p>&lt;strong>当调用元数据中心指标收集器、注册中心指标收集器的 collect 方法时，最终会调用&lt;code>BaseStatComposite.export(MetricsCategory category)&lt;/code> , 该方法会收集内部三个聚合器的指标并返回。&lt;/strong>&lt;/p>
+&lt;p>需要注意的是， 配置中心指标收集器不依赖于基本数据聚合器 导出数据，它在创建时将基本数据聚合器置为null，而使用自己的 updatedMetrics 字段存储采样：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ConfigCenterMetricsCollector&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>ConfigCenterMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> updatedMetrics &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">ConfigCenterMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//BaseStatComposite = null&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>(&lt;span style="color:#cb4b16">null&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>混合指标收集器和数据聚合器之间呈现如下的包含关系：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
+&lt;p>&lt;strong>DefaultMetricsCollector 默认指标采集器：&lt;/strong>&lt;/p>
+&lt;p>它不直接存储采样数据，而是通过收集其下&lt;strong>指标采样器（MetricsSampler）&lt;/strong> 的样本来完成采样工作。这些采样器包括：&lt;/p>
+&lt;ul>
+&lt;li>方法采样器&lt;/li>
+&lt;li>应用采样器&lt;/li>
+&lt;li>线程池采样器&lt;/li>
+&lt;/ul>
+&lt;p>这些采样器完成采样后，还会利用采集器中的&lt;strong>事件多播器（Multicaster）&lt;/strong> 将指标事件发布出去，可以被其它监听器处理。详细流程将在后文中探讨。&lt;/p>
+&lt;p>&lt;strong>HistogramMetricsCollector 直方图指标采集器：&lt;/strong>&lt;/p>
+&lt;p>由于需要使用Timer完成直方图属性的统计，它使用自己的容器存储采样数据。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HistogramMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//方法指标样本与对应的Timer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, Timer&lt;span style="color:#719e07">&amp;gt;&lt;/span> rt &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Timer（计时器）由 micrometer API 提供，常用于统计一分钟内的大量事件。&lt;/p></description></item><item><title>Blog: 2-指标收集器的指标采集流程</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/2-%E6%8C%87%E6%A0%87%E6%94%B6%E9%9B%86%E5%99%A8%E7%9A%84%E6%8C%87%E6%A0%87%E9%87%87%E9%9B%86%E6%B5%81%E7%A8%8B/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/2-%E6%8C%87%E6%A0%87%E6%94%B6%E9%9B%86%E5%99%A8%E7%9A%84%E6%8C%87%E6%A0%87%E9%87%87%E9%9B%86%E6%B5%81%E7%A8%8B/</guid><description>
+&lt;h2 id="二指标收集器的指标采集流程">二、指标收集器的指标采集流程&lt;/h2>
+&lt;p>在前文中，我们了解了指标收集器（Collector）最终收集的数据只有三个来源：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>实现自混合指标收集器（CombMetricsCollector） 的元数据指标收集器（MetadataMetricsCollector）和注册中心指标收集器（RegistryMetricsCollector），它们的样本均存储在内置的基本数据聚合器中。具体来说，是基本数据聚合器下的四个子数据聚合器中：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>DefaultMetricsCollector 默认指标收集器&lt;/strong>，它的样本不仅来自于指标事件，还来自其下&lt;strong>采样器（Sampler）&lt;/strong> 中，用于Dubbo核心模块的采样。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>HistogramMetricsCollector 直方图指标收集器&lt;/strong>，由于采样数据的特殊性，它的样本直接以 Map 存储在内部。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>接下来，我们需要明确它们存储的指标是如何添加进去的。&lt;/p>
+&lt;h3 id="1服务治理模块的指标采集流程">1，服务治理模块的指标采集流程&lt;/h3>
+&lt;p>通过之前的分析，我们知道服务治理模块的指标采集器均实现自混合指标收集器（CombMetricsCollector）。它对基本数据聚合器（BaseStatComposite） 的大部分方法做了封装。基本数据聚合器又封装了四个负责存储不同类型指标采样的子聚合器。&lt;/p>
+&lt;p>这四个子聚合器包括：&lt;/p>
+&lt;ul>
+&lt;li>ApplicationStatComposite&lt;/li>
+&lt;li>ServiceStatComposite&lt;/li>
+&lt;li>MethodStatComposite&lt;/li>
+&lt;li>RtStatComposite&lt;/li>
+&lt;/ul>
+&lt;p>实际上，&lt;strong>元数据、注册中心指标收集器&lt;/strong>更新、添加指标的操作都是通过混合指标收集器暴露的方法进行。而具体的，是通过 &lt;code>setNum&lt;/code>、&lt;code>increment&lt;/code>、&lt;code>addRt&lt;/code> 这三个方法（及它们的重载）进行操作。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//CombMetricsCollector&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> BaseStatComposite stats;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setNum&lt;/span>(MetricsKey metricsKey, String applicationName, String serviceKey, &lt;span style="color:#dc322f">int&lt;/span> num) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.stats.setServiceKey(metricsKey, applicationName, serviceKey, num);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">increment&lt;/span>(String applicationName, MetricsKey metricsKey) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.stats.incrementApp(metricsKey, applicationName, SELF_INCREMENT_SIZE);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">increment&lt;/span>(String applicationName, String serviceKey, MetricsKey metricsKey, &lt;span style="color:#dc322f">int&lt;/span> size) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.stats.incrementServiceKey(metricsKey, applicationName, serviceKey, size);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">addRt&lt;/span>(String applicationName, String registryOpType, Long responseTime) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> stats.calcApplicationRt(applicationName, registryOpType, responseTime);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">addRt&lt;/span>(String applicationName, String serviceKey, String registryOpType, Long responseTime) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> stats.calcServiceKeyRt(applicationName, serviceKey, registryOpType, responseTime);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于几个方法实际上的调用链路类似，我们选择从其中的 setNum 方法开始分析。&lt;/p>
+&lt;p>其在&lt;strong>数据聚合器层面的调用链路&lt;/strong>可以总结为：setNum 方法调用基本数据聚合器的 setServiceKey 方法，该方法又会调用服务数据聚合器（ServiceStatComposite）的同名 setServiceKey 方法（我们已经知道基本数据聚合器内封装了四个不同类型的子聚合器），这个方法实质上是&lt;strong>对应用层面的特定指标（由指标Key决定）进行注册并赋初始值（参数中的 num)。&lt;/strong>&lt;/p>
+&lt;p>setNum 的用法均位于注册中心事件多播器（RegistryMetricsEventMulticaster）中声明的 MCat 接口中，在 APPLICATION_NOTIFY_FINISH 和 APPLICATION_DIRECTORY_POST 两个常量初始化时被调用。MCat 接口本身作为常量类使用，并在初始化时&lt;strong>注册真正的指标常量&lt;/strong>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//RegistryMetricsEventMulticaster.MCat&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>MetricsCat APPLICATION_NOTIFY_FINISH &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetricsCat(MetricsKey.NOTIFY_METRIC_NUM_LAST,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> (key, placeType, collector) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> AbstractMetricsListener.onFinish(key,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.addRt(event.appName(), placeType.getType(), event.getTimePair().calc());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Integer&lt;span style="color:#719e07">&amp;gt;&lt;/span> lastNumMap &lt;span style="color:#719e07">=&lt;/span> Collections.unmodifiableMap(event.getAttachmentValue(ATTACHMENT_KEY_LAST_NUM_MAP));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> lastNumMap.forEach(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> (k, v) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> collector.setNum(key, event.appName(), k, v));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsCat APPLICATION_DIRECTORY_POST &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetricsCat(MetricsKey.DIRECTORY_METRIC_NUM_VALID, (key, placeType, collector) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> AbstractMetricsListener.onEvent(key,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsKey, Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Integer&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> summaryMap &lt;span style="color:#719e07">=&lt;/span> event.getAttachmentValue(ATTACHMENT_DIRECTORY_MAP);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> summaryMap.forEach((metricsKey, map) &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map.forEach(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> (k, v) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> collector.setNum(metricsKey, event.appName(), k, v)));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>此处声明的指标常量都是 MetricsCat 类型的。其中部分常量在创建时还传入了该指标的收集逻辑，如Key 为 NOTIFY_METRIC_NUM_LAST 的常量。以下为 MetricsCat 的定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsCat&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> MetricsPlaceType placeType;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Function&lt;span style="color:#719e07">&amp;lt;&lt;/span>CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span>, AbstractMetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> eventFunc;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">MetricsCat&lt;/span>(MetricsKey metricsKey, BiFunction&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsKey, CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span>, AbstractMetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> biFunc) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.eventFunc &lt;span style="color:#719e07">=&lt;/span> collector &lt;span style="color:#719e07">-&amp;gt;&lt;/span> biFunc.apply(metricsKey, collector);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">MetricsCat&lt;/span>(MetricsKey metricsKey, TpFunction&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsKey, MetricsPlaceType, CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span>, AbstractMetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> tpFunc) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.eventFunc &lt;span style="color:#719e07">=&lt;/span> collector &lt;span style="color:#719e07">-&amp;gt;&lt;/span> tpFunc.apply(metricsKey, placeType, collector);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> MetricsCat &lt;span style="color:#268bd2">setPlaceType&lt;/span>(MetricsPlaceType placeType) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.placeType &lt;span style="color:#719e07">=&lt;/span> placeType;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Function&lt;span style="color:#719e07">&amp;lt;&lt;/span>CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span>, AbstractMetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getEventFunc&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> eventFunc;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//一个接受三个入参，一个返回值的函数接口。通过构造函数我们可以知道这三个入参分别是MetricsKey, MetricsPlaceType, CombMetricsCollector&amp;lt;TimeCounterEvent&amp;gt;，返回值为AbstractMetricsListener。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@FunctionalInterface&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">TpFunction&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>T, U, K, R&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> R &lt;span style="color:#268bd2">apply&lt;/span>(T t, U u, K k);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>MetricsCat 类除了构造器，只提供了两个public方法，都是获取其内部属性的。&lt;/p>
+&lt;p>其实质上 eventFunc 字段的载体，提供了为特定指标生产监听器的逻辑，因此 &lt;code>MetricsCat &lt;/code> 可以看做&lt;strong>为特定指标生产指标监听器的工厂&lt;/strong>，用户在创建时传入这个监听器的处理逻辑。&lt;/p>
+&lt;p>通过泛型，我们可以知道它构造时使用的两个参数分别为 MetricsKey（指标Key）和一个接受 &lt;code>MetricsKey, MetricsPlaceType, CombMetricsCollector&amp;lt;TimeCounterEvent&amp;gt;&lt;/code> 三个参数，返回一个 &lt;code>AbstractMetricsListener&lt;/code> 的函数。之所以要多封装一层函数，是因为 &lt;code>placeType&lt;/code> 字段在 &lt;code>MetricsKey&lt;/code> 实例构造之后才会提供，借此实现延迟初始化。&lt;/p>
+&lt;p>回到之前两个&lt;strong>在 MCat 中定义了监听器生产方法&lt;/strong>的两个常量的初始化流程：它们在创建 MetricsCat 时传入的TpFunction中定义的操作为：返回通过 AbstractMetricsListener.onFinish获取的事件完成监听器。当指定MetricsKey 的指标统计事件完成时，这个监听器中的 onEventFinish 方法就会被调用。 而 MetricsCat 构造时传入的 MetricsKey 会被作为 AbstractMetricsListener 的构造参数，用于指定监听的指标。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//RegistryMetricsEventMulticaster.MCat&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">new&lt;/span> MetricsCat(MetricsKey.NOTIFY_METRIC_NUM_LAST,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> (key, placeType, collector) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> AbstractMetricsListener.onFinish(key,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.addRt(event.appName(), placeType.getType(), event.getTimePair().calc());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Integer&lt;span style="color:#719e07">&amp;gt;&lt;/span> lastNumMap &lt;span style="color:#719e07">=&lt;/span> Collections.unmodifiableMap(event.getAttachmentValue(ATTACHMENT_KEY_LAST_NUM_MAP));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> lastNumMap.forEach(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> (k, v) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> collector.setNum(key, event.appName(), k, v));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//AbstractMetricsListener&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> AbstractMetricsListener &lt;span style="color:#268bd2">onFinish&lt;/span>(MetricsKey metricsKey, Consumer&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> finishFunc) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AbstractMetricsListener(metricsKey) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onEventFinish&lt;/span>(TimeCounterEvent event) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//此处是finishFunc就是之前 event -&amp;gt;{...} 中定义的lambda函数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> finishFunc.accept(event);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>三个形参 (key, placeType, collector) 中的 collector 为 &lt;code>CombMetricsCollector&amp;lt;TimeCounterEvent&amp;gt;&lt;/code>，意味着它的三个实现（ConfigCenterMetricsCollector 、MetadataMetricsCollector、RegistryMetricsCollector）都可以作为参数。&lt;/p>
+&lt;p>至此，我们可以总结，对于这两个参数， &lt;code>MetricsCat&lt;/code> 创建时嵌套的两层 lambda 函数最终是为了注册特定指标的监听器，并定义事件结束时的处理逻辑（内层的lambda）。在处理事件时，会调用混合指标收集器（CombMetricsCollector） 的 &lt;code>addRT&lt;/code> 方法添加响应时间计时，还会调用 &lt;code>setNum&lt;/code> 来添加指标计数。&lt;/p>
+&lt;p>由于此处的 &lt;code>MetricsKey&lt;/code> 在 MetricsCat创建时就被传入，我们可以确定这两个字段存储了以下两个指标的统计逻辑：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>NOTIFY_METRIC_NUM_LAST：Last Notify Nums , 最后一个事件完成时的计数 。监听器中使用的是 &lt;code>setNum&lt;/code>，事件结束时直接更新指定key指标的计数为传入的值，同时使用 &lt;code>addRt &lt;/code> 来统计事件持续时长&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>DIRECTORY_METRIC_NUM_VALID：Valid Directory Urls，服务目录中注册成功的url数量。监听器中同样使用的是 &lt;code>setNum&lt;/code>，事件结束后直接更新为服务目录中的最新计数&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>之后，三个相关的 MetricsCat（指标类型） 实例会被绑定到一个 CategoryOverall（指标综合） 实例中，绑定的逻辑按一个事件进行的三个过程：&lt;strong>事件发生、事件结束、事件失败&lt;/strong>，分别对应 CategoryOverall 的第2、3、4个参数，其中事件发生时的逻辑不能为 null。而第一个参数为 &lt;code>MetricsPlaceType&lt;/code>，该参数封装了指标类型标识（如 register 服务注册、subscribe 服务订阅）和该指标的收集级别（应用还是服务）。&lt;/p>
+&lt;p>还记得 &lt;code>MetricsCat&lt;/code> 中 &lt;code>TpFunction&lt;/code> 的三个入参吗？其中第二个 placeType 就是这个参数。 &lt;code>CategoryOverall&lt;/code> 在构造时会将它设置到其中的三个 MetricsCat 中。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// CategorySet:常量接口，同样位于RegistryMetricsEventMulticaster中&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">CategorySet&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CategoryOverall APPLICATION_NOTIFY &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CategoryOverall(OP_TYPE_NOTIFY, MCat.APPLICATION_NOTIFY_POST, MCat.APPLICATION_NOTIFY_FINISH, &lt;span style="color:#cb4b16">null&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CategoryOverall SERVICE_DIRECTORY &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CategoryOverall(OP_TYPE_DIRECTORY, MCat.APPLICATION_DIRECTORY_POST, &lt;span style="color:#cb4b16">null&lt;/span>, &lt;span style="color:#cb4b16">null&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CategoryOverall SERVICE_REGISTER &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> CategoryOverall(OP_TYPE_REGISTER_SERVICE, MCat.SERVICE_REGISTER_POST, MCat.SERVICE_REGISTER_FINISH, MCat.SERVICE_REGISTER_ERROR);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>CategoryOverall&lt;span style="color:#719e07">&amp;gt;&lt;/span> ALL &lt;span style="color:#719e07">=&lt;/span> Arrays.asList(APPLICATION_REGISTER, APPLICATION_SUBSCRIBE, APPLICATION_NOTIFY, SERVICE_DIRECTORY, SERVICE_REGISTER, SERVICE_SUBSCRIBE);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>CategorySet&lt;/code> 中的常量都会被封装到List中，在 &lt;code>RegistryMetricsEventMulticaster&lt;/code> 创建时统一调用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RegistryMetricsCollector&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">RegistryMetricsEventMulticaster&lt;/span>(RegistryMetricsCollector collector) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CategorySet.ALL.forEach(categorySet &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//通过 MetricsCat 实例中的定义的监听器创建逻辑，逐个注册监听器&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.addListener(categorySet.getPost().getEventFunc().apply(collector));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (categorySet.getFinish() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.addListener(categorySet.getFinish().getEventFunc().apply(collector));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (categorySet.getError() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.addListener(categorySet.getError().getEventFunc().apply(collector));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>由此，我们也明确了 RegistryMetricsEventMulticaster （指标注册事件多播器）的作用&lt;/strong>：统一定义、管理事件，并在初始化时注册其中定义各种事件的&lt;strong>监听器&lt;/strong>。&lt;/p>
+&lt;p>它继承了 SimpleMetricsEventMulticaster，其中的 publishEvent 方法在被调用时就会尝试调用所有监听器，判断其是否对当前事件类型感兴趣，选择是否进行调用。同时，这些监听器会对特定指标数据进行计算，更新到对应的收集器中。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//SimpleMetricsEventMulticaster&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">publishEvent&lt;/span>(MetricsEvent event) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (event &lt;span style="color:#719e07">instanceof&lt;/span> EmptyEvent) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (validateIfApplicationConfigExist(event)) &lt;span style="color:#719e07">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (MetricsListener listener : listeners) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (listener.isSupport(event)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> listener.onEvent(event);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们通过分析混合指标收集器（CombMetricsCollector） 中的 setNum 方法的用法，了解到了 Composite 中的数据来源之一是注册指标事件多播器（RegistryMetricsEventMulticaster）中为服务注册相关指标创建的指标监听器。实际上，increment、addRt方法都是由指标监听器的各个实现调用的。&lt;/p>
+&lt;p>应用程序指标监听器（MetricsApplicationListener）中提供了 AbstractMetricsListener 的几个匿名实现，提供&lt;strong>应用层面事件发生、完成、抛出异常三种情况下对给定指标的计数或RT的计算&lt;/strong>，大多数用做处理应用层面指标事件的 MetricsListener 都是它提供的三个监听器实现：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsApplicationListener&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> AbstractMetricsListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">MetricsApplicationListener&lt;/span>(MetricsKey metricsKey) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>(metricsKey);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//此处的Event均为TimeCounterEvent，在它被创建时就会自动开始计时&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> AbstractMetricsListener &lt;span style="color:#268bd2">onPostEventBuild&lt;/span>(MetricsKey metricsKey, CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> collector) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> AbstractMetricsListener.onEvent(metricsKey,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span> collector.increment(event.appName(), metricsKey)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> AbstractMetricsListener &lt;span style="color:#268bd2">onFinishEventBuild&lt;/span>(MetricsKey metricsKey, MetricsPlaceType placeType, CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> collector) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> AbstractMetricsListener.onFinish(metricsKey,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increment(event.appName(), metricsKey);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.addRt(event.appName(), placeType.getType(), event.getTimePair().calc());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> AbstractMetricsListener &lt;span style="color:#268bd2">onErrorEventBuild&lt;/span>(MetricsKey metricsKey, MetricsPlaceType placeType, CombMetricsCollector&lt;span style="color:#719e07">&amp;lt;&lt;/span>TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> collector) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> AbstractMetricsListener.onError(metricsKey,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increment(event.appName(), metricsKey);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.addRt(event.appName(), placeType.getType(), event.getTimePair().calc());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>还有 MetricsServiceListener（服务指标监听器），它和 MetricsApplicationListener 十分类似，提供的是服务层面的指标监听器的通用实现，不再重复分析。&lt;/p>
+&lt;p>&lt;strong>可以用一句话简单的总结这三个 Collector 注册指标监听器的流程 ： Collector 内部的 Mulicaster/Dispatcher 在被 Collector 创建时直接向自己注册已声明的指标监听器。&lt;/strong>&lt;/p>
+&lt;p>至此，我们可以总结出 MetricsEvent 的部分消息转发路径 ：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/event-dispatch-simple.png" alt="event-dispatch-simple">&lt;/p>
+&lt;h3 id="2dubbo-核心模块的指标采集流程">2，Dubbo 核心模块的指标采集流程&lt;/h3>
+&lt;p>DefaultMetricsCollector（默认指标采集器） 作为指标采集器的默认实现，其主要通过采样器（Sampler）收集dubbo应用核心RPC功能的相关指标。 采样器包括以下几种：&lt;/p>
+&lt;ul>
+&lt;li>线程池线程状态（最大线程数、最小线程数、活跃线程数等），对应 &lt;strong>ThreadPoolMetricsSampler，线程池指标采样器&lt;/strong>&lt;/li>
+&lt;li>线程池中线程耗尽事件的计数，对应 &lt;strong>ThreadRejectMetricsCountSampler， 线程耗尽次数采样器&lt;/strong>&lt;/li>
+&lt;li>应用指标收集情况（收集次数），对应 DefaultMetricsCollector 中实现的 SimpleMetricsCountSampler 匿名子类&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>这些采样器内部会存储其负责采样类型指标的样本。由于默认指标采集器同样继承自 CombMetricsCollector，它也同时具有与前文中分析的三大中心指标收集器相似的指标转发流程。&lt;/strong>&lt;/p>
+&lt;p>除了线程池指标采样器，其它两个采样器均实现自简单指标计数采样器（SimpleMetricsCountSampler）。它实现了通用的指标存取操作。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/sampler-struct.png" alt="sampler-struct">&lt;/p>
+&lt;p>简单指标计数采样器内部的指标样本容器：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">abstract&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">SimpleMetricsCountSampler&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>S, K, M &lt;span style="color:#268bd2">extends&lt;/span> Metric&lt;span style="color:#719e07">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCountSampler&lt;span style="color:#719e07">&amp;lt;&lt;/span>S, K, M&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>K, ConcurrentMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>M, AtomicLong&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> metricCounter &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>其中：泛型 M 为指标类型，如方法指标 MethodMetric；泛型 K 为指标名称类型，如 String；泛型 S 为请求源类型，如 String 或 Invocation。请求源用于定位触发采样的请求来源，指标名称则用于对指标进行分组，便于按名称来分组检索指标数据。&lt;/strong>&lt;/p>
+&lt;p>以及对特定指标的增减操作：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//SimpleMetricsCountSampler&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">inc&lt;/span>(S source, K metricName) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> doExecute(source, metricName, counter &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> counter.incrementAndGet();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">dec&lt;/span>(S source, K metricName) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> doExecute(source, metricName, counter &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> counter.decrementAndGet();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">incOnEvent&lt;/span>(S source, K metricName) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> doExecute(source, metricName, counter &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> counter.incrementAndGet();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">decOnEvent&lt;/span>(S source, K metricName) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> doExecute(source, metricName, counter &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> counter.decrementAndGet();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>对于四个增加、减少计数的方法，它们最终都会调用 &lt;code>doExecute&lt;/code> 方法来完成计数操作，其中 counter 函数定义了对计数器的操作（增加、减少）。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//SimpleMetricsCountSampler&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doExecute&lt;/span>(S source, K metricsName, Function&lt;span style="color:#719e07">&amp;lt;&lt;/span>AtomicLong, Boolean&lt;span style="color:#719e07">&amp;gt;&lt;/span> counter) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsCountSampleConfigurer&lt;span style="color:#719e07">&amp;lt;&lt;/span>S, K, M&lt;span style="color:#719e07">&amp;gt;&lt;/span> sampleConfigure &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetricsCountSampleConfigurer&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sampleConfigure.setSource(source);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sampleConfigure.setMetricsName(metricsName);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//利用子类重写的countConfigure为 sampleConfigure 设置事件发布函数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.countConfigure(sampleConfigure);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//通过指标名获取对应的指标计数器&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>M, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> metricAtomic &lt;span style="color:#719e07">=&lt;/span> metricCounter.get(metricsName);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (metricAtomic &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metricAtomic &lt;span style="color:#719e07">=&lt;/span> metricCounter.computeIfAbsent(metricsName, k &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Assert.notNull(sampleConfigure.getMetric(), &lt;span style="color:#2aa198">&amp;#34;metrics is null&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AtomicLong atomicCounter &lt;span style="color:#719e07">=&lt;/span> metricAtomic.get(sampleConfigure.getMetric());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (atomicCounter &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> atomicCounter &lt;span style="color:#719e07">=&lt;/span> metricAtomic.computeIfAbsent(sampleConfigure.getMetric(), k &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AtomicLong());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// counter函数定义了对atomicCounter的增减操作，如 inc方法定义的counter是对atomicCounter+1，dec方法定义的是对atomicCounter-1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Boolean isEvent &lt;span style="color:#719e07">=&lt;/span> counter.apply(atomicCounter);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//如果本次计数操作应该触发事件...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (isEvent) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取子类设置的事件发布函数，发布事件&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sampleConfigure.getFireEventHandler().accept(sampleConfigure);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>doExecute&lt;/code> 做了两件事：&lt;/p>
+&lt;p>1，判断当前指标是否存在，如果不存在就放到容器中。&lt;/p>
+&lt;p>2，调用提供的计数函数对指标进行修改，对应 counter 字段。&lt;/p>
+&lt;p>以下为各采样器在 countConfigure 方法中提供的创建指标实例的逻辑：&lt;/p>
+&lt;ul>
+&lt;li>DefaultMetricsCollector 中 SimpleMetricsCountSampler 的匿名实现 （applicationSampler）提供的&lt;code>countConfigure&lt;/code> 方法：&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">countConfigure&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsCountSampleConfigurer&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, MetricsEvent.Type, ApplicationMetric&lt;span style="color:#719e07">&amp;gt;&lt;/span> sampleConfigure) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//提供根据 configure 创建指标实例的函数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sampleConfigure.configureMetrics(configure &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ApplicationMetric(sampleConfigure.getSource()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>ThreadRejectMetricsCountSampler 中提供的 &lt;code>countConfigure&lt;/code> 方法：&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">countConfigure&lt;/span>(MetricsCountSampleConfigurer&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String, ThreadPoolRejectMetric&lt;span style="color:#719e07">&amp;gt;&lt;/span> sampleConfigure) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//提供根据 configure 创建指标实例的函数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sampleConfigure.configureMetrics(configure &lt;span style="color:#719e07">-&amp;gt;&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ThreadPoolRejectMetric(collector.getApplicationName(),configure.getSource()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;p>默认指标收集器继承自 CombMetricsCollector，内部包含一个 DefaultSubDispatcher，因此它自身也可以作为指标事件的转发器，接受其它指标监听器的注册。&lt;/p>
+&lt;p>在之前，我们发现了 AggregateMetricsCollector（聚合指标收集器）会将自己注册为 DefaultMetricsCollector 的监听器：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registerListener();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerListener&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>applicationModel.getBeanFactory().getBean(DefaultMetricsCollector.class).addListener(&lt;span style="color:#719e07">this&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>还有 HistogramMetricsCollector （直方图指标收集器）也会将自己注册为它的监听器。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">HistogramMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registerListener();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerListener&lt;/span>() { applicationModel.getBeanFactory().getBean(DefaultMetricsCollector.class).getEventMulticaster().addListener(&lt;span style="color:#719e07">this&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>因此，聚合指标收集器和直方图指标收集器的指标事件来源于默认指标收集器转发的指标事件&lt;/strong>。通过默认指标转发器的 isSupport 方法，还可以发现这些指标事件的类型是 RequestEvent （RPC请求事件）或 RequestBeforeEvent（请求前失败事件：实际请求发送之前在 ClusterFilter 中产生的异常）。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">isSupport&lt;/span>(MetricsEvent event) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> event &lt;span style="color:#719e07">instanceof&lt;/span> RequestEvent &lt;span style="color:#719e07">||&lt;/span> event &lt;span style="color:#719e07">instanceof&lt;/span> RequestBeforeEvent;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/default-metrics-collector-struct.png" alt="default-metrics-collector-struct">&lt;/p>
+&lt;p>&lt;strong>至此，我们也明确了 Dubbo 应用内部核心模块的相关指标是如何收集的：默认指标收集器除了接受上层指标转发器的指标事件之外，还会通过各种采样器对埋点采样，通过 SubDispatcher 统一转发指标事件，通知注册为它的监听器的其它 Collector 完成采样。&lt;/strong>&lt;/p>
+&lt;h3 id="3-直方图相关指标的采集流程">3， 直方图相关指标的采集流程&lt;/h3>
+&lt;p>直方图指标收集器（HistogramMetricsCollector）也是一个较为特殊的收集器，它主要负责RPC调用响应时间直方图指标这一种指标的收集。&lt;/p>
+&lt;p>由于直方图指标收集器只需要采集单一类型的指标，它直接使用Map来存储采样数据，而非更复杂的数据聚合器（Composite）。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//HistogramMetricsCollector&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, Timer&lt;span style="color:#719e07">&amp;gt;&lt;/span> rt &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>其中，key为方法指标，Timer则是该方法对应的RT计时器。该计时器由 micrometer 提供，在跟踪短时间内的大量事件时具有良好的性能。&lt;/strong>&lt;/p>
+&lt;p>前文中已经提到，直方图指标收集器在初始化时会将自己注册为默认指标收集器（DefaultMetricsCollector）中的监听器，与聚合指标收集器相同（AggregateMetricsCollector）。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerListener&lt;/span>() { applicationModel.getBeanFactory().getBean(DefaultMetricsCollector.class).getEventMulticaster().addListener(&lt;span style="color:#719e07">this&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这意味着它接收的指标事件实际也来自于默认指标收集器中的采样器。之前的分析中，我们知道默认指标收集器目前实际只转发来自 MetricsDispatcher 的请求相关事件，因此直方图指标收集器也只会收集请求响应时间相关的指标采样。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//HistogramMetricsCollector&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onRTEvent&lt;/span>(RequestEvent event) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (metricRegister &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MethodMetric metric &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MethodMetric(applicationModel.getApplicationName(), event.getAttachmentValue(MetricsConstants.INVOCATION));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> responseTime &lt;span style="color:#719e07">=&lt;/span> event.getTimePair().calc();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HistogramMetricSample sample &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HistogramMetricSample(MetricsKey.METRIC_RT_HISTOGRAM.getNameByType(metric.getSide()),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsKey.METRIC_RT_HISTOGRAM.getDescription(), metric.getTags(), RT);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Timer timer &lt;span style="color:#719e07">=&lt;/span> ConcurrentHashMapUtils.computeIfAbsent(rt, metric, k &lt;span style="color:#719e07">-&amp;gt;&lt;/span> metricRegister.register(sample));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timer.record(responseTime, TimeUnit.MILLISECONDS);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当接收到事件时，直方图指标收集器会先计算当前调用花费的时间，然后为计时器（Time）添加一条响应时间记录。&lt;/p></description></item><item><title>Blog: 3-指标监听注册梳理</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</guid><description>
+&lt;h2 id="三指标监听注册梳理">三、指标监听注册梳理&lt;/h2>
+&lt;p>在前一章中，我们了解了不同收集器中的指标样本是如何被监听器添加进去的。接下来，我们将归纳指标监听器 的创建位置，及它们对应统计的指标。&lt;/p>
+&lt;p>通过之前的分析，我们已经知道指标 注册事件多播器（RegistryMetricsEventMulticaster）中定义了并绑定了服务注册相关的指标。这种绑定操作同样存在于其它几个简单指标事件多播器（SimpleMetricsEventMulticaster）的几个实现中。&lt;/p>
+&lt;h3 id="转发器注册">转发器注册&lt;/h3>
+&lt;p>&lt;strong>RegistrySubDispatcher （服务注册指标转发器）注册了服务注册相关指标：&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>应用级实例注册成功/失败/总数计数 （APPLICATION_REGISTER_&amp;hellip;)&lt;/li>
+&lt;li>应用级服务接口订阅成功/失败/总数计数 （APPLICATION_SUBSCRIBE_&amp;hellip;)&lt;/li>
+&lt;li>服务级注册成功/失败/总数计数 （SERVICE_REGISTER_&amp;hellip;）&lt;/li>
+&lt;li>特殊的 APPLICATION_NOTIFY_FINISH 和 APPLICATION_DIRECTORY_POST （应用服务目录变化次数）&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>MetadataSubDispatcher（元数据指标转发器）注册应用元数据相关指标&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>应用推送元数据相关计数 （APPLICATION_PUSH_&amp;hellip;)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>应用订阅元数据相关计数 （APPLICAITON_SUBSCRIBE_&amp;hellip;）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>服务订阅元数据相关计数 （SERVICE_SUBSCRIBE_&amp;hellip;）&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>ConfigCenterSubDispatcher (配置中心指标转发器) 注册配置中心配置更新次数指标&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>配置中心推送新配置次数 （CONFIGCENTER_METRIC_TOTAL）&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>DefaultSubDispatcher (默认转发器) 注册核心RPC调用次数指标&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>请求次数 （METRIC_REQUESTS）&lt;/li>
+&lt;li>请求成功次数（METRIC_REQUESTS_SUCCEED）&lt;/li>
+&lt;li>请求失败次数（METRIC_REQUEST_BUSINESS_FAILED）&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>MetricsDispatcher&lt;/strong>&lt;/p>
+&lt;p>MetricsDispatcher 较为特殊，它负责 ApplicationModel 下所有 MetricsCollector（前文中提到的指标收集器） 的初始化注册工作，并将它们添加到自己的监听器列表中。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsDispatcher&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> SimpleMetricsEventMulticaster {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@SuppressWarnings&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;rawtypes&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">MetricsDispatcher&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ScopeBeanFactory beanFactory &lt;span style="color:#719e07">=&lt;/span> applicationModel.getBeanFactory();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExtensionLoader&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCollector&lt;span style="color:#719e07">&amp;gt;&lt;/span> extensionLoader &lt;span style="color:#719e07">=&lt;/span> applicationModel.getExtensionLoader(MetricsCollector.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (extensionLoader &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCollector&lt;span style="color:#719e07">&amp;gt;&lt;/span> customizeCollectors &lt;span style="color:#719e07">=&lt;/span> extensionLoader
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .getActivateExtensions();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (MetricsCollector customizeCollector : customizeCollectors) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> beanFactory.registerBean(customizeCollector);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> customizeCollectors.forEach(&lt;span style="color:#719e07">this&lt;/span>::addListener);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>需要注意，以上几个实现均继承自 SimpleMetricsEventMulticaster，因此它们都具有注册监听、转发事件的能力。它们将自己注册到对应领域的指标 Collector 中，并在收到指标事件时转发到自己注册的监听器中。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//SimpleMetricsEventMulticaster&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">addListener&lt;/span>(MetricsListener&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> listener) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> listeners.add(listener);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">publishEvent&lt;/span>(MetricsEvent event) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (event &lt;span style="color:#719e07">instanceof&lt;/span> EmptyEvent) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (validateIfApplicationConfigExist(event)) &lt;span style="color:#719e07">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (MetricsListener listener : listeners) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (listener.isSupport(event)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> listener.onEvent(event);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//...&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>SubDispatcher 和 Collector 之间的对应关系：&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>MetadataSubDispatcher -&amp;gt; MetadataMetricsCollector 元数据指标事件&lt;/li>
+&lt;li>RegistrySubDispatcher -&amp;gt; RegistryMetricsCollector 服务注册指标事件&lt;/li>
+&lt;li>ConfigCenterSubDispatcher -&amp;gt; ConfigCenterMetricsCollector 配置中心指标事件&lt;/li>
+&lt;li>MetricsDispatcher 由 MetricsEventBus 通过 BeanFactory 加载。它是所有事件转发的入口。&lt;/li>
+&lt;/ul>
+&lt;h3 id="事件触发">事件触发&lt;/h3>
+&lt;p>剩下的问题就是这些监听器是如何被触发的。&lt;/p>
+&lt;p>可以发现三大中心的指标转发器都是在它们对应的Collector中创建的：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">ConfigCenterMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.setEventMulticaster(&lt;span style="color:#719e07">new&lt;/span> ConfigCenterMetricsDispatcher(&lt;span style="color:#719e07">this&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">MetadataMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.setEventMulticaster(&lt;span style="color:#719e07">new&lt;/span> MetadataMetricsEventMulticaster(&lt;span style="color:#719e07">this&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">RegistryMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.setEventMulticaster(&lt;span style="color:#719e07">new&lt;/span> RegistryMetricsEventMulticaster(&lt;span style="color:#719e07">this&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这意味这想要通过它们发布事件，需要通过它们对应的 &lt;code>Collector&lt;/code> 来访问。&lt;/p>
+&lt;p>如前文所述， MetricsDispatcher 在初始化时会尝试获取并加载所有 MetricsCollector 的SPI拓展，&lt;/p>
+&lt;p>三大中心的MetricsCollector （Metadata/Registry/ConfigCenter）也会在这里被初始化，并添加为 MetricsDispatcher 的监听器：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">MetricsDispatcher&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExtensionLoader&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCollector&lt;span style="color:#719e07">&amp;gt;&lt;/span> extensionLoader &lt;span style="color:#719e07">=&lt;/span> applicationModel.getExtensionLoader(MetricsCollector.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (MetricsCollector customizeCollector : customizeCollectors) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> beanFactory.registerBean(customizeCollector);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> customizeCollectors.forEach(&lt;span style="color:#719e07">this&lt;/span>::addListener);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>对于 MetricsDispatcher，它由 MetricsEventBus 创建。而 MetricsEventBus 自身作为指标相关消息的总线，会接收所有指标消息，并将它们转发给监听者。&lt;/p>
+&lt;p>MetricsEvenetBus 提供了三个方法来发布指标事件：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>publish(MetricsEvent event)&lt;/code> ，将事件发布给所有订阅者，只发布一次且不关心事件处理结果&lt;/li>
+&lt;li>&lt;code>post(MetricsEvent event, Supplier&amp;lt;T&amp;gt; targetSupplier)&lt;/code> ，将事件发布给所有订阅者，并根据是否产生异常判断事件成功或失败，调用 MetricsDispatcher 发布对应的事件。&lt;/li>
+&lt;li>&lt;code>post(MetricsEvent event, Supplier&amp;lt;T&amp;gt; targetSupplier, Function&amp;lt;T, Boolean&amp;gt; trFunction)&lt;/code> ，额外的 trFunction 可用于通过业务结果判断事件成功或失败。 &lt;code>targetSupplier&lt;/code> 为业务操作函数，泛型T为业务结果类型。&lt;/li>
+&lt;/ul>
+&lt;p>这三个方法均会通过 MetricsDispatcher 来转发事件。&lt;/p>
+&lt;p>在之前的分析中，我们知道 MetricsDispatcher 创建了所有 MetricsCollector 拓展，并将它们注册为自己的监听者。&lt;/p>
+&lt;p>因此，当 MetricsEventBus 接收到发布的信息时，它会将信息转发到所有 MetricsCollector 中。对于 CombMetricsCollector 的实现，它们又会调用自己创建的 MetricsEventMulticaster 再次转发消息，到具体指标的监听器。&lt;/p>
+&lt;p>之后，这些监听器就会根据自己的逻辑修改Collector中的指标计数。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/metrics-source-blog/metris-event-dispatch-full.png" alt="image-20230629160012950">&lt;/p>
+&lt;h3 id="事件发布">事件发布&lt;/h3>
+&lt;p>接下来，我们将寻找指标事件发布的源头。&lt;/p>
+&lt;p>通过前文的分析，我们知道 MetricsEventBus 是所有指标事件发布的入口。具体来说，它有以下的用法：&lt;/p>
+&lt;ul>
+&lt;li>AbstractDirectory&lt;/li>
+&lt;li>ServiceConfig&lt;/li>
+&lt;li>DefaultApplicationDeployer&lt;/li>
+&lt;li>ApolloDynamicConfiguration&lt;/li>
+&lt;li>NacosDynamicConfiguration&lt;/li>
+&lt;li>ZookeeperDataListener&lt;/li>
+&lt;li>AbstractMetadataReport&lt;/li>
+&lt;/ul>
+&lt;p>我们将逐个分析每个用法。&lt;/p>
+&lt;p>&lt;strong>AbstractDirectory&lt;/strong>&lt;/p>
+&lt;p>AbstractDirectory 在修改 Invoker 状态相关的操作完成后都会通过 MetricsEventBus 发布 refreshDirectoryEvent（服务目录更新事件，类型为 RegistryEvent ），将当前目录中各种状态 Invoker 实例的最新数量作为附件添加到 RegistryEvent 中。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//AbstractDirectory&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">recoverDisabledInvoker&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> invoker) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(RegistryEvent.refreshDirectoryEvent(applicationModel, getSummary()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setInvokers&lt;/span>(BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(RegistryEvent.refreshDirectoryEvent(applicationModel, getSummary()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setInvokers&lt;/span>(BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(RegistryEvent.refreshDirectoryEvent(applicationModel, getSummary()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsKey, Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Integer&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getSummary&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsKey, Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Integer&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> summaryMap &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//目录中可用的Invoker数量&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> summaryMap.put(MetricsKey.DIRECTORY_METRIC_NUM_VALID, groupByServiceKey(getValidInvokers()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//目录中不可用的Invoker数量&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> summaryMap.put(MetricsKey.DIRECTORY_METRIC_NUM_DISABLE, groupByServiceKey(getDisabledInvokers()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//目录中等待重连的Invoker数量&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> summaryMap.put(MetricsKey.DIRECTORY_METRIC_NUM_TO_RECONNECT, groupByServiceKey(getInvokersToReconnect()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> summaryMap.put(MetricsKey.DIRECTORY_METRIC_NUM_ALL, groupByServiceKey(getInvokers()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> summaryMap;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该事件最终会由 RegistryMetricsCollector 中的 RegistryMetricsDispatcher 转发到关系该事件的监听器中。&lt;strong>事件和监听器之间通过 MetricsKey匹配&lt;/strong> 。&lt;/p>
+&lt;p>最终，MetricsKey 为 &lt;code>**DIRECTORY_METRIC_NUM_VALID** &lt;/code> 的监听器会处理这个事件，并更新 Collector中的计数。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//DIRECTORY_METRIC_NUM_VALID 对应的 Listener。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>MetricsCat APPLICATION_DIRECTORY_POST &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetricsCat(MetricsKey.DIRECTORY_METRIC_NUM_VALID, (key, placeType, collector) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> AbstractMetricsListener.onEvent(key,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsKey, Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Integer&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> summaryMap &lt;span style="color:#719e07">=&lt;/span> event.getAttachmentValue(ATTACHMENT_DIRECTORY_MAP);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> summaryMap.forEach((metricsKey, map) &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map.forEach(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> (k, v) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> collector.setNum(metricsKey, event.appName(), k, v)));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样，服务目录中不同状态 Invoker 的计数就通过 RegistryMetricsCollector 更新到了 ServiceStatComposite 中。&lt;/p>
+&lt;p>&lt;strong>ServiceConfig&lt;/strong>&lt;/p>
+&lt;p>当通过 ServiceConfig 导出、注册一个服务时，它会发布一个服务导出事件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ServiceConfig &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doExport&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> doExportUrls();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> exported();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doExportUrls&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.post(RegistryEvent.toRsEvent(module.getApplicationModel(), getUniqueServiceName(), protocols.size() &lt;span style="color:#719e07">*&lt;/span> registryURLs.size()),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//该函数会被同步执行，如果抛出异常则触发 MetricsEvent 的 onError方法，否则触发 onFinish&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> () &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (ProtocolConfig protocolConfig : protocols) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String pathKey &lt;span style="color:#719e07">=&lt;/span> URL.buildKey(getContextPath(protocolConfig)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .map(p &lt;span style="color:#719e07">-&amp;gt;&lt;/span> p &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> path)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .orElse(path), group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>serverService) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> repository.registerService(pathKey, interfaceClass);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> doExportUrlsFor1Protocol(protocolConfig, registryURLs);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> providerModel.setServiceUrls(urls);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>事件发布时，该事件会被转发到 RegistryMetricsCollector，触发对应的 Listener 增加 &lt;strong>SERVICE_REGISTER_METRIC_REQUESTS&lt;/strong> （当前服务级注册请求总数）的计数，然后执行定义的 provider 函数。根据是否抛出异常，之后执行 onError 方法 或 onFinish 方法，增加 &lt;strong>SERVICE_REGISTER_METRIC_REQUESTS_FAILED&lt;/strong> （当前服务级注册请求失败总数）或&lt;strong>SERVICE_REGISTER_METRIC_REQUESTS_SUCCEED&lt;/strong> （当前服务级注册请求成功总数） 的计数。&lt;/p>
+&lt;p>&lt;strong>DefaultApplicationDeployer&lt;/strong>&lt;/p>
+&lt;p>它在应用部署过程中，初始化配置中心时，发布配置发生改变的事件。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">startConfigCenter&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> compositeDynamicConfiguration.addConfiguration(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prepareEnvironment(configCenter)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> DynamicConfiguration &lt;span style="color:#268bd2">prepareEnvironment&lt;/span>(ConfigCenterConfig configCenter) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Add metrics&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, configCenter.getConfigFile(), configCenter.getGroup(),configCenter.getProtocol(), ConfigChangeType.ADDED.name(), configMap.size()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (isNotEmpty(appGroup)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, appConfigFile, appGroup, configCenter.getProtocol(), ConfigChangeType.ADDED.name(), appConfigMap.size()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 &lt;code>prepareEnvironment&lt;/code> 方法中，会按配置中心设置的组（group）和当前应用程序的名称作为组名发布两次事件。该事件会被转发到 ConfigCenterMetricsCollector，增加 &lt;strong>CONFIGCENTER_METRIC_TOTAL&lt;/strong> （配置中心配置变化次数）的计数。&lt;/p>
+&lt;p>&lt;strong>ApolloDynamicConfiguration&lt;/strong>&lt;/p>
+&lt;p>动态配置功能的 Apollo 配置中心实现。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ApolloDynamicConfiguration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onChange&lt;/span>(com.ctrip.framework.apollo.model.ConfigChangeEvent changeEvent) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, event.getKey(), event.getGroup(),ConfigCenterEvent.APOLLO_PROTOCOL, ConfigChangeType.ADDED.name(), SELF_INCREMENT_SIZE));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Apollo配置中心的配置发生变化时，它的 &lt;code>onChange&lt;/code> 方法会被触发，并在最后发布一个 ConfigCenterEvent。该事件最终转发到ConfigCenterMetricsCollector 中，同样增加 &lt;strong>CONFIGCENTER_METRIC_TOTAL&lt;/strong> 的计数。&lt;/p>
+&lt;p>&lt;strong>NacosDynamicConfiguration&lt;/strong>&lt;/p>
+&lt;p>动态配置功能的 Nacos 配置中心实现。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//NacosDynamicConfiguration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">innerReceive&lt;/span>(String dataId, String group, String configInfo) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, event.getKey(), event.getGroup(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigCenterEvent.NACOS_PROTOCOL, ConfigChangeType.ADDED.name(), SELF_INCREMENT_SIZE));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当Nacos配置中心的配置发生变化时，它的 &lt;code>innerReceive&lt;/code> 方法被触发，发布一个 ConfigCenterEvent。它的处理流程和 ApolloDynamicConfiguration 一致，最终增加 &lt;strong>CONFIGCENTER_METRIC_TOTAL&lt;/strong> 的计数。&lt;/p>
+&lt;p>&lt;strong>ZookeeperDataListener&lt;/strong>&lt;/p>
+&lt;p>动态配置功能的 Zookeeper 实现。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//ZookeeperDataListener&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">dataChanged&lt;/span>(String path, Object value, EventType eventType) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.publish(ConfigCenterEvent.toChangeEvent(applicationModel, configChangeEvent.getKey(), configChangeEvent.getGroup(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigCenterEvent.ZK_PROTOCOL, ConfigChangeType.ADDED.name(), SELF_INCREMENT_SIZE));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在指标收集层面，它的行为和前文中两个配置中心一致，此处不详细展开三个配置中心具体实现的异同。&lt;/p>
+&lt;p>&lt;strong>AbstractMetadataReport&lt;/strong>&lt;/p>
+&lt;p>元数据报告接口的抽象实现。它的三个实现 （NacosMetadataReport、RedisMetadataReport、ZookeeperMetadataReport）均使用它的指标事件逻辑。&lt;/p>
+&lt;p>当订阅新服务并获取它的元数据时，它会发布一个 MetadataEvent 触发相关指标的修改。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">storeProviderMetadataTask&lt;/span>(MetadataIdentifier providerMetadataIdentifier, ServiceDefinition serviceDefinition) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsEventBus.post(metadataEvent, () &lt;span style="color:#719e07">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> result &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> doStoreProviderMetadata(providerMetadataIdentifier, data);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> saveProperties(providerMetadataIdentifier, data, &lt;span style="color:#cb4b16">true&lt;/span>, &lt;span style="color:#719e07">!&lt;/span>syncReport);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Exception e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }, aBoolean &lt;span style="color:#719e07">-&amp;gt;&lt;/span> aBoolean
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> );
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在前文中，我们提到 MetricsEventBus.post 的第二个参数是实际要进行的业务操作，第三个参数则是根据业务操作返回值判断操作是否成功的逻辑。&lt;/p>
+&lt;p>此处的业务操作是尝试存储目标服务的元数据。执行操作之前，会先发布事件，最终增加 &lt;strong>STORE_PROVIDER_METADATA&lt;/strong> （尝试存储服务元数据次数）的计数。如果产生异常，会增加 &lt;strong>STORE_PROVIDER_METADATA_ERROR&lt;/strong> （存储服务元数据失败） 的计数，否则增加&lt;strong>STORE_PROVIDER_METADATA_SUCCEED&lt;/strong>（存储服务元数据成功） 的计数。&lt;/p></description></item><item><title>Blog: 4-指标转换与导出</title><link>https://dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</guid><description>
+&lt;h2 id="四指标转换与导出">四、指标转换与导出&lt;/h2>
+&lt;p>本章主要梳理指标收集完成后，向外部收集器导出的流程。&lt;/p>
+&lt;p>通过之前的分析，我们知道不同类型指标的收集分别由各个 Collector 实现进行。它们底层的 MetricsCollector 接口定义了指标导出的操作。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SPI&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsCollector&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>E &lt;span style="color:#268bd2">extends&lt;/span> TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> MetricsLifeListener&lt;span style="color:#719e07">&amp;lt;&lt;/span>E&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">isCollectEnabled&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Collect metrics as {@link MetricSample}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return List of MetricSample
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricSample&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">collect&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>而指标报告器 (MetricsReporter) 的实现会定时调用Collector 的 &lt;code>collect&lt;/code> 方法，更新并导出指标数据。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsReporter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//初始化&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//刷新统计数据，定时调用collect()&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">refreshData&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取指标数据&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">getResponse&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取带指标名的指标样本（单个指标）&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span> String &lt;span style="color:#268bd2">getResponseWithName&lt;/span>(String metricsName) { &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>; }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>指标报告器有两个实现：DefaultMetricsReporter 和 PrometheusMetricsReporter，它们都实现自 AbstractMetricsRepoter，并使用它的指标刷新逻辑 (&lt;code>refreshData&lt;/code>方法)。&lt;/p>
+&lt;p>AbstractMetricsRepoter 初始化时会获取并保存所有 Collector 的实现，每次刷新数据，调用&lt;code>refreshData&lt;/code>方法时都会遍历这些收集器，更新指标数据。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//AbstractMetricsRepoter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">initCollectors&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCollector&lt;span style="color:#719e07">&amp;gt;&lt;/span> otherCollectors &lt;span style="color:#719e07">=&lt;/span> beanFactory.getBeansOfType(MetricsCollector.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collectors.addAll(otherCollectors);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">refreshData&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collectors.forEach(collector &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricSample&lt;span style="color:#719e07">&amp;gt;&lt;/span> samples &lt;span style="color:#719e07">=&lt;/span> collector.collect();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (MetricSample sample : samples) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//将Dubbo的度量类型适配为micrometer的度量类型，并将其添加到CompositeMeterRegistry中，借此实现多监控系统的支持。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>DefaultMetricsReporter 和 PrometheusMetricsReporter 各自实现了自己的指标采样逻辑 (&lt;code>getResponse&lt;/code>方法)。&lt;/p>
+&lt;p>&lt;strong>PrometheusMetricsReporter&lt;/strong>&lt;/p>
+&lt;p>它通过 PrometheusMeterRegistry 获取普罗米修斯支持格式的样本数据：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//PrometheusMetricsReporter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getResponse&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> prometheusRegistry.scrape();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在初始化时，它会开启一个定时任务，定时向普罗米修斯服务端推送采样数据：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//PrometheusMetricsReporter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SimpleMeterRegistry meterRegistry &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> SimpleMeterRegistry();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doInit&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> addMeterRegistry(prometheusRegistry);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> schedulePushJob();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">schedulePushJob&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//这里的URL是DefaultMetricsReporter中定义的指标报告URL，提供了指标服务的具体地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> pushEnabled &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_ENABLED_KEY, &lt;span style="color:#cb4b16">false&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (pushEnabled) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor.scheduleWithFixedDelay(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> push(pushGateway, job), pushInterval, pushInterval, TimeUnit.SECONDS);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">push&lt;/span>(PushGateway pushGateway, String job) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> refreshData();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//将本次采样数据添加到pushGateway，等待下次抓取&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway.pushAdd(prometheusRegistry.getPrometheusRegistry(), job);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>PushGateway 和 PrometheusRegistry 均为 micrometer 提供的 API。&lt;/p>
+&lt;p>&lt;strong>PrometheusRegistry 将度量数据转换为普罗米修斯支持的格式，而 PushGateway 存储样本，暴露一个HTTP端点供普罗米修斯服务端抓取。&lt;/strong>&lt;/p>
+&lt;p>PushGateway 本身只是一个度量数据的缓存区，普罗米修斯服务端每从其中抓取一次数据，其内部的样本就会被清除。&lt;/p>
+&lt;p>&lt;strong>DefaultMetricsReporter&lt;/strong>&lt;/p>
+&lt;p>指标报告器的默认实现，提供了按指标名称导出特定指标的方法。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//DefaultMetricsReporter &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getResponse&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getResponseWithName&lt;/span>(String metricsName) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> meterRegistry.getMeters().stream().filter(meter &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//根据名称过滤样本&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metricsValue.forEach((key, value) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//按格式拼装结果&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> sb.toString();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doInit&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> addMeterRegistry(meterRegistry);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doDestroy&lt;/span>() {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该实现使用的 SimpleMeterRegistry 本身只会存储指标数据的功能，而不像 PrometheusMeterRegistry 那样提供发布数据的方法。&lt;/p>
+&lt;p>&lt;strong>因此该指标报告器不会主动向外部发布数据，而是被动的通过 &lt;code>getResponseWithName&lt;/code> 提供数据。&lt;/strong>&lt;/p>
+&lt;p>而且，该报告器在任何情况下都会被初始化:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//DefaultApplicationDeployer#initMetricsReporter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//If the protocol is not the default protocol, the default protocol is also initialized.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>PROTOCOL_DEFAULT.equals(metricsConfig.getProtocol())) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DefaultMetricsReporterFactory defaultMetricsReporterFactory &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> DefaultMetricsReporterFactory(applicationModel);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsReporter defaultMetricsReporter &lt;span style="color:#719e07">=&lt;/span> defaultMetricsReporterFactory.createMetricsReporter(metricsConfig.toUrl());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> defaultMetricsReporter.init();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel.getBeanFactory().registerBean(defaultMetricsReporter);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>实际上，该类主要在用户使用Qos命令查询时提供指定指标数据，而非提供给某个特定的外部指标中心。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//Qos命令&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultMetricsReporterCmd&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> BaseCommand {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> String &lt;span style="color:#268bd2">getResponseByApplication&lt;/span>(ApplicationModel applicationModel, String metricsName) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String response &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;DefaultMetricsReporter not init&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsReporter metricsReporter &lt;span style="color:#719e07">=&lt;/span> applicationModel.getBeanFactory().getBean(DefaultMetricsReporter.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (metricsReporter &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metricsReporter.refreshData();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取指定名称指标的数据&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#719e07">=&lt;/span> metricsReporter.getResponseWithName(metricsName);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> response;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>*需要注意的是，PrometheusMetricsReporter 也支持使用 Qos 命令查询内部指标数据，同样有对应的 PrometheusMetricsReporterCmd 实现，它们的工作原理相似。&lt;/p>
+&lt;p>以上就是指标样本从收集完成到最终导出到外部指标中心的大致流程。&lt;/p></description></item></channel></rss>

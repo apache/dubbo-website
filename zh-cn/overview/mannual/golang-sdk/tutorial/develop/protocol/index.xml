@@ -1,0 +1,370 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 协议配置</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/</link><description>Recent content in 协议配置 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Triple 异常回传</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/exception_response/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/exception_response/</guid><description>
+&lt;p>参考samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/error">dubbo-go-samples/error&lt;/a>&lt;/p>
+&lt;h2 id="用户异常回传介绍">用户异常回传介绍&lt;/h2>
+&lt;p>用户可以在 provider 端生成用户定义的异常信息，可以记录异常产生堆栈，triple 协议可保证将用户在客户端获取到异常 message ，并可以查看报错堆栈，便于定位问题。&lt;/p>
+&lt;p>注意返回 error 非 nil 时，框架不负责其他返回值的传递。&lt;/p>
+&lt;ul>
+&lt;li>在Triple provider 端返回异常，以 pb 序列化为例：&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/logger&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 使用可以记录对战信息的异常库，此处以 &amp;#34;github.com/pkg/errors&amp;#34; 为例
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#2aa198">&amp;#34;github.com/pkg/errors&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> triplepb &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-samples/api&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 一个实现了 pb 接口的服务提供结构
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> ErrorResponseProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> triplepb.UnimplementedGreeterServer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 回传错误的接口
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>ErrorResponseProvider) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>triplepb.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>triplepb.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Dubbo3 GreeterProvider get user name = %s\n&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 返回用户自定义异常
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>triplepb.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>, Age: &lt;span style="color:#2aa198">21&lt;/span>}, errors.&lt;span style="color:#268bd2">New&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;user defined error&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>客户端打印异常和堆栈&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/logger&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/config&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> tripleCommon &lt;span style="color:#2aa198">&amp;#34;github.com/dubbogo/triple/pkg/common&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> triplepb &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-samples/api&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> greeterProvider = &lt;span style="color:#b58900">new&lt;/span>(triplepb.GreeterClientImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(greeterProvider)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req &lt;span style="color:#719e07">:=&lt;/span> triplepb.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 发起调用
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> user, err &lt;span style="color:#719e07">:=&lt;/span> greeterProvider.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), &lt;span style="color:#719e07">&amp;amp;&lt;/span>req); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 打印异常信息，err.Error() 将返回用户定义的 message，即 user defined error
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v, error = %s&amp;#34;&lt;/span>, user, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 打印异常堆栈，需断言为 tripleCommon.TripleError
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;error details = %+v&amp;#34;&lt;/span>, err.(tripleCommon.TripleError).&lt;span style="color:#268bd2">Stacks&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>2021-11-12T18:36:33.730+0800 INFO cmd/client.go:53 response result: , error = user defined error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2021-11-12T18:36:33.730+0800 INFO cmd/client.go:54 error details = [type.googleapis.com/google.rpc.DebugInfo]:{stack_entries:&amp;#34;user defined error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>main.(*ErrorResponseProvider).SayHello
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /dubbo-go-samples/error/triple/pb/go-server/cmd/error_reponse.go:40
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reflect.Value.call
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /usr/local/go/src/reflect/value.go:543
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reflect.Value.Call
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /usr/local/go/src/reflect/value.go:339
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.apache.org/dubbo-go/v3/common/proxy/proxy_factory.(*ProxyInvoker).Invoke
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /Users/laurence/go/pkg/mod/dubbo.apache.org/dubbo-go/v3@v3.0.0-rc4-1/common/proxy/proxy_factory/default.go:145
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到报错信息和堆栈&lt;/p></description></item><item><title>Overview: 异常信息回传</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/error/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/error/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-传递异常信息">2. 传递异常信息&lt;/h2>
+&lt;p>参考samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/error">dubbo-go-samples/error&lt;/a>&lt;/p>
+&lt;h3 id="用户异常回传介绍">用户异常回传介绍&lt;/h3>
+&lt;p>用户可以在 provider 端生成用户定义的异常信息，可以记录异常产生堆栈，triple 协议可保证将用户在客户端获取到异常 message ，并可以查看报错堆栈，便于定位问题。&lt;/p>
+&lt;p>注意返回 error 非 nil 时，框架不负责其他返回值的传递。&lt;/p>
+&lt;ul>
+&lt;li>在Triple provider 端返回异常，以 pb 序列化为例：&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/logger&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 使用可以记录堆栈的异常库，此处以 &amp;#34;github.com/pkg/errors&amp;#34; 为例
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#2aa198">&amp;#34;github.com/pkg/errors&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> triplepb &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-samples/api&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 一个实现了 pb 接口的服务提供结构
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> ErrorResponseProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> triplepb.UnimplementedGreeterServer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 回传错误的接口
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>ErrorResponseProvider) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>triplepb.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>triplepb.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Dubbo3 GreeterProvider get user name = %s\n&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 返回用户自定义异常
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>triplepb.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>, Age: &lt;span style="color:#2aa198">21&lt;/span>}, errors.&lt;span style="color:#268bd2">New&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;user defined error&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>客户端打印异常和堆栈&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/logger&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/config&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> tripleCommon &lt;span style="color:#2aa198">&amp;#34;github.com/dubbogo/triple/pkg/common&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> triplepb &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-samples/api&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> greeterProvider = &lt;span style="color:#b58900">new&lt;/span>(triplepb.GreeterClientImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(greeterProvider)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req &lt;span style="color:#719e07">:=&lt;/span> triplepb.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 发起调用
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> user, err &lt;span style="color:#719e07">:=&lt;/span> greeterProvider.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), &lt;span style="color:#719e07">&amp;amp;&lt;/span>req); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 打印异常信息，err.Error() 将返回用户定义的 message，即 user defined error
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %v, error = %s&amp;#34;&lt;/span>, user, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 打印异常堆栈，需断言为 tripleCommon.TripleError
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;error details = %+v&amp;#34;&lt;/span>, err.(tripleCommon.TripleError).&lt;span style="color:#268bd2">Stacks&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>2021-11-12T18:36:33.730+0800 INFO cmd/client.go:53 response result: , error = user defined error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2021-11-12T18:36:33.730+0800 INFO cmd/client.go:54 error details = [type.googleapis.com/google.rpc.DebugInfo]:{stack_entries:&amp;#34;user defined error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>main.(*ErrorResponseProvider).SayHello
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /dubbo-go-samples/error/triple/pb/go-server/cmd/error_reponse.go:40
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reflect.Value.call
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /usr/local/go/src/reflect/value.go:543
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reflect.Value.Call
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /usr/local/go/src/reflect/value.go:339
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.apache.org/dubbo-go/v3/common/proxy/proxy_factory.(*ProxyInvoker).Invoke
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> /Users/laurence/go/pkg/mod/dubbo.apache.org/dubbo-go/v3@v3.0.0-rc4-1/common/proxy/proxy_factory/default.go:145
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到报错信息和堆栈&lt;/p></description></item><item><title>Overview: 选择使用的网络协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/choose_protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/choose_protocol/</guid><description>
+&lt;h1 id="修改使用的协议">修改使用的协议&lt;/h1>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-如何配置网络协议">2. 如何配置网络协议&lt;/h2>
+&lt;p>在快速开始章节可以看到，生成的Demo 将 Protocol 设置为 tri，表明使用 Triple 协议进行服务暴露和服务调用。快速开始章节使用的配置 API 进行配置的写入，这样的好处是无需使用配置文件。我们摘取出和网络协议相关的内容进行说明。&lt;/p>
+&lt;h3 id="使用配置文件">使用配置文件&lt;/h3>
+&lt;p>参考 samples/helloworld&lt;/p>
+&lt;ul>
+&lt;li>客户端使用配置文件设置网络协议&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri &lt;span style="color:#586e75"># set protcol to tri&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>服务端使用配置文件设置网络协议&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>: &lt;span style="color:#586e75"># define protcol-id &amp;#39;triple&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri &lt;span style="color:#586e75"># set protcol to tri&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span> &lt;span style="color:#586e75"># set port to be listened&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol-ids&lt;/span>: triple &lt;span style="color:#586e75"># use protocol-ids named &amp;#39;triple&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-编写-dubbo-协议的接口和实现">3. 编写 Dubbo 协议的接口和实现&lt;/h2>
+&lt;h3 id="31-定义接口和传输结构位于apiapigo">3.1 定义接口和传输结构，位于api/api.go&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> api
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/config&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> hessian &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-hessian2&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;time&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//1. 定义传输结构， 如需 Java 互通，字段需要与 Java 侧对应，首字母大写
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Time time.Time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.User&amp;#34;&lt;/span> &lt;span style="color:#586e75">// 如果与 Java 互通，需要与 Java 侧 User class全名对应,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UserProviderClient = &lt;span style="color:#719e07">&amp;amp;&lt;/span>UserProvider{} &lt;span style="color:#586e75">// 客户端指针
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 2。 定义客户端存根类：UserProvider
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// dubbo标签，用于适配go侧客户端大写方法名 -&amp;gt; java侧小写方法名，只有 dubbo 协议客户端才需要使用
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> GetUser &lt;span style="color:#268bd2">func&lt;/span>(ctx context.Context, req &lt;span style="color:#dc322f">int32&lt;/span>) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) &lt;span style="color:#586e75">//`dubbo:&amp;#34;getUser&amp;#34;`
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>(){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> hessian.&lt;span style="color:#268bd2">RegisterPOJO&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>User{}) &lt;span style="color:#586e75">// 注册传输结构到 hessian 库
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 注册客户端存根类到框架，实例化客户端接口指针 userProvider
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(UserProviderClient)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-编写-go-server-配置和代码">2.2 编写 Go-Server 配置和代码&lt;/h3>
+&lt;p>server/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>: &lt;span style="color:#586e75"># 定义服务注册发现中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo &lt;span style="color:#586e75"># 协议名 dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span> &lt;span style="color:#586e75"># 监听端口&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProvider&lt;/span>: &lt;span style="color:#586e75"># 服务提供结构类名&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: org.apache.dubbo.UserProvider &lt;span style="color:#586e75"># 接口需要与 go/java 客户端对应&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>server/server.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/logger&amp;#34;&lt;/span> &lt;span style="color:#586e75">// dubbogo 框架日志
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/config&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span> &lt;span style="color:#586e75">// dubbogo 框架依赖，所有dubbogo进程都需要隐式引入一次
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dubbo3-demo/api&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;strconv&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;time&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> UserProvider &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 实现接口方法
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, req &lt;span style="color:#dc322f">int32&lt;/span>) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">var&lt;/span> err &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;req:%#v&amp;#34;&lt;/span>, req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> user.ID = strconv.&lt;span style="color:#268bd2">Itoa&lt;/span>(&lt;span style="color:#b58900">int&lt;/span>(req))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> user.Name = &lt;span style="color:#2aa198">&amp;#34;laurence&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> user.Age = &lt;span style="color:#2aa198">22&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> user.Time = time.&lt;span style="color:#268bd2">Now&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> user, err
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//// MethodMapper 定义方法名映射，从 Go 的方法名映射到 Java 小写方法名，只有 dubbo 协议服务接口才需要使用
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//// go -&amp;gt; go 互通无需使用
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//func (s *UserProvider) MethodMapper() map[string]string {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// return map[string]string{
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// &amp;#34;GetUser&amp;#34;: &amp;#34;getUser&amp;#34;,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>(){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetProviderService&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>UserProvider{}) &lt;span style="color:#586e75">// 注册服务提供者类，类名与配置文件中的 service 对应
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// export DUBBO_GO_CONFIG_PATH=dubbogo.yml 运行前需要设置环境变量，指定配置文件位置
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">select&lt;/span> {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23-编写-go-client-配置和代码">2.3 编写 Go-Client 配置和代码&lt;/h3>
+&lt;p>client/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>: &lt;span style="color:#586e75"># 定义服务注册发现中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProvider&lt;/span>: &lt;span style="color:#586e75"># 存根类名&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: dubbo &lt;span style="color:#586e75"># dubbo 协议，默认 hessian2 序列化方式&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: org.apache.dubbo.UserProvider &lt;span style="color:#586e75"># 接口需要与 go/java 客户端对应&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>client/client.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/logger&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/config&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo3-demo/api&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 启动框架
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">var&lt;/span> i &lt;span style="color:#dc322f">int32&lt;/span> = &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 发起调用
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> user, err &lt;span style="color:#719e07">:=&lt;/span> api.UserProviderClient.&lt;span style="color:#268bd2">GetUser&lt;/span>(context.&lt;span style="color:#268bd2">TODO&lt;/span>(), i)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;response result: %+v&amp;#34;&lt;/span>, user)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-启动服务">4. 启动服务&lt;/h2>
+&lt;p>开启两个终端，分别进入server client 目录&lt;/p>
+&lt;p>分别执行；&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">DUBBO_GO_CONFIG_PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>dubbogo.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>先后启动服务端和客户端, 可在客户端看到输出：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>response result: &amp;amp;&lt;span style="color:#719e07">{&lt;/span>ID:1 Name:laurence Age:22 Time:2021-11-12 17:59:39.185 +0800 CST&lt;span style="color:#719e07">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>调用成功&lt;/p></description></item></channel></rss>

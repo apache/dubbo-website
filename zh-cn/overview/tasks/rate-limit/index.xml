@@ -1,0 +1,204 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 限流降级</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/</link><description>Recent content in 限流降级 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Sentinel 限流</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/sentinel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/sentinel/</guid><description>
+&lt;h2 id="sentinel-是什么">Sentinel 是什么&lt;/h2>
+&lt;p>随着微服务的流行，服务和服务之间的稳定性变得越来越重要。Sentinel 是面向分布式、多语言异构化服务架构的流量治理组件，主要以流量为切入点，从流量路由、流量控制、流量整形、熔断降级、系统自适应过载保护、热点流量防护等多个维度来帮助开发者保障微服务的稳定性。&lt;/p>
+&lt;h2 id="一示例架构说明">一、示例架构说明&lt;/h2>
+&lt;p>完整示例项目地址 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-sentinel" target="_blank">dubbo-samples-sentinel&lt;/a>&lt;/p>
+&lt;p>接口定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">FooService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口实现：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(timeout &lt;span style="color:#719e07">=&lt;/span> 3000)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">FooServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> FooService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> String.format(&lt;span style="color:#2aa198">&amp;#34;Hello, %s at %s&amp;#34;&lt;/span>, name, LocalDateTime.now());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>限流配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>FlowRule flowRule &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> FlowRule(FooService.class.getName())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .setCount(10)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .setGrade(RuleConstant.FLOW_GRADE_QPS);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>FlowRuleManager.loadRules(Collections.singletonList(flowRule));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="二快速启动示例">二、快速启动示例&lt;/h2>
+&lt;h3 id="step-1-下载源码">Step 1: 下载源码&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone -b master https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> ./dubbo-samples-sentinel/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-构建用例">Step 2: 构建用例&lt;/h3>
+&lt;p>执行 maven 命令，打包 demo 工程&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn clean package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-3-启动-provider">Step 3: 启动 Provider&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>sentinel&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.samples.sentinel.FooProviderBootstrap
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-4-启动-orderservice">Step 4: 启动 OrderService&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>java &lt;span style="color:#719e07">-&lt;/span>classpath .&lt;span style="color:#719e07">/&lt;/span>target&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>sentinel&lt;span style="color:#719e07">-&lt;/span>1.0&lt;span style="color:#719e07">-&lt;/span>SNAPSHOT.jar org.apache.samples.sentinel.FooConsumerBootstrap
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到控制台输出中，&lt;code>Blocked&lt;/code> 代表已经开始拦截。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.809
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.812
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.815
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.818
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.821
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.823
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.826
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.828
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.830
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success: Hello, dubbo at 2022-08-08T15:42:40.834
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Blocked
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>关于 Sentinel 的更多使用方式可以参考：&lt;a href="https://dubbo.apache.org/zh-cn/blog/2018/07/27/sentinel-%E4%B8%BA-dubbo-%E6%9C%8D%E5%8A%A1%E4%BF%9D%E9%A9%BE%E6%8A%A4%E8%88%AA/">Sentinel 为 Dubbo 服务保驾护航&lt;/a>，&lt;a href="https://sentinelguard.io/zh-cn/index.html">Sentinel 官网&lt;/a>&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: Hystrix 熔断降级</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/hystrix/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/hystrix/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。&lt;/p>
+&lt;p>本文介绍在spring应用里，怎么把 Dubbo 和 Hystrix 结合起来使用。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="spring-boot应用">Spring Boot应用&lt;/h2>
+&lt;p>Demo 地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix&lt;/a>&lt;/p>
+&lt;h3 id="生成dubbo集成spring-boot的应用">生成dubbo集成spring boot的应用&lt;/h3>
+&lt;p>对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： &lt;a href="http://start.dubbo.apache.org/bootstrap.html/">http://start.dubbo.apache.org/bootstrap.html/&lt;/a>&lt;/p>
+&lt;h3 id="配置spring-cloud-starter-netflix-hystrix">配置spring-cloud-starter-netflix-hystrix&lt;/h3>
+&lt;p>spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.cloud&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-cloud-starter-netflix-hystrix&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.4.4.RELEASE&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在Application类上增加&lt;code>@EnableHystrix&lt;/code>来启用hystrix starter：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableHystrix&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderApplication&lt;/span> {
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置provider端">配置Provider端&lt;/h3>
+&lt;p>在Dubbo的Provider上增加&lt;code>@HystrixCommand&lt;/code>配置，这样子调用就会经过Hystrix代理。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixCommand&lt;/span>(commandProperties &lt;span style="color:#719e07">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;circuitBreaker.requestVolumeThreshold&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;execution.isolation.thread.timeoutInMilliseconds&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span>) })
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// System.out.println(&amp;#34;async provider received: &amp;#34; + name);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// return &amp;#34;annotation: hello, &amp;#34; + name;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(&lt;span style="color:#2aa198">&amp;#34;Exception to show hystrix enabled.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置consumer端">配置Consumer端&lt;/h3>
+&lt;p>对于Consumer端，则可以增加一层method调用，并在method上配置&lt;code>@HystrixCommand&lt;/code>。当调用出错时，会走到&lt;code>fallbackMethod = &amp;quot;reliable&amp;quot;&lt;/code>的调用里。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Reference&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> HelloService demoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixCommand&lt;/span>(fallbackMethod &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;reliable&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">doSayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> demoService.sayHello(name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">reliable&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hystrix fallback value&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过上面的配置，很简单地就完成了Spring Boot里Dubbo + Hystrix的集成。&lt;/p>
+&lt;h2 id="传统spring-annotation应用">传统Spring Annotation应用&lt;/h2>
+&lt;p>Demo地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-hystrix&lt;/a>
+传统spring annotation应用的配置其实也很简单，和spring boot应用不同的是：&lt;/p>
+&lt;ol>
+&lt;li>显式配置Spring AOP支持：&lt;code>@EnableAspectJAutoProxy&lt;/code>&lt;/li>
+&lt;li>显式通过&lt;code>@Configuration&lt;/code>配置&lt;code>HystrixCommandAspect&lt;/code> Bean。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@EnableDubbo&lt;/span>(scanBasePackages &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.annotation.action&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@PropertySource&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;classpath:/spring/dubbo-consumer.properties&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@ComponentScan&lt;/span>(value &lt;span style="color:#719e07">=&lt;/span> {&lt;span style="color:#2aa198">&amp;#34;com.alibaba.dubbo.samples.annotation.action&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@EnableAspectJAutoProxy&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ConsumerConfiguration&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> HystrixCommandAspect &lt;span style="color:#268bd2">hystrixCommandAspect&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HystrixCommandAspect();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="hystrix集成spring-aop原理">Hystrix集成Spring AOP原理&lt;/h2>
+&lt;p>在上面的例子里可以看到，Hystrix对Spring的集成是通过Spring AOP来实现的。下面简单分析下实现。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Aspect&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HystrixCommandAspect&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Pointcut&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;@annotation(com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand)&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">hystrixCommandAnnotationPointcut&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Pointcut&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;@annotation(com.netflix.hystrix.contrib.javanica.annotation.HystrixCollapser)&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">hystrixCollapserAnnotationPointcut&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Around&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hystrixCommandAnnotationPointcut() || hystrixCollapserAnnotationPointcut()&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">methodsAnnotatedWithHystrixCommand&lt;/span>(&lt;span style="color:#268bd2">final&lt;/span> ProceedingJoinPoint joinPoint) &lt;span style="color:#268bd2">throws&lt;/span> Throwable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Method method &lt;span style="color:#719e07">=&lt;/span> getMethodFromTarget(joinPoint);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Validate.notNull(method, &lt;span style="color:#2aa198">&amp;#34;failed to get method from joinPoint: %s&amp;#34;&lt;/span>, joinPoint);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (method.isAnnotationPresent(HystrixCommand.class) &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> method.isAnnotationPresent(HystrixCollapser.class)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException(&lt;span style="color:#2aa198">&amp;#34;method cannot be annotated with HystrixCommand and HystrixCollapser &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;annotations at the same time&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetaHolderFactory metaHolderFactory &lt;span style="color:#719e07">=&lt;/span> META_HOLDER_FACTORY_MAP.get(HystrixPointcutType.of(method));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetaHolder metaHolder &lt;span style="color:#719e07">=&lt;/span> metaHolderFactory.create(joinPoint);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HystrixInvokable invokable &lt;span style="color:#719e07">=&lt;/span> HystrixCommandFactory.getInstance().create(metaHolder);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExecutionType executionType &lt;span style="color:#719e07">=&lt;/span> metaHolder.isCollapserAnnotationPresent() &lt;span style="color:#719e07">?&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> metaHolder.getCollapserExecutionType() : metaHolder.getExecutionType();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>metaHolder.isObservable()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">=&lt;/span> CommandExecutor.execute(invokable, executionType, metaHolder);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result &lt;span style="color:#719e07">=&lt;/span> executeObservable(invokable, executionType, metaHolder);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (HystrixBadRequestException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e.getCause() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> e.getCause() : e;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (HystrixRuntimeException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> hystrixRuntimeExceptionToThrowable(metaHolder, e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>&lt;code>HystrixCommandAspect&lt;/code>里定义了两个注解的AspectJ Pointcut：&lt;code>@HystrixCommand&lt;/code>, &lt;code>@HystrixCollapser&lt;/code>。所有带这两个注解的spring bean都会经过AOP处理&lt;/li>
+&lt;li>在&lt;code>@Around&lt;/code> AOP处理函数里，可以看到Hystrix会创建出&lt;code>HystrixInvokable&lt;/code>，再通过&lt;code>CommandExecutor&lt;/code>来执行&lt;/li>
+&lt;/ol>
+&lt;h2 id="spring-cloud-starter-netflix-hystrix的代码分析">spring-cloud-starter-netflix-hystrix的代码分析&lt;/h2>
+&lt;ol>
+&lt;li>&lt;code>@EnableHystrix&lt;/code> 引入了&lt;code>@EnableCircuitBreaker&lt;/code>，&lt;code>@EnableCircuitBreaker&lt;/code>引入了&lt;code>EnableCircuitBreakerImportSelector&lt;/code>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableCircuitBreaker&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">@interface&lt;/span> EnableHystrix {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Import&lt;/span>(EnableCircuitBreakerImportSelector.class)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">@interface&lt;/span> EnableCircuitBreaker {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>&lt;code>EnableCircuitBreakerImportSelector&lt;/code>继承了&lt;code>SpringFactoryImportSelector&amp;lt;EnableCircuitBreaker&amp;gt;&lt;/code>，使spring加载&lt;code>META-INF/spring.factories&lt;/code>里的&lt;code>EnableCircuitBreaker&lt;/code>声明的配置
+在&lt;code>META-INF/spring.factories&lt;/code>里可以找到下面的配置，也就是引入了&lt;code>HystrixCircuitBreakerConfiguration&lt;/code>。
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">org.springframework.cloud.netflix.hystrix.HystrixCircuitBreakerConfiguration&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>在&lt;code>HystrixCircuitBreakerConfiguration&lt;/code>里可以发现创建了&lt;code>HystrixCommandAspect&lt;/code>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HystrixCircuitBreakerConfiguration&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Bean&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> HystrixCommandAspect &lt;span style="color:#268bd2">hystrixCommandAspect&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HystrixCommandAspect();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;p>可见&lt;code>spring-cloud-starter-netflix-hystrix&lt;/code>实际上也是创建了&lt;code>HystrixCommandAspect&lt;/code>来集成Hystrix。
+另外&lt;code>spring-cloud-starter-netflix-hystrix&lt;/code>里还有metrics, health, dashboard等集成。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;ul>
+&lt;li>对于dubbo provider的&lt;code>@Service&lt;/code>是一个spring bean，直接在上面配置&lt;code>@HystrixCommand&lt;/code>即可&lt;/li>
+&lt;li>对于dubbo consumer的&lt;code>@Reference&lt;/code>，可以通过加一层简单的spring method包装，配置&lt;code>@HystrixCommand&lt;/code>即可&lt;/li>
+&lt;li>Hystrix本身提供&lt;code>HystrixCommandAspect&lt;/code>来集成Spring AOP，配置了&lt;code>@HystrixCommand&lt;/code>和&lt;code>@HystrixCollapser&lt;/code>的spring method都会被Hystrix处理&lt;/li>
+&lt;/ul>
+&lt;h2 id="链接">链接&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://start.dubbo.io/">http://start.dubbo.io/&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients">https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Overview: Resilience4j</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/resilience4j/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/rate-limit/resilience4j/</guid><description>
+&lt;p>Resilience4j 提供了一组高阶函数（装饰器），包括断路器，限流器，重试，隔离，可以对任何的函数式接口，lambda表达式，或方法的引用进行增强，并且这些装饰器可以进行叠加。这样做的好处是，你可以根据需要选择特定的装饰器进行组合。&lt;/p>
+&lt;p>关于 Resilience4j 与 Dubbo 集成的使用示例请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-resilience4j">dubbo-samples-resilience4j&lt;/a>&lt;/p></description></item></channel></rss>

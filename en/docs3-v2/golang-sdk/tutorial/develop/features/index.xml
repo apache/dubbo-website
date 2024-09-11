@@ -1,0 +1,298 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Advanced Features</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/</link><description>Recent content in Advanced Features on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Launching the Application Using the Configuration API</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/config_api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/config_api/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-start-the-application-using-the-configuration-api">2. Start the application using the configuration API&lt;/h2>
+&lt;p>Users do not need to use configuration files, and can directly write configurations in the code in the form of API calls&lt;/p>
+&lt;h3 id="21-modify-the-server-code">2.1 Modify the server code:&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config. &lt;span style="color:#268bd2">SetProviderService&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>GreeterProvider{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>protocolConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewProtocolConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">SetPort&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;20000&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">SetName&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;tri&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>serviceConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewServiceConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">SetInterface&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>). &lt;span style="color:#586e75">// read interface from pb
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>providerConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewProviderConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">AddService&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GreeterProvider&amp;#34;&lt;/span>, serviceConfig).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rootConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewRootConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">AddProtocol&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;triple-protocol-id&amp;#34;&lt;/span>, protocolConfig). &lt;span style="color:#586e75">// add protocol, key is custom
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">SetProvider&lt;/span>(providerConfig).&lt;span style="color:#268bd2">Build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(config.&lt;span style="color:#268bd2">WithRootConfig&lt;/span>(rootConfig)); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">select&lt;/span> {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The configuration API looks complicated, but the construction process of a single configuration structure is consistent. Referring to the design of Java Builder, we use &lt;code>New().SetA().SetB().Build()&lt;/code> in the configuration API module way to construct a single configuration structure layer by layer.&lt;/p>
+&lt;p>Once done, the go-server/conf folder can be deleted.&lt;/p>
+&lt;h3 id="22-modify-the-client-code">2.2 Modify the client code:&lt;/h3>
+&lt;p>go-client/cmd/client.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config. &lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewReferenceConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">SetProtocol&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;tri&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">SetURL&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;tri://localhost:20000&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">SetInterface&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>). &lt;span style="color:#586e75">// read interface name from pb
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>consumerConfig &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">NewConsumerConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">AddReference&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GreeterClientImpl&amp;#34;&lt;/span>, referenceConfig).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rootConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewRootConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">SetConsumer&lt;/span>(consumerConfig).&lt;span style="color:#268bd2">Build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(config.&lt;span style="color:#268bd2">WithRootConfig&lt;/span>(rootConfig)); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;start to test dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name: &lt;span style="color:#2aa198">&amp;#34;Laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>reply, err &lt;span style="color:#719e07">:=&lt;/span> grpcGreeterImpl.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger. &lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;client response result: %v\n&amp;#34;&lt;/span>, reply)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Once done, the go-client/conf folder can be deleted.&lt;/p>
+&lt;h3 id="23-verify-config-api">2.3 Verify Config API&lt;/h3>
+&lt;p>Start the server and client respectively to view the call information.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:62 client response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: log</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/custom-logger/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/custom-logger/</guid><description>
+&lt;p>Refer to samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/logger">dubbo-go-samples/logger&lt;/a>&lt;/p>
+&lt;h2 id="1-log-configuration">1. Log configuration&lt;/h2>
+&lt;p>dubbogo 3.0 uses the zap log library by default. If you do not add logger configuration in the configuration file, the log will be printed to the control. The default level is debug. You can also configure the log level in the configuration file. You can configure zap-config and lumberjack-config as follows to customize the log output.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">logger&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zap-config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">level&lt;/span>: debug &lt;span style="color:#586e75"># log level&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">development&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">disableCaller&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">disableStacktrace&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">encoding&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;console&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># zap encoder configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">encoderConfig&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">messageKey&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;message&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">levelKey&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;level&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeKey&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;time&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nameKey&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;logger&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">callerKey&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;caller&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">stacktraceKey&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;stacktrace&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">lineEnding&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">levelEncoder&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;capitalColor&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeEncoder&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;iso8601&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">durationEncoder&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;seconds&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">callerEncoder&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;short&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nameEncoder&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">outputPaths&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;stderr&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">errorOutputPaths&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;stderr&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">lumberjack-config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Write the log file name&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filename&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;logs.log&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># The maximum size of each log file length, in MiB. Default 100MiB&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxSize&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># The maximum number of days to keep the log (only keep the log of the last few days)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxAge&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Only how many recent log files are kept to control the size of the total log of the program&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">maxBackups&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Whether to use local time or not, UTC time is used by default&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">localTime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Whether to compress the log file, compression method gzip&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">compress&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-logging-api-and-custom-logging">2. Logging API and custom logging&lt;/h2>
+&lt;p>log interface&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Logger &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Info&lt;/span>(args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Warn&lt;/span>(args &lt;span style="color:#719e07">...&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Error&lt;/span>(args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Debug&lt;/span>(args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Fatal&lt;/span>(args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Infof&lt;/span>(fmt &lt;span style="color:#dc322f">string&lt;/span>, args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Warnf&lt;/span>(fmt &lt;span style="color:#dc322f">string&lt;/span>, args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Errorf&lt;/span>(fmt &lt;span style="color:#dc322f">string&lt;/span>, args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Debugf&lt;/span>(fmt &lt;span style="color:#dc322f">string&lt;/span>, args&lt;span style="color:#719e07">...&lt;/span>&lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">Fatalf&lt;/span>(fmt &lt;span style="color:#dc322f">string&lt;/span>, args &lt;span style="color:#719e07">...&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span>{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>log API&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/common/logger&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">SetLoggerLevel&lt;/span>(warn) &lt;span style="color:#586e75">// Set the log level in the main function
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>logger.&lt;span style="color:#268bd2">SetLogger&lt;/span>(myLogger) &lt;span style="color:#586e75">// Set a custom logger in the main function
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>The log API cannot be used in the Init phase, otherwise unexpected problems may occur.&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: Use ctx to pass context information</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/context/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/context/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-use-context-to-pass-additional-information">2. Use context to pass additional information&lt;/h2>
+&lt;p>Reference &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/context">dubbo-go-samples/context&lt;/a>&lt;/p></description></item><item><title>Docs3-V2: generalization call</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/generic/</guid><description>
+&lt;h2 id="1-dubbo-go-generalization-calls-java-server">1. Dubbo-go generalization calls Java Server&lt;/h2>
+&lt;p>Use Triple protocol + hessian2 serialization scheme&lt;/p>
+&lt;h3 id="11-java-server-startup">1.1 Java-Server startup&lt;/h3>
+&lt;ol>
+&lt;li>Transmission structure definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.io.Serializable;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Date;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> String id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Date time &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Date();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Interface definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.ArrayList;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Map;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserProvider&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">GetUser1&lt;/span>(String userId);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-go-client-generalization-call">1.2 Go-Client generalization call&lt;/h3>
+&lt;p>Constructing a generalized interface reference in the form of an API is shown here&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Initialize the Reference configuration
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewReferenceConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetInterface&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;org. apache. dubbo. UserProvider&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetRegistryIDs&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetProtocol&lt;/span>(tripleConst.TRIPLE).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetGeneric&lt;/span>(&lt;span style="color:#cb4b16">true&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetSerialization&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Construct the Root configuration and import the registry module
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>rootConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewRootConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">AddRegistry&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>, config. &lt;span style="color:#268bd2">NewRegistryConfigWithProtocolDefaultPort&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>)).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Reference configuration initialization, because you need to use the registry for service discovery, you need to pass in the configured rootConfig
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">Init&lt;/span>(rootConfig); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Generalized call loading, service discovery
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf. &lt;span style="color:#268bd2">GenericLoad&lt;/span>(appName)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time. &lt;span style="color:#268bd2">Sleep&lt;/span>(time. Second)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Initiate generalization call
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>resp, err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">GetRPCService&lt;/span>().(&lt;span style="color:#719e07">*&lt;/span>generic.GenericService).&lt;span style="color:#268bd2">Invoke&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context. &lt;span style="color:#268bd2">TODO&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;getUser1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java. lang. String&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []hessian. Object{&lt;span style="color:#2aa198">&amp;#34;A003&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GetUser1(userId string) res: %+v&amp;#34;&lt;/span>, resp)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The Invoke method of GenericService includes three parameters: context.Context, []string, []hessian.Object,&lt;/p>
+&lt;p>The second parameter is the Java class name of the corresponding parameter, such as java.lang.String, org.apache.dubbo.User, the third parameter is the parameter list, and hessian.Object is the interface. The second and third parameters should be consistent with the method signature and correspond in order.&lt;/p>
+&lt;p>Get the return result of the map structure&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:89 GetUser1(userId string) res: map[age:48 class:org.apache.dubbo.User id:A003 name:Joe sex:MAN time:2021-10-04 14:03:03.37 +0800 CST]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: generalization call</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/generic-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/develop/features/generic-2/</guid><description>
+&lt;h2 id="1-dubbogo-generalization-calls-java-server">1. Dubbogo generalization calls Java Server&lt;/h2>
+&lt;p>Use Triple protocol + hessian2 serialization scheme&lt;/p>
+&lt;p>Please refer to Dubbogo 3.0 &lt;a href="https://www.yuque.com/docs/share/f4e72670-74ab-45b9-bc0c-4b42249ed953?#">Generalization Call Documentation&lt;/a>&lt;/p>
+&lt;h3 id="11-java-server-startup">1.1 Java-Server startup&lt;/h3>
+&lt;ol>
+&lt;li>Transmission structure definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.io.Serializable;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Date;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> String id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Date time &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Date();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Interface definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.ArrayList;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Map;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserProvider&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">GetUser1&lt;/span>(String userId);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-go-client-generalization-call">1.2 Go-Client generalization call&lt;/h3>
+&lt;p>Constructing a generalized interface reference in the form of an API is shown here&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Initialize the Reference configuration
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewReferenceConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetInterface&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;org. apache. dubbo. UserProvider&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetRegistryIDs&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetProtocol&lt;/span>(tripleConst.TRIPLE).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetGeneric&lt;/span>(&lt;span style="color:#cb4b16">true&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetSerialization&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span>).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Construct the Root configuration and import the registry module
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>rootConfig &lt;span style="color:#719e07">:=&lt;/span> config. &lt;span style="color:#268bd2">NewRootConfigBuilder&lt;/span>().
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">AddRegistry&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>, config. &lt;span style="color:#268bd2">NewRegistryConfigWithProtocolDefaultPort&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>)).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">build&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Reference configuration initialization, because you need to use the registry for service discovery, you need to pass in the configured rootConfig
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">Init&lt;/span>(rootConfig); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Generalized call loading, service discovery
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf. &lt;span style="color:#268bd2">GenericLoad&lt;/span>(appName)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time. &lt;span style="color:#268bd2">Sleep&lt;/span>(time. Second)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Initiate generalization call
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>resp, err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">GetRPCService&lt;/span>().(&lt;span style="color:#719e07">*&lt;/span>generic.GenericService).&lt;span style="color:#268bd2">Invoke&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context. &lt;span style="color:#268bd2">TODO&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;getUser1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java. lang. String&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []hessian. Object{&lt;span style="color:#2aa198">&amp;#34;A003&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GetUser1(userId string) res: %+v&amp;#34;&lt;/span>, resp)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The Invoke method of GenericService includes three parameters: context.Context, []string, []hessian.Object,&lt;/p>
+&lt;p>The second parameter is the Java class name of the corresponding parameter, such as java.lang.String, org.apache.dubbo.User, the third parameter is the parameter list, and hessian.Object is the interface. The second and third parameters should be consistent with the method signature and correspond in order.&lt;/p>
+&lt;p>Get the return result of the map structure&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:89 GetUser1(userId string) res: map[age:48 class:org.apache.dubbo.User id:A003 name:Joe sex:MAN time:2021-10-04 14:03:03.37 +0800 CST]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

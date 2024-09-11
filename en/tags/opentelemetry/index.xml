@@ -1,0 +1,88 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – OpenTelemetry</title><link>https://dubbo.apache.org/en/tags/opentelemetry/</link><description>Recent content in OpenTelemetry on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Wed, 31 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://dubbo.apache.org/en/tags/opentelemetry/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Tracing Dubbo With OpenTelemetry</title><link>https://dubbo.apache.org/en/blog/2024/01/31/tracing-dubbo-with-opentelemetry/</link><pubDate>Wed, 31 Jan 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/2024/01/31/tracing-dubbo-with-opentelemetry/</guid><description>
+&lt;h2 id="overview">Overview&lt;/h2>
+&lt;p>This case shows using OpenTelemetry(otlp) as the Tracer in the Dubbo project to report the Trace information to the Otlp Collector, which then forwards it to Zipkin and Jagger. &lt;a href="https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-otel-otlp">Code address&lt;/a>&lt;/p>
+&lt;p>It consists of three parts：&lt;/p>
+&lt;ul>
+&lt;li>dubbo-samples-spring-boot-tracing-otel-oltp-interface&lt;/li>
+&lt;li>dubbo-samples-spring-boot-tracing-otel-oltp-provider&lt;/li>
+&lt;li>dubbo-samples-spring-boot-tracing-otel-oltp-consumer&lt;/li>
+&lt;/ul>
+&lt;h2 id="architecture">Architecture&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/demo_arch.png" alt="architecture architecture">&lt;/p>
+&lt;h2 id="quick-start">Quick Start&lt;/h2>
+&lt;h3 id="install--start-otlp-collector">Install &amp;amp; start Otlp Collector&lt;/h3>
+&lt;p>Follow &lt;a href="https://OpenTelemetry.io/docs/collector/getting-started/">OpenTelemetry Collector Quick Start&lt;/a> to start the otlp collector.&lt;/p>
+&lt;h3 id="start-provider">Start Provider&lt;/h3>
+&lt;p>Run &lt;code>org.apache.dubbo.springboot.demo.provider.ProviderApplication&lt;/code> directly from IDE.&lt;/p>
+&lt;h3 id="start-consumer">Start Consumer&lt;/h3>
+&lt;p>Start &lt;code>org.apache.dubbo.springboot.demo.consumer.ConsumerApplication&lt;/code> directly from IDE.&lt;/p>
+&lt;h3 id="view-trace-information">View trace information&lt;/h3>
+&lt;p>Open the zipkin dashboard &lt;code>http://localhost:9411/zipkin/&lt;/code> in the browser:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/zipkin_search.png" alt="zipkin.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/zipkin_detail.png" alt="zipkin.png">&lt;/p>
+&lt;p>Open the Jaeger dashboard &lt;code>http://localhost:16686/search&lt;/code> in the browser:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/jaeger_search.png" alt="jaeger_search.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/observability/tracing/otlp/jaeger_detail.png" alt="jaeger_detail.png">&lt;/p>
+&lt;h2 id="how-to-use-it-in-spring-boot-project">How to use it in Spring Boot project&lt;/h2>
+&lt;h3 id="1-add-dependencies-to-your-project">1. Add dependencies to your project&lt;/h3>
+&lt;p>For Spring Boot projects, you can use &lt;code>dubbo-spring-boot-tracing-otel-otlp-starter&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- OpenTelemetry as Tracer, Otlp as exporter --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-spring-boot-tracing-otel-otlp-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-configuration">2. Configuration&lt;/h3>
+&lt;h4 id="applicationyml">application.yml&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span> &lt;span style="color:#586e75"># default is false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">sampling&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">probability&lt;/span>: &lt;span style="color:#2aa198">0.5&lt;/span> &lt;span style="color:#586e75"># sampling rate, default is 0.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">propagation&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: W3C &lt;span style="color:#586e75"># W3C/B3 default is W3C&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tracing-exporter&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">otlp-config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">endpoint&lt;/span>: http://localhost:4317
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 10s &lt;span style="color:#586e75"># default is 10s&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">compression-method&lt;/span>: none &lt;span style="color:#586e75"># none/gzip The method used to compress payloads, default is &amp;#34;none&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">headers&lt;/span>: &lt;span style="color:#586e75"># customized added headers, default is empty&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">auth&lt;/span>: admin
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># tracing info output to logging&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">logging&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">level&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">root&lt;/span>: info
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">pattern&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">console&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;[%d{dd/MM/yy HH:mm:ss:SSS z}] %t %5p %c{2} [%X{traceId:-}, %X{spanId:-}]: %m%n&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="how-to-use-based-on-dubbo-api">How to use based on Dubbo API&lt;/h2>
+&lt;h3 id="1-add-dependencies-to-your-project-1">1. Add dependencies to your project&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Required, dubbo-tracing core dependency --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-tracing&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Opentelemetry as Tracer --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.micrometer&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>micrometer-tracing-bridge-otel&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- OTlp as exporter --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>io.opentelemetry&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>opentelemetry-exporter-otlp&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-configuration-1">2. Configuration&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>TracingConfig tracingConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TracingConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Enable dubbo tracing&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setEnabled(&lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set the sampling&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setSampling(&lt;span style="color:#719e07">new&lt;/span> SamplingConfig(1.0f));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set Propagation, default is W3C, optional W3C/B3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setPropagation(&lt;span style="color:#719e07">new&lt;/span> PropagationConfig(&lt;span style="color:#2aa198">&amp;#34;W3C&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set trace reporting&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ExporterConfig exporterConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ExporterConfig();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set up trace reporting to Zipkin&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>exporterConfig.setZipkin(&lt;span style="color:#719e07">new&lt;/span> ExporterConfig.OtlpConfig(&lt;span style="color:#2aa198">&amp;#34;http://localhost:4317&amp;#34;&lt;/span>, Duration.ofSeconds(10), &lt;span style="color:#2aa198">&amp;#34;none&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tracingConfig.setExporter(exporterConfig);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

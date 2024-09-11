@@ -1,0 +1,493 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 其他</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/</link><description>Recent content in 其他 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 自定义服务容器</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/service-container/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/service-container/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>Dubbo 的服务容器是一个 standalone 的启动程序，因为后台服务不需要 Tomcat 或 JBoss 等 Web 容器的功能，如果硬要用 Web 容器去加载服务提供方，增加复杂性，也浪费资源。所以服务通常不需要 Tomcat/JBoss 等 Web 容器的特性，没必要用 Web 容器去加载服务。&lt;/p>
+&lt;p>Dubbo 服务容器只是一个简单的 Main 方法，并加载一个简单的 Spring 容器，用于暴露服务。&lt;/p>
+&lt;p>服务容器的加载内容可以扩展，内置了 spring, jetty, log4j 等加载，可通过 &lt;a href="../../../reference-manual/spi/description/container">容器扩展点&lt;/a> 进行扩展。配置配在 java 命令的 -D 参数或者 &lt;code>dubbo.properties&lt;/code> 中。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>web 容器主要是用来响应 http 请求以及静态页面的，Dubbo 服务提供方只是对外提供 dubbo 服务，用 web 容器不太适合，单独作为 dubbo 服务提供方，只需要通过一个 main 方法加载一个简单的 spring 容器将服务暴露。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="spring-container">Spring Container&lt;/h3>
+&lt;ul>
+&lt;li>自动加载 &lt;code>META-INF/spring&lt;/code> 目录下的所有 Spring 配置。&lt;/li>
+&lt;li>配置 spring 配置加载位置：&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.spring.config=classpath*:META-INF/spring/*.xml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="jetty-container">Jetty Container&lt;/h3>
+&lt;ul>
+&lt;li>启动一个内嵌 Jetty，用于汇报状态。&lt;/li>
+&lt;li>配置：
+&lt;ul>
+&lt;li>&lt;code>dubbo.jetty.port=8080&lt;/code>：配置 jetty 启动端口&lt;/li>
+&lt;li>&lt;code>dubbo.jetty.directory=/foo/bar&lt;/code>：配置可通过 jetty 直接访问的目录，用于存放静态文件&lt;/li>
+&lt;li>&lt;code>dubbo.jetty.page=log,status,system&lt;/code>：配置显示的页面，缺省加载所有页面&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="log4j-container">Log4j Container&lt;/h3>
+&lt;ul>
+&lt;li>自动配置 log4j 的配置，在多进程启动时，自动给日志文件按进程分目录。&lt;/li>
+&lt;li>配置：
+&lt;ul>
+&lt;li>&lt;code>dubbo.log4j.file=/foo/bar.log&lt;/code>：配置日志文件路径&lt;/li>
+&lt;li>&lt;code>dubbo.log4j.level=WARN&lt;/code>：配置日志级别&lt;/li>
+&lt;li>&lt;code>dubbo.log4j.subdirectory=20880&lt;/code>：配置日志子目录，用于多进程启动，避免冲突&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="容器加载说明">容器加载说明&lt;/h3>
+&lt;p>缺省只加载 spring&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java org.apache.dubbo.container.Main
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 main 函数参数传入要加载的容器&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java org.apache.dubbo.container.Main spring jetty log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 JVM 启动参数传入要加载的容器&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java org.apache.dubbo.container.Main -Ddubbo.container&lt;span style="color:#719e07">=&lt;/span>spring,jetty,log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 classpath 下的 &lt;code>dubbo.properties&lt;/code> 配置传入要加载的容器&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.container=spring,jetty,log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 优雅停机</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>优雅停机是指服务实例能安全平稳的停止，对进行中的业务不产生影响。
+一个Dubbo服务可能既作为服务提供者，又是服务消费者，当服务停止时：&lt;/p>
+&lt;ol>
+&lt;li>消费者不会再请求已停止的服务实例&lt;/li>
+&lt;li>该服务实例正在处理的请求能正常处理完成&lt;/li>
+&lt;/ol>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;ol>
+&lt;li>通过 &lt;code>kill PID&lt;/code> 停止服务&lt;/li>
+&lt;li>通过 SpringBoot Actuator 的 &lt;code>/shutdown&lt;/code> 停止服务&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>Dubbo 3.0 及以上版本支持不同类型的Java应用，包括 SpringBoot 应用、 Spring 应用、非 Spring 应用。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>设置优雅停机超时时间，缺省超时时间是 10 秒，如果超时则强制关闭。
+该参数可在 dubbo.properties 文件里配置，例如：配置为 30 秒。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 停止服务等待时间，单位：毫秒&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.service.shutdown.wait&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">30000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意事项&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>Dubbo 是通过 JDK 的 ShutdownHook 来完成优雅停机的，所以如果用户使用 &lt;code>kill -9 PID&lt;/code> 等强制关闭指令，是不会执行优雅停机的，只有通过 &lt;code>kill PID&lt;/code> 时，才会执行。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>验证是否执行了 Dubbo 的 ShutdownHook 可在日志文件中查找关键字：&lt;code>Run shutdown hook now.&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果使用了 Spring，请升级 4.2 及以上版本，建议使用 5 以上版本&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果使用了 SpringBoot，Dubbo 的 ShutdownHook 会在 SpringBoot 的 ShutdownHook 之前执行，
+如果使用 SpringBoot 2.3及以上版本，建议配合 SpringBoot 的优雅停机使用，在配置文件 applicaion.yml 中配置：&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">server&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown&lt;/span>: graceful
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>如果 ShutdownHook 不能生效，可根据具体场景自行调用：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ApplicationModel.defaultModel().destroy();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div></description></item><item><title>Overview: 主机地址自定义暴露</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/set-host/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/set-host/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>在 Dubbo 中， Provider 启动时主要做两个事情&lt;/p>
+&lt;ul>
+&lt;li>一是启动 server&lt;/li>
+&lt;li>二是向注册中心注册服务。启动 server 时需要绑定 socket，向注册中心注册服务时也需要发送 socket 唯一标识服务地址。&lt;/li>
+&lt;/ul>
+&lt;ol>
+&lt;li>&lt;code>dubbo&lt;/code> 中不设置 &lt;code>host&lt;/code> 时默认 &lt;code>host&lt;/code> 是什么?&lt;/li>
+&lt;li>那在 &lt;code>dubbo&lt;/code> 中如何指定服务的 &lt;code>host&lt;/code>,我们是否可以用 hostname 或 domain 代替 IP 地址作为 &lt;code>host&lt;/code>?&lt;/li>
+&lt;li>在使用 docker 时,有时需要设置端口映射,此时,启动 server 时绑定的 socket 和向注册中心注册的 socket 使用不同的端口号,此时又该如何设置?&lt;/li>
+&lt;/ol>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>应用程序包含多个服务每个服务定制地址，外部客户端通过定制的地址访问服务。&lt;/p>
+&lt;p>应用程序同一服务的多个版本每个版本的服务定制地址，外部客户端通过定制的地址访问相应版本的服务。&lt;/p>
+&lt;p>应用程序多个地区部署服务每个地区定制地址，外部客户端通过定制的地址访问相应地区的相应服务。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="不设置-host-时默认-host">不设置 host 时默认 host&lt;/h3>
+&lt;p>一般的 dubbo 协议配置如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20890&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到,只配置了端口号,没有配置 host，此时设置的 host 又是什么呢?&lt;/p>
+&lt;p>查看代码发现,在 &lt;code>org.apache.dubbo.config.ServiceConfig#findConfigedHosts()&lt;/code> 中,通过 &lt;code>InetAddress.getLocalHost().getHostAddress()&lt;/code> 获取默认 host。其返回值如下：&lt;/p>
+&lt;ol>
+&lt;li>未联网时，返回 127.0.0.1&lt;/li>
+&lt;li>在阿里云服务器中，返回私有地址,如: 172.18.46.234&lt;/li>
+&lt;li>在本机测试时，返回公有地址，如: 30.5.10.11&lt;/li>
+&lt;/ol>
+&lt;h3 id="指定服务的-socket">指定服务的 socket&lt;/h3>
+&lt;p>除此之外,可以通过 &lt;code>dubbo.protocol&lt;/code> 或 &lt;code>dubbo.provider &lt;/code>的 &lt;code>host&lt;/code> 属性对 &lt;code>host&lt;/code> 进行配置,支持IP地址和域名,如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20890&amp;#34;&lt;/span> host=&lt;span style="color:#2aa198">&amp;#34;www.example.com&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="socket-使用不同的端口号">socket 使用不同的端口号&lt;/h3>
+&lt;p>见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo 通过环境变量设置 host&lt;/a>&lt;/p>
+&lt;p>有些部署场景需要动态指定服务注册的地址，如 docker bridge 网络模式下要指定注册宿主机 ip 以实现外网通信。dubbo 提供了两对启动阶段的系统属性，用于设置对外通信的ip、port地址。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>DUBBO_IP_TO_REGISTRY&lt;/strong>：注册到注册中心的 ip 地址&lt;/li>
+&lt;li>&lt;strong>DUBBO_PORT_TO_REGISTRY&lt;/strong>：注册到注册中心的 port 端口&lt;/li>
+&lt;li>&lt;strong>DUBBO_IP_TO_BIND&lt;/strong>：监听 ip 地址&lt;/li>
+&lt;li>&lt;strong>DUBBO_PORT_TO_BIND&lt;/strong>：监听 port 端口&lt;/li>
+&lt;/ul>
+&lt;p>以上四个配置项均为可选项，如不配置 dubbo 会自动获取 ip 与端口，请根据具体的部署场景灵活选择配置。
+dubbo 支持多协议，如果一个应用同时暴露多个不同协议服务，且需要为每个服务单独指定 ip 或 port，请分别在以上属性前加协议前缀。 如：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>HESSIAN_DUBBO_PORT_TO_BIND&lt;/strong>：hessian 协议绑定的 port&lt;/li>
+&lt;li>&lt;strong>DUBBO_DUBBO_PORT_TO_BIND&lt;/strong>：dubbo 协议绑定的 port&lt;/li>
+&lt;li>&lt;strong>HESSIAN_DUBBO_IP_TO_REGISTRY&lt;/strong>：hessian 协议注册的 ip&lt;/li>
+&lt;li>&lt;strong>DUBBO_DUBBO_IP_TO_REGISTRY&lt;/strong>：dubbo 协议注册的 ip&lt;/li>
+&lt;/ul>
+&lt;p>PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BIND，但是反过来是成立的。如：&lt;/p>
+&lt;ul>
+&lt;li>设置 &lt;code>PORT_TO_REGISTRY=20881&lt;/code> 和 &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>，则 &lt;code>PORT_TO_BIND&lt;/code> 和 &lt;code>IP_TO_BIND&lt;/code> 不受影响&lt;/li>
+&lt;li>设置 &lt;code>PORT_TO_BIND=20881&lt;/code> 和 &lt;code>IP_TO_BIND=30.5.97.6&lt;/code>，则默认 &lt;code>PORT_TO_REGISTRY=20881&lt;/code> 且 &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">总结&lt;/h4>
+&lt;ol>
+&lt;li>可以通过&lt;code>dubbo.protocol&lt;/code>或&lt;code>dubbo.provider&lt;/code>的&lt;code>host&lt;/code>属性对&lt;code>host&lt;/code>进行配置,支持IP地址和域名.但此时注册到注册中心的IP地址和监听IP地址是同一个值&lt;/li>
+&lt;li>为了解决在虚拟环境或局域网内consumer无法与provider通信的问题,可以通过环境变量分别设置注册到注册中心的IP地址和监听IP地址,其优先级高于&lt;code>dubbo.protocol&lt;/code>或&lt;code>dubbo.provider&lt;/code>的&lt;code>host&lt;/code>配置&lt;/li>
+&lt;/ol>
+&lt;p>参考一：&lt;a href="https://github.com/apache/dubbo/issues/2043">Proposal: support hostname or domain in service discovery.&lt;/a>&lt;/p>
+&lt;p>参考二：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo通过环境变量设置host&lt;/a>&lt;/p>
+&lt;/div></description></item><item><title>Overview: 日志框架适配及运行时管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/logger-management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/logger-management/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>日志框架适配，自 &lt;code>2.2.1&lt;/code> 开始，dubbo 开始内置 log4j、slf4j、jcl、jdk 这些日志框架的适配。&lt;/p>
+&lt;p>日志框架运行时管理，自 &lt;code>3.0.10&lt;/code> 开始，dubbo-qos 运行时管控支持查询日志配置以及动态修改使用的日志框架和日志级别。&lt;/p>
+&lt;blockquote>
+&lt;p>通过 dubbo-qos 修改的日志配置不进行持久化存储，在应用重启后将会失效。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>应用程序日志: 收集和存储分布式服务的应用程序日志,支持多种日志格式，包括文本、JSON、XML 和二进制,提供了过滤、聚合和分析日志数据,用于解决分布式应用程序的问题，监控服务的性能。&lt;/p>
+&lt;p>运行时管理: 管理分布式服务的运行时,提供设置阈值和在满足某些条件时采取纠正措施,确保服务保持稳定并高效运行实时检测和响应性能问题。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="日志框架适配">日志框架适配&lt;/h3>
+&lt;p>可以通过以下方式显式配置日志输出策略&lt;/p>
+&lt;ol>
+&lt;li>命令行&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java -Ddubbo.application.logger&lt;span style="color:#719e07">=&lt;/span>log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>&lt;code>dubbo.properties&lt;/code> 中指定&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo.application.logger=log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>&lt;code>dubbo.xml&lt;/code> 中配置&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> logger=&lt;span style="color:#2aa198">&amp;#34;log4j&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>自定义扩展可以参考 &lt;a href="../../../reference-manual/spi/description/logger-adapter">日志适配扩展&lt;/a>&lt;/p>
+&lt;h3 id="日志框架运行时管理">日志框架运行时管理&lt;/h3>
+&lt;ol>
+&lt;li>查询日志配置
+命令：&lt;code>loggerInfo&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>示例&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; loggerInfo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>输出&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>修改日志级别
+命令：&lt;code>switchLogLevel {level}&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>level: &lt;code>ALL&lt;/code>, &lt;code>TRACE&lt;/code>, &lt;code>DEBUG&lt;/code>, &lt;code>INFO&lt;/code>, &lt;code>WARN&lt;/code>, &lt;code>ERROR&lt;/code>, &lt;code>OFF&lt;/code>&lt;/p>
+&lt;p>&lt;strong>示例&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; switchLogLevel WARN
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>输出&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;switchLogLevel WARN
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: WARN```
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>修改日志输出框架
+命令：&lt;code>switchLogger {loggerAdapterName}&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>loggerAdapterName: &lt;code>slf4j&lt;/code>, &lt;code>jcl&lt;/code>, &lt;code>log4j&lt;/code>, &lt;code>jdk&lt;/code>, &lt;code>log4j2&lt;/code>&lt;/p>
+&lt;p>&lt;strong>示例&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&amp;gt; telnet 127.0.0.1 &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; switchLogger slf4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>输出&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Trying 127.0.0.1...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Connected to localhost.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Escape character is &amp;#39;^]&amp;#39;.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ___ __ __ ___ ___ ____
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / _ \ / / / // _ ) / _ ) / __ \
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> / // // /_/ // _ |/ _ |/ /_/ /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/____/ \____//____//____/ \____/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [log4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;switchLogger slf4j
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&amp;gt;loggerInfo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [slf4j]. Log level: INFO
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Kubernetes 生命周期探针</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>&lt;a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/">Pod 的生命周期&lt;/a> 与服务调度息息相关，通过对 Kubernetes 官方探针的实现，能够使 Dubbo3 乃至整个应用的生命周期与 Pod 的生命周期，在 Pod 的整个生命周期中，影响到 Pod 的就只有健康检查这一部分, 我们可以通过配置 liveness probe（存活探针）和 readiness probe（可读性探针）来影响容器的生命周期。&lt;/p>
+&lt;p>通过 Dubbo3 的 SPI 机制，在内部实现多种“探针”，基于 Dubbo3 QOS 运维模块的 HTTP 服务，使容器探针能够获取到应用内对应探针的状态。另外，SPI 的实现机制也利于用户自行拓展内部“探针”，使整个应用的生命周期更有效的进行管控。&lt;/p>
+&lt;p>&lt;strong>三种探针对应的 SPI 接口&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>livenessProbe: &lt;code>org.apache.dubbo.qos.probe.LivenessProbe&lt;/code>&lt;/li>
+&lt;li>readinessProbe: &lt;code>org.apache.dubbo.qos.probe.ReadinessProbe&lt;/code>&lt;/li>
+&lt;li>startupProbe: &lt;code>org.apache.dubbo.qos.probe.StartupProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>接口将自动获取当前应用所有 SPI 的实现，对应接口的 SPI 实现均成功就绪则接口返回成功。&lt;/p>
+&lt;p>Dubbo3 SPI 更多扩展的介绍见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/">Dubbo SPI扩展&lt;/a>&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>&lt;code>liveness probe&lt;/code> 来确定你的应用程序是否正在运行，查看是否存活。&lt;/p>
+&lt;p>&lt;code>readiness probe&lt;/code> 来确定容器是否已经就绪可以接收流量过来,是否准备就绪,是否可以开始工作。&lt;/p>
+&lt;p>&lt;code>startup probe&lt;/code> 来确定容器内的应用程序是否已启动，如果提供了启动探测则禁用所有其他探测，直到它成功为止，如果启动探测失败则杀死容器，容器将服从其重启策略。如果容器没有提供启动探测，则默认状态为成功。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="存活检测">存活检测&lt;/h3>
+&lt;p>对于 livenessProbe 存活检测，由于 Dubbo3 框架本身无法获取到应用的存活状态，因此本接口无默认实现，且默认返回成功。开发者可以根据 SPI 定义对此 SPI 接口进行拓展，从应用层次对是否存活进行判断。&lt;/p>
+&lt;p>关于 &lt;a href="../../../reference-manual/spi/description/liveness/">liveness 存活探针&lt;/a> 扩展示例&lt;/p>
+&lt;h3 id="就绪检测">就绪检测&lt;/h3>
+&lt;p>对于 readinessProbe 就绪检测，目前 Dubbo3 默认提供了两个检测维度，一是对 Dubbo3 服务自身是否启停做判断，另外是对所有服务是否存在已注册接口，如果所有服务均已从注册中心下线（可以通过 QOS 运维进行操作）将返回未就绪的状态。&lt;/p>
+&lt;p>关于 &lt;a href="../../../reference-manual/spi/description/readiness/">readiness 就绪探针&lt;/a> 扩展示例&lt;/p>
+&lt;h3 id="启动检测">启动检测&lt;/h3>
+&lt;p>对于 startupProbe 启动检测，目前 Dubbo3 默认提供了一个检测维度，即是在所有启动流程（接口暴露、注册中心写入等）均结束后返回已就绪状态。&lt;/p>
+&lt;p>关于 &lt;a href="../../../reference-manual/spi/description/startup/">startup 启动探针&lt;/a> 扩展示例&lt;/p>
+&lt;h3 id="参考示例">参考示例&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">livenessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /live
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">readinessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /ready
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">startupProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /startup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">failureThreshold&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>QOS 当计算节点检测到内存压力时，kuberentes 会 BestEffort -&amp;gt; Burstable -&amp;gt; Guaranteed 依次驱逐 Pod。&lt;/p>
+&lt;/blockquote>
+&lt;p>目前三种探针均有对应的接口，路径为 QOS 中的命令，端口信息请根据 QOS 配置进行对应修改（默认端口为 22222）。其他参数请参考 &lt;a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes官方文档说明&lt;/a>。&lt;/p></description></item><item><title>Overview: Dubbo 部署 Docker 环境</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/docker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/docker/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>一些部署场景需要动态地指定服务注册地址。例如，docker bridge网络模式需要为外部网络通信指定一个注册主机IP。Dubbo在启动阶段提供了两对系统属性，用于设置外部通信的IP和端口地址。&lt;/p>
+&lt;ul>
+&lt;li>DUBBO_IP_TO_REGISTRY &amp;mdash; 注册到注册中心的IP地址&lt;/li>
+&lt;li>DUBBO_PORT_TO_REGISTRY &amp;mdash; 注册到注册中心的端口&lt;/li>
+&lt;li>DUBBO_IP_TO_BIND &amp;mdash; 侦听IP地址&lt;/li>
+&lt;li>DUBBO_PORT_TO_BIND &amp;mdash; 侦听端口&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;ol>
+&lt;li>以上四个配置是可选的。如果没有配置，Dubbo会自动获得IP和端口。请根据部署情况，灵活选择。&lt;/li>
+&lt;li>Dubbo支持多协议. &lt;strong>如果一个应用程序同时暴露了多个不同的协议服务，并且需要为每个服务分别指定IP或端口。请在上述属性前分别添加协议前缀。&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>HESSIAN_DUBBO_PORT_TO_BIND hessian 协议绑定端口&lt;/li>
+&lt;li>DUBBO_DUBBO_PORT_TO_BIND   dubbo 协议绑定端口&lt;/li>
+&lt;li>HESSIAN_DUBBO_IP_TO_REGISTRY hessian 协议注册的IP&lt;/li>
+&lt;li>DUBBO_DUBBO_IP_TO_REGISTRY     dubbo 协议注册的IP&lt;/li>
+&lt;/ul>
+&lt;ol start="3">
+&lt;li>&lt;code>PORT_TO_REGISTRY&lt;/code>或&lt;code>IP_TO_REGISTRY&lt;/code>不会被用作默认的&lt;code>PORT_TO_BIND&lt;/code>或&lt;code>IP_TO_BIND&lt;/code>，但相反的是 true。&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>如果设置&lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code>，那么 &lt;code>PORT_TO_BIND&lt;/code> &lt;code>IP_TO_BIND&lt;/code>不会受到影响。&lt;/li>
+&lt;li>如果设置&lt;code>PORT_TO_BIND=20881&lt;/code> &lt;code>IP_TO_BIND=30.5.97.6&lt;/code>，那么 &lt;code>PORT_TO_REGISTRY=20881&lt;/code> &lt;code>IP_TO_REGISTRY=30.5.97.6&lt;/code> 默认情况下。&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>提供隔离的环境，从而确保在开发和部署过程中服务不会受到彼此的影响,对于微服务的开发和部署有很大帮助。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker">dubbo-docker-sample&lt;/a> 本地操作过程：&lt;/p>
+&lt;ol>
+&lt;li>克隆项目到本地&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>git clone git@github.com:dubbo/dubbo-docker-sample.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>包本地的maven&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>mvn clean install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>通过docker build建立一个镜像&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker build --no-cache -t dubbo-docker-sample .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>构建镜像&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>FROM openjdk:8-jdk-alpine
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ADD target/dubbo-docker-sample-0.0.1-SNAPSHOT.jar app.jar
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENV &lt;span style="color:#268bd2">JAVA_OPTS&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ENTRYPOINT &lt;span style="color:#b58900">exec&lt;/span> java &lt;span style="color:#268bd2">$JAVA_OPTS&lt;/span> -jar /app.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>从镜像中创建和运行容器&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 由于我们使用zk注册中心，我们先启动zk容器&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --name zkserver --restart always -d zookeeper:3.4.9
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>docker run -e &lt;span style="color:#268bd2">DUBBO_IP_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>30.5.97.6 -e &lt;span style="color:#268bd2">DUBBO_PORT_TO_REGISTRY&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span> -p 30.5.97.6:20881:20880 --link zkserver:zkserver -it --rm dubbo-docker-sample
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>假设主机IP是 30.5.97.6.
+通过环境变量设置提供商注册的IP地址和注册中心的端口 &lt;code>DUBBO_IP_TO_REGISTRY=30.5.97.6&lt;/code> &lt;code>DUBBO_PORT_TO_REGISTRY=20881&lt;/code>  
+通过以下方式实现端口映射&lt;code>-p 30.5.97.6:20881:20880&lt;/code>, 其中20880是由dubbo自动选择的监听端口。没有监控IP的配置，所以它将监听0.0.0.0（所有IP）。
+启动后，提供者的注册地址是30.5.97.6:20881，而容器的监听地址是：0.0.0.0:20880。  &lt;/p>
+&lt;/blockquote>
+&lt;ol start="6">
+&lt;li>测试从另一个主机或容器中执行&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>telnet 30.5.97.6 &lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ls
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>invoke org.apache.dubbo.test.docker.DemoService.hello&lt;span style="color:#719e07">(&lt;/span>&lt;span style="color:#2aa198">&amp;#34;world&amp;#34;&lt;/span>&lt;span style="color:#719e07">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 日志框架配置与使用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/logger-howto/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/logger-howto/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>在dubbo 3.3.0-beta.3之前，dubbo和dubbo-samples中存在混用log4j和logback的情况，并且部分模块缺少日志配置，造成日志框架使用混乱，经常冲突报错。因此在3.3.0-beta.3之后，统一将日志组件升级替换为log4j2，配置使用上更加简洁，减少了维护成本。此文档说明了应该如何配置使用日志框架，避免间接引入多种日志框架，引起冲突报错。&lt;/p>
+&lt;h2 id="使用方法">使用方法&lt;/h2>
+&lt;h3 id="使用约定">使用约定&lt;/h3>
+&lt;ul>
+&lt;li>请使用log4j2做为日志框架，禁止使用log4j和logback.
+除部分遗留场景，统一使用一种日志框架可以降低使用成本，避免冲突&lt;/li>
+&lt;li>避免日志框架依赖被传递到上游，可以通过在maven设置scope为&lt;code>test、provider&lt;/code>或设置&lt;code>&amp;lt;optional&amp;gt;true&amp;lt;/optional&amp;gt;&lt;/code>的方式解决.
+dubbo作为一个服务框架应该尽量避免传递非必选依赖，将日志框架选择权交给用户&lt;/li>
+&lt;/ul>
+&lt;h3 id="使用场景">使用场景&lt;/h3>
+&lt;h4 id="1-普通dubbo模块">1. 普通dubbo模块&lt;/h4>
+&lt;p>绝大多数模块是此类型，一般是单元测试需要用到日志框架&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>引入maven依赖，注意如果parent已经引入则无需重复添加&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>test&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加log4j2日志配置 &lt;code>src/test/resources/log4j2-test.xml&lt;/code>，使用此名称原因是可以保证最高优先级&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%d{HH:mm:ss.SSS} |-%highlight{%-5p} [%t] %40.40c:%-3L -| %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect,org.junit,org.mockito)}&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="2-非spring-boot-demo模块">2. 非spring-boot demo模块&lt;/h4>
+&lt;ol>
+&lt;li>
+&lt;p>引入maven依赖，注意如果parent已经引入则无需重复添加&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加log4j2日志配置 &lt;code>src/main/resources/log4j2.xml&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;Configuration&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Console&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span> target=&lt;span style="color:#2aa198">&amp;#34;SYSTEM_OUT&amp;#34;&lt;/span> follow=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;PatternLayout&lt;/span> pattern=&lt;span style="color:#2aa198">&amp;#34;%style{%d{HH:mm:ss.SSS}}{Magenta} %style{|-}{White}%highlight{%-5p} [%t] %style{%40.40c}{Cyan}:%style{%-3L}{Blue} %style{-|}{White} %m%n%rEx{filters(jdk.internal.reflect,java.lang.reflect,sun.reflect)}&amp;#34;&lt;/span> disableAnsi=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> charset=&lt;span style="color:#2aa198">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Console&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Appenders&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;Root&lt;/span> level=&lt;span style="color:#2aa198">&amp;#34;info&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;AppenderRef&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;Console&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/Loggers&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/Configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol>
+&lt;h4 id="3-spring-boot-demo模块">3. spring-boot demo模块&lt;/h4>
+&lt;p>spring-boot支持用starter的方式引入log4j2依赖，但是注意spring-boot默认使用logback，因此需要在&lt;code>&amp;lt;dependencyManagement&amp;gt;&lt;/code>中排除&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>排除spring-boot-starter-logging&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-dependencies&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;type&amp;gt;&lt;/span>pom&lt;span style="color:#268bd2">&amp;lt;/type&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;scope&amp;gt;&lt;/span>import&lt;span style="color:#268bd2">&amp;lt;/scope&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${spring-boot.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-logging&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusion&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/exclusions&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependencyManagement&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>引入maven依赖&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-starter-log4j2&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>添加log4j2日志配置 &lt;code>src/main/resources/log4j2.xml&lt;/code>&lt;/p>
+&lt;p>可选，spring-boot自带默认日志配置&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="4-spring-boot-native-demo模块">4. spring-boot native demo模块&lt;/h4>
+&lt;p>因为log4j2尚不支持native，需要使用logback来作为日志框架，因此无需任何修改，保留原有方式即可，注意不要间接引入log4j或slf4j-log4j12&lt;/p>
+&lt;h2 id="常见日志框架问题">常见日志框架问题&lt;/h2>
+&lt;h4 id="1-缺少日志框架">1. 缺少日志框架&lt;/h4>
+&lt;p>控制台输出:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: No SLF4J providers were found.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Defaulting to no-operation (NOP) logger implementation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See SLF4J Error Codes for further details.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>解决方案: 引入log4j2依赖&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.logging.log4j&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>log4j-slf4j-impl&lt;span style="color:#268bd2">&amp;lt;/artifactI&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-日志框架冲突">2. 日志框架冲突&lt;/h4>
+&lt;p>控制台输出:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>SLF4J: Class path contains multiple SLF4J bindings.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../slf4j-log4j12-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../logback-classic-1.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Found binding in [jar:file:.../log4j-slf4j-impl-2.x.x.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Exception in thread &amp;#34;main&amp;#34; java.lang.IllegalArgumentException: LoggerFactory is not a Logback LoggerContext but Logback is on the classpath
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>解决方案: 排除掉除了log4j-slf4j-impl的依赖, 强烈推荐使用 &lt;a href="https://plugins.jetbrains.com/plugin/7179-maven-helper">Maven Helper - IntelliJ IDEs Plugin&lt;/a> 来分析和排除依赖&lt;/p>
+&lt;h4 id="3-其他问题">3. 其他问题&lt;/h4>
+&lt;p>可以参考: &lt;a href="https://www.slf4j.org/codes.html">SLF4J Error Codes&lt;/a>&lt;/p></description></item></channel></rss>

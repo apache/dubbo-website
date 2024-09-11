@@ -1,0 +1,81 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Http Filter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/</link><description>Recent content in Http Filter 介绍 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Dubbo HttpFilter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/dubbo/</guid><description>
+&lt;h1 id="使用-http-调用-dubbo">使用 HTTP 调用 Dubbo&lt;/h1>
+&lt;h2 id="定义pixiu配置文件">定义Pixiu配置文件&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">static_resources&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">listeners&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;http-listener&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol_type&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;HTTP&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">socket_address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8888&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter_chains&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filter.httpconnectionmanager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">routes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prefix&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;*&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http_filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filter.http.dubboproxy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubboProxyConfig&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">auto_resolve&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;3s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">connect_timeout&lt;/span>: 5s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">request_timeout&lt;/span>: 5s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">clusters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo-server&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">lb_policy&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;lb&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">endpoints&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">id&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">socket_address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;60s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step_timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;10s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">reject_policy&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;immediacy&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="准备dubbo服务">准备Dubbo服务&lt;/h2>
+&lt;h3 id="启动zookeeper需要提前准备好docker和compose如果本地有的话可以忽略">启动zookeeper,需要提前准备好docker和compose，如果本地有的话可以忽略&lt;/h3>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbohttpproxy/server/dubbo/app">docker-compose.yml&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>docker-compose -f &lt;span style="color:#719e07">{&lt;/span>CURRENT_PATH&lt;span style="color:#719e07">}&lt;/span>/dubbo-go-pixiu-samples/dubbohttpproxy/docker/docker-compose.yml &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> docker-compose up -d
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动-dubbo-server">启动 Dubbo Server&lt;/h3>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbohttpproxy/server/dubbo/app">Run&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">DUBBO_GO_CONFIG_PATH&lt;/span>&lt;span style="color:#719e07">={&lt;/span>CURRENT_PATH&lt;span style="color:#719e07">}&lt;/span>/dubbo-go-pixiu-samples/dubbohttpproxy/server/dubbo/profiles/dev/server.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go run .
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="启动-pixiu">启动 Pixiu&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>./dubbo-go-pixiu gateway start --config &lt;span style="color:#719e07">{&lt;/span>CURRENT_PATH&lt;span style="color:#719e07">}&lt;/span>pixiu/conf.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="使用-curl-来做查询和更新">使用 curl 来做查询和更新&lt;/h2>
+&lt;p>使用以下命令运行命令 curl：&lt;/p>
+&lt;blockquote>
+&lt;p>查询&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://localhost:8888/UserService/com.dubbogo.pixiu.UserService/GetUserByName -X POST &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;Content-Type: application/json&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-http1.1-dubbo-version: 1.0.0&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-service-protocol: dubbo&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-service-version: 1.0.0&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-service-group: test&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -d &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;types&amp;#34;:&amp;#34;string&amp;#34;,&amp;#34;values&amp;#34;:&amp;#34;tc&amp;#34;}&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>更新&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://localhost:8888/UserService/com.dubbogo.pixiu.UserService/UpdateUserByName -X POST &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;Content-Type: application/json&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-http1.1-dubbo-version: 1.0.0&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-service-protocol: dubbo&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-service-version: 1.0.0&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -H &lt;span style="color:#2aa198">&amp;#39;x-dubbo-service-group: test&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -d &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;types&amp;#34;:&amp;#34;string,object&amp;#34;,&amp;#34;values&amp;#34;:[&amp;#34;tc&amp;#34;,{&amp;#34;id&amp;#34;:&amp;#34;0001&amp;#34;,&amp;#34;code&amp;#34;:1,&amp;#34;name&amp;#34;:&amp;#34;tc&amp;#34;,&amp;#34;age&amp;#34;:15}]}&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: RateLimiter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/ratelimit/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/ratelimit/</guid><description>
+&lt;p>欢迎认领补充此文档。&lt;/p></description></item><item><title>Overview: 断路器介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/hystrix/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/hystrix/</guid><description>
+&lt;p>欢迎认领补充此文档。&lt;/p></description></item></channel></rss>

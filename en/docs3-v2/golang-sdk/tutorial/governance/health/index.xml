@@ -1,0 +1,107 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Health Check</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/</link><description>Recent content in Health Check on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Grpc-based health check</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/triple-health-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/triple-health-check/</guid><description>
+&lt;h2 id="1-grpc-health-check">1. Grpc health check&lt;/h2>
+&lt;p>The Grpc health check is implemented through an ordinary user rpc call. The Grpc health check defines the following protobuf, so that the intercommunication of all Grpc protocol health checks can be realized.&lt;/p>
+&lt;blockquote>
+&lt;p>Firstly, since it is a GRPC service itself, doing a health check is in the same format as a normal rpc. Secondly, it has rich semantics such as per-service health status. Thirdly, as a GRPC service, it is able to reuse All the existing billing, quota infrastructure, etc, and thus the server has full control over the access of the health checking service.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> grpc&lt;span style="color:#719e07">.&lt;/span>health.v1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HealthCheckRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">service&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HealthCheckResponse&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enum&lt;/span> ServingStatus {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> UNKNOWN &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SERVING &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> NOT_SERVING &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SERVICE_UNKNOWN &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>; &lt;span style="color:#586e75">// Used only by the Watch method.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServingStatus status &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> Health {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Check(HealthCheckRequest) &lt;span style="color:#719e07">returns&lt;/span> (HealthCheckResponse);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Watch(HealthCheckRequest) &lt;span style="color:#719e07">returns&lt;/span> (stream HealthCheckResponse);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-triple-health-check-service">2 triple health check service&lt;/h2>
+&lt;ul>
+&lt;li>The Dubbo-go framework will automatically register the health check service with the framework after startup, and provide health check services based on grpc health proto, without additional configuration in the configuration file.&lt;/li>
+&lt;li>The triple health check service can check the status of the service in the framework through grpc-health-probe, and can also call the health check service through grpc, but it cannot call the health check service through the triple client (the health check service based on grpc does not pass the registration Center registration), the called service name is &amp;ldquo;grpc.health.v1.Health&amp;rdquo;, and the interface is check.&lt;/li>
+&lt;/ul>
+&lt;h3 id="21-call-the-health-check-service-through-the-gprc-client">2.1 Call the health check service through the gprc client:&lt;/h3>
+&lt;ul>
+&lt;li>Start &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server">triple service&lt;/a> in dubbo-go-samples, through The following grpc client can view the status of &amp;ldquo;org.apache.dubbogo.samples.api.Greeter&amp;rdquo;. The triple health check service communicates with grpc, so the health status of services based on the triple protocol can be checked through the grpc client.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;context&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;fmt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;log&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;google.golang.org/grpc&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;google.golang.org/grpc/credentials/insecure&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>healthpb &lt;span style="color:#2aa198">&amp;#34;google.golang.org/grpc/health/grpc_health_v1&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">const&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>address = &lt;span style="color:#2aa198">&amp;#34;localhost:20000&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Set up a connection to the server
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>conn, err &lt;span style="color:#719e07">:=&lt;/span> grpc.&lt;span style="color:#268bd2">Dial&lt;/span>(address, grpc.&lt;span style="color:#268bd2">WithTransportCredentials&lt;/span>(insecure.&lt;span style="color:#268bd2">NewCredentials&lt;/span>()))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>log.&lt;span style="color:#268bd2">Fatalf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;did not connect: %v&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">defer&lt;/span> &lt;span style="color:#268bd2">func&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>_ = conn.&lt;span style="color:#268bd2">Close&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">checkHealth&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbogo.samples.api.Greeter&amp;#34;&lt;/span>, conn)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">checkHealth&lt;/span>(service &lt;span style="color:#dc322f">string&lt;/span>, conn &lt;span style="color:#719e07">*&lt;/span>grpc.ClientConn) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; gRPC-go check %s status&amp;#34;&lt;/span>, service)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>healthpb.HealthCheckRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Service: service,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ctx &lt;span style="color:#719e07">:=&lt;/span> context. &lt;span style="color:#268bd2">Background&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rsp, err &lt;span style="color:#719e07">:=&lt;/span> healthpb. &lt;span style="color:#268bd2">NewHealthClient&lt;/span>(conn). &lt;span style="color:#268bd2">Check&lt;/span>(ctx, req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;get service status = %+v\n&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-grpc-health-probe-debugging-health-check-service">2.2 grpc-health-probe debugging health check service:&lt;/h3>
+&lt;ul>
+&lt;li>Start &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/triple/pb/dubbogo-grpc/go-server">triple service&lt;/a> in dubbo-go-samples, provide &lt;code>org.apache.dubbogo.samples.api.Greeter&lt;/code> service. Use grpc-health-probe to check the health status of the service, &lt;code>grpc-health-probe -addr=localhost:20000 -service &amp;quot;org.apache.dubbogo.samples.api.Greeter&amp;quot;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/tasks/service_management/triple-health-check/health-check.png" alt="image-health-check">&lt;/p>
+&lt;h4 id="refer-to">refer to:&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/grpc/grpc/blob/master/doc/health-checking.md">https://github.com/grpc/grpc/blob/master/doc/health-checking.md&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/grpc/grpc-go/tree/master/health">https://github.com/grpc/grpc-go/tree/master/health&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: dubbogo 3.0 check at startup</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/start-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/start-check/</guid><description>
+&lt;h1 id="check-at-startup">check at startup&lt;/h1>
+&lt;p>Check if dependent services are available at startup&lt;/p>
+&lt;p>By default, Dubbo-go will check whether the dependent services are available at startup. When they are not available, an exception will be thrown to prevent the application from completing initialization, so that problems can be detected early when going online. The default check=&amp;ldquo;true&amp;rdquo; and wait for 3s.&lt;/p>
+&lt;p>You can turn off the check with check=&amp;ldquo;false&amp;rdquo;. For example, when testing, some services don&amp;rsquo;t care, or there is a circular dependency, and one of them must be started first.&lt;/p>
+&lt;p>After closing check, please note that when the number of providers is large, there may be a certain delay when the consumer subscribes to the provider to generate the service dictionary. If the consumer provides services to the outside world as soon as it starts,
+May cause &amp;ldquo;cold start&amp;rdquo;. So at this time, please warm up the service.&lt;/p>
+&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">check&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">reference&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">myserivce&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">check&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Kubernetes Probe</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/kubernetes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/health/kubernetes/</guid><description/></item></channel></rss>

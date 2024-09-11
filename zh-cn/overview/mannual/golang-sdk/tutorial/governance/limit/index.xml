@@ -1,0 +1,88 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 限流</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/</link><description>Recent content in 限流 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Dubbo Go 内置的限流使用教程</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/internally/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/internally/</guid><description/></item><item><title>Overview: 基于 Sentinel 的限流教程</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/sentinel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/sentinel/</guid><description/></item><item><title>Overview: 基于 Polaris 的限流教程</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/polaris/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/polaris/</guid><description/></item><item><title>Overview: 为服务端设置限流</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/tps_limiter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/tps_limiter/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-修改限流逻辑并验证">2. 修改限流逻辑并验证&lt;/h2>
+&lt;p>Dubbo-go 为用户提供了内置的限流拒绝逻辑，并支持用户根据自己的业务场景，定义需要的限流机制、拒绝逻辑。&lt;/p>
+&lt;p>正常情况下，不设置流量限制，当用户在 server 端配置了限流逻辑和参数后，将会&lt;/p>
+&lt;h3 id="21-配置限流参数">2.1 配置限流参数&lt;/h3>
+&lt;p>go-server/conf/dubbogo.yaml: 配置限流参数&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limiter&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;method-service&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.strategy&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;slidingWindow&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.rejected.handler&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;default&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.interval&lt;/span>: &lt;span style="color:#2aa198">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">tps.limit.rate&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>参数说明：&lt;/p>
+&lt;ul>
+&lt;li>tps.limiter：限流器选择。method-service 为框架内置的一个限流器，可以配置服务和方法级别的限流逻辑，可自定义。&lt;/li>
+&lt;li>tps.limit.strategy：限流策略选择，slidingWindow 为框架内置的一个限流策略，可以按照滑动窗口的形式，拒绝掉窗口内超过流量限制的请求。&lt;/li>
+&lt;li>tps.limit.rejected.handler: 拒绝策略，default 为默认拒绝方式，返回空对象，可自定义&lt;/li>
+&lt;li>tps.limit.interval：限流窗口区间，单位是ms。&lt;/li>
+&lt;li>tps.limit.rate：窗口内流量限制，单位是请求次数。&lt;/li>
+&lt;/ul>
+&lt;p>按照上述配置，服务端只允许当前接口在一秒内被调用三次。&lt;/p>
+&lt;h3 id="22-发起超流请求验证限流能力">2.2 发起超流请求，验证限流能力&lt;/h3>
+&lt;p>将客户端的请求逻辑设置为每秒钟请求五次，并计算成功率。&lt;/p>
+&lt;p>go-client/cmd/client.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;start to test dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> goodCount &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> badCount &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Millisecond&lt;span style="color:#719e07">*&lt;/span>&lt;span style="color:#2aa198">200&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reply, _ &lt;span style="color:#719e07">:=&lt;/span> grpcGreeterImpl.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> reply.Name &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> badCount&lt;span style="color:#719e07">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }&lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> goodCount&lt;span style="color:#719e07">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> badCount &lt;span style="color:#719e07">+&lt;/span> goodCount &lt;span style="color:#719e07">==&lt;/span>&lt;span style="color:#2aa198">5&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Success rate = %v\n&amp;#34;&lt;/span>, &lt;span style="color:#b58900">float64&lt;/span>(goodCount)&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#b58900">float64&lt;/span>(goodCount &lt;span style="color:#719e07">+&lt;/span> badCount))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可在日志中看到请求成功率为0.6，每秒钟只允许三次请求被执行。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:62 Success &lt;span style="color:#268bd2">rate&lt;/span> &lt;span style="color:#719e07">=&lt;/span> 0.6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:62 Success &lt;span style="color:#268bd2">rate&lt;/span> &lt;span style="color:#719e07">=&lt;/span> 0.6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:62 Success &lt;span style="color:#268bd2">rate&lt;/span> &lt;span style="color:#719e07">=&lt;/span> 0.6
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在服务端日志中可以看到拒绝的信息：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>ERROR tps/filter.go:84 The invocation was rejected due to over the limiter limitation...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: dubbogo 3.0 柔性服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/adaptive-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/governance/limit/adaptive-service/</guid><description>
+&lt;h1 id="柔性负载均衡-柔性服务">柔性负载均衡 (柔性服务)&lt;/h1>
+&lt;p>柔性服务是一种去中心化的智能负载均衡组件，同时也是 Dubbo-go 3.0 版本中重磅新特性之一。柔性服务尚处于早期实验阶段，该特性将在后续版本中持续优化，与 Dubbo 社区共同探索出一套适合微服务场景的最佳实践。&lt;/p>
+&lt;p>传统的负载均衡算法是由随机节点、RoundRobin 等算法实现，他们的局限性在于不知道当前服务提供者的负载情况，算法总是以尽可能公平的概率调用不同的服务提供者。在实践中，公平不等于高性能，集群服务性能还与服务负载、任务复杂度等多因素相关。为解决传统负载均衡算法的不足，Dubbo-go 在 3.0 版本中引入了柔性服务，实现了容量动态评估和分流功能。&lt;/p>
+&lt;p>容量评估是柔性服务的核心，它能动态评估服务端容量水平。在容量评估的过程中，两个核心指标是 TPS 和响应时间，要平衡系统利用率和系统性能两者之间的关系，使整体处于最佳的状态。&lt;/p>
+&lt;ul>
+&lt;li>TPS 从服务提供者的角度反映系统利用率。在系统压力未饱和前，请求数越大则系统利用率越高，但是进一步加大请求量直至系统过饱和后，出现过载的问题，导致整体效率呈下降趋势。&lt;/li>
+&lt;li>响应时间是从服务调用者的角度反映系统性能。在系统压力未饱和前，响应时间与请求数成线性增长的关系，但是进一步加大请求量直至系统过饱和后，响应时间与请求数成指数级增长。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/samples/adaptive-service/adaptive.png" alt="img">&lt;/p>
+&lt;p>柔性服务则在调用过程中收集&lt;/p>
+&lt;p>在 Dubbo-go 3.0 版本中，支持服务柔性负载均衡。在微服务场景下，客户端会在调用过程中收集该服务下游 server 实例的硬件资源消耗情况，通过容量评估与筛选策略，选择最合适的下游实例进行调用，从而提升系统整体的性能。&lt;/p>
+&lt;p>服务柔性将在之后的迭代中持续优化，追求与 Dubbo 社区共同探索出最佳实践。&lt;/p></description></item></channel></rss>

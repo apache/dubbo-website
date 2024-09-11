@@ -1,0 +1,242 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Kubernetes Deployment Solution</title><link>https://dubbo.apache.org/en/overview/tasks/kubernetes/</link><description>Recent content in Kubernetes Deployment Solution on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/tasks/kubernetes/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Deploying to Kubernetes</title><link>https://dubbo.apache.org/en/overview/tasks/kubernetes/deploy-on-k8s/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/tasks/kubernetes/deploy-on-k8s/</guid><description>
+&lt;p>You can follow the steps below to easily deploy the Dubbo service to the Kubernetes cluster. Check out the [full code sample address](&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry">https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry&lt;/a> /dubbo-samples-kubernetes)&lt;/p>
+&lt;h2 id="1-overall-objective">1 Overall Objective&lt;/h2>
+&lt;ul>
+&lt;li>Deploy Dubbo application to Kubernetes&lt;/li>
+&lt;li>Realize service discovery based on Kubernetes built-in Service&lt;/li>
+&lt;li>Connect Dubbo application to Kubernetes life cycle&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-basic-process">2 Basic process&lt;/h2>
+&lt;ol>
+&lt;li>Create a Dubbo
+Application ( &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes">dubbo-samples-kubernetes&lt;/a> )&lt;/li>
+&lt;li>Build the container image and push it to the mirror warehouse ( &lt;a href="https://hub.docker.com/r/apache/dubbo-demo">dubbo-demo example image&lt;/a> )&lt;/li>
+&lt;li>Deploy Dubbo Provider and Dubbo Consumer to Kubernetes respectively&lt;/li>
+&lt;li>Verify that service discovery and calling are normal&lt;/li>
+&lt;/ol>
+&lt;h2 id="3-detailed-steps">3 detailed steps&lt;/h2>
+&lt;h3 id="31-environmental-requirements">3.1 Environmental requirements&lt;/h3>
+&lt;p>Please ensure that the following environment is installed locally to provide container runtime, Kubernetes cluster and access tools&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://www.docker.com/get-started/">Docker&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://minikube.sigs.k8s.io/docs/start/">Minikube&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubectl&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/ahmetb/kubectx">Kubens(optional)&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Start the local Kubernetes cluster with the following command&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>minikube start
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Check that the cluster is up and running with kubectl, and that kubectl is bound to the default local cluster&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl cluster-info
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-preconditions">3.2 Preconditions&lt;/h3>
+&lt;p>Since the sample Dubbo projects are all deployed in Pods and interact with API-SERVER, there are corresponding permission requirements. Here we create an independent ServiceAccount and bind the necessary Roles. All Dubbo Kubernetes later
+All resources will use the newly created ServiceAccount here.&lt;/p>
+&lt;p>Through the following commands, we have created an independent Namespace &lt;code>dubbo-demo&lt;/code> and ServiceAccount &lt;code>dubbo-sa&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Initialize namespace and account&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-provider/src/main/resources/k8s/ServiceAccount.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># switch namespace&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubens dubbo-demo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="33-deploy-to-kubernetes">3.3 Deploy to Kubernetes&lt;/h3>
+&lt;h4 id="331-deploy-provider">3.3.1 Deploy Provider&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy the Service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-provider/src/main/resources/k8s/Service.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy Deployment&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-provider/src/main/resources/k8s/Deployment.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above command creates a Service named &lt;code>dubbo-samples-apiserver-provider&lt;/code>, note that the service name here is the same as the dubbo application name in the project.&lt;/p>
+&lt;p>Then Deployment deploys a 3-copy pod instance, and the Provider is started.
+You can check the startup log with the following command.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod list&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl get pods -l &lt;span style="color:#268bd2">app&lt;/span>&lt;span style="color:#719e07">=&lt;/span>dubbo-samples-apiserver-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod deployment logs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl logs your-pod-id
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="332-deploy-consumer">3.3.2 Deploy Consumer&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy the Service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-consumer/src/main/resources/k8s/Service.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Deploy Deployment&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-consumer/src/main/resources/k8s/Deployment.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Deploying consumer and provider is the same, here also keep K8S Service and Dubbo consumer name consistent: dubbo-samples-apiserver-consumer.&lt;/p>
+&lt;p>Check the startup log, the consumer completes the consumption of the provider service.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod list&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl get pods -l &lt;span style="color:#268bd2">app&lt;/span>&lt;span style="color:#719e07">=&lt;/span>dubbo-samples-apiserver-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># View pod deployment logs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl logs your-pod-id
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see the log output as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>22&lt;span style="color:#719e07">/&lt;/span>04&lt;span style="color:#719e07">/&lt;/span>22 01:10:24:024UTC&lt;span style="color:#719e07">]&lt;/span>main INFO deploy.DefaultApplicationDeployer:&lt;span style="color:#719e07">[&lt;/span>DUBBO&lt;span style="color:#719e07">]&lt;/span>Dubbo Application&lt;span style="color:#719e07">[&lt;/span>1.1&lt;span style="color:#719e07">]&lt;/span>(dubbo&lt;span style="color:#719e07">-&lt;/span>samples&lt;span style="color:#719e07">-&lt;/span>apiserver&lt;span style="color:#719e07">-&lt;/span>consumer) is ready.,dubbo version:3.0.7,current host :172.17.0.6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result: hello, Kubernetes Api Server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="34-modify-the-project-and-package-it-can-be-skipped">3.4 Modify the project and package it (can be skipped)&lt;/h3>
+&lt;p>The sample project and related images are ready, this section is only for users who need to modify the sample and see the deployment effect. Check here &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes">full code sample address&lt;/a>&lt;/p>
+&lt;p>Set the Dubbo project to use Kubernetes as the registration center. Here, DEFAULT_MASTER_HOST specifies the default API-SERVER cluster address kubernetes.default.srv, and also specifies
+namespace, trustCerts two parameters&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">dubbo-samples-apiserver-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.metadataServicePort&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20885&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">kubernetes://DEFAULT_MASTER_HOST?registry-type=service&amp;amp;duplicate=false&amp;amp;namespace=dubbo-demo&amp;amp;trustCerts=true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosEnable&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.qosAcceptForeignIp&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If you want to package the image locally, you can use the jib-maven-plugin plugin to package the image&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Package and push the image&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mvn compile jib:build
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>The Jib plugin will automatically package and publish the image. Note that for local development, you need to change the docker registry organization apache/dubbo-demo in the jib plug-in configuration to an organization with your own authority (including dubboteam in other kubernetes manifests to ensure that kubernetes deploys your own customized image) , if you encounter jib plug-in authentication problems, please refer to [corresponding link](&lt;a href="https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-">https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-&lt;/a> registry-responds-with-unauthorized) to configure docker registry authentication information.
+You can specify &lt;code>mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth directly on the command line .username=x&lt;/code>, or use docker-credential-helper.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="4-best-practices">4 Best Practices&lt;/h2>
+&lt;p>TBD&lt;/p>
+&lt;ul>
+&lt;li>rediness probe&lt;/li>
+&lt;li>liveness probe&lt;/li>
+&lt;li>ci/cd access to Skalfold&lt;/li>
+&lt;/ul>
+&lt;h2 id="5-appendix-k8s-manifests">5 Appendix k8s manifests&lt;/h2>
+&lt;p>ServiceAccount.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Namespace
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: rbac.authorization.k8s.io/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Role
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-role
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">rules&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">apiGroups&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">resources&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;pods&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">verbs&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;get&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;watch&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;list&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;update&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;patch&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">apiGroups&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;service.dubbo.apache.org&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">resources&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;services&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;endpoints&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;virtualservices&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;destinationrules&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">verbs&lt;/span>: [&lt;span style="color:#2aa198">&amp;#34;get&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;watch&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;list&amp;#34;&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: ServiceAccount
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-sa
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: rbac.authorization.k8s.io/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: RoleBinding
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-sa-bind
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">roleRef&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">apiGroup&lt;/span>: rbac.authorization.k8s.io
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">kind&lt;/span>: Role
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-role
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">subjects&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">kind&lt;/span>: ServiceAccount
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-sa
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Service.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-samples-apiserver-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">clusterIP&lt;/span>: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: dubbo-samples-apiserver-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">protocol&lt;/span>: TCP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">targetPort&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Deployment.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-samples-apiserver-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: dubbo-samples-apiserver-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: dubbo-samples-apiserver-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serviceAccountName&lt;/span>: dubbo-sa
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: apache/dubbo-deemo:dubbo-samples-apiserver-provider_0.0.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">containerPort&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">livenessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /live
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">readinessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /ready
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">startupProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /startup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">failureThreshold&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Service.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-samples-apiserver-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">clusterIP&lt;/span>: None
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: dubbo-samples-apiserver-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">protocol&lt;/span>: TCP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">targetPort&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Deployment.yml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-samples-apiserver-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo-demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: dubbo-samples-apiserver-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: dubbo-samples-apiserver-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serviceAccountName&lt;/span>: dubbo-sa
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: apache/dubbo-demo:dubbo-samples-apiserver-consumer_0.0.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">containerPort&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">livenessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /live
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">readinessProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /ready
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">initialDelaySeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">startupProbe&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">httpGet&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /startup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">22222&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">failureThreshold&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">periodSeconds&lt;/span>: &lt;span style="color:#2aa198">10&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

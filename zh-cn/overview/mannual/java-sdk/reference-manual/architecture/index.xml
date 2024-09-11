@@ -1,0 +1,196 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 源码架构</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/</link><description>Recent content in 源码架构 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 代码架构</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/code-architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/code-architecture/</guid><description>
+&lt;h2 id="整体设计">整体设计&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-framework.jpg" alt="/dev-guide/images/dubbo-framework.jpg">&lt;/p>
+&lt;p>图例说明：&lt;/p>
+&lt;ul>
+&lt;li>图中左边淡蓝背景的为服务消费方使用的接口，右边淡绿色背景的为服务提供方使用的接口，位于中轴线上的为双方都用到的接口。&lt;/li>
+&lt;li>图中从下至上分为十层，各层均为单向依赖，右边的黑色箭头代表层之间的依赖关系，每一层都可以剥离上层被复用，其中，Service 和 Config 层为 API，其它各层均为 SPI。&lt;/li>
+&lt;li>图中绿色小块的为扩展接口，蓝色小块为实现类，图中只显示用于关联各层的实现类。&lt;/li>
+&lt;li>图中蓝色虚线为初始化过程，即启动时组装链，红色实线为方法调用过程，即运行时调用链，紫色三角箭头为继承，可以把子类看作父类的同一个节点，线上的文字为调用的方法。&lt;/li>
+&lt;/ul>
+&lt;h2 id="各层说明">各层说明&lt;/h2>
+&lt;ul>
+&lt;li>&lt;strong>Config 配置层&lt;/strong>：对外配置接口，以 &lt;code>ServiceConfig&lt;/code>, &lt;code>ReferenceConfig&lt;/code> 为中心，可以直接初始化配置类，也可以通过 spring 解析配置生成配置类&lt;/li>
+&lt;li>&lt;strong>Proxy 服务代理层&lt;/strong>：服务接口透明代理，生成服务的客户端 Stub 和服务器端 Skeleton, 以 &lt;code>ServiceProxy&lt;/code> 为中心，扩展接口为 &lt;code>ProxyFactory&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Registry 注册中心层&lt;/strong>：封装服务地址的注册与发现，以服务 URL 为中心，扩展接口为 &lt;code>RegistryFactory&lt;/code>, &lt;code>Registry&lt;/code>, &lt;code>RegistryService&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Cluster 路由层&lt;/strong>：封装多个提供者的路由及负载均衡，并桥接注册中心，以 &lt;code>Invoker&lt;/code> 为中心，扩展接口为 &lt;code>Cluster&lt;/code>, &lt;code>Directory&lt;/code>, &lt;code>Router&lt;/code>, &lt;code>LoadBalance&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Monitor 监控层&lt;/strong>：RPC 调用次数和调用时间监控，以 &lt;code>Statistics&lt;/code> 为中心，扩展接口为 &lt;code>MonitorFactory&lt;/code>, &lt;code>Monitor&lt;/code>, &lt;code>MonitorService&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Protocol 远程调用层&lt;/strong>：封装 RPC 调用，以 &lt;code>Invocation&lt;/code>, &lt;code>Result&lt;/code> 为中心，扩展接口为 &lt;code>Protocol&lt;/code>, &lt;code>Invoker&lt;/code>, &lt;code>Exporter&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Exchange 信息交换层&lt;/strong>：封装请求响应模式，同步转异步，以 &lt;code>Request&lt;/code>, &lt;code>Response&lt;/code> 为中心，扩展接口为 &lt;code>Exchanger&lt;/code>, &lt;code>ExchangeChannel&lt;/code>, &lt;code>ExchangeClient&lt;/code>, &lt;code>ExchangeServer&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Transport 网络传输层&lt;/strong>：抽象 mina 和 netty 为统一接口，以 &lt;code>Message&lt;/code> 为中心，扩展接口为 &lt;code>Channel&lt;/code>, &lt;code>Transporter&lt;/code>, &lt;code>Client&lt;/code>, &lt;code>Server&lt;/code>, &lt;code>Codec&lt;/code>&lt;/li>
+&lt;li>&lt;strong>Serialize 数据序列化层&lt;/strong>：可复用的一些工具，扩展接口为 &lt;code>Serialization&lt;/code>, &lt;code>ObjectInput&lt;/code>, &lt;code>ObjectOutput&lt;/code>, &lt;code>ThreadPool&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="关系说明">关系说明&lt;/h2>
+&lt;ul>
+&lt;li>在 RPC 中，Protocol 是核心层，也就是只要有 Protocol + Invoker + Exporter 就可以完成非透明的 RPC 调用，然后在 Invoker 的主过程上 Filter 拦截点。&lt;/li>
+&lt;li>图中的 Consumer 和 Provider 是抽象概念，只是想让看图者更直观的了解哪些类分属于客户端与服务器端，不用 Client 和 Server 的原因是 Dubbo 在很多场景下都使用 Provider, Consumer, Registry, Monitor 划分逻辑拓扑节点，保持统一概念。&lt;/li>
+&lt;li>而 Cluster 是外围概念，所以 Cluster 的目的是将多个 Invoker 伪装成一个 Invoker，这样其它人只要关注 Protocol 层 Invoker 即可，加上 Cluster 或者去掉 Cluster 对其它层都不会造成影响，因为只有一个提供者时，是不需要 Cluster 的。&lt;/li>
+&lt;li>Proxy 层封装了所有接口的透明化代理，而在其它层都以 Invoker 为中心，只有到了暴露给用户使用时，才用 Proxy 将 Invoker 转成接口，或将接口实现转成 Invoker，也就是去掉 Proxy 层 RPC 是可以 Run 的，只是不那么透明，不那么看起来像调本地服务一样调远程服务。&lt;/li>
+&lt;li>而 Remoting 实现是 Dubbo 协议的实现，如果你选择 RMI 协议，整个 Remoting 都不会用上，Remoting 内部再划为 Transport 传输层和 Exchange 信息交换层，Transport 层只负责单向消息传输，是对 Mina, Netty, Grizzly 的抽象，它也可以扩展 UDP 传输，而 Exchange 层是在传输层之上封装了 Request-Response 语义。&lt;/li>
+&lt;li>Registry 和 Monitor 实际上不算一层，而是一个独立的节点，只是为了全局概览，用层的方式画在一起。&lt;/li>
+&lt;/ul>
+&lt;h2 id="模块分包">模块分包&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-modules.jpg" alt="/dev-guide/images/dubbo-modules.jpg">&lt;/p>
+&lt;p>模块说明：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>dubbo-common 公共逻辑模块&lt;/strong>：包括 Util 类和通用模型。&lt;/li>
+&lt;li>&lt;strong>dubbo-remoting 远程通讯模块&lt;/strong>：相当于 Dubbo 协议的实现，如果 RPC 用 RMI协议则不需要使用此包。&lt;/li>
+&lt;li>&lt;strong>dubbo-rpc 远程调用模块&lt;/strong>：抽象各种协议，以及动态代理，只包含一对一的调用，不关心集群的管理。&lt;/li>
+&lt;li>&lt;strong>dubbo-cluster 集群模块&lt;/strong>：将多个服务提供方伪装为一个提供方，包括：负载均衡, 容错，路由等，集群的地址列表可以是静态配置的，也可以是由注册中心下发。&lt;/li>
+&lt;li>&lt;strong>dubbo-registry 注册中心模块&lt;/strong>：基于注册中心下发地址的集群方式，以及对各种注册中心的抽象。&lt;/li>
+&lt;li>&lt;strong>dubbo-monitor 监控模块&lt;/strong>：统计服务调用次数，调用时间的，调用链跟踪的服务。&lt;/li>
+&lt;li>&lt;strong>dubbo-config 配置模块&lt;/strong>：是 Dubbo 对外的 API，用户通过 Config 使用Dubbo，隐藏 Dubbo 所有细节。&lt;/li>
+&lt;li>&lt;strong>dubbo-container 容器模块&lt;/strong>：是一个 Standlone 的容器，以简单的 Main 加载 Spring 启动，因为服务通常不需要 Tomcat/JBoss 等 Web 容器的特性，没必要用 Web 容器去加载服务。&lt;/li>
+&lt;/ul>
+&lt;p>整体上按照分层结构进行分包，与分层的不同点在于：&lt;/p>
+&lt;ul>
+&lt;li>Container 为服务容器，用于部署运行服务，没有在层中画出。&lt;/li>
+&lt;li>Protocol 层和 Proxy 层都放在 rpc 模块中，这两层是 rpc 的核心，在不需要集群也就是只有一个提供者时，可以只使用这两层完成 rpc 调用。&lt;/li>
+&lt;li>Transport 层和 Exchange 层都放在 remoting 模块中，为 rpc 调用的通讯基础。&lt;/li>
+&lt;li>Serialize 层放在 common 模块中，以便更大程度复用。&lt;/li>
+&lt;/ul>
+&lt;h2 id="依赖关系">依赖关系&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-relation.jpg" alt="/dev-guide/images/dubbo-relation.jpg">&lt;/p>
+&lt;p>图例说明：&lt;/p>
+&lt;ul>
+&lt;li>图中小方块 Protocol, Cluster, Proxy, Service, Container, Registry, Monitor 代表层或模块，蓝色的表示与业务有交互，绿色的表示只对 Dubbo 内部交互。&lt;/li>
+&lt;li>图中背景方块 Consumer, Provider, Registry, Monitor 代表部署逻辑拓扑节点。&lt;/li>
+&lt;li>图中蓝色虚线为初始化时调用，红色虚线为运行时异步调用，红色实线为运行时同步调用。&lt;/li>
+&lt;li>图中只包含 RPC 的层，不包含 Remoting 的层，Remoting 整体都隐含在 Protocol 中。&lt;/li>
+&lt;/ul>
+&lt;h2 id="调用链">调用链&lt;/h2>
+&lt;p>展开总设计图的红色调用链，如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-extension.jpg" alt="/dev-guide/images/dubbo-extension.jpg">&lt;/p>
+&lt;h2 id="暴露服务时序">暴露服务时序&lt;/h2>
+&lt;p>展开总设计图右边服务提供方暴露服务的蓝色初始化链，时序图如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-export.jpg" alt="/dev-guide/images/dubbo-export.jpg">&lt;/p>
+&lt;h2 id="引用服务时序">引用服务时序&lt;/h2>
+&lt;p>展开总设计图左边服务消费方引用服务的绿色初始化链，时序图如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo-refer.jpg" alt="/dev-guide/images/dubbo-refer.jpg">&lt;/p>
+&lt;h2 id="领域模型">领域模型&lt;/h2>
+&lt;p>在 Dubbo 的核心领域模型中：&lt;/p>
+&lt;ul>
+&lt;li>Protocol 是服务域，它是 Invoker 暴露和引用的主功能入口，它负责 Invoker 的生命周期管理。&lt;/li>
+&lt;li>Invoker 是实体域，它是 Dubbo 的核心模型，其它模型都向它靠拢，或转换成它，它代表一个可执行体，可向它发起 invoke 调用，它有可能是一个本地的实现，也可能是一个远程的实现，也可能一个集群实现。&lt;/li>
+&lt;li>Invocation 是会话域，它持有调用过程中的变量，比如方法名，参数等。&lt;/li>
+&lt;/ul>
+&lt;h2 id="基本设计原则">基本设计原则&lt;/h2>
+&lt;ul>
+&lt;li>采用 Microkernel + Plugin 模式，Microkernel 只负责组装 Plugin，Dubbo 自身的功能也是通过扩展点实现的，也就是 Dubbo 的所有功能点都可被用户自定义扩展所替换。&lt;/li>
+&lt;li>采用 URL 作为配置信息的统一格式，所有扩展点都通过传递 URL 携带配置信息。&lt;/li>
+&lt;/ul></description></item><item><title>Overview: 服务调用扩展点</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/service-invocation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/service-invocation/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/invoke-arch.jpg" alt="dubbo-architucture">&lt;/p>
+&lt;p>如上图所示，从服务调用的角度来看，Dubbo 在链路中提供了丰富的扩展点，覆盖了负载均衡方式、选址前后的拦截器、服务端处理拦截器等。
+简单来说 Dubbo 发起远程调用的时候，主要工作流程可以分为消费端和服务端两个部分。&lt;/p>
+&lt;p>消费端的工作流程如下：&lt;/p>
+&lt;ul>
+&lt;li>通过 Stub 接收来自用户的请求，并且封装在 &lt;code>Invocation&lt;/code> 对象中&lt;/li>
+&lt;li>将 &lt;code>Invocation&lt;/code> 对象传递给 &lt;code>ClusterFilter&lt;/code>（&lt;strong>扩展点&lt;/strong>）做选址前的请求预处理，如请求参数的转换、请求日志记录、限流等操作都是在此阶段进行的&lt;/li>
+&lt;li>将 &lt;code>Invocation&lt;/code> 对象传递给 &lt;code>Cluster&lt;/code>（&lt;strong>扩展点&lt;/strong>）进行集群调用逻辑的决策，如快速失败模式、安全失败模式等决策都是在此阶段进行的
+&lt;ul>
+&lt;li>&lt;code>Cluster&lt;/code> 调用 &lt;code>Directory&lt;/code> 获取所有可用的服务端地址信息&lt;/li>
+&lt;li>&lt;code>Directory&lt;/code> 调用 &lt;code>StateRouter&lt;/code>（&lt;strong>扩展点&lt;/strong>，推荐使用） 和 &lt;code>Router&lt;/code>（&lt;strong>扩展点&lt;/strong>） 对服务端的地址信息进行路由筛选，此阶段主要是从全量的地址信息中筛选出本次调用允许调用到的目标，如基于打标的流量路由就是在此阶段进行的&lt;/li>
+&lt;li>&lt;code>Cluster&lt;/code> 获得从 &lt;code>Directory&lt;/code> 提供的可用服务端信息后，会调用 &lt;code>LoadBalance&lt;/code> （&lt;strong>扩展点&lt;/strong>）从多个地址中选择出一个本次调用的目标，如随机调用、轮询调用、一致性哈希等策略都是在此阶段进行的&lt;/li>
+&lt;li>&lt;code>Cluster&lt;/code> 获得目标的 &lt;code>Invoker&lt;/code> 以后将 &lt;code>Invocation&lt;/code> 传递给对应的 &lt;code>Invoker&lt;/code>，并等待返回结果，如果出现报错则执行对应的决策（如快速失败、安全失败等）&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>经过上面的处理，得到了带有目标地址信息的 &lt;code>Invoker&lt;/code>，会再调用 &lt;code>Filter&lt;/code>（&lt;strong>扩展点&lt;/strong>）进行选址后的请求处理（由于在消费端侧创建的 &lt;code>Filter&lt;/code> 数量级和服务端地址量级一致，如无特殊需要建议使用 &lt;code>ClusterFilter&lt;/code> 进行扩展拦截，以提高性能）&lt;/li>
+&lt;li>最后 &lt;code>Invocation&lt;/code> 会被通过网络发送给服务端&lt;/li>
+&lt;/ul>
+&lt;p>服务端的工作流程如下：&lt;/p>
+&lt;ul>
+&lt;li>服务端通信层收到请求以后，会将请求传递给协议层构建出 &lt;code>Invocation&lt;/code>&lt;/li>
+&lt;li>将 &lt;code>Invocation&lt;/code> 对象传递给 &lt;code>Filter&lt;/code> （&lt;strong>扩展点&lt;/strong>）做服务端请求的预处理，如服务端鉴权、日志记录、限流等操作都是在此阶段进行的&lt;/li>
+&lt;li>将 &lt;code>Invocation&lt;/code> 对象传递给动态代理做真实的服务端调用&lt;/li>
+&lt;/ul>
+&lt;h2 id="filter拦截器">Filter（拦截器）&lt;/h2>
+&lt;p>拦截器可以实现服务提供方和服务消费方调用过程拦截，Dubbo 本身的大多功能均基于此扩展点实现，每次远程方法执行，该拦截都会被执行，请注意对性能的影响。
+其中在消费端侧，&lt;code>ClusterFilter&lt;/code> 用于选址前的拦截和 &lt;code>Filter&lt;/code> 用于选址后的拦截。如无特殊需要使用 &lt;code>ClusterFilter&lt;/code> 进行扩展拦截，以提高性能。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/filter-arch.jpg" alt="filter-architucture">&lt;/p>
+&lt;p>在 Dubbo 3 中，&lt;code>Filter&lt;/code> 和 &lt;code>ClusterFilter&lt;/code> 的接口签名被统一抽象到 &lt;code>BaseFilter&lt;/code> 中，开发者可以分别实现 &lt;code>Filter&lt;/code> 或 &lt;code>ClusterFilter&lt;/code> 的接口来实现自己的拦截器。
+如果需要拦截返回状态，可以直接实现 &lt;code>BaseFilter.Listener&lt;/code> 的接口，Dubbo 将自动识别，并进行调用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.rpc;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">BaseFilter&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Result &lt;span style="color:#268bd2">invoke&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker, Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">Listener&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onResponse&lt;/span>(Result appResponse, Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker, Invocation invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onError&lt;/span>(Throwable t, Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker, Invocation invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.rpc;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SPI&lt;/span>(scope &lt;span style="color:#719e07">=&lt;/span> ExtensionScope.MODULE)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">Filter&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> BaseFilter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.rpc.cluster.filter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SPI&lt;/span>(scope &lt;span style="color:#719e07">=&lt;/span> ExtensionScope.MODULE)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">ClusterFilter&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> BaseFilter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>特别的，如果需要在 Consumer 侧生效 &lt;code>Filter&lt;/code> 或 &lt;code>ClusterFilter&lt;/code>，需要增加 &lt;code>@Activate&lt;/code> 注解，并且需要指定 &lt;code>group&lt;/code> 的值为 &lt;code>consumer&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> CommonConstants.CONSUMER)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果需要在 Provider 侧生效 &lt;code>Filter&lt;/code> 或 &lt;code>ClusterFilter&lt;/code>，需要增加 &lt;code>@Activate&lt;/code> 注解，并且需要指定 &lt;code>group&lt;/code> 的值为 &lt;code>provider&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> CommonConstants.PROVIDER)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/">调用拦截扩展方式&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="router路由选址">Router（路由选址）&lt;/h2>
+&lt;p>路由选址提供从多个服务提供方中选择&lt;strong>一批&lt;/strong>满足条件的目标提供方进行调用的能力。
+Dubbo 的路由主要需要实现 3 个接口，分别是负责每次调用筛选的 &lt;code>route&lt;/code> 方法，负责地址推送后缓存的 &lt;code>notify&lt;/code> 方法，以及销毁路由的 &lt;code>stop&lt;/code> 方法。
+在 Dubbo 3 中推荐实现 &lt;code>StateRouter&lt;/code> 接口，能够提供高性能的路由选址方式。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.rpc.cluster.router.state;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">StateRouter&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">route&lt;/span>(BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> needToPrintMessage, Holder&lt;span style="color:#719e07">&amp;lt;&lt;/span>RouterSnapshotNode&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> nodeHolder) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">notify&lt;/span>(BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">stop&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.rpc.cluster;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">Router&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> Comparable&lt;span style="color:#719e07">&amp;lt;&lt;/span>Router&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Deprecated&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">route&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> RouterResult&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">route&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> needToPrintMessage) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">notify&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">stop&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/">路由选址扩展方式&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="cluster集群规则">Cluster（集群规则）&lt;/h2>
+&lt;p>集群规则提供在有多个服务提供方时进行结果聚合、容错等能力。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.rpc.cluster.support;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">abstract&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AbstractClusterInvoker&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ClusterInvoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#268bd2">abstract&lt;/span> Result &lt;span style="color:#268bd2">doInvoke&lt;/span>(Invocation invocation, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LoadBalance loadbalance) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/cluster/">集群规则扩展方式&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="loadbalance负载均衡">LoadBalance（负载均衡）&lt;/h2>
+&lt;p>负载均衡提供从多个服务提供方中选择&lt;strong>一个&lt;/strong>目标提供方进行调用的能力。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.rpc.cluster;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">LoadBalance&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">select&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/">调用拦截扩展方式&lt;/a>&lt;/p>
+&lt;/blockquote></description></item></channel></rss>

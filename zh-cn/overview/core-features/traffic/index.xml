@@ -1,0 +1,565 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 流量管控</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/</link><description>Recent content in 流量管控 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/core-features/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 条件路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/condition-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/condition-rule/</guid><description>
+&lt;p>条件路由规则将符合特定条件的请求转发到特定的地址实例子集上。规则首先对发起流量的请求参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。&lt;/p>
+&lt;p>以下是一个条件路由规则示例。&lt;/p>
+&lt;p>基于以下示例规则，所有 &lt;code>org.apache.dubbo.samples.CommentService&lt;/code> 服务 &lt;code>getComment&lt;/code> 方法的调用都将被转发到有 &lt;code>region=Hangzhou&lt;/code> 标记的地址子集。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">runtime&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.CommentService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">conditions&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - method=getComment =&amp;gt; region=Hangzhou
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看具体的例子代码： &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-configconditionrouter/src/main/java/org/apache/dubbo/samples/governance">条件路由&lt;/a>&lt;/p>
+&lt;h2 id="conditionrule">ConditionRule&lt;/h2>
+&lt;p>条件路由规则主体。定义路由规则生效的目标服务或应用、流量过滤条件以及一些特定场景下的行为。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>字段名&lt;/th>
+&lt;th>类型&lt;/th>
+&lt;th>&lt;strong>描述&lt;/strong>&lt;/th>
+&lt;th>必填&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>configVersion&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>条件路由的版本，当前版本为 &lt;code>v3.0&lt;/code>&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>scope&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>支持 &lt;code>service&lt;/code> 和 &lt;code>application&lt;/code> 两种规则&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>key&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>应用到的目标服务或应用程序的标识符&lt;br/>&lt;br/>- 当 &lt;code>scope:service&lt;/code> 时, &lt;code>key&lt;/code>应该是该规则生效的服务名比如 org.apache.dubbo.samples.CommentService&lt;br/> - 当 &lt;code>scope:application&lt;/code> 时, then &lt;code>key&lt;/code>应该是该规则应该生效的应用名称，比如说my-dubbo-service.&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enabled&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>规则是否生效 当 &lt;code>enabled:false&lt;/code> 时，规则不生效&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>conditions&lt;/td>
+&lt;td>string[]&lt;/td>
+&lt;td>配置中定义的条件规则，详情可以看&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/core-features/traffic/condition-rule/#condition">条件规则&lt;/a>&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>force&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>T路由后实例子集为空时的行为。 &lt;code>true&lt;/code> 则抛出一个No Provider Exception。 &lt;code>false&lt;/code> 则忽略规则，直接去请求其他的实例。默认值是false&lt;/td>
+&lt;td>否&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>runtime&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>是否为每个 rpc 调用运行路由规则或使用路由缓存（如果可用）。默认值是false（false则走缓存，true不走缓存）&lt;/td>
+&lt;td>否&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="condition">Condition&lt;/h2>
+&lt;p>&lt;code>Condition&lt;/code> 为条件路由规则的主体，类型为一个复合结构的 string 字符串，如 &lt;code>method=getComment =&amp;gt; region=Hangzhou&lt;/code>。其中，&lt;/p>
+&lt;ul>
+&lt;li>=&amp;gt; 之前的为请求参数匹配条件，指定的 &lt;code>匹配条件指定的参数&lt;/code> 将与 &lt;code>消费者的请求上下文 (URL)、甚至方法参数&lt;/code> 进行对比，当消费者满足匹配条件时，对该消费者执行后面的地址子集过滤规则。&lt;/li>
+&lt;li>=&amp;gt; 之后的为地址子集过滤条件，指定的 &lt;code>过滤条件指定的参数&lt;/code> 将与 &lt;code>提供者实例地址 (URL)&lt;/code> 进行对比，消费者最终只能拿到符合过滤条件的实例列表，从而确保流量只会发送到符合条件的地址子集。
+&lt;ul>
+&lt;li>如果匹配条件为空，表示对所有请求生效，如：&lt;code>=&amp;gt; status != staging&lt;/code>&lt;/li>
+&lt;li>如果过滤条件为空，表示禁止来自相应请求的访问，如：&lt;code>application = product =&amp;gt;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="匹配过滤条件">匹配/过滤条件&lt;/h3>
+&lt;p>&lt;strong>参数支持&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>服务调用上下文，如：interface, method, group, version 等&lt;/li>
+&lt;li>请求上下文，如 attachments[key] = value&lt;/li>
+&lt;li>方法参数，如 arguments[0] = tom&lt;/li>
+&lt;li>URL 本身的字段，如：protocol, host, port 等&lt;/li>
+&lt;li>URL 上任务扩展参数，如：application, organization 等&lt;/li>
+&lt;li>支持开发者自定义扩展&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>条件支持&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>等号 = 表示 &amp;ldquo;匹配&amp;rdquo;，如：method = getComment&lt;/li>
+&lt;li>不等号 != 表示 &amp;ldquo;不匹配&amp;rdquo;，如：method != getComment&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>值支持&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>以逗号 , 分隔多个值，如：host != 10.20.153.10,10.20.153.11&lt;/li>
+&lt;li>以星号 * 结尾，表示通配，如：host != 10.20.*&lt;/li>
+&lt;li>以美元符 $ 开头，表示引用消费者参数，如：region = $region&lt;/li>
+&lt;li>整数值范围，如：userId = 1~100、userId = 101~&lt;/li>
+&lt;li>支持开发者自定义扩展&lt;/li>
+&lt;/ul></description></item><item><title>Overview: 标签路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/tag-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/tag-rule/</guid><description>
+&lt;p>标签路由通过将某一个服务的实例划分到不同的分组，约束具有特定标签的流量只能在指定分组中流转，不同分组为不同的流量场景服务，从而达到实现流量隔离的目的，可以作为蓝绿发布、灰度发布等场景能力的基础。目前有两种方式可以对实例打标，分别是&lt;code>动态规则打标&lt;/code>和&lt;code>静态规则打标&lt;/code>。&lt;code>动态规则打标&lt;/code> 可以在运行时动态的圈住一组机器实例，而 &lt;code>静态规则打标&lt;/code> 则需要实例重启后才能生效，其中，动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。&lt;/p>
+&lt;p>本文要讲的就是标签路由规则就是 &lt;code>动态规则打标&lt;/code>。&lt;/p>
+&lt;p>标签路由是一套严格隔离的流量体系，对于同一个应用而言，一旦打了标签则这部分地址子集就被隔离出来，只有带有对应标签的请求流量可以访问这个地址子集，这部分地址不再接收没有标签或者具有不同标签的流量。&lt;/p>
+&lt;p>举个例子，如果我们将一个应用进行打标，打标后划分为 tag-a、tag-b、无 tag 三个地址子集，则访问这个应用的流量，要么路由到 tag-a (当请求上下文 dubbo.tag=tag-a)，要么路由到 tag-b (dubbo.tag=tag-b)，或者路由到无 tag 的地址子集 (dubbo.tag 未设置)，不会出现混调的情况。&lt;/p>
+&lt;p>标签路由的作用域是提供者应用，消费者应用无需配置标签路由规则。一个提供者应用内的所有服务只能有一条分组规则，不会有服务 A 使用一条路由规则、服务 B 使用另一条路由规则的情况出现。以下条件路由示例，在 &lt;code>shop-detail&lt;/code> 应用中圈出了一个隔离环境 &lt;code>gray&lt;/code>，&lt;code>gray&lt;/code> 环境包含所有带有 &lt;code>env=gray&lt;/code> 标识的机器实例。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: shop-detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">tags&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: gray
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">key&lt;/span>: env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">exact&lt;/span>: gray
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="tagrule">TagRule&lt;/h2>
+&lt;p>标签路由规则主体。定义路由规则生效的目标应用、标签分类规则以及一些特定场景下的行为。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>configVersion&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The version of the tag rule definition, currently available version is &lt;code>v3.0&lt;/code>&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>key&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The identifier of the target application that this rule is about to control&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enabled&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>Whether enable this rule or not, set &lt;code>enabled:false&lt;/code> to disable this rule.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>tags&lt;/td>
+&lt;td>Tag[]&lt;/td>
+&lt;td>The tag definition of this rule.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>force&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>The behaviour when the instance subset is empty after routing. &lt;code>true&lt;/code> means return no provider exception while &lt;code>false&lt;/code> means fallback to subset without any tags.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>runtime&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>Whether run routing rule for every rpc invocation or use routing cache if available.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="tag">Tag&lt;/h2>
+&lt;p>标签定义，根据 &lt;code>match&lt;/code> 条件筛选出一部分地址子集。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>name&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The name of the tag used to match the &lt;code>dubbo.tag&lt;/code> value in the request context.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>match&lt;/td>
+&lt;td>MatchCondition&lt;/td>
+&lt;td>A set of criterion to be met for instances to be classified as member of this tag.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="matchcondition">MatchCondition&lt;/h2>
+&lt;p>定义实例过滤条件，根据 Dubbo URL 地址中的特定参数进行过滤。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>key&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The name of the key in the Dubbo url address.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>value&lt;/td>
+&lt;td>StringMatch (oneof)&lt;/td>
+&lt;td>The matching condition for the value in the Dubbo url address.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table></description></item><item><title>Overview: 脚本路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/script-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/script-rule/</guid><description>
+&lt;p>脚本路由为流量管理提供了最大的灵活性，所有流量在执行负载均衡选址之前，都会动态的执行一遍规则脚本，根据脚本执行的结果确定可用的地址子集。&lt;/p>
+&lt;p>脚本路由只对消费者生效且只支持应用粒度管理，因此， &lt;code>key&lt;/code> 必须设置为消费者应用名；脚本语法支持多种，以 Dubbo Java SDK 为例，脚本语法支持 Javascript、Groovy、Kotlin 等，具体可参见每个语言实现的限制。&lt;/p>
+&lt;blockquote>
+&lt;p>脚本路由由于可以动态加载远端代码执行，因此存在潜在的安全隐患，在启用脚本路由前，一定要确保脚本规则在安全沙箱内运行。&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span>: javascript
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">enabled&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">script&lt;/span>: |&lt;span style="color:#2aa198">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> (function route(invokers,invocation,context) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> var result = new java.util.ArrayList(invokers.size());
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> for (i = 0; i &amp;lt; invokers.size(); i ++) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> if (&amp;#34;10.20.3.3&amp;#34;.equals(invokers.get(i).getUrl().getHost())) {
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> result.add(invokers.get(i));
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> }
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> return result;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198"> } (invokers, invocation, context)); // 表示立即执行方法&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="scriptrule">ScriptRule&lt;/h2>
+&lt;p>脚本路由规则主体。定义脚本规则生效的目标消费者应用、流量过滤脚本以及一些特定场景下的行为。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>configVersion&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The version of the script rule definition, currently available version is &lt;code>v3.0&lt;/code>&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>key&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The identifier of the target application that this rule is about to apply to.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>type&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The script language used to define &lt;code>script&lt;/code>.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enabled&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>Whether enable this rule or not, set &lt;code>enabled:false&lt;/code> to disable this rule.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>script&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The script definition used to filter dubbo provider instances.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>force&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>The behaviour when the instance subset is empty after after routing. &lt;code>true&lt;/code> means return no provider exception while &lt;code>false&lt;/code> means ignore this rule.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="script">Script&lt;/h2>
+&lt;p>&lt;code>script&lt;/code> 为脚本路由规则的主体，类型为一个具有符合结构的 string 字符串，具体取决于 &lt;code>type&lt;/code> 指定的脚本语言。&lt;/p>
+&lt;p>以下是 &lt;code>type: javascript&lt;/code> 的一个脚本规则示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>(&lt;span style="color:#268bd2">function&lt;/span> route(invokers,invocation,context) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">var&lt;/span> result &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> java.util.ArrayList(invokers.size());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (i &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> invokers.size(); i &lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#2aa198">&amp;#34;10.20.3.3&amp;#34;&lt;/span>.equals(invokers.get(i).getUrl().getHost())) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> result.add(invokers.get(i));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } (invokers, invocation, context)); &lt;span style="color:#586e75">// 表示立即执行方法
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 动态配置规则</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/configuration-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/configuration-rule/</guid><description>
+&lt;p>动态配置规则 (ConfigurationRule) 是 Dubbo 设计的在无需重启应用的情况下，动态调整 RPC 调用行为的一种能力，也称为动态覆盖规则，因为它是通过在运行态覆盖 Dubbo 实例或者 Dubbo 实例中 URL 地址的各种参数值，实现改变 RPC 调用行为的能力。&lt;/p>
+&lt;p>使用动态配置规则，有以下几条关键信息值得注意：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>设置规则生效过滤条件。&lt;/strong> 配置规则支持一系列的过滤条件，用来限定规则只对符合特定条件的服务、应用或实例才生效。&lt;/li>
+&lt;li>&lt;strong>设置规则生效范围。&lt;/strong> 一个 rpc 服务有服务发起方（消费者）和服务处理方（提供者）两个角色，对某一个服务定义的规则，可以具体到限制是对消费者还是提供者生效。&lt;/li>
+&lt;li>&lt;strong>选择规则管理粒度。&lt;/strong> Dubbo 支持从服务和应用两个粒度来管理和下发规则。&lt;/li>
+&lt;/ul>
+&lt;p>以下一个应用级别的配置示例，配置生效后，&lt;code>shop-detail&lt;/code> 应用下提供的所有服务都将启用 accesslog，对 &lt;code>shop-detail&lt;/code> 部署的所有实例生效。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: application
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: shop-detail
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">side&lt;/span>: provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">accesslog&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;true&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下是一个服务级别的配置示例，&lt;code>key: org.apache.dubbo.samples.UserService&lt;/code> 和 &lt;code>side: consumer&lt;/code> 说明这条配置对所有正在消费 UserService 的 Dubbo 实例生效，在调用失败后都执行 4 次重试。&lt;code>match&lt;/code> 条件进一步限制了消费端的范围，限定为只对应用名为 &lt;code>shop-frontend&lt;/code> 的这个消费端应用生效。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configVersion&lt;/span>: v3.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">scope&lt;/span>: service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: org.apache.dubbo.samples.UserService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">configs&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">oneof&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">exact&lt;/span>: shop-frontend
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">side&lt;/span>: consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">parameters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">retries&lt;/span>: &lt;span style="color:#2aa198">&amp;#39;4&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="configurationrule">ConfigurationRule&lt;/h2>
+&lt;p>配置规则主体，定义要设置的目标服务或应用、具体的规则配置。具体配置规则 (configs) 可以设置多条。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>configVersion&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The version of the configuration rule definition, currently available version is &lt;code>v3.0&lt;/code>&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>scope&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>Supports &lt;code>service&lt;/code> and &lt;code>application&lt;/code> scope configurations.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>key&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The identifier of the target service or application that this rule is about to apply to. &lt;br/>&lt;br/>- If &lt;code>scope:service&lt;/code>is set, then &lt;code>key&lt;/code>should be specified as the Dubbo service key that this rule targets to control.&lt;br/> - If &lt;code>scope:application&lt;/code> is set, then &lt;code>key&lt;/code>should be specified as the name of the application that this rule targets to control.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enabled&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>Whether enable this rule or not, set &lt;code>enabled:false&lt;/code> to disable this rule.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>configs&lt;/td>
+&lt;td>Config[]&lt;/td>
+&lt;td>The &lt;code>match condition&lt;/code> and &lt;code>configuration&lt;/code> of this rule.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="config">Config&lt;/h2>
+&lt;p>具体的规则配置定义，包含生效端 (consumer 或 provider) 和过滤条件。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>side&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>Especially useful when &lt;code>scope:service&lt;/code>is set.&lt;br/>&lt;br/>- &lt;code>side: provider&lt;/code>means this Config will only take effect on the provider instances of the service key.&lt;br/>- &lt;code>side:consumer&lt;/code>means this Config will only take effect on the consumer instances of the service key&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>parameters&lt;/td>
+&lt;td>map&amp;lt;string, string&amp;gt;&lt;/td>
+&lt;td>The keys and values this rule aims to change.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>match&lt;/td>
+&lt;td>MatchCondition&lt;/td>
+&lt;td>A set of criterion to be met in order for the rule/config to be applied to the Dubbo instance.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enabled&lt;/td>
+&lt;td>bool&lt;/td>
+&lt;td>Whether enable this Config or not, will use the value in ConfigurationRule if not set&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;del>addresses&lt;/del>&lt;/td>
+&lt;td>&lt;del>string[]&lt;/del>&lt;/td>
+&lt;td>&lt;del>replaced with address in MatchCondition&lt;/del>&lt;/td>
+&lt;td>&lt;del>No&lt;/del>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;del>providerAddresses&lt;/del>&lt;/td>
+&lt;td>&lt;del>string[]&lt;/del>&lt;/td>
+&lt;td>&lt;del>not supported anymore&lt;/del>&lt;/td>
+&lt;td>&lt;del>No&lt;/del>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;del>services&lt;/del>&lt;/td>
+&lt;td>&lt;del>string[]&lt;/del>&lt;/td>
+&lt;td>&lt;del>replaced with service in MatchCondition&lt;/del>&lt;/td>
+&lt;td>&lt;del>No&lt;/del>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;del>applications&lt;/del>&lt;/td>
+&lt;td>&lt;del>string[]&lt;/del>&lt;/td>
+&lt;td>&lt;del>replaced with application in MatchCondition&lt;/del>&lt;/td>
+&lt;td>&lt;del>No&lt;/del>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="matchcondition">MatchCondition&lt;/h2>
+&lt;p>过滤条件，用来设置规则对哪个服务 (service)、应用 (application)、实例 (address)，或者包含哪些参数 (param) 的实例生效。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>address&lt;/td>
+&lt;td>StringMatch&lt;/td>
+&lt;td>The instance address matching condition for this config rule to take effect.&lt;br/>&lt;br/>- xact: &amp;ldquo;value&amp;rdquo; for exact string match&lt;br/>- prefix: &amp;ldquo;value&amp;rdquo; for prefix-based match&lt;br/>- regex: &amp;ldquo;value&amp;rdquo; for RE2 style regex-based match (&lt;a href="https://github.com/google/re2/wiki/Syntax">https://github.com/google/re2/wiki/Syntax)&lt;/a>).&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>service&lt;/td>
+&lt;td>StringMatch (oneof)&lt;/td>
+&lt;td>The service matching condition for this config rule to take effect. Effective when &lt;code>scope: application&lt;/code> is set.&lt;br/>&lt;br/>- exact: &amp;ldquo;value&amp;rdquo; for exact string match&lt;br/>- prefix: &amp;ldquo;value&amp;rdquo; for prefix-based match&lt;br/>- regex: &amp;ldquo;value&amp;rdquo; for RE2 style regex-based match (&lt;a href="https://github.com/google/re2/wiki/Syntax">https://github.com/google/re2/wiki/Syntax)&lt;/a>).&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>application&lt;/td>
+&lt;td>StringMatch (oneof)&lt;/td>
+&lt;td>The application matching condition for this config rule to take effect. Effective when &lt;code>scope: service&lt;/code> is set.&lt;br/>&lt;br/>- exact: &amp;ldquo;value&amp;rdquo; for exact string match&lt;br/>- prefix: &amp;ldquo;value&amp;rdquo; for prefix-based match&lt;br/>- regex: &amp;ldquo;value&amp;rdquo; for RE2 style regex-based match (&lt;a href="https://github.com/google/re2/wiki/Syntax">https://github.com/google/re2/wiki/Syntax)&lt;/a>).&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>param&lt;/td>
+&lt;td>ParamCondition[]&lt;/td>
+&lt;td>The Dubbo url keys and values matching condition for this config rule to take effect.&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="paramcondition">ParamCondition&lt;/h2>
+&lt;p>定义实例参数 (param) 过滤条件，对应到 Dubbo URL 地址参数。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>key&lt;/td>
+&lt;td>string&lt;/td>
+&lt;td>The name of the key in the Dubbo url address.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>value&lt;/td>
+&lt;td>StringMatch (oneof)&lt;/td>
+&lt;td>The matching condition for the value in the Dubbo url address.&lt;/td>
+&lt;td>Yes&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="stringmatch">StringMatch&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Field&lt;/th>
+&lt;th>Type&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;th>Required&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>exact&lt;/td>
+&lt;td>string (oneof)&lt;/td>
+&lt;td>exact string match&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>prefix&lt;/td>
+&lt;td>string (oneof)&lt;/td>
+&lt;td>prefix-based match&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>regex&lt;/td>
+&lt;td>string (oneof)&lt;/td>
+&lt;td>RE2 style regex-based match (&lt;a href="https://github.com/google/re2/wiki/Syntax">https://github.com/google/re2/wiki/Syntax)&lt;/a>).&lt;/td>
+&lt;td>No&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table></description></item><item><title>Overview: 限流 &amp; 熔断</title><link>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/circuit-breaking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/core-features/traffic/circuit-breaking/</guid><description>
+&lt;p>由于微服务分布式的特点，如何构建稳定的微服务集群是一个很大的挑战，其中有两项非常关键的点值得关注&lt;/p>
+&lt;ul>
+&lt;li>流量控制 (Rate Limiting)&lt;/li>
+&lt;li>熔断降级 (Circuit Breaking)&lt;/li>
+&lt;/ul>
+&lt;h2 id="流量控制">流量控制&lt;/h2>
+&lt;p>&lt;strong>流量控制更多的是站在 Dubbo 服务提供者视角来保证服务稳定性&lt;/strong>，通过明确的为 Dubbo 服务设置请求上限阈值，确保服务所处理的请求数始终在一个合理范围之内，从而确保系统整体的稳定性。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/circuit-breaking/provider-rate-limit.png" alt="provider-rate-limit">&lt;/p>
+&lt;p>根据服务的具体部署情况，服务所能处理的流量上限是一定的，当对服务的请求数量保持在合理的范围时，系统运行正常；而当请求数量严重超过服务处理能力时，如大促期间的流量洪峰等场景，就可能造成服务提供者端的资源过度消耗、负载过高，进而出现响应延迟、请求无应答、系统假死等情况。&lt;/p>
+&lt;p>流量控制解决的问题和工作方式比较容易理解，而其使用的难点就是如何确定服务所能处理的流量最大值？&lt;/p>
+&lt;ul>
+&lt;li>一种模式是由用户预先设定一个固定的限流值，如 Dubbo 通过集成 Sentinel 等产品实现的限流能力即是这种模式
+&lt;ul>
+&lt;li>&lt;a href="../../../tasks/rate-limit/sentinel/">Dubbo Sentinel 流量控制&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>另一种方式是 Dubbo 框架自动根据系统或集群负载情况执行限流，相比用户预先设置限流值更加灵活方便，Dubbo 目前内置了自适应限流模式，具体可参见：
+&lt;ul>
+&lt;li>&lt;a href="../../../mannual/java-sdk/advanced-features-and-usage/performance/adaptive-concurrency-control/">Java 自适应限流使用方式&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../../reference/proposals/heuristic-flow-control/">Go 自适应限流使用方式&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../../reference/proposals/heuristic-flow-control/">自适应限流设计原理&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="熔断降级">熔断降级&lt;/h2>
+&lt;p>&lt;strong>熔断降级则是更多的从 Dubbo 服务消费者视角来保障系统稳定性的重要手段&lt;/strong>。一个服务往往需要调用更多的下游 Dubbo 服务来完成业务逻辑，这时下游服务的稳定性就会影响当前服务甚至整个系统的稳定性，熔断（Circuit Breaking）即是面向不稳定服务场景设计的，它能最大限度避免下游服务不稳定对上游服务带来的影响。&lt;/p>
+&lt;p>而相比于熔断后直接返回调用失败信息，配合服务降级能力，我们可以继续调用预先设置好的服务降级逻辑，以降级逻辑的结果作为最终调用结果，以更优雅的返回给服务调用方。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/circuit-breaking/consumer-circuit-breaking.png" alt="consumer-circuit-breaking">&lt;/p>
+&lt;p>如上图所示，Dubbo Consumer 依赖的下游的三个 Dubbo 服务，当 Service 3 出现不稳定的情况时（如响应时间变长、错误率增加等），从而 Consumer 调用 Service 3 的线程等资源就会产生堆积，如果此时我们不在 Consumer 侧做任何限制，则 Service 1 与 Service 2 的调用都会受到稳定性影响。通过熔断 Service 3 我们就能保证整个 Dubbo Consumer 服务的稳定性，不拖垮整个 Consumer 服务，熔断 Service 3 的方式可以有很多种实现，包括线程数、信号量、错误率等。&lt;/p>
+&lt;p>Dubbo 通过集成业界主流的框架实现了服务熔断降级能力&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="../../../tasks/rate-limit/sentinel/">Sentinel&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../../tasks/rate-limit/hystrix/">Hystrix&lt;/a>&lt;/li>
+&lt;li>&lt;a href="../../../tasks/rate-limit/resilience4j/">Resilience4J&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

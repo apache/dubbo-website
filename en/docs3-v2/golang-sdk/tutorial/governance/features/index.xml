@@ -1,0 +1,173 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Advanced Features</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/</link><description>Recent content in Advanced Features on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Custom service call middleware</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/aop/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/aop/</guid><description>
+&lt;p>Refer to samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/filter">dubbo-go-samples/filter&lt;/a>&lt;/p>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Read &lt;a href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/preface/design/aop_and_extension/">[Component Loading and Extensibility]&lt;/a>&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-configure-the-specified-filter">2. Configure the specified Filter&lt;/h2>
+&lt;p>When specifying a filter, it can be separated by &amp;lsquo;,&amp;rsquo;&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Consumer side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: echo,token,tps,myCustomFilter &lt;span style="color:#586e75"># Custom filter can be specified&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Provider side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: myCustomFilter, echo, tps
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-custom-filter">3. Custom Filter&lt;/h2>
+&lt;p>Users can customize Filter in the code, register it on the framework, and choose to use it in the configuration.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>extension. &lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myCustomFilter&amp;#34;&lt;/span>, NewMyClientFilter)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewMyClientFilter&lt;/span>() filter. Filter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>MyClientFilter{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> MyClientFilter &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx context.Context, invoker protocol.Invoker, invocation protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter Invoke is called, method Name = &amp;#34;&lt;/span>, invocation.&lt;span style="color:#268bd2">MethodName&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> invoker. &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx, invocation)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">OnResponse&lt;/span>(ctx context.Context, result protocol.Result, invoker protocol.Invoker, protocol protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter OnResponse is called&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: timeout for configuration calls</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/timeout/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/timeout/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-modify-rpc-call-related-parameters-through-configuration-items">2. Modify RPC call-related parameters through configuration items&lt;/h2>
+&lt;h3 id="21-modify-the-timeout-of-the-call-and-verify">2.1 Modify the timeout of the call and verify&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">request-timeout&lt;/span>: 15s &lt;span style="color:#586e75"># Configure client timeout&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The default RPC timeout of the Dubbo-go application is 3s. After the request times out, the client will return an error with the error context deadline exceeded. In this task, you need to first modify the server function of the demo application to take a long time, and then check the client&amp;rsquo;s timeout error; and then configure the client timeout so that the time-consuming function can be called normally.&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>go-server/cmd/server.go: Modify the function of the demo application server to a function that takes 10s&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterProvider) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;Dubbo3 GreeterProvider get user name = %s\n&amp;#34;&lt;/span>, in.Name)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Second&lt;span style="color:#719e07">*&lt;/span>&lt;span style="color:#2aa198">10&lt;/span>) &lt;span style="color:#586e75">// sleep 10s
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span>, Age: &lt;span style="color:#2aa198">21&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>The client initiates a call and observes the error log&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>ERROR cmd/client.go:47 context deadline exceeded
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>go-client/conf/dubbogo.yaml: client modification timeout&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">request-timeout&lt;/span>: 15s &lt;span style="color:#586e75"># Configure client timeout&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">url&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;tri://localhost:20000&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Initiate the call through the client again, observe the log, and return normally:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>client response result: name: &lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id: &lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span> age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ol></description></item><item><title>Docs3-V2: Custom Filter component</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/custom-filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/features/custom-filter/</guid><description>
+&lt;p>Refer to samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/filter">dubbo-go-samples/filter&lt;/a>&lt;/p>
+&lt;h2 id="1-filter-concept">1. Filter concept&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Filter interface defines the functions of a filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Extension - Filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Filter &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Invoke is the core function of a filter, it determines the process of the filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">Invoke&lt;/span>(context.Context, protocol.Invoker, protocol.Invocation) protocol.Result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// OnResponse updates the results from Invoke and then returns the modified results.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">OnResponse&lt;/span>(context.Context, protocol.Result, protocol.Invoker, protocol.Invocation) protocol.Result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Filter can be loaded on the Consumer side or the Provider side. When loaded on the Consumer side, the downstream of its Invoke function call is the network layer, and OnResponse is called after the request is completed and the return result is obtained from the network layer. When loaded on the Provider side, the downstream of its Invoke function call is user code, and OnResponse is called after the user code is executed and passed down to the network layer.&lt;/p>
+&lt;p>Filter adopts the idea of aspect-oriented design. Through reasonable expansion of Filter, it can record logs, set data management, record the performance of the server corresponding to the invoker, limit traffic, and so on.&lt;/p>
+&lt;h2 id="2-framework-predefined-filter">2. Framework predefined Filter&lt;/h2>
+&lt;p>The framework predefines a series of filters, which can be used directly in the configuration, and its code implementation is located at &lt;a href="https://github.com/apache/dubbo-go/tree/release-3.0/filter">filter&lt;/a>&lt;/p>
+&lt;ul>
+&lt;li>accesslog&lt;/li>
+&lt;li>active&lt;/li>
+&lt;li>sign: AuthConsumerFilter&lt;/li>
+&lt;li>auth: AuthProviderFilter
+-echo&lt;/li>
+&lt;li>execute: ExecuteLimitFilter&lt;/li>
+&lt;li>generic: GenericFilter&lt;/li>
+&lt;li>generic_service: GenericServiceFilter&lt;/li>
+&lt;li>pshutdown: GracefulShutdownProviderFilter
+-cshutdown: GracefulShutdownConsumerFilter&lt;/li>
+&lt;li>hystrix_consumer: HystrixConsumerFilter&lt;/li>
+&lt;li>hystrix_provider: HystrixProviderFilter&lt;/li>
+&lt;li>metrics&lt;/li>
+&lt;li>seata&lt;/li>
+&lt;li>sentinel-provider&lt;/li>
+&lt;li>sentinel-consumer
+-token
+-tps&lt;/li>
+&lt;li>tracing&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-load-filter-by-default">3. Load Filter by default&lt;/h2>
+&lt;p>When the user configures the filter to be used in the configuration file, the framework uses the filter configured by the user, otherwise the default filter is loaded:&lt;/p>
+&lt;p>-Consumer:&lt;/p>
+&lt;p>cshutdown&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Provider:&lt;/p>
+&lt;p>echo, metrics, token, accesslog, tps, generic_service, executivete, pshutdown&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-user-specified-filter">4. User specified Filter&lt;/h2>
+&lt;p>When specifying a filter, it can be separated by &amp;lsquo;,&amp;rsquo;&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Consumer side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: echo,token,tps,myCustomFilter &lt;span style="color:#586e75"># Custom filter can be specified&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>Provider side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter&lt;/span>: myCustomFilter, echo, tps
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="5-custom-filter">5. Custom Filter&lt;/h2>
+&lt;p>Users can customize Filter in the code, register it on the framework, and choose to use it in the configuration.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>extension. &lt;span style="color:#268bd2">SetFilter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;myCustomFilter&amp;#34;&lt;/span>, NewMyClientFilter)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">NewMyClientFilter&lt;/span>() filter. Filter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>MyClientFilter{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> MyClientFilter &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx context.Context, invoker protocol.Invoker, invocation protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter Invoke is called, method Name = &amp;#34;&lt;/span>, invocation.&lt;span style="color:#268bd2">MethodName&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> invoker. &lt;span style="color:#268bd2">Invoke&lt;/span>(ctx, invocation)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>MyClientFilter) &lt;span style="color:#268bd2">OnResponse&lt;/span>(ctx context.Context, result protocol.Result, invoker protocol.Invoker, protocol protocol.Invocation) protocol.Result {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>fmt.&lt;span style="color:#268bd2">Println&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;MyClientFilter OnResponse is called&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> result
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

@@ -1,0 +1,1099 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 协议规范</title><link>https://dubbo.apache.org/zh-cn/overview/reference/protocols/</link><description>Recent content in 协议规范 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/protocols/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Triple 协议设计理念与规范</title><link>https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/</guid><description>
+&lt;h2 id="1-协议设计理念">1 协议设计理念&lt;/h2>
+&lt;p>Triple 协议的设计参考了 gRPC、gRPC-Web、通用 HTTP 等多种协议模式，吸取每个协议各自的特性和优点，最终设计成为一个易于浏览器访问、完全兼容 gRPC 且支持 Streaming 通信的协议，Triple 支持同时运行在 HTTP/1、HTTP/2 协议之上。&lt;/p>
+&lt;p>Triple 协议的设计目标如下：&lt;/p>
+&lt;ul>
+&lt;li>Triple 设计为对人类、开发调试友好的一款基于 HTTP 的协议，尤其是对 unary 类型的 RPC 请求。&lt;/li>
+&lt;li>完全兼容基于 HTTP/2 的 gRPC 协议，因此 Dubbo Triple 协议实现可以 100% 与 gRPC 体系互调互通。&lt;/li>
+&lt;li>仅依赖标准的、被广泛使用的 HTTP 特性，以便在实现层面可以直接依赖官方的标准 HTTP 网络库。&lt;/li>
+&lt;/ul>
+&lt;p>当与 Protocol Buffers 一起使用时（即使用 IDL 定义服务），Triple 协议可支持 unary、client-streaming、server-streaming 和 bi-streaming RPC 通信模式，支持二进制 Protobuf、JSON 两种数据格式 payload。 Triple 实现并不绑定 Protocol Buffers，比如你可以使用 Java 接口定义服务，Triple 协议有对这种模式的扩展 Content-type 支持。&lt;/p>
+&lt;h2 id="2-示例">2 示例&lt;/h2>
+&lt;h3 id="21-unary-请求">2.1 Unary 请求&lt;/h3>
+&lt;p>以 HTTP/1 请求为例，目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 编码类型，使用方式与 REST 风格请求保持一致，同时响应也包含常规的 HTTP 响应编码（如 200 OK）。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>&amp;gt; POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Host: 127.0.0.1:30551
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; [&amp;#34;Dubbo&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; HTTP/1.1 200 OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; {&amp;#34;greeting&amp;#34;: &amp;#34;Hello, Dubbo!&amp;#34;}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>一个包含指定超时时间的调用请求。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>&amp;gt; POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Host: 127.0.0.1:30551
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; Rest-service-timeout: 5000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;gt; [&amp;#34;Dubbo&amp;#34;]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; HTTP/1.1 200 OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt; {&amp;#34;greeting&amp;#34;: &amp;#34;Hello, Buf!&amp;#34;}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>目前仅支持 POST 请求类型，我们将考虑在未来支持 GET 请求类型，GET 请求可能适用于具有幂等属性的一些服务调用。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="22-streaming-调用请求">2.2 Streaming 调用请求&lt;/h3>
+&lt;p>Triple 仅支持在 HTTP/2 上支持 Streaming RPC。并且为了与 gRPC 协议保持兼容，Triple 在 HTTP/2 协议实现上（包含 Streaming RPC）保持与标准 gRPC 协议完全一致。&lt;/p>
+&lt;p>Request&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>HEADERS (flags = END_HEADERS)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:method = POST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:scheme = http
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:path = /google.pubsub.v2.PublisherService/CreateTopic
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:authority = pubsub.googleapis.com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-timeout = 1S
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-type = application/grpc+proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-encoding = gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>authorization = Bearer y235.wef315yfh138vh31hv93hv8h3v
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DATA (flags = END_STREAM)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;Length-Prefixed Message&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Response&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>HEADERS (flags = END_HEADERS)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>:status = 200
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-encoding = gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-type = application/grpc+proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DATA
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;Length-Prefixed Message&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>HEADERS (flags = END_STREAM, END_HEADERS)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc-status = 0 # OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>trace-proto-bin = jher831yy13JHy3hc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-规范详情">3 规范详情&lt;/h2>
+&lt;p>Triple 协议支持同时运行在 HTTP/1 和 HTTP/2 协议之上，其包含以下两部分内容：&lt;/p>
+&lt;ol>
+&lt;li>一套自定义的精简 HTTP RPC 子协议，支持 HTTP/1 和 HTTP/2 作为传输层实现，仅支持 Request-Response 类型的 Unary RPC。&lt;/li>
+&lt;li>一套基于 gRPC 协议的扩展子协议（仍保持和 gRPC 的 100% 兼容），仅支持 HTTP/2 实现，支持 Unary RPC 和 Streaming RPC。&lt;/li>
+&lt;/ol>
+&lt;h3 id="31-triple-之-http-rpc-协议">3.1 Triple 之 HTTP RPC 协议&lt;/h3>
+&lt;p>大部分的 RPC 调用都是 unary (request-response) 模式的，Triple HTTP RPC 协议 unary 模式能很好的满足后端服务间的数据传输需求。同时解决了gRPC协议的痛点，让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即不需要借助代理和gRPC-web，使用标准的 HTTP 协议直接发起调用。&lt;/p>
+&lt;p>Triple HTTP RPC 同时支持 HTTP/1、HTTP/2 作为底层传输层协议，在实现上对应支持的 content-type 类型为 application/json、application/proto&lt;/p>
+&lt;h4 id="311-请求-request">3.1.1 请求 Request&lt;/h4>
+&lt;ul>
+&lt;li>Request → Request-Headers Bare-Message&lt;/li>
+&lt;li>Request-Headers → Call-Specification *Leading-Metadata&lt;/li>
+&lt;li>Call-Specification →
+Schema Http-Method Path Http-Host Content-Type TRI-Protocol-Version TRI-Service-Timeout TRI-Service-Version TRI-Service-Group
+Content-Encoding Accept-Encoding Accept Content-Length&lt;/li>
+&lt;li>Scheme → &amp;ldquo;http&amp;rdquo; / &amp;ldquo;https&amp;rdquo;&lt;/li>
+&lt;li>Http-Method → POST&lt;/li>
+&lt;li>Path → /Service-Name/Method-Name; case-sensitive&lt;/li>
+&lt;li>Service-Name → service interface full classname&lt;/li>
+&lt;li>Method-Name → service interface declared method`s name&lt;/li>
+&lt;li>Http-Host → Target-IP:Target-Port&lt;/li>
+&lt;li>Target-IP → target server ip or domain&lt;/li>
+&lt;li>Target-Port → target server process port&lt;/li>
+&lt;li>Content-Type → “Content-Type: ” “application/” Message-Codec&lt;/li>
+&lt;li>Message-Codec → (“json” / {custom})&lt;/li>
+&lt;li>TRI-Protocol-Version → &amp;ldquo;tri-protocol-version&amp;rdquo; &amp;ldquo;1&amp;rdquo;&lt;/li>
+&lt;li>TRI-Service-Timeout → “tri-service-timeout: ” Timeout-Milliseconds&lt;/li>
+&lt;li>Timeout-Milliseconds → positive integer&lt;/li>
+&lt;li>TRI-Service-Version → “tri-service-version: ” Version&lt;/li>
+&lt;li>Version → dubbo service version&lt;/li>
+&lt;li>TRI-Service-Group → &amp;ldquo;tri-service-group: &amp;quot; Group&lt;/li>
+&lt;li>Group → dubbo service group&lt;/li>
+&lt;li>Content-Encoding → “content-encoding” Content-Coding&lt;/li>
+&lt;li>Content-Coding → “identity” / “gzip” / “br” / “zstd” / {custom}&lt;/li>
+&lt;li>Accept-Encoding → “accept-encoding” Content-Coding *(&amp;rdquo;,&amp;quot; [&amp;quot; “] Content-Coding) ; subset of HTTP quality value syntax&lt;/li>
+&lt;li>Content-Length → length of the encoded payload&lt;/li>
+&lt;li>Leading-Metadata → Custom-Metadata&lt;/li>
+&lt;li>Custom-Metadata → ASCII-Metadata / Binary-Metadata&lt;/li>
+&lt;li>ASCII-Metadata → Header-Name ASCII-Value&lt;/li>
+&lt;li>Binary-Metadata → {Header-Name &amp;ldquo;-bin&amp;rdquo;} {base64-encoded value}&lt;/li>
+&lt;li>Header-Name → 1*( %x30-39 / %x61-7A / &amp;ldquo;_&amp;rdquo; / &amp;ldquo;-&amp;rdquo; / &amp;ldquo;.&amp;rdquo;) ; 0-9 a-z _ - .&lt;/li>
+&lt;li>ASCII-Value → 1*( %x20-%x7E ) ; space &amp;amp; printable ASCII&lt;/li>
+&lt;li>Bare-Message → data that encoded by json or custom and Content-Encoding&lt;/li>
+&lt;/ul>
+&lt;p>Triple 协议请求的仅支持 POST 请求，请求 path 为 interfaceName/methodName，为了实现调用超时机制，需要添加 tri-service-timeout (单位 ms)，&lt;/p>
+&lt;p>Dubbo 框架支持基于 &lt;strong>分组（group）&lt;/strong> 和 &lt;strong>版本（version）&lt;/strong> 的服务隔离机制，因此 Triple 协议中引入了 tri-service-group、tri-service-version 支持。&lt;/p>
+&lt;p>&lt;strong>Request-Headers&lt;/strong> 以标准的 HTTP header 的形式发送，如果收到的 headers 数量过多，server 可返回相应错误信息。&lt;/p>
+&lt;p>&lt;strong>TRI-Protocol-Version&lt;/strong> 头用来区分具有相同 Content-Type 的 triple 协议请求和其他协议请求，因为 application/json 格式的 Content-Type 非常普遍。所有的 Dubbo 原生客户端实现都应该在请求中携带 TRI-Protocol-Version，Dubbo 服务端或代理可以选择拒绝没有 TRI-Protocol-Version 的请求并返回 Http-Status 400 错误。&lt;/p>
+&lt;p>如果 Server 不支持 &lt;strong>Message-Codec&lt;/strong> 指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。&lt;/p>
+&lt;p>&lt;strong>Bare-Message&lt;/strong> 即请求 payload 的编码格式取决于 Message-Codec 设置：&lt;/p>
+&lt;ul>
+&lt;li>Message-Codec: json 的场景下，payload 采用有序的数组编码形式，即将 rpc 方法的参数按顺序组装进 Array 后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。对于使用 Protocol Buffer 的情形，payload 则是只有一个 json 对象的数组。&lt;/li>
+&lt;li>Message-Codec: proto 的场景下，Protobuf 生成的 Request 类包含了编码格式，因此将直接使用 Request 对象中的内置编码方式。&lt;/li>
+&lt;li>Message-Codec 支持更多自定义扩展值，请确保框架实现遵循相应的编码与解码约定。&lt;/li>
+&lt;/ul>
+&lt;p>如果 Content-Encoding 指定了相应值，则 payload 是被压缩过的，应该首先进行解压缩后再解析编码数据，Bare-Message 将作为 HTTP Body 在链路上传输。&lt;/p>
+&lt;h5 id="request-报文示例">Request 报文示例&lt;/h5>
+&lt;ul>
+&lt;li>请求行
+&lt;ul>
+&lt;li>POST /org.apache.dubbo.demo.GreetService/greeting HTTP/1.1&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>请求头
+&lt;ul>
+&lt;li>Host: 127.0.0.1:30551&lt;/li>
+&lt;li>Content-Type: application/json&lt;/li>
+&lt;li>Accept: application/json&lt;/li>
+&lt;li>Content-Length: 11&lt;/li>
+&lt;li>Accept-Encoding: compress, gzip&lt;/li>
+&lt;li>tri-protocol-version: 1.0.0&lt;/li>
+&lt;li>tri-service-version: 1.0.0&lt;/li>
+&lt;li>tri-service-group: dubbo&lt;/li>
+&lt;li>tri-service-timeout: 3000&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>请求体
+&lt;ul>
+&lt;li>[{&amp;ldquo;world&amp;rdquo;}]&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-latex" data-lang="latex">&lt;span style="display:flex;">&lt;span>POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host: 127.0.0.1:30551
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length: 11
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept-Encoding: compress, gzip
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri-protocol-version: 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri-service-version: 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri-service-group: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri-service-timeout: 3000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[&lt;span style="color:#b58900">{&lt;/span>&amp;#34;world&amp;#34;&lt;span style="color:#b58900">}&lt;/span>]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="312-响应-response">3.1.2 响应 Response&lt;/h4>
+&lt;ul>
+&lt;li>Response → Response-Headers *Bare-Message&lt;/li>
+&lt;li>Response-Headers → HTTP-Status Content-Type [Content-Encoding] [Accept-Encoding] *Leading-Metadata *Prefixed-Trailing-Metadata&lt;/li>
+&lt;li>HTTP-Status → 200 /{error code translated to HTTP}&lt;/li>
+&lt;li>Bare-Message → data that encoded by Content-Type and Content-Encoding&lt;/li>
+&lt;/ul>
+&lt;p>对于成功 Response 响应 &lt;strong>HTTP-Status&lt;/strong> 是 200，在这种场景下，响应体的 Content-Type 将保持和请求体的 Content-Type 保持一致。&lt;strong>Bare-Message&lt;/strong> 就是 RPC 响应的 Payload，以 Content-Type 指定的方式进行编码并且以 Content-Encoding 来压缩（如果指定了 Content-Encoding 的话）。Bare-Message 作为 HTTP response body 发送。&lt;/p>
+&lt;p>异常 Response 响应的 HTTP-Status 是 non-200，并且都是标准的 HTTP status code，在这个场景下，&lt;strong>Content-Type&lt;/strong> 必须是 &amp;ldquo;application/json&amp;rdquo;。&lt;strong>Bare-Message&lt;/strong> 可以是空的，如果 Bare-Message 有值的话则是一个标准 JSON 格式数据，如果 &lt;strong>Content-Encoding&lt;/strong> 有指定的话则是一个压缩过的数据，Bare-Message 作为标准的 HTTP response body 发送回调用方。客户端可以根据以下表格，查询 HTTP-Status 与 RPC status 之间的映射关系，以了解具体的 RPC 错误情况。&lt;/p>
+&lt;h5 id="response-报文格式">Response 报文格式&lt;/h5>
+&lt;p>** 成功响应 **&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-latex" data-lang="latex">&lt;span style="display:flex;">&lt;span>HTTP/1.1 200 OK
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length: 11
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>hello world
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>** 失败响应 **&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-latex" data-lang="latex">&lt;span style="display:flex;">&lt;span>HTTP/1.1 400 Bad Request
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length: 46
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">{&lt;/span>&amp;#34;status&amp;#34;:20,&amp;#34;message&amp;#34;:&amp;#34;request format error&amp;#34;&lt;span style="color:#b58900">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="313-error-codes">3.1.3 Error Codes&lt;/h4>
+&lt;p>Dubbo 的错误码参考&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> status http-status message
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 20 200 ok
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 25 400 serialization error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 30 408 client side timeout
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 31 408 server side timeout
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 35 500 channel inactive, directly return the unfinished requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 40 400 request format error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 50 500 response format error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 60 404 service not found.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 70 500 service error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 80 500 internal server error
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 90 500 internal client error
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Connect 的 HTTP to Error Code 参考&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>HTTP Status&lt;/th>
+&lt;th>Inferred Code&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>400 Bad Request&lt;/td>
+&lt;td>invalid_argument&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>401 Unauthorized&lt;/td>
+&lt;td>unauthenticated&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>403 Forbidden&lt;/td>
+&lt;td>permission_denied&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>404 Not Found&lt;/td>
+&lt;td>unimplemented&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>408 Request Timeout&lt;/td>
+&lt;td>deadline_exceeded&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>409 Conflict&lt;/td>
+&lt;td>aborted&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>412 Precondition Failed&lt;/td>
+&lt;td>failed_precondition&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>413 Payload Too Large&lt;/td>
+&lt;td>resource_exhausted&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>415 Unsupported Media Type&lt;/td>
+&lt;td>internal&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>429 Too Many Requests&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>431 Request Header Fields Too Large&lt;/td>
+&lt;td>resource_exhausted&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>502 Bad Gateway&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>503 Service Unavailable&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>504 Gateway Timeout&lt;/td>
+&lt;td>unavailable&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;em>all others&lt;/em>&lt;/td>
+&lt;td>unknown&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;/blockquote>
+&lt;h3 id="32-triple-之扩展版-grpc-协议">3.2 Triple 之扩展版 gRPC 协议&lt;/h3>
+&lt;p>Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且仅支持 HTTP/2 作为传输层协议。并且后端服务间的 Unary 请求默认采用扩展版 gPRC 协议。&lt;/p>
+&lt;p>Triple 支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json，除此之外，Triple 在实现上还扩展了 application/triple+wrapper 编码格式。&lt;/p>
+&lt;h4 id="321-outline">3.2.1 Outline&lt;/h4>
+&lt;p>The following is the general sequence of message atoms in a GRPC request &amp;amp; response message stream&lt;/p>
+&lt;ul>
+&lt;li>Request → Request-Headers *Length-Prefixed-Message EOS&lt;/li>
+&lt;li>Response → (Response-Headers *Length-Prefixed-Message Trailers) / Trailers-Only&lt;/li>
+&lt;/ul>
+&lt;h4 id="322-requests">3.2.2 Requests&lt;/h4>
+&lt;ul>
+&lt;li>Request → Request-Headers *Length-Prefixed-Message EOS&lt;/li>
+&lt;/ul>
+&lt;p>Request-Headers are delivered as HTTP2 headers in HEADERS + CONTINUATION frames.&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Request-Headers&lt;/strong> → Call-Definition *Custom-Metadata&lt;/li>
+&lt;li>&lt;strong>Call-Definition&lt;/strong> → Method Scheme Path TE [Authority] [Timeout] Content-Type [Message-Type] [Message-Encoding] [Message-Accept-Encoding] [User-Agent] Service-Version Service-Group Tracing-ID Tracing-Span-ID Cluster-Info&lt;/li>
+&lt;li>&lt;strong>Method&lt;/strong> → &amp;ldquo;:method POST&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Scheme&lt;/strong> → &amp;ldquo;:scheme &amp;quot; (&amp;ldquo;http&amp;rdquo; / &amp;ldquo;https&amp;rdquo;)&lt;/li>
+&lt;li>&lt;strong>Path&lt;/strong> → &amp;ldquo;:path&amp;rdquo; &amp;ldquo;/&amp;rdquo; Service-Name &amp;ldquo;/&amp;rdquo; {&lt;em>method name&lt;/em>} # But see note below.&lt;/li>
+&lt;li>&lt;strong>Service-Name&lt;/strong> → {&lt;em>IDL-specific service name&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>Authority&lt;/strong> → &amp;ldquo;:authority&amp;rdquo; {&lt;em>virtual host name of authority&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>TE&lt;/strong> → &amp;ldquo;te&amp;rdquo; &amp;ldquo;trailers&amp;rdquo; # Used to detect incompatible proxies&lt;/li>
+&lt;li>&lt;strong>Timeout&lt;/strong> → &amp;ldquo;grpc-timeout&amp;rdquo; TimeoutValue TimeoutUnit&lt;/li>
+&lt;li>&lt;strong>TimeoutValue&lt;/strong> → {&lt;em>positive integer as ASCII string of at most 8 digits&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>TimeoutUnit&lt;/strong> → Hour / Minute / Second / Millisecond / Microsecond / Nanosecond
+&lt;ul>
+&lt;li>&lt;strong>Hour&lt;/strong> → &amp;ldquo;H&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Minute&lt;/strong> → &amp;ldquo;M&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Second&lt;/strong> → &amp;ldquo;S&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Millisecond&lt;/strong> → &amp;ldquo;m&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Microsecond&lt;/strong> → &amp;ldquo;u&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Nanosecond&lt;/strong> → &amp;ldquo;n&amp;rdquo;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;strong>Content-Type&lt;/strong> → &amp;ldquo;content-type&amp;rdquo; &amp;ldquo;application/grpc&amp;rdquo; [(&amp;quot;+proto&amp;rdquo; / &amp;ldquo;+json&amp;rdquo; / {&lt;em>custom&lt;/em>})]&lt;/li>
+&lt;li>&lt;strong>Content-Coding&lt;/strong> → &amp;ldquo;identity&amp;rdquo; / &amp;ldquo;gzip&amp;rdquo; / &amp;ldquo;deflate&amp;rdquo; / &amp;ldquo;snappy&amp;rdquo; / {&lt;em>custom&lt;/em>}&lt;/li>
+&lt;li>&lt;a name="message-encoding">&lt;/a>&lt;strong>Message-Encoding&lt;/strong> → &amp;ldquo;grpc-encoding&amp;rdquo; Content-Coding&lt;/li>
+&lt;li>&lt;strong>Message-Accept-Encoding&lt;/strong> → &amp;ldquo;grpc-accept-encoding&amp;rdquo; Content-Coding *(&amp;quot;,&amp;quot; Content-Coding)&lt;/li>
+&lt;li>&lt;strong>User-Agent&lt;/strong> → &amp;ldquo;user-agent&amp;rdquo; {&lt;em>structured user-agent string&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>Message-Type&lt;/strong> → &amp;ldquo;grpc-message-type&amp;rdquo; {&lt;em>type name for message schema&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>Custom-Metadata&lt;/strong> → Binary-Header / ASCII-Header&lt;/li>
+&lt;li>&lt;strong>Binary-Header&lt;/strong> → {Header-Name &amp;ldquo;-bin&amp;rdquo; } {&lt;em>base64 encoded value&lt;/em>}&lt;/li>
+&lt;li>&lt;strong>ASCII-Header&lt;/strong> → Header-Name ASCII-Value&lt;/li>
+&lt;li>&lt;strong>Header-Name&lt;/strong> → 1*( %x30-39 / %x61-7A / &amp;ldquo;_&amp;rdquo; / &amp;ldquo;-&amp;rdquo; / &amp;ldquo;.&amp;rdquo;) ; 0-9 a-z _ - .&lt;/li>
+&lt;li>&lt;strong>ASCII-Value&lt;/strong> → 1*( %x20-%x7E ) ; space and printable ASCII&lt;/li>
+&lt;li>Service-Version → &amp;ldquo;tri-service-version&amp;rdquo; {Dubbo service version}&lt;/li>
+&lt;li>Service-Group → &amp;ldquo;tri-service-group&amp;rdquo; {Dubbo service group}&lt;/li>
+&lt;li>Tracing-ID → &amp;ldquo;tri-trace-traceid&amp;rdquo; {tracing id}&lt;/li>
+&lt;li>Tracing-RPC-ID → &amp;ldquo;tri-trace-rpcid&amp;rdquo; {_span id _}&lt;/li>
+&lt;li>Cluster-Info → &amp;ldquo;tri-unit-info&amp;rdquo; {cluster infomation}&lt;/li>
+&lt;/ul>
+&lt;h4 id="323-responses">3.2.3 Responses&lt;/h4>
+&lt;ul>
+&lt;li>&lt;strong>Response&lt;/strong> → (Response-Headers *Length-Prefixed-Message Trailers) / Trailers-Only&lt;/li>
+&lt;li>&lt;strong>Response-Headers&lt;/strong> → HTTP-Status [Message-Encoding] [Message-Accept-Encoding] Content-Type *Custom-Metadata&lt;/li>
+&lt;li>&lt;strong>Trailers-Only&lt;/strong> → HTTP-Status Content-Type Trailers&lt;/li>
+&lt;li>&lt;strong>Trailers&lt;/strong> → Status [Status-Message] *Custom-Metadata&lt;/li>
+&lt;li>&lt;strong>HTTP-Status&lt;/strong> → &amp;ldquo;:status 200&amp;rdquo;&lt;/li>
+&lt;li>&lt;strong>Status&lt;/strong> → &amp;ldquo;grpc-status&amp;rdquo; 1*DIGIT ; 0-9&lt;/li>
+&lt;li>&lt;strong>Status-Message&lt;/strong> → &amp;ldquo;grpc-message&amp;rdquo; Percent-Encoded&lt;/li>
+&lt;li>&lt;strong>Percent-Encoded&lt;/strong> → 1*(Percent-Byte-Unencoded / Percent-Byte-Encoded)&lt;/li>
+&lt;li>&lt;strong>Percent-Byte-Unencoded&lt;/strong> → 1*( %x20-%x24 / %x26-%x7E ) ; space and VCHAR, except %&lt;/li>
+&lt;li>&lt;strong>Percent-Byte-Encoded&lt;/strong> → &amp;ldquo;%&amp;rdquo; 2HEXDIGIT ; 0-9 A-F&lt;/li>
+&lt;/ul>
+&lt;p>以上即为 Triple 扩展版本的 gRPC 协议，更多详细规范说明请参照 &lt;a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范&lt;/a>。&lt;/p></description></item><item><title>Overview: Triple 协议优势与目标</title><link>https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple/</guid><description>
+&lt;h2 id="简介">简介&lt;/h2>
+&lt;p>Triple 协议是 Dubbo3 设计的基于 HTTP 的 RPC 通信协议规范，它完全兼容 gRPC 协议，支持 Request-Response、Streaming 流式等通信模型，可同时运行在 HTTP/1 和 HTTP/2 之上。&lt;/p>
+&lt;p>Dubbo 框架提供了 Triple 协议的多种语言实现，它们可以帮助你构建浏览器、gRPC 兼容的 HTTP API 接口：你只需要定义一个标准的 Protocol Buffer 格式的服务并实现业务逻辑，Dubbo 负责帮助生成语言相关的 Server Stub、Client Stub，并将整个调用流程无缝接入如路由、服务发现等 Dubbo 体系。Go、Java 等语言的 Triple 协议实现原生支持 HTTP/1 传输层通信，相比于 gRPC 官方实现，Dubbo 框架提供的协议实现更简单、更稳定，帮助你更容易的开发和治理微服务应用。&lt;/p>
+&lt;p>针对某些语言版本，Dubbo 框架还提供了更贴合语言特性的编程模式，即不绑定 IDL 的服务定义与开发模式，比如在 Dubbo Java 中，你可以选择使用 Java Interface 和 Pojo 类定义 Dubbo 服务，并将其发布为基于 Triple 协议通信的微服务。&lt;/p>
+&lt;h2 id="协议规范specification">协议规范(Specification)&lt;/h2>
+&lt;p>基于 Triple 协议，你可以实现以下目标：&lt;/p>
+&lt;h3 id="当-dubbo-作为-client-时">当 Dubbo 作为 Client 时&lt;/h3>
+&lt;p>Dubbo Client 可以访问 Dubbo 服务端 (Server) 发布的 Triple 协议服务，同时还可以访问标准的 gRPC 服务端。&lt;/p>
+&lt;ul>
+&lt;li>调用标准 gRPC 服务端，发送 Content-type 为标准 gRPC 类型的请求：application/grpc, application/grpc+proto, and application/grpc+json&lt;/li>
+&lt;li>调用 Dubbo 服务端，发送 Content-type 为 Triple 类型的请求：application/json, application/proto, application/triple+wrapper&lt;/li>
+&lt;/ul>
+&lt;h3 id="当-dubbo-作为-server-时">当 Dubbo 作为 Server 时&lt;/h3>
+&lt;p>Dubbo Server 默认将同时发布对 Triple、gRPC 协议的支持，并且 Triple 协议可以同时工作在 HTTP/1、HTTP/2 之上。因此，Dubbo Server 可以处理 Dubbo 客户端发过来的 Triple 协议请求，可以处理标准的 gRPC 协议请求，还能处理 cURL、浏览器发送过来的 HTTP 请求。以 Content-type 区分就是：&lt;/p>
+&lt;ul>
+&lt;li>处理 gRPC 客户端发送的 Content-type 为标准 gRPC 类型的请求：application/grpc、application/grpc+proto、application/grpc+json&lt;/li>
+&lt;li>处理 Dubbo 客户端发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper&lt;/li>
+&lt;li>处理 cURL、浏览器等发送的 Content-type 为 Triple 类型的请求：application/json、application/proto、application/grpc+wrapper&lt;/li>
+&lt;/ul>
+&lt;p>详细在此查看详细的 &lt;a href="../triple-spec">Triple Specification&lt;/a>。&lt;/p>
+&lt;h2 id="与-grpc-协议的关系">与 gRPC 协议的关系&lt;/h2>
+&lt;p>上面提到 Triple 完全兼容 gRPC 协议，那既然 gRPC 官方已经提供了多语言的框架实现，为什么 Dubbo 还要通过 Triple 重新实现一遍呢？核心目标主要有以下两点：&lt;/p>
+&lt;ul>
+&lt;li>首先，在协议设计上，Dubbo 参考 gRPC 与 gRPC-Web 两个协议设计了自定义的 Triple 协议：Triple 是一个基于 HTTP 传输层协议的 RPC 协议，它完全兼容 gRPC 的同时可运行在 HTTP/1、HTTP/2 之上。&lt;/li>
+&lt;li>其次，Dubbo 框架在每个语言的实现过程中遵循了符合框架自身定位的设计理念，相比于 grpc-java、grpc-go 等框架库，Dubbo 协议实现更简单、更纯粹，尝试在实现上规避 gRPC 官方库中存在的一系列问题。&lt;/li>
+&lt;/ul>
+&lt;p>gRPC 本身作为 RPC 协议规范非常优秀，但我们发现原生的 gRPC 库实现在实际使用存在一系列问题，包括实现复杂、绑定 IDL、难以调试等，Dubbo 在协议设计与实现上从实践出发，很好的规避了这些问题：&lt;/p>
+&lt;ul>
+&lt;li>原生的 gRPC 实现受限于 HTTP/2 交互规范，无法为浏览器、HTTP API 提供交互方式，你需要额外的代理组件如 grpc-web、grpc-gateway 等才能实现。在 Dubbo 中，你可以直接用 curl、浏览器访问 Dubbo HTTP/2 服务.&lt;/li>
+&lt;li>gRPC 官方库强制绑定 Proto Buffer，唯一的开发选择就是使用 IDL 定义和管理服务，这对于一些多语言诉求不强的用户是一个非常大的使用负担。Dubbo 则在支持 IDL 的同时，为 Java、Go 等提供了语言特有的服务定义与开发方式。&lt;/li>
+&lt;li>在开发阶段，以 gRPC 协议发布的服务非常难以调试，你只能使用 gRPC 特定的工具来进行，很多工具都比较简陋 &amp;amp; 不成熟。而从 Dubbo3 开始，你可以直接使用 curl | jq 或者 Chrome 开发者工具来调试你的服务，直接传入 JSON 结构体就能调用服务。&lt;/li>
+&lt;li>首先，gRPC 协议库有超过 10 万行代码的规模，但 Dubbo (Go、Java、Rust、Node.js 等) 关于协议实现部分仅有几千行代码，这让代码维护和问题排查变得更简单。&lt;/li>
+&lt;li>谷歌提供的 gRPC 实现库没有使用主流的第三方或语言官方协议库，而是选择自己维护了一套实现，让整个维护与生态扩展变得更加复杂。比如 grpc-go 自己维护了一套 HTTP/2 库而不是使用的 go 官方库。Dubbo 使用了官方库的同时，相比 gRPC 自行维护的 http 协议库维持了同一性能水准。&lt;/li>
+&lt;li>gRPC 库仅仅提供了 RPC 协议实现，需要你做很多额外工作为其引入服务治理能力。而 Dubbo 本身是不绑定协议的微服务开发框架，内置 HTTP/2 协议实现可以与 Dubbo 服务治理能力更好的衔接在一起。&lt;/li>
+&lt;/ul>
+&lt;h3 id="实现简单">实现简单&lt;/h3>
+&lt;p>Dubbo 框架实现专注在 Triple 协议自身，而对于底层的网络通信、HTTP/2 协议解析等选择依赖那些经过长期检验的网络库。比如 Dubbo Java 基于 Netty 构建，而 Dubbo Go 则是直接使用的 Go 官方 HTTP 库。&lt;/p>
+&lt;p>Dubbo 提供的 Triple 协议实现非常简单，对应 Dubbo 中的 Protocol 组件实现，你可以仅仅花一下午时间就搞清楚 Dubbo 协议的代码实现。&lt;/p>
+&lt;h3 id="大规模生产环境检验">大规模生产环境检验&lt;/h3>
+&lt;p>自 Dubbo3 发布以来，Triple 协议已被广泛应用于阿里巴巴以及众多社区标杆企业，尤其是一些代理、网关互通场景。一方面 Triple 通过大规模生产实践被证实可靠稳定，另一方面 Triple 的简单、易于调试、不绑定 IDL 的设计也是其得到广泛应用的重要因素。&lt;/p>
+&lt;h3 id="原生多协议支持">原生多协议支持&lt;/h3>
+&lt;p>当以 Dubbo 框架为服务端对外发布服务时，可以做到在同一端口原生支持 Triple、gRPC 和 HTTP/1 协议，这意味着你可以用多种形式访问 Dubbo 服务端发布的服务，所有请求形式最终都会被转发到相同的业务逻辑实现，这给你提供了更大的灵活性。&lt;/p>
+&lt;p>Dubbo 完全兼容 gRPC 协议及相关特性包括 streaming、trailers、error details 等，你选择直接在 Dubbo 框架中使用 Triple 协议（另外，你也可以选择使用原生的 gRPC 协议），然后你就可以直接使用 Dubbo 客户端、curl、浏览器等访问你发布的服务。在与 gRPC 生态互操作性方面，任何标准的 gRPC 客户端，都可以正常访问 Dubbo 服务；Dubbo 客户端也可以调用任何标准的 gRPC 服务，这里有提供的 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple/src/main/java/org/apache/dubbo/sample/tri/interop">互操作性示例&lt;/a>&lt;/p>
+&lt;p>以下是使用 cURL 客户端访问 Dubbo 服务端 Triple 协议服务的示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;sentence&amp;#34;: &amp;#34;Hello Dubbo.&amp;#34;}&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> https://host:port/org.apache.dubbo.sample.GreetService/sayHello
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="一站式服务治理接入">一站式服务治理接入&lt;/h3>
+&lt;p>我们都知道 Dubbo 有丰富的微服务治理能力，比如服务发现、负载均衡、流量管控等，这也是我们使用 Dubbo 框架开发应用的优势所在。要想在 Dubbo 体系下使用 gRPC 协议通信，有两种方式可以实现，一种是直接在 Dubbo 框架中引入 gRPC 官方发布的二进制包，另一种是在 Dubbo 内原生提供 gRPC 协议兼容的源码实现。&lt;/p>
+&lt;p>相比于第一种引入二进制依赖的方式，Dubbo 框架通过内置 Triple 协议实现的方式，原生支持了 gRPC 协议，这种方式的优势在于源码完全由自己掌控，因此协议的实现与 Dubbo 框架结合更为紧密，能够更灵活的接入 Dubbo 的服务治理体系。&lt;/p>
+&lt;h3 id="java-语言">Java 语言&lt;/h3>
+&lt;p>在 Dubbo Java 库实现中，除了 IDL 方式外，你可以使用 Java Interface 方式定义服务，这对于众多熟悉 Dubbo 体系的 Java 用户来说，可以大大降低使用 gRPC 协议的成本。&lt;/p>
+&lt;p>另外，Java 版本的协议实现在性能上与 grpc-java 库基本持平，甚至某些场景下比 grpc-java 性能表现还要出色。而这一切还是建立在 Dubbo 版本协议的实现复杂度远小于 gRPC 版本的情况下，因为 grpc-java 维护了一套定制版本的 netty 协议实现。&lt;/p>
+&lt;h3 id="go-语言实现">Go 语言实现&lt;/h3>
+&lt;p>Dubbo Go 推荐 IDL 开发模式，通过 Dubbo 配套的 protoc 插件生成 stub 代码，你只需要提供对应的业务逻辑实现即可，你可以通过 curl、浏览器访问 Dubbo Go 发布的 gRPC 服务。&lt;/p>
+&lt;h2 id="后续规划">后续规划&lt;/h2>
+&lt;p>当前我们已经提供了 Triple 协议的 Java、Go 语言版本，接下来我们计划陆续提供 Rust、Python、Node.js 等语言的对应实现。&lt;/p></description></item><item><title>Overview: Dubbo2 协议规范</title><link>https://dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo_protocol_header.png" alt="/dev-guide/images/dubbo_protocol_header.jpg">&lt;/p>
+&lt;h2 id="协议规范-specification">协议规范 Specification&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>Magic - Magic High &amp;amp; Magic Low (16 bits)&lt;/p>
+&lt;p>标识协议版本号，Dubbo 协议：0xdabb&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Req/Res (1 bit)&lt;/p>
+&lt;p>标识是请求或响应。请求： 1; 响应： 0。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>2 Way (1 bit)&lt;/p>
+&lt;p>仅在 Req/Res 为1（请求）时才有用，标记是否期望从服务器返回值。如果需要来自服务器的返回值，则设置为1。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Event (1 bit)&lt;/p>
+&lt;p>标识是否是事件消息，例如，心跳事件。如果这是一个事件，则设置为1。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Serialization ID (5 bit)&lt;/p>
+&lt;p>标识序列化类型：比如 fastjson 的值为6。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Status (8 bits)&lt;/p>
+&lt;p>仅在 Req/Res 为0（响应）时有用，用于标识响应的状态。&lt;/p>
+&lt;ul>
+&lt;li>20 - OK&lt;/li>
+&lt;li>30 - CLIENT_TIMEOUT&lt;/li>
+&lt;li>31 - SERVER_TIMEOUT&lt;/li>
+&lt;li>40 - BAD_REQUEST&lt;/li>
+&lt;li>50 - BAD_RESPONSE&lt;/li>
+&lt;li>60 - SERVICE_NOT_FOUND&lt;/li>
+&lt;li>70 - SERVICE_ERROR&lt;/li>
+&lt;li>80 - SERVER_ERROR&lt;/li>
+&lt;li>90 - CLIENT_ERROR&lt;/li>
+&lt;li>100 - SERVER_THREADPOOL_EXHAUSTED_ERROR&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Request ID (64 bits)&lt;/p>
+&lt;p>标识唯一请求。类型为long。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Data Length (32 bits)&lt;/p>
+&lt;p>序列化后的内容长度（可变部分），按字节计数。int类型。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Variable Part&lt;/p>
+&lt;p>被特定的序列化类型（由序列化 ID 标识）序列化后，每个部分都是一个 byte [] 或者 byte&lt;/p>
+&lt;ul>
+&lt;li>如果是请求包 ( Req/Res = 1)，则每个部分依次为：
+&lt;ul>
+&lt;li>Dubbo version&lt;/li>
+&lt;li>Service name&lt;/li>
+&lt;li>Service version&lt;/li>
+&lt;li>Method name&lt;/li>
+&lt;li>Method parameter types&lt;/li>
+&lt;li>Method arguments&lt;/li>
+&lt;li>Attachments&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>如果是响应包（Req/Res = 0），则每个部分依次为：
+&lt;ul>
+&lt;li>返回值类型(byte)，标识从服务器端返回的值类型：
+&lt;ul>
+&lt;li>返回空值：RESPONSE_NULL_VALUE 2&lt;/li>
+&lt;li>正常响应值： RESPONSE_VALUE 1&lt;/li>
+&lt;li>异常：RESPONSE_WITH_EXCEPTION 0&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>返回值：从服务端返回的响应bytes&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>注意：&lt;/strong> 对于(Variable Part)变长部分，当前版本的Dubbo 框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请在Variable Part的每个part后额外增加换行符， 如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Dubbo version bytes (换行符)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Service name bytes (换行符)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="协议特点分析">协议特点分析&lt;/h2>
+&lt;h3 id="优点">优点&lt;/h3>
+&lt;ul>
+&lt;li>协议设计上很紧凑，能用 1 个 bit 表示的，不会用一个 byte 来表示，比如 boolean 类型的标识。&lt;/li>
+&lt;li>请求、响应的 header 一致，通过序列化器对 content 组装特定的内容，代码实现起来简单。&lt;/li>
+&lt;/ul>
+&lt;h3 id="可以改进的点">可以改进的点&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>对于网关代理类组件不友好。http 请求而言，通过 header 就可以确定要访问的资源，而 Dubbo 需要涉及到用特定序列化协议才可以将服务名、方法、方法签名解析出来，并且这些资源定位符是 string 类型或者 string 数组，很容易转成 bytes，因此可以组装到 header 中。类似于 http2 的 header 压缩，对于 rpc 调用的资源也可以协商出来一个int来标识，从而提升性能，如果在&lt;code>header&lt;/code>上组装资源定位符的话，该功能则更易实现。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>通过 req/res 是否是请求后，可以精细定制协议，去掉一些不需要的标识和添加一些特定的标识。比如&lt;code>status&lt;/code>,&lt;code>twoWay&lt;/code>标识可以严格定制，去掉冗余标识。还有超时时间是作为 Dubbo 的 &lt;code>attachment&lt;/code> 进行传输的，理论上应该放到请求协议的header中，因为超时是网络请求中必不可少的。提到 &lt;code>attachment&lt;/code> ，通过实现可以看到 &lt;code>attachment&lt;/code> 中有一些是跟协议 &lt;code>content&lt;/code>中已有的字段是重复的，比如 &lt;code>path&lt;/code>和&lt;code>version&lt;/code>等字段，这些会增大协议尺寸。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Dubbo 会将服务名&lt;code>com.alibaba.middleware.hsf.guide.api.param.ModifyOrderPriceParam&lt;/code>，转换为&lt;code>Lcom/alibaba/middleware/hsf/guide/api/param/ModifyOrderPriceParam;&lt;/code>，理论上是不必要的，最后追加一个&lt;code>;&lt;/code>即可。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Dubbo 协议没有预留扩展字段，没法新增标识，扩展性不太好，比如新增&lt;code>响应上下文&lt;/code>的功能，只有改协议版本号的方式，但是这样要求客户端和服务端的版本都进行升级，对于分布式场景很不友好。&lt;/p>
+&lt;/li>
+&lt;/ul></description></item><item><title>Overview: HTTP 协议规范</title><link>https://dubbo.apache.org/zh-cn/overview/reference/protocols/http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/protocols/http/</guid><description>
+&lt;h2 id="什么是-dubbo-http">什么是 Dubbo Http&lt;/h2>
+&lt;p>基于 spring web 和 resteasy 注解编码风格，通过http协议进行服务间调用互通，dubbo protocol扩展实现的协议&lt;/p>
+&lt;h2 id="为什么选择dubbo-http">为什么选择Dubbo Http&lt;/h2>
+&lt;ul>
+&lt;li>dubbo http 可以实现微服务与dubbo之间的互通&lt;/li>
+&lt;li>多协议发布服务，可以实现服务协议的平滑迁移&lt;/li>
+&lt;li>http的通用性，解决跨语言互通&lt;/li>
+&lt;li>最新版本的http 无需添加其他组件，更轻量&lt;/li>
+&lt;li>resteasy以及spring web的编码风格，上手更快&lt;/li>
+&lt;/ul>
+&lt;h2 id="协议规范">协议规范&lt;/h2>
+&lt;ul>
+&lt;li>Request&lt;/li>
+&lt;/ul>
+&lt;p>相对于原生的http协议dubbo http 请求增加version和group两个header用于确定服务的唯一,
+如果provider一端没有声明group和version,http请求时就不需要传递这连个header,反之必须要传递目标
+服务的group和version, 如果使用dubbo http的RestClient这两个header将会默认通过attachment传递
+为区别于其他的header，attachment将会增加rest-service-前缀，因此通过其他形式的http client调用
+dubbo http服务需要传递 rest-service-version 和 rest-service-group 两个header&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>POST /test/path HTTP/1.1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host: localhost:8080
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept: text/html
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rest-service-version: 1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rest-service-group: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{&amp;#34;name&amp;#34;:&amp;#34;dubbo&amp;#34;,&amp;#34;age&amp;#34;:10,&amp;#34;address&amp;#34;:&amp;#34;hangzhou&amp;#34;}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Response&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>HTTP/1.1 200
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: text/html
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length: 4
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Date: Fri, 28 Apr 2023 14:16:42 GMT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;#34;success&amp;#34;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>content-type支持
+&lt;ul>
+&lt;li>application/json&lt;/li>
+&lt;li>application/x-www-form-urlencoded&lt;/li>
+&lt;li>text/plain&lt;/li>
+&lt;li>text/xml&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>目前支持以上media，后面还会对type进行扩展&lt;/p>
+&lt;h2 id="快速入门">快速入门&lt;/h2>
+&lt;p>详细的依赖以及spring配置，可以参见dubbo 项目的dubbo-demo-xml模块
+&lt;a href="https://github.com/apache/dubbo/tree/3.2/dubbo-demo/dubbo-demo-xml">https://github.com/apache/dubbo/tree/3.2/dubbo-demo/dubbo-demo-xml&lt;/a>&lt;/p>
+&lt;ul>
+&lt;li>spring web 编码
+在使用dubbo http的spring web编码时，类注解我们要求必须出现@RequestMapping或者@Controller,以此来判断用户使用的编码风格，决定使用对应的SpringMvcServiceRestMetadataResolver
+注解解析器进行元注解解析，Provider一侧我们允许用户使用实现类作为Dubbo Service(相比之前dubbo service export时service必须是接口的要求)&lt;/li>
+&lt;/ul>
+&lt;p>API&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RequestMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/spring/demo/service&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">SpringRestDemoService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/hello&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Integer &lt;span style="color:#268bd2">hello&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) Integer a, &lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Integer b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/error&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">error&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.POST, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/say&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(&lt;span style="color:#268bd2">@RequestBody&lt;/span> String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.POST, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/testFormBody&amp;#34;&lt;/span>, consumes &lt;span style="color:#719e07">=&lt;/span> MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long &lt;span style="color:#268bd2">testFormBody&lt;/span>(&lt;span style="color:#268bd2">@RequestBody&lt;/span> Long number);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.POST, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/testJavaBeanBody&amp;#34;&lt;/span>, consumes &lt;span style="color:#719e07">=&lt;/span> MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User &lt;span style="color:#268bd2">testJavaBeanBody&lt;/span>(&lt;span style="color:#268bd2">@RequestBody&lt;/span> User user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/primitive&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">primitiveInt&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">int&lt;/span> a, &lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">int&lt;/span> b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/primitiveLong&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveLong&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">long&lt;/span> a, &lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Long b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/primitiveByte&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveByte&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">byte&lt;/span> a, &lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Long b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.POST, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/primitiveShort&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveShort&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">short&lt;/span> a, &lt;span style="color:#268bd2">@RequestParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Long b, &lt;span style="color:#268bd2">@RequestBody&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> c);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/testMapParam&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">testMapParam&lt;/span>(&lt;span style="color:#268bd2">@RequestParam&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/testMapHeader&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">testMapHeader&lt;/span>(&lt;span style="color:#268bd2">@RequestHeader&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> headers);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.POST, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/testMapForm&amp;#34;&lt;/span>, consumes &lt;span style="color:#719e07">=&lt;/span> MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">testMapForm&lt;/span>(MultiValueMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@RequestMapping&lt;/span>(method &lt;span style="color:#719e07">=&lt;/span> RequestMethod.GET, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/headerInt&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">headerInt&lt;/span>(&lt;span style="color:#268bd2">@RequestHeader&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;header&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">int&lt;/span> header);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Provider&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboService&lt;/span>(interfaceClass &lt;span style="color:#719e07">=&lt;/span> SpringRestDemoService.class ,protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">SpringRestDemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> SpringRestDemoService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Long &lt;span style="color:#268bd2">testFormBody&lt;/span>(Long number) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> number;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">testJavaBeanBody&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> user;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">primitiveInt&lt;/span>(&lt;span style="color:#dc322f">int&lt;/span> a, &lt;span style="color:#dc322f">int&lt;/span> b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveLong&lt;/span>(&lt;span style="color:#dc322f">long&lt;/span> a, Long b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveByte&lt;/span>(&lt;span style="color:#dc322f">byte&lt;/span> a, Long b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveShort&lt;/span>(&lt;span style="color:#dc322f">short&lt;/span> a, Long b, &lt;span style="color:#dc322f">int&lt;/span> c) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">testMapParam&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;param&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">testMapHeader&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> headers) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> headers.get(&lt;span style="color:#2aa198">&amp;#34;header&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">testMapForm&lt;/span>(MultiValueMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">headerInt&lt;/span>(&lt;span style="color:#dc322f">int&lt;/span> header) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> header;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Integer &lt;span style="color:#268bd2">hello&lt;/span>(Integer a, Integer b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">error&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(&lt;span style="color:#2aa198">&amp;#34;test error&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Consumer&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">SpringRestDemoServiceConsumer&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboReference&lt;/span>(interfaceClass &lt;span style="color:#719e07">=&lt;/span> SpringRestDemoService.class )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpringRestDemoService springRestDemoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">invoke&lt;/span>(){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String hello &lt;span style="color:#719e07">=&lt;/span> springRestDemoService.sayHello(&lt;span style="color:#2aa198">&amp;#34;hello&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(&lt;span style="color:#2aa198">&amp;#34;Hello, hello&amp;#34;&lt;/span>, hello);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Integer result &lt;span style="color:#719e07">=&lt;/span> springRestDemoService.primitiveInt(1, 2);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long resultLong &lt;span style="color:#719e07">=&lt;/span> springRestDemoService.primitiveLong(1, 2l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> resultByte &lt;span style="color:#719e07">=&lt;/span> springRestDemoService.primitiveByte((&lt;span style="color:#dc322f">byte&lt;/span>) 1, 2l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> resultShort &lt;span style="color:#719e07">=&lt;/span> springRestDemoService.primitiveShort((&lt;span style="color:#dc322f">short&lt;/span>) 1, 2l, 1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(result, 3);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(resultShort, 3l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(resultLong, 3l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(resultByte, 3l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(Long.valueOf(1l), springRestDemoService.testFormBody(1l));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MultiValueMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> forms &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> LinkedMultiValueMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> forms.put(&lt;span style="color:#2aa198">&amp;#34;form&amp;#34;&lt;/span>, Arrays.asList(&lt;span style="color:#2aa198">&amp;#34;F1&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(Arrays.asList(&lt;span style="color:#2aa198">&amp;#34;F1&amp;#34;&lt;/span>), springRestDemoService.testMapForm(forms));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(User.getInstance(), springRestDemoService.testJavaBeanBody(User.getInstance()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">assertEquals&lt;/span>(Object returnStr, Object exception) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> equal &lt;span style="color:#719e07">=&lt;/span> returnStr &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> returnStr.equals(exception);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (equal) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>JaxRs 编码
+JaxRs注解使用的时候我们要求service 类上必须使用@Path注解，来确定使用JAXRSServiceRestMetadataResolver
+注解解析器来解析注解元信息&lt;/li>
+&lt;/ul>
+&lt;p>API&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/jaxrs/demo/service&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">JaxRsRestDemoService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/hello&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Integer &lt;span style="color:#268bd2">hello&lt;/span>(&lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) Integer a, &lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Integer b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/error&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">error&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/say&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/testFormBody&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long &lt;span style="color:#268bd2">testFormBody&lt;/span>(&lt;span style="color:#268bd2">@FormParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;number&amp;#34;&lt;/span>) Long number);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/testJavaBeanBody&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User &lt;span style="color:#268bd2">testJavaBeanBody&lt;/span>(User user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/primitive&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">primitiveInt&lt;/span>(&lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">int&lt;/span> a, &lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">int&lt;/span> b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/primitiveLong&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveLong&lt;/span>(&lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">long&lt;/span> a, &lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Long b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/primitiveByte&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveByte&lt;/span>(&lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">byte&lt;/span> a, &lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Long b);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/primitiveShort&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveShort&lt;/span>(&lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;a&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">short&lt;/span> a, &lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;b&amp;#34;&lt;/span>) Long b, &lt;span style="color:#dc322f">int&lt;/span> c);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;testMapParam&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.TEXT_PLAIN})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.TEXT_PLAIN})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">testMapParam&lt;/span>(&lt;span style="color:#268bd2">@QueryParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>) Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;testMapHeader&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.TEXT_PLAIN})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.TEXT_PLAIN})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">testMapHeader&lt;/span>(&lt;span style="color:#268bd2">@HeaderParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>) Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> headers);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;testMapForm&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.APPLICATION_FORM_URLENCODED})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">testMapForm&lt;/span>(MultivaluedMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/header&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.TEXT_PLAIN})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">header&lt;/span>(&lt;span style="color:#268bd2">@HeaderParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;header&amp;#34;&lt;/span>) String header);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/headerInt&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.TEXT_PLAIN})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">headerInt&lt;/span>(&lt;span style="color:#268bd2">@HeaderParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;header&amp;#34;&lt;/span>) &lt;span style="color:#dc322f">int&lt;/span> header);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Provider&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(interfaceClass &lt;span style="color:#719e07">=&lt;/span>JaxRsRestDemoService.class ,protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span>,version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>,group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">JaxRsRestDemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> JaxRsRestDemoService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Long &lt;span style="color:#268bd2">testFormBody&lt;/span>(Long number) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> number;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">testJavaBeanBody&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> user;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">primitiveInt&lt;/span>(&lt;span style="color:#dc322f">int&lt;/span> a, &lt;span style="color:#dc322f">int&lt;/span> b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveLong&lt;/span>(&lt;span style="color:#dc322f">long&lt;/span> a, Long b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveByte&lt;/span>(&lt;span style="color:#dc322f">byte&lt;/span> a, Long b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">primitiveShort&lt;/span>(&lt;span style="color:#dc322f">short&lt;/span> a, Long b, &lt;span style="color:#dc322f">int&lt;/span> c) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">testMapParam&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;param&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">testMapHeader&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> headers) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> headers.get(&lt;span style="color:#2aa198">&amp;#34;header&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">testMapForm&lt;/span>(MultivaluedMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> params) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">header&lt;/span>(String header) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> header;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">headerInt&lt;/span>(&lt;span style="color:#dc322f">int&lt;/span> header) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> header;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Integer &lt;span style="color:#268bd2">hello&lt;/span>(Integer a, Integer b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> a &lt;span style="color:#719e07">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">error&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(&lt;span style="color:#2aa198">&amp;#34;test error&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Consumer&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">JaxRsRestDemoService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboReference&lt;/span>(interfaceClass &lt;span style="color:#719e07">=&lt;/span> JaxRsRestDemoService.class)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> JaxRsRestDemoService jaxRsRestDemoService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">jaxRsRestDemoServiceTest&lt;/span>(ClassPathXmlApplicationContext context) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> JaxRsRestDemoService jaxRsRestDemoService &lt;span style="color:#719e07">=&lt;/span> context.getBean(&lt;span style="color:#2aa198">&amp;#34;jaxRsRestDemoService&amp;#34;&lt;/span>, JaxRsRestDemoService.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String hello &lt;span style="color:#719e07">=&lt;/span> jaxRsRestDemoService.sayHello(&lt;span style="color:#2aa198">&amp;#34;hello&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(&lt;span style="color:#2aa198">&amp;#34;Hello, hello&amp;#34;&lt;/span>, hello);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Integer result &lt;span style="color:#719e07">=&lt;/span> jaxRsRestDemoService.primitiveInt(1, 2);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long resultLong &lt;span style="color:#719e07">=&lt;/span> jaxRsRestDemoService.primitiveLong(1, 2l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> resultByte &lt;span style="color:#719e07">=&lt;/span> jaxRsRestDemoService.primitiveByte((&lt;span style="color:#dc322f">byte&lt;/span>) 1, 2l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> resultShort &lt;span style="color:#719e07">=&lt;/span> jaxRsRestDemoService.primitiveShort((&lt;span style="color:#dc322f">short&lt;/span>) 1, 2l, 1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(result, 3);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(resultShort, 3l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(resultLong, 3l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(resultByte, 3l);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(Long.valueOf(1l), jaxRsRestDemoService.testFormBody(1l));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MultivaluedMapImpl&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> forms &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MultivaluedMapImpl&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> forms.put(&lt;span style="color:#2aa198">&amp;#34;form&amp;#34;&lt;/span>, Arrays.asList(&lt;span style="color:#2aa198">&amp;#34;F1&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(Arrays.asList(&lt;span style="color:#2aa198">&amp;#34;F1&amp;#34;&lt;/span>), jaxRsRestDemoService.testMapForm(forms));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> assertEquals(User.getInstance(), jaxRsRestDemoService.testJavaBeanBody(User.getInstance()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>因为dubbo http consumer一端实现http 调用的RestClient 实现有三种形式：httpclient,okhttp,URLConnection(jdk内置)
+默认请情况下采用okhttp,因此在使用dubbo http 去调用其他http服务时，需要添加引入的依赖有&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-rest&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo-rpc-rest_version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.squareup.okhttp3&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>mockwebserver&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${okhttp_version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 或
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.httpcomponents&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>httpclient&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${httpclient_version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>微服务服务调用dubbo http&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * URL rest://localhost:8888/services
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * rest: protocol
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * localhost:8888: server address
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * services: context path
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboReference&lt;/span>(interfaceClass &lt;span style="color:#719e07">=&lt;/span> HttpService.class ,url &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rest://localhost:8888/services&amp;#34;&lt;/span>,version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>,group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HttpService httpService;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">invokeHttpService&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String http &lt;span style="color:#719e07">=&lt;/span> httpService.http(&lt;span style="color:#2aa198">&amp;#34;Others Java Architecture Invoke Dubbo Rest&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(http);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>跨语言调用&lt;/p>
+&lt;p>python&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>import requests
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> url = &amp;#39;http://localhost:8888/services/curl&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> headers = {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#39;rest-service-group&amp;#39;: &amp;#39;test&amp;#39;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#39;rest-service-version&amp;#39;: &amp;#39;1.0.0&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>response = requests.get(url, headers=headers)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span> import (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;fmt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;net/http&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">func&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> url :&lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;http://localhost:8888/services/curl&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req, err :&lt;span style="color:#719e07">=&lt;/span> http&lt;span style="color:#719e07">.&lt;/span>NewRequest(&lt;span style="color:#2aa198">&amp;#34;GET&amp;#34;&lt;/span>, url, nil)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> nil {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt&lt;span style="color:#719e07">.&lt;/span>Println(&lt;span style="color:#2aa198">&amp;#34;Error creating request:&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req&lt;span style="color:#719e07">.&lt;/span>Header&lt;span style="color:#719e07">.&lt;/span>Set(&lt;span style="color:#2aa198">&amp;#34;rest-service-group&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req&lt;span style="color:#719e07">.&lt;/span>Header&lt;span style="color:#719e07">.&lt;/span>Set(&lt;span style="color:#2aa198">&amp;#34;rest-service-version&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> client :&lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>http&lt;span style="color:#719e07">.&lt;/span>Client{}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> resp, err :&lt;span style="color:#719e07">=&lt;/span> client&lt;span style="color:#719e07">.&lt;/span>Do(req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> nil {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt&lt;span style="color:#719e07">.&lt;/span>Println(&lt;span style="color:#2aa198">&amp;#34;Error sending request:&amp;#34;&lt;/span>, err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> defer resp&lt;span style="color:#719e07">.&lt;/span>Body&lt;span style="color:#719e07">.&lt;/span>Close()
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>多协议发布&lt;/p>
+&lt;ul>
+&lt;li>dubbo 协议的代码使用http 进行数据请求测试&lt;/li>
+&lt;li>服务协议迁移&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(interfaceClass &lt;span style="color:#719e07">=&lt;/span> HttpService.class, protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rest,dubbo&amp;#34;&lt;/span>, version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>, group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HttpServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HttpService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">http&lt;/span>(String invokeType) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Rest http request test success! by invokeType: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> invokeType;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>http client组件调用dubbo http(可以不引入 service api)&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HttpClientInvoke&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String versionHeader &lt;span style="color:#719e07">=&lt;/span> RestHeaderEnum.VERSION.getHeader();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String groupHeader &lt;span style="color:#719e07">=&lt;/span> RestHeaderEnum.GROUP.getHeader();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * contextPath services
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String url &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;http://localhost:8888/services/http&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">httpServiceHttpClientInvoke&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CloseableHttpClient httpClient &lt;span style="color:#719e07">=&lt;/span> createHttpClient();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HttpRequestBase httpUriRequest &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HttpGet(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpUriRequest.addHeader(versionHeader, &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpUriRequest.addHeader(RestConstant.ACCEPT, &lt;span style="color:#2aa198">&amp;#34;text/plain&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpUriRequest.addHeader(groupHeader, &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpUriRequest.addHeader(&lt;span style="color:#2aa198">&amp;#34;type&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;Http Client Invoke Dubbo Rest Service&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CloseableHttpResponse response &lt;span style="color:#719e07">=&lt;/span> httpClient.execute(httpUriRequest);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RestResult restResult &lt;span style="color:#719e07">=&lt;/span> parseResponse(response);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#719e07">new&lt;/span> String(restResult.getBody()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> RestResult &lt;span style="color:#268bd2">parseResponse&lt;/span>(CloseableHttpResponse response) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RestResult() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getContentType&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> response.getFirstHeader(&lt;span style="color:#2aa198">&amp;#34;Content-Type&amp;#34;&lt;/span>).getValue();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> &lt;span style="color:#268bd2">getBody&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (response.getEntity() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> IOUtils.toByteArray(response.getEntity().getContent());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">headers&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> Arrays.stream(response.getAllHeaders()).collect(Collectors.toMap(Header::getName, h &lt;span style="color:#719e07">-&amp;gt;&lt;/span> Collections.singletonList(h.getValue())));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> &lt;span style="color:#268bd2">getErrorResponse&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> getBody();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">getResponseCode&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> response.getStatusLine().getStatusCode();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">getMessage&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> appendErrorMessage(response.getStatusLine().getReasonPhrase(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> String(getErrorResponse()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> CloseableHttpClient &lt;span style="color:#268bd2">createHttpClient&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PoolingHttpClientConnectionManager connectionManager &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> PoolingHttpClientConnectionManager();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> HttpClients.custom().setConnectionManager(connectionManager).build();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="32-与-30-http-实现对比">3.2 与 3.0 HTTP 实现对比&lt;/h2>
+&lt;p>因为 Dubbo Java 3.2 内部移除了原本 Resteasy 的实现，因此在对 Resteasy 内置的 Response,extend,ExceptionMapper 支持上将会有所变化
+ExceptionMapper 转换成了org.apache.dubbo.rpc.protocol.rest.exception.mapper.ExceptionHandler,Response后面也会做适配处理&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>版本&lt;/th>
+&lt;th>JaxRs&lt;/th>
+&lt;th>j2ee&lt;/th>
+&lt;th>web容器（tomcat/jetty）&lt;/th>
+&lt;th>spring web&lt;/th>
+&lt;th>http client(okhttp/httpclient/jdk URLConnnection )&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>3.0&lt;/td>
+&lt;td>依赖与resteasy的client和server&lt;/td>
+&lt;td>遵循j2ee规范&lt;/td>
+&lt;td>依赖常见web容器&lt;/td>
+&lt;td>不依赖&lt;/td>
+&lt;td>不依赖&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>3.2&lt;/td>
+&lt;td>不依赖（仅需要JaxRs注解包）&lt;/td>
+&lt;td>不遵循&lt;/td>
+&lt;td>netty实现的http服务器&lt;/td>
+&lt;td>仅依赖spring web注解&lt;/td>
+&lt;td>内部实现RestClient依赖http client（默认为okhttp）&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table></description></item></channel></rss>

@@ -1,0 +1,527 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 自定义扩展</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/</link><description>Recent content in 自定义扩展 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Filter</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/filter/</guid><description>
+&lt;p>通过自定义过滤器，可以对返回的结果进行统一的处理、验证等，减少对开发人员的打扰。&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>有两种部署运行方式，二选一&lt;/p>
+&lt;h3 id="基于kubernetes">基于Kubernetes&lt;/h3>
+&lt;ul>
+&lt;li>安装&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubernetes&lt;/a>环境&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用Kubernetes中部署的nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the port of Dubbo protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Apply AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">appended&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用Kubernetes中部署的nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>部署&lt;code>[Extensibility Filter Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h3 id="使用本地ide">使用本地IDE&lt;/h3>
+&lt;ul>
+&lt;li>部署&lt;a href="https://nacos.io/zh-cn/docs/quick-start.html">Nacos&lt;/a>2.2.0版本&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the port of Dubbo protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Apply AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">appended&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="任务详情">任务详情&lt;/h2>
+&lt;p>对所有调用Provider服务的请求在返回的结果的后面统一添加&lt;code>'s customized AppendedFilter&lt;/code>。&lt;/p>
+&lt;h2 id="实现方式">实现方式&lt;/h2>
+&lt;p>在Provider中自定义一个Filter，在Filter中修改返回结果。&lt;/p>
+&lt;h4 id="代码结构">代码结构&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-filter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-AppendedFilter.java &lt;span style="color:#2aa198">(实现Filter接口)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Provider配置文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.Filter &lt;span style="color:#2aa198">(纯文本文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="代码详情">代码详情&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.filter.provider;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Filter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invocation;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.AsyncRpcResult;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AppendedFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Filter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Result &lt;span style="color:#268bd2">invoke&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker, Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Result result&lt;span style="color:#719e07">=&lt;/span> invoker.invoke(invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Obtain the returned value&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Result appResponse &lt;span style="color:#719e07">=&lt;/span> ((AsyncRpcResult) result).getAppResponse();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Appended value&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> appResponse.setValue(appResponse.getValue()&lt;span style="color:#719e07">+&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#39;s customized AppendedFilter&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="spi配置">SPI配置&lt;/h4>
+&lt;p>在&lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.Filter&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>appended&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.filter.provider.AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="配置文件">配置文件&lt;/h4>
+&lt;p>在&lt;code>resources/application.properties&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Apply AppendedFilter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">appended&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="运行结果">运行结果&lt;/h2>
+&lt;p>以&lt;strong>使用本地IDE&lt;/strong>的方式来运行任务，结果如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-filter-output.jpg" alt="dubbo-samples-extensibility-filter-output.jpg">&lt;/p></description></item><item><title>Overview: Protocol</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/protocol/</guid><description>
+&lt;p>Dubbo 通过协议扩展实现了很多内置的功能，同时也支持很多常用的协议。所有的自定义协议在&lt;code>org.apache.dubbo.rpc.Protocol&lt;/code>文件中可以看到，以Dubbo 3为例，具体如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo通过协议扩展实现的内置功能&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>filter&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.cluster.filter.ProtocolFilterWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>qos&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.qos.protocol.QosProtocolWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>registry&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.registry.integration.InterfaceCompatibleRegistryProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>service-discovery-registry&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.registry.integration.RegistryProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>listener&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>mock&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.support.MockProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>serializationwrapper&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.ProtocolSerializationWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>securitywrapper&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.ProtocolSecurityWrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Dubbo对外支持的常用协议&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>injvm&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rest&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.rest.RestProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>grpc&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.grpc.GrpcProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>tri&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.rpc.protocol.tri.TripleProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们可以看到，在Dubbo中通过协议扩展的能力实现了过滤、监控数据采集、服务发现、监听器、mock、序列化、安全等一系列能力，同时对外提供了&lt;code>dubbo&lt;/code>，&lt;code>injvm&lt;/code>，&lt;code>rest&lt;/code>，&lt;code>grpc&lt;/code>和&lt;code>tri&lt;/code>协议。&lt;/p>
+&lt;p>自定义一套私有协议有两种方式，第一种是对原有的协议进行包装，添加一些特定的业务逻辑。另外一种是完全自定义一套协议。前者实现简单，在&lt;code>dubbo&lt;/code>中也是有广泛的使用，比如：&lt;code>ProtocolFilterWrapper&lt;/code>, &lt;code>QosProtocolWrapper&lt;/code>, &lt;code>ProtocolListenerWrapper&lt;/code>等。后者实现复杂，一般常见的协议&lt;code>dubbo&lt;/code>都实现了，并且通过了大量生产实践的验证。&lt;/p>
+&lt;p>本文会通过示例演示如何通过现有协议实现一套自定义协议。&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>有两种部署运行方式，二选一&lt;/p>
+&lt;h3 id="基于kubernetes">基于Kubernetes&lt;/h3>
+&lt;ul>
+&lt;li>安装&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubernetes&lt;/a>环境&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 自定义协议edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 自定义协议edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>部署&lt;code>[Extensibility Protocol Task](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml)&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h3 id="使用本地ide">使用本地IDE&lt;/h3>
+&lt;ul>
+&lt;li>部署&lt;a href="https://nacos.io/zh-cn/docs/quick-start.html">Nacos&lt;/a>2.2.0版本&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 自定义协议edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-protocol-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-protocol-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 自定义协议edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="任务详情">任务详情&lt;/h2>
+&lt;p>基于现有的&lt;code>dubbo&lt;/code>协议来实现自定义协议&lt;code>edubbo&lt;/code>。&lt;/p>
+&lt;h2 id="实现方式">实现方式&lt;/h2>
+&lt;p>通过对&lt;code>dubbo&lt;/code>协议进行包装来实现&lt;code>edubbo&lt;/code>协议。&lt;/p>
+&lt;h4 id="代码结构">代码结构&lt;/h4>
+&lt;h5 id="common">Common&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-protocol
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-common
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-EnhancedProtocol.java &lt;span style="color:#2aa198">(实现Protocol接口)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="provider">Provider&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-protocol
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolProviderApplication.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolServiceImpl.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Provider配置文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.Protocol &lt;span style="color:#2aa198">(纯文本文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer">Consumer&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-protocol
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolConsumerApplication.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-ExtensibilityProtocolConsumerTask.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Consumer配置文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.Protocol &lt;span style="color:#2aa198">(纯文本文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="代码详情">代码详情&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.protocol.common;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.URL;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Protocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Exporter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.ProtocolServer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.model.FrameworkModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">EnhancedProtocol&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Protocol {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">EnhancedProtocol&lt;/span>(FrameworkModel frameworkModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> DubboProtocol(frameworkModel);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Protocol protocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> &lt;span style="color:#268bd2">getDefaultPort&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.protocol.getDefaultPort();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Exporter&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">export&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> invoker) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// do something&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.protocol.export(invoker);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">refer&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> type, URL url) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// do something&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.protocol.refer(type, url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">destroy&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.protocol.destroy();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>ProtocolServer&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getServers&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> protocol.getServers();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="spi配置">SPI配置&lt;/h4>
+&lt;h5 id="provider-1">Provider&lt;/h5>
+&lt;p>在&lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>edubbo&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.protocol.common.EnhancedProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer-1">Consumer&lt;/h5>
+&lt;p>在&lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>edubbo&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.protocol.common.EnhancedProtocol&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="配置文件">配置文件&lt;/h4>
+&lt;h5 id="provider-2">Provider&lt;/h5>
+&lt;p>在&lt;code>resources/application.properties&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 自定义协议&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="consumer-2">Consumer&lt;/h5>
+&lt;p>在&lt;code>resources/application.properties&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 自定义协议&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">edubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="运行结果">运行结果&lt;/h2>
+&lt;p>以&lt;strong>使用本地IDE&lt;/strong>的方式来运行任务，结果如下：&lt;/p>
+&lt;h4 id="注册协议">注册协议&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-protocol-output2.jpg" alt="dubbo-samples-extensibility-protocol-output2.jpg">&lt;/p>
+&lt;h4 id="输出结果">输出结果&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-protocol-output1.png" alt="dubbo-samples-extensibility-protocol-output1.png">&lt;/p></description></item><item><title>Overview: Registry</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/registry/</guid><description>
+&lt;p>文档编写中&amp;hellip;&lt;/p></description></item><item><title>Overview: Router</title><link>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/tasks/extensibility/router/</guid><description>
+&lt;p>通过自定义路由，可以根据业务场景的特点来实现特定的路由方式。&lt;/p>
+&lt;h2 id="开始之前">开始之前&lt;/h2>
+&lt;p>有两种部署运行方式，二选一&lt;/p>
+&lt;h3 id="基于kubernetes">基于Kubernetes&lt;/h3>
+&lt;ul>
+&lt;li>安装&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubernetes&lt;/a>环境&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-router-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-router-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用Kubernetes中部署的nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the port of Dubbo protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用Kubernetes中部署的nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">#dubbo.registry.address=nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用Kubernetes中部署的nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 配置自定义路由&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.router&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">stickfirst&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>部署&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/deploy/All.yml">Extensibility Router Task&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="使用本地ide">使用本地IDE&lt;/h3>
+&lt;ul>
+&lt;li>部署&lt;a href="https://nacos.io/zh-cn/docs/quick-start.html">Nacos&lt;/a>2.2.0版本&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-provider/src/main/resources/application.properties">Provider&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-router-provider&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the port of Dubbo protocol&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.protocol.port&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">20881&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>修改&lt;a href="https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/dubbo-samples-extensibility-filter-consumer/src/main/resources/application.properties">Consumer&lt;/a>中的配置文件，启用本地nacos的地址
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the application name of Dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">extensibility-filter-consumer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Enable token verification for each invocation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.provider.token&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Specify the registry address&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 启用本地nacos的地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">nacos://localhost:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">#dubbo.registry.address=nacos://${nacos.address:localhost}:8848?username=nacos&amp;amp;password=nacos&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 配置自定义路由&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.router&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">stickfirst&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="任务详情">任务详情&lt;/h2>
+&lt;p>对所有的请求都使用第一提供服务的Provider，如果该Provider下线，则从新选择一个新的Provider。&lt;/p>
+&lt;h2 id="实现方式">实现方式&lt;/h2>
+&lt;p>在Consumer中自定义一个Router，在Router中将第一次调用的Provider保存下来，如果后续有请求调用且Provider列表中包含第一次调用时使用的Provider，则继续使用第一次调用时使用的Provider，否则重新选去一个Provider。&lt;/p>
+&lt;h4 id="代码结构">代码结构&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-extensibility
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-router
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-router
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-StickFirstStateRouter.java &lt;span style="color:#2aa198">(实现StateRouter接口)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-StickFirstStateRouterFactory.java &lt;span style="color:#2aa198">(实现StateRouterFactory接口)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-application.properties &lt;span style="color:#2aa198">(Dubbo Consumer配置文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory &lt;span style="color:#2aa198">(纯文本文件)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="代码详情">代码详情&lt;/h4>
+&lt;ul>
+&lt;li>StickFirstStateRouter&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.router.consumer.router;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.URL;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.config.configcenter.ConfigChangeType;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.config.configcenter.ConfigChangedEvent;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.config.configcenter.ConfigurationListener;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.logger.LoggerFactory;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.utils.CollectionUtils;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.utils.Holder;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invocation;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.AbstractStateRouter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.BitList;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StickFirstStateRouter&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> AbstractStateRouter&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ConfigurationListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">StickFirstStateRouter&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;STICK_FIRST_ROUTER&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ErrorTypeAwareLogger logger &lt;span style="color:#719e07">=&lt;/span> LoggerFactory.getErrorTypeAwareLogger(StickFirstStateRouter.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">volatile&lt;/span> BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> firstInvokers;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">doRoute&lt;/span>(BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation, &lt;span style="color:#dc322f">boolean&lt;/span> needToPrintMessage, Holder&lt;span style="color:#719e07">&amp;lt;&lt;/span>RouterSnapshotNode&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> routerSnapshotNodeHolder, Holder&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> messageHolder) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (CollectionUtils.isEmpty(invokers)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (needToPrintMessage) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> messageHolder.set(&lt;span style="color:#2aa198">&amp;#34;Directly Return. Reason: Invokers from previous router is empty.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invokers;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> BitList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> copy &lt;span style="color:#719e07">=&lt;/span> invokers.clone();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (CollectionUtils.isEmpty(copy)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> BitList&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>(BitList.emptyList());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers.add(copy.get(0));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> copy.and(invokers);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span>(CollectionUtils.isEmpty(&lt;span style="color:#719e07">this&lt;/span>.firstInvokers)){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers.add(copy.get(0));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">process&lt;/span>(ConfigChangedEvent event) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (logger.isDebugEnabled()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.debug(&lt;span style="color:#2aa198">&amp;#34;Notification of tag rule, change type is: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> event.getChangeType() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, raw rule is:\n &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> event.getContent());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Reset&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (event.getChangeType().equals(ConfigChangeType.DELETED)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">stop&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>.stop();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.firstInvokers &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>StickFirstStateRouterFactory&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.extensibility.router.consumer.router;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.URL;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.StateRouter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StickFirstStateRouterFactory&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> StateRouterFactory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> StateRouter&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getRouter&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> interfaceClass, URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StickFirstStateRouter&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="spi配置">SPI配置&lt;/h4>
+&lt;p>在&lt;code>resources/META-INF/dubbo/org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>stickfirst&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">org.apache.dubbo.samples.extensibility.router.consumer.router.StickFirstStateRouterFactory&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="配置文件">配置文件&lt;/h4>
+&lt;p>在&lt;code>resources/application.properties&lt;/code>文件中添加如下配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 配置自定义路由&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.consumer.router&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">stickfirst&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="运行结果">运行结果&lt;/h2>
+&lt;p>以&lt;strong>使用本地IDE&lt;/strong>的方式来运行任务，结果如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-router-output.png" alt="dubbo-samples-extensibility-router-output.png">&lt;/p></description></item></channel></rss>

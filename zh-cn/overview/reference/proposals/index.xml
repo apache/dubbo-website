@@ -1,0 +1,1653 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 提案</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/</link><description>Recent content in 提案 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Rest 协议</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/protocol-http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/protocol-http/</guid><description>
+&lt;p>本文将介绍 Dubbo 的 REST/HTTP 协议设计。&lt;/p>
+&lt;h2 id="restprotocol设计">RestProtocol 设计&lt;/h2>
+&lt;h3 id="原版本dubborest">原版本dubbo rest&lt;/h3>
+&lt;p>&lt;strong>consumer&lt;/strong>&lt;/p>
+&lt;p>restClient支持 依赖resteasy 不支持spring mvc &lt;/p>
+&lt;p>&lt;strong>provider(较重)&lt;/strong>&lt;/p>
+&lt;p>依赖web container   (tomcat,jetty，)servlet 模式，jaxrs netty server&lt;/p>
+&lt;h3 id="新版本dubborest">新版本dubbo rest &lt;/h3>
+&lt;p>更加轻量，具有dubbo风格的rest，微服务体系互通（Springcloud Alibaba）&lt;/p>
+&lt;p>&lt;strong>1.注解解析&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>2.报文编解码&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>3.restClient&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>4.restServer(netty)&lt;/strong>&lt;/p>
+&lt;p>支持程度：&lt;/p>
+&lt;p>content-type   text json xml form(后续会扩展)&lt;/p>
+&lt;p>注解&lt;/p>
+&lt;p>param,header,body,pathvaribale （spring mvc &amp;amp; resteasy）&lt;/p>
+&lt;h2 id="http协议报文">Http 协议报文&lt;/h2>
+&lt;pre>&lt;code>POST /test/path? HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-type: application/json
+{&amp;quot;name&amp;quot;:&amp;quot;dubbo&amp;quot;,&amp;quot;age&amp;quot;:10,&amp;quot;address&amp;quot;:&amp;quot;hangzhou&amp;quot;}
+&lt;/code>&lt;/pre>
+&lt;h3 id="dubbohttpheader">dubbo http(header)&lt;/h3>
+&lt;pre>&lt;code>// service key header
+path: com.demo.TestInterface
+group: demo
+port: 80
+version: 1.0.0
+// 保证长连接
+Keep-Alive,Connection: keep-alive
+Keep-alive: 60
+// RPCContext Attachment
+userId: 123456
+&lt;/code>&lt;/pre>
+&lt;h2 id="支持粒度">支持粒度&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>数据位置&lt;/th>
+&lt;th>content-type&lt;/th>
+&lt;th>spring注解&lt;/th>
+&lt;th>resteasy注解&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>body&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>ReuqestBody&lt;/td>
+&lt;td> 无注解即为body&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>querystring(?test=demo)&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>RequestParam&lt;/td>
+&lt;td>QueryParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>header&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>RequestHeader&lt;/td>
+&lt;td>PathParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>form&lt;/td>
+&lt;td>application/x-www-form-urlencoded&lt;/td>
+&lt;td>RequestParam ReuqestBody&lt;/td>
+&lt;td>FormParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>path&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>PathVariable&lt;/td>
+&lt;td>PathParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>method&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>PostMapping GetMapping&lt;/td>
+&lt;td>GET POST&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>url&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping path属性&lt;/td>
+&lt;td>Path&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>content-type&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping consumers属性&lt;/td>
+&lt;td>Consumers&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Accept&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping produces属性&lt;/td>
+&lt;td>Produces&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="rest注解解析">rest注解解析&lt;/h2>
+&lt;p>ServiceRestMetadataResolver&lt;/p>
+&lt;pre>&lt;code>JAXRSServiceRestMetadataResolver
+SpringMvcServiceRestMetadataResolver
+&lt;/code>&lt;/pre>
+&lt;p>ServiceRestMetadata&lt;/p>
+&lt;pre>&lt;code>public class ServiceRestMetadata implements Serializable {
+private String serviceInterface; // com.demo.TestInterface
+private String version;// 1.0.0
+private String group;// demo
+private Set&amp;lt;RestMethodMetadata&amp;gt; meta;// method 元信息
+private int port;// 端口 for provider service key
+private boolean consumer;// consumer 标志
+/**
+* make a distinction between mvc &amp;amp; resteasy
+*/
+private Class codeStyle;//
+/**
+* for provider
+*/
+private Map&amp;lt;PathMatcher, RestMethodMetadata&amp;gt; pathToServiceMap;
+/**
+* for consumer
+*/
+private Map&amp;lt;String, Map&amp;lt;ParameterTypesComparator, RestMethodMetadata&amp;gt;&amp;gt; methodToServiceMa
+&lt;/code>&lt;/pre>
+&lt;p>RestMethodMetadata&lt;/p>
+&lt;pre>&lt;code>public class RestMethodMetadata implements Serializable {
+private MethodDefinition method; // method 定义信息（name ,pramType,returnType）
+private RequestMetadata request;// 请求元信息
+private Integer urlIndex;
+private Integer bodyIndex;
+private Integer headerMapIndex;
+private String bodyType;
+private Map&amp;lt;Integer, Collection&amp;lt;String&amp;gt;&amp;gt; indexToName;
+private List&amp;lt;String&amp;gt; formParams;
+private Map&amp;lt;Integer, Boolean&amp;gt; indexToEncoded;
+private ServiceRestMetadata serviceRestMetadata;
+private List&amp;lt;ArgInfo&amp;gt; argInfos;
+private Method reflectMethod;
+/**
+* make a distinction between mvc &amp;amp; resteasy
+*/
+private Class codeStyle;
+&lt;/code>&lt;/pre>
+&lt;p>ArgInfo&lt;/p>
+&lt;pre>&lt;code>public class ArgInfo {
+/**
+* method arg index 0,1,2,3
+*/
+private int index;
+/**
+* method annotation name or name
+*/
+private String annotationNameAttribute;
+/**
+* param annotation type
+*/
+private Class paramAnnotationType;
+/**
+* param Type
+*/
+private Class paramType;
+/**
+* param name
+*/
+private String paramName;
+/**
+* url split(&amp;quot;/&amp;quot;) String[n] index
+*/
+private int urlSplitIndex;
+private Object defaultValue;
+private boolean formContentType;
+&lt;/code>&lt;/pre>
+&lt;p>RequestMeatadata&lt;/p>
+&lt;pre>&lt;code>public class RequestMetadata implements Serializable {
+private static final long serialVersionUID = -240099840085329958L;
+private String method;// 请求method
+private String path;// 请求url
+private Map&amp;lt;String, List&amp;lt;String&amp;gt;&amp;gt; params // param参数?拼接
+private Map&amp;lt;String, List&amp;lt;String&amp;gt;&amp;gt; headers// header;
+private Set&amp;lt;String&amp;gt; consumes // content-type;
+private Set&amp;lt;String&amp;gt; produces // Accept;
+&lt;/code>&lt;/pre>
+&lt;h3 id="consumer代码">Consumer 代码&lt;/h3>
+&lt;p>refer&lt;/p>
+&lt;pre>&lt;code> @Override
+protected &amp;lt;T&amp;gt; Invoker&amp;lt;T&amp;gt; protocolBindingRefer(final Class&amp;lt;T&amp;gt; type, final URL url) throws RpcException {
+// restClient spi创建
+ReferenceCountedClient&amp;lt;? extends RestClient&amp;gt; refClient =
+clients.computeIfAbsent(url.getAddress(), key -&amp;gt; createReferenceCountedClient(url, clients));
+refClient.retain();
+// resolve metadata
+Map&amp;lt;String, Map&amp;lt;ParameterTypesComparator, RestMethodMetadata&amp;gt;&amp;gt; metadataMap = MetadataResolver.resolveConsumerServiceMetadata(type, url);
+ReferenceCountedClient&amp;lt;? extends RestClient&amp;gt; finalRefClient = refClient;
+Invoker&amp;lt;T&amp;gt; invoker = new AbstractInvoker&amp;lt;T&amp;gt;(type, url, new String[]{INTERFACE_KEY, GROUP_KEY, TOKEN_KEY}) {
+@Override
+protected Result doInvoke(Invocation invocation) {
+try {
+// 获取 method的元信息
+RestMethodMetadata restMethodMetadata = metadataMap.get(invocation.getMethodName()).get(ParameterTypesComparator.getInstance(invocation.getParameterTypes()));
+RequestTemplate requestTemplate = new RequestTemplate(invocation, restMethodMetadata.getRequest().getMethod(), url.getAddress(), getContextPath(url));
+HttpConnectionCreateContext httpConnectionCreateContext = new HttpConnectionCreateContext();
+// TODO dynamic load config
+httpConnectionCreateContext.setConnectionConfig(new HttpConnectionConfig());
+httpConnectionCreateContext.setRequestTemplate(requestTemplate);
+httpConnectionCreateContext.setRestMethodMetadata(restMethodMetadata);
+httpConnectionCreateContext.setInvocation(invocation);
+httpConnectionCreateContext.setUrl(url);
+// http 信息构建拦截器
+for (HttpConnectionPreBuildIntercept intercept : httpConnectionPreBuildIntercepts) {
+intercept.intercept(httpConnectionCreateContext);
+}
+CompletableFuture&amp;lt;RestResult&amp;gt; future = finalRefClient.getClient().send(requestTemplate);
+CompletableFuture&amp;lt;AppResponse&amp;gt; responseFuture = new CompletableFuture&amp;lt;&amp;gt;();
+AsyncRpcResult asyncRpcResult = new AsyncRpcResult(responseFuture, invocation);
+// response 处理
+future.whenComplete((r, t) -&amp;gt; {
+if (t != null) {
+responseFuture.completeExceptionally(t);
+} else {
+AppResponse appResponse = new AppResponse();
+try {
+int responseCode = r.getResponseCode();
+MediaType mediaType = MediaType.TEXT_PLAIN;
+if (400 &amp;lt; responseCode &amp;amp;&amp;amp; responseCode &amp;lt; 500) {
+throw new HttpClientException(r.getMessage());
+} else if (responseCode &amp;gt;= 500) {
+throw new RemoteServerInternalException(r.getMessage());
+} else if (responseCode &amp;lt; 400) {
+mediaType = MediaTypeUtil.convertMediaType(r.getContentType());
+}
+Object value = HttpMessageCodecManager.httpMessageDecode(r.getBody(),
+restMethodMetadata.getReflectMethod().getReturnType(), mediaType);
+appResponse.setValue(value);
+Map&amp;lt;String, String&amp;gt; headers = r.headers()
+.entrySet()
+.stream()
+.collect(Collectors.toMap(Map.Entry::getKey, e -&amp;gt; e.getValue().get(0)));
+appResponse.setAttachments(headers);
+responseFuture.complete(appResponse);
+} catch (Exception e) {
+responseFuture.completeExceptionally(e);
+}
+}
+});
+return asyncRpcResult;
+} catch (RpcException e) {
+if (e.getCode() == RpcException.UNKNOWN_EXCEPTION) {
+e.setCode(getErrorCode(e.getCause()));
+}
+throw e;
+}
+}
+@Override
+public void destroy() {
+super.destroy();
+invokers.remove(this);
+destroyInternal(url);
+}
+};
+invokers.add(invoker);
+return invoker;
+&lt;/code>&lt;/pre>
+&lt;h3 id="provider代码">provider 代码&lt;/h3>
+&lt;p>export&lt;/p>
+&lt;pre>&lt;code> public &amp;lt;T&amp;gt; Exporter&amp;lt;T&amp;gt; export(final Invoker&amp;lt;T&amp;gt; invoker) throws RpcException {
+URL url = invoker.getUrl();
+final String uri = serviceKey(url);
+Exporter&amp;lt;T&amp;gt; exporter = (Exporter&amp;lt;T&amp;gt;) exporterMap.get(uri);
+if (exporter != null) {
+// When modifying the configuration through override, you need to re-expose the newly modified service.
+if (Objects.equals(exporter.getInvoker().getUrl(), invoker.getUrl())) {
+return exporter;
+}
+}
+// TODO addAll metadataMap to RPCInvocationBuilder metadataMap
+Map&amp;lt;PathMatcher, RestMethodMetadata&amp;gt; metadataMap = MetadataResolver.resolveProviderServiceMetadata(url.getServiceModel().getProxyObject().getClass(),url);
+PathAndInvokerMapper.addPathAndInvoker(metadataMap, invoker);
+final Runnable runnable = doExport(proxyFactory.getProxy(invoker, true), invoker.getInterface(), invoker.getUrl());
+exporter = new AbstractExporter&amp;lt;T&amp;gt;(invoker) {
+@Override
+public void afterUnExport() {
+exporterMap.remove(uri);
+if (runnable != null) {
+try {
+runnable.run();
+} catch (Throwable t) {
+logger.warn(PROTOCOL_UNSUPPORTED, &amp;quot;&amp;quot;, &amp;quot;&amp;quot;, t.getMessage(), t);
+}
+}
+}
+};
+exporterMap.put(uri, exporter);
+return exporter;
+}
+&lt;/code>&lt;/pre>
+&lt;p>RestHandler&lt;/p>
+&lt;pre>&lt;code> private class RestHandler implements HttpHandler&amp;lt;HttpServletRequest, HttpServletResponse&amp;gt; {
+@Override
+public void handle(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws IOException, ServletException {
+// 有servlet reuqest 和nettyRequest
+RequestFacade request = RequestFacadeFactory.createRequestFacade(servletRequest);
+RpcContext.getServiceContext().setRemoteAddress(request.getRemoteAddr(), request.getRemotePort());
+// dispatcher.service(request, servletResponse);
+Pair&amp;lt;RpcInvocation, Invoker&amp;gt; build = null;
+try {
+// 根据请求信息创建 RPCInvocation
+build = RPCInvocationBuilder.build(request, servletRequest, servletResponse);
+} catch (PathNoFoundException e) {
+servletResponse.setStatus(404);
+}
+Invoker invoker = build.getSecond();
+Result invoke = invoker.invoke(build.getFirst());
+// TODO handling exceptions
+if (invoke.hasException()) {
+servletResponse.setStatus(500);
+} else {
+try {
+Object value = invoke.getValue();
+String accept = request.getHeader(RestConstant.ACCEPT);
+MediaType mediaType = MediaTypeUtil.convertMediaType(accept);
+// TODO write response
+HttpMessageCodecManager.httpMessageEncode(servletResponse.getOutputStream(), value, invoker.getUrl(), mediaType);
+servletResponse.setStatus(200);
+} catch (Exception e) {
+servletResponse.setStatus(500);
+}
+}
+// TODO add Attachment header
+}
+}
+&lt;/code>&lt;/pre>
+&lt;p>RPCInvocationBuilder&lt;/p>
+&lt;pre>&lt;code>{
+private static final ParamParserManager paramParser = new ParamParserManager();
+public static Pair&amp;lt;RpcInvocation, Invoker&amp;gt; build(RequestFacade request, Object servletRequest, Object servletResponse) {
+// 获取invoker
+Pair&amp;lt;Invoker, RestMethodMetadata&amp;gt; invokerRestMethodMetadataPair = getRestMethodMetadata(request);
+RpcInvocation rpcInvocation = createBaseRpcInvocation(request, invokerRestMethodMetadataPair.getSecond());
+ProviderParseContext parseContext = createParseContext(request, servletRequest, servletResponse, invokerRestMethodMetadataPair.getSecond());
+// 参数构建
+Object[] args = paramParser.providerParamParse(parseContext);
+rpcInvocation.setArguments(args);
+return Pair.make(rpcInvocation, invokerRestMethodMetadataPair.getFirst());
+}
+private static ProviderParseContext createParseContext(RequestFacade request, Object servletRequest, Object servletResponse, RestMethodMetadata restMethodMetadata) {
+ProviderParseContext parseContext = new ProviderParseContext(request);
+parseContext.setResponse(servletResponse);
+parseContext.setRequest(servletRequest);
+Object[] objects = new Object[restMethodMetadata.getArgInfos().size()];
+parseContext.setArgs(Arrays.asList(objects));
+parseContext.setArgInfos(restMethodMetadata.getArgInfos());
+return parseContext;
+}
+private static RpcInvocation createBaseRpcInvocation(RequestFacade request, RestMethodMetadata restMethodMetadata) {
+RpcInvocation rpcInvocation = new RpcInvocation();
+int localPort = request.getLocalPort();
+String localAddr = request.getLocalAddr();
+int remotePort = request.getRemotePort();
+String remoteAddr = request.getRemoteAddr();
+String HOST = request.getHeader(RestConstant.HOST);
+String GROUP = request.getHeader(RestConstant.GROUP);
+String PATH = request.getHeader(RestConstant.PATH);
+String VERSION = request.getHeader(RestConstant.VERSION);
+String METHOD = restMethodMetadata.getMethod().getName();
+String[] PARAMETER_TYPES_DESC = restMethodMetadata.getMethod().getParameterTypes();
+rpcInvocation.setParameterTypes(restMethodMetadata.getReflectMethod().getParameterTypes());
+rpcInvocation.setMethodName(METHOD);
+rpcInvocation.setAttachment(RestConstant.GROUP, GROUP);
+rpcInvocation.setAttachment(RestConstant.METHOD, METHOD);
+rpcInvocation.setAttachment(RestConstant.PARAMETER_TYPES_DESC, PARAMETER_TYPES_DESC);
+rpcInvocation.setAttachment(RestConstant.PATH, PATH);
+rpcInvocation.setAttachment(RestConstant.VERSION, VERSION);
+rpcInvocation.setAttachment(RestConstant.HOST, HOST);
+rpcInvocation.setAttachment(RestConstant.REMOTE_ADDR, remoteAddr);
+rpcInvocation.setAttachment(RestConstant.LOCAL_ADDR, localAddr);
+rpcInvocation.setAttachment(RestConstant.REMOTE_PORT, remotePort);
+rpcInvocation.setAttachment(RestConstant.LOCAL_PORT, localPort);
+Enumeration&amp;lt;String&amp;gt; attachments = request.getHeaders(RestConstant.DUBBO_ATTACHMENT_HEADER);
+while (attachments != null &amp;amp;&amp;amp; attachments.hasMoreElements()) {
+String s = attachments.nextElement();
+String[] split = s.split(&amp;quot;=&amp;quot;);
+rpcInvocation.setAttachment(split[0], split[1]);
+}
+// TODO set path,version,group and so on
+return rpcInvocation;
+}
+private static Pair&amp;lt;Invoker, RestMethodMetadata&amp;gt; getRestMethodMetadata(RequestFacade request) {
+String path = request.getRequestURI();
+String version = request.getHeader(RestConstant.VERSION);
+String group = request.getHeader(RestConstant.GROUP);
+int port = request.getIntHeader(RestConstant.REST_PORT);
+return PathAndInvokerMapper.getRestMethodMetadata(path, version, group, port);
+}
+}
+&lt;/code>&lt;/pre>
+&lt;h2 id="编码示例">编码示例&lt;/h2>
+&lt;p>&lt;strong>API&lt;/strong>&lt;/p>
+&lt;p>mvc&lt;/p>
+&lt;pre>&lt;code>@RestController()
+@RequestMapping(&amp;quot;/demoService&amp;quot;)
+public interface DemoService {
+@RequestMapping(value = &amp;quot;/hello&amp;quot;, method = RequestMethod.GET)
+Integer hello(@RequestParam Integer a, @RequestParam Integer b);
+@RequestMapping(value = &amp;quot;/error&amp;quot;, method = RequestMethod.GET)
+String error();
+@RequestMapping(value = &amp;quot;/say&amp;quot;, method = RequestMethod.POST, consumes = MediaType.TEXT_PLAIN_VALUE)
+String sayHello(@RequestBody String name);
+}
+&lt;/code>&lt;/pre>
+&lt;p>resteasy:&lt;/p>
+&lt;pre>&lt;code>@Path(&amp;quot;/demoService&amp;quot;)
+public interface RestDemoService {
+@GET
+@Path(&amp;quot;/hello&amp;quot;)
+Integer hello(@QueryParam(&amp;quot;a&amp;quot;)Integer a,@QueryParam(&amp;quot;b&amp;quot;) Integer b);
+@GET
+@Path(&amp;quot;/error&amp;quot;)
+String error();
+@POST
+@Path(&amp;quot;/say&amp;quot;)
+@Consumes({MediaType.TEXT_PLAIN})
+String sayHello(String name);
+boolean isCalled();
+}
+&lt;/code>&lt;/pre>
+&lt;p>impl(service)&lt;/p>
+&lt;pre>&lt;code>@DubboService()
+public class RestDemoServiceImpl implements RestDemoService {
+private static Map&amp;lt;String, Object&amp;gt; context;
+private boolean called;
+@Override
+public String sayHello(String name) {
+called = true;
+return &amp;quot;Hello, &amp;quot; + name;
+}
+public boolean isCalled() {
+return called;
+}
+@Override
+public Integer hello(Integer a, Integer b) {
+context = RpcContext.getServerAttachment().getObjectAttachments();
+return a + b;
+}
+@Override
+public String error() {
+throw new RuntimeException();
+}
+public static Map&amp;lt;String, Object&amp;gt; getAttachments() {
+return context;
+}
+}
+&lt;/code>&lt;/pre>
+&lt;h2 id="流程图">流程图&lt;/h2>
+&lt;p>&lt;strong>Consumer&lt;/strong>  &lt;/p>
+&lt;p>&lt;img src="https://static.dingtalk.com/media/lQLPJxLOtqTxs9TNA5rNBQCwci8F2QYiGAYD5sSyd4BVAA_1280_922.png" alt="image">&lt;/p>
+&lt;p>&lt;strong>Provider(RestServer)&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://static.dingtalk.com/media/lQLPJxZcNUm4M9TNA1_NBMuwZUu6IC3FeYAD5sSydYADAA_1227_863.png" alt="image">&lt;/p>
+&lt;h2 id="场景">场景 &lt;/h2>
+&lt;h3 id="1体系互通">1.体系互通&lt;/h3>
+&lt;p>&lt;strong>非dubbo体系互通（Springcloud alibaba  互通）&lt;/strong>&lt;/p>
+&lt;p>互通条件：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>协议&lt;/th>
+&lt;th>Dubbo&lt;/th>
+&lt;th>SpringCloud Alibaba&lt;/th>
+&lt;th>互通&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>通信协议&lt;/td>
+&lt;td>rest&lt;/td>
+&lt;td>spring web/resteasy  编码风格&lt;/td>
+&lt;td>集成feignclient，ribbon (spring web 编码风格)&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>triple&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>dubbo&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>grpc&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>hessian&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>注册中心&lt;/td>
+&lt;td>zookeeper&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;td>支持&lt;/td>
+&lt;td>支持&lt;/td>
+&lt;td>应用级别注册&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="2dubbo双注册">2.dubbo 双注册 &lt;/h3>
+&lt;p> 完成应用级别注册，（dubo2-dubbo3 过度），dubbo版本升级&lt;/p>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/0ceca951-f467-4ab3-9b71-8e7d52e5e7d1.png" alt="image">&lt;/p>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/6bcc7aed-1d22-470f-b185-efbab32df1e5.png" alt="image">&lt;/p>
+&lt;h3 id="3多协议发布">3.多协议发布&lt;/h3>
+&lt;p>配置：&lt;/p>
+&lt;pre>&lt;code>&amp;lt;dubbo:service interface=&amp;quot;org.apache.dubbo.samples.DemoService&amp;quot; protocol=&amp;quot;dubbo, grpc,rest&amp;quot;/&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;h3 id="4跨语言">4.跨语言&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/1bdf8f91-9666-4c20-9aea-8396c745f554.png" alt="image">&lt;/p>
+&lt;h3 id="5多协议交互">5.多协议交互&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/af72e3df-05d5-42a2-a333-618be7ec6cb8.png" alt="image">&lt;/p>
+&lt;h3 id="6协议迁移">6.协议迁移&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/36d30183-8d5f-494c-8ebb-b57403c88661.png" alt="image">&lt;/p>
+&lt;p>rest编码风格&lt;/p>
+&lt;p>Http协议更通用跨语言调用&lt;/p>
+&lt;p>dubbo rest 对其他http服务 进行调用&lt;/p>
+&lt;p>其他httpclient 对dubbo rest进行调用&lt;/p>
+&lt;p>dubbo restServer 可以与其他web服务，浏览器等客户端直接进行http交互&lt;/p>
+&lt;h2 id="consumertodolist">consumer TODOLIST&lt;/h2>
+&lt;blockquote>
+&lt;p>功能已经初步实现，可以调通解析response&lt;/p>
+&lt;/blockquote>
+&lt;p>1. org/apache/dubbo/rpc/protocol/rest/RestProtocol.java:157  dynamic load config&lt;/p>
+&lt;p>2.org/apache/dubbo/remoting/http/factory/AbstractHttpClientFactory.java:50 load config  HttpClientConfig&lt;/p>
+&lt;p>3.org/apache/dubbo/rpc/protocol/rest/annotation/metadata/MetadataResolver.java:52  support Dubbo style service&lt;/p>
+&lt;p>4.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:120  TODO config&lt;/p>
+&lt;p>5.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:140 TODO close judge&lt;/p>
+&lt;p>6.org/apache/dubbo/rpc/protocol/rest/message/decode/MultiValueCodec.java:35  TODO java bean  get set convert&lt;/p>
+&lt;h2 id="providertodolist">provider TODOLIST&lt;/h2>
+&lt;blockquote>
+&lt;p>待实现&lt;/p>
+&lt;/blockquote>
+&lt;p>基于netty实现支持http协议的NettyServer&lt;/p>
+&lt;p>无注解协议定义&lt;/p>
+&lt;p>官网场景补充&lt;/p>
+&lt;h2 id="rest使用说明文档及demo">Rest使用说明文档及demo&lt;/h2></description></item><item><title>Overview: 注册中心、配置中心和元数据中心</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/registry-config-meta/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/registry-config-meta/</guid><description>
+&lt;h2 id="三中心逻辑架构">三中心逻辑架构&lt;/h2>
+&lt;blockquote>
+&lt;p>本节侧重描述传统模式下的 Dubbo 部署架构，在云原生背景下的部署架构会有些变化，主要体现在基础设施（Kubernetes、Service Mesh等）会承担更多的职责，
+中心化组件如注册中心、元数据中心、配置中心等的职责被集成、运维变得更加简单，但通过强调这些中心化的组件能让我们更容易理解 Dubbo 的工作原理。&lt;/p>
+&lt;/blockquote>
+&lt;p>作为一个微服务框架，Dubbo sdk 跟随着微服务组件被部署在分布式集群各个位置，为了在分布式环境下实现各个微服务组件间的协作，
+Dubbo 定义了一些中心化组件，这包括：&lt;/p>
+&lt;ul>
+&lt;li>注册中心。协调 Consumer 与 Provider 之间的地址注册与发现&lt;/li>
+&lt;li>配置中心。
+&lt;ul>
+&lt;li>存储 Dubbo 启动阶段的全局配置，保证配置的跨环境共享与全局一致性&lt;/li>
+&lt;li>负责服务治理规则（路由规则、动态配置等）的存储与推送。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>元数据中心。
+&lt;ul>
+&lt;li>接收 Provider 上报的服务接口元数据，为 Admin 等控制台提供运维能力（如服务测试、接口文档等）&lt;/li>
+&lt;li>作为服务发现机制的补充，提供额外的接口/方法级别配置信息的同步能力，相当于注册中心的额外扩展&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/threecenters.png" alt="threecenters">&lt;/p>
+&lt;p>上图完整的描述了 Dubbo 微服务组件与各个中心的交互过程。&lt;/p>
+&lt;p>以上三个中心并不是运行 Dubbo 的必要条件，用户完全可以根据自身业务情况决定只启用其中一个或多个，以达到简化部署的目的。通常情况下，所有用户都会以独立的注册中心
+以开始 Dubbo 服务开发，而配置中心、元数据中心则会在微服务演进的过程中逐步的按需被引入进来。&lt;/p>
+&lt;h3 id="注册中心">注册中心&lt;/h3>
+&lt;p>注册中心扮演着非常重要的角色，它承载着服务注册和服务发现的职责。目前Dubbo支持以下两种粒度的服务发现和服务注册，分别是接口级别和应用级别，注册中心可以按需进行部署：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>在传统的Dubbo SDK使用姿势中，如果仅仅提供直连模式的RPC服务，不需要部署注册中心。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>无论是接口级别还是应用级别，如果需要Dubbo SDK自身来做服务注册和服务发现，则可以选择部署注册中心，在Dubbo中集成对应的注册中心。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在Dubbo + Mesh 的场景下，随着 Dubbo 服务注册能力的弱化，Dubbo内的注册中心也不再是必选项，其职责开始被控制面取代，如果采用了Dubbo + Mesh的部署方式，无论是ThinSDK的mesh方式还是Proxyless的mesh方式，都不再需要独立部署注册中心。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>而注册中心并不依赖于配置中心和元数据中心，如下图所示：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/centers-registry.png" alt="centers-registry">&lt;/p>
+&lt;p>该图中没有部署配置中心和元数据中心，在Dubbo中会默认将注册中心的实例同时作为配置中心和元数据中心，这是Dubbo的默认行为，如果确实不需要配置中心或者元数据中心的能力，可在配置中关闭，在注册中心的配置中有两个配置分别为use-as-config-center和use-as-metadata-center，将配置置为false即可。&lt;/p>
+&lt;h3 id="元数据中心">元数据中心&lt;/h3>
+&lt;p>元数据中心在2.7.x版本开始支持，随着应用级别的服务注册和服务发现在Dubbo中落地，元数据中心也变的越来越重要。在以下几种情况下会需要部署元数据中心：&lt;/p>
+&lt;ol>
+&lt;li>对于一个原先采用老版本Dubbo搭建的应用服务，在迁移到Dubbo 3时，Dubbo 3 会需要一个元数据中心来维护RPC服务与应用的映射关系（即接口与应用的映射关系），因为如果采用了应用级别的服务发现和服务注册，在注册中心中将采用“应用 —— 实例列表”结构的数据组织形式，不再是以往的“接口 —— 实例列表”结构的数据组织形式，而以往用接口级别的服务注册和服务发现的应用服务在迁移到应用级别时，得不到接口与应用之间的对应关系，从而无法从注册中心得到实例列表信息，所以Dubbo为了兼容这种场景，在Provider端启动时，会往元数据中心存储接口与应用的映射关系。&lt;/li>
+&lt;li>为了让注册中心更加聚焦于地址的发现和推送能力，减轻注册中心的负担，元数据中心承载了所有的服务元数据、大量接口/方法级别配置信息等，无论是接口粒度还是应用粒度的服务发现和注册，元数据中心都起到了重要的作用。&lt;/li>
+&lt;/ol>
+&lt;p>如果有以上两种需求，都可以选择部署元数据中心，并通过Dubbo的配置来集成该元数据中心。&lt;/p>
+&lt;p>元数据中心并不依赖于注册中心和配置中心，用户可以自由选择是否集成和部署元数据中心，如下图所示：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/centers-metadata.png" alt="centers-metadata">&lt;/p>
+&lt;p>该图中不配备配置中心，意味着可以不需要全局管理配置的能力。该图中不配备注册中心，意味着可能采用了Dubbo mesh的方案，也可能不需要进行服务注册，仅仅接收直连模式的服务调用。&lt;/p>
+&lt;h3 id="配置中心">配置中心&lt;/h3>
+&lt;p>配置中心与其他两大中心不同，它无关于接口级还是应用级，它与接口并没有对应关系，它仅仅与配置数据有关，即使没有部署注册中心和元数据中心，配置中心也能直接被接入到Dubbo应用服务中。在整个部署架构中，整个集群内的实例（无论是Provider还是Consumer）都将会共享该配置中心集群中的配置，如下图所示：
+&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/centers-config.png" alt="centers-config">&lt;/p>
+&lt;p>该图中不配备注册中心，意味着可能采用了Dubbo mesh的方案，也可能不需要进行服务注册，仅仅接收直连模式的服务调用。&lt;/p>
+&lt;p>该图中不配备元数据中心，意味着Consumer可以从Provider暴露的MetadataService获取服务元数据，从而实现RPC调用&lt;/p>
+&lt;h3 id="保证三大中心高可用的部署架构">保证三大中心高可用的部署架构&lt;/h3>
+&lt;p>虽然三大中心已不再是Dubbo应用服务所必须的，但是在真实的生产环境中，一旦已经集成并且部署了该三大中心，三大中心还是会面临可用性问题，Dubbo需要支持三大中心的高可用方案。在Dubbo中就支持多注册中心、多元数据中心、多配置中心，来满足同城多活、两地三中心、异地多活等部署架构模式的需求。&lt;/p>
+&lt;p>Dubbo SDK对三大中心都支持了Multiple模式。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>多注册中心：Dubbo 支持多注册中心，即一个接口或者一个应用可以被注册到多个注册中心中，比如可以注册到ZK集群和Nacos集群中，Consumer也能够从多个注册中心中进行订阅相关服务的地址信息，从而进行服务发现。通过支持多注册中心的方式来保证其中一个注册中心集群出现不可用时能够切换到另一个注册中心集群，保证能够正常提供服务以及发起服务调用。这也能够满足注册中心在部署上适应各类高可用的部署架构模式。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>多配置中心：Dubbo支持多配置中心，来保证其中一个配置中心集群出现不可用时能够切换到另一个配置中心集群，保证能够正常从配置中心获取全局的配置、路由规则等信息。这也能够满足配置中心在部署上适应各类高可用的部署架构模式。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>多元数据中心：Dubbo 支持多元数据中心：用于应对容灾等情况导致某个元数据中心集群不可用，此时可以切换到另一个元数据中心集群，保证元数据中心能够正常提供有关服务元数据的管理能力。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>拿注册中心举例，下面是一个多活场景的部署架构示意图：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/multiple-registry-deployment-architecture.png" alt="multiple-registry-deployment-architecture">&lt;/p>
+&lt;h2 id="三中心物理部署架构">三中心物理部署架构&lt;/h2>
+&lt;p>&lt;img src="#" alt="同一集群，承担三个中心职责">&lt;/p>
+&lt;h2 id="不同场景下的推荐使用方式">不同场景下的推荐使用方式&lt;/h2>
+&lt;ul>
+&lt;li>只配置 registry，默认作为 metadata、config-center&lt;/li>
+&lt;li>registry、metadata、config-center 使用不同的集群甚至是不同的扩展实现，此时需要独立配置 metadata 或 config-center&lt;/li>
+&lt;/ul></description></item><item><title>Overview: Dubbo Admin 控制面总体架构设计</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/admin/</link><pubDate>Tue, 28 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/admin/</guid><description>
+&lt;h2 id="1-dubbo-整体架构">1 Dubbo 整体架构&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/architecture.png" alt="DubboAdmin架构图.png">&lt;/p>
+&lt;p>架构上分为：&lt;strong>服务治理抽象控制面&lt;/strong> 和 &lt;strong>Dubbo 数据面&lt;/strong> 。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>服务治理控制面&lt;/strong>。控制面包含注册中心、流量管控策略、Admin 控制台、Istio、OpenSergo 等组件。&lt;/li>
+&lt;li>&lt;strong>Dubbo 数据面&lt;/strong>。数据面代表集群部署的所有 Dubbo 进程，进程之间通过 RPC 协议实现数据交换，并与控制面进行治理策略交互。&lt;/li>
+&lt;/ul>
+&lt;p>**进一步解释：**&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/what/overview/">https://cn.dubbo.apache.org/zh-cn/overview/what/overview/&lt;/a>&lt;/p>
+&lt;h2 id="dubbo-admin-的整体定位与解释">Dubbo Admin 的整体定位与解释&lt;/h2>
+&lt;p>&lt;strong>Dubbo Admin 是对微服务治理体系的统一定义与抽象，通过自定义核心组件与一系列配套工具，为不同部署架构和基础设施环境下部署的微服务集群带来统一的开发与运维差异。&lt;/strong>&lt;/p>
+&lt;h2 id="2-面向用户的开发步骤">2 面向用户的开发步骤&lt;/h2>
+&lt;h3 id="第一步安装-dubbo-stackadmin">第一步：安装 Dubbo Stack/Admin&lt;/h3>
+&lt;blockquote>
+&lt;p>核心思路是，屏蔽架构差异，通过统一入口将治理组件的安装和配置纳入成为 Dubbo 体系中的前置步骤&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>dubboctl install dubbo-stack
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装请参见: &lt;a href="../../setup/install/">Dubbo Admin 安装指南&lt;/a>&lt;/p>
+&lt;h3 id="第二步服务框架开发">第二步：服务框架开发&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/quickstart/java/">Java&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/quickstart/go/">Go&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/apache/dubbo-js">Node.js&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/quickstart/rust/">Rust&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-控制面方案">3 控制面方案&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/architecture-draft.png" alt="Dubbo架构草图.jpeg">&lt;/p>
+&lt;h3 id="31-确定-dubbo-微服务治理体系的核心能力">3.1 确定 Dubbo 微服务治理体系的核心能力&lt;/h3>
+&lt;ul>
+&lt;li>服务发现&lt;/li>
+&lt;li>配置管理&lt;/li>
+&lt;li>流量治理规则&lt;/li>
+&lt;li>安全基础设施&lt;/li>
+&lt;li>可视化控制台&lt;/li>
+&lt;/ul>
+&lt;h3 id="32-统一服务治理层接入方式">3.2 统一服务治理层接入方式&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/address-discovery.png" alt="address-discovery.png">&lt;/p>
+&lt;p>**对于任何微服务部署模式，Dubbo 数据面统一面向 **&lt;code>**dubbo://hopst:ip**&lt;/code>&lt;strong>抽象服务治理控制面编程。&lt;/strong>&lt;/p>
+&lt;p>具体工作流程：&lt;/p>
+&lt;ol>
+&lt;li>数据面通过配置先与 admin 组件进行交互，admin 返回当前部署架构下的实际注册中心、配置中心等组件地址，如图中的 &lt;code>nacos://host:port&lt;/code>。&lt;/li>
+&lt;li>数据面组件接收到新的组件地址后，直接与 Nacos 建立通信，此后依赖 Nacos 完成服务发现等功能。&lt;/li>
+&lt;/ol>
+&lt;h3 id="33-在不同场景下如何兑现这些核心能力">3.3 在不同场景下如何兑现这些核心能力？&lt;/h3>
+&lt;h4 id="场景一传统微服务体系-vm--kubernetes">场景一：传统微服务体系 (VM &amp;amp; Kubernetes)&lt;/h4>
+&lt;ul>
+&lt;li>控制面治理体系一键安装 (Admin &amp;amp; Nacos)&lt;/li>
+&lt;li>传统 Nacos 服务发现与治理模式&lt;/li>
+&lt;li>控制面可按需拉起更多的的组件，如 prometheus 等&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/traditional.png" alt="traditional.png">&lt;/p>
+&lt;h4 id="场景二kubernetes-service">场景二：Kubernetes Service&lt;/h4>
+&lt;ol>
+&lt;li>&lt;strong>Istio 模式&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/kubernetes-service.png" alt="kubernetes-service.png">&lt;/p>
+&lt;ol start="2">
+&lt;li>&lt;strong>其他对等模式 Nacos/OpenSergo&lt;/strong>&lt;/li>
+&lt;/ol>
+&lt;h4 id="场景三migration-or-multi-cluster">场景三：Migration or Multi-cluster&lt;/h4>
+&lt;p>集群处于隔离的子网络空间&lt;/p>
+&lt;ul>
+&lt;li>1&lt;/li>
+&lt;li>2&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/multi-cluster-ingress.png" alt="multi-cluster-ingress.png">&lt;/p>
+&lt;p>集群处于同一网络空间&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/multi-cluster.png" alt="multi-cluster.png">&lt;/p>
+&lt;h3 id="34-admin-控制面">3.4 Admin 控制面&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/admin-core-components.png" alt="admin-core-components
+.png">&lt;/p>
+&lt;h3 id="35-其他配套基础设施与工具">3.5 其他配套基础设施与工具&lt;/h3>
+&lt;h4 id="用户控制台-console">用户控制台 Console&lt;/h4>
+&lt;p>交互地址：&lt;a href="https://qedzyx.axshare.com/#id=2pqh0k&amp;amp;p=admin__&amp;amp;g=1">https://qedzyx.axshare.com/#id=2pqh0k&amp;amp;p=admin__&amp;amp;g=1&lt;/a>&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/reference/admin/console-ui.png" alt="console-ui.png">&lt;/p>
+&lt;h4 id="dubboctl--helm">Dubboctl &amp;amp; Helm&lt;/h4></description></item><item><title>Overview: 指标埋点</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/metrics/</link><pubDate>Mon, 20 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/metrics/</guid><description>
+&lt;h1 id="概述">概述&lt;/h1>
+&lt;h2 id="1-指标接入说明">1. 指标接入说明&lt;/h2>
+&lt;h2 id="2-指标体系设计">2. 指标体系设计&lt;/h2>
+&lt;p>Dubbo的指标体系，总共涉及三块，指标收集、本地聚合、指标推送&lt;/p>
+&lt;ul>
+&lt;li>指标收集：将Dubbo内部需要监控的指标推送至统一的Collector中进行存储&lt;/li>
+&lt;li>本地聚合：指标收集获取的均为基础指标，而一些分位数指标则需通过本地聚合计算得出&lt;/li>
+&lt;li>指标推送：收集和聚合后的指标通过一定的方式推送至第三方服务器，目前只涉及Prometheus&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-结构设计">3. 结构设计&lt;/h2>
+&lt;ul>
+&lt;li>移除原来与 Metrics 相关的类&lt;/li>
+&lt;li>创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类&lt;/li>
+&lt;li>使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-数据流转">4. 数据流转&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dataflow.png" alt="img.png">&lt;/p>
+&lt;h2 id="5-目标">5. 目标&lt;/h2>
+&lt;p>指标接口将提供一个 MetricsService，该 Service 不仅提供柔性服务所的接口级数据，也提供所有指标的查询方式，其中方法级指标的查询的接口可按如下方式声明&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Default {@link MetricsService} extension name.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String DEFAULT_EXTENSION_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;default&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * The contract version of {@link MetricsService}, the future update must make sure compatible.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String VERSION &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface and prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(String serviceUniqueName, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface、method and prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param methodName methodName
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param parameterTypes method parameter types
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(String serviceUniqueName, String methodName, Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;[]&lt;/span> parameterTypes, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 MetricsCategory 设计如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">enum&lt;/span> MetricsCategory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RT,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> QPS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> REQUESTS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>MetricsEntity 设计如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsEntity&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> tags;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> MetricsCategory category;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Object value;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标收集">指标收集&lt;/h1>
+&lt;h2 id="1-嵌入位置">1. 嵌入位置&lt;/h2>
+&lt;p>Dubbo 架构图如下
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dubbo.png" alt="img.png">&lt;/p>
+&lt;p>在 provider 中添加一层 MetricsFilter 重写 invoke 方法嵌入调用链路用于收集指标，用 try-catch-finally 处理，核心代码如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> PROVIDER, order &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">-&lt;/span>1)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Filter, ScopeModelAware {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Result &lt;span style="color:#268bd2">invoke&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker, Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseTotalRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseProcessingRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long startTime &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Result invoke &lt;span style="color:#719e07">=&lt;/span> invoker.invoke(invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseSucceedRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invoke;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (RpcException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseFailedRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">finally&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long endTime &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long rt &lt;span style="color:#719e07">=&lt;/span> endTime &lt;span style="color:#719e07">-&lt;/span> startTime;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.addRT(interfaceName, methodName, group, version, rt);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.decreaseProcessingRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-指标标识">2. 指标标识&lt;/h2>
+&lt;p>用以下五个属性作为隔离级别区分标识不同方法，也是各个 ConcurrentHashMap 的 key&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MethodMetric&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String applicationName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String interfaceName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String methodName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String group;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String version;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-基础指标">3. 基础指标&lt;/h2>
+&lt;p>指标通过 common 模块下的 MetricsCollector 存储所有指标数据&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Boolean collectEnabled &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> listeners &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ApplicationModel applicationModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String applicationName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> succeedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> failedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> processingRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> lastRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, LongAccumulator&lt;span style="color:#719e07">&amp;gt;&lt;/span> minRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, LongAccumulator&lt;span style="color:#719e07">&amp;gt;&lt;/span> maxRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> avgRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> rtCount &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="本地聚合">本地聚合&lt;/h1>
+&lt;p>本地聚合指将一些简单的指标通过计算获取各分位数指标的过程&lt;/p>
+&lt;h2 id="1-参数设计">1. 参数设计&lt;/h2>
+&lt;p>收集指标时，默认只收集基础指标，而一些单机聚合指标则需要开启服务柔性或者本地聚合后另起线程计算。此处若开启服务柔性，则本地聚合默认开启&lt;/p>
+&lt;h3 id="11-本地聚合开启方式">1.1 本地聚合开启方式&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-指标聚合参数">1.2 指标聚合参数&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> bucket-num=&lt;span style="color:#2aa198">&amp;#34;5&amp;#34;&lt;/span> time-window-seconds=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-具体指标">2. 具体指标&lt;/h2>
+&lt;p>Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 &lt;a href="https://sre.google/sre-book/monitoring-distributed-systems/">&amp;ldquo;四大黄金信号&amp;rdquo;&lt;/a>、&lt;em>RED方法&lt;/em>、&lt;em>USE方法&lt;/em>等理论并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。&lt;/p>
+&lt;p>Dubbo的关键指标包含：&lt;strong>延迟（Latency）&lt;/strong>、&lt;strong>流量（Traffic）&lt;/strong>、 &lt;strong>错误（Errors）&lt;/strong> 和 &lt;strong>饱和度（Saturation）&lt;/strong> 等内容 。同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如Dubbo应用信息、线程池信息、三大中心交互的指标数据等。&lt;/p>
+&lt;p>在Dubbo中主要包含如下监控指标：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">&lt;/th>
+&lt;th style="text-align:left">基础设施&lt;/th>
+&lt;th style="text-align:left">业务监控&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">延迟类&lt;/td>
+&lt;td style="text-align:left">IO 等待； 网络延迟；&lt;/td>
+&lt;td style="text-align:left">接口、服务的平均耗时、TP90、TP99、TP999 等&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">流量类&lt;/td>
+&lt;td style="text-align:left">网络和磁盘 IO；&lt;/td>
+&lt;td style="text-align:left">服务层面的 QPS、&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">错误类&lt;/td>
+&lt;td style="text-align:left">宕机； 磁盘（坏盘或文件系统错误）； 进程或端口挂掉； 网络丢包；&lt;/td>
+&lt;td style="text-align:left">错误日志;业务状态码、错误码走势;&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">饱和度类&lt;/td>
+&lt;td style="text-align:left">系统资源利用率： CPU、内存、磁盘、网络等； 饱和度：等待线程数，队列积压长度；&lt;/td>
+&lt;td style="text-align:left">这里主要包含JVM、线程池等&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;ul>
+&lt;li>qps: 基于滑动窗口获取动态qps&lt;/li>
+&lt;li>rt: 基于滑动窗口获取动态rt&lt;/li>
+&lt;li>失败请求数: 基于滑动窗口获取最近时间内的失败请求数&lt;/li>
+&lt;li>成功请求数: 基于滑动窗口获取最近时间内的成功请求数&lt;/li>
+&lt;li>处理中请求数: 前后增加Filter简单统计&lt;/li>
+&lt;li>具体指标依赖滑动窗口，额外使用 AggregateMetricsCollector 收集&lt;/li>
+&lt;/ul>
+&lt;p>输出到普罗米修斯的相关指标可以参考的内容如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_live_data_size_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_live_data_size_bytes &lt;span style="color:#2aa198">1.6086528E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_succeed_aggregate Aggregated Succeed Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_succeed_aggregate gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed_aggregate{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">39.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_buffer_memory_used_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;direct&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.679975E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mapped&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_memory_allocated_bytes_total Incremented for an increase in the size of the (young) heap memory pool after one GC to before the next&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_memory_allocated_bytes_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_allocated_bytes_total &lt;span style="color:#2aa198">2.9884416E9&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_total_aggregate Aggregated Total Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_total_aggregate gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total_aggregate{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">39.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE system_load_average_1m gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_load_average_1m &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP system_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the whole system&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE system_cpu_usage gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_usage &lt;span style="color:#2aa198">0.015802269043760128&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_peak_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_peak_threads &lt;span style="color:#2aa198">40.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_processing Processing Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_processing gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_processing{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_memory_max_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.22912768E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Survivor Space&amp;#34;&lt;/span>,} &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Old Gen&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">9.52107008E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metaspace&amp;#34;&lt;/span>,} &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Eden Space&amp;#34;&lt;/span>,} &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5828608.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Compressed Class Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.073741824E9&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.22916864E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_states_threads The current number of threads having BLOCKED state&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_states_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;blocked&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;runnable&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">10.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;waiting&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">16.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;timed-waiting&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">13.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;new&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;terminated&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_buffer_total_capacity_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;direct&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.6799749E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mapped&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_p99 Response Time P99&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_p99 gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p99{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_memory_used_bytes The amount of used memory&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_memory_used_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Survivor Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1048576.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.462464E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Old Gen&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.6098728E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metaspace&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4.0126952E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Eden Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">8.2837504E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1372032.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Compressed Class Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4519248.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5697408.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP qps Query Per Seconds&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE qps gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>qps{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.3333333333333333&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_min Min Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_min gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_min{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_buffer_count_buffers An estimate of the number of buffers in the pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_buffer_count_buffers gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mapped&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;direct&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">10.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP system_cpu_count The number of processors available to the Java virtual machine&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE system_cpu_count gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_count &lt;span style="color:#2aa198">2.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_classes_loaded_classes The number of classes that are currently loaded in the Java virtual machine&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_classes_loaded_classes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_loaded_classes &lt;span style="color:#2aa198">7325.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_total Total Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_total gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_total{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">2783.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_last Last Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_last gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_last{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_memory_promoted_bytes_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_promoted_bytes_total &lt;span style="color:#2aa198">1.4450952E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_pause_seconds Time spent in GC pause&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_pause_seconds summary&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metadata GC Threshold&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">2.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metadata GC Threshold&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.026&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Evacuation Pause&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">37.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Evacuation Pause&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.156&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_pause_seconds_max Time spent in GC pause&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_pause_seconds_max gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metadata GC Threshold&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Evacuation Pause&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_p95 Response Time P95&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_p95 gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p95{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_total Total Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_total gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">27738.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP process_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the Java Virtual Machine process&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE process_cpu_usage gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>process_cpu_usage &lt;span style="color:#2aa198">8.103727714748784E-4&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_max Max Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_max gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_max{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_max_data_size_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_max_data_size_bytes &lt;span style="color:#2aa198">9.52107008E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_live_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_live_threads &lt;span style="color:#2aa198">39.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_daemon_threads The current number of live daemon threads&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_daemon_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_daemon_threads &lt;span style="color:#2aa198">36.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_classes_unloaded_classes_total The total number of classes unloaded since the Java virtual machine has started execution&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_classes_unloaded_classes_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_unloaded_classes_total &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_memory_committed_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.4680064E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Survivor Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1048576.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Old Gen&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5.24288E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metaspace&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4.1623552E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Eden Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">9.0177536E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">2555904.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Compressed Class Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5111808.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5701632.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_succeed Succeed Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_succeed gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">27738.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_avg Average Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_avg gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_avg{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="聚合收集器">聚合收集器&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector, MetricsListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> bucketNum;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> timeWindowSeconds;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> succeedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> failedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> qps &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowQuantile&lt;span style="color:#719e07">&amp;gt;&lt;/span> rt &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ApplicationModel applicationModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_COMPRESSION &lt;span style="color:#719e07">=&lt;/span> 100;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_BUCKET_NUM &lt;span style="color:#719e07">=&lt;/span> 10;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_TIME_WINDOW_SECONDS &lt;span style="color:#719e07">=&lt;/span> 120;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//在构造函数中解析配置信息&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.applicationModel &lt;span style="color:#719e07">=&lt;/span> applicationModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigManager configManager &lt;span style="color:#719e07">=&lt;/span> applicationModel.getApplicationConfigManager();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsConfig config &lt;span style="color:#719e07">=&lt;/span> configManager.getMetrics().orElse(&lt;span style="color:#cb4b16">null&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (config &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> config.getAggregation() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> Boolean.TRUE.equals(config.getAggregation().getEnabled())) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// only registered when aggregation is enabled.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registerListener();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AggregationConfig aggregation &lt;span style="color:#719e07">=&lt;/span> config.getAggregation();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.bucketNum &lt;span style="color:#719e07">=&lt;/span> aggregation.getBucketNum() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> DEFAULT_BUCKET_NUM : aggregation.getBucketNum();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.timeWindowSeconds &lt;span style="color:#719e07">=&lt;/span> aggregation.getTimeWindowSeconds() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> DEFAULT_TIME_WINDOW_SECONDS : aggregation.getTimeWindowSeconds();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果开启了本地聚合，则通过 spring 的 BeanFactory 添加监听，将 AggregateMetricsCollector 与 DefaultMetricsCollector 绑定，实现一种生存者消费者的模式，DefaultMetricsCollector 中使用监听器列表，方便扩展&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerListener&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel.getBeanFactory().getBean(DefaultMetricsCollector.class).addListener(&lt;span style="color:#719e07">this&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-指标聚合">3. 指标聚合&lt;/h2>
+&lt;p>滑动窗口
+假设我们初始有6个bucket，每个窗口时间设置为2分钟
+每次写入指标数据时，会将数据分别写入6个bucket内，每隔两分钟移动一个bucket并且清除原来bucket内的数据
+读取指标时，读取当前current指向的bucket，以达到滑动窗口的效果
+具体如下图所示，实现了当前 bucket 内存储了配置中设置的 bucket 生命周期内的数据，即近期数据
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/aggre.png" alt="img_1.png">&lt;/p>
+&lt;p>在每个bucket内，使用&lt;strong>TDigest 算法&lt;/strong>计算分位数指标&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>TDigest 算法&lt;/strong>（极端分位精确度高，如p1 p99，中间分位精确度低，如p50），相关资料如下&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://op8867555.github.io/posts/2018-04-09-tdigest.html">https://op8867555.github.io/posts/2018-04-09-tdigest.html&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://blog.csdn.net/csdnnews/article/details/116246540">https://blog.csdn.net/csdnnews/article/details/116246540&lt;/a>&lt;/li>
+&lt;li>开源实现：https://github.com/tdunning/t-digest&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;p>代码实现如下，除了 TimeWindowQuantile 用来计算分位数指标外，另外提供了 TimeWindowCounter 来收集时间区间内的指标数量&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TimeWindowQuantile&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> compression;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> TDigest&lt;span style="color:#719e07">[]&lt;/span> ringBuffer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> currentBucket;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> lastRotateTimestampMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> durationBetweenRotatesMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">TimeWindowQuantile&lt;/span>(&lt;span style="color:#dc322f">double&lt;/span> compression, &lt;span style="color:#dc322f">int&lt;/span> bucketNum, &lt;span style="color:#dc322f">int&lt;/span> timeWindowSeconds) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.compression &lt;span style="color:#719e07">=&lt;/span> compression;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.ringBuffer &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TDigest&lt;span style="color:#719e07">[&lt;/span>bucketNum&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> bucketNum; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.ringBuffer&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> TDigest.createDigest(compression);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.currentBucket &lt;span style="color:#719e07">=&lt;/span> 0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.lastRotateTimestampMillis &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.durationBetweenRotatesMillis &lt;span style="color:#719e07">=&lt;/span> TimeUnit.SECONDS.toMillis(timeWindowSeconds) &lt;span style="color:#719e07">/&lt;/span> bucketNum;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> &lt;span style="color:#268bd2">quantile&lt;/span>(&lt;span style="color:#dc322f">double&lt;/span> q) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TDigest currentBucket &lt;span style="color:#719e07">=&lt;/span> rotate();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> currentBucket.quantile(q);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">add&lt;/span>(&lt;span style="color:#dc322f">double&lt;/span> value) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rotate();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (TDigest bucket : ringBuffer) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bucket.add(value);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> TDigest &lt;span style="color:#268bd2">rotate&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> timeSinceLastRotateMillis &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis() &lt;span style="color:#719e07">-&lt;/span> lastRotateTimestampMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">while&lt;/span> (timeSinceLastRotateMillis &lt;span style="color:#719e07">&amp;gt;&lt;/span> durationBetweenRotatesMillis) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ringBuffer&lt;span style="color:#719e07">[&lt;/span>currentBucket&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> TDigest.createDigest(compression);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">++&lt;/span>currentBucket &lt;span style="color:#719e07">&amp;gt;=&lt;/span> ringBuffer.length) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> currentBucket &lt;span style="color:#719e07">=&lt;/span> 0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeSinceLastRotateMillis &lt;span style="color:#719e07">-=&lt;/span> durationBetweenRotatesMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> lastRotateTimestampMillis &lt;span style="color:#719e07">+=&lt;/span> durationBetweenRotatesMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> ringBuffer&lt;span style="color:#719e07">[&lt;/span>currentBucket&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标推送">指标推送&lt;/h1>
+&lt;p>指标推送只有用户在设置了&amp;lt;dubbo:metrics /&amp;gt;配置且配置protocol参数后才开启，若只开启指标聚合，则默认不推送指标。&lt;/p>
+&lt;h2 id="1-promehteus-pull-servicediscovery">1. Promehteus Pull ServiceDiscovery&lt;/h2>
+&lt;p>使用dubbo-admin等类似的中间层，启动时根据配置将本机 IP、Port、MetricsURL 推送地址信息至dubbo-admin（或任意中间层）的方式，暴露HTTP ServiceDiscovery供prometheus读取，配置方式如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;pull&amp;rdquo; address=&amp;quot;${dubbo-admin.address}&amp;quot; port=&amp;ldquo;20888&amp;rdquo; url=&amp;quot;/metrics&amp;quot;/&amp;gt;，其中在pull模式下address为可选参数，若不填则需用户手动在Prometheus配置文件中配置地址&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">exportHttpServer&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> exporterEnabled &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_EXPORTER_ENABLED_KEY, &lt;span style="color:#cb4b16">false&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (exporterEnabled) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> port &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_EXPORTER_METRICS_PORT_KEY, PROMETHEUS_DEFAULT_METRICS_PORT);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String path &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_EXPORTER_METRICS_PATH_KEY, PROMETHEUS_DEFAULT_METRICS_PATH);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>path.startsWith(&lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> path;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer &lt;span style="color:#719e07">=&lt;/span> HttpServer.create(&lt;span style="color:#719e07">new&lt;/span> InetSocketAddress(port), 0);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer.createContext(path, httpExchange &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String response &lt;span style="color:#719e07">=&lt;/span> prometheusRegistry.scrape();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpExchange.sendResponseHeaders(200, response.getBytes().length);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> (OutputStream os &lt;span style="color:#719e07">=&lt;/span> httpExchange.getResponseBody()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> os.write(response.getBytes());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Thread(prometheusExporterHttpServer::start);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread.start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (IOException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-prometheus-push-pushgateway">2. Prometheus Push Pushgateway&lt;/h2>
+&lt;p>用户直接在Dubbo配置文件中配置Prometheus Pushgateway的地址即可，如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;push&amp;rdquo; address=&amp;quot;${prometheus.pushgateway-url}&amp;quot; interval=&amp;ldquo;5&amp;rdquo; /&amp;gt;，其中interval代表推送间隔&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">schedulePushJob&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> pushEnabled &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_ENABLED_KEY, &lt;span style="color:#cb4b16">false&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (pushEnabled) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String baseUrl &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_BASE_URL_KEY);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String job &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_JOB_KEY, PROMETHEUS_DEFAULT_JOB_NAME);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> pushInterval &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_PUSH_INTERVAL_KEY, PROMETHEUS_DEFAULT_PUSH_INTERVAL);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String username &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_USERNAME_KEY);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String password &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_PASSWORD_KEY);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> NamedThreadFactory threadFactory &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> NamedThreadFactory(&lt;span style="color:#2aa198">&amp;#34;prometheus-push-job&amp;#34;&lt;/span>, &lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor &lt;span style="color:#719e07">=&lt;/span> Executors.newScheduledThreadPool(1, threadFactory);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PushGateway pushGateway &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> PushGateway(baseUrl);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>StringUtils.isBlank(username)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway.setConnectionFactory(&lt;span style="color:#719e07">new&lt;/span> BasicAuthHttpConnectionFactory(username, password));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor.scheduleWithFixedDelay(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> push(pushGateway, job), pushInterval, pushInterval, TimeUnit.SECONDS);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">push&lt;/span>(PushGateway pushGateway, String job) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway.pushAdd(prometheusRegistry.getPrometheusRegistry(), job);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (IOException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.error(&lt;span style="color:#2aa198">&amp;#34;Error occurred when pushing metrics to prometheus: &amp;#34;&lt;/span>, e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="可视化展示">可视化展示&lt;/h2>
+&lt;p>目前推荐使用 Prometheus 来进行服务监控，Grafana 来展示指标数据。可以通过案例来快速入门 &lt;a href="../../../tasks/observability/grafana/">Dubbo 可视化监控&lt;/a>。&lt;/p></description></item><item><title>Overview: 自适应负载均衡与限流</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/heuristic-flow-control/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/heuristic-flow-control/</guid><description>
+&lt;h1 id="整体介绍">整体介绍&lt;/h1>
+&lt;p>本文所说的柔性服务主要是指&lt;strong>consumer端的负载均衡&lt;/strong>和&lt;strong>provider端的限流&lt;/strong>两个功能。在之前的dubbo版本中，&lt;/p>
+&lt;ul>
+&lt;li>负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。&lt;/li>
+&lt;li>限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。&lt;/li>
+&lt;/ul>
+&lt;p>我们针对这些存在的问题进行了改进。&lt;/p>
+&lt;h2 id="负载均衡">负载均衡&lt;/h2>
+&lt;h3 id="使用介绍">使用介绍&lt;/h3>
+&lt;p>在原本的dubbo版本中，有五种负载均衡的方案供选择，他们分别是 &lt;code>Random&lt;/code>、&lt;code>ShortestResponse&lt;/code>、&lt;code>RoundRobin&lt;/code>、&lt;code>LeastActive&lt;/code> 和 &lt;code>ConsistentHash&lt;/code>。其中除 &lt;code>ShortestResponse&lt;/code> 和 &lt;code>LeastActive&lt;/code> 外，其他的几种方案主要是考虑选择时的公平性和稳定性。&lt;/p>
+&lt;p>对于 &lt;code>ShortestResponse&lt;/code> 来说，其设计目的是从所有备选的 provider 中选择 response 时间最短的以提高系统整体的吞吐量。然而存在两个问题：&lt;/p>
+&lt;ol>
+&lt;li>在大多数的场景下，不同provider的response时长没有非常明显的区别，此时该算法会退化为随机选择。&lt;/li>
+&lt;li>response的时间长短有时也并不能代表机器的吞吐能力。对于 &lt;code>LeastActive&lt;/code> 来说，其认为应该将流量尽可能分配到当前并发处理任务较少的机器上。但是其同样存在和 &lt;code>ShortestResponse&lt;/code> 类似的问题，即这并不能单独代表机器的吞吐能力。&lt;/li>
+&lt;/ol>
+&lt;p>基于以上分析，我们提出了两种新的负载均衡算法。一种是同样基于公平性考虑的单纯 &lt;code>P2C&lt;/code> 算法，另一种是基于自适应的方法 &lt;code>adaptive&lt;/code>，其试图自适应的衡量 provider 端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。&lt;/p>
+&lt;h4 id="总体效果">总体效果&lt;/h4>
+&lt;p>对于负载均衡部分的有效性实验在两个不同的情况下进行的，分别是提供端机器配置比较均衡和提供端机器配置差距较大的情况。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/1675265258687-c3df68a8-80e0-4311-816c-63480494850c.png" alt="image.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png" alt="image.png">&lt;/p>
+&lt;h4 id="使用方法">使用方法&lt;/h4>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance">Dubbo Java 实现的使用方法&lt;/a> 与原本的负载均衡方法相同。只需要在consumer端将&amp;quot;loadbalance&amp;quot;设置为&amp;quot;p2c&amp;quot;或者&amp;quot;adaptive&amp;quot;即可。&lt;/p>
+&lt;h4 id="代码结构">代码结构&lt;/h4>
+&lt;p>负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。&lt;/p>
+&lt;h3 id="原理介绍">原理介绍&lt;/h3>
+&lt;h4 id="p2c算法">P2C算法&lt;/h4>
+&lt;p>Power of Two Choice 算法简单但是经典，主要思路如下：&lt;/p>
+&lt;ol>
+&lt;li>对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。&lt;/li>
+&lt;li>比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。&lt;/li>
+&lt;/ol>
+&lt;h4 id="adaptive算法">adaptive算法&lt;/h4>
+&lt;p>&lt;a href="https://github.com/apache/dubbo/pull/10745">代码的github地址&lt;/a>&lt;/p>
+&lt;h5 id="相关指标">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>cpuLoad
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/26808016bc7f1ee83ab425e308074f17.svg" alt="img">。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>rt
+rt为一次rpc调用所用的时间，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>timeout
+timeout为本次rpc调用超时剩余的时间，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>weight
+weight是设置的服务权重。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>currentProviderTime
+provider端在计算cpuLoad时的时间，单位是毫秒&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>currentTime
+currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>multiple
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/b60f036bd026b92129df8a6476922cc8.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>lastLatency
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/f2abbc771049cf4f3e492e93a258d699.svg" alt="img">&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/8fb1af970b995232ebed2764a5706aab.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>beta
+平滑参数，默认为0.5&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ewma
+lastLatency的平滑值&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/c26fdbae56f3a06c46434ae91185a3d6.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>inflight
+inflight为consumer端还未返回的请求的数量。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/f429c4726dec484e70ee73e6a37c88dd.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>load
+对于备选后端机器x来说，若距离上次被调用的时间大于2*timeout，则其load值为0。
+否则,&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/0f56746b3643dc3ed0e019c24ad5f377.svg" alt="img">&lt;/p>
+&lt;h5 id="算法实现">算法实现&lt;/h5>
+&lt;p>依然是基于P2C算法。&lt;/p>
+&lt;ol>
+&lt;li>从备选列表中做两次随机选择，得到providerA和providerB&lt;/li>
+&lt;li>比较providerA和providerB的load值，选择较小的那个。&lt;/li>
+&lt;/ol>
+&lt;h2 id="自适应限流">自适应限流&lt;/h2>
+&lt;p>与负载均衡运行在consumer端不同的是，限流功能运行在provider端。其作用是限制provider端处理并发任务时的最大数量。从理论上讲，服务端机器的处理能力是存在上限的，对于一台服务端机器，当短时间内出现大量的请求调用时，会导致处理不及时的请求积压，使机器过载。在这种情况下可能导致两个问题：&lt;/p>
+&lt;ol>
+&lt;li>由于请求积压，最终所有的请求都必须等待较长时间才能被处理，从而使整个服务瘫痪。&lt;/li>
+&lt;li>服务端机器长时间的过载可能有宕机的风险。&lt;/li>
+&lt;/ol>
+&lt;p>因此，在可能存在过载风险时，拒绝掉一部分请求反而是更好的选择。在之前的 Dubbo 版本中，限流是通过在 provider 端设置静态的最大并发值实现的。但是在服务数量多，拓扑复杂且处理能力会动态变化的局面下，该值难以通过计算静态设置。&lt;/p>
+&lt;p>基于以上原因，我们需要一种自适应的算法，其可以动态调整服务端机器的最大并发值，使其可以在保证机器不过载的前提下，尽可能多的处理接收到的请求。因此，我们参考相关理论与算法实践基础上，在 Dubbo 框架内实现了两种自适应限流算法，分别是基于启发式平滑的&lt;code>HeuristicSmoothingFlowControl&lt;/code> 和基于窗口的 &lt;code>AutoConcurrencyLimier&lt;/code>。&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo/pull/10642">代码的github地址&lt;/a>&lt;/p>
+&lt;h3 id="使用介绍-1">使用介绍&lt;/h3>
+&lt;h4 id="总体效果-1">总体效果&lt;/h4>
+&lt;p>自适应限流部分的有效性实验我们在提供端机器配置尽可能大的情况下进行，并且为了凸显效果，在实验中我们将单次请求的复杂度提高，将超时时间尽可能设置的大，并且开启消费端的重试功能。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/1675267798831-3da99681-577f-4e5a-b122-b87c8aba7299.png" alt="image.png">&lt;/p>
+&lt;h4 id="使用方法-1">使用方法&lt;/h4>
+&lt;p>要确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。&lt;/p>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance">Dubbo Java 实现的自适应限流开启方法&lt;/a> 与静态的最大并发值设置类似，只需在provider端将&amp;quot;flowcontrol&amp;quot;设置为&amp;quot;autoConcurrencyLimier&amp;quot;或者&amp;quot;heuristicSmoothingFlowControl&amp;quot;即可。&lt;/p>
+&lt;h4 id="代码结构-1">代码结构&lt;/h4>
+&lt;ol>
+&lt;li>FlowControlFilter：在provider端的filter负责根据限流算法的结果来对provider端进行限流功能。&lt;/li>
+&lt;li>FlowControl：根据dubbo的spi实现的限流算法的接口。限流的具体实现算法需要继承自该接口并可以通过dubbo的spi方式使用。&lt;/li>
+&lt;li>CpuUsage：周期性获取cpu的相关指标&lt;/li>
+&lt;li>HardwareMetricsCollector：获取硬件指标的相关方法&lt;/li>
+&lt;li>ServerMetricsCollector：基于滑动窗口的获取限流需要的指标的相关方法。比如qps等。&lt;/li>
+&lt;li>AutoConcurrencyLimier：自适应限流的具体实现算法。&lt;/li>
+&lt;li>HeuristicSmoothingFlowControl：自适应限流的具体实现方法。&lt;/li>
+&lt;/ol>
+&lt;h3 id="原理介绍-1">原理介绍&lt;/h3>
+&lt;h4 id="heuristicsmoothingflowcontrol">HeuristicSmoothingFlowControl&lt;/h4>
+&lt;h5 id="相关指标-1">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>alpha
+alpha为可接受的延时的上升幅度，默认为0.3&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>minLatency
+在一个时间窗口内的最小的Latency值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>noLoadLatency
+noLoadLatency是单纯处理任务的延时，不包括排队时间。这是服务端机器的固有属性，但是并不是一成不变的。在HeuristicSmoothingFlowControl算法中，我们根据机器CPU的使用率来确定机器当前的noLoadLatency。当机器的CPU使用率较低时，我们认为minLatency便是noLoadLatency。当CPU使用率适中时，我们平滑的用minLatency来更新noLoadLatency的值。当CPU使用率较高时，noLoadLatency的值不再改变。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxQPS
+一个时间窗口周期内的QPS的最大值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>avgLatency
+一个时间窗口周期内的Latency的平均值，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxConcurrency
+计算得到的当前服务提供端的最大并发值。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/f40e48ebdb49648cf942714609808c52.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h5 id="算法实现-1">算法实现&lt;/h5>
+&lt;p>当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从HeuristicSmoothingFlowControl算法中获得当前的maxConcurrency值。如果当前正在处理的请求数量超过了maxConcurrency，则拒绝该请求。&lt;/p>
+&lt;h4 id="autoconcurrencylimier">AutoConcurrencyLimier&lt;/h4>
+&lt;h5 id="相关指标-2">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>MaxExploreRatio
+默认设置为0.3&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MinExploreRatio
+默认设置为0.06&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>SampleWindowSizeMs
+采样窗口的时长。默认为1000毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MinSampleCount
+采样窗口的最小请求数量。默认为40。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MaxSampleCount
+采样窗口的最大请求数量。默认为500。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>emaFactor
+平滑处理参数。默认为0.1。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>exploreRatio
+探索率。初始设置为MaxExploreRatio。
+若avgLatency&amp;lt;=noLoadLatency*(1.0 + MinExploreRatio)或者qps&amp;gt;=maxQPS*(1.0 + MinExploreRatio)
+则exploreRatio=min(MaxExploreRatio,exploreRatio+0.02)
+否则
+exploreRatio=max(MinExploreRatio,exploreRatio-0.02)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxQPS
+窗口周期内QPS的最大值。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/d5cf045bc17267befc176f3d76273267.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>noLoadLatency
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/8c700211f5c7a13403e3088df9cd9f43.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>halfSampleIntervalMs
+半采样区间。默认为25000毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>resetLatencyUs
+下一次重置所有值的时间戳，这里的重置包括窗口内值和noLoadLatency。单位是微秒。初始为0.
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/1af4a6134ede96985302ee8a27f93df7.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>remeasureStartUs
+下一次重置窗口的开始时间。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/c7da904b9a4c890456499b09d01938d3.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>startSampleTimeUs
+开始采样的时间。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>sampleCount
+当前采样窗口内请求的数量。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>totalSampleUs
+采样窗口内所有请求的latency的和。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>totalReqCount
+采样窗口时间内所有请求的数量和。注意区别sampleCount。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>samplingTimeUs
+采样当前请求的时间戳。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>latency
+当前请求的latency。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>qps
+在该时间窗口内的qps值。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/c0e8b30fc1ecf9438bc2d574fb3da8b6.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>avgLatency
+窗口内的平均latency。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/3a3acfdb05be7d3985835d43e492d3b9.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxConcurrency
+上一个窗口计算得到当前周期的最大并发值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>nextMaxConcurrency
+当前窗口计算出的下一个周期的最大并发值。
+&lt;img src="https://dubbo.apache.org/imgs/overview/reference/proposals/heuristic-flow-control/09852cc0ef125b43a37719796cb8baae.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h5 id="littles-law">Little&amp;rsquo;s Law&lt;/h5>
+&lt;ul>
+&lt;li>当服务处于稳定状态时：concurrency=latency*qps。这是自适应限流理论的基础。&lt;/li>
+&lt;li>当请求没有导致机器超载时，latency基本稳定，qps和concurrency处于线性关系。&lt;/li>
+&lt;li>当短时间内请求数量过多，导致服务超载的时候，concurrency会和latency一起上升，qps则会趋于稳定。&lt;/li>
+&lt;/ul>
+&lt;h5 id="算法实现-2">算法实现&lt;/h5>
+&lt;p>AutoConcurrencyLimier的算法使用过程和HeuristicSmoothingFlowControl类似。与HeuristicSmoothingFlowControl的最大区别是:&lt;/p>
+&lt;p>AutoConcurrencyLimier是基于窗口的。每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到maxConcurrency。
+其次，利用exploreRatio来对剩余的容量进行探索。&lt;/p>
+&lt;p>另外，每隔一段时间都会自动缩小max_concurrency并持续一段时间，以处理noLoadLatency上涨的情况。因为估计noLoadLatency时必须先让服务处于低负载的状态，因此对maxConcurrency的缩小是难以避免的。&lt;/p>
+&lt;p>由于 max_concurrency &amp;lt; concurrency 时，服务会拒绝掉所有的请求，限流算法将 &amp;ldquo;排空所有的经历过排队的等待请求的时间&amp;rdquo; 设置为 2*latency，以确保 minLatency 的样本绝大部分时没有经过排队等待的。&lt;/p></description></item><item><title>Overview: Dubbo3 应用级服务发现设计</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/service-discovery/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/service-discovery/</guid><description>
+&lt;h2 id="objective">Objective&lt;/h2>
+&lt;ul>
+&lt;li>显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。&lt;/li>
+&lt;li>适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。&lt;/li>
+&lt;/ul>
+&lt;h2 id="background">Background&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/arc.png" alt="interface-arc">&lt;/p>
+&lt;p>我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。&lt;/p>
+&lt;p>在这个过程中：&lt;/p>
+&lt;ul>
+&lt;li>每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；&lt;/li>
+&lt;li>注册中心通过这个 key 对 provider 实例地址进行聚合；&lt;/li>
+&lt;li>Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data1.png" alt="interface-data1">&lt;/p>
+&lt;p>这里，我们对接口级地址发现的内部数据结构进行详细分析。&lt;/p>
+&lt;p>首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。&lt;/p>
+&lt;p>然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data2.png" alt="interface-data2">&lt;/p>
+&lt;p>这里把 URL 地址数据划分成了几份：&lt;/p>
+&lt;ul>
+&lt;li>首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体&lt;/li>
+&lt;li>其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明&lt;/li>
+&lt;li>下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。&lt;/li>
+&lt;li>最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。&lt;/li>
+&lt;/ul>
+&lt;p>结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：&lt;/p>
+&lt;ul>
+&lt;li>第一，地址发现聚合的 key 就是 RPC 粒度的服务&lt;/li>
+&lt;li>第二，注册中心同步的数据不止包含地址，还包含了各种元数据以及配置&lt;/li>
+&lt;li>得益于 1 与 2，Dubbo 实现了支持应用、RPC 服务、方法粒度的服务治理能力&lt;/li>
+&lt;/ul>
+&lt;p>这就是一直以来 Dubbo2 在易用性、服务治理功能性、可扩展性上强于很多服务框架的真正原因。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-defect.png" alt="interface-defect">&lt;/p>
+&lt;p>一个事物总是有其两面性，Dubbo2 地址模型带来易用性和强大功能的同时，也给整个架构的水平可扩展性带来了一些限制。这个问题在普通规模的微服务集群下是完全感知不到的，而随着集群规模的增长，当整个集群内应用、机器达到一定数量时，整个集群内的各个组件才开始遇到规模瓶颈。在总结包括阿里巴巴、工商银行等多个典型的用户在生产环境特点后，我们总结出以下两点突出问题（如图中红色所示）：&lt;/p>
+&lt;ul>
+&lt;li>首先，注册中心集群容量达到上限阈值。由于所有的 URL 地址数据都被发送到注册中心，注册中心的存储容量达到上限，推送效率也随之下降。&lt;/li>
+&lt;li>而在消费端这一侧，Dubbo2 框架常驻内存已超 40%，每次地址推送带来的 cpu 等资源消耗率也非常高，影响正常的业务调用。&lt;/li>
+&lt;/ul>
+&lt;p>为什么会出现这个问题？我们以一个具体 provider 示例进行展开，来尝试说明为何应用在接口级地址模型下容易遇到容量问题。
+青蓝色部分，假设这里有一个普通的 Dubbo Provider 应用，该应用内部定义有 10 个 RPC Service，应用被部署在 100 个机器实例上。这个应用在集群中产生的数据量将会是 “Service 数 * 机器实例数”，也就是 10 * 100 = 1000 条。数据被从两个维度放大：&lt;/p>
+&lt;ul>
+&lt;li>从地址角度。100 条唯一的实例地址，被放大 10 倍&lt;/li>
+&lt;li>从服务角度。10 条唯一的服务元数据，被放大 100 倍&lt;/li>
+&lt;/ul>
+&lt;h2 id="proposal">Proposal&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-principle.png" alt="app-principle">&lt;/p>
+&lt;p>面对这个问题，在 Dubbo3 架构下，我们不得不重新思考两个问题：&lt;/p>
+&lt;ul>
+&lt;li>如何在保留易用性、功能性的同时，重新组织 URL 地址数据，避免冗余数据的出现，让 Dubbo3 能支撑更大规模集群水平扩容？&lt;/li>
+&lt;li>如何在地址发现层面与其他的微服务体系如 Kubernetes、Spring Cloud 打通？&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-data1.png" alt="app-data1">&lt;/p>
+&lt;p>Dubbo3 的应用级服务发现方案设计本质上就是围绕以上两个问题展开。其基本思路是：地址发现链路上的聚合元素也就是我们之前提到的 Key 由服务调整为应用，这也是其名称叫做应用级服务发现的由来；另外，通过注册中心同步的数据内容上做了大幅精简，只保留最核心的 ip、port 地址数据。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-data2.png" alt="app-data2">&lt;/p>
+&lt;p>这是升级之后应用级地址发现的内部数据结构进行详细分析。
+对比之前接口级的地址发现模型，我们主要关注橙色部分的变化。首先，在 provider 实例这一侧，相比于之前每个 RPC Service 注册一条地址数据，一个 provider 实例只会注册一条地址到注册中心；而在注册中心这一侧，地址以应用名为粒度做聚合，应用名节点下是精简过后的 provider 实例地址；&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-metadataservice.png" alt="app-metadataservice">&lt;/p>
+&lt;p>应用级服务发现的上述调整，同时实现了地址单条数据大小和总数量的下降，但同时也带来了新的挑战：我们之前 Dubbo2 强调的易用性和功能性的基础损失了，因为元数据的传输被精简掉了，如何精细的控制单个服务的行为变得无法实现。&lt;/p>
+&lt;p>针对这个问题，Dubbo3 的解法是引入一个内置的 MetadataService 元数据服务，由中心化推送转为 Consumer 到 Provider 的点对点拉取，在这个模式下，元数据传输的数据量将不在是一个问题，因此可以在元数据中扩展出更多的参数、暴露更多的治理数据。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-workflow.png" alt="app-metadataservice">&lt;/p>
+&lt;p>这里我们个重点看消费端 Consumer 的地址订阅行为，消费端从分两步读取地址数据，首先是从注册中心收到精简后的地址，随后通过调用 MetadataService 元数据服务，读取对端的元数据信息。在收到这两部分数据之后，消费端会完成地址数据的聚合，最终在运行态还原出类似 Dubbo2 的 URL 地址格式。因此从最终结果而言，应用级地址模型同时兼顾了地址传输层面的性能与运行层面的功能性。&lt;/p>
+&lt;p>以上就是的应用级服务发现背景、工作原理部分的所有内容，接下来我们看一下饿了么升级到 Dubbo3 尤其是应用级服务发现的过程。&lt;/p></description></item><item><title>Overview: Triple协议Http标准能力增强-多Content-Type支持</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/support-more-content-types/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/support-more-content-types/</guid><description>
+&lt;h3 id="triple协议http标准能力增强-多content-type支持">&lt;strong>Triple协议Http标准能力增强-多Content-Type支持&lt;/strong>&lt;/h3>
+&lt;blockquote>
+&lt;p>本文主要介绍Triple对更多HTTP标准Content-Type的支持方式，以及服务该如何接收这些请求。&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="概述">&lt;strong>概述&lt;/strong>&lt;/h4>
+&lt;p>Triple目前支持两种序列化方式：Json和protobuf，对应的ContentType：&lt;/p>
+&lt;ul>
+&lt;li>application/json&lt;/li>
+&lt;li>application/grpc+proto&lt;/li>
+&lt;/ul>
+&lt;p>这在消费者和提供者都是后端服务时没有问题。但对于浏览器客户端，其可能发送更多类型的ContentType，需要服务端支持解码，如：&lt;/p>
+&lt;ul>
+&lt;li>multipart/formdata&lt;/li>
+&lt;li>text/plain&lt;/li>
+&lt;li>application/x-www-form-urlencoded&lt;/li>
+&lt;li>application/xml&lt;/li>
+&lt;/ul>
+&lt;p>Rest已基本实现上述解码能力，使Triple实现这些能力是让Triple服务端与浏览器客户端完全互通的重要一步。&lt;/p>
+&lt;h4 id="用法">&lt;strong>用法&lt;/strong>&lt;/h4>
+&lt;h5 id="multipartformdata">&lt;strong>multipart/formdata&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetPojo &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> multipart/form-data; boundary=example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;username&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: text/plain
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LuYue
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userdetail&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;location&amp;#34;:&amp;#34;beijing&amp;#34;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;username&amp;#34;:&amp;#34;LuYue&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userimg&amp;#34;;filename=&amp;#34;user.jpeg&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: image/jpeg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;binary-image data&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary--
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接收：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetPojo&lt;/span>(String username, User user, &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> attachment) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//LuYue&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//user.name=Luyue;user.location=beijing&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//&amp;lt;binary-image data&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#719e07">new&lt;/span> String(attachment, StandardCharsets.UTF_8));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>每一个 part 根据其 Content-Type 解码&lt;/li>
+&lt;li>若方法参数是 byte[] 或 Byte[]，对应字段不会解码&lt;/li>
+&lt;li>响应使用 application/json 编码&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationx-www-form-urlencoded">application/x-www-form-urlencoded&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetUrlForm &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/x-www-form-urlencoded
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 33
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello=World&amp;amp;Apache=Dubbo&amp;amp;id=10086
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>两种接收方式：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(String hello,String apache,&lt;span style="color:#dc322f">long&lt;/span> id){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>hello);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>apache);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String,Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> params){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>params.get(&lt;span style="color:#2aa198">&amp;#34;Hello&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>params.get(&lt;span style="color:#2aa198">&amp;#34;Apache&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span>params.get(&lt;span style="color:#2aa198">&amp;#34;Id&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>若参数为Map，则解码为Map&amp;lt;String,String&amp;gt;传入&lt;/li>
+&lt;li>若参数均为String或数值类型，按照参数列表逐个解码传入&lt;/li>
+&lt;li>响应使用 application/json 编码&lt;/li>
+&lt;/ul>
+&lt;h5 id="textplain">text/plain&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetString &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> text/plain; charset=UTF-8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>World!
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接收：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(String world){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span>&lt;span style="color:#719e07">+&lt;/span> world);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>charset支持ASCII、UTF-8、UTF-16等，默认UTF-8&lt;/li>
+&lt;li>响应使用 application/json 编码&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationxml">application/xml&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetXml &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 86
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34; standalone=&amp;#34;yes&amp;#34;?&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;User&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;username&amp;gt;&lt;/span>JohnDoe&lt;span style="color:#268bd2">&amp;lt;/username&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;location&amp;gt;&lt;/span>New York&lt;span style="color:#268bd2">&amp;lt;/location&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/User&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接收：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetXml&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getUsername());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getLocation());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received xml.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>该实现与Rest的XMLCodec相同&lt;/li>
+&lt;li>响应使用 application/xml 编码&lt;/li>
+&lt;/ul></description></item></channel></rss>

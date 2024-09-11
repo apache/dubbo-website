@@ -1,0 +1,515 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/</link><description>Recent content in 注册中心 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 了解注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/desc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/desc/</guid><description>
+&lt;h2 id="什么是注册中心">什么是注册中心&lt;/h2>
+&lt;p>所谓的注册中心，可以简单的理解为手机的通讯录。通讯录的目的是方便我们记录朋友、同事、家人等联系方式。一般的存储方式格式都是：姓名&amp;ndash;联系方式，当我们需要联系某个人时，打开我们的通讯，找到他的名字，拨打电话。&lt;/p>
+&lt;p>注册中心要做的事情，也是类似的。它记录了服务和服务地址的映射关系。在分布式架构中，服务会注册到这里，当服务需要调用其它服务时，就到这里找到服务的地址，进行调用。&lt;/p>
+&lt;h2 id="为什么需要注册中心">为什么需要注册中心&lt;/h2>
+&lt;p>随着单体应用拆分，首当面临的第一份挑战就是服务实例的数量较多，并且服务自身对外暴露的访问地址也具有动态性。以及微服务架构的发展，越来越多的设计中采用微服务架构。在微服务中首先需要面对的问题就是不同的服务之间如何进行通信。在单体服务中如果不同的服务之间需要通信，一般就是服务将接口暴露，然后其他的服务通过配置文件记录依赖服务的地址即可。在分布式系统中，这种方案是明显不合适的。分布式系统会变得更加复杂，比如：&lt;/p>
+&lt;ul>
+&lt;li>新服务上线后，如何被及时发现&lt;/li>
+&lt;li>服务宕机后，如何及时下线&lt;/li>
+&lt;li>服务如何有效的水平扩展&lt;/li>
+&lt;li>服务发现时，如何进行路由&lt;/li>
+&lt;li>服务异常时，如何进行降级&lt;/li>
+&lt;/ul>
+&lt;p>这里问题的解决都依赖于注册中心。
+为了有效的解决这些问题，我们可以把这些问题全部交给注册中心去解决，这样，不同的服务只需要关注自身的业务和设计实现即可。&lt;/p>
+&lt;h2 id="dubbo-go支持的注册中心">dubbo-go支持的注册中心&lt;/h2>
+&lt;h3 id="nacos">Nacos&lt;/h3>
+&lt;p>Nacos /nɑ:kəʊs/ 是 Dynamic Naming and Configuration Service的首字母简称，一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。&lt;/p>
+&lt;p>Nacos 致力于帮助您发现、配置和管理微服务。Nacos 提供了一组简单易用的特性集，帮助您快速实现动态服务发现、服务配置、服务元数据及流量管理。&lt;/p>
+&lt;p>Nacos 帮助您更敏捷和容易地构建、交付和管理微服务平台。 Nacos 是构建以“服务”为中心的现代应用架构 (例如微服务范式、云原生范式) 的服务基础设施。&lt;/p>
+&lt;p>官网：https://nacos.io/&lt;/p>
+&lt;h3 id="zookeeper">Zookeeper&lt;/h3>
+&lt;p>ZooKeeper 是 Apache 软件基金会的一个软件项目，它为大型分布式计算提供开源的分布式配置服务、同步服务和命名注册。&lt;/p>
+&lt;p>ZooKeeper 的架构通过冗余服务实现高可用性。&lt;/p>
+&lt;p>Zookeeper 的设计目标是将那些复杂且容易出错的分布式一致性服务封装起来，构成一个高效可靠的原语集，并以一系列简单易用的接口提供给用户使用。&lt;/p>
+&lt;p>一个典型的分布式数据一致性的解决方案，分布式应用程序可以基于它实现诸如数据发布/订阅、负载均衡、命名服务、分布式协调/通知、集群管理、Master 选举、分布式锁和分布式队列等功能。&lt;/p>
+&lt;p>官网：https://zookeeper.apache.org/&lt;/p>
+&lt;h3 id="polaris">Polaris&lt;/h3>
+&lt;p>北极星是腾讯开源的服务治理平台，致力于解决分布式和微服务架构中的服务管理、流量管理、配置管理、故障容错和可观测性问题，针对不同的技术栈和环境提供服务治理的标准方案和最佳实践。下面介绍北极星的应用场景、功能特性、系统组件和常见问题。&lt;/p>
+&lt;p>官网：https://polarismesh.cn/&lt;/p></description></item><item><title>Overview: 应用级服务发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/service-discovery/</guid><description>
+&lt;p>参考文章&lt;a href="https://baijiahao.baidu.com/s?id=1669266413887039723&amp;amp;wfr=spider&amp;amp;for=pc">&lt;strong>《Dubbo 迈出云原生重要一步 应用级服务发现解析》&lt;/strong>&lt;/a>&lt;/p>
+&lt;p>参考仓库：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/45a0d843b54e4922c240900e63516176cc7da4f6/registry/servicediscovery">dubbo-go-samples/registry/serivcediscovery&lt;/a>&lt;/p>
+&lt;h2 id="配置方案">配置方案&lt;/h2>
+&lt;ul>
+&lt;li>Consumer 端&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: service &lt;span style="color:#586e75"># 指定该注册中心为应用级服务发现，不填默认为接口级&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>: &lt;span style="color:#586e75"># 定义元数据中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos &lt;span style="color:#586e75"># 元数据中心可选nacos/zk&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Provider 端&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: service &lt;span style="color:#586e75"># 指定该注册中心为应用级服务发现，不填默认为接口级&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>: &lt;span style="color:#586e75"># 定义元数据中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos &lt;span style="color:#586e75"># 元数据中心可选nacos/zk&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>相比于常规配置，定义好registry-type: service, 并且定义好元数据中心后，将会使用应用级服务注册/服务发现。&lt;/p></description></item><item><title>Overview: 注册中心配置</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/registry/</guid><description>
+&lt;p>参考samples &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry">dubbo-go-samples/registry&lt;/a>&lt;/p>
+&lt;h2 id="registry-注册中心配置">Registry 注册中心配置&lt;/h2>
+&lt;ul>
+&lt;li>&lt;strong>Nacos 注册中心&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>: &lt;span style="color:#586e75"># 应用信息，服务启动后会将相关信息注册到注册中心，可被客户端从 url 中识别&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: myApp &lt;span style="color:#586e75"># application=myApp; name=myApp&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">module&lt;/span>: opensource &lt;span style="color:#586e75"># module=opensource&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">organization&lt;/span>: dubbo &lt;span style="color:#586e75"># organization=dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">owner&lt;/span>: laurence &lt;span style="color:#586e75"># owner=laurence&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myversion &lt;span style="color:#586e75"># app.version=myversion&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">environment&lt;/span>: pro &lt;span style="color:#586e75"># environment=pro&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacosWithCustomGroup&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos &lt;span style="color:#586e75"># 注册中心选择 nacos &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span> &lt;span style="color:#586e75"># nacos ip&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup &lt;span style="color:#586e75"># nacos group, 默认 DEFAULT_GROUP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: 9fb00abb-278d-42fc-96bf-e0151601e4a1 &lt;span style="color:#586e75"># nacos namespaceID, should be created before. 默认public&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">username&lt;/span>: abc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">password&lt;/span>: abc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion&lt;/span>: &lt;span style="color:#586e75"># 接口三元组：接口名、版本号、分组。client 和 server 需要保持一致。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: org.apache.dubbo.UserProvider.Test &lt;span style="color:#586e75"># 接口名必填&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># 默认为空&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># 默认为空&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>dubbogo 的注册中心配置的 group、namespace、username、password，均与 nacos 相关概念对应。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Zookeeper 注册中心&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># application: 与nacos 一致，不再赘述&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper &lt;span style="color:#586e75"># 注册中心选择 nacos &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span> &lt;span style="color:#586e75"># zookeeper ip&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup &lt;span style="color:#586e75"># nacos group, 默认 dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion&lt;/span>: &lt;span style="color:#586e75"># 接口三元组：接口名、版本号、分组。client 和 server 需要保持一致。&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># 接口名必填&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># 默认为空&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># 默认为空&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>zookeeper 注册时，provider 端将接口信息注册在&lt;code> /$(group)/$(interface)/providers&lt;/code> 节点，以上面配置为例，注册的 zk path 为 &lt;code>/myGroup/com.apache.dubbo.sample.basic.IGreeter/providers/&lt;/code>&lt;/p>
+&lt;p>consumer 端注册在 /$(group)/$(interface)/consumers 作统计用。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>ETCD 注册中心&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">etcd&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: etcdv3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2379&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: org.apache.dubbo.UserProvider
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;strong>应用级服务注册发现&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper &lt;span style="color:#586e75"># nacos/zookeeper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: service &lt;span style="color:#586e75"># 使用应用级服务发现&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>: &lt;span style="color:#586e75"># 配置元数据中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: 使用 Nacos 作为注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/nacos-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/nacos-2/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;li>启动一个 Nacos 实例，暴露 8848 端口&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-配置注册中心">2. 配置注册中心&lt;/h2>
+&lt;p>修改服务端配置 go-server/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>: &lt;span style="color:#586e75"># 配置 Nacos 注册中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span> &lt;span style="color:#586e75"># 指定 Nacos 地址&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改客户端配置 go-client/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from pb&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-使用-nacos-进行服务发现">3. 使用 Nacos 进行服务发现&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>启动go-server/cmd，查看日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>Nacos Registry&lt;span style="color:#719e07">]&lt;/span> Registry instance with param ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>日志中包含 Nacos 注册信息，将当前服务接口注册在 Nacos。&lt;/p>
+&lt;p>可登陆控制台 http://localhost:8848/nacos 查看注册的服务&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>启动 go-client/cmd 查看日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> [Nacos Registry] Update begin, service event: ServiceEvent{Action{add}, Path{tri://xxx.xxx.xxx.xxx:20000/api.Greeter ...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>日志中包含 Nacos 注册组件的订阅事件信息，获取到服务端 IP 和端口号，显示调用成功。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>client response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-更多支持的注册中心">4. 更多支持的注册中心&lt;/h2>
+&lt;p>参考 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry">dubbo-go-samples/registry&lt;/a>&lt;/p></description></item><item><title>Overview: 使用 Nacos 作为注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/nacos/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-使用-grpc_cli-工具进行-dubbo-服务调试">2. 使用 grpc_cli 工具进行 Dubbo 服务调试&lt;/h2>
+&lt;h3 id="21-开启服务端">2.1 开启服务端&lt;/h3>
+&lt;p>示例：user.go:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>UserProvider) &lt;span style="color:#268bd2">GetUser&lt;/span>(ctx context.Context, userStruct &lt;span style="color:#719e07">*&lt;/span>CallUserStruct) (&lt;span style="color:#719e07">*&lt;/span>User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;=======================\nreq:%#v\n&amp;#34;&lt;/span>, userStruct)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rsp &lt;span style="color:#719e07">:=&lt;/span> User{&lt;span style="color:#2aa198">&amp;#34;A002&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;Alex Stocks&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">18&lt;/span>, userStruct.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fmt.&lt;span style="color:#268bd2">Printf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;=======================\nrsp:%#v\n&amp;#34;&lt;/span>, rsp)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>rsp, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务端开启一个服务，名为GetUser，传入一个CallUserStruct的参数，返回一个User参数&lt;br>
+CallUserStruct参数定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> CallUserStruct &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Male &lt;span style="color:#dc322f">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubInfo SubInfo &lt;span style="color:#586e75">// 嵌套子结构
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (cs CallUserStruct) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.CallUserStruct&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> SubInfo &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubMale &lt;span style="color:#dc322f">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubAge &lt;span style="color:#dc322f">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s SubInfo) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>User结构定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Id &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SubInfo SubInfo &lt;span style="color:#586e75">// 嵌套上述子结构SubInfo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;com.ikurento.user.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>开启服务：&lt;/p>
+&lt;p>&lt;code>cd server &lt;/code>&lt;br>
+&lt;code>source builddev.sh&lt;/code>&lt;br>
+&lt;code>go run .&lt;/code>&lt;/p>
+&lt;h3 id="22-定义请求体打解包协议">2.2 定义请求体(打解包协议)&lt;/h3>
+&lt;p>请求体定义为json文件，约定键值均为string&lt;br>
+键对应go语言struct字段名例如&amp;quot;ID&amp;quot;、&amp;ldquo;Name&amp;rdquo; ，值对应&amp;quot;type@val&amp;quot;&lt;br>
+其中type支持string int bool time，val使用string 来初始化，如果只填写type则初始化为零值。
+约定每个struct必须有JavaClassName字段，务必与server端严格对应&lt;/p>
+&lt;p>见userCall.json:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;ID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@A000&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;Male&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool@true&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubInfo&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@A001&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubMale&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool@false&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;SubAge&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int@18&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;JavaClassName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.CallUserStruct&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>userCall.json将参数CallUserStruct的结构及子结构SubInfo都定义了出来，并且给请求参数赋值。&lt;/p>
+&lt;p>user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段一定与server端严格对应&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;ID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Age&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;JavaClassName&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.User&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubInfo&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubID&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubMale&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;bool&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;SubAge&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;int&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;JavaClassName&amp;#34;&lt;/span>:&lt;span style="color:#2aa198">&amp;#34;string@com.ikurento.user.SubInfo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23-执行请求">2.3 执行请求&lt;/h3>
+&lt;p>&lt;code>dubbogo-cli call --h=localhost --p 20001 --proto=dubbo --i=com.ikurento.user.UserProvider --method=GetUser --sendObj=&amp;quot;./userCall.json&amp;quot; --recvObj=&amp;quot;./user.json&amp;quot;&lt;/code>&lt;/p>
+&lt;p>cli端打印结果：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 Created pkg:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID:A000 Male:true SubInfo:0xc00006ea20 JavaClassName:com.ikurento.user.CallUserStruct}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID:A001 SubMale:false SubAge:18 JavaClassName:com.ikurento.user.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 Created pkg:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID: Name: Age:0 JavaClassName:com.ikurento.user.User SubInfo:0xc00006ec90}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID: SubMale:false SubAge:0 JavaClassName:com.ikurento.user.SubInfo}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 connected to localhost:20001!
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 try calling interface:com.ikurento.user.UserProvider.GetUser
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 with protocol:dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 After 3ms , Got Rsp:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{ID:A002 Name:Alex Stocks Age:18 JavaClassName: SubInfo:0xc0001241b0}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 SubInfo:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2020/10/26 20:47:45 &amp;amp;{SubID:A001 SubMale:false SubAge:18 JavaClassName:}```
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可看到详细的请求体赋值情况，以及返回结果和耗时。支持嵌套结构&lt;/p>
+&lt;p>server端打印结果&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>=======================
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req:&amp;amp;main.CallUserStruct{ID:&amp;#34;A000&amp;#34;, Male:true, SubInfo:main.SubInfo{SubID:&amp;#34;A001&amp;#34;, SubMale:false, SubAge:18}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>=======================
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可见接收到了来自cli的数据&lt;/p></description></item><item><title>Overview: 使用 Zookeeper 作为注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/zookeeper/</guid><description>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;li>准备 Zookeeper 实例&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-配置注册中心">2. 配置注册中心&lt;/h2>
+&lt;p>修改服务端配置 go-server/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup &lt;span style="color:#586e75"># default is dubbo&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: interface
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># dubbo interface version must be same with client&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># dubbo interface group must be same with client&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改客户端配置 go-client/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myGroup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-type&lt;/span>: interface
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProviderWithCustomGroupAndVersion&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter2 &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: myInterfaceGroup &lt;span style="color:#586e75"># dubbo interface group must be same with server&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: myInterfaceVersion &lt;span style="color:#586e75"># dubbo interface version must be same with server&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-使用-zookeeper-进行服务发现">3. 使用 Zookeeper 进行服务发现&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>启动go-server/cmd，查看日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>INFO zookeeper/registry.go:217 &lt;span style="color:#719e07">[&lt;/span>Zookeeper Registry&lt;span style="color:#719e07">]&lt;/span> Registry instance with &lt;span style="color:#268bd2">root&lt;/span> &lt;span style="color:#719e07">=&lt;/span> /myGroup/com.apache.dubbo.sample.basic.IGreeter/providers
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>日志中包含 Zookeeper 注册信息，将当前服务接口注册在 Zookeeper&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>启动 go-client/cmd 查看日志&lt;/p>
+&lt;p>日志中包含 Zookeeper 注册组件的订阅事件信息，获取到服务端 IP 和端口号，显示调用成功。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span> zookeeper&lt;span style="color:#719e07">/&lt;/span>registry&lt;span style="color:#719e07">.&lt;/span>go:&lt;span style="color:#2aa198">217&lt;/span> [Zookeeper Registry] Registry instance with root &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">/&lt;/span>myGroup&lt;span style="color:#719e07">/&lt;/span>com&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>sample&lt;span style="color:#719e07">.&lt;/span>basic&lt;span style="color:#719e07">.&lt;/span>IGreeter&lt;span style="color:#719e07">/&lt;/span>consumers, node &lt;span style="color:#719e07">=&lt;/span> consumer&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>A&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>F&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>F172&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">22.91&lt;/span>&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>Fcom&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>sample&lt;span style="color:#719e07">.&lt;/span>basic&lt;span style="color:#719e07">.&lt;/span>IGreeter&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Fapp&lt;span style="color:#719e07">.&lt;/span>version&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>application&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Ddubbo&lt;span style="color:#719e07">.&lt;/span>io&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>async&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfalse&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>bean&lt;span style="color:#719e07">.&lt;/span>name&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>DGreeterClientImpl&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>cluster&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfailover&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>config&lt;span style="color:#719e07">.&lt;/span>tracing&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>environment&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>generic&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>group&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>interface&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dcom&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>sample&lt;span style="color:#719e07">.&lt;/span>basic&lt;span style="color:#719e07">.&lt;/span>IGreeter&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>loadbalance&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>metadata&lt;span style="color:#719e07">-&lt;/span>type&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dlocal&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>module&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dsample&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>name&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Ddubbo&lt;span style="color:#719e07">.&lt;/span>io&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>organization&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Ddubbo&lt;span style="color:#719e07">-&lt;/span>go&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>owner&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Ddubbo&lt;span style="color:#719e07">-&lt;/span>go&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>protocol&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dtri&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>provided&lt;span style="color:#719e07">-&lt;/span>by&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>reference&lt;span style="color:#719e07">.&lt;/span>filter&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dcshutdown&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>registry&lt;span style="color:#719e07">.&lt;/span>role&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D0&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>release&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Ddubbo&lt;span style="color:#719e07">-&lt;/span>golang&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">3.0&lt;/span>&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">4&lt;/span>&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>retries&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>serialization&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>side&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dconsumer&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>sticky&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>Dfalse&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>timestamp&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D1675407574&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">26&lt;/span>version&lt;span style="color:#719e07">%&lt;/span>&lt;span style="color:#2aa198">3&lt;/span>D
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cmd&lt;span style="color:#719e07">/&lt;/span>client&lt;span style="color:#719e07">.&lt;/span>go:&lt;span style="color:#2aa198">54&lt;/span> start to test dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cmd&lt;span style="color:#719e07">/&lt;/span>client&lt;span style="color:#719e07">.&lt;/span>go:&lt;span style="color:#2aa198">62&lt;/span> client response result: name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span> age:&lt;span style="color:#2aa198">21&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cmd&lt;span style="color:#719e07">/&lt;/span>client&lt;span style="color:#719e07">.&lt;/span>go:&lt;span style="color:#2aa198">68&lt;/span> client response result: name:&lt;span style="color:#2aa198">&amp;#34;Hello laurence from UserProviderWithCustomRegistryGroupAndVersion&amp;#34;&lt;/span> id:&lt;span style="color:#2aa198">&amp;#34;12345&amp;#34;&lt;/span> age:&lt;span style="color:#2aa198">21&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>同时，我们可以直接查看zk中的数据如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 6&lt;span style="color:#719e07">]&lt;/span> ls /
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zookeeper, myGroup&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zk: localhost:2181&lt;span style="color:#719e07">(&lt;/span>CONNECTED&lt;span style="color:#719e07">)&lt;/span> 7&lt;span style="color:#719e07">]&lt;/span> ls /myGroup
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>com.apache.dubbo.sample.basic.IGreeter2, com.apache.dubbo.sample.basic.IGreeter&lt;span style="color:#719e07">]&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-更多支持的注册中心">4. 更多支持的注册中心&lt;/h2>
+&lt;p>参考 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/registry">dubbo-go-samples/registry&lt;/a>&lt;/p></description></item><item><title>Overview: 使用 Polaris 作为注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/polaris/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/polaris/</guid><description>
+&lt;h2 id="1准备工作">1.准备工作&lt;/h2>
+&lt;ul>
+&lt;li>
+&lt;p>假设您已经准备好demo工程，如果不清楚，可以参考前面的文章&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>北极星服务端安装&lt;/p>
+&lt;p>&lt;a href="https://polarismesh.cn/docs/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%89%E8%A3%85/%E5%8D%95%E6%9C%BA%E7%89%88%E5%AE%89%E8%A3%85/">北极星服务端单机版本安装文档&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://polarismesh.cn/docs/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%89%E8%A3%85/%E9%9B%86%E7%BE%A4%E7%89%88%E5%AE%89%E8%A3%85/">北极星服务端集群版本安装文档&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="2使用polaris作为注册中心">2.使用Polaris作为注册中心&lt;/h2>
+&lt;h3 id="21dubbogoyaml-配置文件">2.1dubbogo.yaml 配置文件&lt;/h3>
+&lt;p>当前 PolarisMesh 已实现了 dubbogo 的注册发现扩展点，因此你只需要调整你的 dubbogo.yaml 文件中的 registries 配置项，新增 protocol 为 polaris 的注册中心配置即可，可以参考下面的样例。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">polarisMesh&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: polaris
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: ${北极星服务端IP}:8091
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: ${北极星命名空间信息}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">token&lt;/span>: ${北极星资源鉴权 token} &lt;span style="color:#586e75"># 如果北极星服务端开启了针对客户端的鉴权，则需要配置该参数&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22运行服务提供者">2.2运行服务提供者&lt;/h3>
+&lt;p>进入 go-server 的 cmd 目录，执行以下命令&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">export&lt;/span> DUBBO_GO_CONFIG_PATH&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../conf/dubbogo.yml&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> go run &lt;span style="color:#719e07">.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当看到以下日志时即表示 server 端启动成功&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO dubbo/dubbo_protocol.go:84 [DUBBO Protocol] Export service:
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23运行服务调用者">2.3运行服务调用者&lt;/h3>
+&lt;p>进入 go-client 的 cmd 目录，执行以下命令&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">export&lt;/span> DUBBO_GO_CONFIG_PATH&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;../conf/dubbogo.yml&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> go run &lt;span style="color:#719e07">.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当看到以下日志时即表示 go-client 成功发现 go-server 并发起了 RPC 调用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO cmd/main.go:75 response: &amp;amp;{A001 Alex Stocks 18 2022-11-19 12:52:38.092 +0800 CST}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3使用polaris作为注册中心">3.使用Polaris作为注册中心&lt;/h2>
+&lt;p>相关源码：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/polaris/registry">示例源码&lt;/a>&lt;/p></description></item><item><title>Overview: 多注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/multi_registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/multi_registry/</guid><description>
+&lt;p>一个 Dubbo-go 应用可以配置的多个接口维度的注册中心。&lt;/p>
+&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
+&lt;li>创建一个新的 demo 应用&lt;/li>
+&lt;li>本地启动Nacos、Zookeeper&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-使用多注册中心">2. 使用多注册中心&lt;/h2>
+&lt;p>修改服务端配置 go-server/conf/dubbogo.yaml， 同时将服务注册在两个注册中心上。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zookeeper&lt;/span>: &lt;span style="color:#586e75"># 指定 zookeeper 注册中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>: &lt;span style="color:#586e75"># 指定 nacos 注册中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-ids&lt;/span>: &lt;span style="color:#586e75"># 同时注册&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改客户端配置 go-client/conf/dubbogo.yaml&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>: &lt;span style="color:#586e75"># 指定 nacos 注册中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">8848&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zookeeper&lt;/span>: &lt;span style="color:#586e75"># 指定 zookeeper 注册中心&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">consumer&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">references&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-ids&lt;/span>: &lt;span style="color:#586e75"># 从 nacos 注册中心服务发现&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - nacos
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterClientImpl2&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-ids&lt;/span>: &lt;span style="color:#586e75"># 从 zookeeeper 注册中心服务发现&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>修改客户端代码，再定义一个客户端存根类，名为GreeterClientImpl2：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> grpcGreeterImpl2 = &lt;span style="color:#b58900">new&lt;/span>(GreeterClientImpl2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> GreeterClientImpl2 &lt;span style="color:#268bd2">struct&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> api.GreeterClientImpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>客户端编写调用代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config.&lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl2)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;start to test dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reply, err &lt;span style="color:#719e07">:=&lt;/span> grpcGreeterImpl.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;nacos server response result: %v\n&amp;#34;&lt;/span>, reply)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reply, err = grpcGreeterImpl2.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk server response result: %v\n&amp;#34;&lt;/span>, reply)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-多注册中心服务发现验证">3. 多注册中心服务发现验证&lt;/h2>
+&lt;p>分别启动 go-server/cmd 和 go-client/cmd 查看两条调用成功的日志：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:55 nacos server response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INFO cmd/client.go:61 zk server response result: name:&amp;#34;Hello laurence&amp;#34; id:&amp;#34;12345&amp;#34; age:21
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

@@ -1,0 +1,379 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 开发者指南</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/</link><description>Recent content in 开发者指南 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Pixiu Filter体系介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/filter-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/filter-extension/</guid><description>
+&lt;h2 id="怎样编写一个filter">&lt;strong>怎样编写一个Filter&lt;/strong>&lt;/h2>
+&lt;p>&lt;code>更详细的信息，请移步Blog《谈谈Pixiu的Filter》&lt;/code>&lt;/p>
+&lt;p>我们来尝试写一个简单的Filter，这个Filter将会有简单的配置，在Decode阶段把请求的Body Log出来，并翻转后作为Mock的返回值。最后在Encode阶段根据配置把返回值Log出来。&lt;/p>
+&lt;p>1.首先创建一个Filter&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> DemoFilter &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logPrefix &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Decode阶段，发生在调用Upstream之前
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilter) &lt;span style="color:#268bd2">Decode&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext) filter.FilterStatus {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> body, _ &lt;span style="color:#719e07">:=&lt;/span> ioutil.&lt;span style="color:#268bd2">ReadAll&lt;/span>(ctx.Request.Body)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;request body: %s&amp;#34;&lt;/span>, body)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//reverse res str
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> runes &lt;span style="color:#719e07">:=&lt;/span> []&lt;span style="color:#b58900">rune&lt;/span>(&lt;span style="color:#b58900">string&lt;/span>(body))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; &lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>; i &lt;span style="color:#719e07">+=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> runes[i], runes[&lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">-&lt;/span>i] = runes[&lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">-&lt;/span>i], runes[i]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reverse &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">string&lt;/span>(runes)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//mock response
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ctx.&lt;span style="color:#268bd2">SendLocalReply&lt;/span>(&lt;span style="color:#2aa198">200&lt;/span>, []&lt;span style="color:#b58900">byte&lt;/span>(reverse))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> filter.Stop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Encode阶段，此时可以获取到Upstream的Response
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilter) &lt;span style="color:#268bd2">Encode&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext) filter.FilterStatus {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res &lt;span style="color:#719e07">:=&lt;/span> ctx.SourceResp.(&lt;span style="color:#dc322f">string&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;%s: %s&amp;#34;&lt;/span>, f.logPrefix, res)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> filter.Continue
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>2.创建Filter Factory&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DemoFilterFactory &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conf &lt;span style="color:#719e07">*&lt;/span>Config
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Config describe the config of Filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> Config &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LogPrefix &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`yaml:&amp;#34;logPrefix,omitempty&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilterFactory) &lt;span style="color:#268bd2">PrepareFilterChain&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext, chain filter.FilterChain) &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demo &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>DemoFilter{logPrefix: f.conf.LogPrefix}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> chain.&lt;span style="color:#268bd2">AppendDecodeFilters&lt;/span>(demo)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> chain.&lt;span style="color:#268bd2">AppendEncodeFilters&lt;/span>(demo)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilterFactory) &lt;span style="color:#268bd2">Config&lt;/span>() &lt;span style="color:#268bd2">interface&lt;/span>{} {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> f.conf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilterFactory) &lt;span style="color:#268bd2">Apply&lt;/span>() &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>3.创建Filter Plugin，并注册自己&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//important
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filter.&lt;span style="color:#268bd2">RegisterHttpFilter&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>Plugin{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Plugin &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>Plugin) &lt;span style="color:#268bd2">Kind&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dgp.filters.demo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>Plugin) &lt;span style="color:#268bd2">CreateFilterFactory&lt;/span>() (filter.HttpFilterFactory, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>DemoFilterFactory{conf: &lt;span style="color:#719e07">&amp;amp;&lt;/span>Config{}}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>4.配置文件中配置此Filter，并启动Pixiu&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">static_resources&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">listeners&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;net/http&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol_type&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;HTTP&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">socket_address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8888&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter_chains&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filter.httpconnectionmanager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">routes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prefix&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http_filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filters.demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>5.访问并查看日志与结果&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl localhost:8888/demo -d &lt;span style="color:#2aa198">&amp;#34;eiv al tse’c&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>c’est la vie%
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>日志&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>2022-02-19T20:20:11.900+0800 INFO demo/demo.go:62 request body: eiv al tse’c
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-02-19T20:20:11.900+0800 INFO demo/demo.go:71 : eiv al tse’c
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: dubbo-pilot Control Plane 部署</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/dubbo-pilot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/dubbo-pilot/</guid><description>
+&lt;ul>
+&lt;li>&lt;a href="#target">1.总体目标&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#basic">2.基本流程&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#detail">3.详细步骤&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#env">3.1 环境要求&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#native_deploy">3.2 istio 本地部署&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#nbuild">3.2.1 编译&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#ndeploy">3.2.2 部署 &amp;amp; debug&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="#docker_deploy">3.3 istio 容器部署&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#dbuild">3.3.1 编译&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#ddeploy">3.3.2 部署 &amp;amp; debug&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="target">1 总体目标&lt;/h2>
+&lt;ul>
+&lt;li>控制面编译和镜像构建&lt;/li>
+&lt;li>使用 istioctl 在 kubernetes 环境部署&lt;/li>
+&lt;li>如何对控制面程序 debug&lt;/li>
+&lt;/ul>
+&lt;h2 id="basic">2 基本流程&lt;/h2>
+这个例子将演示如何在编译 dubbo-pilot 控制平面并在 kubernetes 环境下如何使用 istioctl 进行部署
+&lt;ol>
+&lt;li>本地启动控制平面，对 dubbo-pilot 进行启动和 debug&lt;/li>
+&lt;li>使用 istioctl 在 k8s 环境启动和 debug&lt;/li>
+&lt;/ol>
+&lt;h2 id="detail">3 详细步骤&lt;/h2>
+&lt;h3 id="env">3.1 环境要求&lt;/h3>
+&lt;ul>
+&lt;li>Golang&lt;/li>
+&lt;li>Docker&lt;/li>
+&lt;li>Minikube/Kind&lt;/li>
+&lt;li>Kubectl&lt;/li>
+&lt;li>Dlv&lt;/li>
+&lt;/ul>
+&lt;h3 id="native_deploy">3.2 本地部署&lt;/h3>
+&lt;h4 id="nbuild">3.2.1 编译&lt;/h4>
+&lt;ol>
+&lt;li>编译 docker-builder&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>cd dubbo&lt;span style="color:#719e07">-&lt;/span>go&lt;span style="color:#719e07">-&lt;/span>pixiu&lt;span style="color:#719e07">/&lt;/span>tools&lt;span style="color:#719e07">/&lt;/span>docker&lt;span style="color:#719e07">-&lt;/span>builder &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> go install
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker&lt;span style="color:#719e07">-&lt;/span>builder &lt;span style="color:#719e07">-&lt;/span>h:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Builds Istio docker images
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Usage:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [flags]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Flags:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>architecures strings architectures to build (default [linux&lt;span style="color:#719e07">/&lt;/span>amd64])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>base&lt;span style="color:#719e07">-&lt;/span>version string base version to use (default &lt;span style="color:#2aa198">&amp;#34;latest&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>builder string type of builder to use&lt;span style="color:#719e07">.&lt;/span> options are crane &lt;span style="color:#719e07">or&lt;/span> docker (default &lt;span style="color:#2aa198">&amp;#34;docker&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">-&lt;/span>h, &lt;span style="color:#719e07">--&lt;/span>help help &lt;span style="color:#719e07">for&lt;/span> this command
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>hub strings docker hub(s) (default [localhost:&lt;span style="color:#2aa198">5000&lt;/span>])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>istio&lt;span style="color:#719e07">-&lt;/span>version string istio version to use (default &lt;span style="color:#2aa198">&amp;#34;1.14-dev&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>kind&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#b58900">load&lt;/span> kind cluster to &lt;span style="color:#b58900">load&lt;/span> into
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>no&lt;span style="color:#719e07">-&lt;/span>cache disable caching
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>no&lt;span style="color:#719e07">-&lt;/span>clobber &lt;span style="color:#719e07">do&lt;/span> &lt;span style="color:#719e07">not&lt;/span> allow pushing images that already exist
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>proxy&lt;span style="color:#719e07">-&lt;/span>version string proxy version to use (default &lt;span style="color:#2aa198">&amp;#34;7ae8e27f274b33dc2f4d83100aea5971ed6698d3&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>push push targets to registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>save save targets to tar&lt;span style="color:#719e07">.&lt;/span>gz
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>tag strings docker tag(s) (default [latest])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>targets strings targets to build (default [app,app_sidecar_centos_7,app_sidecar_debian_11,app_sidecar_ubuntu_jammy,app_sidecar_ubuntu_xenial,ext&lt;span style="color:#719e07">-&lt;/span>authz,install&lt;span style="color:#719e07">-&lt;/span>cni,istioctl,operator,pilot,proxyv2])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>variants strings variants to build (default [default])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>version show build version
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>使用 docker-builder 自动编译 &amp;amp;&amp;amp; 构建镜像&lt;/li>
+&lt;/ol>
+&lt;p>编译 istioctl&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker-builder --targets istioctl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>编译完成：
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ls out/linux_amd64/
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>istioctl logs pilot-agent pilot-discovery
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译 dubbo-pilot 并推送到私有镜像仓库&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>tools&lt;span style="color:#719e07">/&lt;/span>docker&lt;span style="color:#719e07">-&lt;/span>builder&lt;span style="color:#719e07">/&lt;/span>docker&lt;span style="color:#719e07">-&lt;/span>builder &lt;span style="color:#719e07">--&lt;/span>targets pilot &lt;span style="color:#719e07">--&lt;/span>hub docker&lt;span style="color:#719e07">.&lt;/span>io&lt;span style="color:#719e07">/&lt;/span>bobtthp &lt;span style="color:#719e07">--&lt;/span>push
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="ndeploy">3.2.2 本地部署&lt;/h4>
+&lt;p>本地启动方式：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>./out/linux_amd64/pilot-discovery
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>启动日志：
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751245Z info FLAG: --caCertFile=&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751277Z info FLAG: --clusterAliases=&amp;#34;[]&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751280Z info FLAG: --clusterID=&amp;#34;Kubernetes&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751282Z info FLAG: --clusterRegistriesNamespace=&amp;#34;istio-system&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751284Z info FLAG: --configDir=&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751286Z info FLAG: --ctrlz_address=&amp;#34;localhost&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751289Z info FLAG: --ctrlz_port=&amp;#34;9876&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.751291Z info FLAG: --domain=&amp;#34;cluster.local&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-09-24T15:31:56.753814Z info initializing mesh configuration ./etc/istio/config/mesh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="docker_deploy">3.3 容器部署&lt;/h3>
+&lt;h4 id="dbuild">3.3.1 镜像构建&lt;/h4>
+&lt;p>构建远程 debug 镜像&lt;/p>
+&lt;ol>
+&lt;li>下载 dlv&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>git clone https://github.com/go-delve/delve.git
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make install
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>which dlv
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/root/go/bin/dlv
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Dockerfile 增加dlv dubbo-go-pixiu/pilot/docker/Dockerfile.pilot:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>COPY ${TARGETARCH:-amd64}/dlv /usr/local/bin/dlv
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>拷贝 dlv 至镜像挂载目录中：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>cp /root/go/bin/dlv out/linux_amd64/dockerx_build/build.docker.pilot/amd64/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>debug 镜像构建并推送:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>docker-builder --targets pilot --hub docker.io/bobtthp --push --tag debug
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>本地也可以查看镜像构建情况：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>[root&lt;span style="color:#719e07">~&lt;/span>master&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>] &lt;span style="color:#719e07">/&lt;/span>tmp&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>go&lt;span style="color:#719e07">-&lt;/span>pixiu&lt;span style="color:#719e07">/&lt;/span>tools&lt;span style="color:#719e07">/&lt;/span>docker&lt;span style="color:#719e07">-&lt;/span>builder&lt;span style="color:#719e07">&amp;gt;&lt;/span> docker images
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REPOSITORY TAG IMAGE ID CREATED SIZE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>bobtthp&lt;span style="color:#719e07">/&lt;/span>pilot latest &lt;span style="color:#2aa198">7&lt;/span>b1aadd55120 &lt;span style="color:#2aa198">13&lt;/span> minutes ago &lt;span style="color:#2aa198">262&lt;/span>MB
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="ddeploy">3.3.2 部署&lt;/h4>
+&lt;ol>
+&lt;li>使用刚构建的镜像部署:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>out/linux_amd64/istioctl --set .values.pilot.image=bobtthp/pilot:debug install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>查看部署情况：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>[root&lt;span style="color:#719e07">~&lt;/span>master] &lt;span style="color:#719e07">/&lt;/span>tmp&lt;span style="color:#719e07">/&lt;/span>dubbo&lt;span style="color:#719e07">-&lt;/span>go&lt;span style="color:#719e07">-&lt;/span>pixiu&lt;span style="color:#719e07">/&lt;/span>tools&lt;span style="color:#719e07">/&lt;/span>docker&lt;span style="color:#719e07">-&lt;/span>builder&lt;span style="color:#719e07">&amp;gt;&lt;/span> kubectl get po &lt;span style="color:#719e07">-&lt;/span>n istio&lt;span style="color:#719e07">-&lt;/span>system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>NAME READY STATUS RESTARTS AGE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>istiod&lt;span style="color:#719e07">-&lt;/span>fd5d9f77&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>ncjq &lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> Running &lt;span style="color:#2aa198">0&lt;/span> &lt;span style="color:#2aa198">18&lt;/span>m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>进入容器远程 debug:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[root~master-1] /tmp/dubbo-go-pixiu&amp;gt; kubectl exec -it -n istio-system istiod-fd5d9f77-2ncjq bash
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>启动 dlv:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>istio-proxy@istiod-fd5d9f77-2ncjq:/$ dlv --listen=:8015 --headless=true --api-version=2 --log attach `ps -ef |grep pilot-discovery| awk &amp;#39;{print $2}&amp;#39;`
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-11-04T15:43:14Z error layer=debugger could not create config directory: mkdir /home/istio-proxy/.config: read-only file system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>API server listening at: [::]:8015
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-11-04T15:43:14Z warning layer=rpc Listening for remote connections (connections are not authenticated nor encrypted)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>2022-11-04T15:43:14Z info layer=debugger attaching to pid 1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>对外暴露端口：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[root~master-1] /tmp&amp;gt; kubectl port-forward -n istio-system istiod-fd5d9f77-2ncjq 8015:8015
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Forwarding from 127.0.0.1:8015 -&amp;gt; 8015
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Forwarding from [::1]:8015 -&amp;gt; 8015
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="6">
+&lt;li>可以进行远程调试&lt;/li>
+&lt;/ol></description></item><item><title>Overview: Trie 前缀树介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/trie/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/dev/trie/</guid><description>
+&lt;h1 id="简介">简介&lt;/h1>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-1.png" alt="image.png">&lt;br />网关的核心之一是路由逻辑，决定一个请求需要经过怎样的加工，被转发到哪个下行服务。&lt;br />其中 80% 的路由需求表达都以 URL 为基础。需要描述清楚具有某个特征的 URL 或者 URL 集合对应怎样的一系列下游处理策略。&lt;/p>
+&lt;p>例如，&amp;rsquo;/test/&lt;strong>&amp;rsquo; 开头的 URL 路由到测试环境集群，&amp;rsquo;/release/user/&lt;/strong>&amp;rsquo; 开头的 URL 会被路由到正式环境的 user 服务集群。&lt;/p>
+&lt;p>同时网关作为所有请求的入口，每一毫秒的延时都会做用在全量的业务下，在 mesh 场景下，延时还会随着调用链路的加深，被倍数放大。按照生产环境业务相应 &amp;lt;=7 毫秒的标准来看，规则匹配的性能要求也是十分苛刻的。一定不能随着规则数目的增加而性能退化。&lt;/p>
+&lt;h1 id="使用介绍">使用介绍&lt;/h1>
+&lt;p>仅从使用方的角度阐述 pixiu 的配置文件如何描述 URL 相关的路由规则。（下面，我们介绍一下如何配置 URL 路由规则）&lt;br />如下是一份 pixiu 的 api 配置文件，这份配置文件会被解析后生成一份对应的内存模型，作为 pixiu 路由相关配置的初始状态。之后由 RDS 协议修改解析后得到的内存模型，实现路由逻辑动态生效的效果。RDS 协议（RDS：xDS 协议下描述路由规则的部分）相关内容是后话不详细阐述。我们把注意力聚焦到resource部分。&lt;br />resource 下 path 部分就是上文阐述的，URL 相关的路由描述。意思是满足 path 描述特征的 URL 会被成功匹配。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>name: server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>description: server sample
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>resources:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - path: &amp;#39;/api/v&lt;span style="color:#2aa198">1&lt;/span>/test-dubbo/user/name/:name&amp;#39;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type: restful
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> description: user
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methods:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - httpVerb: GET
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> enable: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout: &lt;span style="color:#2aa198">1000&lt;/span>ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> inboundRequest:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> requestType: http
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> uri:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> required: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> integrationRequest:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> requestType: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> mappingParams:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: uri.name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> mapTo: &lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> mapType: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationName: &lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> interface: &lt;span style="color:#2aa198">&amp;#34;com.dubbogo.server.UserService&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> method: &lt;span style="color:#2aa198">&amp;#34;GetUserByName&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> group: &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> version: &lt;span style="color:#2aa198">1.0&lt;/span>.&lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> clusterName: &lt;span style="color:#2aa198">&amp;#34;test_dubbo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>被匹配后的请求会被转化成 dubbo 协议转发到 test_dubbo 集群调用 com.dubbogo.server.UserService 下的 GetUserByName 服务。&lt;br />我们继续聚焦到如下范围：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>path: &amp;#39;/api/v&lt;span style="color:#2aa198">1&lt;/span>/test-dubbo/user/name/:name&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为了描述清楚一个 URL 或者一组 URL，路由引擎需要拥有以下能力：&lt;/p>
+&lt;ol>
+&lt;li>URL 可以包含变量，&amp;rsquo;/api/v1/test-dubbo/user/name/:name&amp;rsquo; 代表 URL 用“/”分割后，第六个部分的值作为变量 name 的值，向下游 filter 传递供filter使用。&lt;/li>
+&lt;li>需要有通配符
+&lt;ol>
+&lt;li>
+&lt;ul>
+&lt;li>代表一个层级任意字符的通配 &amp;lsquo;/api/*/test-dubbo/user/name/:name&amp;rsquo; 这样的一个 path 描述代表了可能并不关心具体的版本，不论什么版本下的 URL 只要匹配都使用相同的逻辑加工数据并转发。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>** 代表多个层级的通配，从这个层级以后，子层级也可以是任意字符，&lt;strong>只可能存在于 URL 的末尾，不然会有二义性。&amp;rsquo;/api/v1/&lt;/strong>&amp;rsquo; 这样的 path 表达了所有 V1 版本下的 URL 都采用相同的逻辑。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;p>为了正确的使用 pixiu 您可能还需要了解如下内容。&lt;/p>
+&lt;h2 id="优先级">优先级&lt;/h2>
+&lt;p>并非是独创的，类似 java 下的 spring 以及其他框架统一具有的优先级逻辑：&lt;/p>
+&lt;ol>
+&lt;li>通配的优先级低于特指 。 &amp;lsquo;/api/v1/**&amp;rsquo; 低于 &amp;lsquo;/api/v1/test-dubbo/user/name/:name&amp;rsquo; 的优先级，假设有两个 resource 分别采用了如上两个path 配置，request 为 &amp;lsquo;/api/v1/test-dubbo/user/name/yqxu&amp;rsquo; 的请求到达pixiu 后应该生效哪个 resource？按照通配低于特指的原则，&amp;rsquo;/api/v1/test-dubbo/user/name/:name&amp;rsquo; 这条规则会生效。&lt;/li>
+&lt;li>深度更深的，优先级更高 。 &amp;lsquo;/api/v1/&lt;strong>&amp;rsquo; 对比 /api/v1/test-dubbo/&lt;/strong>&amp;rsquo; ，如果请求同时满足如上两个描述， &amp;lsquo;/api/v1/test-dubbo/**&amp;rsquo; 深度更深，会生效。&lt;/li>
+&lt;li>通配符之间 &amp;lsquo;/*&amp;rsquo; 优先级高于 &amp;lsquo;/**&amp;rsquo;&lt;/li>
+&lt;li>变量等同于通配。&lt;/li>
+&lt;/ol>
+&lt;h2 id="冲突处理">冲突处理&lt;/h2>
+&lt;p>优先级规则只是冲突解决策略的一种，才同时匹配多个url描述时，优先级更高的那一种将会生效，然而优先级策略并不能涵盖所有的情况。&lt;br />如果强行配置两条 resource path 完全相同，但是转发到不同的下游服务，这时候就会冲突。pixiu 下应对冲突的方案是 failfast，在 pixiu 初始化阶段，发现配置文件中有冲突的两项规则，则启动失败，让开发者今早发现问题并处理。&lt;/p>
+&lt;h1 id="原理介绍">原理介绍&lt;/h1>
+&lt;p>技术选型之初，以及确定使用pixiu后为了处理一些突发情况，以及应付一些pixiu自身可能存在的bug，开发者需要对pixiu 的路由原理有更深刻的了解。&lt;br />下面，我们将详细介绍路由引擎的相关原理和实现，供感兴趣的同学了解。&lt;br />相信阅读这部分内容的同学一定会有人下意识联想到字典树这个结构。使用字典树这个结构能实现存量规则数无关的匹配性能优化。&lt;/p>
+&lt;p>一个存放字符串作为node的字典树，具有表达url 的能力。&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-2.png" alt="img">&lt;br />如上图描述等价于URL集合 &amp;lsquo;/api/v1&amp;rsquo; ，&amp;rsquo;/api/v2&amp;rsquo; ，&amp;rsquo;/web&amp;rsquo;&lt;/p>
+&lt;p>维护一个标准字典树有几个关键的操作&lt;/p>
+&lt;ol>
+&lt;li>字典树指定节点的查找（find）: 从root 开始遍历字典书，&amp;rsquo;/api/v2&amp;rsquo; 称之为路径，在当前层级寻找指定路径，如果存在就继续在子树下完成剩下的路径匹配。&amp;rsquo;/api/v2&amp;rsquo; 先从 logic root 找到 &amp;lsquo;/api&amp;rsquo; ，并在 &amp;lsquo;/api&amp;rsquo; 的子树下继续查找剩下的路径 &amp;lsquo;/v2&amp;rsquo; 。&lt;/li>
+&lt;li>字典树节点的添加（add）： 尝试查找指定节点，如果指定节点不存在则新建一个节点。假设一个空树状态下添加 &amp;lsquo;/api/v1&amp;rsquo; ，因为是空树那么logic root 下查找 &amp;lsquo;/api&amp;rsquo; 一定不存在，则在 root 下创建 &amp;lsquo;/api&amp;rsquo; ，继续在创建的 &amp;lsquo;/api&amp;rsquo; 节点下查找 &amp;lsquo;/v1&amp;rsquo; 因为 &amp;lsquo;/api&amp;rsquo; 是新建的 v1 一定也不存在，则继续创建v1&lt;/li>
+&lt;li>字典树url匹配（match）：在这个最简单的版本下，匹配逻辑与指定节点的查找逻辑没有区别。&lt;/li>
+&lt;/ol>
+&lt;p>还有一些不涉及递归或者复用上面逻辑递归操作的简单操作&lt;/p>
+&lt;ol start="4">
+&lt;li>修改字典树节点（modify）：通过 find 逻辑找到指定节点，调用 set 方法或者直接赋值的方式修改节点内容。&lt;/li>
+&lt;li>删除字典树节点（delete）: 通过 modify 逻辑修改 isdeleted 标为 true，并把节点内容 modify 为空。节点本身的内存不释放。&lt;/li>
+&lt;li>重建字典树（rebuild）：遍历所有节点，添加到新树，如果 isdeleted为 true 则不添加到新树，通过rebuild 操作创建副本。&lt;/li>
+&lt;/ol>
+&lt;p>由上可知，标准字典树结构距离通用的路由引擎底层数据结构能力还有一定差距，缺乏统配描述能力，缺乏变量表达的能力，下面我们来看一下如何进行改进。&lt;/p>
+&lt;p>添加 描述统配逻辑的子树，作为子树中默认存在的一部分&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-3.png" alt="img">&lt;br />现在我们的变种字典树多了变量表达能力&lt;br />&amp;rsquo;/web/:appname/test/*&amp;rsquo; 这样的url 在图中应该怎么表达？&lt;br />没错就是这个路径&lt;br />&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-4.png" alt="img">&lt;/p>
+&lt;p>继续分析字典树几个关键的操作是否需要做变化？&lt;/p>
+&lt;ol>
+&lt;li>字典树指定节点的查找 ：
+&lt;ol>
+&lt;li>如果不改动使用前一版本逻辑在 &amp;lsquo;/&lt;em>&amp;rsquo; 节点处理之前都不会有问题： 从root 开始遍历字典书，&amp;rsquo;/api/v2/&lt;/em>&amp;rsquo; 称之为路径，在当前层级寻找指定路径，如果存在就继续在子树下完成剩下的路径匹配。 /api/v2 先从 logic root 找到 &amp;lsquo;/api&amp;rsquo; ，并在 &amp;lsquo;/api&amp;rsquo; 的子树下继续查找剩下的路径 &amp;lsquo;/v2&amp;rsquo; 。&lt;/li>
+&lt;li>这版本我们加上对 &amp;lsquo;/&lt;em>&amp;rsquo; 节点的处理：&amp;rsquo;/v2&amp;rsquo; 后是 &amp;lsquo;/&lt;/em>&amp;rsquo; ，&amp;rsquo;/&lt;em>&amp;rsquo; 对应单级通配节点，继续递归查找 &amp;lsquo;/v2&amp;rsquo; 节点下一级通配节点是否为空。如果 path 是 &amp;lsquo;/api/v2/&lt;/em>/test2&amp;rsquo; 这样的路径则继续在统配子树下完成递归过程。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>字典树节点的添加 ：
+&lt;ol>
+&lt;li>在添加 &amp;lsquo;/&lt;em>&amp;rsquo; 节点之前，所有逻辑上一版本就足够处理：尝试查找指定节点，如果指定节点不存在则新建一个节点。假设一个空树状态下添加 &amp;lsquo;/api/v1/&lt;/em>&amp;rsquo; ，因为是空树那么 logic root 下查找 &amp;lsquo;/api&amp;rsquo; 一定不存在，则在 root 下创建 &amp;lsquo;/api&amp;rsquo; ，继续在创建的 &amp;lsquo;/api&amp;rsquo; 节点下查找 &amp;lsquo;/v1&amp;rsquo; 因为 &amp;lsquo;/api&amp;rsquo; 是新建的 v1 一定也不存在，则继续创建 v1。&lt;/li>
+&lt;li>这版本加上 &amp;lsquo;/*&amp;rsquo; 的特殊处理 ：&amp;rsquo;/v1&amp;rsquo; 新建后，查看通配子树，通配子树不存在，则为V1 节点添加内容为空的单级通配子树并在子树中继续递归。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>字典树url匹配：在这个版本下，对比查找逻辑需要增加回朔逻辑。
+&lt;ol>
+&lt;li>在遇到通配节点前逻辑与find 依旧相同 ： 从root 开始遍历字典书，&amp;rsquo;/api/v2/*&amp;rsquo; 称之为路径，在当前层级寻找指定路径，如果存在就继续在子树下完成剩下的路径匹配。 &amp;lsquo;/api/v2&amp;rsquo; 先从 logic root 找到 &amp;lsquo;/api&amp;rsquo; ，并在 &amp;lsquo;/api&amp;rsquo; 的子树下继续查找剩下的路径 &amp;lsquo;/v2&amp;rsquo; 。&lt;/li>
+&lt;li>在处理统配节点的时候会与 find 逻辑有所不同：&amp;rsquo;/v2&amp;rsquo; 下普通子树无匹配节点，回朔到通配子树，查看是否能匹配，这个例子中 &amp;lsquo;/v2&amp;rsquo; 下无通配子树，查询不到节点 。值得注意的是回朔逻辑的先后顺序，是先找普通子树再回朔到通配子树还是先查找通配子树再回朔到普通子树是取决于优先级规则的，按照需求必须是先查找普通子树。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;p>但是我们目前还是缺乏 &amp;lsquo;/&lt;strong>&amp;rsquo; 这种通配的表达能力代表了多级通配，可以分析需求得到结论，这种通配符，一定不存在子树，是一种特殊的叶子结点，仅用于 match 逻辑回朔时做特殊判断。继续加点特殊 node 后演化为：&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-5.png" alt="img">&lt;br />好了至此，需求都能满足了。&lt;br />&amp;rsquo;/api/&lt;/strong>&amp;rsquo; 等价路径为：&lt;br />&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/dubbo-go-pixiu/dev/trie/1642993180981-51a0df19-bb03-49c8-9128-a6e95dbabfcd.png" alt="img">&lt;br />其他逻辑大同小异，match 逻辑回朔再多一级判断，如果一级通配子树也匹配不到结果，则再看一下多级通配子树是否为空（其实留一个标位就可以，为了统一模型好理解，还是用一个子树去描述）&lt;/p>
+&lt;p>到目前这个版本所有上文提到的能力已经都能有效支撑，回头分析一下时间复杂读。&lt;br />url 被 &amp;lsquo;/&amp;rsquo; 分割出一个一个的段，容易理解在匹配一个url 过程中复杂度是 O(n) n= url 段数。与树中存有的规则数量无关。再分析 n 的范围，n 其实不是一个可以无限大的数字，一部分浏览器甚至约束 url 长度必须小于 2000，按照一个单词长度为 5 来计算，可以大概估计段数最多会在 400 左右，n 如果可以被视为一个常数，那么复杂读可以看作是 O（1）。&lt;/p>
+&lt;p>稍微解释一下find 和 match 有什么不同，为什么需要两种查找节点的方法。看下这个例子 :假设树中已经add 了 &amp;lsquo;/api/v1/:name/add&amp;rsquo; 这个 path，那么&lt;br />find（&amp;quot;/api/v1/:name/add&amp;quot;），find（&amp;quot;/api/v1/*/add&amp;quot;）两个调用应该能够拿到结果，在add 的过程中用于冲突判断。&lt;br />假设有请求进来url 为 &amp;lsquo;/api/v1/:name/add&amp;rsquo; 那么match（&amp;quot;/api/v1/:name/list&amp;quot;）也应该能 match 到结果且变量name 为 :name。&lt;br />再假设有请求进来 url 为 &amp;lsquo;/api/v1/yq/add&amp;rsquo; 那么match（&amp;quot;/api/v1/yq/list&amp;quot;）也应该能 match 到结果且变量name 为 yq 。find（&amp;quot;/api/v1/yq/add&amp;quot; ） 则不会匹配到结果。&lt;/p>
+&lt;h1 id="后续改进">后续改进&lt;/h1>
+&lt;p>目前实现在读树和写树之前，竞争一把全局锁，竞争失败后自旋直到竞争成功，然后完成读写。&lt;br />解释一下为什么读都需要上锁，因为代码中大量运用了go 的 map 结构。这个结构只要并发读写直接会报如下错误：concurrent map read and map write&lt;br />目前实现如下&lt;br />&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-6.png" alt="img">&lt;br />引入 command 队列，所有对 trie 的用户写操作先入列，同时做读写分离，分为读树和写树，维护一个线程负责追 log 把 command 写入到写树，读树因为只读，没有写入线程操作读树所以可以不加锁。写树因为只有一条线程向树内写入，没有竞争问题，也可以不加锁。（写入操作并不会很频繁单线程完全能负荷）&lt;br />定义一个配置延迟生效的时间，比如3s&lt;br />每3秒，读树和写树角色切换，每个 trie 分别维护一个 command 队列的游标，游标代表当前这个 trie，追 log 追到了哪条记录，写入线程每3s 切换写游标引用。&lt;br />&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-7.png" alt="img">&lt;/p>
+&lt;p>如上图，最上面部分是一个先进先出的 command 队列，追 log 线程从这个队列中读取用户写操作，这个队列维护了两个游标 index1，index2，index1 代表了trie1 追 log 追到了 index1 的位置，index2 代表了 trie2 追 log 追到了 index2 的位置。追 log 线程同一时间内只会使用一个引用进行写操作，每次写完树对应的 index 游标下移一格，另一个 trie 引用将被用于读操作，一切读请求将从读引用对应的树中读取。因为追的是同一份 log ，最终一致性是能保证的。&lt;/p>
+&lt;p>切换逻辑：&lt;/p>
+&lt;ol>
+&lt;li>先使追 log 线程空转（不挂起，避免上下文切换，因为马上要恢复）&lt;/li>
+&lt;li>保证两个树都没有写入线程操作&lt;/li>
+&lt;li>切换读引用到另一个树&lt;/li>
+&lt;li>切换写引用到另一个树&lt;/li>
+&lt;li>恢复追 log 线程&lt;/li>
+&lt;/ol>
+&lt;p>pr：&lt;br />&lt;a href="https://github.com/apache/dubbo-go-pixiu/pull/262">https://github.com/apache/dubbo-go-pixiu/pull/262&lt;/a>&lt;br />pkg/common/router/trie/trie.go:26&lt;/p></description></item></channel></rss>

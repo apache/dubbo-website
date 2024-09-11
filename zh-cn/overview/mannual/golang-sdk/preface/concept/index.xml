@@ -1,0 +1,302 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 概念体系</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/</link><description>Recent content in 概念体系 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 多语言 RPC</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/multi_language/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/multi_language/</guid><description>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/multi_language/dubbogo-3.0-invocation.png" alt="img">&lt;/p>
+&lt;h3 id="跨语言调用">跨语言调用&lt;/h3>
+&lt;p>随着微服务场景的大范围应用，多语言场景越来越普遍，开发人员更愿意使用更适合的语言，来实现一个复杂系统的不同模块。例如使用 C 来编写网关，使用 Go 来编写 K8S 资源 operator，使用 Java 来编写业务应用。语言与场景并不是绑定的，企业往往可以结合自身发展的技术栈、开发人员的专长，来选型合适的语言。&lt;/p>
+&lt;p>在多语言场景中，跨语言调用能力就显得十分重要。&lt;/p>
+&lt;p>跨语言能力本质上是 &lt;a href="../protocol/">【网络协议】&lt;/a> 提供的能力。如何方便地让用户使用需要的网络协议、针对合适的跨语言场景进行开发、享受 Dubbo 生态的服务治理能力，是 Dubbo-go 服务框架所关心的。&lt;/p>
+&lt;h3 id="跨生态">跨生态&lt;/h3>
+&lt;p>Dubbo-go 服务框架提供了跨生态的能力，开发人员可以使用 Dubbo-go 以及其 &lt;a href="../../../refer/ecology/">生态项目&lt;/a> 建立 HTTP/前端服务、Dubbo/Spring 应用、gRPC 生态应用之间的联系。&lt;/p></description></item><item><title>Overview: 泛化调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/generic/</guid><description>
+&lt;p>泛化调用是一种 Dubbo-Go 的特殊调用方式，它允许中间节点在没有接口信息的情况下传递调用信息，常被用于测试、网关的场景下。泛化调用支持 Dubbo 和 Triple 协议，但是目前序列化方案只支持 Hessian。&lt;/p>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>为了便于理解，这篇文档中以网关使用场景介绍泛化调用。我们先来考虑普通调用（非泛化调用）。下图包含了 consumer 和 provider 两个关键角色（后文中用 endpoint 代表一个 consumer 或一个 provider），各自都有一份关于 org.apache.dubbo.sample.User 接口的定义。假定在调用行为中需要使用 org.apache.dubbo.sample.User 接口。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1631941941270-86ce9845-5a88-4cb5-8c8a-da8ae7eeb4d5.png" alt="img">&lt;/p>
+&lt;p>RPC 需要借助网络介质传输，因此数据不能以 go struct 形式传输，而必须以二进制形式传输。这就要求 consumer 端在传输前，需要将实现 org.apache.dubbo.sample.User 接口的结构体序列化为二进制格式。同样的，对于 provider 端，需要将二进制数据反序列化为结构体信息。&lt;strong>总之，普通调用要求接口信息在每一个 endpoint 必须有相同的定义，这样才能保证数据序列化和反序列化的结果与预期一致&lt;/strong>。&lt;/p>
+&lt;p>在网关场景下，网关不可能存储全部接口定义。比如一个网关需要转发 100 个服务调用，每个服务需要的接口数量为 10 个，普通调用要求把 1000 个（100 * 10）接口定义提前全部存储在网关内，这显然是难以做到的。所以有没有一种方式可以既不需要提前存储接口定义，又能正确转发调用呢？答案是肯定的，这就是使用泛化调用的原因。&lt;/p>
+&lt;h2 id="原理">原理&lt;/h2>
+&lt;p>泛化调用本质上就是把复杂结构转化为通用结构，这里说的通用结构是指 map、string 等，网关是可以顺利解析并传递这些通用结构的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1632207075184-25939db4-f384-452e-a0b8-e1deff7971de.png" alt="img">&lt;/p>
+&lt;p>目前，Dubbo-go v3 只支持 Map 泛化方式（default）。我们以 User 接口为例，其定义如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// definition
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> User &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ID &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age &lt;span style="color:#dc322f">int32&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>User) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>假定调用一个服务需要一个 user 作为入参，其定义如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// an instance of the User
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>user &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>User{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ID: &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name: &lt;span style="color:#2aa198">&amp;#34;Zhangsan&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Age: &lt;span style="color:#2aa198">20&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>那么在使用 Map 泛化方式下，user 会被自动转换为 Map 格式，如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>usermap &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#268bd2">interface&lt;/span>{}]&lt;span style="color:#268bd2">interface&lt;/span>{} {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;iD&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;zhangsan&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;age&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">20&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;class&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.User&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>需要注意的是：&lt;/p>
+&lt;ul>
+&lt;li>Map 泛化方式会自动将首字母小写，即 ID 会被转换为 iD，如果需要对齐 Dubbo-Java 请考虑将 ID 改为 Id；&lt;/li>
+&lt;li>在 Map 中会自动插入 class 字段，用于标识原有接口类。&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用">使用&lt;/h2>
+&lt;p>泛化调用对 provider 端是透明的，即 provider 端不需要任何显式配置就可以正确处理泛化请求。&lt;/p>
+&lt;h3 id="基于-dubbo-url-泛化调用">基于 Dubbo URL 泛化调用&lt;/h3>
+&lt;p>基于 Filter 泛化调用对 consumer 是透明的，典型应用场景是网关。这种方式需要要求 Dubbo URL 中包含泛化调用标识，如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>dubbo://127.0.0.1:20000/org.apache.dubbo.sample.UserProvider?generic=true&amp;amp;...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个 Dubbo URL 表达的语意是：&lt;/p>
+&lt;ul>
+&lt;li>RPC 协议为 dubbo；&lt;/li>
+&lt;li>org.apache.dubbo.sample.UserProvider 接口位于 127.0.0.1:20000；&lt;/li>
+&lt;li>使用泛化调用（generic=true）。&lt;/li>
+&lt;/ul>
+&lt;p>Consumer 端的 Filter 会自动根据 Dubbo URL 携带的配置自动将普通调用转化为泛化调用，但是需要注意的是，在这种方式下响应结果是以泛化格式返回，不会自动转化为相应的对象。举个例子，在 map 泛化方式下，如果需要返回 User 类，那么 consumer 获得的相应是一个 User 类对应的 map。&lt;/p>
+&lt;h3 id="手动泛化调用">手动泛化调用&lt;/h3>
+&lt;p>手动泛化调用发起的请求不经过 filter，所以需要 consumer 端显式地发起泛化调用，典型应用场景是测试。在 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/generic">dubbo-go-samples&lt;/a> 中，为了便于测试都是采用手动调用的方式。&lt;/p>
+&lt;p>泛化调用不需要创建配置文件（dubbogo.yaml），但是需要在代码中手动配置注册中心、reference 等信息，初始化方法被封装到 newRefConf 方法中，如下所示。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">newRefConf&lt;/span>(appName, iface, protocol &lt;span style="color:#dc322f">string&lt;/span>) config.ReferenceConfig {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>config.RegistryConfig{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Protocol: &lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Address: &lt;span style="color:#2aa198">&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> refConf &lt;span style="color:#719e07">:=&lt;/span> config.ReferenceConfig{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> InterfaceName: iface,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Cluster: &lt;span style="color:#2aa198">&amp;#34;failover&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Registry: []&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Protocol: protocol,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Generic: &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rootConfig &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">NewRootConfig&lt;/span>(config.&lt;span style="color:#268bd2">WithRootRegistryConfig&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>, registryConfig))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ = rootConfig.&lt;span style="color:#268bd2">Init&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _ = refConf.&lt;span style="color:#268bd2">Init&lt;/span>(rootConfig)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> refConf.&lt;span style="color:#268bd2">GenericLoad&lt;/span>(appName)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> refConf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>newRefConf 方法接收三个参数，分别是：&lt;/p>
+&lt;ul>
+&lt;li>appName: 应用名；&lt;/li>
+&lt;li>iface: 服务接口名；&lt;/li>
+&lt;li>protocol: RPC 协议，目前只支持 dubbo 和 tri（triple 协议）。&lt;/li>
+&lt;/ul>
+&lt;p>在上述方法中，为了保持函数简单性，把注册中心设置为一个固定值，即使用在 127.0.0.1:2181 的 ZooKeeper 作为注册中心，在实践中可以根据实际情况自由定制。&lt;/p>
+&lt;p>我们可以很容易的获取一个 ReferenceConfig 实例，暂时命名为 refConf。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>refConf &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#268bd2">newRefConf&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;example.dubbo.io&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.UserProvider&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;tri&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接着我们可以对 org.apache.dubbo.sample.UserProvider 服务的 GetUser 方法发起泛化调用。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>resp, err &lt;span style="color:#719e07">:=&lt;/span> refConf.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GetRPCService&lt;/span>().(&lt;span style="color:#719e07">*&lt;/span>generic.GenericService).
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">Invoke&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.&lt;span style="color:#268bd2">TODO&lt;/span>(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;GetUser&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []hessian.Object{&lt;span style="color:#2aa198">&amp;#34;A003&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>GenericService 的 Invoke 方法接收四个参数，分别是：&lt;/p>
+&lt;ul>
+&lt;li>context；&lt;/li>
+&lt;li>方法名: 在这个例子中表示调用 GetUser 方法；&lt;/li>
+&lt;li>参数类型: GetUser 方法接收一个 string 类型的参数，如果目标方法接收多个参数，可以写为 &lt;code>[]string{&amp;quot;type1&amp;quot;, &amp;quot;type2&amp;quot;, ...}&lt;/code>，如果目前方法是无参的，则需要填入一个空数组 &lt;code>[]string{}&lt;/code>；&lt;/li>
+&lt;li>实参: 写法同参数类型，如果是无参函数，依然要填入一个空数组 &lt;code>[]hessian.Object{}&lt;/code> 占位。&lt;/li>
+&lt;/ul>
+&lt;p>注意：在目前版本中，无参调用会出现崩溃问题。&lt;/p>
+&lt;p>相关阅读：&lt;a href="https://blog.csdn.net/weixin_39860915/article/details/122738548">【Dubbo-go 服务代理模型】&lt;/a>&lt;/p></description></item><item><title>Overview: 服务注册发现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/registry/</guid><description>
+&lt;h2 id="1-dubbo-的注册中心">1. Dubbo 的注册中心&lt;/h2>
+&lt;p>注册中心在 RPC 场景下负责保存服务端应用的信息。&lt;/p>
+&lt;p>服务端注册接口信息和到自身地址到注册中心，客户端从注册中心读取和订阅需要调用的地址列表。整个架构如图所示：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/architecture.png" alt="img">&lt;/p>
+&lt;p>关于 Dubbo 服务发现细节，详情可参考 &lt;a href="https://dubbo.apache.org/zh-cn/docs/concepts/service-discovery/">Dubbo 官网的概念介绍&lt;/a>&lt;/p>
+&lt;h2 id="2-服务发现概念">2. 服务发现概念&lt;/h2>
+&lt;p>Dubbo 生态中，服务发现有以下主要概念：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>应用 Application&lt;/p>
+&lt;p>应用是一个 dubbo 服务进程，对应一个应用名。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>接口（服务）&lt;/p>
+&lt;p>接口是一个 RPC 接口类，例如一个通过 proto 定义的 Service，再例如一个 Java Interface 类。一个 dubbo 进程可以包含多个服务/接口。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>方法&lt;/p>
+&lt;p>方法在接口中定义，一个接口可以包含多个方法。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>参数列表&lt;/p>
+&lt;p>参数列表在方法中定义。由于 Java 支持重载，一个方法可以包含多个参数列表。对于 Go 是一对一的关系。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>注册信息&lt;/p>
+&lt;p>在“接口级服务发现”的场景下，注册信息主要包含应用名、接口列表、元数据信息、以及服务端的IP地址等。以 URL 的形式保存在注册中心，供客户端发起调用前查询。&lt;/p>
+&lt;p>在“应用级服务发现”的场景下，注册信息只包含应用名、应用名到接口的映射等少量应用级别的信息，接口级别的信息作为元数据保存在元数据中心。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>元数据&lt;/p>
+&lt;p>元数据指接口信息，例如接口名、包含的方法、方法对应的参数、序列化方式、协议等等信息。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>注册中心&lt;/p>
+&lt;p>注册中心用于保存服务端的信息。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>元数据中心&lt;/p>
+&lt;p>元数据中心用于保存服务端的元数据信息，在“应用级服务发现”场景中，作为“服务自省”阶段的依赖。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo-go 中的服务网格能力，引入以下几个概念&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>主机名&lt;/p>
+&lt;p>主机名当前应用在 k8s 上注册的 Service 名。其他应用可以通过主机名访问本应用实例。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>端点&lt;/p>
+&lt;p>端点包含实例的 IP 地址、端口。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>集群&lt;/p>
+&lt;p>集群 ID 保存了从{主机名、集群子集名、端口}&lt;/p>
+&lt;p>集群保存集群 ID 到所有其包含端点的映射关系。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>服务网格元数据&lt;/p>
+&lt;p>服务网格元数据是接口名到主机名到映射，用于客户端查询所需接口的主机名信息。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-dubbo-go-注册中心">3. Dubbo-go 注册中心&lt;/h2>
+&lt;p>Dubbo-go 支持的注册中心类型如下：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>注册中心&lt;/th>
+&lt;th>注册中心名（用于配置）&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Zookeeper&lt;/td>
+&lt;td>zookeeper&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Nacos&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Etcd&lt;/td>
+&lt;td>etcd&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Consul&lt;/td>
+&lt;td>consul&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>相关阅读：&lt;a href="https://developer.aliyun.com/article/764173">【应用级服务发现解析】&lt;/a>&lt;/p></description></item><item><title>Overview: 网络协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/preface/concept/protocol/</guid><description>
+&lt;h2 id="1-rpc-服务框架与网络协议">1. RPC 服务框架与网络协议&lt;/h2>
+&lt;p>网络协议在 RPC 场景十分重要，在微服务场景下，服务进程之间的通信依赖可以连通的网络，以及client与server 端保持一致的网络协议。网络协议是一个抽象的概念，站在 Dubbo-go 应用开发的角度，不妨把我们关注的协议分为三个维度来讨论。&lt;/p>
+&lt;h3 id="11-打解包协议">1.1 打解包协议&lt;/h3>
+&lt;p>Dubbo-go 服务框架内置的打解包协议都是基于 TCP/IP 协议栈的，在此基础之上，封装/引入了多种协议，例如 Triple(dubbo3)、Dubbo、gRPC。&lt;/p>
+&lt;p>这一类协议重点关注 TCP 报文的封装和拆解过程，保证点对点的可靠通信。&lt;/p>
+&lt;p>在 dubbo-go 生态中，支持多种网络往往指的这一类协议。&lt;/p>
+&lt;h3 id="12-序列化协议">1.2 序列化协议&lt;/h3>
+&lt;p>序列化协议负责将内存中的对象以特定格式序列化为二进制流。一些主流的序列化库有：具有较好可读性、应用广泛的 json 序列化方式；较高压缩效率，性能较好的 protobuf 序列化方式；适配与 Java 语言的 hessian2 序列化方式等。Dubbo-go 内置了这三种序列化方式&lt;/p>
+&lt;p>序列化协议是需要开发者在业务开发过程中关注的，序列化协议往往需要特定的对象标注：&lt;/p>
+&lt;p>一个由 protoc-gen-go 生成的 protobuf 序列对象的例子：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>type HelloRequest struct {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> state protoimpl.MessageState
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sizeCache protoimpl.SizeCache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> unknownFields protoimpl.UnknownFields
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span> `protobuf&lt;span style="color:#719e07">:&lt;/span>&lt;span style="color:#2aa198">&amp;#34;bytes,1,opt,name=name,proto3&amp;#34;&lt;/span> json&lt;span style="color:#719e07">:&lt;/span>&lt;span style="color:#2aa198">&amp;#34;name,omitempty&amp;#34;&lt;/span>`
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>一个可与 java 服务互通的 hessian2 序列化对象&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> HelloRequest &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Name &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`hessian:&amp;#34;name&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (u &lt;span style="color:#719e07">*&lt;/span>HelloRequest) &lt;span style="color:#268bd2">JavaClassName&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.sample.User&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>序列化协议与打解包协议的关系&lt;/p>
+&lt;ul>
+&lt;li>一种打解包协议可以适配于多种序列化协议支持：例如，您可以使用 dubbogo 的 triple 协议来传递 hessian序列化参数与 Dubbo-java 服务框架互通；传递 pb 序列化参数与原生 gRPC 服务互通；通过实现接口来自定义您的希望的序列化方式例如 json，从而传递具有较强可读性的参数。&lt;/li>
+&lt;/ul>
+&lt;h3 id="13-接口协议">1.3 接口协议&lt;/h3>
+&lt;p>接口协议，是由业务开发人员开发并且维护的协议，用于描述服务接口的信息。例如接口名、方法、参数类型。&lt;/p>
+&lt;p>以 Triple/gRPC 为例，开发人员可以使用插件，从 proto 文件中定义的接口生成存根(.pb.go 文件)，存根文件内包含接口所有信息，及接口协议。&lt;/p>
+&lt;p>在编写服务时，客户端和服务端同时引入相同的接口，即可保证客户端发起针对特定接口和方法的调用，能被服务端正确识别和响应。&lt;/p>
+&lt;p>一个由 proto 编写的接口描述文件：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> api;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> go_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;./;api&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The greeting service definition.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">service&lt;/span> Greeter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Sends a greeting
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">rpc&lt;/span> SayHello (HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (User) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Sends a greeting via stream
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">rpc&lt;/span> SayHelloStream (stream HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (stream User) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The request message containing the user&amp;#39;s name.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The response message containing the greetings
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> id &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">2&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int32&lt;/span> age &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口协议与序列化协议的关系&lt;/p>
+&lt;ul>
+&lt;li>接口协议是抽象的概念，一种接口协议可以使用多种接口描述语言来编写，并且可以转化成多种序列化协议对象。&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-dubbo-go-支持的网络协议">2. Dubbo-go 支持的网络协议&lt;/h2>
+&lt;p>Dubbo-go 支持的网络协议和序列化方式如下：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>协议&lt;/th>
+&lt;th>协议名 (用于配置)&lt;/th>
+&lt;th style="text-align:center">序列化方式&lt;/th>
+&lt;th>默认序列化方式&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Triple 【推荐】&lt;/td>
+&lt;td>tri&lt;/td>
+&lt;td style="text-align:center">pb/hessian2/msgpack/自定义&lt;/td>
+&lt;td>pb&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Dubbo&lt;/td>
+&lt;td>dubbo&lt;/td>
+&lt;td style="text-align:center">hessian2&lt;/td>
+&lt;td>hessian2&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>gRPC&lt;/td>
+&lt;td>grpc&lt;/td>
+&lt;td style="text-align:center">pb&lt;/td>
+&lt;td>pb&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>jsonRPC&lt;/td>
+&lt;td>jsonrpc&lt;/td>
+&lt;td style="text-align:center">json&lt;/td>
+&lt;td>json&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>相关阅读：&lt;a href="https://developer.aliyun.com/article/878252">【Dubbo-go 服务代理模型】&lt;/a>&lt;/p></description></item></channel></rss>

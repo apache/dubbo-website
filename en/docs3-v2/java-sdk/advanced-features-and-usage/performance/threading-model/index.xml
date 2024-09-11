@@ -1,0 +1,153 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Threading Model</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/</link><description>Recent content in Threading Model on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Server Thread Model</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/provider/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/provider/</guid><description>
+&lt;p>The current threading models of the Dubbo protocol and the Triple protocol are not yet aligned. The threading models of the Triple protocol and the Dubbo protocol are introduced separately below.&lt;/p>
+&lt;h1 id="dubbo-protocol---provider-side-threading-model">Dubbo protocol - Provider-side threading model&lt;/h1>
+&lt;p>Before introducing the Provider-side threading model of the Dubbo protocol, it is introduced that Dubbo abstracts the operations on the channel into five behaviors:&lt;/p>
+&lt;ul>
+&lt;li>Establish a connection: connected, the main responsibility is to record the time of read and write in the channel, and handle the callback logic after the connection is established. For example, dubbo supports a custom callback hook (onconnect) after disconnection, that is, in this operation implement.&lt;/li>
+&lt;li>Disconnected: disconnected, the main responsibility is to remove the read and write time of the channel, and handle the callback logic after the connection is opened. For example, dubbo supports a custom callback hook (ondisconnect) after disconnection, that is, in in this operation.&lt;/li>
+&lt;li>Send message: sent, including sending request and sending response. Record the write time.&lt;/li>
+&lt;li>Received message: received, including receiving request and receiving response. Record the read time.&lt;/li>
+&lt;li>Exception capture: caught, used to handle various exceptions that occur on the channel.&lt;/li>
+&lt;/ul>
+&lt;p>The thread model of the Dubbo framework is closely related to the above five behaviors. The thread model of the Dubbo protocol Provider can be divided into five categories, namely AllDispatcher, DirectDispatcher, MessageOnlyDispatcher, ExecutionDispatcher, and ConnectionOrderedDispatcher.&lt;/p>
+&lt;h3 id="all-dispatcher">All Dispatcher&lt;/h3>
+&lt;p>The following figure is an illustration of the threading model of All Dispatcher:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-alldispatcher.png" alt="dubbo-provider-alldispatcher">&lt;/p>
+&lt;ul>
+&lt;li>The operations performed in the IO thread are:
+&lt;ol>
+&lt;li>The sent operation is executed on the IO thread.&lt;/li>
+&lt;li>The serialized response is executed on the IO thread.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>The operations performed in the Dubbo thread are:
+&lt;ol>
+&lt;li>Received, connected, disconnected, and caught are all executed on the Dubbo thread.&lt;/li>
+&lt;li>The behavior of deserializing the request is done in Dubbo.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="direct-dispatcher">Direct Dispatcher&lt;/h3>
+&lt;p>The following figure is an illustration of the threading model of Direct Dispatcher:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-directDispatcher.png" alt="dubbo-provider-directDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>The operations performed in the IO thread are:
+&lt;ol>
+&lt;li>The received, connected, disconnected, caught, and sent operations are executed on the IO thread.&lt;/li>
+&lt;li>The deserialization request and serialization response are executed on the IO thread.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;ol>
+&lt;li>It does not operate on Dubbo threads.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="execution-dispatcher">Execution Dispatcher&lt;/h3>
+&lt;p>The following figure is an illustration of the thread model of Execution Dispatcher:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-executionDispatcher.png" alt="dubbo-provider-ExecutionDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>The operations performed in the IO thread are:
+&lt;ol>
+&lt;li>The sent, connected, disconnected, and caught operations are executed on the IO thread.&lt;/li>
+&lt;li>The serialized response is executed on the IO thread.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>The operations performed in the Dubbo thread are:
+&lt;ol>
+&lt;li>Received is executed on the Dubbo thread.&lt;/li>
+&lt;li>The behavior of deserializing the request is done in Dubbo.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="message-only-dispatcher">Message Only Dispatcher&lt;/h3>
+&lt;p>On the Provider side, the threading models of Message Only Dispatcher and Execution Dispatcher are consistent, so the following figure is consistent with that of Execution Dispatcher, and the difference is on the Consumer side. See the threading model on the Consumer side below.&lt;/p>
+&lt;p>The following figure is an illustration of the threading model of Message Only Dispatcher:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbo-provider-executionDispatcher.png" alt="dubbo-provider-ExecutionDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>The operations performed in the IO thread are:
+&lt;ol>
+&lt;li>The sent, connected, disconnected, and caught operations are executed on the IO thread.&lt;/li>
+&lt;li>The serialized response is executed on the IO thread.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>The operations performed in the Dubbo thread are:
+&lt;ol>
+&lt;li>Received is executed on the Dubbo thread.&lt;/li>
+&lt;li>The behavior of deserializing the request is done in Dubbo.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="connection-ordered-dispatcher">Connection Ordered Dispatcher&lt;/h3>
+&lt;p>The following figure is an illustration of the threading model of the Connection Ordered Dispatcher:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/dubbbo-provider-connectionOrderedDispatcher.png" alt="dubbbo-provider-connectionOrderedDispatcher">&lt;/p>
+&lt;ul>
+&lt;li>The operations performed in the IO thread are:
+&lt;ol>
+&lt;li>The sent operation is executed on the IO thread.&lt;/li>
+&lt;li>The serialized response is executed on the IO thread.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>The operations performed in the Dubbo thread are:
+&lt;ol>
+&lt;li>Received, connected, disconnected, and caught are all executed on the Dubbo thread. But the two behaviors of connected and disconnected are isolated from the other two behaviors through the thread pool. And in Dubbo connected thread pool, link limit and warning light capabilities are provided.&lt;/li>
+&lt;li>The behavior of deserializing the request is done in Dubbo.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="triple-protocolprovider-side-threading-model">Triple protocol——Provider-side threading model&lt;/h1>
+&lt;p>The following figure shows the threading model of the Provider side of the Triple protocol&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/feature/performance/threading-model/triple-provider.png" alt="triple-provider">&lt;/p>
+&lt;p>The provider thread model of the Triple protocol is relatively simple at present. Currently, the serialization and deserialization operations work on the Dubbo thread, while the IO thread does not carry these tasks.&lt;/p>
+&lt;h1 id="how-to-adjust-the-threading-model">How to adjust the threading model&lt;/h1>
+&lt;p>Take the yaml configuration method as an example: configure dispatcher: all under protocol to adjust the thread model of the dubbo protocol to All Dispatcher&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo-springboot-demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: -&lt;span style="color:#2aa198">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dispatcher&lt;/span>: all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">id&lt;/span>: zk-registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata-report&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: zookeeper://127.0.0.1:2181
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configuration values for each threading model:&lt;/p>
+&lt;ul>
+&lt;li>All Dispatcher all
+-Direct Dispatcher direct&lt;/li>
+&lt;li>Execution Dispatcher execution&lt;/li>
+&lt;li>Message Only Dispatcher: message&lt;/li>
+&lt;li>Connection Ordered Dispatcher: connection&lt;/li>
+&lt;/ul></description></item><item><title>Docs3-V2: Consumer Thread Model</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/</guid><description>
+&lt;p>The 2.7.5 version has fully optimized the entire call link. According to the pressure test results, the overall QPS performance has been improved by nearly 30%, and the memory allocation overhead during the call process has also been reduced. One of the design points worth mentioning is that 2.7.5 introduces the concept of Servicerepository, which generates ServiceDescriptor and MethodDescriptor in advance in the service registration phase to reduce resource consumption caused by calculating the original information of the Service in the RPC call phase.&lt;/p>
+&lt;h2 id="consumer-thread-pool-model-optimization">Consumer thread pool model optimization&lt;/h2>
+&lt;p>For Dubbo applications before version 2.7.5, especially some consumer-side applications, when faced with high-traffic scenarios that need to consume a large number of services and have a relatively large number of concurrency (typically such as gateway scenarios), the number of threads on the consumer side is often over-allocated. There are a lot of problems, for specific discussion, please refer to &lt;a href="https://github.com/apache/dubbo/issues/2013">Need a limited Threadpool in consumer side #2013&lt;/a>&lt;/p>
+&lt;p>The improved consumer-side thread pool model solves this problem well by reusing the blocked threads on the business side.&lt;/p>
+&lt;h2 id="the-old-thread-pool-model">The old thread pool model&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/consumer-threadpool0.png" alt="Consumer thread pool.png">&lt;/p>
+&lt;p>Let&amp;rsquo;s focus on the Consumer part:&lt;/p>
+&lt;ol>
+&lt;li>The business thread sends a request and gets a Future instance.&lt;/li>
+&lt;li>The business thread then calls future.get to block and wait for the business result to return.&lt;/li>
+&lt;li>When the business data is returned, it will be deserialized by the independent consumer-side thread pool, and future.set will be called to return the deserialized business results.&lt;/li>
+&lt;li>The business thread returns directly after getting the result&lt;/li>
+&lt;/ol>
+&lt;h2 id="the-thread-pool-model-introduced-in-version-275">The thread pool model introduced in version 2.7.5&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/consumer-threadpool1.png" alt="Consumer thread pool new.png">&lt;/p>
+&lt;ol>
+&lt;li>The business thread sends a request and gets a Future instance.&lt;/li>
+&lt;li>Before calling future.get(), call ThreadlessExecutor.wait() first, wait will make the business thread wait on a blocking queue until elements are added to the queue.&lt;/li>
+&lt;li>When the business data is returned, generate a Runnable Task and put it into the ThreadlessExecutor queue&lt;/li>
+&lt;li>The business thread takes out the Task and executes it in this thread: deserialize the business data and set it to Future.&lt;/li>
+&lt;li>The business thread returns directly after getting the result&lt;/li>
+&lt;/ol>
+&lt;p>In this way, compared with the old thread pool model, the business thread itself is responsible for monitoring and parsing the returned results, eliminating the need for additional consumption-side thread pool overhead.&lt;/p>
+&lt;p>Regarding performance optimization, it will continue to advance in the next version, mainly starting from the following two aspects:&lt;/p>
+&lt;ol>
+&lt;li>RPC call link. The points that can be seen so far include: further reducing the memory allocation of the execution link, improving the efficiency of protocol transmission under the premise of ensuring protocol compatibility, and improving the computing efficiency of Filter and Router.&lt;/li>
+&lt;li>Service governance link. Further reduce memory and cpu resource consumption caused by address push and service governance rule push.&lt;/li>
+&lt;/ol></description></item></channel></rss>

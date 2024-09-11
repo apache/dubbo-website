@@ -1,0 +1,897 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 源码分析</title><link>https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/</link><description>Recent content in 源码分析 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: dubbo-metrics 指标模块源码浅析</title><link>https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/</guid><description/></item><item><title>Blog: Dubbo 3.0.8 源码解析</title><link>https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/3.0.8/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/java/codeanalysis/3.0.8/</guid><description/></item><item><title>Blog: Dubbo 3 中的三层配置隔离</title><link>https://dubbo.apache.org/zh-cn/blog/1/01/01/dubbo-3-%E4%B8%AD%E7%9A%84%E4%B8%89%E5%B1%82%E9%85%8D%E7%BD%AE%E9%9A%94%E7%A6%BB/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/1/01/01/dubbo-3-%E4%B8%AD%E7%9A%84%E4%B8%89%E5%B1%82%E9%85%8D%E7%BD%AE%E9%9A%94%E7%A6%BB/</guid><description>
+&lt;h2 id="models提供的隔离">Models提供的隔离&lt;/h2>
+&lt;p>Dubbo目前提供了三个级别上的隔离：JVM级别、应用级别、服务(模块)级别，从而实现各个级别上的生命周期及配置信息的单独管理。这三个层次上的隔离由 FrameworkModel、ApplicationModel 和 ModuleModel 及它们对应的 Config 来完成。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/models.png" alt="image">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>FrameworkModel ：Dubbo 框架的顶级模型，表示 Dubbo 框架的全局运行环境，适配多应用混合部署的场景，降低资源成本。&lt;/p>
+&lt;p>如：假设我们有一个在线教育平台，平台下有多个租户，而我们希望使这些租户的服务部署在同一个 JVM 上以节省资源，但它们之间可能使用不同的注册中心、监控设施、协议等，因此我们可以为每个租户分配一个 FrameWorkModel 实例来实现这种隔离。&lt;/p>
+&lt;p>FrameworkModel负责管理整个Dubbo框架的各种全局配置、元数据以及默认配置。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ApplicationModel ：应用程序级别模型，表示一个 Dubbo 应用（通常为一个 SpringApplication）。适配单JVM多应用场景，通常结合热发布使用，降低热发布对整个应用的影响范围。&lt;/p>
+&lt;p>如，以上的在线教育平台有多个子系统，如课程管理、学生管理，而每个子系统都是独立的 Spring 应用，在同个 JVM 中运行，共享一个 FrameworkModel，也会共享 Framework 级别的默认配置和资源：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//课程管理应用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ClassApplication&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> ApplicationModel classAppModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classAppModel
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .getApplicationConfigManager()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .addRegistry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(REGISTRY_URL_CLASS));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...其它设置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpringApplication.run(ClassApplication.class, args);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setApplicationModel&lt;/span>(ApplicationModel classAppModel){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.classAppModel &lt;span style="color:#719e07">=&lt;/span> classAppModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//学生管理应用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StudentApplication&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> ApplicationModel studentAppModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> studentAppModel
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .getApplicationConfigManager()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .addRegistry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(REGISTRY_URL_STUDENT));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...其它设置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpringApplication.run(StudentApplication.class, args);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setApplicationModel&lt;/span>(ApplicationModel studentAppModel){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.studentAppModel &lt;span style="color:#719e07">=&lt;/span> studentAppModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//单机发布多应用&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MultiContextLauncher&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> FrameworkModel frameworkModel &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> FrameworkModel();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//使用同一个FrameworkModel&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassApplication.setApplicationModel(frameworkModel.newApplication());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StudenAppication.setApplicationModel(frameworkModel.newApplication());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SpringApplicationBuilder(ClassApplication.class)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .run(args);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SpringApplicationBuilder(StudentApplication.class.class)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .run(args);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由此，我们可以重新部署单个应用与其对应的ApplicationModel，实现热发布，而不会影响到另一个应用。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ModuleModel ：模块级别模型，表示应用下的子模块。适配一个应用下的多个模块（容器）。&lt;/p>
+&lt;p>如，上述的课程管理子系统内，新增课程和发布课程两个业务模块可能使用不同的spring容器。我们可以为每个spirng容器提供一个ModuleModel实例来管理、隔离模块级别的配置和资源：&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@ComponentScan&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;com.example.demo.class&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ClassManageConfig&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 课程管理模块配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Configuration&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@ComponentScan&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;com.example.demo.student&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ClassPublishConfig&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 课程发布模块配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">EducationPlatformApplication&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> FrameworkModel frameworkModel &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> FrameworkModel();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel applicationModel &lt;span style="color:#719e07">=&lt;/span> frameworkModel.newApplication();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 创建课程管理模块，使用自己的ApplicationContext与ModuleModel&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ModuleModel classManageModuleModel &lt;span style="color:#719e07">=&lt;/span> applicationModel.newModule();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AnnotationConfigApplicationContext classManageContext &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AnnotationConfigApplicationContext(classManageModuleModel);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classManageContext.register(ClassManagementConfig.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classManageContext.refresh();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 创建学生管理模块，使用自己的ApplicationContext与ModuleModel&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ModuleModel classPublishModuleModel &lt;span style="color:#719e07">=&lt;/span> applicationModel.newModule();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AnnotationConfigApplicationContext classPublishContext &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AnnotationConfigApplicationContext(classPublishModuleModel);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classPublishContext.register(ClassPublishConfig.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classPublishContext.refresh();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>三层的模型设计让Dubbo在处理复杂业务场景时具有更强的适应性和可扩展性。&lt;/p>
+&lt;p>​ 以下是一个以传统方式（而非 DubboBootstrap）启动 Dubbo 的 Demo，可以帮助我们了解 FrameworkModel、ApplicationModel 和 ModuleModel 之间的组织关系。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">startWithExportNew&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> InterruptedException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//创建三个层级的Model&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> FrameworkModel frameworkModel &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> FrameworkModel();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ApplicationModel applicationModel &lt;span style="color:#719e07">=&lt;/span> frameworkModel.newApplication();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ModuleModel moduleModel &lt;span style="color:#719e07">=&lt;/span> applicationModel.newModule();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//提供配置中心、元数据中心、协议的配置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RegistryConfig registryConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RegistryConfig(REGISTRY_URL);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetadataReportConfig metadataReportConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> MetadataReportConfig(METADATA_REPORT_URL);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ProtocolConfig protocolConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ProtocolConfig(CommonConstants.DUBBO, &lt;span style="color:#719e07">-&lt;/span>1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//如果之后需要获取注册中心或元数据中心，需要设置id，之后通过它们的Id获取（适配多注册中心）&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">final&lt;/span> String registryId &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;registry-1&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registryConfig.setId(registryId);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//Model的配置管理通过对应的ConfigManager进行&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigManager appConfigManager &lt;span style="color:#719e07">=&lt;/span> applicationModel.getApplicationConfigManager();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> appConfigManager.setApplication(&lt;span style="color:#719e07">new&lt;/span> ApplicationConfig(&lt;span style="color:#2aa198">&amp;#34;dubbo-demo-api-provider-app-1&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//提供应用层级的配置中心、元数据中心、协议默认设置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> appConfigManager.addRegistry(registryConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> appConfigManager.addMetadataReport(metadataReportConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> appConfigManager.addProtocol(protocolConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ModuleConfigManager moduleConfigManager &lt;span style="color:#719e07">=&lt;/span> moduleModel.getConfigManager();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> moduleConfigManager.setModule(&lt;span style="color:#719e07">new&lt;/span> ModuleConfig(&lt;span style="color:#2aa198">&amp;#34;dubbo-demo-api-provider-app-1-module-1&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span> serviceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//设置该ServiceConfig对应的ModuleModel&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceConfig.setScopeModel(moduleModel);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceConfig.setProtocol(protocolConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceConfig.setInterface(DemoService.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceConfig.setRef(&lt;span style="color:#719e07">new&lt;/span> DemoServiceImpl());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//为ModuleModel添加ServiceConfig&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> moduleConfigManager.addConfig(serviceConfig);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> serviceConfig.export();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> CountDownLatch(1).await();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>ApplicationModel 由 FrameWorkModel 创建，ModuleModel 由 ApplicationModel 创建，由此完成它们之间层级关系的引用。&lt;/li>
+&lt;li>ServiceConfig 和 ReferenceConfig 需要设置其所属的 ScopeModel（实际只能为 ModuleModel ）。然后，还需将它们设置到对应的ModuleModel 中。&lt;/li>
+&lt;/ul></description></item><item><title>Blog: Dubbo 3 之 Triple 流控反压原理解析</title><link>https://dubbo.apache.org/zh-cn/blog/2022/12/28/dubbo-3-%E4%B9%8B-triple-%E6%B5%81%E6%8E%A7%E5%8F%8D%E5%8E%8B%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</link><pubDate>Wed, 28 Dec 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/12/28/dubbo-3-%E4%B9%8B-triple-%E6%B5%81%E6%8E%A7%E5%8F%8D%E5%8E%8B%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</guid><description>
+&lt;p>Triple 是 Dubbo 3 提出的基于 HTTP2 的开放协议，
+旨在解决 Dubbo 2 私有协议带来的互通性问题。
+Triple 基于 HTTP/2 定制自己的流控，支持通过特定的异常通知客户端业务层服务端负载高情况，
+保护了服务端被大流量击垮，提高系统高可用能力。&lt;/p>
+&lt;h2 id="一流控反压现状">一、流控反压现状&lt;/h2>
+&lt;p>客户端和服务器端在接收数据的时候有一个缓冲区来临时存储数据，
+但是缓冲区的大小是有限制的，所以有可能会出现缓冲区溢出的情况，
+HTTP 通过流控保护数据溢出丢失风险。&lt;/p>
+&lt;h3 id="1http1-流控">1、HTTP/1 流控&lt;/h3>
+&lt;p>在 HTTP/1.1 中，流量的控制依赖的是底层TCP协议，在客户端和服务器端建立连接的时候，
+会使用系统默认的设置来建立缓冲区。在数据进行通信的时候，会告诉对方它的接收窗口的大小，
+这个接收窗口就是缓冲区中剩余的可用空间。如果接收窗口大小为零，则说明接收方缓冲区已满，
+则发送方将不再发送数据，直到客户端清除其内部缓冲区，然后请求恢复数据传输。&lt;/p>
+&lt;h3 id="2http2-流控">2、HTTP/2 流控&lt;/h3>
+&lt;p>HTTP/2 使用了多路复用机制，一个TCP连接可以有多个 HTTP/2 连接，
+故在 HTTP/2 中，有更加精细的流控制机制，允许服务端实现自己数据流和连接级的流控制。
+服务端与客户端第一次连接时，会通过发送 &lt;code>HTTP/2 SettingsFrame&lt;/code>设置初始化的流控窗口大小，
+用于 &lt;code>Stream&lt;/code> 级别流控，默认为 65,535 字节。
+定好流控窗口后，每次客户端发送数据就会减少流控窗口的大小，
+服务端收到数据后会发送窗口更新包（&lt;code>WINDOW_UPDATE frame&lt;/code>）通知客户端更新窗口。
+客户端收到窗口更新包后就会增加对应值的流控窗口，从而达到动态控制的目的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/1.png" alt="1.png">&lt;/p>
+&lt;h2 id="二triple流控反压">二、Triple流控反压&lt;/h2>
+&lt;p>Netty 基于 HTTP/2 实现了基础的流控，当服务端负载过高，客户端发送窗口为 0 时，
+新增请求就无法被发送出去，会在缓存到客户端待发送请求队列中，缓存数据过大，
+就会造成客户端内存溢出，影响业务程序。&lt;/p>
+&lt;p>Triple 基于 Netty 实现了 HTTP/2 协议，通过 &lt;code>HTTP/2 FlowController&lt;/code>接口统一封装，
+在实现分为进站（inbound）和出站（outbound）两个维度的实现。
+Triple 在 inbound 流量上使用了 Netty 的默认流控实现，
+在 outbound 上实现了自己流控，基于服务端负载，
+将服务端流量压力透传到客户端业务层，实现客户端的业务反压，暂停业务继续发送请求，
+保护服务端不被大流量击垮。&lt;/p>
+&lt;h3 id="1连接初始化">1、连接初始化&lt;/h3>
+&lt;p>Triple在初次建立连接时，通过 &lt;code>TripleHttpProtocol&lt;/code> 初始化 HTTP/2 配置，
+默认流控窗口 &lt;code>DEFAULT_WINDOW_INIT_SIZE = MIB_8&lt;/code>，
+并在服务端和客户端加入自己的 outbound 流控接口。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/2.png" alt="2.png">&lt;/p>
+&lt;h3 id="2inbound流控">2、Inbound流控&lt;/h3>
+&lt;p>Inbound 流量会通过 &lt;code>DefaultHttpLocalFlowController&lt;/code> 的 &lt;code>consumeBytes&lt;/code> 方法实现流控窗口更新与发送。&lt;/p>
+&lt;h4 id="1-入口传入http-流与更新数据大小">1) 入口传入HTTP 流与更新数据大小&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/3.png" alt="3.png">&lt;/p>
+&lt;h4 id="2-找到对应连接实现数据消费">2) 找到对应连接实现数据消费&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/4.png" alt="4.png">&lt;/p>
+&lt;h4 id="3-更新流控窗口">3) 更新流控窗口&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/5.png" alt="5.png">&lt;/p>
+&lt;h4 id="4-发送流控更新数据包window_update">4) 发送流控更新数据包（window_update）&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/6.png" alt="6.png">&lt;/p>
+&lt;h3 id="3outbound流控">3、Outbound流控&lt;/h3>
+&lt;p>Outbound 通过 Triple 自己的流控实现 &lt;code>TriHttpRemoteFlowController&lt;/code>，
+将服务端压力反馈到业务层，保护服务端被大流量击垮。&lt;/p>
+&lt;h4 id="1-发送数据时判断是否还有窗口">1) 发送数据时判断是否还有窗口&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/7.png" alt="7.png">&lt;/p>
+&lt;h4 id="2-窗口为0时抛出特定异常">2) 窗口为0时抛出特定异常&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/8.png" alt="8.png">&lt;/p>
+&lt;h4 id="3-反馈客户端流控异常">3) 反馈客户端流控异常&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/28/triple/9.png" alt="9.png">&lt;/p>
+&lt;h3 id="4总结">4、总结&lt;/h3>
+&lt;p>Triple 通过将底层客户端发送窗口为 0 场景封装为特定流控异常，
+透传至客户端上层业务，阻止客户端业务继续数据发送，
+有效的保护了服务端被大流量击垮和客户端的内存溢出的问题。&lt;/p>
+&lt;h2 id="三未来展望">三、未来展望&lt;/h2>
+&lt;p>目前 Triple 已经基本实现了流控反压能力，未来我们将深度联动业务，
+基于业务负载自适应调整反压流控，
+一是在 inbound 上将流控窗口包发送时机调整到服务端业务处理完成后，
+二是在 outbound 流量上关联客户端业务层，动态调整客户端发送速率。
+从而实现基于服务端业务负载动态反压流控机制。&lt;/p></description></item><item><title>Blog: Triple 协议支持 Java 异常回传的设计与实现</title><link>https://dubbo.apache.org/zh-cn/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</link><pubDate>Mon, 19 Dec 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</guid><description>
+&lt;h2 id="背景">背景&lt;/h2>
+&lt;p>在一些业务场景, 往往需要自定义异常来满足特定的业务, 主流用法是在catch里抛出异常, 例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deal&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//doSomething &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span>(IGreeterException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者通过ExceptionBuilder，把相关的异常对象返回给consumer：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>provider.send(&lt;span style="color:#719e07">new&lt;/span> ExceptionBuilders.IGreeterExceptionBuilder()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .setDescription(&amp;#39;异常描述信息&amp;#39;);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在抛出异常后, 通过捕获和instanceof来判断特定的异常, 然后做相应的业务处理，例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy.echo(REQUEST_MSG);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>} &lt;span style="color:#719e07">catch&lt;/span> (IGreeterException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//做相应的处理&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Dubbo 2.x 版本，可以通过上述方法来捕获 Provider 端的异常。
+而随着云原生时代的到来， Dubbo 也开启了 3.0 的里程碑。&lt;/p>
+&lt;p>Dubbo 3.0 的一个很重要的目标就是全面拥抱云原生，
+在 3.0 的许多特性中，很重要的一个改动就是支持&lt;strong>新的一代Rpc协议Triple&lt;/strong>。&lt;/p>
+&lt;p>Triple 协议基于 HTTP 2.0 进行构建，对网关的穿透性强，&lt;strong>兼容 gRPC&lt;/strong>，
+提供 Request Response、Request Streaming、Response Streaming、
+Bi-directional Streaming 等通信模型；
+从 Triple 协议开始，Dubbo 还支持基于 IDL 的服务定义。&lt;/p>
+&lt;p>采用 Triple 协议的用户可以在 provider 端生成用户定义的异常信息，
+记录异常产生的堆栈，triple 协议可保证将用户在客户端获取到异常的message。&lt;/p>
+&lt;p>Triple 的回传异常会在 &lt;code>AbstractInvoker&lt;/code> 的 &lt;code>waitForResultIfSync&lt;/code>
+中把异常信息堆栈统一封装成 &lt;code>RpcException&lt;/code>，
+所有来自 Provider 端的异常都会被封装成 &lt;code>RpcException&lt;/code> 类型并抛出，
+这会导致用户无法根据特定的异常类型捕获来自 Provider 的异常，
+只能通过捕获 RpcException 异常来返回信息，
+且 Provider 携带的异常 message 也无法回传，只能获取打印的堆栈信息：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy.echo(REQUEST_MSG);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (RpcException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> e.printStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>自定义异常信息在社区中的呼声也比较高，
+因此本次改动将支持自定义异常的功能, 使得服务端能抛出自定义异常后被客户端捕获到。&lt;/p>
+&lt;h2 id="dubbo异常处理简介">Dubbo异常处理简介&lt;/h2>
+&lt;p>我们从Consumer的角度看一下一次Triple协议 Unary请求的大致流程：&lt;/p>
+&lt;p>Dubbo Consumer 从 Spring 容器中获取 bean 时获取到的是一个代理接口，
+在调用接口的方法时会通过代理类远程调用接口并返回结果。&lt;/p>
+&lt;p>Dubbo提供的代理工厂类是 &lt;code>ProxyFactory&lt;/code>，通过 SPI 机制默认实现的是 &lt;code>JavassistProxyFactory&lt;/code>，
+&lt;code>JavassistProxyFactory&lt;/code> 创建了一个继承自 &lt;code>AbstractProxyInvoker&lt;/code> 类的匿名对象，
+并重写了抽象方法 &lt;code>doInvoke&lt;/code>。
+重写后的 &lt;code>doInvoke&lt;/code> 只是将调用请求转发给了 &lt;code>Wrapper&lt;/code> 类的 &lt;code>invokeMethod&lt;/code> 方法，
+并生成 &lt;code>invokeMethod&lt;/code> 方法代码和其他一些方法代码。&lt;/p>
+&lt;p>代码生成完毕后，通过 &lt;code>Javassist&lt;/code> 生成 &lt;code>Class&lt;/code> 对象，
+最后再通过反射创建 &lt;code>Wrapper&lt;/code> 实例，随后通过 &lt;code>InvokerInvocationHandler&lt;/code> -&amp;gt; &lt;code>InvocationUtil&lt;/code> -&amp;gt; &lt;code>AbstractInvoker&lt;/code> -&amp;gt; 具体实现类发送请求到Provider端。&lt;/p>
+&lt;p>Provider 进行相应的业务处理后返回相应的结果给 Consumer 端，来自 Provider 端的结果会被封装成 &lt;code>AsyncResult&lt;/code> ，在 &lt;code>AbstractInvoker&lt;/code> 的具体实现类里，
+接受到来自 Provider 的响应之后会调用 &lt;code>appResponse&lt;/code> 到 &lt;code>recreate&lt;/code> 方法，若 &lt;code>appResponse&lt;/code> 里包含异常，
+则会抛出给用户，大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/19/triple/1.jpeg" alt="1.jpeg">&lt;/p>
+&lt;p>上述的异常处理相关环节是在 Consumer 端，在 Provider 端则是由 &lt;code>org.apache.dubbo.rpc.filter.ExceptionFilter&lt;/code> 进行处理，
+它是一系列责任链 Filter 中的一环，专门用来处理异常。&lt;/p>
+&lt;p>Dubbo 在 Provider 端的异常会在封装进 &lt;code>appResponse&lt;/code> 中。下面的流程图揭示了 &lt;code>ExceptionFilter&lt;/code> 源码的异常处理流程:&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/19/triple/2.jpeg" alt="2.jpeg">&lt;/p>
+&lt;p>而当 &lt;code>appResponse&lt;/code> 回到了 Consumer 端，会在 &lt;code>InvocationUtil&lt;/code> 里调用 &lt;code>AppResponse&lt;/code> 的 &lt;code>recreate&lt;/code> 方法抛出异常，
+最终可以在 Consumer 端捕获：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">recreate&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> Throwable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (exception &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object stackTrace &lt;span style="color:#719e07">=&lt;/span> exception.getStackTrace();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (stackTrace &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> exception.setStackTrace(&lt;span style="color:#719e07">new&lt;/span> StackTraceElement&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Exception e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ignore&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> exception;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> result;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="triple-通信原理">Triple 通信原理&lt;/h2>
+&lt;p>在上一节中，我们已经介绍了 Dubbo 在 Consumer 端大致发送数据的流程，
+可以看到最终依靠的是 &lt;code>AbstractInvoker&lt;/code> 的实现类来发送数据。
+在 Triple 协议中，&lt;code>AbstractInvoker&lt;/code> 的具体实现类是 &lt;code>TripleInvoker&lt;/code> ，
+&lt;code>TripleInvoker&lt;/code> 在发送前会启动监听器，监听来自 Provider 端的响应结果，
+并调用 &lt;code>ClientCallToObserverAdapter&lt;/code> 的 &lt;code>onNext&lt;/code> 方法发送消息，
+最终会在底层封装成 Netty 请求发送数据。&lt;/p>
+&lt;p>在正式的请求发起前，TripleServer 会注册 &lt;code>TripleHttp2FrameServerHandler&lt;/code>，
+它继承自 Netty 的 &lt;code>ChannelDuplexHandler&lt;/code>，
+其作用是会在 &lt;code>channelRead&lt;/code> 方法中不断读取 Header 和 Data 信息并解析，
+经过层层调用，
+会在 &lt;code>AbstractServerCall&lt;/code> 的 &lt;code>onMessage&lt;/code> 方法里把来自 consumer 的信息流进行反序列化，
+并最终由交由 &lt;code>ServerCallToObserverAdapter&lt;/code> 的 &lt;code>invoke&lt;/code> 方法进行处理。&lt;/p>
+&lt;p>在 &lt;code>invoke&lt;/code> 方法中，根据 consumer 请求的数据调用服务端相应的方法，并异步等待结果；'
+若服务端抛出异常，则调用 &lt;code>onError&lt;/code> 方法进行处理，
+否则，调用 &lt;code>onReturn&lt;/code> 方法返回正常的结果，大致代码逻辑如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">invoke&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用invoke方法请求服务&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">final&lt;/span> Result response &lt;span style="color:#719e07">=&lt;/span> invoker.invoke(invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//异步等待结果&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.whenCompleteWithContext((r, t) &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//若异常不为空&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (t &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用方法过程出现异常，调用onError方法处理&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> responseObserver.onError(t);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (response.hasException()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//调用onReturn方法处理业务异常&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> onReturn(response.getException());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//正常返回结果&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> onReturn(r.getValue());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/19/triple/3.jpeg" alt="3.jpeg">&lt;/p>
+&lt;h2 id="实现版本">实现版本&lt;/h2>
+&lt;p>了解了上述原理，我们就可以进行相应的改造了，
+能让 consumer 端捕获异常的&lt;strong>关键在于把异常对象以及异常信息序列化后再发送给consumer端&lt;/strong>。
+常见的序列化协议很多，例如 Dubbo/HSF 默认的 hessian2 序列化；
+还有使用广泛的 JSON 序列化；以及 gRPC 原生支持的 protobuf(PB) 序列化等等。
+Triple协议因为兼容grpc的原因，默认采用 Protobuf 进行序列化。
+上述提到的这三种典型的序列化方案作用类似，但在实现和开发中略有不同。
+PB 不可由序列化后的字节流直接生成内存对象，
+而 Hessian 和 JSON 都是可以的。后两者反序列化的过程不依赖“二方包”，
+其序列化和反序列化的代码由 proto 文件相同，只要客户端和服务端用相同的 proto 文件进行通信，
+就可以构造出通信双方可解析的结构。&lt;/p>
+&lt;p>单一的 protobuf 无法序列化异常信息，
+因此我们采用 &lt;code>Wrapper + PB&lt;/code> 的形式进行序列化异常信息，
+抽象出一个 &lt;code>TripleExceptionWrapperUtils&lt;/code> 用于序列化异常，
+并在 &lt;code>trailer&lt;/code> 中采用 &lt;code>TripleExceptionWrapperUtils&lt;/code> 序列化异常，大致代码流程如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/19/triple/4.jpeg" alt="4.jpeg">&lt;/p>
+&lt;p>上面的实现方案看似非常合理，已经能把 Provider 端的异常对象和信息回传，
+并在 Consumer 端进行捕获。但仔细想想还是有问题的：
+通常在 HTTP2 为基础的通信协议里会对 header 大小做一定的限制，
+太大的header size 会导致性能退化严重，为了保证性能，
+往往以 HTTP2 为基础的协议在建立连接的时候是要协商最大 header size 的，
+超过后会发送失败。对于 Triple 协议来说，在设计之初就是基于 HTTP 2.0，
+能无缝兼容 Grpc，而 Grpc header 头部只有 8KB 大小，
+异常对象大小可能超过限制，从而丢失异常信息；
+且多一个 header 携带序列化的异常信息意味着用户能加的 header 数量会减少，
+挤占了其他 header 所能占用的空间。&lt;/p>
+&lt;p>经过讨论，考虑将异常信息放置在 Body，将序列化后的异常从 trailer 挪至 body，
+采用 &lt;code>TripleWrapper + protobuf&lt;/code> 进行序列化，把相关的异常信息序列化后回传。
+社区围绕这个问题进行了一系列的争论，读者也可尝试先思考一下：&lt;/p>
+&lt;p>1.在 body 中携带回传的异常信息，其对应HTTP header状态码该设置为多少？&lt;/p>
+&lt;p>2.基于 http2 构建的协议，按照主流的 grpc 实现方案，相关的错误信息放在 &lt;code>trailer&lt;/code>，理论上不存在body，上层协议也需要保持语义一致性，若此时在payload回传异常对象，且grpc并没有支持在Body回传序列化对象的功能， 会不会破坏Http和grpc协议的语义？从这个角度出发，异常信息更应该放在trailer里。&lt;/p>
+&lt;p>3.作为开源社区，不能一味满足用户的需求，非标准化的用法注定是会被淘汰的，应该尽量避免更改 Protobuf的语义，是否在Wrapper层去支持序列化异常就能满足需求？&lt;/p>
+&lt;p>首先回答第二、三个问题：HTTP 协议并没有约定在状态码非 2xx 的时候不能返回 body，返回之后是否读取取决于用户。grpc 采用protobuf进行序列化，所以无法返回 exception；且try catch机制为java独有，其他语言并没有对应的需求，但Grpc暂时不支持的功能并一定是unimplemented，Dubbo的设计目标之一是希望能和主流协议甚至架构进行对齐，但对于用户合理的需求也希望能进行一定程度的修改。且从throw本身的语义出发，throw 的数据不只是一个 error message，序列化的异常信息带有业务属性，根据这个角度，更不应该采用类似trailer的设计。至于单一的Wrapper层，也没办法和grpc进行互通。至于Http header状态码设置为200，因为其返回的异常信息已经带有一定的业务属性，不再是单纯的error，这个设计也与grpc保持一致，未来考虑网关采集可以增加新的triple-status。&lt;/p>
+&lt;p>更改后的版本只需在异常不为空时返回相关的异常信息，采用 &lt;code>TripleWrapper + Protobuf&lt;/code> 进行序列化异常信息，并在consumer端进行解析和反序列化，大体流程如下：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2022/12/19/triple/5.jpeg" alt="5.jpeg">&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>通过对 Dubbo 3.0 新增自定义异常的版本迭代中可以看出，尽管只能新增一个小小的特性，流程下并不复杂，但由于要考虑互通、兼容和协议的设计理念，因此思考和讨论的时间可能比写代码的时间更多。&lt;/p></description></item><item><title>Blog: 浅析 Dubbo 3.0 中接口级地址推送性能的优化</title><link>https://dubbo.apache.org/zh-cn/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</link><pubDate>Thu, 23 Jun 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</guid><description>
+&lt;h2 id="url-简介">URL 简介&lt;/h2>
+&lt;p>在阐述地址推送性能的具体优化之前，我们有必要先了解一下与之息息相关的内容 &amp;mdash; URL。&lt;/p>
+&lt;h3 id="定义">定义&lt;/h3>
+&lt;p>在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 (&lt;a href="https://www.ietf.org/rfc/rfc1738.txt">RFC1738&lt;/a>――Uniform Resource Locators (URL))应该是最广为人知的一个 RFC 规范，它的定义也非常简单。&lt;/p>
+&lt;blockquote>
+&lt;p>因特网上的可用资源可以用简单字符串来表示，该文档就是描述了这种字符串的语法和语 义。而这些字符串则被称为：“统一资源定位器”（URL）&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;strong>一个标准的 URL 格式&lt;/strong>至多可以包含如下的几个部分&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>protocol://username:password@host:port/path?key=value&amp;amp;key=value
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>一些典型 URL&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://www.facebook.com/friends?param1=value1&amp;amp;amp;param2=value2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://username:password@10.20.130.230:8080/list?version=1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ftp://username:password@192.168.1.7:21/1/read.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，也有一些&lt;strong>不太符合常规的 URL&lt;/strong>，也被归类到了 URL 之中&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>192.168.1.3:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = 192.168.1.3, port = 20880, url path = null
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///home/user1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = home/user1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file://home/user1/router.js?type=script&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = home, url path = user1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///D:/1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = D:/1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:/D:/1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>同上 file:///D:/1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/home/user1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = null, url path = home/user1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>home/user1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = home, url path = user1/router.js
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-中的-url">Dubbo 中的 URL&lt;/h3>
+&lt;p>在 dubbo 中，也使用了类似的 URL，主要用于在各个扩展点之间传递数据，组成此 URL 对象的具体参数如下:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>protocol：一般是 dubbo 中的各种协议 如：dubbo thrift http zk&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>username/password：用户名/密码&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>host/port：主机/端口&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>path：接口名称&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>parameters：参数键值对&lt;/p>
+&lt;p>&lt;strong>一些典型的 Dubbo URL&lt;/strong>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo://192.168.1.6:20880/moe.cnkirito.sample.HelloService?timeout=3000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>描述一个 dubbo 协议的服务
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>zookeeper://127.0.0.1:2181/org.apache.dubbo.registry.RegistryService?application=demo-consumer&amp;amp;dubbo=2.0.2&amp;amp;interface=org.apache.dubbo.registry.RegistryService&amp;amp;pid=1214&amp;amp;qos.port=33333&amp;amp;timestamp=1545721981946
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>描述一个 zookeeper 注册中心
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consumer&amp;amp;category=consumers&amp;amp;check=false&amp;amp;dubbo=2.0.2&amp;amp;interface=org.apache.dubbo.demo.DemoService&amp;amp;methods=sayHello&amp;amp;pid=1209&amp;amp;qos.port=33333&amp;amp;side=consumer&amp;amp;timestamp=1545721827784
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>描述一个消费者
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以说，任意的一个领域中的一个实现都可以认为是一类 URL，dubbo 使用 URL 来统一描述了元数据，配置信息，贯穿在整个框架之中。&lt;/p>
+&lt;h2 id="dubbo-27">Dubbo 2.7&lt;/h2>
+&lt;h3 id="url-结构">URL 结构&lt;/h3>
+&lt;p>在 Dubbo 2.7 中，URL 的结构非常简单，一个类就涵盖了所有内容，如下图所示。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-1.png" alt="Dubbo2 URL类图.png">&lt;/p>
+&lt;h3 id="地址推送模型">地址推送模型&lt;/h3>
+&lt;p>接下来我们再来看看 Dubbo 2.7 中的地址推送模型方案，主要性能问题由下列过程引起。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-2.png" alt="Dubbo2 地址推送模型.png">&lt;/p>
+&lt;p>上图中主要的流程为
+1、用户新增/删除DemoService的某个具体Provider实例（常见于扩容缩容、网络波动等原因）
+2、ZooKeeper将DemoService下所有实例推送给Consumer端
+3、Consumer端根据Zookeeper推送的数据重新全量生成URL
+根据该方案可以看出在Provider实例数量较小时，Consumer端的影响比较小，但当某个接口有大量Provider实例时，便会有大量不必要的URL创建过程。
+而Dubbo 3.0中则主要针对上述推送流程进行了一系列的优化，接下来我们便对其进行具体的讲解。&lt;/p>
+&lt;h2 id="dubbo-30">Dubbo 3.0&lt;/h2>
+&lt;h3 id="url-结构-1">URL 结构&lt;/h3>
+&lt;p>当然，地址推送模型的优化依然离不开 URL 的优化，下图是Dubbo 3.0中优化地址推送模型的过程中使用的新的URL结构。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-3.png" alt="Dubbo3 URL类图.png">&lt;/p>
+&lt;p>根据上图我们可以看出，在 Dubbo 2.7 的 URL 中的几个重要属性在 Dubbo 3.0 中已经不存在了，取而代之的是 URLAddress 和 URLParam 两个类。原来的 parameters 属性被移动到了 URLParam 中的 params，其他的属性则移动到了 URLAddress 及其子类中。
+再来介绍 URL 新增的 3 个子类，其中 InstanceAddressURL 属于应用级接口地址，本篇章中不做介绍。
+而 ServiceConfigURL 及 ServiceAddressURL 主要的差别就是，ServiceConfigURL 是程序读取配置文件时生成的 URL。而 ServiceAddressURL 则是注册中心推送一些信息（如 providers）过来时生成的 URL。
+在这里我们顺便提一下为什么会有 DubboServiceAddressURL 这个子类，按照目前的结构来看，ServiceAddressURL 只有这一个子类，所以完全可以将他们两个的属性全都放到 ServiceAddressURL 中，那么为什么还要有这个子类呢？其实是 Dubbo 3.0 为了兼容 HSF 框架所设计的，抽象出了一个 ServiceAddressURL，而 HSF 框架则可以继承这个类，使用 HSFServiceAddressURL，当然，这个类目前没有体现出来，所以此处我们简单一提，不过多讲解。
+那么，我们接下来就讨论一下 Dubbo 3.0 为什么要改为此种数据结构，并且该结构和地址推送模型的优化有何关联性吧！&lt;/p>
+&lt;h3 id="地址推送模型的优化">地址推送模型的优化&lt;/h3>
+&lt;h4 id="url-结构上的优化">URL 结构上的优化&lt;/h4>
+&lt;p>我们在上小节中的类图里看到虽然原来的属性都被移到了 URLAddress 和 URLParam 里，但是 URL 的子类依然多了几个属性，这几个属性自然也是为了优化而新增的，那么这里就讲讲这几个属性的作用。
+&lt;strong>ServiceConfigURL&lt;/strong>：这个子类中新增了 attribute 这个属性，这个属性主要是针对 URLParam 的 params 做了冗余，仅仅只是将 value 的类型从 String 改为了 Object，减少了代码中每次获取 parameters 的格式转换消耗。
+&lt;strong>ServiceAddressURL&lt;/strong>：这个子类及其对应的其他子类中则新增了 overrideURL 和 consumerURL 属性。其中 consumerURL 是针对 consumer 端的配置信息，overrideURL 则是在 Dubbo Admin 上进行动态配置时写入的值，当我们调用 URL 的 getParameter() 方法时，优先级为 &lt;code>overrideURL &amp;gt; consumerURL &amp;gt; urlParam&lt;/code>。在 Dubbo 2.7 时，动态配置属性会替换 URL 中的属性，及当你有大量 URL 时消耗也是不可忽视的，而此处的 overrideURL 则避免了这种消耗，因为所有 URL 都会共同使用同一个对象。&lt;/p>
+&lt;h4 id="多级缓存">多级缓存&lt;/h4>
+&lt;p>缓存是 Dubbo 3.0 在 URL 上做的优化的重点，同时这部分也是直接针对地址推送模型所做的优化，那么接下来我们就开始来介绍一下多级缓存的具体实现。
+首先，多级缓存主要体现在 CacheableFailbackRegistry 这个类之中，它直接继承于 FailbackRegistry，以 Zookeeper 为例，我们看看 Dubbo 2.7 和 Dubbo 3.0 继承结构的区别。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-4.png" alt="Dubbo3 CacheableFailbackRegistry缓存.png">&lt;/p>
+&lt;p>可以看到在 CacheableFailbackRegistry 缓存中，我们新增了 3 个缓存属性 &lt;code>stringAddress&lt;/code>，&lt;code>stringParam&lt;/code> 和 &lt;code>stringUrls&lt;/code>。我们通过下图来描述这 3 个缓存的具体使用场景。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-5.png" alt="多级缓存.png">&lt;/p>
+&lt;p>在该方案下，我们使用了 3 个纬度的缓存数据(URL 字符串缓存、URL 地址缓存、URL 参数缓存)，这样一来，在大部分情况下都能有效利用到缓存中的数据，减少了 Zookeeper 重复通知的消耗。&lt;/p>
+&lt;h4 id="延迟通知">延迟通知&lt;/h4>
+&lt;p>除了上面提到的优化之外，其实另外还有两个小小的优化。
+第一个是解析 URL 时可以直接使用编码后的 URL 字符串字节进行解析，而在 Dubbo 2.7 中，所有编码后的 URL 字符串都需要经过解码才可以正常解析为 URL 对象。该方式也直接减少了 URL 解码过程的开销。
+第二个则是 URL 变更后的通知机制增加了延迟，下图以Zookeeper为例讲解了实现细节。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-6.png" alt="延迟通知.png">&lt;/p>
+&lt;p>在该方案中，当 Consumer 接收 Zookeeper 的变更通知后会主动休眠一段时间，而这段时间内的变更在休眠结束后只会保留最后一次变更，Consumer 便会使用最后一次变更来进行监听实例的更新，以此方法来减少大量 URL 的创建开销。&lt;/p>
+&lt;h4 id="字符串重用">字符串重用&lt;/h4>
+&lt;p>在旧版本实现中，不同的 URL 中属性相同的字符串会存储在堆内不同的地址中，如 protocol、path 等，当有大量 provider 的情况下，Consumer 端的堆内会存在大量的重复字符串，导致内存利用率低下，所以此处提供了另一个优化方式，即字符串重用。
+而它的实现方式也非常的简单，让我们来看看对应的代码片段。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">URLItemCache&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> PATH_CACHE &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> LRUCache&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>(10000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> PROTOCOL_CACHE &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 省略无关代码片段&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> String &lt;span style="color:#268bd2">checkProtocol&lt;/span>(String _protocol) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (_protocol &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> _protocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String cachedProtocol &lt;span style="color:#719e07">=&lt;/span> PROTOCOL_CACHE.putIfAbsent(_protocol, _protocol);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (cachedProtocol &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> cachedProtocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> _protocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> String &lt;span style="color:#268bd2">checkPath&lt;/span>(String _path) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (_path &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> _path;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String cachedPath &lt;span style="color:#719e07">=&lt;/span> PATH_CACHE.putIfAbsent(_path, _path);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (cachedPath &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> cachedPath;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> _path;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由如上代码片段可以得知，字符串重用即为简单地使用了 Map 来存储对应的缓存值，当你使用了相同的字符串时，便会从 Map 中获取早已存在的对象返回给调用方，由此便可以减少堆内存中重复的字符串数以达到优化的效果。&lt;/p>
+&lt;h3 id="优化结果">优化结果&lt;/h3>
+&lt;p>这里优化结果我引用了&lt;a href="https://zhuanlan.zhihu.com/p/345626851">《Dubbo 3.0 前瞻：服务发现支持百万集群，带来可伸缩微服务架构》&lt;/a>这篇文章中的两副图来说明，下图模拟了在&lt;strong>220万&lt;/strong>个 Provider 接口的情况下，接口数据不断变更导致的 Consumer 端的消耗，我们看到整个 Consumer 端几乎被 Full GC 占满了，严重影响了性能。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-7.png" alt="Dubbo2 接口级地址模型.png">&lt;/p>
+&lt;p>那么我们再来看看 Dubbo 3.0 中对 URL 进行优化后同一个环境下的压测结果，如下图所示。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/url-perf-tuning-8.png" alt="Dubbo3 接口级地址模型.png">&lt;/p>
+&lt;p>我们明显可以看到 Full GC 的频率减少到了只有 3 次，大大提升了性能。当然，该文章中还有其他方面的对比，此处便不一一引用了，感兴趣的读者可以自行去阅读该文章。&lt;/p></description></item><item><title>Blog: Dubbo3 应用级服务发现</title><link>https://dubbo.apache.org/zh-cn/blog/2021/06/02/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</link><pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/06/02/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</guid><description>
+&lt;h2 id="1-服务发现service-discovery-概述">1 服务发现（Service Discovery） 概述&lt;/h2>
+&lt;p>从 Internet 刚开始兴起，如何动态感知后端服务的地址变化就是一个必须要面对的问题，为此人们定义了 DNS 协议，基于此协议，调用方只需要记住由固定字符串组成的域名，就能轻松完成对后端服务的访问，而不用担心流量最终会访问到哪些机器 IP，因为有代理组件会基于 DNS 地址解析后的地址列表，将流量透明的、均匀的分发到不同的后端机器上。&lt;/p>
+&lt;p>在使用微服务构建复杂的分布式系统时，如何感知 backend 服务实例的动态上下线，也是微服务框架最需要关心并解决的问题之一。业界将这个问题称之为 - 微服务的地址发现（Service Discovery），业界比较有代表性的微服务框架如 SpringCloud、Dubbo 等都抽象了强大的动态地址发现能力，并且为了满足微服务业务场景的需求，绝大多数框架的地址发现都是基于自己设计的一套机制来实现，因此在能力、灵活性上都要比传统 DNS 丰富得多。如 SpringCloud 中常用的 Eureka， Dubbo 中常用的 Zookeeper、Nacos 等，这些注册中心实现不止能够传递地址（IP + Port），还包括一些微服务的 Metadata 信息，如实例序列化类型、实例方法列表、各个方法级的定制化配置等。&lt;/p>
+&lt;p>下图是微服务中 Service Discovery 的基本工作原理图，微服务体系中的实例大概可分为三种角色：服务提供者（Provider）、服务消费者（Consumer）和注册中心（Registry）。而不同框架实现间最主要的区别就体现在注册中心数据的组织：地址如何组织、以什么粒度组织、除地址外还同步哪些数据？&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-1.png" alt="img1">&lt;/p>
+&lt;p>我们今天这篇文章就是围绕这三个角色展开，重点看下 Dubbo 中对于服务发现方案的设计，包括之前老的服务发现方案的优势和缺点，以及 Dubbo 3.0 中正在设计、开发中的全新的&lt;strong>面向应用粒度的地址发现方案&lt;/strong>，我们期待这个新的方案能做到：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>支持几十万/上百万级集群实例的地址发现&lt;/strong>&lt;/li>
+&lt;li>&lt;strong>与不同的微服务体系（如 Spring Cloud）实现在地址发现层面的互通&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-dubbo-地址发现机制解析">2 Dubbo 地址发现机制解析&lt;/h2>
+&lt;p>我们先以一个 DEMO 应用为例，来快速的看一下 Dubbo “接口粒度”服务发现与“应用粒度”服务发现体现出来的区别。这里我们重点关注 Provider 实例是如何向注册中心注册的，并且，为了体现注册中心数据量变化，我们观察的是两个 Provider 实例的场景。&lt;/p>
+&lt;p>&lt;strong>应用 DEMO 提供的服务列表如下：&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.basic.api.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.basic.api.GreetingService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;greetingService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们示例注册中心实现采用的是 Zookeeper ，启动 192.168.0.103 和 192.168.0.104 两个实例后，以下是两种模式下注册中心的实际数据&lt;/p>
+&lt;p>&lt;strong>1. “接口粒度” 服务发现&lt;/strong>&lt;/p>
+&lt;p>192.168.0.103 实例注册的数据&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>dubbo://192.168.0.103:20880/org.apache.dubbo.samples.basic.api.DemoService?anyhost=true&amp;amp;application=demo-provider&amp;amp;default=true&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dynamic=true&amp;amp;generic=false&amp;amp;interface=org.apache.dubbo.samples.basic.api.DemoService&amp;amp;methods=testVoid,sayHello&amp;amp;pid=995&amp;amp;release=2.7.7&amp;amp;side=provider&amp;amp;timestamp=1596988171266
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo://192.168.0.103:20880/org.apache.dubbo.samples.basic.api.GreetingService?anyhost=true&amp;amp;application=demo-provider&amp;amp;default=true&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dynamic=true&amp;amp;generic=false&amp;amp;interface=org.apache.dubbo.samples.basic.api.GreetingService&amp;amp;methods=greeting&amp;amp;pid=995&amp;amp;release=2.7.7&amp;amp;side=provider&amp;amp;timestamp=1596988170816
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>192.168.0.104 实例注册的数据&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>dubbo://192.168.0.104:20880/org.apache.dubbo.samples.basic.api.DemoService?anyhost=true&amp;amp;application=demo-provider&amp;amp;default=true&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dynamic=true&amp;amp;generic=false&amp;amp;interface=org.apache.dubbo.samples.basic.api.DemoService&amp;amp;methods=testVoid,sayHello&amp;amp;pid=995&amp;amp;release=2.7.7&amp;amp;side=provider&amp;amp;timestamp=1596988171266
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo://192.168.0.104:20880/org.apache.dubbo.samples.basic.api.GreetingService?anyhost=true&amp;amp;application=demo-provider&amp;amp;default=true&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dynamic=true&amp;amp;generic=false&amp;amp;interface=org.apache.dubbo.samples.basic.api.GreetingService&amp;amp;methods=greeting&amp;amp;pid=995&amp;amp;release=2.7.7&amp;amp;side=provider&amp;amp;timestamp=1596988170816
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>2. “应用粒度” 服务发现&lt;/strong>&lt;/p>
+&lt;p>192.168.0.103 与 192.168.0.104 两个实例共享一份注册中心数据，如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;id&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;192.168.0.103:20880&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;address&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;192.168.0.103&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;port&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;dubbo.endpoints&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;[{\&amp;#34;port\&amp;#34;:20880,\&amp;#34;protocol\&amp;#34;:\&amp;#34;dubbo\&amp;#34;}]&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;dubbo.metadata.storage-type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;local&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;dubbo.revision&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;6785535733750099598&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;time&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">1583461240877&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;id&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;192.168.0.104:20880&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;address&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;192.168.0.104&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;port&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;dubbo.endpoints&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;[{\&amp;#34;port\&amp;#34;:20880,\&amp;#34;protocol\&amp;#34;:\&amp;#34;dubbo\&amp;#34;}]&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;dubbo.metadata.storage-type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;local&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;dubbo.revision&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;7829635812370099387&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;time&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">1583461240877&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>对比以上两种不同粒度的服务发现模式，从 “接口粒度” 升级到 “应用粒度” 后我们可以总结出最大的区别是：注册中心数据量不再与接口数成正比，不论应用提供有多少接口，注册中心只有一条实例数据。&lt;/p>
+&lt;p>那么接下来我们详细看下这个变化给 Dubbo 带来了哪些好处。&lt;/p>
+&lt;h2 id="3-dubbo-应用级服务发现的意义">3 Dubbo 应用级服务发现的意义&lt;/h2>
+&lt;p>我们先说结论，应用级服务发现给 Dubbo 带来以下优势：&lt;/p>
+&lt;ol>
+&lt;li>与业界主流微服务模型对齐，比如 SpringCloud、Kubernetes Native Service等。&lt;/li>
+&lt;li>提升性能与可伸缩性。注册中心数据的重新组织（减少），能最大幅度的减轻注册中心的存储、推送压力，进而减少 Dubbo Consumer 侧的地址计算压力；集群规模也开始变得可预测、可评估（与 RPC 接口数量无关，只与实例部署规模相关）。&lt;/li>
+&lt;/ol>
+&lt;h3 id="31-对齐主流微服务模型">3.1 对齐主流微服务模型&lt;/h3>
+&lt;p>自动、透明的实例地址发现（负载均衡）是所有微服务框架需要解决的事情，这能让后端的部署结构对上游微服务透明，上游服务只需要从收到的地址列表中选取一个，发起调用就可以了。要实现以上目标，涉及两个关键点的自动同步：&lt;/p>
+&lt;ul>
+&lt;li>实例地址，服务消费方需要知道地址以建立连接&lt;/li>
+&lt;li>RPC 方法定义，服务消费方需要知道 RPC 服务的具体定义，不论服务类型是 rest 或 rmi 等。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-2.png" alt="img2">&lt;/p>
+&lt;p>对于 RPC 实例间借助注册中心的数据同步，REST 定义了一套非常有意思的成熟度模型，感兴趣的朋友可以参考这里的链接 &lt;a href="https://www.martinfowler.com/articles/richardsonMaturityModel.html">https://www.martinfowler.com/articles/richardsonMaturityModel.html&lt;/a>， 按照文章中的 4 级成熟度定义，Dubbo 当前基于接口粒度的模型可以对应到 L4 级别。&lt;/p>
+&lt;p>接下来，我们看看 Dubbo、SpringCloud 以及 Kubernetes 分别是怎么围绕自动化的实例地址发现这个目标设计的。&lt;/p>
+&lt;p>&lt;strong>1. Spring Cloud&lt;/strong>&lt;/p>
+&lt;p>Spring Cloud 通过注册中心只同步了应用与实例地址，消费方可以基于实例地址与服务提供方建立连接，但是消费方对于如何发起 http 调用（SpringCloud 基于 rest 通信）一无所知，比如对方有哪些 http endpoint，需要传入哪些参数等。&lt;/p>
+&lt;p>RPC 服务这部分信息目前都是通过线下约定或离线的管理系统来协商的。这种架构的优缺点总结如下。
+优势：部署结构清晰、地址推送量小；
+缺点：地址订阅需要指定应用名， provider 应用变更（拆分）需消费端感知；RPC 调用无法全自动同步。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-3.png" alt="img3">&lt;/p>
+&lt;p>&lt;strong>2. Dubbo&lt;/strong>&lt;/p>
+&lt;p>Dubbo 通过注册中心同时同步了实例地址和 RPC 方法，因此其能实现 RPC 过程的自动同步，面向 RPC 编程、面向 RPC 治理，对后端应用的拆分消费端无感知，其缺点则是地址推送数量变大，和 RPC 方法成正比。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-4.png" alt="img4">&lt;/p>
+&lt;p>&lt;strong>3. Dubbo + Kubernetes&lt;/strong>&lt;/p>
+&lt;p>Dubbo 要支持 Kubernetes native service，相比之前自建注册中心的服务发现体系来说，在工作机制上主要有两点变化：&lt;/p>
+&lt;ul>
+&lt;li>服务注册由平台接管，provider 不再需要关心服务注册&lt;/li>
+&lt;li>consumer 端服务发现将是 Dubbo 关注的重点，通过对接平台层的 API-Server、DNS 等，Dubbo client 可以通过一个 &lt;a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service Name&lt;/a>（通常对应到 Application Name）查询到一组 Endpoints（一组运行 provider 的 pod），通过将 Endpoints 映射到 Dubbo 内部地址列表，以驱动 Dubbo 内置的负载均衡机制工作。&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>Kubernetes Service 作为一个抽象概念，怎么映射到 Dubbo 是一个值得讨论的点&lt;/p>
+&lt;ul>
+&lt;li>Service Name - &amp;gt; Application Name，Dubbo 应用和 Kubernetes 服务一一对应，对于微服务运维和建设环节透明，与开发阶段解耦。&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: provider-app-name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: provider-app-name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">protocol&lt;/span>: TCP
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">targetPort&lt;/span>: &lt;span style="color:#2aa198">9376&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Service Name - &amp;gt; Dubbo RPC Service，Kubernetes 要维护调度的服务与应用内建 RPC 服务绑定，维护的服务数量变多。&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: rpc-service-1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: provider-app-name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>: &lt;span style="color:#586e75">##&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: rpc-service-2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: provider-app-name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>: &lt;span style="color:#586e75">##&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: rpc-service-N
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: provider-app-name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>: &lt;span style="color:#586e75">##&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/blockquote>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-5.png" alt="img5">&lt;/p>
+&lt;p>结合以上几种不同微服务框架模型的分析，我们可以发现，Dubbo 与 SpringCloud、Kubernetes 等不同产品在微服务的抽象定义上还是存在很大不同的。SpringCloud 和 Kubernetes 在微服务的模型抽象上还是比较接近的，两者基本都只关心实例地址的同步，如果我们去关心其他的一些服务框架产品，会发现它们绝大多数也是这么设计的；&lt;/p>
+&lt;blockquote>
+&lt;p>即 REST 成熟度模型中的 L3 级别。&lt;/p>
+&lt;/blockquote>
+&lt;p>对比起来 Dubbo 则相对是比较特殊的存在，更多的是从 RPC 服务的粒度去设计的。&lt;/p>
+&lt;blockquote>
+&lt;p>对应 REST 成熟度模型中的 L4 级别。&lt;/p>
+&lt;/blockquote>
+&lt;p>如我们上面针对每种模型做了详细的分析，每种模型都有其优势和不足。而我们最初决定 Dubbo 要做出改变，往其他的微服务发现模型上的对齐，是我们最早在确定 Dubbo 的云原生方案时，我们发现要让 Dubbo 去支持 Kubernetes Native Service，模型对齐是一个基础条件；另一点是来自用户侧对 Dubbo 场景化的一些工程实践的需求，得益于 Dubbo 对多注册、多协议能力的支持，使得 Dubbo 联通不同的微服务体系成为可能，而服务发现模型的不一致成为其中的一个障碍，这部分的场景描述请参见以下文章：&lt;a href="https://developer.aliyun.com/article/740260">Dubbo 如何成为连接异构微服务体系的最佳服务开发框架&lt;/a>&lt;/p>
+&lt;h3 id="32-更大规模的微服务集群---解决性能瓶颈">3.2 更大规模的微服务集群 - 解决性能瓶颈&lt;/h3>
+&lt;p>这部分涉及到和注册中心、配置中心的交互，关于不同模型下注册中心数据的变化，之前原理部分我们简单分析过。为更直观的对比服务模型变更带来的推送效率提升，我们来通过一个示例看一下不同模型注册中心的对比：&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-6.png" alt="img6">&lt;/p>
+&lt;p>图中左边是微服务框架的一个典型工作流程，Provider 和 Consumer 通过注册中心实现自动化的地址通知。其中，Provider 实例的信息如图中表格所示：
+应用 DEMO 包含三个接口 DemoService 1 2 3，当前实例的 ip 地址为 10.210.134.30。&lt;/p>
+&lt;ul>
+&lt;li>对于 Spring Cloud 和 Kubernetes 模型，注册中心只会存储一条 &lt;code>DEMO - 10.210.134.30+metadata&lt;/code> 的数据；&lt;/li>
+&lt;li>对于老的 Dubbo 模型，注册中心存储了三条接口粒度的数据，分别对应三个接口 DemoService 1 2 3，并且很多的址数据都是重复的；&lt;/li>
+&lt;/ul>
+&lt;p>可以总结出，基于应用粒度的模型所存储和推送的数据量是和应用、实例数成正比的，只有当我们的应用数增多或应用的实例数增长时，地址推送压力才会上涨。
+而对于基于接口粒度的模型，数据量是和接口数量正相关的，鉴于一个应用通常发布多个接口的现状，这个数量级本身比应用粒度是要乘以倍数的；另外一个关键点在于，接口粒度导致的集群规模评估的不透明，相对于实例、应用增长都通常是在运维侧的规划之中，接口的定义更多的是业务侧的内部行为，往往可以绕过评估给集群带来压力。&lt;/p>
+&lt;p>以 Consumer 端服务订阅举例，根据我对社区部分 Dubbo 中大规模头部用户的粗略统计，根据受统计公司的实际场景，一个 Consumer 应用要消费（订阅）的 Provier 应用数量往往要超过 10 个，而具体到其要消费（订阅）的的接口数量则通常要达到 30 个，平均情况下 Consumer 订阅的 3 个接口来自同一个 Provider 应用，如此计算下来，如果以应用粒度为地址通知和选址基本单位，则平均地址推送和计算量将下降 60% 还要多，
+而在极端情况下，也就是当 Consumer 端消费的接口更多的来自同一个应用时，这个地址推送与内存消耗的占用将会进一步得到降低，甚至可以超过 80% 以上。&lt;/p>
+&lt;p>一个典型的极端场景即是 Dubbo 体系中的网关型应用，有些网关应用消费（订阅）达 100+ 应用，而消费（订阅）的服务有 1000+ ，平均有 10 个接口来自同一个应用，如果我们把地址推送和计算的粒度改为应用，则地址推送量从原来的 n * 1000 变为 n * 100，地址数量降低可达近 90%。&lt;/p>
+&lt;h2 id="4-应用级服务发现工作原理">4 应用级服务发现工作原理&lt;/h2>
+&lt;h3 id="41-设计原则">4.1 设计原则&lt;/h3>
+&lt;p>上面一节我们从&lt;strong>服务模型&lt;/strong>及&lt;strong>支撑大规模集群&lt;/strong>的角度分别给出了 Dubbo 往应用级服务发现靠拢的好处和原因，但这么做的同时接口粒度的服务治理能力还是要继续保留，这是 Dubbo 框架编程模型易用性、服务治理能力优势的基础。
+以下是我认为我们做服务模型迁移仍要坚持的设计原则&lt;/p>
+&lt;ul>
+&lt;li>新的服务发现模型要实现对原有 Dubbo 消费端开发者的无感知迁移，即 Dubbo 继续面向 RPC 服务编程、面向 RPC 服务治理，做到对用户侧完全无感知。&lt;/li>
+&lt;li>建立 Consumer 与 Provider 间的自动化 RPC 服务元数据协调机制，解决传统微服务模型无法同步 RPC 级接口配置的缺点。&lt;/li>
+&lt;/ul>
+&lt;h3 id="42-基本原理详解">4.2 基本原理详解&lt;/h3>
+&lt;p>应用级服务发现作为一种新的服务发现机制，和以前 Dubbo 基于 RPC 服务粒度的服务发现在核心流程上基本上是一致的：即服务提供者往注册中心注册地址信息，服务消费者从注册中心拉取&amp;amp;订阅地址信息。&lt;/p>
+&lt;p>这里主要的不同有以下两点：&lt;/p>
+&lt;h4 id="421-注册中心数据以应用---实例列表格式组织不再包含-rpc-服务信息">4.2.1 注册中心数据以“应用 - 实例列表”格式组织，不再包含 RPC 服务信息&lt;/h4>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-7.png" alt="img7">&lt;/p>
+&lt;p>以下是每个 Instance metadata 的示例数据，总的原则是 metadata 只包含当前 instance 节点相关的信息，不涉及 RPC 服务粒度的信息。&lt;/p>
+&lt;p>总体信息概括如下：实例地址、实例各种环境标、metadata service 元数据、其他少量必要属性。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;provider-app-name&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;id&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;192.168.0.102:20880&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;address&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;192.168.0.102&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;port&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">20880&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;sslPort&amp;#34;&lt;/span>: &lt;span style="color:#cb4b16">null&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;payload&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;id&amp;#34;&lt;/span>: &lt;span style="color:#cb4b16">null&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;provider-app-name&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;metadata&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;metadataService&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;{\&amp;#34;dubbo\&amp;#34;:{\&amp;#34;version\&amp;#34;:\&amp;#34;1.0.0\&amp;#34;,\&amp;#34;dubbo\&amp;#34;:\&amp;#34;2.0.2\&amp;#34;,\&amp;#34;release\&amp;#34;:\&amp;#34;2.7.5\&amp;#34;,\&amp;#34;port\&amp;#34;:\&amp;#34;20881\&amp;#34;}}&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;endpoints&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;[{\&amp;#34;port\&amp;#34;:20880,\&amp;#34;protocol\&amp;#34;:\&amp;#34;dubbo\&amp;#34;}]&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;storage-type&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;local&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;revision&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;6785535733750099598&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;registrationTimeUTC&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">1583461240877&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;serviceType&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;DYNAMIC&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;#34;uriSpec&amp;#34;&lt;/span>: &lt;span style="color:#cb4b16">null&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="422-client--server-自行协商-rpc-方法信息">4.2.2 Client – Server 自行协商 RPC 方法信息&lt;/h4>
+&lt;p>在注册中心不再同步 RPC 服务信息后，服务自省在服务消费端和提供端之间建立了一条内置的 RPC 服务信息协商机制，这也是“服务自省”这个名字的由来。服务端实例会暴露一个预定义的 MetadataService RPC 服务，消费端通过调用 MetadataService 获取每个实例 RPC 方法相关的配置信息。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-8.png" alt="img8">&lt;/p>
+&lt;p>当前 MetadataService 返回的数据格式如下，&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>[
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo://192.168.0.102:20880/org.apache.dubbo.demo.DemoService?anyhost=true&amp;amp;application=demo-provider&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dynamic=true&amp;amp;generic=false&amp;amp;interface=org.apache.dubbo.demo.DemoService&amp;amp;methods=sayHello&amp;amp;pid=9585&amp;amp;release=2.7.5&amp;amp;side=provider&amp;amp;timestamp=1583469714314&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo://192.168.0.102:20880/org.apache.dubbo.demo.HelloService?anyhost=true&amp;amp;application=demo-provider&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dynamic=true&amp;amp;generic=false&amp;amp;interface=org.apache.dubbo.demo.DemoService&amp;amp;methods=sayHello&amp;amp;pid=9585&amp;amp;release=2.7.5&amp;amp;side=provider&amp;amp;timestamp=1583469714314&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;dubbo://192.168.0.102:20880/org.apache.dubbo.demo.WorldService?anyhost=true&amp;amp;application=demo-provider&amp;amp;deprecated=false&amp;amp;dubbo=2.0.2&amp;amp;dynamic=true&amp;amp;generic=false&amp;amp;interface=org.apache.dubbo.demo.DemoService&amp;amp;methods=sayHello&amp;amp;pid=9585&amp;amp;release=2.7.5&amp;amp;side=provider&amp;amp;timestamp=1583469714314&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>熟悉 Dubbo 基于 RPC 服务粒度的服务发现模型的开发者应该能看出来，服务自省机制机制将以前注册中心传递的 URL 一拆为二：&lt;/p>
+&lt;ul>
+&lt;li>一部分和实例相关的数据继续保留在注册中心，如 ip、port、机器标识等。&lt;/li>
+&lt;li>另一部分和 RPC 方法相关的数据从注册中心移除，转而通过 MetadataService 暴露给消费端。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>理想情况下是能达到数据按照实例、RPC 服务严格区分开来，但明显可以看到以上实现版本还存在一些数据冗余，有些数据也还未合理划分。尤其是 MetadataService 部分，其返回的数据还只是简单的 URL 列表组装，这些 URL其实是包含了全量的数据。&lt;/strong>&lt;/p>
+&lt;/blockquote>
+&lt;p>以下是服务自省的一个完整工作流程图，详细描述了服务注册、服务发现、MetadataService、RPC 调用间的协作流程。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-9.png" alt="img9">&lt;/p>
+&lt;ul>
+&lt;li>服务提供者启动，首先解析应用定义的“普通服务”并依次注册为 RPC 服务，紧接着注册内建的 MetadataService 服务，最后打开 TCP 监听端口。&lt;/li>
+&lt;li>启动完成后，将实例信息注册到注册中心（仅限 ip、port 等实例相关数据），提供者启动完成。&lt;/li>
+&lt;li>服务消费者启动，首先依据其要“消费的 provider 应用名”到注册中心查询地址列表，并完成订阅（以实现后续地址变更自动通知）。&lt;/li>
+&lt;li>消费端拿到地址列表后，紧接着对 MetadataService 发起调用，返回结果中包含了所有应用定义的“普通服务”及其相关配置信息。&lt;/li>
+&lt;li>至此，消费者可以接收外部流量，并对提供者发起 Dubbo RPC 调用&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>在以上流程中，我们只考虑了一切顺利的情况，但在更详细的设计或编码实现中，我们还需要严格约定一些异常场景下的框架行为。比如，如果消费者 MetadataService 调用失败，则在重试直到成功之前，消费者将不可以接收外部流量。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="43-服务自省中的关键机制">4.3 服务自省中的关键机制&lt;/h3>
+&lt;h4 id="431-元数据同步机制">4.3.1 元数据同步机制&lt;/h4>
+&lt;p>Client 与 Server 间在收到地址推送后的配置同步是服务自省的关键环节，目前针对元数据同步有两种具体的可选方案，分别是：&lt;/p>
+&lt;ul>
+&lt;li>内建 MetadataService。&lt;/li>
+&lt;li>独立的元数据中心，通过中心化的元数据集群协调数据。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>1. 内建 MetadataService&lt;/strong>
+MetadataService 通过标准的 Dubbo 协议暴露，根据查询条件，会将内存中符合条件的“普通服务”配置返回给消费者。这一步发生在消费端选址和调用前。&lt;/p>
+&lt;p>&lt;strong>2. 元数据中心&lt;/strong>
+复用 2.7 版本中引入的元数据中心，provider 实例启动后，会尝试将内部的 RPC 服务组织成元数据的格式同步到元数据中心，而 consumer 则在每次收到注册中心推送更新后，主动查询元数据中心。&lt;/p>
+&lt;blockquote>
+&lt;p>注意 consumer 端查询元数据中心的时机，是等到注册中心的地址更新通知之后。也就是通过注册中心下发的数据，我们能明确的知道何时某个实例的元数据被更新了，此时才需要去查元数据中心。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-10.png" alt="img10">&lt;/p>
+&lt;h4 id="432-rpc-服务-----应用映射关系">4.3.2 RPC 服务 &amp;lt; - &amp;gt; 应用映射关系&lt;/h4>
+&lt;p>回顾上文讲到的注册中心关于“应用 - 实例列表”结构的数据组织形式，这个变动目前对开发者并不是完全透明的，业务开发侧会感知到查询/订阅地址列表的机制的变化。具体来说，相比以往我们基于 RPC 服务来检索地址，现在 consumer 需要通过指定 provider 应用名才能实现地址查询或订阅。&lt;/p>
+&lt;p>老的 Consumer 开发与配置示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- 框架直接通过 RPC Service 1/2/N 去注册中心查询或订阅地址列表 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;RPC Service 1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;RPC Service 2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;RPC Service N&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>新的 Consumer 开发与配置示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- 框架需要通过额外的 provided-by=&amp;#34;provider-app-x&amp;#34; 才能在注册中心查询或订阅到地址列表 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181?registry-type=service&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;RPC Service 1&amp;#34;&lt;/span> provided-by=&lt;span style="color:#2aa198">&amp;#34;provider-app-x&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;RPC Service 2&amp;#34;&lt;/span> provided-by=&lt;span style="color:#2aa198">&amp;#34;provider-app-x&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;RPC Service N&amp;#34;&lt;/span> provided-by=&lt;span style="color:#2aa198">&amp;#34;provider-app-y&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上指定 provider 应用名的方式是 Spring Cloud 当前的做法，需要 consumer 端的开发者显示指定其要消费的 provider 应用。&lt;/p>
+&lt;p>以上问题的根源在于注册中心不知道任何 RPC 服务相关的信息，因此只能通过应用名来查询。&lt;/p>
+&lt;p>为了使整个开发流程对老的 Dubbo 用户更透明，同时避免指定 provider 对可扩展性带来的影响（参见下方说明），我们设计了一套 &lt;code>RPC 服务到应用名&lt;/code>的映射关系，以尝试在 consumer 端自动完成 RPC 服务到 provider 应用名的转换。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/service-discovery-11.png" alt="img11">&lt;/p>
+&lt;blockquote>
+&lt;p>Dubbo 之所以选择建立一套“接口-应用”的映射关系，主要是考虑到 service - app 映射关系的不确定性。一个典型的场景即是应用/服务拆分，如上面提到的配置&lt;code>&amp;lt;dubbo:reference interface=&amp;quot;RPC Service 2&amp;quot; provided-by=&amp;quot;provider-app-x&amp;quot; /&amp;gt;&lt;/code>，PC Service 2 是定义于 provider-app-x 中的一个服务，未来它随时可能会被开发者分拆到另外一个新的应用如 provider-app-x-1 中，这个拆分要被所有的 PC Service 2 消费方感知到，并对应用进行修改升级，如改为&lt;code>&amp;lt;dubbo:reference interface=&amp;quot;RPC Service 2&amp;quot; provided-by=&amp;quot;provider-app-x-1&amp;quot; /&amp;gt;&lt;/code>，这样的升级成本不可否认还是挺高的。
+到底是 Dubbo 框架帮助开发者透明的解决这个问题，还是交由开发者自己去解决，当然这只是个策略选择问题，并且 Dubbo 2.7.5+ 版本目前是都提供了的。其实我个人更倾向于交由业务开发者通过组织上的约束来做，这样也可进一步降低 Dubbo 框架的复杂度，提升运行态的稳定性。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="5-总结与展望">5 总结与展望&lt;/h2>
+&lt;p>应用级服务发现机制是 Dubbo 面向云原生走出的重要一步，它帮 Dubbo 打通了与其他微服务体系之间在地址发现层面的鸿沟，也成为 Dubbo 适配 Kubernetes Native Service 等基础设施的基础。我们期望 Dubbo 在新模型基础上，能继续保留在编程易用性、服务治理能力等方面强大的优势。但是我们也应该看到应用粒度的模型一方面带来了新的复杂性，需要我们继续去优化与增强；另一方面，除了地址存储与推送之外，应用粒度在帮助 Dubbo 选址层面也有进一步挖掘的潜力。&lt;/p></description></item><item><title>Blog: Dubbo 中的 URL 统一模型</title><link>https://dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</link><pubDate>Thu, 17 Oct 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</guid><description>
+&lt;h3 id="定义">定义&lt;/h3>
+&lt;p>在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 (&lt;a href="https://www.ietf.org/rfc/rfc1738.txt">RFC1738&lt;/a>――Uniform Resource Locators (URL)）应该是最广为人知的一个 RFC 规范，它的定义也非常简单&lt;/p>
+&lt;blockquote>
+&lt;p>因特网上的可用资源可以用简单字符串来表示，该文档就是描述了这种字符串的语法和语
+义。而这些字符串则被称为：“统一资源定位器”（URL）&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;strong>一个标准的 URL 格式&lt;/strong>至多可以包含如下的几个部分&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>protocol://username:password@host:port/path?key=value&amp;amp;key=value
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>一些典型 URL&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://www.facebook.com/friends?param1=value1&amp;amp;amp;param2=value2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://username:password@10.20.130.230:8080/list?version=1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ftp://username:password@192.168.1.7:21/1/read.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，也有一些&lt;strong>不太符合常规的 URL&lt;/strong>，也被归类到了 URL 之中&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>192.168.1.3:20880
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = 192.168.1.3, port = 20880, url path = null
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///home/user1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = home/user1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file://home/user1/router.js?type=script&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = home, url path = user1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///D:/1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = D:/1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:/D:/1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>同上 file:///D:/1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/home/user1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = null, url path = home/user1/router.js
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>home/user1/router.js?type=script
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = home, url path = user1/router.js
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-中的-url">Dubbo 中的 URL&lt;/h3>
+&lt;p>在 dubbo 中，也使用了类似的 URL，主要用于在各个扩展点之间传递数据，组成此 URL 对象的具体参数如下:&lt;/p>
+&lt;ul>
+&lt;li>protocol：一般是 dubbo 中的各种协议 如：dubbo thrift http zk&lt;/li>
+&lt;li>username/password：用户名/密码&lt;/li>
+&lt;li>host/port：主机/端口&lt;/li>
+&lt;li>path：接口名称&lt;/li>
+&lt;li>parameters：参数键值对&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">URL&lt;/span>(String protocol, String username, String password, String host, &lt;span style="color:#dc322f">int&lt;/span> port, String path, Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> parameters) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> ((username &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">||&lt;/span> username.length() &lt;span style="color:#719e07">==&lt;/span> 0)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> password &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> password.length() &lt;span style="color:#719e07">&amp;gt;&lt;/span> 0) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException(&lt;span style="color:#2aa198">&amp;#34;Invalid url, password without username!&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.protocol &lt;span style="color:#719e07">=&lt;/span> protocol;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.username &lt;span style="color:#719e07">=&lt;/span> username;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.password &lt;span style="color:#719e07">=&lt;/span> password;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.host &lt;span style="color:#719e07">=&lt;/span> host;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.port &lt;span style="color:#719e07">=&lt;/span> (port &lt;span style="color:#719e07">&amp;lt;&lt;/span> 0 &lt;span style="color:#719e07">?&lt;/span> 0 : port);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.path &lt;span style="color:#719e07">=&lt;/span> path;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// trim the beginning &amp;#34;/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">while&lt;/span>(path &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> path.startsWith(&lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path &lt;span style="color:#719e07">=&lt;/span> path.substring(1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (parameters &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> parameters &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> parameters &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span>(parameters);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.parameters &lt;span style="color:#719e07">=&lt;/span> Collections.unmodifiableMap(parameters);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看出，dubbo 认为 protocol，username，passwored，host，port，path 是主要的 URL 参数，其他键值对存放在 parameters 之中。&lt;/p>
+&lt;p>&lt;strong>一些典型的 Dubbo URL&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>dubbo://192.168.1.6:20880/moe.cnkirito.sample.HelloService?timeout=3000
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>描述一个 dubbo 协议的服务
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>zookeeper://127.0.0.1:2181/org.apache.dubbo.registry.RegistryService?application=demo-consumer&amp;amp;dubbo=2.0.2&amp;amp;interface=org.apache.dubbo.registry.RegistryService&amp;amp;pid=1214&amp;amp;qos.port=33333&amp;amp;timestamp=1545721981946
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>描述一个 zookeeper 注册中心
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>consumer://30.5.120.217/org.apache.dubbo.demo.DemoService?application=demo-consumer&amp;amp;category=consumers&amp;amp;check=false&amp;amp;dubbo=2.0.2&amp;amp;interface=org.apache.dubbo.demo.DemoService&amp;amp;methods=sayHello&amp;amp;pid=1209&amp;amp;qos.port=33333&amp;amp;side=consumer&amp;amp;timestamp=1545721827784
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>描述一个消费者
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以说，任意的一个领域中的一个实现都可以认为是一类 URL，dubbo 使用 URL 来统一描述了元数据，配置信息，贯穿在整个框架之中。&lt;/p>
+&lt;h3 id="url-相关的生命周期">URL 相关的生命周期&lt;/h3>
+&lt;h4 id="rpc调用">RPC调用&lt;/h4>
+&lt;p>从地址发现的视角，URL 代表了一条可用的 provider 实例地址，除了地址信息之外还有相关的配置信息，这些配置信息是层次化的，有 provider 侧指定的配置值、consumer 侧指定的配置值、接口级别的配置值、方法级别的配置值等。这些 URL 配置值将直接影响消费端的 RPC 调用行为。&lt;/p>
+&lt;p>以 timeout 为例，下图显示了配置的查找顺序，其它 retries, loadbalance, actives 等类似：&lt;/p>
+&lt;ul>
+&lt;li>方法级优先，接口级次之，全局配置再次之。&lt;/li>
+&lt;li>如果级别一样，则消费方优先，提供方次之。&lt;/li>
+&lt;/ul>
+&lt;p>其中，服务提供方配置，通过 URL 经由注册中心传递给消费方。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-config-override.jpg" alt="dubbo-config-override">&lt;/p>
+&lt;p>（建议由服务提供方设置超时，因为一个方法需要执行多长时间，服务提供方更清楚，如果一个消费方同时引用多个服务，就不需要关心每个服务的超时设置）。&lt;/p>
+&lt;p>理论上 ReferenceConfig 中除了&lt;code>interface&lt;/code>这一项，其他所有配置项都可以缺省不配置，框架会自动使用ConsumerConfig，ServiceConfig, ProviderConfig等提供的缺省配置。&lt;/p>
+&lt;h4 id="解析服务">解析服务&lt;/h4>
+&lt;p>基于 dubbo.jar 内的 &lt;code>META-INF/spring.handlers&lt;/code> 配置，Spring 在遇到 dubbo 名称空间时，会回调 &lt;code>DubboNamespaceHandler&lt;/code>。&lt;/p>
+&lt;p>所有 dubbo 的标签，都统一用 &lt;code>DubboBeanDefinitionParser&lt;/code> 进行解析，基于一对一属性映射，将 XML 标签解析为 Bean 对象。&lt;/p>
+&lt;p>在 &lt;code>ServiceConfig.export()&lt;/code> 或 &lt;code>ReferenceConfig.get()&lt;/code> 初始化时，将 Bean 对象转换 URL 格式，所有 Bean 属性转成 URL 的参数。&lt;/p>
+&lt;p>然后将 URL 传给协议扩展点，基于扩展点自适应机制，根据 URL 的协议头，进行不同协议的服务暴露或引用。&lt;/p>
+&lt;h4 id="暴露服务">暴露服务&lt;/h4>
+&lt;p>&lt;strong>1. 只暴露服务端口：&lt;/strong>&lt;/p>
+&lt;p>在没有注册中心，直接暴露提供者的情况下，&lt;code>ServiceConfig&lt;/code> 解析出的 URL 的格式为：&lt;code>dubbo://service-host/com.foo.FooService?version=1.0.0&lt;/code>。&lt;/p>
+&lt;p>基于扩展点自适应机制，通过 URL 的 &lt;code>dubbo://&lt;/code> 协议头识别，直接调用 &lt;code>DubboProtocol&lt;/code>的 &lt;code>export()&lt;/code> 方法，打开服务端口。&lt;/p>
+&lt;p>&lt;strong>2. 向注册中心暴露服务：&lt;/strong>&lt;/p>
+&lt;p>在有注册中心，需要注册提供者地址的情况下，&lt;code>ServiceConfig&lt;/code> 解析出的 URL 的格式为: &lt;code>registry://registry-host/org.apache.dubbo.registry.RegistryService?export=URL.encode(&amp;quot;dubbo://service-host/com.foo.FooService?version=1.0.0&amp;quot;)&lt;/code>，&lt;/p>
+&lt;p>基于扩展点自适应机制，通过 URL 的 &lt;code>registry://&lt;/code> 协议头识别，就会调用 &lt;code>RegistryProtocol&lt;/code> 的 &lt;code>export()&lt;/code> 方法，将 &lt;code>export&lt;/code> 参数中的提供者 URL，先注册到注册中心。&lt;/p>
+&lt;p>再重新传给 &lt;code>Protocol&lt;/code> 扩展点进行暴露： &lt;code>dubbo://service-host/com.foo.FooService?version=1.0.0&lt;/code>，然后基于扩展点自适应机制，通过提供者 URL 的 &lt;code>dubbo://&lt;/code> 协议头识别，就会调用 &lt;code>DubboProtocol&lt;/code> 的 &lt;code>export()&lt;/code> 方法，打开服务端口。&lt;/p>
+&lt;h4 id="引用服务">引用服务&lt;/h4>
+&lt;p>&lt;strong>1. 直连引用服务：&lt;/strong>&lt;/p>
+&lt;p>在没有注册中心，直连提供者的情况下，&lt;code>ReferenceConfig&lt;/code> 解析出的 URL 的格式为：&lt;code>dubbo://service-host/com.foo.FooService?version=1.0.0&lt;/code>。&lt;/p>
+&lt;p>基于扩展点自适应机制，通过 URL 的 &lt;code>dubbo://&lt;/code> 协议头识别，直接调用 &lt;code>DubboProtocol&lt;/code> 的 &lt;code>refer()&lt;/code> 方法，返回提供者引用。&lt;/p>
+&lt;p>&lt;strong>2. 从注册中心发现引用服务：&lt;/strong>&lt;/p>
+&lt;p>在有注册中心，通过注册中心发现提供者地址的情况下，&lt;code>ReferenceConfig&lt;/code> 解析出的 URL 的格式为：&lt;code>registry://registry-host/org.apache.dubbo.registry.RegistryService?refer=URL.encode(&amp;quot;consumer://consumer-host/com.foo.FooService?version=1.0.0&amp;quot;)&lt;/code>。&lt;/p>
+&lt;p>基于扩展点自适应机制，通过 URL 的 &lt;code>registry://&lt;/code> 协议头识别，就会调用 &lt;code>RegistryProtocol&lt;/code> 的 &lt;code>refer()&lt;/code> 方法，基于 &lt;code>refer&lt;/code> 参数中的条件，查询提供者 URL，如： &lt;code>dubbo://service-host/com.foo.FooService?version=1.0.0&lt;/code>。&lt;/p>
+&lt;p>基于扩展点自适应机制，通过提供者 URL 的 &lt;code>dubbo://&lt;/code> 协议头识别，就会调用 &lt;code>DubboProtocol&lt;/code> 的 &lt;code>refer()&lt;/code> 方法，得到提供者引用。&lt;/p>
+&lt;p>然后 &lt;code>RegistryProtocol&lt;/code> 将多个提供者引用，通过 &lt;code>Cluster&lt;/code> 扩展点，伪装成单个提供者引用返回。&lt;/p>
+&lt;h3 id="url-统一模型的意义">URL 统一模型的意义&lt;/h3>
+&lt;p>对于 dubbo 中的 URL，有人理解为配置总线，有人理解为统一配置模型，说法虽然不同，但都是在表达一个意思，这样的 URL 在 dubbo 中被当做是&lt;a href="https://dubbo.apache.org/zh-cn/docsv2.7/dev/contract/">公共契约&lt;/a>，所有扩展点参数都包含 URL 参数，URL 作为上下文信息贯穿整个扩展点设计体系。&lt;/p>
+&lt;p>在没有 URL 之前，只能以字符串传递参数，不停的解析和拼装，导致相同类型的接口，参数时而 Map, 时而 Parameters 类包装：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>export(String url)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>createExporter(String host, &lt;span style="color:#dc322f">int&lt;/span> port, Parameters params)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>使用 URL 一致性模型：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>export(URL url)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>createExporter(URL url)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在最新的 dubbo 代码中，我们可以看到大量使用 URL 来进行上下文之间信息的传递，这样的好处是显而易见的：&lt;/p>
+&lt;ol>
+&lt;li>使得代码编写者和阅读者能够将一系列的参数联系起来，进而形成规范，使得代码易写，易读。&lt;/li>
+&lt;li>可扩展性强，URL 相当于参数的集合(相当于一个 Map)，他所表达的含义比单个参数更丰富，当我们在扩展代码时，可以将新的参数追加到 URL 之中，而不需要改变入参，返参的结构。&lt;/li>
+&lt;li>统一模型，它位于 org.apache.dubbo.common 包中，各个扩展模块都可以使用它作为参数的表达形式，简化了概念，降低了代码的理解成本。&lt;/li>
+&lt;/ol>
+&lt;p>如果你能够理解 final 契约和 restful 契约，那我相信你会很好地理解 URL 契约。契约的好处我还是啰嗦一句：大家都这么做，就形成了默契，沟通是一件很麻烦的事，统一 URL 模型可以省去很多沟通成本，这边是 URL 统一模型存在的意义。&lt;/p></description></item></channel></rss>

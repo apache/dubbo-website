@@ -1,0 +1,209 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Service Status Monitoring</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/</link><description>Recent content in Service Status Monitoring on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Indicator observation based on http metrics</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/http/</guid><description/></item><item><title>Docs3-V2: View monitoring information of RPC calls</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/</guid><description>
+&lt;h2 id="1-preparations">1. Preparations&lt;/h2>
+&lt;ul>
+&lt;li>dubbo-go cli tools and dependent tools have been installed&lt;/li>
+&lt;li>Create a new demo application&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-modify-the-client-logic-and-initiate-calls-repeatedly">2. Modify the client logic and initiate calls repeatedly&lt;/h2>
+&lt;p>go-client/cmd/client.go&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>config. &lt;span style="color:#268bd2">SetConsumerService&lt;/span>(grpcGreeterImpl)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">Load&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Info&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;start to test dubbo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>req &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.HelloRequest{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Name: &lt;span style="color:#2aa198">&amp;#34;Laurence&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span>{ &lt;span style="color:#586e75">// repeat the call
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>reply, err &lt;span style="color:#719e07">:=&lt;/span> grpcGreeterImpl.&lt;span style="color:#268bd2">SayHello&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), req)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger. &lt;span style="color:#268bd2">Error&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;client response result: %v\n&amp;#34;&lt;/span>, reply)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-view-request-rt-information">3. View request RT information&lt;/h2>
+&lt;p>Start the server and client service applications successively. View localhost:9090/metrics in the browser, search for &amp;ldquo;dubbo&amp;rdquo;, and you can view the request delay of the exposed interface on the server, in ns.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>$ curl localhost:9090/metrics | grep dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># HELP dubbo_provider_service_rt
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># TYPE dubbo_provider_service_rt gauge
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_provider_service_rt{group=&amp;#34;&amp;#34;,method=&amp;#34;SayHello&amp;#34;,service=&amp;#34;api.Greeter&amp;#34;,timeout=&amp;#34;&amp;#34;,version=&amp;#34;3.0.0&amp;#34;} 41084
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It can be seen that the latest request rt is 41084 ns.&lt;/p></description></item><item><title>Docs3-V2: Data Reporting Promethus Tutorial</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/promethus/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/promethus/</guid><description/></item><item><title>Docs3-V2: Grafana-based Visual Monitoring Tutorial</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/grafana/</guid><description/></item><item><title>Docs3-V2: Dubbo Go Log Management</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/logger/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/logger/</guid><description/></item><item><title>Docs3-V2: Metrics data reporting</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/metrics/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/monitor/metrics/</guid><description>
+&lt;p>Reference Samples: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/metrics">dubbo-go-samples/metrics&lt;/a>&lt;/p>
+&lt;h2 id="1-data-reporting-configuration">1. Data reporting configuration&lt;/h2>
+&lt;p>When the metrics: field is not specified, the pull mode prometheus data reporting is enabled by default, the default port is 9090, and the monitoring path defaults to /metrics. You can customize it by referring to the server configuration example below.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">application&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">3.0.0&lt;/span>-rc3 &lt;span style="color:#586e75"># version number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metrics&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">enable&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span> &lt;span style="color:#586e75"># default is true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /custom-metrics-path &lt;span style="color:#586e75"># default is /metrics&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">9091&lt;/span> &lt;span style="color:#586e75"># default is 9090&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">namespace&lt;/span>: dubbo &lt;span style="color:#586e75"># default is dubbo as the prefix for data reporting metrics&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">myzk&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: localhost:2181
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: dubbo-go &lt;span style="color:#586e75"># belongs to the group, need to be consistent with the client&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.HelloService &lt;span style="color:#586e75"># interface name&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-default-data-reporting-indicators">2. Default data reporting indicators&lt;/h2>
+&lt;p>After starting the above server locally, you can collect default data metrics at localhost:9091/custom-metrics-path, including gc, goroutine number, memory usage, etc.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_gc_duration_seconds summary&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_gc_duration_seconds{quantile=&amp;#34;0&amp;#34;} 3.0916e-05
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_gc_duration_seconds{quantile=&amp;#34;0.25&amp;#34;} 3.0916e-05
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_gc_duration_seconds{quantile=&amp;#34;0.5&amp;#34;} 3.1167e-05
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_gc_duration_seconds{quantile=&amp;#34;0.75&amp;#34;} 0.000164084
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_gc_duration_seconds{quantile=&amp;#34;1&amp;#34;} 0.000164084
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_gc_duration_seconds_sum 0.000226167
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_gc_duration_seconds_count 3
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_goroutines Number of goroutines that currently exist.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_goroutines gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_goroutines 25
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_info Information about the Go environment.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_info gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_info{version=&amp;#34;go1.17.2&amp;#34;} 1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_alloc_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_alloc_bytes 6.195808e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_alloc_bytes_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_alloc_bytes_total 9.482768e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_buck_hash_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_buck_hash_sys_bytes 1.449179e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_frees_total Total number of frees.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_frees_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_frees_total 29419
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_gc_cpu_fraction The fraction of this program&amp;#39;s available CPU time used by the GC since the program started.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_gc_cpu_fraction gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_gc_cpu_fraction 0.022937924367975027
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_gc_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_gc_sys_bytes 5.235864e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_heap_alloc_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_heap_alloc_bytes 6.195808e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_heap_idle_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_heap_idle_bytes 3.792896e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_heap_inuse_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_heap_inuse_bytes 8.036352e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_heap_objects Number of allocated objects.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_heap_objects gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_heap_objects 16489
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_heap_released_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_heap_released_bytes 3.416064e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_heap_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_heap_sys_bytes 1.1829248e+07
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_last_gc_time_seconds gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_last_gc_time_seconds 1.635778234064745e+09
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_lookups_total Total number of pointer lookups.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_lookups_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_lookups_total 0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_mallocs_total Total number of mallocs.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_mallocs_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_mallocs_total 45908
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_mcache_inuse_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_mcache_inuse_bytes 9600
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_mcache_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_mcache_sys_bytes 16384
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_mspan_inuse_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_mspan_inuse_bytes 116144
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_mspan_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_mspan_sys_bytes 131072
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_next_gc_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_next_gc_bytes 7.935184e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_other_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_other_sys_bytes 1.426069e+06
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_stack_inuse_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_stack_inuse_bytes 753664
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_stack_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_stack_sys_bytes 753664
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_memstats_sys_bytes Number of bytes obtained from system.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_memstats_sys_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_memstats_sys_bytes 2.084148e+07
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP go_threads Number of OS threads created.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE go_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go_threads 12
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-call-indicator-rt">3. Call indicator RT&lt;/h2>
+&lt;p>Start the client in the example. After several calls, you will find that the corresponding data indicators have been added, prefixed with the default namespace dubbo.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP dubbo_provider_service_rt&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE dubbo_provider_service_rt gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_provider_service_rt{group=&amp;#34;dubbo-go&amp;#34;, method=&amp;#34;SayHello&amp;#34;, service=&amp;#34;com.apache.dubbo.HelloService&amp;#34;, timeout=&amp;#34;&amp;#34;, version=&amp;#34;3.0.0-rc3&amp;#34;} 127542
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>You can see the request rt time corresponding to the interface name and method name. This part of the calling indicators is to be improved later.&lt;/p>
+&lt;h2 id="4-manual-data-reporting">4. Manual data reporting&lt;/h2>
+&lt;p>The API can be called in the business code for manual data reporting. Supports Counter, Summary, Gauge types, and supports multiple labels. It can be collected after reporting.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/metrics/prometheus&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">for&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// metrics refresh per second
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>time. &lt;span style="color:#268bd2">Sleep&lt;/span>(time. Second)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus.&lt;span style="color:#268bd2">IncSummary&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test_summary&amp;#34;&lt;/span>, rand.&lt;span style="color:#268bd2">Float64&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus.&lt;span style="color:#268bd2">IncSummaryWithLabel&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test_summary_with_label&amp;#34;&lt;/span>, rand.&lt;span style="color:#268bd2">Float64&lt;/span>(), &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#dc322f">string&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;summarylabel1&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;value1&amp;#34;&lt;/span>, &lt;span style="color:#586e75">// label and value for this summary
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#2aa198">&amp;#34;summarylabel2&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;value2&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus. &lt;span style="color:#268bd2">IncCounter&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test_counter&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus.&lt;span style="color:#268bd2">IncCounterWithLabel&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test_counter_with_label&amp;#34;&lt;/span>, &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#dc322f">string&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;counterlabel1&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;value1&amp;#34;&lt;/span>, &lt;span style="color:#586e75">// label and value for this counter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#2aa198">&amp;#34;counterlabel2&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;value2&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus. &lt;span style="color:#268bd2">SetGauge&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test_gauge&amp;#34;&lt;/span>, rand. &lt;span style="color:#268bd2">Float64&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus.&lt;span style="color:#268bd2">SetGaugeWithLabel&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;test_gauge_with_label&amp;#34;&lt;/span>, rand.&lt;span style="color:#268bd2">Float64&lt;/span>(), &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#dc322f">string&lt;/span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;gaugelabel1&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;value1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#2aa198">&amp;#34;gaugelabel2&amp;#34;&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;value2&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After running for a period of time, the following user-defined indicators can be collected&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP dubbo_test_counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE dubbo_test_counter counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_counter 463
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP dubbo_test_counter_with_label&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE dubbo_test_counter_with_label counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_counter_with_label{counterlabel1=&amp;#34;value1&amp;#34;, counterlabel2=&amp;#34;value2&amp;#34;} 463
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP dubbo_test_gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE dubbo_test_gauge gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_gauge 0.7402836247772934
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP dubbo_test_gauge_with_label&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE dubbo_test_gauge_with_label gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_gauge_with_label{gaugelabel1=&amp;#34;value1&amp;#34;, gaugelabel2=&amp;#34;value2&amp;#34;} 0.8360973807546456
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP dubbo_test_summary&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE dubbo_test_summary summary&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_sum 228.1800106582441
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_count 463
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP dubbo_test_summary_with_label&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE dubbo_test_summary_with_label summary&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;,quantile=&amp;#34;0.5&amp;#34;} 0.5174757569778469
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;,quantile=&amp;#34;0.75&amp;#34;} 0.734268575017709
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;,quantile=&amp;#34;0.9&amp;#34;} 0.9059918694279894
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;,quantile=&amp;#34;0.98&amp;#34;} 0.9761803018478838
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;,quantile=&amp;#34;0.99&amp;#34;} 0.9820270046489341
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;,quantile=&amp;#34;0.999&amp;#34;} 0.9986025122460248
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label_sum{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;} 233.609026131067
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo_test_summary_with_label_count{summarylabel1=&amp;#34;value1&amp;#34;,summarylabel2=&amp;#34;value2&amp;#34;} 463
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

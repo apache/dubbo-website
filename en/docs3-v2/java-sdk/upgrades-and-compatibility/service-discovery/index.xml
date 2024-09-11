@@ -1,0 +1,278 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Application Level Service Discovery</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/</link><description>Recent content in Application Level Service Discovery on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: Application-Level Service Discovery Migration Example</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-samples/</guid><description>
+&lt;p>Application-level service discovery is a protocol for service discovery between applications. Therefore, to use application-level service discovery, both the consumer and the server must be upgraded to Dubbo 3.0 and new features enabled (enabled by default) to use application-level service discovery in the link. Take advantage of application-level service discovery.&lt;/p>
+&lt;h2 id="open-method">Open method&lt;/h2>
+&lt;h3 id="server">Server&lt;/h3>
+&lt;p>After the application is upgraded to Dubbo 3.0, the server will automatically enable the interface-level + application-level dual registration function, and the developer does not need to modify any configuration by default&lt;/p>
+&lt;h3 id="consumer-side">Consumer side&lt;/h3>
+&lt;p>After the application is upgraded to Dubbo 3.0, the consumer side automatically starts the interface-level + application-level dual subscription function, and the developer does not need to modify any configuration by default. It is recommended that after the server is upgraded to Dubbo 3.0 and the application-level registration is enabled, configure the consumer end to close the interface-level subscription through rules to release the corresponding memory space.&lt;/p>
+&lt;h2 id="detailed-description">Detailed description&lt;/h2>
+&lt;h3 id="server-configuration">Server configuration&lt;/h3>
+&lt;ol>
+&lt;li>Global switch&lt;/li>
+&lt;/ol>
+&lt;p>Application configuration (can be specified by configuration file or -D) &lt;code>dubbo.application.register-mode&lt;/code> enables the global registration switch for instance (only register application level) and all (both interface level and application level registration). After configuring this switch , by default, application-level addresses will be registered with all registries for service discovery on the consumer side.&lt;/p>
+&lt;blockquote>
+&lt;p>Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src/main/resources/ dubbo.properties](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src">https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider2/src&lt;/a> /main/resources/dubbo.properties)&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># double registration
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.register-mode=all
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># Application-level registration only
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.register-mode=instance
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Registration center address parameter configuration&lt;/li>
+&lt;/ol>
+&lt;p>Registry-type=service can be configured on the address of the registry to display the registry that specifies the registry as application-level service discovery, and the registry with this configuration will only perform application-level service discovery.&lt;/p>
+&lt;blockquote>
+&lt;p>Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources/spring/ dubbo-provider.xml](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src">https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src&lt;/a> /main/resources/spring/dubbo-provider.xml)&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;nacos://${nacos.address:127.0.0.1}:8848?registry-type=service&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="consumer-subscription-mode">Consumer Subscription Mode&lt;/h3>
+&lt;p>FORCE_INTERFACE: only interface-level subscription, the behavior is consistent with Dubbo 2.7 and previous versions.
+APPLICATION_FIRST: interface level + application level multi-subscription, if the application level can subscribe to the address, use the application level subscription, if the address cannot be subscribed, use the interface level subscription, so as to ensure the greatest compatibility during the migration process. (Note: Due to the simultaneous subscription behavior, the memory usage in this mode will increase to a certain extent, so after all servers are upgraded to Dubbo 3.0, it is recommended to migrate to FORCE_APPLICATION mode to reduce memory usage)
+FORCE_APPLICATION: Only application-level subscriptions will only use the new service discovery model.&lt;/p>
+&lt;h3 id="consumer-configuration">Consumer configuration&lt;/h3>
+&lt;ol>
+&lt;li>Default configuration (no configuration required)&lt;/li>
+&lt;/ol>
+&lt;p>After upgrading to Dubbo 3.0, the default behavior is interface-level + application-level multi-subscription. If the address can be subscribed at the application level, the application-level subscription will be used. If the address cannot be subscribed, the interface-level subscription will be used to ensure maximum compatibility.&lt;/p>
+&lt;ol start="2">
+&lt;li>Subscription parameter configuration&lt;/li>
+&lt;/ol>
+&lt;p>Application configuration (can be specified by configuration file or -D) &lt;code>dubbo.application.service-discovery.migration&lt;/code> is &lt;code>APPLICATION_FIRST&lt;/code> to enable multi-subscription mode, and configuration to &lt;code>FORCE_APPLICATION&lt;/code> can force application-level subscription mode only.
+The specific interface subscription can be configured in &lt;code>parameters&lt;/code> in &lt;code>ReferenceConfig&lt;/code>, and the Key is &lt;code>migration.step&lt;/code>, and the Value is &lt;code>APPLICATION_FIRST&lt;/code> or &lt;code>FORCE_APPLICATION&lt;/code> key-value pair to configure a single subscription.&lt;/p>
+&lt;blockquote>
+&lt;p>Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/test/java/ org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration">https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration&lt;/a> /dubbo-servicediscovery-migration-consumer/src/test/java/org/apache/dubbo/demo/consumer/DemoServiceConfigIT.java)&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>System.setProperty(&lt;span style="color:#2aa198">&amp;#34;dubbo.application.service-discovery.migration&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;APPLICATION_FIRST&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span> referenceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>(applicationModel. &lt;span style="color:#268bd2">newModule&lt;/span>());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.setInterface(DemoService.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.setParameters(&lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>referenceConfig.getParameters().put(&lt;span style="color:#2aa198">&amp;#34;migration.step&amp;#34;&lt;/span>, mode);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> referenceConfig.get();
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>Dynamic configuration (highest priority, configuration can be modified at runtime)&lt;/li>
+&lt;/ol>
+&lt;p>This configuration needs to be pushed based on the configuration center, the Key is the application name + &lt;code>.migration&lt;/code> (such as &lt;code>demo-application.migraion&lt;/code>), and the Group is &lt;code>DUBBO_SERVICEDISCOVERY_MIGRATION&lt;/code>. For details on rule body configuration, see &lt;a href="../migration-service-discovery/">Guidelines for migrating from interface-level service discovery to application-level service discovery&lt;/a>.&lt;/p>
+&lt;blockquote>
+&lt;p>Example: [https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-cloud-native/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-consumer/src/main/java/ org/apache/dubbo/demo/consumer/UpgradeUtil.java](&lt;a href="https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration">https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration&lt;/a> /dubbo-servicediscovery-migration-consumer/src/main/java/org/apache/dubbo/demo/consumer/UpgradeUtil.java)&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>step: FORCE_INTERFACE
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Docs3-V2: Guidelines for migrating interface-level service discovery to application-level service discovery</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/</guid><description>
+&lt;p>**In general, 3.x is fully compatible with 2.x in address registration and discovery, which means that users can choose to upgrade any number of applications or machines in the cluster to 3.x, and at the same time Interoperability with 2.x versions is maintained in the process. **
+If you are concerned about the working principle behind migration, please refer to &lt;a href="../service-discovery-rule">Migration Rule Details and Working Principle&lt;/a>&lt;/p>
+&lt;h2 id="1-quick-upgrade-steps">1 Quick upgrade steps&lt;/h2>
+&lt;p>Simply modify the pom.xml to the latest version to complete the upgrade. If you want to migrate to the application-level address, you only need to adjust the switch to control the default behavior of the 3.x version.&lt;/p>
+&lt;ol>
+&lt;li>Upgrade the Provider application to the latest 3.x version dependency, configure the dual registration switch &lt;code>dubbo.application.register-mode=all&lt;/code> (it is recommended to set it through the global configuration center, it is automatically enabled by default), and complete the application release.&lt;/li>
+&lt;li>Upgrade the Consumer application to the latest 3.x version dependency, configure the dual subscription switch &lt;code>dubbo.application.service-discovery.migration=APPLICATION_FIRST&lt;/code> (it is recommended to set it through the global configuration center, it is automatically enabled by default), and complete the application release.&lt;/li>
+&lt;li>After confirming that all consumers on the Provider have completed the application-level address migration, the Provider switches to the application-level address list registration. complete upgrade&lt;/li>
+&lt;/ol>
+&lt;p>The following is a detailed description of the migration process.&lt;/p>
+&lt;h2 id="2-provider-side-upgrade-process-details">2 Provider-side upgrade process details&lt;/h2>
+&lt;p>Without changing any Dubbo configuration, an application or instance can be upgraded to version 3.x, and the upgraded Dubbo instance will tacitly guarantee compatibility with version 2.x, that is, the 2.x format will be registered normally address to the registry, so upgraded instances will still remain visible to the entire cluster.&lt;/p>
+&lt;p>At the same time, the new address discovery model (registering application-level addresses) will also be automatically registered.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/provider-registration.png" alt="//imgs/v3/migration/provider-registration.png">&lt;/p>
+&lt;p>Through the -D parameter, you can specify the registration behavior when the provider starts&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.register-mode=all
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># Optional values interface, instance, all, the default is all, that is, both interface-level addresses and application-level addresses are registered
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In addition, the global default behavior can be modified in the configuration center to control the registration behavior of all 3.x instances. Among them, the priority of the global switch is lower than that of the -D parameter.&lt;/p>
+&lt;p>In order to ensure smooth migration, that is, instances upgraded to 3.x can be discovered by 2.x and 3.x consumer instances at the same time, 3.x instances need to enable dual registration; when all upstream consumers are migrated to 3.x After the address model is specified, the provider can switch to the instance mode (only register application-level addresses). See the next section for how to upgrade the consumer to 3.x.&lt;/p>
+&lt;h3 id="21-resource-consumption-caused-by-double-registration">2.1 Resource consumption caused by double registration&lt;/h3>
+&lt;p>Double registration will inevitably bring additional storage pressure on the registration center, but considering the great advantages of the data volume of the application-level address discovery model in terms of storage, even for some ultra-large-scale cluster users, the new data volume It doesn&amp;rsquo;t cause storage problems either. Generally speaking, for an ordinary cluster, data growth can be controlled at 1/100 ~ 1/1000 of the previous total data&lt;/p>
+&lt;p>Take a medium-sized cluster instance: 2000 instances, 50 applications (500 Dubbo interfaces, 10 interfaces per application on average).&lt;/p>
+&lt;p>Assume that the average size of each interface-level URL address is 5kb, and the average size of each application-level URL is 0.5kb&lt;/p>
+&lt;p>Old interface-level address volume: 2000 * 500 * 5kb ≈ 4.8G&lt;/p>
+&lt;p>New application-level addresses: 2000 * 50 * 0.5kb ≈ 48M&lt;/p>
+&lt;p>After double registration, only 48M data volume has been increased.&lt;/p>
+&lt;h2 id="3-consumer-side-upgrade-process">3 Consumer side upgrade process&lt;/h2>
+&lt;p>For 2.x consumer instances, they will naturally see the 2.x version of the provider address list;&lt;/p>
+&lt;p>For 3.x consumers, it has the ability to discover both 2.x and 3.x provider address lists. By default, if there is a 3.x address that can be consumed in the cluster, the 3.x address will be automatically consumed, and if there is no new address, the 2.x address will be automatically consumed. Dubbo3 provides a switch to control this behavior:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>dubbo.application.service-discovery.migration=APPLICATION_FIRST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># optional value
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># FORCE_INTERFACE, only consume interface-level addresses, if there is no address, an error will be reported, and only subscribe to 2.x addresses
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># APPLICATION_FIRST, intelligent decision interface level/application level address, double subscription
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># FORCE_APPLICATION, only consume application-level addresses, if there is no address, an error will be reported, and only subscribe to 3.x addresses
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>dubbo.application.service-discovery.migration&lt;/code> supports configuration via &lt;code>-D&lt;/code> and &lt;code>Global Configuration Center&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/consumer-subscription.png" alt="//imgs/v3/migration/consumer-subscription.png">&lt;/p>
+&lt;p>Next, let&amp;rsquo;s take a closer look at how to migrate consumers upgraded to 3.x to application-level addresses through the dual subscription mode (APPLICATION_FIRST). Before the specific development, first clarify the location selection behavior of the consumer: **For the dual subscription scenario, although the consumer can hold the 2.x address and the 3.x address at the same time, the two addresses are completely isolated during the location selection process Definitely: Either use 2.x address or 3.x address, there is no mixed calling of two addresses, this decision-making process is completed after receiving the first address notification. **&lt;/p>
+&lt;p>Next, let&amp;rsquo;s look at the specific operation process of an &lt;code>APPLICATION_FIRST&lt;/code> strategy.&lt;/p>
+&lt;p>First, configure a configuration item in the global configuration center Nacos in advance (all consumers will implement this address selection strategy by default):&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/nacos-migration-item.png" alt="//imgs/v3/migration/nacos-migration-item.png">&lt;/p>
+&lt;p>Next, upgrade the consumer to version 3.x and start it. At this time, the consumer reads the &lt;code>APPLICATION_FIRST&lt;/code> configuration and executes the double subscription logic (subscribing to 2.x interface-level addresses and 3.x application-level addresses)&lt;/p>
+&lt;p>At this point, the upgrade operation is completed, and the rest is the execution within the framework. Before the call occurs, the framework will have a &amp;ldquo;site selection process&amp;rdquo; on the consumer side. Note that the site selection here is different from the previous 2.x version. The site selection process includes two layers of screening:&lt;/p>
+&lt;ul>
+&lt;li>Filter the address list (ClusterInvoker) first (interface-level address or application-level address)&lt;/li>
+&lt;li>Then perform the actual provider address (Invoker) screening.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-cluster-invoker.png" alt="//imgs/v3/migration/migration-cluster-item.png">&lt;/p>
+&lt;p>The basis for ClusterInvoker screening can be defined by the MigrationAddressComparator SPI. Currently, the official provides a simple address quantity comparison strategy, that is, migration will be performed when &lt;code>application-level address quantity == interface-level address quantity&lt;/code> is satisfied.&lt;/p>
+&lt;blockquote>
+&lt;p>In fact, FORCE_INTERFACE, APPLICATION_FIRST, and FORCE_APPLICATION control the filtering strategy of the ClusterInvoker type here&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="31-resource-consumption-caused-by-double-subscription">3.1 Resource consumption caused by double subscription&lt;/h3>
+&lt;p>Double subscription will inevitably increase the memory consumption of the consumer, but due to the advantages of application-level address discovery in terms of the total number of addresses, this process is usually acceptable. We analyze it from two aspects:&lt;/p>
+&lt;ol>
+&lt;li>The amount of address push data increased due to double subscription. We introduced this point in the &amp;ldquo;Double Registration Resource Consumption&amp;rdquo; section, and the data volume growth of the registration center brought about by application-level service discovery is very limited.&lt;/li>
+&lt;li>The increase in memory on the consumer side brought about by double subscriptions. It should be noted that double subscription only exists in the startup transient state, and one of the addresses will be completely destroyed after the ClusterInvoker site selection decision; for a single service, the memory growth caused by the double subscription during the startup phase can be controlled at about 30% of the original memory % ~ 40%, and then it will drop to the single subscription level. If you switch to the application-level address, you can achieve a 50% drop in memory.&lt;/li>
+&lt;/ol>
+&lt;h3 id="32-finer-grained-control-on-the-consumer-side">3.2 Finer-grained control on the consumer side&lt;/h3>
+&lt;p>In addition to the global migration strategy, Dubbo provides more fine-grained migration strategy support on the consumer side. The control unit can be a certain consumer application, and the service A and service B it consumes can have their own independent migration strategies. The specific method is to configure the migration rules on the consumer side:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">step&lt;/span>: APPLICATION_FIRST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">applications&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: demo-provider
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: FORCE_APPLICATION
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey&lt;/span>: org.apache.dubbo.config.api.DemoService:1.0.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: FORCE_INTERFACE
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Using this method can achieve more fine-grained migration control, but the current and subsequent transformation costs will be relatively high. Except for some special scenarios, we do not recommend enabling this configuration method.
+(&lt;a href="../service-discovery-rule/">Migration Guide&lt;/a>) **Officially recommended global switch-type migration strategy, allowing consumer instances to decide which available address list to use during the startup phase. **&lt;/p>
+&lt;h2 id="4-convergence-of-transition-state">4 Convergence of transition state&lt;/h2>
+&lt;p>In order to be compatible with the 2.x version at the same time, the application upgraded to the 3.x version is either in the double registration state or in the double subscription state for a period of time.&lt;/p>
+&lt;p>To solve this problem, we still look at it from the Provider perspective. When all Providers are switched to application-level address registration, there will be no double subscription problem.&lt;/p>
+&lt;h3 id="41-different-upgrade-strategies-have-a-great-impact">4.1 Different upgrade strategies have a great impact&lt;/h3>
+&lt;p>There is no doubt that the sooner and more thoroughly the upgrade will be able to get rid of this situation as soon as possible. Imagine that if all applications in the organization can be upgraded to version 3.x, version convergence becomes very simple: Provider always maintains dual registration during the upgrade process. After all applications are upgraded to 3.x, you can Adjust the global default behavior to make Providers become application-level address list registrations. This process will not cause trouble for Consumer applications, because they are already version 3.x that can recognize application-level addresses.&lt;/p>
+&lt;p>If there is no way to upgrade the entire application, or even only a part of the application can be upgraded within a long period of time, the inevitable migration state will last for a relatively long time.
+In this case, what we can only pursue is to keep the upstream and downstream implementation versions and functions of the upgraded application converged as much as possible. The upstream consumers of certain Providers are promoted to upgrade to Dubbo3, so that the dual registration of these Providers can be lifted. To do this, the support of some auxiliary statistical tools may be required.&lt;/p>
+&lt;ol>
+&lt;li>To be able to analyze the dependencies between applications, such as which consumer applications a Provdier application is consumed by, this can be achieved through the service metadata reporting capability provided by Dubbo.&lt;/li>
+&lt;li>To know the dubbo version currently used by each application, you can scan or actively report.&lt;/li>
+&lt;/ol></description></item><item><title>Docs3-V2: Application-level Service Discovery Address Migration Rules Description</title><link>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/</guid><description>
+&lt;h2 id="state-model">State Model&lt;/h2>
+&lt;p>Before Dubbo 3, the address registration model was registered to the registry at the interface-level granularity, while the new application-level registration model of Dubbo 3 is registered to the registry at the application-level granularity. The implementation of the registry is almost different, which leads to the inability to merge the invokers obtained from the interface-level registration model with the invokers obtained from the application-level registration model. In order to help users migrate from the interface level to the application level, Dubbo 3 has designed the Migration mechanism, which realizes the switching of the address model in the actual call based on the switching of the three states.&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-1.png" alt="//imgs/v3/migration/migration-1.png">&lt;/p>
+&lt;p>Currently there are three states, FORCE_INTERFACE (mandatory interface level), APPLICATION_FIRST (application level priority), FORCE_APPLICATION (mandatory application level).&lt;/p>
+&lt;p>FORCE_INTERFACE: Only enable the registry logic for interface-level service discovery in compatibility mode, and 100% of the call traffic follows the original process
+APPLICATION_FIRST: Enable interface-level and application-level dual subscriptions, and dynamically determine the calling traffic direction according to the threshold and grayscale traffic ratio at runtime
+FORCE_APPLICATION: Only enable the registration center logic of application-level service discovery in the new mode, and 100% of the call traffic goes to the address of the application-level subscription&lt;/p>
+&lt;h2 id="description-of-rule-body">Description of rule body&lt;/h2>
+&lt;p>The rules are configured in yaml format, and the specific configuration is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: consumer application name (required)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">step&lt;/span>: state name (required)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">threshold&lt;/span>: decision threshold (default 1.0)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">proportion&lt;/span>: grayscale ratio (default 100)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">delay&lt;/span>: delay decision time (default 0)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: force switching (default false)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">interfaces&lt;/span>: interface granularity configuration (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey: interface name (interface + &lt;/span>: + version number) (required)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threshold&lt;/span>: decision threshold
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">proportion&lt;/span>: grayscale ratio
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: delay decision time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: force switch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: state name (required)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey: interface name (interface + &lt;/span>: + version number)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: state name
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">applications&lt;/span>: application granular configuration (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey&lt;/span>: application name (consumed upstream application name) (required)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threshold&lt;/span>: decision threshold
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">proportion&lt;/span>: grayscale ratio
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: delay decision time
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: force switch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: state name (required)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>key: consumer application name&lt;/li>
+&lt;li>step: state name (FORCE_INTERFACE, APPLICATION_FIRST, FORCE_APPLICATION)&lt;/li>
+&lt;li>threshold: decision threshold (floating point number, refer to the following for specific meaning)&lt;/li>
+&lt;li>proportion: grayscale ratio (0 to 100, determines the proportion of calling times)&lt;/li>
+&lt;li>delay: Delay decision time (delay decision time, the actual waiting time is 1~2 times the delay time, depending on the time of the first notification from the registration center, for the current Dubbo registration center to achieve secondary configuration items keep 0)&lt;/li>
+&lt;li>force: Forced switching (for FORCE_INTERFACE, FORCE_APPLICATION whether to switch directly without considering the decision, which may cause no address call failure)&lt;/li>
+&lt;li>interfaces: interface granularity configuration&lt;/li>
+&lt;/ul>
+&lt;p>The reference configuration example is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: demo-consumer
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">step&lt;/span>: APPLICATION_FIRST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">threshold&lt;/span>: &lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">proportion&lt;/span>: &lt;span style="color:#2aa198">60&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">delay&lt;/span>: &lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">interfaces&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey: DemoService&lt;/span>: &lt;span style="color:#2aa198">1.0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threshold&lt;/span>: &lt;span style="color:#2aa198">0.5&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">proportion&lt;/span>: &lt;span style="color:#2aa198">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: &lt;span style="color:#2aa198">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: &lt;span style="color:#cb4b16">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: APPLICATION_FIRST
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey: GreetingService&lt;/span>: &lt;span style="color:#2aa198">1.0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: FORCE_APPLICATION
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="description-of-configuration-method">Description of configuration method&lt;/h2>
+&lt;h3 id="1-configuration-center-configuration-file-delivery-recommended">1. Configuration center configuration file delivery (recommended)&lt;/h3>
+&lt;ul>
+&lt;li>Key: consumer application name + &amp;ldquo;.migration&amp;rdquo;&lt;/li>
+&lt;li>Group: DUBBO_SERVICEDISCOVERY_MIGRATION&lt;/li>
+&lt;/ul>
+&lt;p>Refer to the previous section for the content of configuration items&lt;/p>
+&lt;p>When the program starts, it will pull this configuration as the highest priority startup item. When the configuration item is a startup item, no checking operation will be performed, and the final state will be reached directly according to the status information.
+When a new configuration item is received during the running of the program, the migration operation will be performed, and the configuration information will be checked during the process. If the check fails, it will be rolled back to the pre-migration state. Migration is performed at the interface granularity, that is, if an application has 10 interfaces, 8 of which migrate successfully and 2 fail, then in the final state, the 8 successfully migrated interfaces will execute the new behavior, and the 2 failed interfaces will still be old state. If it is necessary to re-trigger the migration, it can be achieved by re-delivering the rules.&lt;/p>
+&lt;p>Note: If the program is rolled back due to check failure during migration, since the program does not have the behavior of writing back configuration items, if the program is restarted at this time, the program will directly initialize according to the new behavior without checking.&lt;/p>
+&lt;h3 id="2-start-parameter-configuration">2. Start parameter configuration&lt;/h3>
+&lt;ul>
+&lt;li>Configuration item name: dubbo.application.service-discovery.migration&lt;/li>
+&lt;li>Range of allowed values: FORCE_INTERFACE, APPLICATION_FIRST, FORCE_APPLICATION&lt;/li>
+&lt;/ul>
+&lt;p>This configuration item can be passed in through environment variables or the configuration center, and has a lower priority than the configuration file at startup, that is, when the configuration file in the configuration center does not exist, this configuration item is read as the startup status.&lt;/p>
+&lt;h3 id="3-local-file-configuration">3. Local file configuration&lt;/h3>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Configuration item name&lt;/th>
+&lt;th>Default value&lt;/th>
+&lt;th>Description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>dubbo.migration.file&lt;/td>
+&lt;td>dubbo-migration.yaml&lt;/td>
+&lt;td>Local configuration file path&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>dubbo.application.migration.delay&lt;/td>
+&lt;td>60000&lt;/td>
+&lt;td>Configuration file delay effective time (milliseconds)&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>The format in the configuration file is consistent with the rules mentioned above&lt;/p>
+&lt;p>The local file configuration method is essentially a delayed configuration notification method. The local file will not affect the default startup method. When the delay time is reached, a notification with the same content as the local file will be triggered. The delay time here is not related to the delay field in the rule body.
+The local file configuration method can ensure that the startup is initialized with the default behavior. When the delay is reached, the migration operation is triggered and the corresponding check is performed to avoid starting in the final state at startup.&lt;/p>
+&lt;h2 id="decision-statement">Decision statement&lt;/h2>
+&lt;h3 id="1-threshold-detection">1. Threshold detection&lt;/h3>
+&lt;p>The threshold mechanism is designed to check the number of addresses before traffic switching. If the number of available addresses at the application level is compared with the number of available addresses at the interface level, the check fails if the threshold is not reached.&lt;/p>
+&lt;p>The core code is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (((&lt;span style="color:#dc322f">float&lt;/span>) newAddressSize &lt;span style="color:#719e07">/&lt;/span> (&lt;span style="color:#dc322f">float&lt;/span>) oldAddressSize) &lt;span style="color:#719e07">&amp;gt;=&lt;/span> threshold) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>At the same time, MigrationAddressComparator is also an SPI extension point, users can expand it by themselves, and the results of all checks are intersected.&lt;/p>
+&lt;h3 id="2-gray-scale">2. Gray scale&lt;/h3>
+&lt;p>The gray scale function only takes effect in the application-level priority state. This feature allows users to determine the proportion of calls to the address of the new mode application-level registry. The prerequisite for the gray scale to take effect is to meet the threshold detection. In the application-level priority state, if the threshold detection passes, &lt;code>currentAvailableInvoker&lt;/code> will be switched to the invoker corresponding to the application-level address; if the detection fails, &lt;code>currentAvailableInvoker&lt;/code> will still be the original interface-level address The invoker.&lt;/p>
+&lt;p>The flow chart is as follows:
+detection stage
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-2.png" alt="//imgs/v3/migration/migration-2.png">
+call phase
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-3.png" alt="//imgs/v3/migration/migration-3.png">&lt;/p>
+&lt;p>The core code is as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// currentAvailableInvoker is based on MigrationAddressComparator&amp;#39;s result&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (currentAvailableInvoker &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (step &lt;span style="color:#719e07">==&lt;/span> APPLICATION_FIRST) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// call ratio calculation based on random value&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (ThreadLocalRandom. &lt;span style="color:#268bd2">current&lt;/span>(). nextDouble(100) &lt;span style="color:#719e07">&amp;gt;&lt;/span> promotion) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invoker.invoke(invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> currentAvailableInvoker.invoke(invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="description-of-switching-process">Description of switching process&lt;/h2>
+&lt;p>The process of address migration involves the switching of three states. In order to ensure smooth migration, there are 6 switching paths that need to be supported, which can be summarized as switching from mandatory interface level, mandatory application level to application level priority; application level priority to mandatory interface level, Mandatory application-level switching; there are also mandatory interface-level and mandatory application-level switching.
+The switching process for the same interface is always synchronous. If a new rule is received before the previous rule has been processed, it will wait.&lt;/p>
+&lt;h3 id="1-switch-to-application-level-priority">1. Switch to application-level priority&lt;/h3>
+&lt;p>Switching from mandatory interface level, mandatory application level to application level priority is essentially a process of switching from a single subscription to a dual subscription, retaining the original subscription and creating another subscription. In this switching mode, the delay configuration configured in the rule body will not take effect, that is, the threshold detection will be performed immediately after the subscription is created, and a decision will be made to select a certain group of subscriptions for the actual priority call. Since the application-level priority mode supports dynamic threshold detection at runtime, the threshold will be recalculated and switched after all addresses are notified for the scenario where some registry centers fail to start and obtain all addresses.
+Dynamic switching in the application-level priority mode is implemented based on the address listener of the service directory (Directory).
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-4.png" alt="//imgs/v3/migration/migration-4.png">&lt;/p>
+&lt;h3 id="2-application-level-priority-switch-to-mandatory">2. Application-level priority switch to mandatory&lt;/h3>
+&lt;p>The process of switching from application-level priority to mandatory interface level and mandatory application level is to check the address of the double subscription. If it is satisfied, the other subscription will be destroyed. If it is not satisfied, the original application-level priority status will be rolled back.
+If the user wants the switching process to switch directly without checking, it can be realized by configuring the force parameter.
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-5.png" alt="//imgs/v3/migration/migration-5.png">&lt;/p>
+&lt;h3 id="3-mandatory-interface-level-and-mandatory-application-level-switch-between-each-other">3. Mandatory interface level and mandatory application level switch between each other&lt;/h3>
+&lt;p>To switch between the mandatory interface level and the mandatory application level, a new subscription needs to be temporarily created to determine whether the new subscription (that is, the number of addresses of the new subscription is used to subtract the number of addresses of the old subscription when calculating the threshold) is up to the standard. Failure to meet the standard will destroy the new subscription and roll back to the previous state.
+&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-6.png" alt="//imgs/v3/migration/migration-6.png">&lt;/p></description></item></channel></rss>

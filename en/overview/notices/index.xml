@@ -1,0 +1,172 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Security Notice</title><link>https://dubbo.apache.org/en/overview/notices/</link><description>Recent content in Security Notice on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/notices/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Serialization Security</title><link>https://dubbo.apache.org/en/overview/notices/serialization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/notices/serialization/</guid><description>
+&lt;h1 id="overview">Overview&lt;/h1>
+&lt;p>Dubbo supports the extension of serialization protocols. In theory, users can enable any serialization protocol based on this extension mechanism. This brings great flexibility, but at the same time, users must be aware of the hidden security risks.
+Data deserialization is the link most easily exploited by attackers, who use it to perform RCE attacks to steal or destroy server-side data.
+Before switching serialization protocols or implementations, users should fully investigate the security guarantees of the target serialization protocol and its framework implementation, and set up corresponding security measures in advance (such as setting up a black/white list).
+The Dubbo framework itself cannot directly guarantee the security of the target serialization mechanism.&lt;/p>
+&lt;p>The serialization protocols provided by the official version of Dubbo 2.7 are as follows:&lt;/p>
+&lt;ul>
+&lt;li>Hessian2&lt;/li>
+&lt;li>Fastjson&lt;/li>
+&lt;li>Kryo&lt;/li>
+&lt;li>FST&lt;/li>
+&lt;li>JDK&lt;/li>
+&lt;li>Protostuff&lt;/li>
+&lt;li>Protocol Buffers&lt;/li>
+&lt;li>Avro&lt;/li>
+&lt;li>Gson&lt;/li>
+&lt;/ul>
+&lt;p>Starting from Dubbo 3.0, only the following serialization protocol support is provided by default:&lt;/p>
+&lt;ul>
+&lt;li>Hessian2&lt;/li>
+&lt;li>JDK&lt;/li>
+&lt;li>Protocol Buffers&lt;/li>
+&lt;/ul>
+&lt;p>Starting from Dubbo 3.2, the following serialization protocol support is provided by default:&lt;/p>
+&lt;ul>
+&lt;li>Hessian2&lt;/li>
+&lt;li>Fastjson2&lt;/li>
+&lt;li>JDK&lt;/li>
+&lt;li>Protocol Buffers&lt;/li>
+&lt;/ul>
+&lt;p>For security reasons, starting from Dubbo 3.3, only the following serialization protocols will be supported by default:&lt;/p>
+&lt;ul>
+&lt;li>Hessian2&lt;/li>
+&lt;li>Fastjson2&lt;/li>
+&lt;li>Protocol Buffers&lt;/li>
+&lt;/ul>
+&lt;p>For the above serialization extensions, after discovering or receiving relevant vulnerability reports, Dubbo officials will follow up and upgrade dependencies to the latest security version, but the final vulnerability fix depends on the serialization framework implementation.&lt;/p>
+&lt;blockquote>
+&lt;p>For users using the &lt;a href="https://github.com/apache/dubbo-hessian-lite/releases">dubbo hessian2&lt;/a> version, Dubbo officials will ensure the security of the hessian2 serialization mechanism and fix reported security vulnerabilities as much as possible&lt;/p>
+&lt;/blockquote>
+&lt;p>In addition, starting from Dubbo version 3.2, the whitelist mechanism is adopted by default for Hessian2 and Fastjson2. If you find that some data processing has been removed, you can refer to [Document](/zh-cn/overview/mannual/java-sdk/advanced-features- and-usage/security/class-check/) to configure.&lt;/p>
+&lt;h1 id="full-reinforcement">Full reinforcement&lt;/h1>
+&lt;p>In order to improve the security of application serialization as much as possible, Dubbo 3.0 has upgraded and strengthened the security of the serialization protocol. It is recommended to use the non-Wrapper mode of the Tripe protocol.
+This protocol is secure by default, but requires developers to write IDL files.&lt;/p>
+&lt;p>Triple protocol Wrapper mode allows compatibility with other serialized data, providing good compatibility. However, other protocols may have deserialization security flaws. For the Hessian2 protocol, users with high security attributes should follow the sample code instructions to turn on the whitelist mode. The framework will turn on the blacklist mode by default to intercept malicious calls.&lt;/p>
+&lt;p>If other serialization protocols must be used, a certain degree of security is expected. The Token authentication mechanism should be enabled to prevent unauthenticated and untrusted request sources from threatening Provider security. When turning on the Token authentication mechanism, the authentication function of the registration center should be turned on simultaneously.&lt;/p>
+&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/">Reinforcement reference&lt;/a>&lt;/p></description></item><item><title>Overview: RPC Protocol Security</title><link>https://dubbo.apache.org/en/overview/notices/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/notices/protocol/</guid><description>
+&lt;p>Dubbo supports the extension of the RPC protocol. In theory, users can enable any RPC protocol based on this extension mechanism. This brings great flexibility, but at the same time, users must be aware of the hidden security risks.&lt;/p>
+&lt;p>The serialization protocols provided by the official version of Dubbo 2.7 are as follows:&lt;/p>
+&lt;ul>
+&lt;li>Dubbo&lt;/li>
+&lt;li>RMI&lt;/li>
+&lt;li>Hessian&lt;/li>
+&lt;li>Http/Rest&lt;/li>
+&lt;li>Webservice&lt;/li>
+&lt;li>Thrift&lt;/li>
+&lt;li>gRPC&lt;/li>
+&lt;li>…&lt;/li>
+&lt;/ul>
+&lt;p>Starting from Dubbo 3.0, only the following serialization protocol support is provided by default:&lt;/p>
+&lt;ul>
+&lt;li>Dubbo&lt;/li>
+&lt;li>Triple/gRPC&lt;/li>
+&lt;li>Http/Rest&lt;/li>
+&lt;/ul>
+&lt;p>The Triple, gRPC, Http, and Rest protocols are all built based on the HTTP protocol. The format of the request can be strictly distinguished. For example, the header is plain text to avoid risks such as RCE when reading the Token.
+For the Dubbo protocol, since it is designed based on TCP binary directly, except for a few specific fields, it is written using the serialization protocol. Therefore, if a risky serialization protocol is turned on, there will still be risks such as RCE.
+For the RMI protocol, since it is based on the Java serialization mechanism, there are risks such as RCE.
+For the Hessian protocol, because it is based on the Hessian serialization mechanism, and the default Hessian protocol (non-Dubbo Shade&amp;rsquo;s Hessian-Lite protocol) cannot configure a black and white list and has no default black list, there are risks such as RCE.&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>If the user wants to use the Token authentication mechanism to prevent unauthenticated and untrusted request sources from threatening the security of the Provider, they should use protocols based on HTTP standard extensions such as Triple to avoid security risks when reading token parameters.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>In particular, the Dubbo community &lt;strong>strongly does not recommend&lt;/strong> exposing the Dubbo protocol, RMI protocol, Hessian protocol and other protocols that are not based on HTTP standard extensions to the public network environment, because the original intention of the Dubbo protocol is to be used on the intranet Provide high-performance RPC services in the environment, rather than in the public network environment.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>If your application needs to expose public network access, the Dubbo community recommends that you use the Triple protocol and avoid using non-Protobuf mode or services based on Dubbo 3.3 and above that only expose standard application/json format services.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Please be advised that all networked servers are susceptible to Denial of Service (DoS) attacks. We are unable to provide &lt;strong>magic&lt;/strong> solutions for common issues, such as clients transmitting large amounts of data to your server or repeatedly requesting the same URL. Generally, Apache Dubbo aims to defend against attacks that could cause server resource consumption to become disproportionate to the size or structure of the input data. Therefore, to safeguard your server, ensure you have a Web Application Firewall (WAF) or other security devices in place before exposing your Dubbo services to the public internet, in order to prevent such attacks.&lt;/p>
+&lt;/li>
+&lt;/ol></description></item><item><title>Overview: Registration Center Security</title><link>https://dubbo.apache.org/en/overview/notices/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/notices/registry/</guid><description>
+&lt;p>Dubbo supports the extension of the registration center. In theory, users can enable any registration center based on this extension mechanism. This brings great flexibility, but at the same time, users must be aware of the hidden security risks.&lt;/p>
+&lt;p>The official version of Dubbo 2.7 provides the following registration centers:&lt;/p>
+&lt;ul>
+&lt;li>Zookeeper&lt;/li>
+&lt;li>Redis&lt;/li>
+&lt;li>Nacos&lt;/li>
+&lt;li>Etcd&lt;/li>
+&lt;li>Consul&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;p>Starting from Dubbo 3.0, only the following registration centers are supported by default:&lt;/p>
+&lt;ul>
+&lt;li>Zookeeper&lt;/li>
+&lt;li>Nacos&lt;/li>
+&lt;/ul>
+&lt;p>For the registration center, Dubbo can only fully trust the data pushed by it. Therefore, if there is a security vulnerability in the registration center, the Dubbo service may be maliciously registered or data may be maliciously pushed, resulting in the service being attacked.
+Therefore, in order to ensure the security of the registration center, Dubbo officially recommends that you:&lt;/p>
+&lt;ul>
+&lt;li>Enable the authentication mechanism of the registration center, such as Zookeeper&amp;rsquo;s ACL mechanism, Nacos&amp;rsquo; username and password mechanism, etc.&lt;/li>
+&lt;li>Avoid exposing the registration center to the public network environment, and try to deploy the registration center in a trusted intranet environment&lt;/li>
+&lt;/ul></description></item><item><title>Overview: Dubbo Admin Security</title><link>https://dubbo.apache.org/en/overview/notices/admin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/notices/admin/</guid><description>
+&lt;p>In order to facilitate the use of Dubbo, Dubbo officially provides the Dubbo Admin console to facilitate the management of Dubbo applications.&lt;/p>
+&lt;h2 id="risk">Risk&lt;/h2>
+&lt;p>Dubbo Admin has query and call permissions for the entire cluster by default, so it needs to be used with more caution in the online environment.
+In addition, in order to reduce the risk of arbitrary access to Dubbo Admin, Dubbo Admin also provides a simple authentication mechanism.
+To make Dubbo Admin more secure, please refer to the documentation below.&lt;/p>
+&lt;h2 id="authentication-scheme">Authentication scheme&lt;/h2>
+&lt;p>Dubbo Admin provides a login mechanism based on username and password by default, and authenticates based on JWT Token during the request process.
+From the perspective of convenience for beginners, Dubbo Admin includes a default username, password, and JWT Secret Token.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>Since Dubbo Admin is publicly released, the default username, password, and JWT Secret Token are all public.
+In your production environment, be sure to change the default username, password, and JWT Secret Token.&lt;/strong>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="how-to-change-the-default-username-password-and-jwt-secret-token">How to change the default username, password, and JWT Secret Token&lt;/h2>
+&lt;p>For users who package and deploy directly based on Java code, they can directly modify the following configuration in &lt;code>dubbo-admin-server/src/main/resources/application.properties&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>admin.root.user.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">root&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.root.user.password&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">root&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.check.signSecret&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">86295dd0c4ef69a1036b0b0c15158d77&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For users deployed through Docker, you can modify the following configuration in &lt;code>/dubbo/dubbo-admin/properties&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>admin.root.user.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">root&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.root.user.password&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">root&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.check.signSecret&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">86295dd0c4ef69a1036b0b0c15158d77&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For users deployed via Kubernetes, the following configurations in ConfigMap can be modified:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>admin.root.user.name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">root&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.root.user.password&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">root&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.check.signSecret&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">86295dd0c4ef69a1036b0b0c15158d77&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For users deploying via Helm, you can specify the following configuration:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">properties&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">admin.root.user.name&lt;/span>: root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">admin.root.user.password&lt;/span>: root
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">admin.check.signSecret&lt;/span>: 86295dd0c4ef69a1036b0b0c15158d77
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="best-practices">Best Practices&lt;/h2>
+&lt;ol>
+&lt;li>Please update the default username, password, and JWT Secret Token during privatized deployment. It is recommended to modify the authentication logic of Dubbo Admin and connect it to your organization&amp;rsquo;s personnel management system.&lt;/li>
+&lt;li>Do not directly expose the Dubbo Admin port to the Internet.&lt;/li>
+&lt;/ol></description></item><item><title>Overview: Log4j vulnerability impact</title><link>https://dubbo.apache.org/en/overview/notices/log4j/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/notices/log4j/</guid><description>
+&lt;p>Recently, the mainstream logging component &lt;a href="https://logging.apache.org/log4j/2.x/">log4j2&lt;/a> broke out &lt;a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228">security vulnerability CVE-2021-44228&lt;/a>.&lt;/p>
+&lt;p>The following is a summary of the impact of vulnerability CVE-2021-44228 on the Apache Dubbo framework and user response guidelines.&lt;/p>
+&lt;h2 id="dubbo-scope-of-influence">Dubbo scope of influence&lt;/h2>
+&lt;p>**This vulnerability has no impact on the security of Dubbo framework. **&lt;/p>
+&lt;p>Dubbo itself does not rely heavily on the log4j2 framework, nor does it bring log4j2 to business projects through dependency transfer. Therefore, users who are using Dubbo 2.7.x, 3.0.x and other versions do not need to be forced to upgrade the Dubbo version.&lt;/p>
+&lt;p>The following is an analysis of the dependence of Dubbo components on log4j2, involving &lt;code>dubbo-common&lt;/code>, &lt;code>dubbo-spring-boot-starter&lt;/code>, and &lt;code>dubbo-spring-boot-actuator&lt;/code>:&lt;/p>
+&lt;ul>
+&lt;li>dubbo-common includes an optional dependency on &lt;code>log4j-core&lt;/code>. Please check whether the log4j dependency is enabled in the project itself. If so, upgrade accordingly.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @dubbo-common ---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] org.apache.dubbo:dubbo-common:jar:2.7.14-SNAPSHOT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] +- org.apache.logging.log4j:log4j-api:jar:2.11.1:provided
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-core:jar:2.11.1:provided
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>dubbo-spring-boot-starter passes the log4j-api dependency through the spring-boot component. Log4j-api itself has no security issues. When upgrading the log4j-core component, pay attention to compatibility with log4j-api.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @dubbo-spring-boot-starter ---
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] org.apache.dubbo:dubbo-spring-boot-starter:jar:2.7.14-SNAPSHOT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile (optional)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>dubbo-spring-boot-actuator passes the log4j-api dependency through the spring-boot component. Log4j-api itself has no security issues. When upgrading the log4j-core component, attention should be paid to compatibility with log4j-api&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>[INFO] org.apache.dubbo:dubbo-spring-boot-actuator:jar:2.7.14-SNAPSHOT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:compile (optional)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

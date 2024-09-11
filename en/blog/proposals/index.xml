@@ -1,0 +1,120 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Proposals About Apache Dubbo</title><link>https://dubbo.apache.org/en/blog/proposals/</link><description>Recent content in Proposals About Apache Dubbo on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/blog/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Application-Level Service Discovery</title><link>https://dubbo.apache.org/en/blog/1/01/01/application-level-service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/1/01/01/application-level-service-discovery/</guid><description/></item><item><title>Blog: Enhanced HTTP Standard Capabilities of Triple Protocol</title><link>https://dubbo.apache.org/en/blog/1/01/01/enhanced-http-standard-capabilities-of-triple-protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/blog/1/01/01/enhanced-http-standard-capabilities-of-triple-protocol/</guid><description>
+&lt;h2 id="enhanced-http-standard-capabilities-of-triple-protocol---support-for-multiple-content-type">Enhanced HTTP Standard Capabilities of Triple Protocol - Support for Multiple Content-Type&lt;/h2>
+&lt;blockquote>
+&lt;p>This article focuses on how Triple supports more of the HTTP standard Content-Type and how the service receives these requests.&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="overview">&lt;strong>Overview&lt;/strong>&lt;/h4>
+&lt;p>Triple currently supports two serialization methods: Json and protobuf, corresponding to the ContentTypes:&lt;/p>
+&lt;ul>
+&lt;li>application/json&lt;/li>
+&lt;li>application/grpc+proto&lt;/li>
+&lt;/ul>
+&lt;p>This poses no issue when both the consumer and provider are backend services. However, for browser clients, they may send a wider variety of ContentTypes, which requires server-side support for decoding, such as:&lt;/p>
+&lt;ul>
+&lt;li>multipart/formdata&lt;/li>
+&lt;li>text/plain&lt;/li>
+&lt;li>application/x-www-form-urlencoded&lt;/li>
+&lt;li>application/xml&lt;/li>
+&lt;/ul>
+&lt;p>REST protocol has already largely implemented the above decoding capabilities. Enabling Triple to achieve these capabilities is an important step towards full interoperability between Triple server and browser clients.&lt;/p>
+&lt;h4 id="usage">&lt;strong>Usage&lt;/strong>&lt;/h4>
+&lt;h5 id="multipartformdata">&lt;strong>multipart/formdata&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetPojo &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> multipart/form-data; boundary=example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;username&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: text/plain
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>LuYue
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userdetail&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;location&amp;#34;:&amp;#34;beijing&amp;#34;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;username&amp;#34;:&amp;#34;LuYue&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Disposition: form-data; name=&amp;#34;userimg&amp;#34;;filename=&amp;#34;user.jpeg&amp;#34;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type: image/jpeg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;binary image data&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>--example-part-boundary--
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetPojo&lt;/span>(String username, User user, &lt;span style="color:#dc322f">byte&lt;/span>&lt;span style="color:#719e07">[]&lt;/span> attachment) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//LuYue&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//user.name=Luyue;user.location=beijing&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//&amp;lt;binary image data&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#719e07">new&lt;/span> String(attachment, StandardCharsets.UTF_8));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> username);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Each part is decoded according to its Content-Type.&lt;/li>
+&lt;li>If the method parameter is byte[] or Byte[], the corresponding field will not be decoded.&lt;/li>
+&lt;li>The response is encoded using application/json.&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationx-www-form-urlencoded">&lt;strong>application/x-www-form-urlencoded&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetUrlForm &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/x-www-form-urlencoded
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 33
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Hello=World&amp;amp;Apache=Dubbo&amp;amp;id=10086
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Two ways of receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(String hello, String apache, &lt;span style="color:#dc322f">long&lt;/span> id){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> hello);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> apache);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetUrlForm&lt;/span>(Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, Object&lt;span style="color:#719e07">&amp;gt;&lt;/span> params){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;Hello&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Apache:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;Apache&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Id:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> params.get(&lt;span style="color:#2aa198">&amp;#34;Id&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>If the parameter is a Map, it is decoded into Map&amp;lt;String, String&amp;gt; for input.&lt;/li>
+&lt;li>If all parameters are Strings or numeric types, they are decoded and passed in according to the parameter list.&lt;/li>
+&lt;li>The response is encoded using application/json.&lt;/li>
+&lt;/ul>
+&lt;h5 id="textplain">&lt;strong>text/plain&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetString &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> text/plain; charset=UTF-8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 6
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>World!
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetString&lt;/span>(String world){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> world);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received url form.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Charset supports ASCII, UTF-8, UTF-16, etc., with UTF-8 as the default.&lt;/li>
+&lt;li>The response is encoded using application/json.&lt;/li>
+&lt;/ul>
+&lt;h5 id="applicationxml">&lt;strong>application/xml&lt;/strong>&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">POST&lt;/span> /org.apache.dubbo.samples.tri.noidl.api.PojoGreeter/greetXml &lt;span style="color:#268bd2">HTTP&lt;/span>&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#719e07">:&lt;/span> 192.168.202.1:50052
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#719e07">:&lt;/span> 86
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#719e07">:&lt;/span> application/xml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34; standalone=&amp;#34;yes&amp;#34;?&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;User&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;username&amp;gt;&lt;/span>JohnDoe&lt;span style="color:#268bd2">&amp;lt;/username&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;location&amp;gt;&lt;/span>New York&lt;span style="color:#268bd2">&amp;lt;/location&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/User&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Receiving:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> ServerResponse &lt;span style="color:#268bd2">greetXml&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getUsername());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(user.getLocation());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServerResponse(&lt;span style="color:#2aa198">&amp;#34;Server Received xml.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>This implementation is the same as Rest&amp;rsquo;s XMLCodec.&lt;/li>
+&lt;li>The response is encoded using application/xml.&lt;/li>
+&lt;/ul></description></item></channel></rss>

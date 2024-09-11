@@ -1,0 +1,1689 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – RPC 协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/</link><description>Recent content in RPC 协议 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 协议概述</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/overview/</guid><description>
+&lt;p>Dubbo3 提供了 Triple(Dubbo3)、Dubbo2 协议，这是 Dubbo 框架的原生协议。除此之外，Dubbo3 也对众多第三方协议进行了集成，并将它们纳入 Dubbo 的编程与服务治理体系，
+包括 gRPC、Thrift、JsonRPC、Hessian2、REST 等。以下重点介绍 Triple 与 Dubbo2 协议。&lt;/p>
+&lt;h2 id="协议说明">协议说明&lt;/h2>
+&lt;p>Triple 协议是 Dubbo3 推出的主力协议。Triple 意为第三代，通过 Dubbo1.0/ Dubbo2.0 两代协议的演进，以及云原生带来的技术标准化浪潮，Dubbo3 新协议 Triple 应运而生。&lt;/p>
+&lt;h3 id="rpc-协议">RPC 协议&lt;/h3>
+&lt;p>协议是 RPC 的核心，它规范了数据在网络中的传输内容和格式。除必须的请求、响应数据外，通常还会包含额外控制数据，如单次请求的序列化方式、超时时间、压缩方式和鉴权信息等。&lt;/p>
+&lt;p>协议的内容包含三部分&lt;/p>
+&lt;ul>
+&lt;li>数据交换格式： 定义 RPC 的请求和响应对象在网络传输中的字节流内容，也叫作序列化方式&lt;/li>
+&lt;li>协议结构： 定义包含字段列表和各字段语义以及不同字段的排列方式&lt;/li>
+&lt;li>协议通过定义规则、格式和语义来约定数据如何在网络间传输。一次成功的 RPC 需要通信的两端都能够按照协议约定进行网络字节流的读写和对象转换。如果两端对使用的协议不能达成一致，就会出现鸡同鸭讲，无法满足远程通信的需求。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/triple-protocol.png" alt="协议选择">&lt;/p>
+&lt;p>RPC 协议的设计需要考虑以下内容：&lt;/p>
+&lt;ul>
+&lt;li>通用性： 统一的二进制格式，跨语言、跨平台、多传输层协议支持&lt;/li>
+&lt;li>扩展性： 协议增加字段、升级、支持用户扩展和附加业务元数据&lt;/li>
+&lt;li>性能：As fast as it can be&lt;/li>
+&lt;li>穿透性：能够被各种终端设备识别和转发：网关、代理服务器等
+通用性和高性能通常无法同时达到，需要协议设计者进行一定的取舍。&lt;/li>
+&lt;/ul>
+&lt;h3 id="http11-协议">HTTP/1.1 协议&lt;/h3>
+&lt;p>比于直接构建于 TCP 传输层的私有 RPC 协议，构建于 HTTP 之上的远程调用解决方案会有更好的通用性，如WebServices 或 REST 架构，使用 HTTP + JSON 可以说是一个事实标准的解决方案。&lt;/p>
+&lt;p>选择构建在 HTTP 之上，有两个最大的优势：&lt;/p>
+&lt;ul>
+&lt;li>HTTP 的语义和可扩展性能很好的满足 RPC 调用需求。&lt;/li>
+&lt;li>通用性，HTTP 协议几乎被网络上的所有设备所支持，具有很好的协议穿透性。&lt;/li>
+&lt;/ul>
+&lt;p>但也存在比较明显的问题：&lt;/p>
+&lt;ul>
+&lt;li>典型的 Request – Response 模型，一个链路上一次只能有一个等待的 Request 请求。会产生 HOL。&lt;/li>
+&lt;li>Human Readable Headers，使用更通用、更易于人类阅读的头部传输格式，但性能相当差&lt;/li>
+&lt;li>无直接 Server Push 支持，需要使用 Polling Long-Polling 等变通模式&lt;/li>
+&lt;/ul>
+&lt;h3 id="grpc-协议">gRPC 协议&lt;/h3>
+&lt;p>上面提到了在 HTTP 及 TCP 协议之上构建 RPC 协议各自的优缺点，相比于 Dubbo 构建于 TCP 传输层之上，Google 选择将 gRPC 直接定义在 HTTP/2 协议之上。
+gRPC 的优势由HTTP2 和 Protobuf 继承而来。&lt;/p>
+&lt;ul>
+&lt;li>基于 HTTP2 的协议足够简单，用户学习成本低，天然有 server push/ 多路复用 / 流量控制能力&lt;/li>
+&lt;li>基于 Protobuf 的多语言跨平台二进制兼容能力，提供强大的统一跨语言能力&lt;/li>
+&lt;li>基于协议本身的生态比较丰富，k8s/etcd 等组件的天然支持协议，云原生的事实协议标准&lt;/li>
+&lt;/ul>
+&lt;p>但是也存在部分问题&lt;/p>
+&lt;ul>
+&lt;li>对服务治理的支持比较基础，更偏向于基础的 RPC 功能，协议层缺少必要的统一定义，对于用户而言直接用起来并不容易。&lt;/li>
+&lt;li>强绑定 protobuf 的序列化方式，需要较高的学习成本和改造成本，对于现有的偏单语言的用户而言，迁移成本不可忽视&lt;/li>
+&lt;/ul>
+&lt;h3 id="triple-协议">Triple 协议&lt;/h3>
+&lt;p>最终我们选择了兼容 gRPC ，以 HTTP2 作为传输层构建新的协议，也就是 Triple。&lt;/p>
+&lt;p>容器化应用程序和微服务的兴起促进了针对负载内容优化技术的发展。 客户端中使用的传统通信协议（ RESTFUL或其他基于 HTTP 的自定义协议）难以满足应用在性能、可维护性、扩展性、安全性等方便的需求。一个跨语言、模块化的协议会逐渐成为新的应用开发协议标准。自从 2017 年 gRPC 协议成为 CNCF 的项目后，包括 k8s、etcd 等越来越多的基础设施和业务都开始使用 gRPC 的生态，作为云原生的微服务化框架， Dubbo 的新协议也完美兼容了 gRPC。并且，对于 gRPC 协议中一些不完善的部分， Triple 也将进行增强和补充。&lt;/p>
+&lt;p>那么，Triple 协议是否解决了上面我们提到的一系列问题呢？&lt;/p>
+&lt;ul>
+&lt;li>性能上: Triple 协议采取了 metadata 和 payload 分离的策略，这样就可以避免中间设备，如网关进行 payload 的解析和反序列化，从而降低响应时间。&lt;/li>
+&lt;li>路由支持上，由于 metadata 支持用户添加自定义 header ，用户可以根据 header 更方便的划分集群或者进行路由，这样发布的时候切流灰度或容灾都有了更高的灵活性。&lt;/li>
+&lt;li>安全性上，支持双向TLS认证（mTLS）等加密传输能力。&lt;/li>
+&lt;li>易用性上，Triple 除了支持原生 gRPC 所推荐的 Protobuf 序列化外，使用通用的方式支持了 Hessian / JSON 等其他序列化，能让用户更方便的升级到 Triple 协议。对原有的 Dubbo 服务而言，修改或增加 Triple 协议 只需要在声明服务的代码块添加一行协议配置即可，改造成本几乎为 0。&lt;/li>
+&lt;/ul>
+&lt;h2 id="最终选择协议">最终选择协议&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/v3/concepts/triple.png" alt="Triple 协议通信方式">&lt;/p>
+&lt;p>现状&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>1、完整兼容grpc、客户端/服务端可以与原生grpc客户端打通&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>2、目前已经经过大规模生产实践验证，达到生产级别&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>特点与优势&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>1、具备跨语言互通的能力，传统的多语言多 SDK 模式和 Mesh 化跨语言模式都需要一种更通用易扩展的数据传输格式。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>2、提供更完善的请求模型，除了支持传统的 Request/Response 模型（Unary 单向通信），还支持 Stream（流式通信） 和 Bidirectional（双向通信）。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>3、易扩展、穿透性高，包括但不限于 Tracing / Monitoring 等支持，也应该能被各层设备识别，网关设施等可以识别数据报文，对 Service Mesh 部署友好，降低用户理解难度。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>4、多种序列化方式支持、平滑升级&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>5、支持 Java 用户无感知升级，不需要定义繁琐的 IDL 文件，仅需要简单的修改协议名便可以轻松升级到 Triple 协议&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="triple-协议内容介绍">Triple 协议内容介绍&lt;/h3>
+&lt;p>基于 grpc 协议进行进一步扩展&lt;/p>
+&lt;ul>
+&lt;li>Service-Version → &amp;ldquo;tri-service-version&amp;rdquo; {Dubbo service version}&lt;/li>
+&lt;li>Service-Group → &amp;ldquo;tri-service-group&amp;rdquo; {Dubbo service group}&lt;/li>
+&lt;li>Tracing-ID → &amp;ldquo;tri-trace-traceid&amp;rdquo; {tracing id}&lt;/li>
+&lt;li>Tracing-RPC-ID → &amp;ldquo;tri-trace-rpcid&amp;rdquo; {_span id _}&lt;/li>
+&lt;li>Cluster-Info → &amp;ldquo;tri-unit-info&amp;rdquo; {cluster infomation}&lt;/li>
+&lt;/ul>
+&lt;p>其中 Service-Version 跟 Service-Group 分别标识了 Dubbo 服务的 version 跟 group 信息，因为grpc的 path 申明了 service name 跟 method name，相比于 Dubbo 协议，缺少了version 跟 group 信息；Tracing-ID、Tracing-RPC-ID 用于全链路追踪能力，分别表示 tracing id 跟 span id 信息；Cluster-Info 表示集群信息，可以使用其构建一些如集群划分等路由相关的灵活的服务治理能力。&lt;/p>
+&lt;h3 id="triple-streaming">Triple Streaming&lt;/h3>
+&lt;p>Triple协议相比传统的unary方式，多了目前提供的Streaming RPC的能力&lt;/p>
+&lt;ul>
+&lt;li>Streaming 用于什么场景呢？&lt;/li>
+&lt;/ul>
+&lt;p>在一些大文件传输、直播等应用场景中， consumer或provider需要跟对端进行大量数据的传输，由于这些情况下的数据量是非常大的，因此是没有办法可以在一个RPC的数据包中进行传输，因此对于这些数据包我们需要对数据包进行分片之后，通过多次RPC调用进行传输，如果我们对这些已经拆分了的RPC数据包进行并行传输，那么到对端后相关的数据包是无序的，需要对接收到的数据进行排序拼接，相关的逻辑会非常复杂。但如果我们对拆分了的RPC数据包进行串行传输，那么对应的网络传输RTT与数据处理的时延会是非常大的。&lt;/p>
+&lt;p>为了解决以上的问题，并且为了大量数据的传输以流水线方式在consumer与provider之间传输，因此Streaming RPC的模型应运而生。&lt;/p>
+&lt;p>通过Triple协议的Streaming RPC方式，会在consumer跟provider之间建立多条用户态的长连接，Stream。同一个TCP连接之上能同时存在多个Stream，其中每条Stream都有StreamId进行标识，对于一条Stream上的数据包会以顺序方式读写。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">总结&lt;/h4>
+&lt;p>在API领域，最重要的趋势是标准化技术的崛起。Triple 协议是 Dubbo3 推出的主力协议。它采用分层设计，其数据交换格式基于Protobuf (Protocol Buffers) 协议开发，具备优秀的序列化/反序列化效率，当然还支持多种序列化方式，也支持众多开发语言。在传输层协议，Triple 选择了 HTTP/2，相较于 HTTP/1.1，其传输效率有了很大提升。此外HTTP/2作为一个成熟的开放标准，具备丰富的安全、流控等能力，同时拥有良好的互操作性。Triple 不仅可以用于Server端服务调用，也可以支持浏览器、移动App和IoT设备与后端服务的交互，同时 Triple协议无缝支持 Dubbo3 的全部服务治理能力。&lt;/p>
+&lt;p>在Cloud Native的潮流下，跨平台、跨厂商、跨环境的系统间互操作性的需求必然会催生基于开放标准的RPC技术，而gRPC顺应了历史趋势，得到了越来越广泛地应用。在微服务领域，Triple协议的提出与落地，是 Dubbo3 迈向云原生微服务的一大步。&lt;/p>
+&lt;/div>
+&lt;h2 id="dubbo2">Dubbo2&lt;/h2>
+&lt;h3 id="protocol-spec">Protocol SPEC&lt;/h3>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/dev/dubbo_protocol_header.png" alt="/dev-guide/images/dubbo_protocol_header.jpg">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Magic - Magic High &amp;amp; Magic Low (16 bits)&lt;/p>
+&lt;p>Identifies dubbo protocol with value: 0xdabb&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Req/Res (1 bit)&lt;/p>
+&lt;p>Identifies this is a request or response. Request - 1; Response - 0.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>2 Way (1 bit)&lt;/p>
+&lt;p>Only useful when Req/Res is 1 (Request), expect for a return value from server or not. Set to 1 if need a return value from server.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Event (1 bit)&lt;/p>
+&lt;p>Identifies an event message or not, for example, heartbeat event. Set to 1 if this is an event.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Serialization ID (5 bit)&lt;/p>
+&lt;p>Identifies serialization type: the value for fastjson is 6.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Status (8 bits)&lt;/p>
+&lt;p>Only useful when Req/Res is 0 (Response), identifies the status of response&lt;/p>
+&lt;ul>
+&lt;li>20 - OK&lt;/li>
+&lt;li>30 - CLIENT_TIMEOUT&lt;/li>
+&lt;li>31 - SERVER_TIMEOUT&lt;/li>
+&lt;li>40 - BAD_REQUEST&lt;/li>
+&lt;li>50 - BAD_RESPONSE&lt;/li>
+&lt;li>60 - SERVICE_NOT_FOUND&lt;/li>
+&lt;li>70 - SERVICE_ERROR&lt;/li>
+&lt;li>80 - SERVER_ERROR&lt;/li>
+&lt;li>90 - CLIENT_ERROR&lt;/li>
+&lt;li>100 - SERVER_THREADPOOL_EXHAUSTED_ERROR&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Request ID (64 bits)&lt;/p>
+&lt;p>Identifies an unique request. Numeric (long).&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Data Length (32)&lt;/p>
+&lt;p>Length of the content (the variable part) after serialization, counted by bytes. Numeric (integer).&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Variable Part&lt;/p>
+&lt;p>Each part is a byte[] after serialization with specific serialization type, identifies by Serialization ID.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>Every part is a byte[] after serialization with specific serialization type, identifies by Serialization ID&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>If the content is a Request (Req/Res = 1), each part consists of the content, in turn is:&lt;/p>
+&lt;ul>
+&lt;li>Dubbo version&lt;/li>
+&lt;li>Service name&lt;/li>
+&lt;li>Service version&lt;/li>
+&lt;li>Method name&lt;/li>
+&lt;li>Method parameter types&lt;/li>
+&lt;li>Method arguments&lt;/li>
+&lt;li>Attachments&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>If the content is a Response (Req/Res = 0), each part consists of the content, in turn is:&lt;/p>
+&lt;ul>
+&lt;li>Return value type, identifies what kind of value returns from server side: RESPONSE_NULL_VALUE - 2, RESPONSE_VALUE - 1, RESPONSE_WITH_EXCEPTION - 0.&lt;/li>
+&lt;li>Return value, the real value returns from server.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;div class="alert alert-primary" role="alert">
+&lt;p>对于(Variable Part)变长部分，当前版本的dubbo框架使用json序列化时，在每部分内容间额外增加了换行符作为分隔，请选手在Variable Part的每个part后额外增加换行符， 如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>Dubbo version bytes (换行符)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Service name bytes (换行符)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/div></description></item><item><title>Overview: Dubbo协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。&lt;/p>
+&lt;p>反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-protocol.jpg" alt="dubbo-protocol.jpg">&lt;/p>
+&lt;ul>
+&lt;li>Transporter: mina, netty, grizzy&lt;/li>
+&lt;li>Serialization: dubbo, hessian2, java, json&lt;/li>
+&lt;li>Dispatcher: all, direct, message, execution, connection&lt;/li>
+&lt;li>ThreadPool: fixed, cached&lt;/li>
+&lt;/ul>
+&lt;p>缺省协议，使用基于 netty &lt;code>3.2.5.Final&lt;/code> 和 hessian2 &lt;code>3.2.1-fixed-2(Alibaba embed version)&lt;/code> 的 tbremoting 交互。&lt;/p>
+&lt;ul>
+&lt;li>连接个数：单连接&lt;/li>
+&lt;li>连接方式：长连接&lt;/li>
+&lt;li>传输协议：TCP&lt;/li>
+&lt;li>传输方式：NIO 异步传输&lt;/li>
+&lt;li>序列化：Hessian 二进制序列化&lt;/li>
+&lt;li>适用范围：传入传出参数数据包较小（建议小于100K），消费者比提供者个数多，单一消费者无法压满提供者，尽量不要用 dubbo 协议传输大文件或超大字符串。&lt;/li>
+&lt;li>适用场景：常规远程服务方法调用&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>约束&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>参数及返回值需实现 &lt;code>Serializable&lt;/code> 接口&lt;/li>
+&lt;li>参数及返回值不能自定义实现 &lt;code>List&lt;/code>, &lt;code>Map&lt;/code>, &lt;code>Number&lt;/code>, &lt;code>Date&lt;/code>, &lt;code>Calendar&lt;/code> 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。&lt;/li>
+&lt;li>Hessian 序列化，只传成员属性值和值的类型，不传方法或静态变量，兼容情况由&lt;strong>吴亚军提供&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>数据通讯&lt;/th>
+&lt;th>情况&lt;/th>
+&lt;th>结果&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>类A多一种 属性（或者说类B少一种 属性）&lt;/td>
+&lt;td>不抛异常，A多的那 个属性的值，B没有，其他正常&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>枚举A多一种 枚举（或者说B少一种 枚举）&lt;/td>
+&lt;td>A使用多 出来的枚举进行传输&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>枚举A多一种 枚举（或者说B少一种 枚举）&lt;/td>
+&lt;td>A不使用 多出来的枚举进行传输&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>A和B的属性 名相同，但类型不相同&lt;/td>
+&lt;td>抛异常&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>A-&amp;gt;B&lt;/td>
+&lt;td>serialId 不相同&lt;/td>
+&lt;td>正常传输&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>接口增加方法，对客户端无影响，如果该方法不是客户端需要的，客户端不需要重新部署。输入参数和结果集中增加属性，对客户端无影响，如果客户端并不需要新属性，不用重新部署。&lt;/p>
+&lt;p>输入参数和结果集属性名变化，对客户端序列化无影响，但是如果客户端不重新部署，不管输入还是输出，属性名变化的属性值是获取不到的。&lt;/p>
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">总结&lt;/h4>
+&lt;ul>
+&lt;li>服务器端和客户端对领域对象并不需要完全一致，而是按照最大匹配原则。&lt;/li>
+&lt;li>会抛异常的情况：枚举值一边多一种，一边少一种，正好使用了差别的那种，或者属性名相同，类型不同。&lt;/li>
+&lt;/ul>
+&lt;/div>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>适合大并发小数据量的服务调用，服务消费者远大于服务提供者的情景。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="配置协议">配置协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="设置默认协议">设置默认协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="设置某个服务的协议">设置某个服务的协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="多端口">多端口&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;dubbo1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;dubbo2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20881&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置协议选项">配置协议选项&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">“dubbo”&lt;/span> port=&lt;span style="color:#2aa198">“9090”&lt;/span> server=&lt;span style="color:#2aa198">“netty”&lt;/span> client=&lt;span style="color:#2aa198">“netty”&lt;/span> codec=&lt;span style="color:#2aa198">“dubbo”&lt;/span> serialization=&lt;span style="color:#2aa198">“hessian2”&lt;/span> charset=&lt;span style="color:#2aa198">“UTF-8”&lt;/span> threadpool=&lt;span style="color:#2aa198">“fixed”&lt;/span> threads=&lt;span style="color:#2aa198">“100”&lt;/span> queues=&lt;span style="color:#2aa198">“0”&lt;/span> iothreads=&lt;span style="color:#2aa198">“9”&lt;/span> buffer=&lt;span style="color:#2aa198">“8192”&lt;/span> accepts=&lt;span style="color:#2aa198">“1000”&lt;/span> payload=&lt;span style="color:#2aa198">“8388608”&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="多连接配置">多连接配置&lt;/h3>
+&lt;p>Dubbo 协议缺省每服务每提供者每消费者使用单一长连接，如果数据量较大，可以使用多个连接。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;0&amp;quot;&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:reference connections=&amp;quot;0&amp;quot;&amp;gt;&lt;/code> 表示该服务使用 JVM 共享长连接。&lt;strong>缺省&lt;/strong>&lt;/li>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;1&amp;quot;&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:reference connections=&amp;quot;1&amp;quot;&amp;gt;&lt;/code> 表示该服务使用独立长连接。&lt;/li>
+&lt;li>&lt;code>&amp;lt;dubbo:service connections=&amp;quot;2&amp;quot;&amp;gt;&lt;/code> 或&lt;code>&amp;lt;dubbo:reference connections=&amp;quot;2&amp;quot;&amp;gt;&lt;/code> 表示该服务使用独立两条长连接。&lt;/li>
+&lt;/ul>
+&lt;p>为防止被大量连接撑挂，可在服务提供方限制大接收连接数，以实现服务提供方自我保护。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;1000&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="常见问题">常见问题&lt;/h2>
+&lt;h3 id="q1">Q1&lt;/h3>
+&lt;p>为什么要消费者比提供者个数多?&lt;/p>
+&lt;p>因 dubbo 协议采用单一长连接，假设网络为千兆网卡 &lt;strong>1024Mbit=128MByte&lt;/strong>，根据测试经验数据每条连接最多只能压满 7MByte(不同的环境可能不一样，供参考)，理论上 1 个服务提供者需要 20 个服务消费者才能压满网卡。&lt;/p>
+&lt;h3 id="q2">Q2&lt;/h3>
+&lt;p>为什么不能传大包?&lt;/p>
+&lt;p>因 dubbo 协议采用单一长连接，如果每次请求的数据包大小为 500KByte，假设网络为千兆网卡 &lt;strong>1024Mbit=128MByte&lt;/strong>，每条连接最大 7MByte (不同的环境可能不一样)，单个服务提供者的 TPS(每秒处理事务数)最大为：128MByte / 500KByte = 262。单个消费者调用单个服务提供者的 TPS (每秒处理事务数)最大为：7MByte / 500KByte = 14。如果能接受，可以考虑使用，否则网络将成为瓶颈。&lt;/p>
+&lt;h3 id="q3">Q3&lt;/h3>
+&lt;p>为什么采用异步单一长连接?&lt;/p>
+&lt;p>因为服务的现状大都是服务提供者少，通常只有几台机器，而服务的消费者多，可能整个网站都在访问该服务，比如 Morgan 的提供者只有 6 台提供者，却有上百台消费者，每天有 1.5 亿次调用，如果采用常规的 hessian 服务，服务提供者很容易就被压跨，通过单一连接，保证单一消费者不会压死提供者，长连接，减少连接握手验证等，并使用异步 IO，复用线程池，防止 C10K 问题。&lt;/p></description></item><item><title>Overview: Triple协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/</guid><description>
+&lt;h2 id="协议说明">协议说明&lt;/h2>
+&lt;p>Triple 是 Dubbo3 提出的基于 HTTP 的开放协议，旨在解决 Dubbo2 私有协议带来的互通性问题，Triple 基于 gRPC 和 gRPC-Web 设计而来，保留了两者的优秀设计，Triple 做到了完全兼容 gRPC 协议，并可同时运行在 HTTP/1 和 HTTP/2 之上。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>相比于原有 Dubbo2 协议，Triple 有以下优势:&lt;/p>
+&lt;ol>
+&lt;li>原生和 gRPC 协议互通。打通 gRPC 生态，降低从 gRPC 至 Dubbo 的迁移成本。&lt;/li>
+&lt;li>增强多语言生态。避免因 CPP/C#/RUST 等语言的 Dubbo SDK 能力不足导致业务难以选型适配的问题。&lt;/li>
+&lt;li>网关友好。网关无需参与序列化，方便用户从传统的 HTTP 转泛化 Dubbo 调用网关升级至开源或云厂商的 Ingress 方案。&lt;/li>
+&lt;li>完善的异步和流式支持。带来从底层协议到上层业务的性能提升，易于构建全链路异步以及严格保证消息顺序的流式服务。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;p>相比于 gRPC 协议，Triple 有以下优势：&lt;/p>
+&lt;ol>
+&lt;li>协议内置支持 HTTP/1，可以用 curl、浏览器直接访问你的 gRPC 服务&lt;/li>
+&lt;li>保持性能与 grpc-java 在同一水平的同时，实现上更轻量、简单，协议部分只有几千行代码&lt;/li>
+&lt;li>不绑定 IDL，支持 Java Interface 定义服务&lt;/li>
+&lt;li>保持与官方 gRPC 库的 100% 兼容性的同时，与 Dubbo 的微服务治理体系无缝融合&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ul>
+&lt;p>更多关于 Triple 协议设计与协议规范，请参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple/">triple协议规范&lt;/a>。
+&lt;strong>目前 Java 和 Go 的 Dubbo SDK 已全面支持 Triple 协议。&lt;/strong> 在阿里巴巴，Triple 协议广泛用于跨环境、跨语言、跨生态互通，已有数十万容器生产级使用。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>Java SDK 支持 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/idl">IDL 生成 Stub&lt;/a>
+和 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/idl">Java Interface&lt;/a> 两种方式，多语言、生态互通、流式需求推荐使用 IDL 方式，现有服务平滑升级推荐使用
+Interface 方式。&lt;/p>
+&lt;ul>
+&lt;li>Dubbo2 老用户如何从现有协议升级至 Triple(TBD)&lt;/li>
+&lt;li>新用户或业务参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/idl/">Dubbo3 Triple Quick Start&lt;/a>&lt;/li>
+&lt;li>深入了解 Triple 协议: &lt;a href="https://github.com/apache/dubbo-awesome/blob/master/proposals/D0-triple.md">Dubbo3 Triple 协议设计与原理&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Overview: Rest协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rest/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rest/</guid><description>
+&lt;p>基于标准的 Java REST API——JAX-RS 2.0（Java API for RESTful Web Services 的简写）实现的 REST 调用支持&lt;/p>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>此协议提供通过 web 访问服务的简单方式，将服务与其他基于 web 的应用程序集成。
+支持 JSON、XML 和 Text 格式的请求和响应，发布和使用服务的便捷方式,也提供了服务版本控制、服务过滤、服务元数据和服务参数, 实现 Dubbo 框架的灵活性和可伸缩性。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>将 Dubbo 服务公开为 RESTful API，与微服务和现有 RESTful 系统集成，实现与非 Java 客户端的互操作性，并促进混合通信。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="快速入门">快速入门&lt;/h3>
+&lt;p>在 dubbo 中开发一个 REST 风格的服务会比较简单，下面以一个注册用户的简单服务为例说明。&lt;/p>
+&lt;p>这个服务要实现的功能是提供如下 URL（注：这个URL不是完全符合 REST 的风格，但是更简单实用）&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/register
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>而任何客户端都可以将包含用户信息的 JSON 字符串 POST 到以上 URL 来完成用户注册。&lt;/p>
+&lt;p>首先，开发服务的接口&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后，开发服务的实现&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;register&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// save the user...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面的实现非常简单，但是由于该 REST 服务是要发布到指定 URL 上，供任意语言的客户端甚至浏览器来访问，所以这里额外添加了几个 JAX-RS 的标准 annotation 来做相关的配置。&lt;/p>
+&lt;p>@Path(&amp;ldquo;users&amp;rdquo;)：指定访问 UserService 的 URL 相对路径是 /users，即 http://localhost:8080/users&lt;/p>
+&lt;p>@Path(&amp;ldquo;register&amp;rdquo;)：指定访问 registerUser() 方法的 URL 相对路径是 /register，再结合上一个 @Path为UserService 指定的路径，则调用 UserService.register() 的完整路径为 http://localhost:8080/users/register&lt;/p>
+&lt;p>@POST：指定访问 registerUser()用HTTP POST方法&lt;/p>
+&lt;p>@Consumes({MediaType.APPLICATION_JSON})：指定 registerUser() 接收 JSON 格式的数据。REST 框架会自动将 JSON 数据反序列化为 User 对象&lt;/p>
+&lt;p>最后，在 spring 配置文件中添加此服务，即完成所有服务开发工作&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- 用rest协议在8080端口暴露服务 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- 声明需要暴露的服务接口 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx.UserService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- 和本地bean一样实现服务 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;xxx.UserServiceImpl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="rest-服务提供端">REST 服务提供端&lt;/h3>
+&lt;p>下面我们扩充“快速入门”中的UserService，进一步展示在dubbo中REST服务提供端的开发要点。&lt;/p>
+&lt;h3 id="http-postget-的实现">HTTP POST/GET 的实现&lt;/h3>
+&lt;p>REST 服务中虽然建议使用 HTTP 协议中四种标准方法 POST、DELETE、PUT、GET 来分别实现常见的“增删改查”，但实际中，我们一般情况直接用POST来实现“增改”，GET 来实现“删查”即可（DELETE 和 PUT 甚至会被一些防火墙阻挡）。&lt;/p>
+&lt;p>前面已经简单演示了 POST 的实现，在此，我们为 UserService 添加一个获取注册用户资料的功能，来演示 GET 的实现。&lt;/p>
+&lt;p>这个功能就是要实现客户端通过访问如下不同 URL 来获取不同 ID 的用户资料&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/1001
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/1002
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>http://localhost:8080/users/1003
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，也可以通过其他形式的URL来访问不同 ID 的用户资料，例如&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>http:&lt;span style="color:#719e07">//&lt;/span>localhost:&lt;span style="color:#2aa198">8080&lt;/span>&lt;span style="color:#719e07">/&lt;/span>users&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#b58900">load&lt;/span>?id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1001&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>JAX-RS 本身可以支持所有这些形式。但是上面那种在 URL 路径中包含查询参数的形式（http://localhost:8080/users/1001） 更符合 REST 的一般习惯，所以更推荐大家来使用。下面我们就为 UserService 添加一个 getUser() 方法来实现这种形式的 URL 访问&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;{id : \\d+}&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>@GET：指定用 HTTP GET 方法访问&lt;/p>
+&lt;p>@Path(&amp;quot;{id : \d+}&amp;quot;)：根据上面的功能需求，访问 getUser() 的 URL 应当是 “http://localhost:8080/users/ + 任意数字&amp;quot;，并且这个数字要被做为参数传入 getUser() 方法。 这里的 annotation 配置中，@Path中间的 {id: xxx} 指定 URL 相对路径中包含了名为id参数，而它的值也将被自动传递给下面用 @PathParam(&amp;ldquo;id&amp;rdquo;) 修饰的方法参数 id。{id:后面紧跟的\d+ 是一个正则表达式，指定了 id 参数必须是数字。&lt;/p>
+&lt;p>@Produces({MediaType.APPLICATION_JSON})：指定getUser()输出JSON格式的数据。框架会自动将User对象序列化为JSON数据。&lt;/p>
+&lt;h3 id="annotation">Annotation&lt;/h3>
+&lt;p>在 Dubbo 中开发 REST 服务主要都是通过 JAX-RS的annotation 来完成配置的，在上面的示例中，我们都是将 annotation 放在服务的实现类中。但其实，我们完全也可以将 annotation 放到服务的接口上，这两种方式是完全等价的，例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@GET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;{id : \\d+}&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在一般应用中，我们建议将 annotation 放到服务实现类，这样 annotation 和 java 实现代码位置更接近，更便于开发和维护。另外更重要的是，我们一般倾向于避免对接口的污染，保持接口的纯净性和广泛适用性。&lt;/p>
+&lt;p>但是，如后文所述，如果我们要用 dubbo 直接开发的消费端来访问此服务，则 annotation 必须放到接口上。&lt;/p>
+&lt;p>如果接口和实现类都同时添加了 annotation，则实现类的 annotation 配置会生效，接口上的 annotation 被直接忽略。&lt;/p>
+&lt;h3 id="多数据格式支持">多数据格式支持&lt;/h3>
+&lt;p>在 dubbo 中开发的 REST 服务可以同时支持传输多种格式的数据，以给客户端提供最大的灵活性。其中我们目前对最常用的 JSON 和 XML 格式特别添加了额外的功能。&lt;/p>
+&lt;p>比如，我们要让上例中的getUser()方法支持分别返回 JSON 和 XML 格式的数据，只需要在 annotation 中同时包含两种格式即可&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者也可以直接用字符串（还支持通配符）表示 MediaType&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;application/json&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;text/xml&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果所有方法都支持同样类型的输入输出数据格式，则我们无需在每个方法上做配置，只需要在服务类上添加 annotation 即可&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在一个 REST 服务同时对多种数据格式支持的情况下，根据 JAX-RS 标准，一般是通过HTTP中的MIME header（content-type和accept）来指定当前想用的是哪种格式的数据。&lt;/p>
+&lt;p>但是在 dubbo 中，我们还自动支持目前业界普遍使用的方式，即用一个 URL 后缀（.json和.xml）来指定想用的数据格式。例如，在添加上述 annotation后，直接访问 http://localhost:8888/users/1001.json 则表示用 json 格式，直接访问 http://localhost:8888/users/1002.xml 则表示用 xml 格式，比用 HTTP Header 更简单直观。Twitter、微博等的 REST API 都是采用这种方式。
+如果你既不加 HTTP header，也不加后缀，则 dubbo 的 REST 会优先启用在以上 annotation 定义中排位最靠前的那种数据格式。&lt;/p>
+&lt;blockquote>
+&lt;p>注意：这里要支持 XML 格式数据，在 annotation 中既可以用 MediaType.TEXT_XML，也可以用 MediaType.APPLICATION_XML，但是 TEXT_XML 是更常用的，并且如果要利用上述的 URL 后缀方式来指定数据格式，只能配置为 TEXT_XML 才能生效。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="中文字符支持">中文字符支持&lt;/h3>
+&lt;p>为了在 dubbo REST 中正常输出中文字符，和通常的 Java web 应用一样，我们需要将 HTTP 响应的 contentType 设置为 UTF-8编码。&lt;/p>
+&lt;p>基于 JAX-RS 的标准用法，我们只需要做如下 annotation 配置即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;application/json; charset=UTF-8&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;text/xml; charset=UTF-8&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为了方便用户，我们在 dubbo REST 中直接添加了一个支持类，来定义以上的常量，可以直接使用，减少出错的可能性。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Produces&lt;/span>({ContentType.APPLICATION_JSON_UTF_8, ContentType.TEXT_XML_UTF_8})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="xml-数据格式">XML 数据格式&lt;/h3>
+&lt;p>由于 JAX-RS 的实现一般都用标准的 JAXB（Java API for XML Binding）来序列化和反序列化 XML 格式数据，所以我们需要为每一个要用 XML 传输的对象添加一个类级别的 JAXB annotation，否则序列化将报错。例如为 getUser() 中返回的 User 添加如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlRootElement&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>此外，如果service方法中的返回值是Java的 primitive类型（如int，long，float，double等），最好为它们添加一层wrapper对象，因为JAXB不能直接序列化primitive类型。&lt;/p>
+&lt;p>例如，我们想让前述的registerUser()方法返回服务器端为用户生成的ID号：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#dc322f">long&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于 primitive 类型不被 JAXB 序列化支持，所以添加一个 wrapper 对象：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlRootElement&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RegistrationResult&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Long id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">RegistrationResult&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">RegistrationResult&lt;/span>(Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.id &lt;span style="color:#719e07">=&lt;/span> id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Long &lt;span style="color:#268bd2">getId&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setId&lt;/span>(Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.id &lt;span style="color:#719e07">=&lt;/span> id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>并修改 service 方法：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RegistrationResult &lt;span style="color:#268bd2">registerUser&lt;/span>(User user);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样不但能够解决 XML 序列化的问题，而且使得返回的数据都符合 XML 和 JSON 的规范。例如，在 JSON中，返回的将是如下形式&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>{&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>&lt;span style="color:#719e07">:&lt;/span> &lt;span style="color:#2aa198">1001&lt;/span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果不加 wrapper，JSON 返回值将直接是&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>1001
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>而在 XML 中，加 wrapper 后返回值将是：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;registrationResult&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>1002&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/registrationResult&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种 wrapper 对象其实利用所谓 Data Transfer Object（DTO）模式，采用 DTO 还能对传输数据做更多有用的定制。&lt;/p>
+&lt;h3 id="定制序列化">定制序列化&lt;/h3>
+&lt;p>如上所述，REST 的底层实现会在 service 的对象和 JSON/XML 数据格式之间自动做序列化/反序列化。但有些场景下，如果觉得这种自动转换不满足要求，可以对其做定制。&lt;/p>
+&lt;p>Dubbo 中的 REST 实现是用 JAXB 做 XML 序列化，用 Jackson 做 JSON 序列化，所以在对象上添加 JAXB 或 Jackson 的 annotation 即可以定制映射。&lt;/p>
+&lt;p>例如，定制对象属性映射到 XML 元素的名字：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlRootElement&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@XmlAccessorType&lt;/span>(XmlAccessType.FIELD)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@XmlElement&lt;/span>(name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;username&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>定制对象属性映射到 JSON 字段的名字：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@JsonProperty&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;username&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>更多资料请参考 JAXB 和 Jackson 的官方文档，或自行 google。&lt;/p>
+&lt;h3 id="rest-server-的实现">REST Server 的实现&lt;/h3>
+&lt;p>目前在 dubbo 中，我们支持5种嵌入式 rest server 的实现，并同时支持采用外部应用服务器来做 rest server 的实现。rest server 可以通过如下配置实现：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上配置选用了嵌入式的 jetty 来做 rest server，同时，如果不配置 server 属性，rest 协议默认也是选用 jetty。jetty 是非常成熟的 java servlet 容器，并和 dubbo 已经有较好的集成（目前5种嵌入式 server 中只有 jetty 和后面所述的 tomcat、tjws，与 dubbo 监控系统等完成了无缝的集成），所以，如果你的 dubbo 系统是单独启动的进程，你可以直接默认采用 jetty 即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tomcat&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上配置选用了嵌入式的 tomcat 来做 rest server。在嵌入式 tomcat 上，REST 的性能比 jetty 上要好得多（参见后面的基准测试），建议在需要高性能的场景下采用 tomcat。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;netty&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上配置选用嵌入式的 netty 来做 rest server。（TODO more contents to add）&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tjws&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span> (tjws is now deprecated)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;sunhttp&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上配置选用嵌入式的 tjws 或 Sun HTTP server 来做 rest server。这两个 server 实现非常轻量级，非常方便在集成测试中快速启动使用，当然也可以在负荷不高的生产环境中使用。 注：tjws目前已经被deprecated掉了，因为它不能很好的和servlet 3.1 API工作。&lt;/p>
+&lt;p>如果你的 dubbo 系统不是单独启动的进程，而是部署到了 Java 应用服务器中，则建议你采用以下配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过将 server 设置为 servlet，dubbo 将采用外部应用服务器的 servlet 容器来做 rest server。同时，还要在 dubbo 系统的 web.xml 中添加如下配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;web-app&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;context-param&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param-name&amp;gt;&lt;/span>contextConfigLocation&lt;span style="color:#268bd2">&amp;lt;/param-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;param-value&amp;gt;&lt;/span>/WEB-INF/classes/META-INF/spring/dubbo-demo-provider.xml&lt;span style="color:#268bd2">&amp;lt;/param-value&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/context-param&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.BootstrapListener&lt;span style="color:#268bd2">&amp;lt;/listener-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;listener-class&amp;gt;&lt;/span>org.springframework.web.context.ContextLoaderListener&lt;span style="color:#268bd2">&amp;lt;/listener-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/listener&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.DispatcherServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;load-on-startup&amp;gt;&lt;/span>1&lt;span style="color:#268bd2">&amp;lt;/load-on-startup&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/web-app&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>即必须将 dubbo 的 BootstrapListener 和 DispatherServlet 添加到 web.xml，以完成 dubbo 的 REST 功能与外部 servlet 容器的集成。&lt;/p>
+&lt;blockquote>
+&lt;p>注意：如果你是用 spring 的 ContextLoaderListener 来加载 spring，则必须保证 BootstrapListener 配置在 ContextLoaderListener 之前，否则 dubbo 初始化会出错。&lt;/p>
+&lt;/blockquote>
+&lt;p>其实，这种场景下你依然可以坚持用嵌入式 server，但外部应用服务器的 servlet 容器往往比嵌入式 server 更加强大（特别是如果你是部署到更健壮更可伸缩的 WebLogic，WebSphere 等），另外有时也便于在应用服务器做统一管理、监控等等。&lt;/p>
+&lt;h3 id="获取-context-信息">获取 Context 信息&lt;/h3>
+&lt;p>在远程调用中，值得获取的上下文信息可能有很多种，这里特别以获取客户端 IP 为例。&lt;/p>
+&lt;p>在 dubbo 的 REST 中，我们有两种方式获取客户端 IP。&lt;/p>
+&lt;p>第一种方式，用 JAX-RS 标准的 @Context annotation&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id, &lt;span style="color:#268bd2">@Context&lt;/span> HttpServletRequest request) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> request.getRemoteAddr());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>用 Context 修饰 getUser() 的一个方法参数后，就可以将当前的 HttpServletRequest 注入进来，然后直接调用 servlet api 获取 IP。&lt;/p>
+&lt;blockquote>
+&lt;p>注意：这种方式只能在将server设置为 tjws、tomcat、jetty 或者 servlet 的时候才能工作，因为只有这几种 server 的实现才提供了 servlet 容器。另外，标准的JAX-RS还支持用@Context修饰service类的一个实例字段来获取HttpServletRequest，但在dubbo中我们没有对此作出支持。&lt;/p>
+&lt;/blockquote>
+&lt;p>第二种方式，用 dubbo 中常用的 RpcContext&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@PathParam&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;id&amp;#34;&lt;/span>) Long id) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getRemoteAddressString());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>注意：这种方式只能在设置 server=&amp;ldquo;jetty&amp;rdquo; 或者 server=&amp;ldquo;tomcat&amp;rdquo; 或者 server=&amp;ldquo;servlet&amp;rdquo; 或者 server=&amp;ldquo;tjws&amp;rdquo; 的时候才能工作。另外，目前 dubbo 的 RpcContext 是一种比较有侵入性的用法，未来我们很可能会做出重构。&lt;/p>
+&lt;/blockquote>
+&lt;p>如果你想保持你的项目对 JAX-RS 的兼容性，未来脱离 dubbo 也可以运行，请选择第一种方式。如果你想要更优雅的服务接口定义，请选用第二种方式。&lt;/p>
+&lt;p>此外，在最新的 dubbo rest 中，还支持通过 RpcContext 来获取 HttpServletRequest和 HttpServletResponse，以提供更大的灵活性来方便用户实现某些复杂功能，比如在 dubbo 标准的 filter 中访问 HTTP Header。用法示例如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext.getContext().getRequest() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> RpcContext.getContext().getRequest() &lt;span style="color:#719e07">instanceof&lt;/span> HttpServletRequest) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> ((HttpServletRequest) RpcContext.getContext().getRequest()).getRemoteAddr());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext.getContext().getResponse() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> RpcContext.getContext().getResponse() &lt;span style="color:#719e07">instanceof&lt;/span> HttpServletResponse) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Response object from RpcContext: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getResponse());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>注意：为了保持协议的中立性，RpcContext.getRequest()和RpcContext.getResponse()返回的仅仅是一个Object类，而且可能为null。所以，你必须自己做null和类型的检查。&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>注意：只有在设置server=&amp;ldquo;jetty&amp;quot;或者server=&amp;ldquo;tomcat&amp;quot;或者server=&amp;ldquo;servlet&amp;quot;的时候，你才能通过以上方法正确的得到HttpServletRequest和HttpServletResponse，因为只有这几种server实现了servlet容器。&lt;/p>
+&lt;/blockquote>
+&lt;p>为了简化编程，在此你也可以用泛型的方式来直接获取特定类型的 request/response：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext.getContext().getRequest(HttpServletRequest.class) &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Client address is &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getRequest(HttpServletRequest.class).getRemoteAddr());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> (RpcContext.getContext().getResponse(HttpServletResponse.class) &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Response object from RpcContext: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> RpcContext.getContext().getResponse(HttpServletResponse.class));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果 request/response 不符合指定的类型，这里也会返回 null。&lt;/p>
+&lt;h3 id="端口号和-context-path">端口号和 Context Path&lt;/h3>
+&lt;p>dubbo 中的 rest 协议默认将采用80端口，如果想修改端口，直接配置：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>另外，如前所述，我们可以用 @Path 来配置单个 rest 服务的 URL 相对路径。但其实，我们还可以设置一个所有 rest 服务都适用的基础相对路径，即 java web 应用中常说的 context path。&lt;/p>
+&lt;p>只需要添加如下 contextpath 属性即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> contextpath=&lt;span style="color:#2aa198">&amp;#34;services&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以前面代码为例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;register&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// save the user...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>现在 registerUser() 的完整访问路径&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://localhost:8888/services/users/register
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注意：如果你是选用外部应用服务器做 rest server，即配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> contextpath=&lt;span style="color:#2aa198">&amp;#34;services&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>则必须保证这里设置的 port、contextpath，与外部应用服务器的端口、DispatcherServlet 的上下文路径（即 webapp path 加上 servlet url pattern）保持一致。例如，对于部署为 tomcat ROOT 路径的应用，这里的 contextpath 必须与 web.xml 中 DispacherServlet 的&lt;code>&amp;lt;url-pattern/&amp;gt;&lt;/code> 完全一致：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dispatcher&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/services/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="线程数和-io-线程数">线程数和 IO 线程数&lt;/h3>
+&lt;p>可以为 rest 服务配置线程池大小&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> threads=&lt;span style="color:#2aa198">&amp;#34;500&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>注意：目前线程池的设置只有当server=&amp;ldquo;netty&amp;quot;或者server=&amp;ldquo;jetty&amp;quot;或者server=&amp;ldquo;tomcat&amp;quot;的时候才能生效。另外，如果server=&amp;ldquo;servlet&amp;rdquo;，由于这时候启用的是外部应用服务器做rest server，不受dubbo控制，所以这里的线程池设置也无效。&lt;/p>
+&lt;/blockquote>
+&lt;p>如果是选用 netty server，还可以配置 Netty 的 IO worker 线程数&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> iothreads=&lt;span style="color:#2aa198">&amp;#34;5&amp;#34;&lt;/span> threads=&lt;span style="color:#2aa198">&amp;#34;100&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置长连接">配置长连接&lt;/h3>
+&lt;p>Dubbo 中的 rest 服务默认都是采用 http 长连接来访问，如果想切换为短连接，直接配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> keepalive=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>注意：这个配置目前只对 server=&amp;ldquo;netty&amp;quot;和server=&amp;ldquo;tomcat&amp;rdquo; 才能生效。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="最大-http-连接数">最大 HTTP 连接数&lt;/h3>
+&lt;p>可以配置服务器提供端所能同时接收的最大 HTTP 连接数，防止 REST server 被过多连接撑爆，以作为一种最基本的自我保护机制&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> accepts=&lt;span style="color:#2aa198">&amp;#34;500&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;tomcat/&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>注意：这个配置目前只对server=&amp;ldquo;tomcat&amp;quot;才能生效。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="每个消费端的超时时间和-http-连接数">每个消费端的超时时间和 HTTP 连接数&lt;/h3>
+&lt;p>如果 rest 服务的消费端也是 dubbo 系统，可以像其他 dubbo RPC 机制一样，配置消费端调用此 rest 服务的最大超时时间以及每个消费端所能启动的最大 HTTP 连接数。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，由于这个配置针对消费端生效的，所以也可以在消费端配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span> connections=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>但是，通常我们建议配置在服务提供端提供此类配置。按照 dubbo 官方文档的说法：“Provider 上尽量多配置 Consumer 端的属性，让 Provider 实现者一开始就思考 Provider 服务特点、服务质量的问题。”&lt;/p>
+&lt;blockquote>
+&lt;p>注意：如果 dubbo 的 REST 服务是发布给非 dubbo 的客户端使用，则这里 &lt;code>&amp;lt;dubbo:service/&amp;gt;&lt;/code> 上的配置完全无效，因为这种客户端不受 dubbo 控制。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="annotation-取代部分-spring-xml-配置">Annotation 取代部分 Spring XML 配置&lt;/h3>
+&lt;p>以上所有的讨论都是基于 dubbo 在 spring 中的 xml 配置。但是，dubbo/spring 本身也支持用 annotation 来作配置，所以我们也可以按dubbo官方文档中的步骤，把相关 annotation 加到 REST 服务的实现中，取代一些 xml 配置，例如&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;users&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Autowired&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> UserRepository userRepository;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@POST&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Path&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;register&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Consumes&lt;/span>({MediaType.APPLICATION_JSON})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerUser&lt;/span>(User user) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// save the user&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> userRepository.save(user);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>annotation 的配置更简单更精确，通常也更便于维护（当然现代IDE都可以在xml中支持比如类名重构，所以就这里的特定用例而言，xml 的维护性也很好）。而 xml 对代码的侵入性更小一些，尤其有利于动态修改配置，特别是比如你要针对单个服务配置连接超时时间、每客户端最大连接数、集群策略、权重等等。另外，特别对复杂应用或者模块来说，xml 提供了一个中心点来涵盖的所有组件和配置，更一目了然，一般更便于项目长时期的维护。&lt;/p>
+&lt;p>当然，选择哪种配置方式没有绝对的优劣，和个人的偏好也不无关系。&lt;/p>
+&lt;h3 id="添加自定义的-filterinterceptor">添加自定义的 Filter、Interceptor&lt;/h3>
+&lt;p>Dubbo 的 REST 也支持 JAX-RS 标准的 Filter 和 Interceptor，以方便对 REST 的请求与响应过程做定制化的拦截处理。&lt;/p>
+&lt;p>其中，Filter 主要用于访问和设置 HTTP 请求和响应的参数、URI 等等。例如，设置 HTTP 响应的 cache header：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">CacheControlFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ContainerResponseFilter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">filter&lt;/span>(ContainerRequestContext req, ContainerResponseContext res) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (req.getMethod().equals(&lt;span style="color:#2aa198">&amp;#34;GET&amp;#34;&lt;/span>)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res.getHeaders().add(&lt;span style="color:#2aa198">&amp;#34;Cache-Control&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;someValue&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Interceptor 主要用于访问和修改输入与输出字节流，例如，手动添加 GZIP 压缩&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GZIPWriterInterceptor&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> WriterInterceptor {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">aroundWriteTo&lt;/span>(WriterInterceptorContext context)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">throws&lt;/span> IOException, WebApplicationException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> OutputStream outputStream &lt;span style="color:#719e07">=&lt;/span> context.getOutputStream();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.setOutputStream(&lt;span style="color:#719e07">new&lt;/span> GZIPOutputStream(outputStream));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.proceed();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在标准 JAX-RS 应用中，我们一般是为 Filter 和 Interceptor 添加 @Provider annotation，然后 JAX-RS runtime 会自动发现并启用它们。而在 dubbo 中，我们是通过添加XML配置的方式来注册 Filter 和 Interceptor：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.TraceInterceptor, xxx.TraceFilter&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在此，我们可以将 Filter、Interceptor 和 DynamicFeature 这三种类型的对象都添加到 &lt;code>extension&lt;/code> 属性上，多个之间用逗号分隔。（DynamicFeature 是另一个接口，可以方便我们更动态的启用 Filter 和 Interceptor，感兴趣请自行 google。）&lt;/p>
+&lt;p>当然，dubbo 自身也支持 Filter 的概念，但我们这里讨论的 Filter 和 Interceptor 更加接近协议实现的底层，相比 dubbo 的 filter，可以做更底层的定制化。&lt;/p>
+&lt;blockquote>
+&lt;p>注：这里的 XML 属性叫 extension，而不是叫 interceptor 或者 filter，是因为除了 Interceptor 和 Filter，未来我们还会添加更多的扩展类型。&lt;/p>
+&lt;/blockquote>
+&lt;p>如果 REST 的消费端也是 dubbo 系统（参见下文的讨论），则也可以用类似方式为消费端配置 Interceptor 和 Filter。但注意，JAX-RS 中消费端的 Filter 和提供端的 Filter 是两种不同的接口。例如前面例子中服务端是 ContainerResponseFilter 接口，而消费端对应的是 ClientResponseFilter:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">LoggingFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ClientResponseFilter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">filter&lt;/span>(ClientRequestContext reqCtx, ClientResponseContext resCtx) &lt;span style="color:#268bd2">throws&lt;/span> IOException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;status: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getStatus());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;date: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getDate());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;last-modified: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getLastModified());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;location: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getLocation());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;headers:&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (Entry&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> header : resCtx.getHeaders().entrySet()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.print(&lt;span style="color:#2aa198">&amp;#34;\t&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> header.getKey() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; :&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (String value : header.getValue()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.print(value &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, &amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.print(&lt;span style="color:#2aa198">&amp;#34;\n&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;media-type: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> resCtx.getMediaType().getType());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="添加自定义的-exception-处理">添加自定义的 Exception 处理&lt;/h3>
+&lt;p>Dubbo 的 REST 也支持 JAX-RS 标准的 ExceptionMapper，可以用来定制特定 exception 发生后应该返回的 HTTP 响应。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">CustomExceptionMapper&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ExceptionMapper&lt;span style="color:#719e07">&amp;lt;&lt;/span>NotFoundException&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Response &lt;span style="color:#268bd2">toResponse&lt;/span>(NotFoundException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> Response.status(Response.Status.NOT_FOUND).entity(&lt;span style="color:#2aa198">&amp;#34;Oops! the requested resource is not found!&amp;#34;&lt;/span>).type(&lt;span style="color:#2aa198">&amp;#34;text/plain&amp;#34;&lt;/span>).build();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>和 Interceptor、Filter 类似，将其添加到 XML 配置文件中即可启用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.CustomExceptionMapper&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="http-日志输出">HTTP 日志输出&lt;/h3>
+&lt;p>Dubbo rest 支持输出所有 HTTP 请求/响应中的 header 字段和 body 消息体。&lt;/p>
+&lt;p>在 XML 配置中添加如下自带的 REST filter：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.rpc.protocol.rest.support.LoggingFilter&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后配置在 logging 配置中至少为 org.apache.dubbo.rpc.protocol.rest.support 打开 INFO 级别日志输出，例如，在 log4j.xml 中配置&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;logger&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.rpc.protocol.rest.support&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;level&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;INFO&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;CONSOLE&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/logger&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，你也可以直接在 ROOT logger 打开 INFO 级别日志输出&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;level&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;INFO&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;appender-ref&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;CONSOLE&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在日志中会有类似如下的内容输出&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>The HTTP headers are:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept: application/json;charset=UTF-8
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>accept-encoding: gzip, deflate
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>connection: Keep-Alive
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-length: 22
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>content-type: application/json
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>host: 192.168.1.100:8888
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>user-agent: Apache-HttpClient/4.2.1 (java 1.5)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>The contents of request body is:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{&amp;#34;id&amp;#34;:1,&amp;#34;name&amp;#34;:&amp;#34;dang&amp;#34;}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>打开 HTTP 日志输出后，除了正常日志输出的性能开销外，也会在比如 HTTP 请求解析时产生额外的开销，因为需要建立额外的内存缓冲区来为日志的输出做数据准备。&lt;/p>
+&lt;h3 id="输入参数的校验">输入参数的校验&lt;/h3>
+&lt;p>dubbo 的 rest 支持采用 Java 标准的 bean validation annotation（JSR 303) 来做输入校验 &lt;a href="http://beanvalidation.org/">http://beanvalidation.org/&lt;/a>&lt;/p>
+&lt;p>为了和其他 dubbo 远程调用协议保持一致，在 rest 中作校验的 annotation 必须放在服务的接口上，例如&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> User &lt;span style="color:#268bd2">getUser&lt;/span>(&lt;span style="color:#268bd2">@Min&lt;/span>(value&lt;span style="color:#719e07">=&lt;/span>1L, message&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;User ID must be greater than 1&amp;#34;&lt;/span>) Long id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，在很多其他的 bean validation 的应用场景都是将 annotation 放到实现类而不是接口上。把 annotation 放在接口上至少有一个好处是，dubbo 的客户端可以共享这个接口的信息，dubbo 甚至不需要做远程调用，在本地就可以完成输入校验。&lt;/p>
+&lt;p>然后按照 dubbo 的标准方式在 XML 配置中打开验证：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">xxx.UserService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;userService&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> validation=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 dubbo 的其他很多远程调用协议中，如果输入验证出错，是直接将 &lt;code>RpcException&lt;/code> 抛向客户端，而在 rest 中由于客户端经常是非 dubbo，甚至非 java 的系统，所以不便直接抛出 Java 异常。因此，目前我们将校验错误以 XML 的格式返回&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;violationReport&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;constraintViolations&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;path&amp;gt;&lt;/span>getUserArgument0&lt;span style="color:#268bd2">&amp;lt;/path&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;message&amp;gt;&lt;/span>User ID must be greater than 1&lt;span style="color:#268bd2">&amp;lt;/message&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;value&amp;gt;&lt;/span>0&lt;span style="color:#268bd2">&amp;lt;/value&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/constraintViolations&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/violationReport&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>稍后也会支持其他数据格式的返回值。至于如何对验证错误消息作国际化处理，直接参考 bean validation 的相关文档即可。&lt;/p>
+&lt;p>如果你认为默认的校验错误返回格式不符合你的要求，可以如上面章节所述，添加自定义的 ExceptionMapper 来自由的定制错误返回格式。需要注意的是，这个 ExceptionMapper 必须用泛型声明来捕获 dubbo 的 RpcException，才能成功覆盖 dubbo rest 默认的异常处理策略。为了简化操作，其实这里最简单的方式是直接继承 dubbo rest 的 RpcExceptionMapper，并覆盖其中处理校验异常的方法即可&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MyValidationExceptionMapper&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> RpcExceptionMapper {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> Response &lt;span style="color:#268bd2">handleConstraintViolationException&lt;/span>(ConstraintViolationException cve) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ViolationReport report &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ViolationReport();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (ConstraintViolation cv : cve.getConstraintViolations()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> report.addConstraintViolation(&lt;span style="color:#719e07">new&lt;/span> RestConstraintViolation(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cv.getPropertyPath().toString(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cv.getMessage(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cv.getInvalidValue() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#2aa198">&amp;#34;null&amp;#34;&lt;/span> : cv.getInvalidValue().toString()));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 采用json输出代替xml输出&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(report).type(ContentType.APPLICATION_JSON_UTF_8).build();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后将这个 ExceptionMapper 添加到 XML 配置中即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rest&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8888&amp;#34;&lt;/span> extension=&lt;span style="color:#2aa198">&amp;#34;xxx.MyValidationExceptionMapper&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: gRPC协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/grpc/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>Dubbo 自 2.7.5 版本开始支持 gRPC 协议，对于计划使用 HTTP/2 通信，或者想利用 gRPC 带来的 Stream、反压、Reactive 编程等能力的开发者来说，
+都可以考虑启用 gRPC 协议。&lt;/p>
+&lt;h4 id="支持-grpc-的好处">支持 gRPC 的好处&lt;/h4>
+&lt;ul>
+&lt;li>为期望使用 gRPC 协议的用户带来服务治理能力，方便接入 Dubbo 体系&lt;/li>
+&lt;li>用户可以使用 Dubbo 风格的，基于接口的编程风格来定义和使用远程服务&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;ul>
+&lt;li>需要立即响应才能继续处理的同步后端微服务到微服务通信。&lt;/li>
+&lt;li>需要支持混合编程平台的 Polyglot 环境。&lt;/li>
+&lt;li>性能至关重要的低延迟和高吞吐量通信。&lt;/li>
+&lt;li>点到点实时通信 - gRPC 无需轮询即可实时推送消息，并且能对双向流式处理提供出色的支持。&lt;/li>
+&lt;li>网络受约束环境 - 二进制 gRPC 消息始终小于等效的基于文本的 JSON 消息。&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="在-dubbo-中使用-grpc">在 Dubbo 中使用 gRPC&lt;/h3>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc">示例&lt;/a>&lt;/p>
+&lt;h3 id="步骤">步骤&lt;/h3>
+&lt;ol>
+&lt;li>使用 IDL 定义服务&lt;/li>
+&lt;li>配置 compiler 插件，本地预编译&lt;/li>
+&lt;li>配置暴露/引用 Dubbo 服务&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>除了原生 StreamObserver 接口类型之外，Dubbo 还支持 &lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava">RxJava&lt;/a>、&lt;a href="https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-reactor">Reactor&lt;/a> 编程风格的 API。&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: HTTP协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/http/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>基于 HTTP 表单的远程调用协议，采用 Spring 的 HttpInvoker 实现，&lt;code>2.3.0&lt;/code> 以上版本支持。&lt;/p>
+&lt;ul>
+&lt;li>连接个数：多连接&lt;/li>
+&lt;li>连接方式：短连接&lt;/li>
+&lt;li>传输协议：HTTP&lt;/li>
+&lt;li>传输方式：同步传输&lt;/li>
+&lt;li>序列化：表单序列化&lt;/li>
+&lt;li>适用范围：传入传出参数数据包大小混合，提供者比消费者个数多，可用浏览器查看，可用表单或URL传入参数，暂不支持传文件。&lt;/li>
+&lt;li>适用场景：需同时给应用程序和浏览器 JS 使用的服务。&lt;/li>
+&lt;/ul>
+&lt;h4 id="约束">约束&lt;/h4>
+&lt;ul>
+&lt;li>参数及返回值需符合 Bean 规范&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>http短连接，协议标准化且易读，容易对接外部系统，适用于上层业务模块。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;p>从 Dubbo 3 开始，Http 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的&lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">模块&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-http&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置协议">配置协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;http&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置-jetty-server-默认">配置 Jetty Server (默认)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置-servlet-bridge-server-推荐使用">配置 Servlet Bridge Server (推荐使用)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置-dispatcherservlet">配置 DispatcherServlet&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.DispatcherServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;load-on-startup&amp;gt;&lt;/span>1&lt;span style="color:#268bd2">&amp;lt;/load-on-startup&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;p>如果使用 servlet 派发请求&lt;/p>
+&lt;ul>
+&lt;li>协议的端口 &lt;code>&amp;lt;dubbo:protocol port=&amp;quot;8080&amp;quot; /&amp;gt;&lt;/code> 必须与 servlet 容器的端口相同，&lt;/li>
+&lt;li>协议的上下文路径 &lt;code>&amp;lt;dubbo:protocol contextpath=&amp;quot;foo&amp;quot; /&amp;gt;&lt;/code> 必须与 servlet 应用的上下文路径相同。&lt;/li>
+&lt;/ul>
+&lt;/div></description></item><item><title>Overview: Rest 协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/v3.2_rest_protocol_design/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/v3.2_rest_protocol_design/</guid><description>
+&lt;h1 id="dubborestprotocol设计文档">Dubbo RestProtocol 设计文档&lt;/h1>
+&lt;h2 id="原版本dubborest">原版本dubbo rest&lt;/h2>
+&lt;p>consumer&lt;/p>
+&lt;p>restClient支持 依赖resteasy 不支持spring mvc &lt;/p>
+&lt;p>provider(较重)&lt;/p>
+&lt;p>依赖web container   (tomcat,jetty，)servlet 模式，jaxrs netty server&lt;/p>
+&lt;h3 id="改版dubborest">改版dubbo rest &lt;/h3>
+&lt;p>方向：&lt;/p>
+&lt;p>更加轻量，具有dubbo风格的rest，微服务体系互通（Springcloud Alibaba）&lt;/p>
+&lt;p>1.注解解析&lt;/p>
+&lt;p>2.报文编解码&lt;/p>
+&lt;p>3.restClient&lt;/p>
+&lt;p>4.restServer(netty)&lt;/p>
+&lt;p>支持程度：&lt;/p>
+&lt;p>content-type   text json xml form(后续会扩展)&lt;/p>
+&lt;p>注解&lt;/p>
+&lt;p>param,header,body,pathvariable （spring mvc &amp;amp; resteasy）&lt;/p>
+&lt;h2 id="http协议报文">Http 协议报文&lt;/h2>
+&lt;pre>&lt;code>POST /test/path? HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-type: application/json
+{&amp;quot;name&amp;quot;:&amp;quot;dubbo&amp;quot;,&amp;quot;age&amp;quot;:10,&amp;quot;address&amp;quot;:&amp;quot;hangzhou&amp;quot;}
+&lt;/code>&lt;/pre>
+&lt;h3 id="dubbohttpheader">dubbo http(header)&lt;/h3>
+&lt;pre>&lt;code>// service key header
+path: com.demo.TestInterface
+group: demo
+port: 80
+version: 1.0.0
+// 保证长连接
+Keep-Alive,Connection: keep-alive
+Keep-alive: 60
+// RPCContext Attachment
+userId: 123456
+&lt;/code>&lt;/pre>
+&lt;h2 id="目前支持粒度">目前支持粒度：&lt;/h2>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>数据位置&lt;/th>
+&lt;th>content-type&lt;/th>
+&lt;th>spring注解&lt;/th>
+&lt;th>resteasy注解&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>body&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>ReuqestBody&lt;/td>
+&lt;td> 无注解即为body&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>querystring(?test=demo)&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>RequestParam&lt;/td>
+&lt;td>QueryParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>header&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>RequestHeader&lt;/td>
+&lt;td>PathParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>form&lt;/td>
+&lt;td>application/x-www-form-urlencoded&lt;/td>
+&lt;td>RequestParam ReuqestBody&lt;/td>
+&lt;td>FormParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>path&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>PathVariable&lt;/td>
+&lt;td>PathParam&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>method&lt;/td>
+&lt;td>无要求&lt;/td>
+&lt;td>PostMapping GetMapping&lt;/td>
+&lt;td>GET POST&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>url&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping path属性&lt;/td>
+&lt;td>Path&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>content-type&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping consumers属性&lt;/td>
+&lt;td>Consumers&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Accept&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>PostMapping GetMapping produces属性&lt;/td>
+&lt;td>Produces&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="rest注解解析servicerestmetadataresolver">rest注解解析（ServiceRestMetadataResolver）&lt;/h2>
+&lt;pre>&lt;code>JAXRSServiceRestMetadataResolver
+SpringMvcServiceRestMetadataResolver
+&lt;/code>&lt;/pre>
+&lt;p>ServiceRestMetadata&lt;/p>
+&lt;pre>&lt;code>public class ServiceRestMetadata implements Serializable {
+private String serviceInterface; // com.demo.TestInterface
+private String version;// 1.0.0
+private String group;// demo
+private Set&amp;lt;RestMethodMetadata&amp;gt; meta;// method 元信息
+private int port;// 端口 for provider service key
+private boolean consumer;// consumer 标志
+/**
+* make a distinction between mvc &amp;amp; resteasy
+*/
+private Class codeStyle;//
+/**
+* for provider
+*/
+private Map&amp;lt;PathMatcher, RestMethodMetadata&amp;gt; pathToServiceMap;
+/**
+* for consumer
+*/
+private Map&amp;lt;String, Map&amp;lt;ParameterTypesComparator, RestMethodMetadata&amp;gt;&amp;gt; methodToServiceMa
+&lt;/code>&lt;/pre>
+&lt;p>RestMethodMetadata&lt;/p>
+&lt;pre>&lt;code>public class RestMethodMetadata implements Serializable {
+private MethodDefinition method; // method 定义信息（name ,pramType,returnType）
+private RequestMetadata request;// 请求元信息
+private Integer urlIndex;
+private Integer bodyIndex;
+private Integer headerMapIndex;
+private String bodyType;
+private Map&amp;lt;Integer, Collection&amp;lt;String&amp;gt;&amp;gt; indexToName;
+private List&amp;lt;String&amp;gt; formParams;
+private Map&amp;lt;Integer, Boolean&amp;gt; indexToEncoded;
+private ServiceRestMetadata serviceRestMetadata;
+private List&amp;lt;ArgInfo&amp;gt; argInfos;
+private Method reflectMethod;
+/**
+* make a distinction between mvc &amp;amp; resteasy
+*/
+private Class codeStyle;
+&lt;/code>&lt;/pre>
+&lt;p>ArgInfo&lt;/p>
+&lt;pre>&lt;code>public class ArgInfo {
+/**
+* method arg index 0,1,2,3
+*/
+private int index;
+/**
+* method annotation name or name
+*/
+private String annotationNameAttribute;
+/**
+* param annotation type
+*/
+private Class paramAnnotationType;
+/**
+* param Type
+*/
+private Class paramType;
+/**
+* param name
+*/
+private String paramName;
+/**
+* url split(&amp;quot;/&amp;quot;) String[n] index
+*/
+private int urlSplitIndex;
+private Object defaultValue;
+private boolean formContentType;
+&lt;/code>&lt;/pre>
+&lt;p>RequestMeatadata&lt;/p>
+&lt;pre>&lt;code>public class RequestMetadata implements Serializable {
+private static final long serialVersionUID = -240099840085329958L;
+private String method;// 请求method
+private String path;// 请求url
+private Map&amp;lt;String, List&amp;lt;String&amp;gt;&amp;gt; params // param参数?拼接
+private Map&amp;lt;String, List&amp;lt;String&amp;gt;&amp;gt; headers// header;
+private Set&amp;lt;String&amp;gt; consumes // content-type;
+private Set&amp;lt;String&amp;gt; produces // Accept;
+&lt;/code>&lt;/pre>
+&lt;h3 id="consumer代码">Consumer 代码：&lt;/h3>
+&lt;p>refer:&lt;/p>
+&lt;pre>&lt;code> @Override
+protected &amp;lt;T&amp;gt; Invoker&amp;lt;T&amp;gt; protocolBindingRefer(final Class&amp;lt;T&amp;gt; type, final URL url) throws RpcException {
+// restClient spi创建
+ReferenceCountedClient&amp;lt;? extends RestClient&amp;gt; refClient =
+clients.computeIfAbsent(url.getAddress(), key -&amp;gt; createReferenceCountedClient(url, clients));
+refClient.retain();
+// resolve metadata
+Map&amp;lt;String, Map&amp;lt;ParameterTypesComparator, RestMethodMetadata&amp;gt;&amp;gt; metadataMap = MetadataResolver.resolveConsumerServiceMetadata(type, url);
+ReferenceCountedClient&amp;lt;? extends RestClient&amp;gt; finalRefClient = refClient;
+Invoker&amp;lt;T&amp;gt; invoker = new AbstractInvoker&amp;lt;T&amp;gt;(type, url, new String[]{INTERFACE_KEY, GROUP_KEY, TOKEN_KEY}) {
+@Override
+protected Result doInvoke(Invocation invocation) {
+try {
+// 获取 method的元信息
+RestMethodMetadata restMethodMetadata = metadataMap.get(invocation.getMethodName()).get(ParameterTypesComparator.getInstance(invocation.getParameterTypes()));
+RequestTemplate requestTemplate = new RequestTemplate(invocation, restMethodMetadata.getRequest().getMethod(), url.getAddress(), getContextPath(url));
+HttpConnectionCreateContext httpConnectionCreateContext = new HttpConnectionCreateContext();
+// TODO dynamic load config
+httpConnectionCreateContext.setConnectionConfig(new HttpConnectionConfig());
+httpConnectionCreateContext.setRequestTemplate(requestTemplate);
+httpConnectionCreateContext.setRestMethodMetadata(restMethodMetadata);
+httpConnectionCreateContext.setInvocation(invocation);
+httpConnectionCreateContext.setUrl(url);
+// http 信息构建拦截器
+for (HttpConnectionPreBuildIntercept intercept : httpConnectionPreBuildIntercepts) {
+intercept.intercept(httpConnectionCreateContext);
+}
+CompletableFuture&amp;lt;RestResult&amp;gt; future = finalRefClient.getClient().send(requestTemplate);
+CompletableFuture&amp;lt;AppResponse&amp;gt; responseFuture = new CompletableFuture&amp;lt;&amp;gt;();
+AsyncRpcResult asyncRpcResult = new AsyncRpcResult(responseFuture, invocation);
+// response 处理
+future.whenComplete((r, t) -&amp;gt; {
+if (t != null) {
+responseFuture.completeExceptionally(t);
+} else {
+AppResponse appResponse = new AppResponse();
+try {
+int responseCode = r.getResponseCode();
+MediaType mediaType = MediaType.TEXT_PLAIN;
+if (400 &amp;lt; responseCode &amp;amp;&amp;amp; responseCode &amp;lt; 500) {
+throw new HttpClientException(r.getMessage());
+} else if (responseCode &amp;gt;= 500) {
+throw new RemoteServerInternalException(r.getMessage());
+} else if (responseCode &amp;lt; 400) {
+mediaType = MediaTypeUtil.convertMediaType(r.getContentType());
+}
+Object value = HttpMessageCodecManager.httpMessageDecode(r.getBody(),
+restMethodMetadata.getReflectMethod().getReturnType(), mediaType);
+appResponse.setValue(value);
+Map&amp;lt;String, String&amp;gt; headers = r.headers()
+.entrySet()
+.stream()
+.collect(Collectors.toMap(Map.Entry::getKey, e -&amp;gt; e.getValue().get(0)));
+appResponse.setAttachments(headers);
+responseFuture.complete(appResponse);
+} catch (Exception e) {
+responseFuture.completeExceptionally(e);
+}
+}
+});
+return asyncRpcResult;
+} catch (RpcException e) {
+if (e.getCode() == RpcException.UNKNOWN_EXCEPTION) {
+e.setCode(getErrorCode(e.getCause()));
+}
+throw e;
+}
+}
+@Override
+public void destroy() {
+super.destroy();
+invokers.remove(this);
+destroyInternal(url);
+}
+};
+invokers.add(invoker);
+return invoker;
+&lt;/code>&lt;/pre>
+&lt;h3 id="provider代码">provider 代码：&lt;/h3>
+&lt;p>export:&lt;/p>
+&lt;pre>&lt;code> public &amp;lt;T&amp;gt; Exporter&amp;lt;T&amp;gt; export(final Invoker&amp;lt;T&amp;gt; invoker) throws RpcException {
+URL url = invoker.getUrl();
+final String uri = serviceKey(url);
+Exporter&amp;lt;T&amp;gt; exporter = (Exporter&amp;lt;T&amp;gt;) exporterMap.get(uri);
+if (exporter != null) {
+// When modifying the configuration through override, you need to re-expose the newly modified service.
+if (Objects.equals(exporter.getInvoker().getUrl(), invoker.getUrl())) {
+return exporter;
+}
+}
+// TODO addAll metadataMap to RPCInvocationBuilder metadataMap
+Map&amp;lt;PathMatcher, RestMethodMetadata&amp;gt; metadataMap = MetadataResolver.resolveProviderServiceMetadata(url.getServiceModel().getProxyObject().getClass(),url);
+PathAndInvokerMapper.addPathAndInvoker(metadataMap, invoker);
+final Runnable runnable = doExport(proxyFactory.getProxy(invoker, true), invoker.getInterface(), invoker.getUrl());
+exporter = new AbstractExporter&amp;lt;T&amp;gt;(invoker) {
+@Override
+public void afterUnExport() {
+exporterMap.remove(uri);
+if (runnable != null) {
+try {
+runnable.run();
+} catch (Throwable t) {
+logger.warn(PROTOCOL_UNSUPPORTED, &amp;quot;&amp;quot;, &amp;quot;&amp;quot;, t.getMessage(), t);
+}
+}
+}
+};
+exporterMap.put(uri, exporter);
+return exporter;
+}
+&lt;/code>&lt;/pre>
+&lt;p>RestHandler&lt;/p>
+&lt;pre>&lt;code> private class RestHandler implements HttpHandler&amp;lt;HttpServletRequest, HttpServletResponse&amp;gt; {
+@Override
+public void handle(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws IOException, ServletException {
+// 有servlet reuqest 和nettyRequest
+RequestFacade request = RequestFacadeFactory.createRequestFacade(servletRequest);
+RpcContext.getServiceContext().setRemoteAddress(request.getRemoteAddr(), request.getRemotePort());
+// dispatcher.service(request, servletResponse);
+Pair&amp;lt;RpcInvocation, Invoker&amp;gt; build = null;
+try {
+// 根据请求信息创建 RPCInvocation
+build = RPCInvocationBuilder.build(request, servletRequest, servletResponse);
+} catch (PathNoFoundException e) {
+servletResponse.setStatus(404);
+}
+Invoker invoker = build.getSecond();
+Result invoke = invoker.invoke(build.getFirst());
+// TODO handling exceptions
+if (invoke.hasException()) {
+servletResponse.setStatus(500);
+} else {
+try {
+Object value = invoke.getValue();
+String accept = request.getHeader(RestConstant.ACCEPT);
+MediaType mediaType = MediaTypeUtil.convertMediaType(accept);
+// TODO write response
+HttpMessageCodecManager.httpMessageEncode(servletResponse.getOutputStream(), value, invoker.getUrl(), mediaType);
+servletResponse.setStatus(200);
+} catch (Exception e) {
+servletResponse.setStatus(500);
+}
+}
+// TODO add Attachment header
+}
+}
+&lt;/code>&lt;/pre>
+&lt;p>RPCInvocationBuilder&lt;/p>
+&lt;pre>&lt;code>{
+private static final ParamParserManager paramParser = new ParamParserManager();
+public static Pair&amp;lt;RpcInvocation, Invoker&amp;gt; build(RequestFacade request, Object servletRequest, Object servletResponse) {
+// 获取invoker
+Pair&amp;lt;Invoker, RestMethodMetadata&amp;gt; invokerRestMethodMetadataPair = getRestMethodMetadata(request);
+RpcInvocation rpcInvocation = createBaseRpcInvocation(request, invokerRestMethodMetadataPair.getSecond());
+ProviderParseContext parseContext = createParseContext(request, servletRequest, servletResponse, invokerRestMethodMetadataPair.getSecond());
+// 参数构建
+Object[] args = paramParser.providerParamParse(parseContext);
+rpcInvocation.setArguments(args);
+return Pair.make(rpcInvocation, invokerRestMethodMetadataPair.getFirst());
+}
+private static ProviderParseContext createParseContext(RequestFacade request, Object servletRequest, Object servletResponse, RestMethodMetadata restMethodMetadata) {
+ProviderParseContext parseContext = new ProviderParseContext(request);
+parseContext.setResponse(servletResponse);
+parseContext.setRequest(servletRequest);
+Object[] objects = new Object[restMethodMetadata.getArgInfos().size()];
+parseContext.setArgs(Arrays.asList(objects));
+parseContext.setArgInfos(restMethodMetadata.getArgInfos());
+return parseContext;
+}
+private static RpcInvocation createBaseRpcInvocation(RequestFacade request, RestMethodMetadata restMethodMetadata) {
+RpcInvocation rpcInvocation = new RpcInvocation();
+int localPort = request.getLocalPort();
+String localAddr = request.getLocalAddr();
+int remotePort = request.getRemotePort();
+String remoteAddr = request.getRemoteAddr();
+String HOST = request.getHeader(RestConstant.HOST);
+String GROUP = request.getHeader(RestConstant.GROUP);
+String PATH = request.getHeader(RestConstant.PATH);
+String VERSION = request.getHeader(RestConstant.VERSION);
+String METHOD = restMethodMetadata.getMethod().getName();
+String[] PARAMETER_TYPES_DESC = restMethodMetadata.getMethod().getParameterTypes();
+rpcInvocation.setParameterTypes(restMethodMetadata.getReflectMethod().getParameterTypes());
+rpcInvocation.setMethodName(METHOD);
+rpcInvocation.setAttachment(RestConstant.GROUP, GROUP);
+rpcInvocation.setAttachment(RestConstant.METHOD, METHOD);
+rpcInvocation.setAttachment(RestConstant.PARAMETER_TYPES_DESC, PARAMETER_TYPES_DESC);
+rpcInvocation.setAttachment(RestConstant.PATH, PATH);
+rpcInvocation.setAttachment(RestConstant.VERSION, VERSION);
+rpcInvocation.setAttachment(RestConstant.HOST, HOST);
+rpcInvocation.setAttachment(RestConstant.REMOTE_ADDR, remoteAddr);
+rpcInvocation.setAttachment(RestConstant.LOCAL_ADDR, localAddr);
+rpcInvocation.setAttachment(RestConstant.REMOTE_PORT, remotePort);
+rpcInvocation.setAttachment(RestConstant.LOCAL_PORT, localPort);
+Enumeration&amp;lt;String&amp;gt; attachments = request.getHeaders(RestConstant.DUBBO_ATTACHMENT_HEADER);
+while (attachments != null &amp;amp;&amp;amp; attachments.hasMoreElements()) {
+String s = attachments.nextElement();
+String[] split = s.split(&amp;quot;=&amp;quot;);
+rpcInvocation.setAttachment(split[0], split[1]);
+}
+// TODO set path,version,group and so on
+return rpcInvocation;
+}
+private static Pair&amp;lt;Invoker, RestMethodMetadata&amp;gt; getRestMethodMetadata(RequestFacade request) {
+String path = request.getRequestURI();
+String version = request.getHeader(RestConstant.VERSION);
+String group = request.getHeader(RestConstant.GROUP);
+int port = request.getIntHeader(RestConstant.REST_PORT);
+return PathAndInvokerMapper.getRestMethodMetadata(path, version, group, port);
+}
+}
+&lt;/code>&lt;/pre>
+&lt;h2 id="编码示例">编码示例&lt;/h2>
+&lt;p>API&lt;/p>
+&lt;p>mvc:&lt;/p>
+&lt;pre>&lt;code>@RestController()
+@RequestMapping(&amp;quot;/demoService&amp;quot;)
+public interface DemoService {
+@RequestMapping(value = &amp;quot;/hello&amp;quot;, method = RequestMethod.GET)
+Integer hello(@RequestParam Integer a, @RequestParam Integer b);
+@RequestMapping(value = &amp;quot;/error&amp;quot;, method = RequestMethod.GET)
+String error();
+@RequestMapping(value = &amp;quot;/say&amp;quot;, method = RequestMethod.POST, consumes = MediaType.TEXT_PLAIN_VALUE)
+String sayHello(@RequestBody String name);
+}
+&lt;/code>&lt;/pre>
+&lt;p>resteasy:&lt;/p>
+&lt;pre>&lt;code>@Path(&amp;quot;/demoService&amp;quot;)
+public interface RestDemoService {
+@GET
+@Path(&amp;quot;/hello&amp;quot;)
+Integer hello(@QueryParam(&amp;quot;a&amp;quot;)Integer a,@QueryParam(&amp;quot;b&amp;quot;) Integer b);
+@GET
+@Path(&amp;quot;/error&amp;quot;)
+String error();
+@POST
+@Path(&amp;quot;/say&amp;quot;)
+@Consumes({MediaType.TEXT_PLAIN})
+String sayHello(String name);
+boolean isCalled();
+}
+&lt;/code>&lt;/pre>
+&lt;p>impl(service)&lt;/p>
+&lt;pre>&lt;code>@DubboService()
+public class RestDemoServiceImpl implements RestDemoService {
+private static Map&amp;lt;String, Object&amp;gt; context;
+private boolean called;
+@Override
+public String sayHello(String name) {
+called = true;
+return &amp;quot;Hello, &amp;quot; + name;
+}
+public boolean isCalled() {
+return called;
+}
+@Override
+public Integer hello(Integer a, Integer b) {
+context = RpcContext.getServerAttachment().getObjectAttachments();
+return a + b;
+}
+@Override
+public String error() {
+throw new RuntimeException();
+}
+public static Map&amp;lt;String, Object&amp;gt; getAttachments() {
+return context;
+}
+}
+&lt;/code>&lt;/pre>
+&lt;h2 id="流程图">流程图&lt;/h2>
+&lt;p>&lt;strong>Consumer&lt;/strong>  &lt;/p>
+&lt;p>&lt;img src="https://static.dingtalk.com/media/lQLPJxLOtqTxs9TNA5rNBQCwci8F2QYiGAYD5sSyd4BVAA_1280_922.png" alt="image">&lt;/p>
+&lt;p>&lt;strong>Provider(RestServer)&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://static.dingtalk.com/media/lQLPJxZcNUm4M9TNA1_NBMuwZUu6IC3FeYAD5sSydYADAA_1227_863.png" alt="image">&lt;/p>
+&lt;h2 id="场景">场景 :&lt;/h2>
+&lt;p>&lt;strong>非dubbo体系互通（Springcloud alibaba  互通）&lt;/strong>&lt;/p>
+&lt;p>互通条件：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>&lt;/th>
+&lt;th>协议&lt;/th>
+&lt;th>Dubbo&lt;/th>
+&lt;th>SpringCloud Alibaba&lt;/th>
+&lt;th>互通&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>通信协议&lt;/td>
+&lt;td>rest&lt;/td>
+&lt;td>spring web/resteasy  编码风格&lt;/td>
+&lt;td>集成feignclient，ribbon (spring web 编码风格)&lt;/td>
+&lt;td>是&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>triple&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>dubbo&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>grpc&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>hessian&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>注册中心&lt;/td>
+&lt;td>zookeeper&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;/td>
+&lt;td>nacos&lt;/td>
+&lt;td>支持&lt;/td>
+&lt;td>支持&lt;/td>
+&lt;td>应用级别注册&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="2dubbo双注册">2.dubbo 双注册 &lt;/h3>
+&lt;p> 完成应用级别注册，（dubo2-dubbo3 过度），dubbo版本升级&lt;/p>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/0ceca951-f467-4ab3-9b71-8e7d52e5e7d1.png" alt="image">&lt;/p>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/6bcc7aed-1d22-470f-b185-efbab32df1e5.png" alt="image">&lt;/p>
+&lt;h3 id="3多协议发布">3.多协议发布&lt;/h3>
+&lt;p>配置：&lt;/p>
+&lt;pre>&lt;code>&amp;lt;dubbo:service interface=&amp;quot;org.apache.dubbo.samples.DemoService&amp;quot; protocol=&amp;quot;dubbo, grpc,rest&amp;quot;/&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;h3 id="4跨语言">4.跨语言&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/1bdf8f91-9666-4c20-9aea-8396c745f554.png" alt="image">&lt;/p>
+&lt;h3 id="5多协议交互">5.多协议交互&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/af72e3df-05d5-42a2-a333-618be7ec6cb8.png" alt="image">&lt;/p>
+&lt;h3 id="6协议迁移">6.协议迁移&lt;/h3>
+&lt;p>&lt;img src="https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/36d30183-8d5f-494c-8ebb-b57403c88661.png" alt="image">&lt;/p>
+&lt;p>rest编码风格&lt;/p>
+&lt;p>Http协议更通用跨语言调用&lt;/p>
+&lt;p>dubbo rest 对其他http服务 进行调用&lt;/p>
+&lt;p>其他httpclient 对dubbo rest进行调用&lt;/p>
+&lt;p>dubbo restServer 可以与其他web服务，浏览器等客户端直接进行http交互&lt;/p>
+&lt;h2 id="consumertodolist功能已经初步实现可以调通解析response">consumer TODOLIST（功能已经初步实现，可以调通解析response）&lt;/h2>
+&lt;p>1. org/apache/dubbo/rpc/protocol/rest/RestProtocol.java:157  dynamic load config&lt;/p>
+&lt;p>2.org/apache/dubbo/remoting/http/factory/AbstractHttpClientFactory.java:50 load config  HttpClientConfig&lt;/p>
+&lt;p>3.org/apache/dubbo/rpc/protocol/rest/annotation/metadata/MetadataResolver.java:52  support Dubbo style service&lt;/p>
+&lt;p>4.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:120  TODO config&lt;/p>
+&lt;p>5.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:140 TODO close judge&lt;/p>
+&lt;p>6.org/apache/dubbo/rpc/protocol/rest/message/decode/MultiValueCodec.java:35  TODO java bean  get set convert&lt;/p>
+&lt;h2 id="providertodolist待实现">provider TODOLIST(待实现)&lt;/h2>
+&lt;p>基于netty实现支持http协议的NettyServer&lt;/p>
+&lt;p>无注解协议定义&lt;/p>
+&lt;p>官网场景补充&lt;/p>
+&lt;h2 id="rest使用说明文档及demo">Rest使用说明文档及demo：&lt;/h2></description></item><item><title>Overview: Thrift协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/thrift/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/thrift/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>当前 dubbo 支持的 thrift 协议是对 thrift 原生协议的扩展，在原生协议的基础上添加了一些额外的头信息，比如 service name，magic number 等。&lt;code>2.3.0&lt;/code> 以上版本支持。&lt;/p>
+&lt;p>&lt;a href="http://thrift.apache.org">Thrift&lt;/a> 是 Facebook 捐给 Apache 的一个 RPC 框架。&lt;/p>
+&lt;p>使用 dubbo thrift 协议同样需要使用 thrift 的 idl compiler 编译生成相应的 java 代码，后续版本中会在这方面做一些增强。&lt;/p>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>适用于 SOA 标准 RPC 框架。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="依赖">依赖&lt;/h3>
+&lt;p>从 Dubbo 3 开始，Thrift 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的&lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">模块&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-native-thrift&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.thrift&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>libthrift&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.8.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="所有服务共用一个端口">所有服务共用一个端口&lt;/h3>
+&lt;p>与原生 Thrift 不兼容&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;thrift&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;3030&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;a href="https://github.com/apache/dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol/thrift">dubbo 项目中的示例代码&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>Thrift 不支持 null 值，即：不能在协议中传递 null 值&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: Rmi协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rmi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rmi/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>RMI 协议采用 JDK 标准的 &lt;code>java.rmi.*&lt;/code> 实现，采用阻塞式短连接和 JDK 标准序列化方式。&lt;/p>
+&lt;ul>
+&lt;li>连接个数：多连接&lt;/li>
+&lt;li>连接方式：短连接&lt;/li>
+&lt;li>传输协议：TCP&lt;/li>
+&lt;li>传输方式：同步传输&lt;/li>
+&lt;li>序列化：Java 标准二进制序列化&lt;/li>
+&lt;li>适用范围：传入传出参数数据包大小混合，消费者与提供者个数差不多，可传文件。&lt;/li>
+&lt;li>适用场景：常规远程服务方法调用，与原生RMI服务互操作&lt;/li>
+&lt;/ul>
+&lt;h4 id="约束">约束&lt;/h4>
+&lt;ul>
+&lt;li>参数及返回值需实现 &lt;code>Serializable&lt;/code> 接口&lt;/li>
+&lt;li>dubbo 配置中的超时时间对 RMI 无效，需使用 java 启动参数设置：&lt;code>-Dsun.rmi.transport.tcp.responseTimeout=3000&lt;/code>，参见下面的 RMI 配置&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>是 Java 的一组拥护开发分布式应用程序的 API，实现了不同操作系统之间程序的方法调用。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="引入依赖">引入依赖&lt;/h3>
+&lt;p>从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的&lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">模块&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-rmi&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java -Dsun.rmi.transport.tcp.responseTimeout&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">3000&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>更多 RMI 优化参数请查看 &lt;a href="https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html">JDK 文档&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="接口说明">接口说明&lt;/h3>
+&lt;p>如果服务接口继承了 &lt;code>java.rmi.Remote&lt;/code> 接口，可以和原生 RMI 互操作，即：&lt;/p>
+&lt;ul>
+&lt;li>提供者用 Dubbo 的 RMI 协议暴露服务，消费者直接用标准 RMI 接口调用，&lt;/li>
+&lt;li>或者提供方用标准 RMI 暴露服务，消费方用 Dubbo 的 RMI 协议调用。&lt;/li>
+&lt;/ul>
+&lt;p>如果服务接口没有继承 &lt;code>java.rmi.Remote&lt;/code> 接口：&lt;/p>
+&lt;ul>
+&lt;li>缺省 Dubbo 将自动生成一个 &lt;code>com.xxx.XxxService$Remote&lt;/code> 的接口，并继承 &lt;code>java.rmi.Remote&lt;/code> 接口，并以此接口暴露服务，&lt;/li>
+&lt;li>但如果设置了 &lt;code>&amp;lt;dubbo:protocol name=&amp;quot;rmi&amp;quot; codec=&amp;quot;spring&amp;quot; /&amp;gt;&lt;/code>，将不生成 &lt;code>$Remote&lt;/code> 接口，而使用 Spring 的 &lt;code>RmiInvocationHandler&lt;/code> 接口暴露服务，和 Spring 兼容。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>定义 RMI 协议&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>设置默认协议&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>设置某个服务的协议&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>多端口&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;rmi1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;1099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;rmi2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;2099&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;...&amp;#34;&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;rmi1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Spring 兼容性&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;rmi&amp;#34;&lt;/span> codec=&lt;span style="color:#2aa198">&amp;#34;spring&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>如果正在使用 RMI 提供服务给外部访问，&lt;/strong> 公司内网环境应该不会有攻击风险。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>同时应用里依赖了老的 common-collections 包的情况下，&lt;/strong> dubbo 不会依赖这个包，请排查自己的应用有没有使用。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>存在反序列化安全风险。&lt;/strong> 请检查应用：将 commons-collections3 请升级到 &lt;a href="https://commons.apache.org/proper/commons-collections/release_3_2_2.html">3.2.2&lt;/a>；将 commons-collections4 请升级到 &lt;a href="https://commons.apache.org/proper/commons-collections/release_4_1.html">4.1&lt;/a>。新版本的 commons-collections 解决了该问题。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;/div></description></item><item><title>Overview: Redis协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>&lt;a href="http://redis.io">Redis&lt;/a> 是一个高效的 KV 存储服务器。基于 Redis 实现的 RPC 协议。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;code>2.3.0&lt;/code> 以上版本支持。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>缓存，限流，分布式锁等&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="引入依赖">引入依赖&lt;/h3>
+&lt;p>从 Dubbo 3 开始，Redis 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的&lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">模块&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-redis&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="注册-redis-服务的地址">注册 redis 服务的地址&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RegistryFactory registryFactory &lt;span style="color:#719e07">=&lt;/span> ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Registry registry &lt;span style="color:#719e07">=&lt;/span> registryFactory.getRegistry(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;zookeeper://10.20.153.10:2181&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>registry.register(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.11/com.foo.BarService?category=providers&amp;amp;dynamic=false&amp;amp;application=foo&amp;amp;group=member&amp;amp;loadbalance=consistenthash&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="在客户端引用">在客户端引用&lt;/h3>
+&lt;p>不需要感知 Redis 的地址&lt;/p>
+&lt;p>在客户端使用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;store&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;member&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者点对点直连：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;store&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以使用自定义接口：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;store&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.StoreService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 &amp;ldquo;p:xxx&amp;rdquo; 为 spring 的标准 p 标签&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.CacheService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> p:set=&lt;span style="color:#2aa198">&amp;#34;putFoo&amp;#34;&lt;/span> p:get=&lt;span style="color:#2aa198">&amp;#34;getFoo&amp;#34;&lt;/span> p:delete=&lt;span style="color:#2aa198">&amp;#34;removeFoo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>方法名建议和 redis 的标准方法名相同，即：get(key), set(key, value), delete(key)。&lt;/p>
+&lt;p>如果方法名和 redis 的标准方法名不相同，则需要配置映射关系。&lt;/p></description></item><item><title>Overview: Hessian协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/hessian/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/hessian/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>Hessian 协议用于集成 Hessian 的服务，Hessian 底层采用 Http 通讯，采用 Servlet 暴露服务，Dubbo 缺省内嵌 Jetty 作为服务器实现。&lt;/p>
+&lt;p>&lt;a href="http://hessian.caucho.com">Hessian&lt;/a> 是 Caucho 开源的一个 RPC 框架，其通讯效率高于 WebService 和 Java 自带的序列化。&lt;/p>
+&lt;ul>
+&lt;li>连接个数：多连接&lt;/li>
+&lt;li>连接方式：短连接&lt;/li>
+&lt;li>传输协议：HTTP&lt;/li>
+&lt;li>传输方式：同步传输&lt;/li>
+&lt;li>序列化：Hessian二进制序列化&lt;/li>
+&lt;li>适用范围：传入传出参数数据包较大，提供者比消费者个数多，提供者压力较大，可传文件。&lt;/li>
+&lt;li>适用场景：页面传输，文件传输，或与原生hessian服务互操作。&lt;/li>
+&lt;/ul>
+&lt;p>Dubbo 的 Hessian 协议可以和原生 Hessian 服务互操作，即：&lt;/p>
+&lt;ul>
+&lt;li>提供者用 Dubbo 的 Hessian 协议暴露服务，消费者直接用标准 Hessian 接口调用，&lt;/li>
+&lt;li>或者提供方用标准 Hessian 暴露服务，消费方用 Dubbo 的 Hessian 协议调用。&lt;/li>
+&lt;/ul>
+&lt;h4 id="约束">约束&lt;/h4>
+&lt;ul>
+&lt;li>参数及返回值需实现 &lt;code>Serializable&lt;/code> 接口。&lt;/li>
+&lt;li>参数及返回值不能自定义实现 &lt;code>List&lt;/code>, &lt;code>Map&lt;/code>, &lt;code>Number&lt;/code>, &lt;code>Date&lt;/code>, &lt;code>Calendar&lt;/code> 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序列化与反序列化实例。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="依赖">依赖&lt;/h3>
+&lt;p>从 Dubbo 3 开始，Hessian 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的&lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">模块&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-hessian&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.caucho&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>hessian&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>4.0.7&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="定义-hessian-协议">定义 hessian 协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="设置默认协议">设置默认协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="设置-service-协议">设置 service 协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="多端口">多端口&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hessian1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;hessian&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8081&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="直连">直连&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;HelloWorld&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;hessian://10.20.153.10:8080/helloWorld&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Overview: Webservice协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/webservice/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/webservice/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>基于 WebService 的远程调用协议，基于 &lt;a href="http://cxf.apache.org">Apache CXF&lt;/a> 的 &lt;code>frontend-simple&lt;/code> 和 &lt;code>transports-http&lt;/code> 实现。&lt;code>2.3.0&lt;/code> 以上版本支持。&lt;/p>
+&lt;p>CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。&lt;/p>
+&lt;ul>
+&lt;li>连接个数：多连接&lt;/li>
+&lt;li>连接方式：短连接&lt;/li>
+&lt;li>传输协议：HTTP&lt;/li>
+&lt;li>传输方式：同步传输&lt;/li>
+&lt;li>序列化：SOAP 文本序列化&lt;/li>
+&lt;li>适用场景：系统集成，跨语言调用&lt;/li>
+&lt;/ul>
+&lt;p>可以和原生 WebService 服务互操作，即：&lt;/p>
+&lt;ul>
+&lt;li>提供者用 Dubbo 的 WebService 协议暴露服务，消费者直接用标准 WebService 接口调用，&lt;/li>
+&lt;li>或者提供方用标准 WebService 暴露服务，消费方用 Dubbo 的 WebService 协议调用。&lt;/li>
+&lt;/ul>
+&lt;h4 id="约束">约束&lt;/h4>
+&lt;ul>
+&lt;li>参数及返回值需实现 &lt;code>Serializable&lt;/code> 接口&lt;/li>
+&lt;li>参数尽量使用基本类型和 POJO&lt;/li>
+&lt;/ul>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>发布一个服务（对内/对外），不考虑客户端类型，不考虑性能，建议使用webservice。服务端已经确定使用webservice，客户端不能选择，必须使用webservice。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="依赖">依赖&lt;/h3>
+&lt;p>从 Dubbo 3 开始，Webservice 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的&lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">模块&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-webservice&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.cxf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>cxf-rt-frontend-simple&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.6.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.cxf&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>cxf-rt-transports-http&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.6.1&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置协议">配置协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置默认协议">配置默认协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置服务协议">配置服务协议&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="多端口">多端口&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;webservice1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8080&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;webservice2&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;webservice&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;8081&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="直连">直连&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;HelloWorld&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;webservice://10.20.153.10:8080/com.foo.HelloWorld&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="wsdl">WSDL&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://10.20.153.10:8080/com.foo.HelloWorld?wsdl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="jetty-server-默认">Jetty Server (默认)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;jetty&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="servlet-bridge-server-推荐">Servlet Bridge Server (推荐)&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> ... server=&lt;span style="color:#2aa198">&amp;#34;servlet&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置-dispatcherservlet">配置 DispatcherServlet&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-class&amp;gt;&lt;/span>org.apache.dubbo.remoting.http.servlet.DispatcherServlet&lt;span style="color:#268bd2">&amp;lt;/servlet-class&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;load-on-startup&amp;gt;&lt;/span>1&lt;span style="color:#268bd2">&amp;lt;/load-on-startup&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;servlet-name&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/servlet-name&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;url-pattern&amp;gt;&lt;/span>/*&lt;span style="color:#268bd2">&amp;lt;/url-pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/servlet-mapping&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;p>如果使用 servlet 派发请求:&lt;/p>
+&lt;p>协议的端口 &lt;code>&amp;lt;dubbo:protocol port=&amp;quot;8080&amp;quot; /&amp;gt;&lt;/code> 必须与 servlet 容器的端口相同。&lt;/p>
+&lt;p>协议的上下文路径 &lt;code>&amp;lt;dubbo:protocol contextpath=&amp;quot;foo&amp;quot; /&amp;gt;&lt;/code> 必须与 servlet 应用的上下文路径相同。&lt;/p>
+&lt;/div></description></item><item><title>Overview: Memcached协议</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/memcached/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/memcached/</guid><description>
+&lt;h2 id="特性说明">特性说明&lt;/h2>
+&lt;p>&lt;a href="http://memcached.org/">Memcached&lt;/a> 是一个高效的 KV 缓存服务器。基于 memcached 实现的 RPC 协议。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;code>2.3.0&lt;/code> 以上版本支持。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="使用场景">使用场景&lt;/h2>
+&lt;p>缓解数据库压力，提高交互速度等。&lt;/p>
+&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="引入依赖">引入依赖&lt;/h3>
+&lt;p>从 Dubbo 3 开始，Memcached 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的&lt;a href="https://dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-rpc">模块&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-rpc-memcached&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="注册-memcached-服务的地址">注册 memcached 服务的地址&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RegistryFactory registryFactory &lt;span style="color:#719e07">=&lt;/span> ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Registry registry &lt;span style="color:#719e07">=&lt;/span> registryFactory.getRegistry(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;zookeeper://10.20.153.10:2181&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>registry.register(URL.valueOf(&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.11/com.foo.BarService?category=providers&amp;amp;dynamic=false&amp;amp;application=foo&amp;amp;group=member&amp;amp;loadbalance=consistenthash&amp;#34;&lt;/span>));
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="在客户端引用">在客户端引用&lt;/h3>
+&lt;p>&lt;strong>不需要感知 Memcached 的地址&lt;/strong>&lt;/p>
+&lt;p>在客户端使用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> group=&lt;span style="color:#2aa198">&amp;#34;member&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者点对点直连&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;java.util.Map&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.10:11211&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以使用自定义接口&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.CacheService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.10:11211&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 &amp;ldquo;p:xxx&amp;rdquo; 为 spring 的标准 p 标签&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;cache&amp;#34;&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.CacheService&amp;#34;&lt;/span> url=&lt;span style="color:#2aa198">&amp;#34;memcached://10.20.153.10:11211&amp;#34;&lt;/span> p:set=&lt;span style="color:#2aa198">&amp;#34;putFoo&amp;#34;&lt;/span> p:get=&lt;span style="color:#2aa198">&amp;#34;getFoo&amp;#34;&lt;/span> p:delete=&lt;span style="color:#2aa198">&amp;#34;removeFoo&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果方法名和 memcached 的标准方法名不相同，则需要配置映射关系;&lt;/p>
+&lt;p>方法名建议和 memcached 的标准方法名相同，即：get(key), set(key, value), delete(key)。&lt;/p></description></item></channel></rss>

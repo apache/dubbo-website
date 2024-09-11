@@ -1,0 +1,75 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Network Filter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/</link><description>Recent content in Network Filter 介绍 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: Http NetWorkFilter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/http/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/http/</guid><description>
+&lt;p>Http NetWorkFilter 用来处理 HTTP 请求，它能接收来自 HTTP Listener 传递的 HTTP 请求，然后将其交给自身维护的 HTTP Filter 链进行处理，最后将响应返回给调用方。&lt;/p></description></item><item><title>Overview: Grpc NetWorkFilter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/grpc/</guid><description>
+&lt;h1 id="使用-grpc-调用服务提供程序">使用 grpc 调用服务提供程序&lt;/h1>
+&lt;blockquote>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-go-pixiu-samples/blob/main/http/grpc/pixiu/conf.yaml">下面的文档符合代码&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="定义pixiu配置文件">定义Pixiu配置文件&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">static_resources&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">listeners&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;net/http&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol_type&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;HTTP&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">socket_address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8881&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter_chains&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filter.httpconnectionmanager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">routes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prefix&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;/api/v1&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cluster&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;test-grpc&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cluster_not_found_response_code&lt;/span>: &lt;span style="color:#2aa198">505&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http_filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filter.http.grpcproxy
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">path&lt;/span>: /mnt/d/WorkSpace/GoLandProjects/dubbo-go-pixiu/samples/http/grpc/proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filter.http.response
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">server_name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;test-http-grpc&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">generate_request_id&lt;/span>: &lt;span style="color:#cb4b16">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">idle_timeout&lt;/span>: 5s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">read_timeout&lt;/span>: 5s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">write_timeout&lt;/span>: 5s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">clusters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;test-grpc&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">lb_policy&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;RoundRobin&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">endpoints&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">socket_address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">50001&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol_type&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;GRPC&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">connect_timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;5s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">request_timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;10s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;60s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step_timeout&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;10s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">reject_policy&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;immediacy&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Grpc 服务器在“集群”中定义&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>目前 http 请求仅支持 json body 解析参数&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="准备服务器">准备服务器&lt;/h2>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-go-pixiu-samples/tree/main/http/grpc/proto">generate pb files under with command:&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative hello_grpc.proto
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="启动-server">启动 Server&lt;/h2>
+&lt;p>&lt;a href="https://github.com/apache/dubbo-go-pixiu-samples/blob/main/http/grpc/server/app/server.go">Run&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>go run server.go
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="启动-pixiu">启动 Pixiu&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>./dubbo-go-pixiu gateway start --config &lt;span style="color:#719e07">{&lt;/span>CURRENT_PATH&lt;span style="color:#719e07">}&lt;/span>/samples/http/grpc/pixiu/conf.yaml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="使用-curl-进行测试">使用 curl 进行测试&lt;/h2>
+&lt;p>使用以下命令运行命令 curl：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://127.0.0.1:8881/api/v1/provider.UserProvider/GetUser
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl http://127.0.0.1:8881/api/v1/provider.UserProvider/GetUser -X POST -d &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;userId&amp;#34;:1}&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>如果响应正文是 json，则&lt;code>Content-Type&lt;/code>的标头将设置为&lt;code>application/json&lt;/code>。如果它只是一个纯文本，则&lt;code>Content-Type&lt;/code>的标题是&lt;code>text/plain&lt;/code>。&lt;/p>
+&lt;/blockquote></description></item><item><title>Overview: Dubbo NetWorkFilter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/dubbo/</guid><description>
+&lt;p>欢迎认领补充此文档。&lt;/p></description></item></channel></rss>

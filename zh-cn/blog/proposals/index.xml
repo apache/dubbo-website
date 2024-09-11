@@ -1,0 +1,1009 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 技术方案</title><link>https://dubbo.apache.org/zh-cn/blog/proposals/</link><description>Recent content in 技术方案 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: [Google Paper] 面向云时代的应用开发新模式</title><link>https://dubbo.apache.org/zh-cn/blog/2023/05/26/google-paper-%E9%9D%A2%E5%90%91%E4%BA%91%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E6%96%B0%E6%A8%A1%E5%BC%8F/</link><pubDate>Fri, 26 May 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/05/26/google-paper-%E9%9D%A2%E5%90%91%E4%BA%91%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E6%96%B0%E6%A8%A1%E5%BC%8F/</guid><description>
+&lt;blockquote>
+&lt;p>本文翻译自发表在以下地址的论文：https://serviceweaver.dev/assets/docs/hotos23_vision_paper.pdf&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>原文作者(Authors): Sanjay Ghemawat, Robert Grandl, Srdjan Petrovic, Michael Whittaker, Parveen Patel, Ivan Posva, Amin Vahdat&lt;/p>
+&lt;p>转载或发布请遵循原文许可：
+Permission to make digital or hard copies of part or all of this work for
+personal or classroom use is granted without fee provided that copies are
+not made or distributed for profit or commercial advantage and that copies
+bear this notice and the full citation on the first page. Copyrights for thirdparty components of this work must be honored. For all other uses, contact
+the owner/author(s).
+HOTOS ’23, June 22–24, 2023, Providence, RI, USA
+© 2023 Copyright held by the owner/author(s).
+ACM ISBN 979-8-4007-0195-5/23/06.
+&lt;a href="https://doi.org/10.1145/3593856.3595909">https://doi.org/10.1145/3593856.3595909&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="摘要">摘要&lt;/h2>
+&lt;p>在编写分布式应用程序时，传统的明智做法是将您的应用程序拆分为可以分别拉起的独立服务。这种方式的用意是好的，但像这样基于微服务的架构经常会适得其反，带来的挑战抵消了架构试图实现的好处。从根本上说，这是因为微服务将逻辑边界（代码的编写方式）与物理边界（代码的部署方式）混为一谈。在本文中，我们提出了一种不同的编程方法，将两者（代码编写与部署方式）分离以解决这些挑战。通过我们的方法，开发人员将他们的应用程序编写为逻辑上的单体，将有关如何分发和运行应用程序的决策放到一套自动化运行时 (runtime)，并以原子方式部署应用程序。与当前的微服务开发模式相比，我们的原型应用最多可减少延迟 15 倍、成本最多减少了 9 倍。&lt;/p>
+&lt;p>ACM 参考格式：
+Sanjay Ghemawat, Robert Grandl, Srdjan Petrovic, Michael Whit-taker, Parveen Patel, Ivan Posva, Amin Vahdat. 2023. Towards Mod-ern Development of Cloud Applications. In Workshop on Hot Topics in Operating Systems (HOTOS ’23), June 22–24, 2023, Providence, RI, USA. ACM, New York, NY, USA, 8 pages. &lt;a href="https://doi.org/10.1145/3593856.3595909">https://doi.org/10.1145/3593856.3595909&lt;/a>&lt;/p>
+&lt;h2 id="1-介绍">1 介绍&lt;/h2>
+&lt;p>近年来，云计算出现了前所未有的增长。编写和部署可扩展到数百万用户的分布式应用程序从未如此简单，这在很大程度上归功于 Kubernetes [25] 等框架，[7, 18, 31, 33, 40, 60] 等消息传递解决方案，以及数据格式如 [5,6, 23, 30]。使用这些技术时，普遍的做法是手动将您的应用程序拆分为可以独立部署的独立微服务。
+通过对各种基础设施团队的内部调查，我们发现大多数开发人员出于以下原因之一将他们的应用程序拆分为多个二进制包：(1) 提升性能。单独的二进制包可以独立扩展，从而提高资源利用率。 (2) 提升容错能力。一个微服务的崩溃不会导致其他微服务崩溃，从而限制了错误的传播范围。 (3) 改进抽象边界。微服务需要清晰明确的 API，并且代码纠缠的可能性会大大降低。 (4) 允许灵活的滚动发布。不同的二进制包可以以不同的速率发布，从而导致更敏捷的代码升级。
+然而，将应用程序拆分为可独立部署的微服务并非没有挑战，其中一些直接与收益相矛盾。&lt;/p>
+&lt;ul>
+&lt;li>C1：影响性能。序列化数据并通过网络发送数据的开销越来越成为瓶颈 [72]。当开发人员过度拆分他们的应用程序时，这些开销也会增加 [55]。&lt;/li>
+&lt;li>C2：损害正确性。推断每个微服务的每个已部署版本之间的交互是极具挑战性的。在对八个广泛使用的系统的 100 多个灾难性故障进行的案例研究中，三分之二的故障是由系统的多个版本之间的交互引起的 [78]。&lt;/li>
+&lt;li>C3：很难管理。开发人员必须按照自己的发布计划管理不同的二进制包，而不是使用一个二进制文件来构建、测试和部署。如果在本地运行一个应用程序，同时需要执行端到端的集成测试，那可是一个不小的工程。&lt;/li>
+&lt;li>C4：API 冻结。一旦微服务建立了 API，就很难在不破坏使用该 API 的其他服务的情况下进行更改。遗留的 API 不得不长期存在，只能不停的在上面打补丁。&lt;/li>
+&lt;li>C5：降低应用程序的开发速度。当开发活动影响多个微服务的更改时，开发人员无法以原子方式实施和部署更改。&lt;/li>
+&lt;/ul>
+&lt;p>开发人员必须仔细计划规划发布时间表，已决定在何时跨微服务引入更改。根据我们的经验，我们发现许多开发人员将上述挑战视为开展业务的必要部分，并且这个比例是压倒性的。许多云原生公司实际上正在开发旨在缓解上述一些挑战的内部框架和流程，但这不会从根本上改变或完全消除它们。例如，&lt;/p>
+&lt;p>持续部署框架 [12, 22, 37] 简化了单个二进制包的构建、推送到生产环境的方式，但它们没有解决版本控制问题；如果它有提供这个能力的话，情况可能会更糟，因为代码将以更快的速度被发布并投入生产。各种编程库 [13、27] 使创建和发现网络端点变得更加容易，但对简化应用程序管理没有任何帮助。像 gRPC [18] 这样的网络协议和像 Protocol Buffers [30]这样的数据格式在不断改进，但仍然占据了应用程序执行成本的主要部分。&lt;/p>
+&lt;p>这些基于微服务的解决方案无法解决上述 C1-C5 的原因有两个。第一个原因是他们都假设开发人员手动将他们的应用程序拆分为多个二进制包。这意味着应用程序的网络布局由应用程序开发人员预先确定。此外，一旦确定，网络布局就会通过将网络代码添加到应用程序中而变得更加坚固（例如，网络端点、客户端/服务器存根、网络优化数据结构，如 [30] ）。这意味着撤消或修改拆分变得更加困难，即使这样做是有意义的。这隐含地促成了上述挑战 C1、C2 和 C4。&lt;/p>
+&lt;p>第二个原因是假设应用程序二进制包是单独（在某些情况下是连续的）发布到生产环境中。这使得对跨二进制协议进行更改变得更加困难。此外，它还引入了版本控制问题并强制使用更低效的数据格式，如[23、30]。这反过来又会导致上面列出的挑战 C1-C5。&lt;/p>
+&lt;p>在本文中，我们提出了一种不同的编写和部署分布式应用程序的方法，一种解决 C1-C5 问题的方法。我们的编程方法包括三个核心原则：&lt;/p>
+&lt;ul>
+&lt;li>(1) 以模块化的方式编写逻辑上划分为多个组件的单体应用程序。&lt;/li>
+&lt;li>(2) 利用运行时根据执行特征动态自动地将逻辑组件分配给物理进程。&lt;/li>
+&lt;li>(3) 以原子方式部署应用程序，防止应用程序的不同版本交互。&lt;/li>
+&lt;/ul>
+&lt;p>其他解决方案（例如 actor 系统）也尝试提高抽象度。但是，它们无法解决其中一项或多项挑战（第 7 节）。尽管这些挑战和我们的提案是在服务型应用 (serving application) 的背景下讨论的，但我们相信我们的观察和解决方案具有广泛的用途。&lt;/p>
+&lt;h2 id="2-提出的解决方案">2 提出的解决方案&lt;/h2>
+&lt;p>我们提案的两个主要部分是 (1) 具有抽象的编程模型（programing model），允许开发人员编写仅关注业务逻辑的单一二进制模块化应用程序，(2) 用于构建、部署和优化这些应用程序的运行时（runtime）。&lt;/p>
+&lt;p>编程模型使开发人员能够将分布式应用程序编写为单个程序，其中代码被拆分为称为组件的模块化单元（第 3 节）。这类似于将应用程序拆分为微服务，除了微服务将逻辑和物理边界混为一谈。相反，我们的解决方案将两者分离：组件以基于应用程序业务逻辑的逻辑边界为中心，而运行时以基于应用程序性能的物理边界为中心（例如，两个组件应位于同一位置以提高性能）。这种解耦——连同边界可以自动更改的事实——解决了 C4。&lt;/p>
+&lt;p>通过将所有执行责任委托给运行时，我们的解决方案能够提供与微服务相同的优势，但性能更高，成本更低（解决 C1）。例如，运行时决定如何运行、放置、复制和缩放组件（第 4 节）。由于应用程序是原子部署的，因此运行时可以鸟瞰应用程序的执行情况，从而实现进一步的优化。例如，运行时可以使用自定义序列化和传输协议，利用所有参与者都以相同版本执行的事实。&lt;/p>
+&lt;p>将应用程序编写为单个二进制文件并以原子方式部署它还可以更轻松地推断其正确性（解决 C2）并使应用程序更易于管理（解决 C3）。我们的提案为开发人员提供了一个编程模型，使他们能够专注于应用程序业务逻辑，将部署复杂性委托给运行时（解决 C5）。最后，我们的提案支持未来的创新，例如分布式应用程序的自动化测试（第 5 节）。&lt;/p>
+&lt;h2 id="3-编程模型">3 编程模型&lt;/h2>
+&lt;h3 id="31-组件">3.1 组件&lt;/h3>
+&lt;p>我们提案的关键抽象是组件 (component)。组件是一种长期存在的、可复制的计算代理，类似于 actor [2]。每个组件都实现一个接口（interface），与组件交互的唯一方法是调用其接口上的方法。组件可能由不同的操作系统进程托管（可能跨越多台机器）。组件方法调用在必要时变成远程过程调用，但如果调用者和被调用者组件在同一个进程中，则仍然是本地过程调用。&lt;/p>
+&lt;p>组件如 图-1 所示。示例应用程序包含三个组件：A、B 和 C。当部署应用程序时，运行时决定如何共同定位和复制组件。在此示例中，组件 A 和组件 B 位于同一个操作系统进程中，因此它们之间的方法调用作为常规方法调用执行。组件 C 不与任何其他组件位于同一位置，同时组件 C 被部署到了两台不同机器上，组件 C 之间的方法调用是通过跨网络 RPC 完成的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/5/pic1-arch.png" alt="pic1-arch.png">&lt;/p>
+&lt;p>图-1：说明如何编写和部署组件。应用程序被编写为一组组件（左）并跨机器部署（右）。请注意，组件可以复制和放置在同一位置。&lt;/p>
+&lt;p>组件通常是长期存在的，但运行时可能会根据负载随时间增加或减少组件的副本数量。同样，组件副本可能会失败并重新启动。运行时还可以四处移动组件副本，例如，将两个交互非常多的组件放在同一个操作系统进程中，以便组件之间的通信在本地而不是通过网络完成。&lt;/p>
+&lt;h3 id="32--接口">3.2 接口&lt;/h3>
+&lt;p>为了具体起见，我们在 Go 中提供了一个组件 API，尽管我们的想法与语言无关。图-2 给出了一个“Hello, World!” 应用程序。组件接口表示为 Go 接口，组件实现表示为实现这些接口的 Go 结构。在图-2 中， &lt;code>hello&lt;/code> 结构嵌入了 **Implements[ Hello] **结构来表示它是 &lt;code>Hello&lt;/code> 组件的实现。&lt;/p>
+&lt;p>**Init **初始化应用程序。**Get[Hello] **将客户端返回给具有接口 &lt;code>Hello&lt;/code> 的组件，必要时创建它。对 &lt;code>hello.Greet&lt;/code> 的调用看起来像是常规方法调用，开发人员不需要关心任何序列化和远程过程调用相关内容。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/5/pic2-hello-world.png" alt="image.png">&lt;/p>
+&lt;p>图-2: “Hello, World!” 应用&lt;/p>
+&lt;h2 id="4---运行时">4 运行时&lt;/h2>
+&lt;h3 id="41--概述">4.1 概述&lt;/h3>
+&lt;p>在编程模型之下是一个负责分发（distributing）和执行（executing）组件的运行时。运行时做出关于如何运行组件的所有高级决策。例如，它决定将哪些组件放在一起并进行多副本部署。运行时还负责底层细节，例如将组件运行到物理资源以及在组件失败时重新启动组件。最后，运行时负责执行原子滚动更新，确保一个应用程序版本中的组件永远不会与不同版本中的组件进行通信。&lt;/p>
+&lt;p>有许多方法可以实现运行时。本文的目的不是规定任何特定的实现。不过，重要的是要认识到运行时并没有什么神奇魔法。在本节的其余部分，我们将概述运行时的关键部分并揭开其内部工作原理的神秘面纱。&lt;/p>
+&lt;h3 id="42---代码生成">4.2 代码生成&lt;/h3>
+&lt;p>运行时的首要职责是代码生成。通过检查一个项目中使用 **Implements[T] **的相关源码调用，代码生成器即可计算出所有组件接口和实现的集合。然后它生成代码来编码和解码组件方法的参数。它还生成代码以将这些方法作为远程过程调用来执行。生成的代码将与开发人员的代码一起编译成一个二进制文件。&lt;/p>
+&lt;h3 id="43---应用-运行时交互">4.3 应用-运行时交互&lt;/h3>
+&lt;p>根据我们的提案，应用程序不需要包含任何特定于其部署环境的代码，但由于它们最终必须运行并集成到特定环境中（例如在本地集群中跨机器或在公共云中跨区域运行)，为了支持这种集成，我们引入了一个 API（在表-1 中进行了部分概述），它将应用程序逻辑与部署环境的细节隔离开来。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/5/table1.png" alt="table1.png">&lt;/p>
+&lt;p>表-1：应用程序和运行时之间的示例 API。&lt;/p>
+&lt;p>API 的调用者是一个 &lt;code>proclet&lt;/code>。每个应用程序二进制文件都会运行一个小型的、与环境无关的守护进程，称为 &lt;code>proclet&lt;/code>，它在编译期间链接到二进制文件中。 proclet 管理正在运行的二进制文件中的组件:运行、启动、停止、在失败时重新启动这些组件等等。
+API 的实现者是运行时，它负责所有控制平面操作。运行时决定 &lt;code>proclet&lt;/code> 应该如何运行以及在何处运行。例如，多进程运行时可以运行子进程中的每个 &lt;code>proclet&lt;/code>； SSH 运行时可以通过 SSH 运行 &lt;code>proclet&lt;/code>；云运行时可以将 &lt;code>proclet&lt;/code> 作为 Kubernetes pod [25、28] 运行。&lt;/p>
+&lt;p>具体而言，&lt;code>proclet&lt;/code> 通过 Unix Pipeline 与运行时交互。例如，当构造一个 &lt;code>proclet&lt;/code> 时，它会通过管道发送一条 &lt;code>RegisterReplica&lt;/code> 消息，以将自己标记为活动和就绪。它定期发出 &lt;code>ComponentsToHost&lt;/code> 请求以了解它应该运行哪些组件。如果组件调用不同组件的方法，&lt;code>proclet&lt;/code> 会发出 &lt;code>StartComponent&lt;/code> 请求以确保它已启动。&lt;/p>
+&lt;p>运行时以对部署环境有意义的方式实现这些 API。我们希望大多数运行时实现包含以下两部分：&lt;/p>
+&lt;ul>
+&lt;li>(1) 一组通过 UNIX 管道与 proclet 直接通信的信封（Envelope）进程，以及&lt;/li>
+&lt;li>(2) 协调 proclet 执行的全局管理器（Global Manager）（参见图-3）。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/5/pic3-runtime.png" alt="image.png">&lt;/p>
+&lt;p>图-3：提案中的 Deployer 架构&lt;/p>
+&lt;p>信封（Envelope）作为 proclet 的父进程运行，并将 API 调用中继到管理器。管理器跨可用资源集（例如服务器、VM）启动信封和（间接）proclet。在应用程序的整个生命周期中，管理器与信封交互以收集运行组件的健康和负载信息；聚合组件导出的指标、日志和跟踪；并处理启动新组件的请求。管理器还发布特定于环境的 API（例如，谷歌云[16]、AWS [4]）更新流量分配并根据负载、健康状况和性能约束扩展和缩减组件。请注意，运行时实现控制平面（Golbal Manager）而不是数据平面，Proclet 直接相互通信。&lt;/p>
+&lt;h3 id="44---原子滚动更新rollout">4.4 原子滚动更新（Rollout）&lt;/h3>
+&lt;p>开发人员不可避免地必须发布其应用程序的新版本。一种广泛使用的方法是执行滚动更新，其中部署中的机器一台一台地从旧版本更新到新版本。在滚动更新期间，运行不同版本代码的机器必须相互通信，这可能会导致失败。 [78]表明大多数更新失败是由这些跨版本交互引起的。
+为了解决这些复杂性，我们提出了一种不同的方法。运行时确保应用程序版本以原子方式推出，这意味着所有组件通信都发生在应用程序的单个版本中。运行时逐渐将流量从旧版本转移到新版本，但是一旦用户请求转发到特定版本，它就会完全在该版本内处理。原子部署的一种流行实现是使用蓝/绿部署[9]。&lt;/p>
+&lt;h2 id="5-启用创新">5 启用创新&lt;/h2>
+&lt;h3 id="51-传输transport放置placement和缩容scaling">5.1 传输（Transport）、放置（Placement）和缩容（Scaling）&lt;/h3>
+&lt;p>运行时可以鸟瞰应用程序执行，这为性能优化开辟了新途径。例如，我们的框架可以在组件之间构建一个细粒度的调用图，并用它来识别关键的路径路径、瓶颈组件、频繁交互型组件等。使用这些信息，运行时可以做出更智能的扩缩容、独立部署和组合部署决策。此外，由于序列化和传输机制对开发者透明（Code Generate 机制自动实现），运行时可以自由地优化它们。例如，对于网络瓶颈应用程序，运行时可能决定压缩网络上的消息，对于某些部署，传输可能会利用 RDMA [32] 等技术。&lt;/p>
+&lt;h3 id="52---路由routing">5.2 路由（Routing）&lt;/h3>
+&lt;p>当请求以亲和力（affinity）路由时，某些组件的性能会大大提高。例如，考虑由基于磁盘的底层存储系统支持的内存缓存组件。当对相同键的请求被路由到相同的缓存副本时，缓存命中率和整体性能会提高。 Slicer [44]表明，许多应用程序可以从这种基于亲和力的路由中受益，并且当路由嵌入到应用程序本身时，路由效率最高[43]。我们的编程框架可以自然地扩展为包含路由 API。运行时还可以了解哪些方法从路由中获益最多并自动路由它们。&lt;/p>
+&lt;h3 id="53--自动化测试automated-testing">5.3 自动化测试（Automated Testing）&lt;/h3>
+&lt;p>微服务架构被吹捧的好处之一是容错。这个想法是，如果应用中的一个服务组件失败，应用的部分功能可用性会降低，但整个应用仍然可用。这在理论上很棒，但在实践中它依赖于开发人员确保他们的应用对故障具有弹性，更重要的是，测试他们的故障处理逻辑是否正确。由于构建和运行不同的微服务、系统地失败和恢复它们以及检查正确行为的开销，测试尤其具有挑战性。结果，只有一小部分基于微服务的系统针对这种类型的容错进行了测试。根据我们的建议，运行端到端测试能带来的帮助是微不足道的。因为应用程序是用单一编程语言编写的单个二进制文件，所以端到端测试变成了简单的单元测试。这为自动化容错测试打开了大门，类似于混沌测试[47]、Jepsen 测试[14]和模型检查[62]。&lt;/p>
+&lt;h3 id="54--有状态应用滚动更新rollout">5.4 有状态应用滚动更新（Rollout）&lt;/h3>
+&lt;p>我们的建议确保一个应用程序版本中的组件永远不会与不同版本中的组件通信。这使开发人员更容易推理正确性。但是，如果应用程序更新持久存储系统（如数据库）中的状态，则应用程序的不同版本将通过它们读取和写入的数据间接影响彼此。这些跨版本交互是不可避免的——持久状态，根据定义，跨版本持续存在 —— 但一个悬而未决的问题是如何测试这些交互并及早发现错误以避免在推出期间出现灾难性故障。&lt;/p>
+&lt;h3 id="55--讨论">5.5 讨论&lt;/h3>
+&lt;p>请注意，本节讨论的领域中的创新并不是我们提案所独有的。对传输协议[63、64]、路由[44、65]、测试[45、75]、资源管理[57、67、71]、故障排除[54、56]等。然而，我们的编程模型的独特功能支持新的创新，并使现有的创新更容易实现实施。&lt;/p>
+&lt;p>例如，通过在我们的提议中利用原子部署，我们可以设计高效的序列化协议，可以安全地假设所有参与者都使用相同的模式。此外，我们的编程模型可以轻松地将路由逻辑直接嵌入到用户的应用程序中，从而提供一系列好处[43]。同样，我们的提案提供应用程序鸟瞰图的能力允许
+研究人员专注于开发用于调整应用程序和降低部署成本的新解决方案。&lt;/p>
+&lt;h2 id="6--原型实现">6 原型实现&lt;/h2>
+&lt;p>我们的原型实现是用 Go [38]编写的，包括图2 中描述的组件 API、第4.2节中描述的代码生成器以及第 4.3 节中描述的 proclet 架构。该实现使用自定义序列化格式和直接构建在 TCP 之上的自定义传输协议。该原型还带有一个谷歌 Kubernetes 引擎 (GKE) 部署器，它通过渐进的蓝/绿部署实现多区域部署。它使用 Horizontal Pod Autoscalers [20]根据负载动态调整容器副本的数量，并遵循类似于图3中的架构。我们的实现可在github.com/ServiceWeaver 获得。&lt;/p>
+&lt;h3 id="61--评价">6.1 评价&lt;/h3>
+&lt;p>为了评估我们的原型，我们使用了一个流行的 Web 应用程序[41]，它代表了开发人员编写的各种微服务应用程序。该应用程序有 11 个微服务，并使用 gRPC [18]和 Kubernetes [25]部署在云端。该应用程序是用各种编程语言编写的，因此为了公平比较，我们将应用程序移植为完全用 Go 编写。然后我们将应用程序移植到我们的原型中，每个微服务都被重写为一个组件。我们使用 Locust [26]，一种工作负载生成器，在有和没有我们的原型的情况下对应用程序进行负载测试。&lt;/p>
+&lt;p>工作负载生成器向应用程序发送稳定速率的 HTTP 请求。两个应用程序版本都配置为自动缩放容器副本的数量以响应负载。我们测量了应用程序版本在稳定状态下使用的 CPU 内核数量，以及它们的端到端延迟。表-2 显示了我们的结果。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/2023/5/table2.png" alt="table2.png">&lt;/p>
+&lt;p>表-2&lt;/p>
+&lt;p>我们原型的大部分性能优势来自它使用专为非版本化数据交换设计的自定义序列化格式，以及它使用直接构建在 TCP 之上的流线型传输协议。例如，使用的序列化格式不需要对字段编号或类型信息进行任何编码。这是因为所有编码器和解码器都以完全相同的版本运行，并且预先就字段集以及它们的编码和解码顺序达成一致。&lt;/p>
+&lt;p>为了与基线进行同类比较，我们没有将任何组件放在一起。当我们共同定位所有将 11 个组件集成到单个操作系统进程中，内核数量下降到 9，中值延迟下降到 0.38 毫秒，均比基线低一个数量级。这反映了行业经验[34、39]。&lt;/p>
+&lt;h2 id="7--相关工作">7 相关工作&lt;/h2>
+&lt;p>演员系统。最接近我们建议的解决方案是 Orleans [74]和 Akka [3]。这些框架还使用抽象来解耦应用程序和运行时。 Ray [70]是另一个基于角色的框架，但专注于 ML 应用程序。这些系统都不支持原子部署，而原子部署是完全应对 C2-C5 挑战的必要组成部分。其他流行的基于 actor 的框架，如 Er-lang [61]、E [52]、Thorn [48]和 C++ Actor Framework [10]，给开发人员带来了处理系统和有关部署和执行的低级细节的负担，因此它们未能分离应用程序和运行时之间的关注点，因此没有完全解决 C1-C5。 CORBA、DCOM 和 Java RMI 等分布式对象框架使用与我们类似的编程模型，但存在许多技术和组织问题[58]，并且也没有完全解决 C1-C5。&lt;/p>
+&lt;p>基于微服务的系统。 Kubernetes [25]广泛用于在云中部署基于容器的应用程序。但是，它的重点与我们的提案正交，不涉及 C1-C5 中的任何一个。 Docker Compose [15]、Acorn [1]、Helm [19]、Skaffold [35]和 Istio [21]抽象出了一些微服务挑战（例如，配置生成）。然而，与将应用程序拆分为微服务、版本化推出和测试相关的挑战仍然留给了用户。因此，它们不满足 C1-C5。&lt;/p>
+&lt;p>其他系统。还有许多其他解决方案可以让开发人员更轻松地编写分布式应用程序，包括数据流系统[51、59、77]、ML 推理服务系统[8、17、42、50、73]、无服务器解决方案[11, 24、36]、数据库[29、49]和 Web 应用程序[66]。最近，服务网格[46、69]提出了网络抽象以分解出常见的通信功能。我们的提案体现了这些相同的想法，但在通用服务系统和分布式应用程序的新领域中。在这种情况下，出现了新的挑战（例如，原子推出）。&lt;/p>
+&lt;h2 id="8-讨论">8 讨论&lt;/h2>
+&lt;h3 id="81-多个应用程序二进制文件">8.1 多个应用程序二进制文件&lt;/h3>
+&lt;p>我们认为应用程序应该作为单个二进制文件来编写和构建，但我们承认这可能并不总是可行的。例如，应用程序的大小可能超出单个团队的能力，或者不同的应用程序服务可能出于组织原因需要不同的发布周期。在所有这些情况下，应用程序可能需要包含多个二进制文件。&lt;/p>
+&lt;p>虽然本文没有解决需要使用多个二进制文件的情况，但我们相信我们的提议允许开发人员编写更少的二进制文件（即尽可能将多个服务分组为单个二进制文件），实现更好的性能，并推迟做出艰难的决定与如何划分应用程序有关。我们正在探索如何容纳以多种语言编写并编译成单独的二进制文件的应用程序。&lt;/p>
+&lt;h3 id="82-与外部服务集成">8.2 与外部服务集成&lt;/h3>
+&lt;p>应用程序通常需要与外部服务（例如，Postgres 数据库[29]）进行交互。我们的编程模型允许应用程序像任何应用程序一样与这些服务交互。什么都不是，一切都必须是一个组件。但是，当外部服务在应用程序内部和跨应用程序广泛使用时，定义相应的组件可能会提供更好的代码重用。&lt;/p>
+&lt;h3 id="83-分布式系统挑战">8.3 分布式系统挑战&lt;/h3>
+&lt;p>虽然我们的编程模型允许开发人员专注于他们的业务逻辑并推迟将他们的应用程序部署到运行时的大量复杂性，但我们的提议并没有解决分布式系统的基本挑战 [53, 68, 76]。应用程序开发人员仍然需要意识到组件可能会失败或经历高延迟。&lt;/p>
+&lt;h3 id="84-编程指导">8.4 编程指导&lt;/h3>
+&lt;p>没有关于如何编写分布式应用程序的官方指南，因此关于将应用程序编写为单体应用程序还是微服务是更好的选择，一直存在着长期而激烈的争论。但是，每种方法都有其优点和缺点。我们认为开发人员应该使用我们的建议将他们的应用程序编写为单个二进制文件，然后再决定他们是否真的需要迁移到基于微服务的架构。通过推迟决定如何准确地拆分成不同的微服务，它允许他们编写更少但更好的微服务。&lt;/p>
+&lt;h2 id="9--结论">9 结论&lt;/h2>
+&lt;p>编写分布式应用程序时的现状涉及将应用程序拆分为可独立部署的服务。这种架构有很多好处，但也有很多缺点。在本文中，我们提出了一种不同的编程范式来回避这些缺点。我们的提议鼓励开发人员 (1) 编写划分为逻辑组件的单体应用程序，(2) 将物理分布和执行模块化单体的挑战推迟到运行时，以及 (3) 原子部署应用程序。这三个指导原则带来了许多好处，并为未来的创新打开了大门。与现状相比，我们的原型实施将应用程序延迟最多减少了 15 倍，并将成本最多减少了 9 倍。&lt;/p>
+&lt;p>[1] Acorn. &lt;a href="https://www.acorn.io/">https://www.acorn.io/.&lt;/a>&lt;/p>
+&lt;p>[2] Actor model. &lt;a href="https://en.wikipedia.org/wiki/Actor_model">https://en.wikipedia.org/wiki/Actor_model.&lt;/a>&lt;/p>
+&lt;p>[3] Akka. &lt;a href="https://akka.io">https://akka.io.&lt;/a>&lt;/p>
+&lt;p>[4] Amazon Web Services. &lt;a href="https://aws.amazon.com/">https://aws.amazon.com/.&lt;/a>&lt;/p>
+&lt;p>[5] Apache avro. &lt;a href="https://avro.apache.org/docs/1.2.0/">https://avro.apache.org/docs/1.2.0/.&lt;/a>&lt;/p>
+&lt;p>[6] Apache thrift. &lt;a href="https://thrift.apache.org/">https://thrift.apache.org/.&lt;/a>&lt;/p>
+&lt;p>[7] AWS Cloud Map. &lt;a href="https://aws.amazon.com/cloud-map/">https://aws.amazon.com/cloud-map/.&lt;/a>&lt;/p>
+&lt;p>[8] Azure Machine Learning. &lt;a href="https://docs.microsoft.com/en-us/azure/machine-learning">https://docs.microsoft.com/en-us/azure/&lt;/a>&lt;a href="https://docs.microsoft.com/en-us/azure/machine-learning">machine-learning.&lt;/a>&lt;/p>
+&lt;p>[9] Blue/green deployments. &lt;a href="https://tinyurl.com/3bk64ch2">https://tinyurl.com/3bk64ch2.&lt;/a>&lt;/p>
+&lt;p>[10] The c++ actor framework. &lt;a href="https://www.actor-framework.org/">https://www.actor-framework.org/.&lt;/a>&lt;/p>
+&lt;p>[11] Cloudflare Workers. &lt;a href="https://workers.cloudflare.com/">https://workers.cloudflare.com/.&lt;/a>&lt;/p>
+&lt;p>[12] Continuous integration and delivery - circleci. &lt;a href="https://circleci.com/">https://circleci.com/.&lt;/a>&lt;/p>
+&lt;p>[13] Dapr - distributed application runtime. &lt;a href="https://dapr.io/">https://dapr.io/.&lt;/a>&lt;/p>
+&lt;p>[14] Distributed systems safety research. &lt;code>https://jespen.io.&lt;/code>&lt;/p>
+&lt;p>[15] Docker compose. &lt;a href="https://docs.docker.com/compose/">https://docs.docker.com/compose/.&lt;/a>&lt;/p>
+&lt;p>[16] Google Cloud. &lt;a href="https://cloud.google.com/">https://cloud.google.com/.&lt;/a>&lt;/p>
+&lt;p>[17] Google Cloud AI Platform. &lt;a href="https://cloud.google.com/ai-platform">https://cloud.google.com/ai-platform.&lt;/a>&lt;/p>
+&lt;p>[18] grpc. &lt;a href="https://grpc.io/">https://grpc.io/.&lt;/a>&lt;/p>
+&lt;p>[19] Helm. &lt;a href="http://helm.sh">http://helm.sh.&lt;/a>&lt;/p>
+&lt;p>[20] Horizontal Pod Autoscaling. &lt;a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-&lt;/a>&lt;a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">application/horizontal-pod-autoscale/.&lt;/a>&lt;/p>
+&lt;p>[21] Istio. &lt;a href="https://istio.io/">https://istio.io/.&lt;/a>&lt;/p>
+&lt;p>[22] Jenkins. &lt;a href="https://www.jenkins.io/">https://www.jenkins.io/.&lt;/a>&lt;/p>
+&lt;p>[23] Json. &lt;a href="https://www.json.org/json-en.html">https://www.json.org/json-en.html.&lt;/a>&lt;/p>
+&lt;p>[24] Kalix. &lt;a href="https://www.kalix.io/">https://www.kalix.io/.&lt;/a>&lt;/p>
+&lt;p>[25] Kubernetes. &lt;a href="https://kubernetes.io/">https://kubernetes.io/.&lt;/a>&lt;/p>
+&lt;p>[26] Locust. &lt;a href="https://locust.io/">https://locust.io/.&lt;/a>&lt;/p>
+&lt;p>[27] Micro | powering the future of cloud. &lt;a href="https://micro.dev/">https://micro.dev/.&lt;/a>&lt;/p>
+&lt;p>[28] Pods. &lt;a href="https://kubernetes.io/docs/concepts/workloads/pods/">https://kubernetes.io/docs/concepts/workloads/pods/.&lt;/a>&lt;/p>
+&lt;p>[29] Postgresql. &lt;a href="https://www.postgresql.org/">https://www.postgresql.org/.&lt;/a>&lt;/p>
+&lt;p>[30] Protocol buffers. &lt;a href="https://developers.google.com/protocol-buffers">https://developers.google.com/protocol-buffers.&lt;/a>&lt;/p>
+&lt;p>[31] RabbitMQ. &lt;a href="https://www.rabbitmq.com/">https://www.rabbitmq.com/.&lt;/a>&lt;/p>
+&lt;p>[32] Remote direct memory access. &lt;a href="https://en.wikipedia.org/wiki/Remote_direct_memory_access">https://en.wikipedia.org/wiki/Remote_&lt;/a>&lt;a href="https://en.wikipedia.org/wiki/Remote_direct_memory_access">direct_memory_access.&lt;/a>&lt;/p>
+&lt;p>[33] REST API. &lt;a href="https://restfulapi.net/">https://restfulapi.net/.&lt;/a>&lt;/p>
+&lt;p>[34] Scaling up the Prime Video audio/video monitoring service and reduc-ing costs by 90%. &lt;a href="https://tinyurl.com/yt6nxt63">https://tinyurl.com/yt6nxt63.&lt;/a>&lt;/p>
+&lt;p>[35] Skaffold. &lt;a href="https://skaffold.dev/">https://skaffold.dev/.&lt;/a>&lt;/p>
+&lt;p>[36] Temporal. &lt;a href="https://temporal.io/">https://temporal.io/.&lt;/a>&lt;/p>
+&lt;p>[37] Terraform. &lt;a href="https://www.terraform.io/">https://www.terraform.io/.&lt;/a>&lt;/p>
+&lt;p>[38] The Go programming language. &lt;a href="https://go.dev/">https://go.dev/.&lt;/a>&lt;/p>
+&lt;p>[39] To Microservices and Back Again - Why Segment Went Back to a Monolith. &lt;a href="https://tinyurl.com/5932ce5n">https://tinyurl.com/5932ce5n.&lt;/a>&lt;/p>
+&lt;p>[40] WebSocket. &lt;a href="https://en.wikipedia.org/wiki/WebSocket">https://en.wikipedia.org/wiki/WebSocket.&lt;/a>&lt;/p>
+&lt;p>[41] Online boutique. &lt;a href="https://github.com/GoogleCloudPlatform/microservices-demo">https://github.com/GoogleCloudPlatform/&lt;/a>&lt;a href="https://github.com/GoogleCloudPlatform/microservices-demo">microservices-demo,&lt;/a>2023.&lt;/p>
+&lt;p>[42] M. Abadi, P. Barham, J. Chen, Z. Chen, A. Davis, J. Dean, M. Devin,
+S.Ghemawat, G. Irving, M. Isard, M. Kudlur, J. Levenberg, R. Monga,
+S.Moore, D. G. Murray, B. Steiner, P. Tucker, V. Vasudevan, P. Warden,
+M.Wicke, Y. Yu, and X. Zheng. Tensorflow: A system for large-scale machine learning. In OSDI, 2016.&lt;/p>
+&lt;p>[43] A. Adya, R. Grandl, D. Myers, and H. Qin. Fast key-value stores: An idea whose time has come and gone. In HotOS, 2019.&lt;/p>
+&lt;p>[44] A. Adya, D. Myers, J. Howell, J. Elson, C. Meek, V. Khemani, S. Fulger,
+P.Gu, L. Bhuvanagiri, J. Hunter, R. Peon, L. Kai, A. Shraer, A. Merchant, and K. Lev-Ari. Slicer: Auto-sharding for datacenter applications. In OSDI, 2016.&lt;/p>
+&lt;p>[45] D. Ardelean, A. Diwan, and C. Erdman. Performance analysis of cloud applications. In NSDI, 2018.&lt;/p>
+&lt;p>[46] S. Ashok, P. B. Godfrey, and R. Mittal. Leveraging service meshes as a new network layer. In HotNets, 2021.&lt;/p>
+&lt;p>[47] A. Basiri, N. Behnam, R. De Rooij, L. Hochstein, L. Kosewski, J.Reynolds, and C. Rosenthal. Chaos engineering. In IEEE Software, 2016.&lt;/p>
+&lt;p>[48] B. Bloom, J. Field, N. Nystrom, J. Östlund, G. Richards, R. Strniša, J.Vitek, and T. Wrigstad. Thorn: Robust, concurrent, extensible script-ing on the jvm. In OOPSLA, 2009.&lt;/p>
+&lt;p>[49] J. C. Corbett, J. Dean, M. Epstein, A. Fikes, C. Frost, J. J. Furman, S. Ghe-mawat, A. Gubarev, C. Heiser, P. Hochschild, W. Hsieh, S. Kanthak, E.Kogan, H. Li, A. Lloyd, S. Melnik, D. Mwaura, D. Nagle, S. Quin-lan, R. Rao, L. Rolig, Y. Saito, M. Szymaniak, C. Taylor, R. Wang, and D.Woodford. Spanner: Google’s globally-distributed database. In OSDI, 2012.&lt;/p>
+&lt;p>[50] D. Crankshaw, X. Wang, G. Zhou, M. J. Franklin, J. E. Gonzalez, and I.Stoica. Clipper: A low-latency online prediction serving system. In NSDI, 2017.&lt;/p>
+&lt;p>[51] J. Dean and S. Ghemawat. Mapreduce: Simplified data processing on large clusters. In OSDI, 2004.
+[52] J. Eker, J. Janneck, E. Lee, J. Liu, X. Liu, J. Ludvig, S. Neuendorffer, S.Sachs, and Y. Xiong. Taming heterogeneity - the ptolemy approach. In Proceedings of the IEEE, 2003.&lt;/p>
+&lt;p>[53] M. J. Fischer, N. A. Lynch, and M. S. Paterson. Impossibility of dis-tributed consensus with one faulty process. In ACM Journal, 1985.&lt;/p>
+&lt;p>[54] Y. Gan, M. Liang, S. Dev, D. Lo, and C. Delimitrou. Sage: Practical and Scalable ML-Driven Performance Debugging in Microservices. In ASPLOS, 2021.&lt;/p>
+&lt;p>[55] Y. Gan, Y. Zhang, D. Cheng, A. Shetty, P. Rathi, N. Katarki, A. Bruno, J.Hu, B. Ritchken, B. Jackson, et al. An open-source benchmark suite for microservices and their hardware-software implications for cloud &amp;amp; edge systems. In ASPLOS, 2019.&lt;/p>
+&lt;p>[56] Y. Gan, Y. Zhang, K. Hu, Y. He, M. Pancholi, D. Cheng, and C. De-limitrou. Seer: Leveraging Big Data to Navigate the Complexity of Performance Debugging in Cloud Microservices. In ASPLOS, 2019.&lt;/p>
+&lt;p>[57] R. Grandl, G. Ananthanarayanan, S. Kandula, S. Rao, and A. Akella. Multi-resource packing for cluster schedulers. In SIGCOMM, 2014.&lt;/p>
+&lt;p>[58] M. Henning. The rise and fall of corba: There’s a lot we can learn from corba’s mistakes. In Queue, 2006.&lt;/p>
+&lt;p>[59] M. Isard, M. Budiu, Y. Yu, A. Birrell, and D. Fetterly. Dryad: Distributed data-parallel programs from sequential building blocks. In Eurosys, 2007.&lt;/p>
+&lt;p>[60] K. Jay, N. Neha, and R. Jun. Kafka : a distributed messaging system for log processing. In NetDB, 2011.&lt;/p>
+&lt;p>[61] A. Joe. Erlang. In Communications of the ACM, 2010.&lt;/p>
+&lt;p>[62] L. Lamport. The temporal logic of actions. In ACM TOPLS, 1994.&lt;/p>
+&lt;p>[63] A. Langley, A. Riddoch, A. Wilk, A. Vicente, C. Krasic, D. Zhang, F.Yang, F. Kouranov, I. Swett, J. Iyengar, J. Bailey, J. Dorfman, J. Roskind, J.Kulik, P. Westin, R. Tenneti, R. Shade, R. Hamilton, V. Vasiliev, W.-T. Chang, and Z. Shi. The quic transport protocol: Design and internet-scale deployment. In SIGCOMM, 2017.&lt;/p>
+&lt;p>[64] N. Lazarev, N. Adit, S. Xiang, Z. Zhang, and C. Delimitrou. Dagger: Towards Efficient RPCs in Cloud Microservices with Near-Memory Reconfigurable NICs. In ASPLOS, 2021.&lt;/p>
+&lt;p>[65] S. Lee, Z. Guo, O. Sunercan, J. Ying, T. Kooburat, S. Biswal, J. Chen, K.Huang, Y. Cheung, Y. Zhou, K. Veeraraghavan, B. Damani, P. M. Ruiz, V.Mehta, and C. Tang. Shard manager: A generic shard management framework for geo-distributed applications. In SOSP, 2021.&lt;/p>
+&lt;p>[66] B. Livshits and E. Kiciman. Doloto: Code splitting for network-bound web 2.0 applications. In FSE, 2008.&lt;/p>
+&lt;p>[67] S. Luo, H. Xu, C. Lu, K. Ye, G. Xu, L. Zhang, Y. Ding, J. He, and C. Xu. Characterizing microservice dependency and performance: Alibaba trace analysis. In SOCC, 2021.&lt;/p>
+&lt;p>[68] N. A. Lynch. Distributed algorithms. In Morgan Kaufmann Publishers Inc., 1996.&lt;/p>
+&lt;p>[69] S. McClure, S. Ratnasamy, D. Bansal, and J. Padhye. Rethinking net-working abstractions for cloud tenants. In HotOS, 2021.&lt;/p>
+&lt;p>[70] P. Moritz, R. Nishihara, S. Wang, A. Tumanov, R. Liaw, E. Liang, M. Eli-bol, Z. Yang, W. Paul, M. I. Jordan, and I. Stoica. Ray: A distributed framework for emerging ai applications. In OSDI, 2018.&lt;/p>
+&lt;p>[71] H. Qiu, S. S. Banerjee, S. Jha, Z. T. Kalbarczyk, and R. K. Iyer. FIRM: An intelligent fine-grained resource management framework for SLO-Oriented microservices. In OSDI, 2020.&lt;/p>
+&lt;p>[72] D. Raghavan, P. Levis, M. Zaharia, and I. Zhang. Breakfast of champi-ons: towards zero-copy serialization with nic scatter-gather. In HotOS, 2021.&lt;/p>
+&lt;p>[73] F. Romero, Q. Li, N. J. Yadwadkar, and C. Kozyrakis. Infaas: Automated model-less inference serving. In ATC, 2021.&lt;/p>
+&lt;p>[74] B. Sergey, G. Allan, K. Gabriel, L. James, P. Ravi, and T. Jorgen. Orleans: Cloud computing for everyong. In SOCC, 2011.&lt;/p>
+&lt;p>[75] M. Waseem, P. Liang, G. Márquez, and A. D. Salle. Testing microser-vices architecture-based applications: A systematic mapping study. In APSEC, 2020.&lt;/p>
+&lt;p>[76] Wikipedia contributors. Fallacies of distributed computing.&lt;/p>
+&lt;p>[77] M. Zaharia, M. Chowdhury, T. Das, A. Dave, J. Ma, M. McCauly, M. J. Franklin, S. Shenker, and I. Stoica. Resilient distributed datasets: A fault-tolerant abstraction for in-memory cluster computing. In NSDI, 2012.&lt;/p>
+&lt;p>[78] Y. Zhang, J. Yang, Z. Jin, U. Sethi, K. Rodrigues, S. Lu, and D. Yuan. Understanding and detecting software upgrade failures in distributed systems. In SOSP, 2021.&lt;/p></description></item><item><title>Blog: 指标埋点</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/20/%E6%8C%87%E6%A0%87%E5%9F%8B%E7%82%B9/</link><pubDate>Mon, 20 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/20/%E6%8C%87%E6%A0%87%E5%9F%8B%E7%82%B9/</guid><description>
+&lt;h1 id="概述">概述&lt;/h1>
+&lt;h2 id="1-指标接入说明">1. 指标接入说明&lt;/h2>
+&lt;h2 id="2-指标体系设计">2. 指标体系设计&lt;/h2>
+&lt;p>Dubbo的指标体系，总共涉及三块，指标收集、本地聚合、指标推送&lt;/p>
+&lt;ul>
+&lt;li>指标收集：将Dubbo内部需要监控的指标推送至统一的Collector中进行存储&lt;/li>
+&lt;li>本地聚合：指标收集获取的均为基础指标，而一些分位数指标则需通过本地聚合计算得出&lt;/li>
+&lt;li>指标推送：收集和聚合后的指标通过一定的方式推送至第三方服务器，目前只涉及Prometheus&lt;/li>
+&lt;/ul>
+&lt;h2 id="3-结构设计">3. 结构设计&lt;/h2>
+&lt;ul>
+&lt;li>移除原来与 Metrics 相关的类&lt;/li>
+&lt;li>创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类&lt;/li>
+&lt;li>使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换&lt;/li>
+&lt;/ul>
+&lt;h2 id="4-数据流转">4. 数据流转&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dataflow.png" alt="img.png">&lt;/p>
+&lt;h2 id="5-目标">5. 目标&lt;/h2>
+&lt;p>指标接口将提供一个 MetricsService，该 Service 不仅提供柔性服务所的接口级数据，也提供所有指标的查询方式，其中方法级指标的查询的接口可按如下方式声明&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsService&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Default {@link MetricsService} extension name.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String DEFAULT_EXTENSION_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;default&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * The contract version of {@link MetricsService}, the future update must make sure compatible.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String VERSION &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface and prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(String serviceUniqueName, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface、method and prefixes
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param methodName methodName
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param parameterTypes method parameter types
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(String serviceUniqueName, String methodName, Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;[]&lt;/span> parameterTypes, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 MetricsCategory 设计如下:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">enum&lt;/span> MetricsCategory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RT,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> QPS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> REQUESTS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>MetricsEntity 设计如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsEntity&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, String&lt;span style="color:#719e07">&amp;gt;&lt;/span> tags;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> MetricsCategory category;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Object value;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标收集">指标收集&lt;/h1>
+&lt;h2 id="1-嵌入位置">1. 嵌入位置&lt;/h2>
+&lt;p>Dubbo 架构图如下
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dubbo.png" alt="img.png">&lt;/p>
+&lt;p>在 provider 中添加一层 MetricsFilter 重写 invoke 方法嵌入调用链路用于收集指标，用 try-catch-finally 处理，核心代码如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> PROVIDER, order &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">-&lt;/span>1)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Filter, ScopeModelAware {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Result &lt;span style="color:#268bd2">invoke&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker, Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseTotalRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseProcessingRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long startTime &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Result invoke &lt;span style="color:#719e07">=&lt;/span> invoker.invoke(invocation);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseSucceedRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invoke;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (RpcException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.increaseFailedRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">finally&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long endTime &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Long rt &lt;span style="color:#719e07">=&lt;/span> endTime &lt;span style="color:#719e07">-&lt;/span> startTime;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.addRT(interfaceName, methodName, group, version, rt);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> collector.decreaseProcessingRequests(interfaceName, methodName, group, version);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-指标标识">2. 指标标识&lt;/h2>
+&lt;p>用以下五个属性作为隔离级别区分标识不同方法，也是各个 ConcurrentHashMap 的 key&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MethodMetric&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String applicationName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String interfaceName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String methodName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String group;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String version;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-基础指标">3. 基础指标&lt;/h2>
+&lt;p>指标通过 common 模块下的 MetricsCollector 存储所有指标数据&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DefaultMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Boolean collectEnabled &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsListener&lt;span style="color:#719e07">&amp;gt;&lt;/span> listeners &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ArrayList&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ApplicationModel applicationModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String applicationName;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> succeedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> failedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> processingRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> lastRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, LongAccumulator&lt;span style="color:#719e07">&amp;gt;&lt;/span> minRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, LongAccumulator&lt;span style="color:#719e07">&amp;gt;&lt;/span> maxRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> avgRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRT &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, AtomicLong&lt;span style="color:#719e07">&amp;gt;&lt;/span> rtCount &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="本地聚合">本地聚合&lt;/h1>
+&lt;p>本地聚合指将一些简单的指标通过计算获取各分位数指标的过程&lt;/p>
+&lt;h2 id="1-参数设计">1. 参数设计&lt;/h2>
+&lt;p>收集指标时，默认只收集基础指标，而一些单机聚合指标则需要开启服务柔性或者本地聚合后另起线程计算。此处若开启服务柔性，则本地聚合默认开启&lt;/p>
+&lt;h3 id="11-本地聚合开启方式">1.1 本地聚合开启方式&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-指标聚合参数">1.2 指标聚合参数&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:aggregation&lt;/span> enable=&lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span> bucket-num=&lt;span style="color:#2aa198">&amp;#34;5&amp;#34;&lt;/span> time-window-seconds=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:metrics&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-具体指标">2. 具体指标&lt;/h2>
+&lt;p>Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 &lt;a href="https://sre.google/sre-book/monitoring-distributed-systems/">&amp;ldquo;四大黄金信号&amp;rdquo;&lt;/a>、&lt;em>RED方法&lt;/em>、&lt;em>USE方法&lt;/em>等理论并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。&lt;/p>
+&lt;p>Dubbo的关键指标包含：&lt;strong>延迟（Latency）&lt;/strong>、&lt;strong>流量（Traffic）&lt;/strong>、 &lt;strong>错误（Errors）&lt;/strong> 和 &lt;strong>饱和度（Saturation）&lt;/strong> 等内容 。同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如Dubbo应用信息、线程池信息、三大中心交互的指标数据等。&lt;/p>
+&lt;p>在Dubbo中主要包含如下监控指标：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">&lt;/th>
+&lt;th style="text-align:left">基础设施&lt;/th>
+&lt;th style="text-align:left">业务监控&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">延迟类&lt;/td>
+&lt;td style="text-align:left">IO 等待； 网络延迟；&lt;/td>
+&lt;td style="text-align:left">接口、服务的平均耗时、TP90、TP99、TP999 等&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">流量类&lt;/td>
+&lt;td style="text-align:left">网络和磁盘 IO；&lt;/td>
+&lt;td style="text-align:left">服务层面的 QPS、&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">错误类&lt;/td>
+&lt;td style="text-align:left">宕机； 磁盘（坏盘或文件系统错误）； 进程或端口挂掉； 网络丢包；&lt;/td>
+&lt;td style="text-align:left">错误日志;业务状态码、错误码走势;&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">饱和度类&lt;/td>
+&lt;td style="text-align:left">系统资源利用率： CPU、内存、磁盘、网络等； 饱和度：等待线程数，队列积压长度；&lt;/td>
+&lt;td style="text-align:left">这里主要包含JVM、线程池等&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;ul>
+&lt;li>qps: 基于滑动窗口获取动态qps&lt;/li>
+&lt;li>rt: 基于滑动窗口获取动态rt&lt;/li>
+&lt;li>失败请求数: 基于滑动窗口获取最近时间内的失败请求数&lt;/li>
+&lt;li>成功请求数: 基于滑动窗口获取最近时间内的成功请求数&lt;/li>
+&lt;li>处理中请求数: 前后增加Filter简单统计&lt;/li>
+&lt;li>具体指标依赖滑动窗口，额外使用 AggregateMetricsCollector 收集&lt;/li>
+&lt;/ul>
+&lt;p>输出到普罗米修斯的相关指标可以参考的内容如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_live_data_size_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_live_data_size_bytes &lt;span style="color:#2aa198">1.6086528E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_succeed_aggregate Aggregated Succeed Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_succeed_aggregate gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed_aggregate{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">39.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_buffer_memory_used_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;direct&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.679975E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_memory_used_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mapped&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_memory_allocated_bytes_total Incremented for an increase in the size of the (young) heap memory pool after one GC to before the next&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_memory_allocated_bytes_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_allocated_bytes_total &lt;span style="color:#2aa198">2.9884416E9&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_total_aggregate Aggregated Total Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_total_aggregate gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total_aggregate{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">39.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE system_load_average_1m gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_load_average_1m &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP system_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the whole system&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE system_cpu_usage gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_usage &lt;span style="color:#2aa198">0.015802269043760128&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_peak_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_peak_threads &lt;span style="color:#2aa198">40.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_processing Processing Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_processing gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_processing{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_memory_max_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.22912768E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Survivor Space&amp;#34;&lt;/span>,} &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Old Gen&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">9.52107008E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metaspace&amp;#34;&lt;/span>,} &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Eden Space&amp;#34;&lt;/span>,} &lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5828608.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Compressed Class Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.073741824E9&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_max_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.22916864E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_states_threads The current number of threads having BLOCKED state&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_states_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;blocked&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;runnable&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">10.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;waiting&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">16.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;timed-waiting&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">13.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;new&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_states_threads{state&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;terminated&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_buffer_total_capacity_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;direct&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.6799749E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_total_capacity_bytes{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mapped&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_p99 Response Time P99&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_p99 gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p99{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_memory_used_bytes The amount of used memory&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_memory_used_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Survivor Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1048576.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.462464E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Old Gen&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.6098728E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metaspace&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4.0126952E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Eden Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">8.2837504E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1372032.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Compressed Class Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4519248.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_used_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5697408.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP qps Query Per Seconds&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE qps gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>qps{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.3333333333333333&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_min Min Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_min gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_min{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_buffer_count_buffers An estimate of the number of buffers in the pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_buffer_count_buffers gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;mapped&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_buffer_count_buffers{id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;direct&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">10.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP system_cpu_count The number of processors available to the Java virtual machine&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE system_cpu_count gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>system_cpu_count &lt;span style="color:#2aa198">2.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_classes_loaded_classes The number of classes that are currently loaded in the Java virtual machine&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_classes_loaded_classes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_loaded_classes &lt;span style="color:#2aa198">7325.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_total Total Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_total gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_total{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">2783.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_last Last Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_last gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_last{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_memory_promoted_bytes_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_memory_promoted_bytes_total &lt;span style="color:#2aa198">1.4450952E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_pause_seconds Time spent in GC pause&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_pause_seconds summary&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metadata GC Threshold&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">2.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metadata GC Threshold&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.026&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_count{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Evacuation Pause&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">37.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_sum{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Evacuation Pause&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.156&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_pause_seconds_max Time spent in GC pause&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_pause_seconds_max gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metadata GC Threshold&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_pause_seconds_max{action&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;end of minor GC&amp;#34;&lt;/span>,cause&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Evacuation Pause&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_p95 Response Time P95&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_p95 gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_p95{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_total Total Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_total gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_total{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">27738.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP process_cpu_usage The &amp;#34;recent cpu usage&amp;#34; for the Java Virtual Machine process&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE process_cpu_usage gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>process_cpu_usage &lt;span style="color:#2aa198">8.103727714748784E-4&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_max Max Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_max gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_max{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_gc_max_data_size_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_gc_max_data_size_bytes &lt;span style="color:#2aa198">9.52107008E8&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_live_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_live_threads &lt;span style="color:#2aa198">39.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_threads_daemon_threads The current number of live daemon threads&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_threads_daemon_threads gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_threads_daemon_threads &lt;span style="color:#2aa198">36.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_classes_unloaded_classes_total The total number of classes unloaded since the Java virtual machine has started execution&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_classes_unloaded_classes_total counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_classes_unloaded_classes_total &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE jvm_memory_committed_bytes gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1.4680064E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Survivor Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">1048576.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Old Gen&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5.24288E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Metaspace&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">4.1623552E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;heap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;G1 Eden Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">9.0177536E7&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">2555904.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;Compressed Class Space&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5111808.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>jvm_memory_committed_bytes{area&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;nonheap&amp;#34;&lt;/span>,id&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;CodeHeap &amp;#39;non-profiled nmethods&amp;#39;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">5701632.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP requests_succeed Succeed Requests&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE requests_succeed gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>requests_succeed{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">27738.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># HELP rt_avg Average Response Time&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># TYPE rt_avg gauge&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rt_avg{application_name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;metrics-provider&amp;#34;&lt;/span>,group&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,hostname&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;iZ8lgm9icspkthZ&amp;#34;&lt;/span>,interface&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.metrics.prometheus.api.DemoService&amp;#34;&lt;/span>,ip&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;172.28.236.104&amp;#34;&lt;/span>,method&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>,} &lt;span style="color:#2aa198">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="聚合收集器">聚合收集器&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MetricsCollector, MetricsListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> bucketNum;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> timeWindowSeconds;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> totalRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> succeedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> failedRequests &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowCounter&lt;span style="color:#719e07">&amp;gt;&lt;/span> qps &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MethodMetric, TimeWindowQuantile&lt;span style="color:#719e07">&amp;gt;&lt;/span> rt &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConcurrentHashMap&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> ApplicationModel applicationModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_COMPRESSION &lt;span style="color:#719e07">=&lt;/span> 100;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_BUCKET_NUM &lt;span style="color:#719e07">=&lt;/span> 10;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> Integer DEFAULT_TIME_WINDOW_SECONDS &lt;span style="color:#719e07">=&lt;/span> 120;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//在构造函数中解析配置信息&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">AggregateMetricsCollector&lt;/span>(ApplicationModel applicationModel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.applicationModel &lt;span style="color:#719e07">=&lt;/span> applicationModel;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigManager configManager &lt;span style="color:#719e07">=&lt;/span> applicationModel.getApplicationConfigManager();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetricsConfig config &lt;span style="color:#719e07">=&lt;/span> configManager.getMetrics().orElse(&lt;span style="color:#cb4b16">null&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (config &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> config.getAggregation() &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> Boolean.TRUE.equals(config.getAggregation().getEnabled())) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// only registered when aggregation is enabled.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registerListener();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> AggregationConfig aggregation &lt;span style="color:#719e07">=&lt;/span> config.getAggregation();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.bucketNum &lt;span style="color:#719e07">=&lt;/span> aggregation.getBucketNum() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> DEFAULT_BUCKET_NUM : aggregation.getBucketNum();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.timeWindowSeconds &lt;span style="color:#719e07">=&lt;/span> aggregation.getTimeWindowSeconds() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">?&lt;/span> DEFAULT_TIME_WINDOW_SECONDS : aggregation.getTimeWindowSeconds();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果开启了本地聚合，则通过 spring 的 BeanFactory 添加监听，将 AggregateMetricsCollector 与 DefaultMetricsCollector 绑定，实现一种生产者消费者的模式，DefaultMetricsCollector 中使用监听器列表，方便扩展&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">registerListener&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationModel.getBeanFactory().getBean(DefaultMetricsCollector.class).addListener(&lt;span style="color:#719e07">this&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-指标聚合">3. 指标聚合&lt;/h2>
+&lt;p>滑动窗口
+假设我们初始有6个bucket，每个窗口时间设置为2分钟
+每次写入指标数据时，会将数据分别写入6个bucket内，每隔两分钟移动一个bucket并且清除原来bucket内的数据
+读取指标时，读取当前current指向的bucket，以达到滑动窗口的效果
+具体如下图所示，实现了当前 bucket 内存储了配置中设置的 bucket 生命周期内的数据，即近期数据
+&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/aggre.png" alt="img_1.png">&lt;/p>
+&lt;p>在每个bucket内，使用&lt;strong>TDigest 算法&lt;/strong>计算分位数指标&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>TDigest 算法&lt;/strong>（极端分位精确度高，如p1 p99，中间分位精确度低，如p50），相关资料如下&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://op8867555.github.io/posts/2018-04-09-tdigest.html">https://op8867555.github.io/posts/2018-04-09-tdigest.html&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://blog.csdn.net/csdnnews/article/details/116246540">https://blog.csdn.net/csdnnews/article/details/116246540&lt;/a>&lt;/li>
+&lt;li>开源实现：https://github.com/tdunning/t-digest&lt;/li>
+&lt;/ul>
+&lt;/blockquote>
+&lt;p>代码实现如下，除了 TimeWindowQuantile 用来计算分位数指标外，另外提供了 TimeWindowCounter 来收集时间区间内的指标数量&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">TimeWindowQuantile&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> compression;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> TDigest&lt;span style="color:#719e07">[]&lt;/span> ringBuffer;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> currentBucket;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> lastRotateTimestampMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#dc322f">long&lt;/span> durationBetweenRotatesMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">TimeWindowQuantile&lt;/span>(&lt;span style="color:#dc322f">double&lt;/span> compression, &lt;span style="color:#dc322f">int&lt;/span> bucketNum, &lt;span style="color:#dc322f">int&lt;/span> timeWindowSeconds) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.compression &lt;span style="color:#719e07">=&lt;/span> compression;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.ringBuffer &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> TDigest&lt;span style="color:#719e07">[&lt;/span>bucketNum&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (&lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> 0; i &lt;span style="color:#719e07">&amp;lt;&lt;/span> bucketNum; i&lt;span style="color:#719e07">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.ringBuffer&lt;span style="color:#719e07">[&lt;/span>i&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> TDigest.createDigest(compression);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.currentBucket &lt;span style="color:#719e07">=&lt;/span> 0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.lastRotateTimestampMillis &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.durationBetweenRotatesMillis &lt;span style="color:#719e07">=&lt;/span> TimeUnit.SECONDS.toMillis(timeWindowSeconds) &lt;span style="color:#719e07">/&lt;/span> bucketNum;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#dc322f">double&lt;/span> &lt;span style="color:#268bd2">quantile&lt;/span>(&lt;span style="color:#dc322f">double&lt;/span> q) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TDigest currentBucket &lt;span style="color:#719e07">=&lt;/span> rotate();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> currentBucket.quantile(q);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">add&lt;/span>(&lt;span style="color:#dc322f">double&lt;/span> value) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rotate();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (TDigest bucket : ringBuffer) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bucket.add(value);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> TDigest &lt;span style="color:#268bd2">rotate&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> timeSinceLastRotateMillis &lt;span style="color:#719e07">=&lt;/span> System.currentTimeMillis() &lt;span style="color:#719e07">-&lt;/span> lastRotateTimestampMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">while&lt;/span> (timeSinceLastRotateMillis &lt;span style="color:#719e07">&amp;gt;&lt;/span> durationBetweenRotatesMillis) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ringBuffer&lt;span style="color:#719e07">[&lt;/span>currentBucket&lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">=&lt;/span> TDigest.createDigest(compression);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">++&lt;/span>currentBucket &lt;span style="color:#719e07">&amp;gt;=&lt;/span> ringBuffer.length) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> currentBucket &lt;span style="color:#719e07">=&lt;/span> 0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeSinceLastRotateMillis &lt;span style="color:#719e07">-=&lt;/span> durationBetweenRotatesMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> lastRotateTimestampMillis &lt;span style="color:#719e07">+=&lt;/span> durationBetweenRotatesMillis;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> ringBuffer&lt;span style="color:#719e07">[&lt;/span>currentBucket&lt;span style="color:#719e07">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="指标推送">指标推送&lt;/h1>
+&lt;p>指标推送只有用户在设置了&amp;lt;dubbo:metrics /&amp;gt;配置且配置protocol参数后才开启，若只开启指标聚合，则默认不推送指标。&lt;/p>
+&lt;h2 id="1-promehteus-pull-servicediscovery">1. Promehteus Pull ServiceDiscovery&lt;/h2>
+&lt;p>使用dubbo-admin等类似的中间层，启动时根据配置将本机 IP、Port、MetricsURL 推送地址信息至dubbo-admin（或任意中间层）的方式，暴露HTTP ServiceDiscovery供prometheus读取，配置方式如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;pull&amp;rdquo; address=&amp;quot;${dubbo-admin.address}&amp;quot; port=&amp;ldquo;20888&amp;rdquo; url=&amp;quot;/metrics&amp;quot;/&amp;gt;，其中在pull模式下address为可选参数，若不填则需用户手动在Prometheus配置文件中配置地址&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">exportHttpServer&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> exporterEnabled &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_EXPORTER_ENABLED_KEY, &lt;span style="color:#cb4b16">false&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (exporterEnabled) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> port &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_EXPORTER_METRICS_PORT_KEY, PROMETHEUS_DEFAULT_METRICS_PORT);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String path &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_EXPORTER_METRICS_PATH_KEY, PROMETHEUS_DEFAULT_METRICS_PATH);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>path.startsWith(&lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> path;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer &lt;span style="color:#719e07">=&lt;/span> HttpServer.create(&lt;span style="color:#719e07">new&lt;/span> InetSocketAddress(port), 0);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prometheusExporterHttpServer.createContext(path, httpExchange &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String response &lt;span style="color:#719e07">=&lt;/span> prometheusRegistry.scrape();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpExchange.sendResponseHeaders(200, response.getBytes().length);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> (OutputStream os &lt;span style="color:#719e07">=&lt;/span> httpExchange.getResponseBody()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> os.write(response.getBytes());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Thread(prometheusExporterHttpServer::start);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> httpServerThread.start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (IOException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-prometheus-push-pushgateway">2. Prometheus Push Pushgateway&lt;/h2>
+&lt;p>用户直接在Dubbo配置文件中配置Prometheus Pushgateway的地址即可，如&amp;lt;dubbo:metrics protocol=&amp;ldquo;prometheus&amp;rdquo; mode=&amp;ldquo;push&amp;rdquo; address=&amp;quot;${prometheus.pushgateway-url}&amp;quot; interval=&amp;ldquo;5&amp;rdquo; /&amp;gt;，其中interval代表推送间隔&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">schedulePushJob&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">boolean&lt;/span> pushEnabled &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_ENABLED_KEY, &lt;span style="color:#cb4b16">false&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (pushEnabled) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String baseUrl &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_BASE_URL_KEY);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String job &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_JOB_KEY, PROMETHEUS_DEFAULT_JOB_NAME);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> pushInterval &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_PUSH_INTERVAL_KEY, PROMETHEUS_DEFAULT_PUSH_INTERVAL);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String username &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_USERNAME_KEY);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String password &lt;span style="color:#719e07">=&lt;/span> url.getParameter(PROMETHEUS_PUSHGATEWAY_PASSWORD_KEY);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> NamedThreadFactory threadFactory &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> NamedThreadFactory(&lt;span style="color:#2aa198">&amp;#34;prometheus-push-job&amp;#34;&lt;/span>, &lt;span style="color:#cb4b16">true&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor &lt;span style="color:#719e07">=&lt;/span> Executors.newScheduledThreadPool(1, threadFactory);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PushGateway pushGateway &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> PushGateway(baseUrl);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (&lt;span style="color:#719e07">!&lt;/span>StringUtils.isBlank(username)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway.setConnectionFactory(&lt;span style="color:#719e07">new&lt;/span> BasicAuthHttpConnectionFactory(username, password));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushJobExecutor.scheduleWithFixedDelay(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> push(pushGateway, job), pushInterval, pushInterval, TimeUnit.SECONDS);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">push&lt;/span>(PushGateway pushGateway, String job) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pushGateway.pushAdd(prometheusRegistry.getPrometheusRegistry(), job);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (IOException e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.error(&lt;span style="color:#2aa198">&amp;#34;Error occurred when pushing metrics to prometheus: &amp;#34;&lt;/span>, e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="可视化展示">可视化展示&lt;/h2>
+&lt;p>目前推荐使用 Prometheus 来进行服务监控，Grafana 来展示指标数据。可以通过案例来快速入门 &lt;a href="https://dubbo.apache.org/zh-cn/overview/tasks/observability/grafana/">Dubbo 可视化监控&lt;/a>。&lt;/p></description></item><item><title>Blog: Dubbo3 应用级服务发现设计</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</guid><description>
+&lt;h2 id="objective">Objective&lt;/h2>
+&lt;ul>
+&lt;li>显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。&lt;/li>
+&lt;li>适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。&lt;/li>
+&lt;/ul>
+&lt;h2 id="background">Background&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/arc.png" alt="interface-arc">&lt;/p>
+&lt;p>我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。&lt;/p>
+&lt;p>在这个过程中：&lt;/p>
+&lt;ul>
+&lt;li>每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；&lt;/li>
+&lt;li>注册中心通过这个 key 对 provider 实例地址进行聚合；&lt;/li>
+&lt;li>Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data1.png" alt="interface-data1">&lt;/p>
+&lt;p>这里，我们对接口级地址发现的内部数据结构进行详细分析。&lt;/p>
+&lt;p>首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。&lt;/p>
+&lt;p>然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data2.png" alt="interface-data2">&lt;/p>
+&lt;p>这里把 URL 地址数据划分成了几份：&lt;/p>
+&lt;ul>
+&lt;li>首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体&lt;/li>
+&lt;li>其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明&lt;/li>
+&lt;li>下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。&lt;/li>
+&lt;li>最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。&lt;/li>
+&lt;/ul>
+&lt;p>结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：&lt;/p>
+&lt;ul>
+&lt;li>第一，地址发现聚合的 key 就是 RPC 粒度的服务&lt;/li>
+&lt;li>第二，注册中心同步的数据不止包含地址，还包含了各种元数据以及配置&lt;/li>
+&lt;li>得益于 1 与 2，Dubbo 实现了支持应用、RPC 服务、方法粒度的服务治理能力&lt;/li>
+&lt;/ul>
+&lt;p>这就是一直以来 Dubbo2 在易用性、服务治理功能性、可扩展性上强于很多服务框架的真正原因。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-defect.png" alt="interface-defect">&lt;/p>
+&lt;p>一个事物总是有其两面性，Dubbo2 地址模型带来易用性和强大功能的同时，也给整个架构的水平可扩展性带来了一些限制。这个问题在普通规模的微服务集群下是完全感知不到的，而随着集群规模的增长，当整个集群内应用、机器达到一定数量时，整个集群内的各个组件才开始遇到规模瓶颈。在总结包括阿里巴巴、工商银行等多个典型的用户在生产环境特点后，我们总结出以下两点突出问题（如图中红色所示）：&lt;/p>
+&lt;ul>
+&lt;li>首先，注册中心集群容量达到上限阈值。由于所有的 URL 地址数据都被发送到注册中心，注册中心的存储容量达到上限，推送效率也随之下降。&lt;/li>
+&lt;li>而在消费端这一侧，Dubbo2 框架常驻内存已超 40%，每次地址推送带来的 cpu 等资源消耗率也非常高，影响正常的业务调用。&lt;/li>
+&lt;/ul>
+&lt;p>为什么会出现这个问题？我们以一个具体 provider 示例进行展开，来尝试说明为何应用在接口级地址模型下容易遇到容量问题。
+青蓝色部分，假设这里有一个普通的 Dubbo Provider 应用，该应用内部定义有 10 个 RPC Service，应用被部署在 100 个机器实例上。这个应用在集群中产生的数据量将会是 “Service 数 * 机器实例数”，也就是 10 * 100 = 1000 条。数据被从两个维度放大：&lt;/p>
+&lt;ul>
+&lt;li>从地址角度。100 条唯一的实例地址，被放大 10 倍&lt;/li>
+&lt;li>从服务角度。10 条唯一的服务元数据，被放大 100 倍&lt;/li>
+&lt;/ul>
+&lt;h2 id="proposal">Proposal&lt;/h2>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-principle.png" alt="app-principle">&lt;/p>
+&lt;p>面对这个问题，在 Dubbo3 架构下，我们不得不重新思考两个问题：&lt;/p>
+&lt;ul>
+&lt;li>如何在保留易用性、功能性的同时，重新组织 URL 地址数据，避免冗余数据的出现，让 Dubbo3 能支撑更大规模集群水平扩容？&lt;/li>
+&lt;li>如何在地址发现层面与其他的微服务体系如 Kubernetes、Spring Cloud 打通？&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-data1.png" alt="app-data1">&lt;/p>
+&lt;p>Dubbo3 的应用级服务发现方案设计本质上就是围绕以上两个问题展开。其基本思路是：地址发现链路上的聚合元素也就是我们之前提到的 Key 由服务调整为应用，这也是其名称叫做应用级服务发现的由来；另外，通过注册中心同步的数据内容上做了大幅精简，只保留最核心的 ip、port 地址数据。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-data2.png" alt="app-data2">&lt;/p>
+&lt;p>这是升级之后应用级地址发现的内部数据结构进行详细分析。
+对比之前接口级的地址发现模型，我们主要关注橙色部分的变化。首先，在 provider 实例这一侧，相比于之前每个 RPC Service 注册一条地址数据，一个 provider 实例只会注册一条地址到注册中心；而在注册中心这一侧，地址以应用名为粒度做聚合，应用名节点下是精简过后的 provider 实例地址；&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-metadataservice.png" alt="app-metadataservice">&lt;/p>
+&lt;p>应用级服务发现的上述调整，同时实现了地址单条数据大小和总数量的下降，但同时也带来了新的挑战：我们之前 Dubbo2 强调的易用性和功能性的基础损失了，因为元数据的传输被精简掉了，如何精细的控制单个服务的行为变得无法实现。&lt;/p>
+&lt;p>针对这个问题，Dubbo3 的解法是引入一个内置的 MetadataService 元数据服务，由中心化推送转为 Consumer 到 Provider 的点对点拉取，在这个模式下，元数据传输的数据量将不在是一个问题，因此可以在元数据中扩展出更多的参数、暴露更多的治理数据。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/app-workflow.png" alt="app-metadataservice">&lt;/p>
+&lt;p>这里我们个重点看消费端 Consumer 的地址订阅行为，消费端从分两步读取地址数据，首先是从注册中心收到精简后的地址，随后通过调用 MetadataService 元数据服务，读取对端的元数据信息。在收到这两部分数据之后，消费端会完成地址数据的聚合，最终在运行态还原出类似 Dubbo2 的 URL 地址格式。因此从最终结果而言，应用级地址模型同时兼顾了地址传输层面的性能与运行层面的功能性。&lt;/p>
+&lt;p>以上就是的应用级服务发现背景、工作原理部分的所有内容，接下来我们看一下饿了么升级到 Dubbo3 尤其是应用级服务发现的过程。&lt;/p></description></item><item><title>Blog: 启发式流控制</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</guid><description>
+&lt;h1 id="整体介绍">整体介绍&lt;/h1>
+&lt;p>本文所说的柔性服务主要是指&lt;strong>consumer端的负载均衡&lt;/strong>和&lt;strong>provider端的限流&lt;/strong>两个功能。在之前的dubbo版本中，&lt;/p>
+&lt;ul>
+&lt;li>负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。&lt;/li>
+&lt;li>限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。&lt;/li>
+&lt;/ul>
+&lt;p>我们针对这些存在的问题进行了改进。&lt;/p>
+&lt;h2 id="负载均衡">负载均衡&lt;/h2>
+&lt;h3 id="使用介绍">使用介绍&lt;/h3>
+&lt;p>在原本的dubbo版本中，有五种负载均衡的方案供选择，他们分别是 &lt;code>Random&lt;/code>、&lt;code>ShortestResponse&lt;/code>、&lt;code>RoundRobin&lt;/code>、&lt;code>LeastActive&lt;/code> 和 &lt;code>ConsistentHash&lt;/code>。其中除 &lt;code>ShortestResponse&lt;/code> 和 &lt;code>LeastActive&lt;/code> 外，其他的几种方案主要是考虑选择时的公平性和稳定性。&lt;/p>
+&lt;p>对于 &lt;code>ShortestResponse&lt;/code> 来说，其设计目的是从所有备选的 provider 中选择 response 时间最短的以提高系统整体的吞吐量。然而存在两个问题：&lt;/p>
+&lt;ol>
+&lt;li>在大多数的场景下，不同provider的response时长没有非常明显的区别，此时该算法会退化为随机选择。&lt;/li>
+&lt;li>response的时间长短有时也并不能代表机器的吞吐能力。对于 &lt;code>LeastActive&lt;/code> 来说，其认为应该将流量尽可能分配到当前并发处理任务较少的机器上。但是其同样存在和 &lt;code>ShortestResponse&lt;/code> 类似的问题，即这并不能单独代表机器的吞吐能力。&lt;/li>
+&lt;/ol>
+&lt;p>基于以上分析，我们提出了两种新的负载均衡算法。一种是同样基于公平性考虑的单纯 &lt;code>P2C&lt;/code> 算法，另一种是基于自适应的方法 &lt;code>adaptive&lt;/code>，其试图自适应的衡量 provider 端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。&lt;/p>
+&lt;h4 id="总体效果">总体效果&lt;/h4>
+&lt;p>对于负载均衡部分的有效性实验在两个不同的情况下进行的，分别是提供端机器配置比较均衡和提供端机器配置差距较大的情况。&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1675265258687-c3df68a8-80e0-4311-816c-63480494850c.png" alt="image.png">&lt;/p>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png" alt="image.png">&lt;/p>
+&lt;h4 id="使用方法">使用方法&lt;/h4>
+&lt;p>使用方法与原本的负载均衡方法相同。只需要在consumer端将&amp;quot;loadbalance&amp;quot;设置为&amp;quot;p2c&amp;quot;或者&amp;quot;adaptive&amp;quot;即可。&lt;/p>
+&lt;h4 id="代码结构">代码结构&lt;/h4>
+&lt;p>负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。&lt;/p>
+&lt;h3 id="原理介绍">原理介绍&lt;/h3>
+&lt;h4 id="p2c算法">P2C算法&lt;/h4>
+&lt;p>Power of Two Choice算法简单但是经典，主要思路如下：&lt;/p>
+&lt;ol>
+&lt;li>对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。&lt;/li>
+&lt;li>比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。&lt;/li>
+&lt;/ol>
+&lt;h4 id="adaptive算法">adaptive算法&lt;/h4>
+&lt;p>&lt;a href="https://github.com/apache/dubbo/pull/10745">代码的github地址&lt;/a>&lt;/p>
+&lt;h5 id="相关指标">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>cpuLoad
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/26808016bc7f1ee83ab425e308074f17.svg" alt="img">。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>rt
+rt为一次rpc调用所用的时间，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>timeout
+timeout为本次rpc调用超时剩余的时间，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>weight
+weight是设置的服务权重。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>currentProviderTime
+provider端在计算cpuLoad时的时间，单位是毫秒&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>currentTime
+currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>multiple
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/b60f036bd026b92129df8a6476922cc8.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>lastLatency
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/f2abbc771049cf4f3e492e93a258d699.svg" alt="img">&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/8fb1af970b995232ebed2764a5706aab.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>beta
+平滑参数，默认为0.5&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ewma
+lastLatency的平滑值&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/c26fdbae56f3a06c46434ae91185a3d6.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>inflight
+inflight为consumer端还未返回的请求的数量。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/f429c4726dec484e70ee73e6a37c88dd.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>load
+对于备选后端机器x来说，若距离上次被调用的时间大于2*timeout，则其load值为0。
+否则,&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/0f56746b3643dc3ed0e019c24ad5f377.svg" alt="img">&lt;/p>
+&lt;h5 id="算法实现">算法实现&lt;/h5>
+&lt;p>依然是基于P2C算法。&lt;/p>
+&lt;ol>
+&lt;li>从备选列表中做两次随机选择，得到providerA和providerB&lt;/li>
+&lt;li>比较providerA和providerB的load值，选择较小的那个。&lt;/li>
+&lt;/ol>
+&lt;h2 id="自适应限流">自适应限流&lt;/h2>
+&lt;p>与负载均衡运行在consumer端不同的是，限流功能运行在provider端。其作用是限制provider端处理并发任务时的最大数量。从理论上讲，服务端机器的处理能力是存在上限的，对于一台服务端机器，当短时间内出现大量的请求调用时，会导致处理不及时的请求积压，使机器过载。在这种情况下可能导致两个问题：1.由于请求积压，最终所有的请求都必须等待较长时间才能被处理，从而使整个服务瘫痪。2.服务端机器长时间的过载可能有宕机的风险。因此，在可能存在过载风险时，拒绝掉一部分请求反而是更好的选择。在之前的dubbo版本中，限流是通过在provider端设置静态的最大并发值实现的。但是在服务数量多，拓扑复杂且处理能力会动态变化的局面下，该值难以通过计算静态设置。
+基于以上原因，我们需要一种自适应的算法，其可以动态调整服务端机器的最大并发值，使其可以在保证机器不过载的前提下，尽可能多的处理接收到的请求。因此，我们参考brpc等其他框架的基础上，在dubbo的框架内实现了两种自适应限流算法，分别是基于启发式平滑的&amp;quot;HeuristicSmoothingFlowControl&amp;quot;和基于窗口的&amp;quot;AutoConcurrencyLimier&amp;quot;。&lt;/p>
+&lt;p>&lt;a href="https://github.com/apache/dubbo/pull/10642">代码的github地址&lt;/a>&lt;/p>
+&lt;h3 id="使用介绍-1">使用介绍&lt;/h3>
+&lt;h4 id="总体效果-1">总体效果&lt;/h4>
+&lt;p>自适应限流部分的有效性实验我们在提供端机器配置尽可能大的情况下进行，并且为了凸显效果，在实验中我们将单次请求的复杂度提高，将超时时间尽可能设置的大，并且开启消费端的重试功能。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1675267798831-3da99681-577f-4e5a-b122-b87c8aba7299.png" alt="image.png">&lt;/p>
+&lt;h4 id="使用方法-1">使用方法&lt;/h4>
+&lt;p>要确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。&lt;/p>
+&lt;p>设置方法与静态的最大并发值设置类似，只需在provider端将&amp;quot;flowcontrol&amp;quot;设置为&amp;quot;autoConcurrencyLimier&amp;quot;或者&amp;quot;heuristicSmoothingFlowControl&amp;quot;即可。&lt;/p>
+&lt;h4 id="代码结构-1">代码结构&lt;/h4>
+&lt;ol>
+&lt;li>FlowControlFilter：在provider端的filter负责根据限流算法的结果来对provider端进行限流功能。&lt;/li>
+&lt;li>FlowControl：根据dubbo的spi实现的限流算法的接口。限流的具体实现算法需要继承自该接口并可以通过dubbo的spi方式使用。&lt;/li>
+&lt;li>CpuUsage：周期性获取cpu的相关指标&lt;/li>
+&lt;li>HardwareMetricsCollector：获取硬件指标的相关方法&lt;/li>
+&lt;li>ServerMetricsCollector：基于滑动窗口的获取限流需要的指标的相关方法。比如qps等。&lt;/li>
+&lt;li>AutoConcurrencyLimier：自适应限流的具体实现算法。&lt;/li>
+&lt;li>HeuristicSmoothingFlowControl：自适应限流的具体实现方法。&lt;/li>
+&lt;/ol>
+&lt;h3 id="原理介绍-1">原理介绍&lt;/h3>
+&lt;h4 id="heuristicsmoothingflowcontrol">HeuristicSmoothingFlowControl&lt;/h4>
+&lt;h5 id="相关指标-1">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>alpha
+alpha为可接受的延时的上升幅度，默认为0.3&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>minLatency
+在一个时间窗口内的最小的Latency值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>noLoadLatency
+noLoadLatency是单纯处理任务的延时，不包括排队时间。这是服务端机器的固有属性，但是并不是一成不变的。在HeuristicSmoothingFlowControl算法中，我们根据机器CPU的使用率来确定机器当前的noLoadLatency。当机器的CPU使用率较低时，我们认为minLatency便是noLoadLatency。当CPU使用率适中时，我们平滑的用minLatency来更新noLoadLatency的值。当CPU使用率较高时，noLoadLatency的值不再改变。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxQPS
+一个时间窗口周期内的QPS的最大值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>avgLatency
+一个时间窗口周期内的Latency的平均值，单位为毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxConcurrency
+计算得到的当前服务提供端的最大并发值。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/f40e48ebdb49648cf942714609808c52.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h5 id="算法实现-1">算法实现&lt;/h5>
+&lt;p>当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从HeuristicSmoothingFlowControl算法中获得当前的maxConcurrency值。如果当前正在处理的请求数量超过了maxConcurrency，则拒绝该请求。&lt;/p>
+&lt;h4 id="autoconcurrencylimier">AutoConcurrencyLimier&lt;/h4>
+&lt;h5 id="相关指标-2">相关指标&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>MaxExploreRatio
+默认设置为0.3&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MinExploreRatio
+默认设置为0.06&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>SampleWindowSizeMs
+采样窗口的时长。默认为1000毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MinSampleCount
+采样窗口的最小请求数量。默认为40。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>MaxSampleCount
+采样窗口的最大请求数量。默认为500。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>emaFactor
+平滑处理参数。默认为0.1。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>exploreRatio
+探索率。初始设置为MaxExploreRatio。
+若avgLatency&amp;lt;=noLoadLatency*(1.0 + MinExploreRatio)或者qps&amp;gt;=maxQPS*(1.0 + MinExploreRatio)
+则exploreRatio=min(MaxExploreRatio,exploreRatio+0.02)
+否则
+exploreRatio=max(MinExploreRatio,exploreRatio-0.02)&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxQPS
+窗口周期内QPS的最大值。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/d5cf045bc17267befc176f3d76273267.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>noLoadLatency
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/8c700211f5c7a13403e3088df9cd9f43.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>halfSampleIntervalMs
+半采样区间。默认为25000毫秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>resetLatencyUs
+下一次重置所有值的时间戳，这里的重置包括窗口内值和noLoadLatency。单位是微秒。初始为0.
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1af4a6134ede96985302ee8a27f93df7.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>remeasureStartUs
+下一次重置窗口的开始时间。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/c7da904b9a4c890456499b09d01938d3.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>startSampleTimeUs
+开始采样的时间。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>sampleCount
+当前采样窗口内请求的数量。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>totalSampleUs
+采样窗口内所有请求的latency的和。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>totalReqCount
+采样窗口时间内所有请求的数量和。注意区别sampleCount。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>samplingTimeUs
+采样当前请求的时间戳。单位为微秒。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>latency
+当前请求的latency。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>qps
+在该时间窗口内的qps值。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/c0e8b30fc1ecf9438bc2d574fb3da8b6.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>avgLatency
+窗口内的平均latency。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/3a3acfdb05be7d3985835d43e492d3b9.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>maxConcurrency
+上一个窗口计算得到当前周期的最大并发值。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>nextMaxConcurrency
+当前窗口计算出的下一个周期的最大并发值。
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/09852cc0ef125b43a37719796cb8baae.svg" alt="img">&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h5 id="littles-law">Little&amp;rsquo;s Law&lt;/h5>
+&lt;ul>
+&lt;li>当服务处于稳定状态时：concurrency=latency*qps。这是自适应限流理论的基础。&lt;/li>
+&lt;li>当请求没有导致机器超载时，latency基本稳定，qps和concurrency处于线性关系。&lt;/li>
+&lt;li>当短时间内请求数量过多，导致服务超载的时候，concurrency会和latency一起上升，qps则会趋于稳定。&lt;/li>
+&lt;/ul>
+&lt;h5 id="算法实现-2">算法实现&lt;/h5>
+&lt;p>AutoConcurrencyLimier的算法使用过程和HeuristicSmoothingFlowControl类似。与HeuristicSmoothingFlowControl的最大区别是:&lt;/p>
+&lt;p>AutoConcurrencyLimier是基于窗口的。每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到maxConcurrency。
+其次，利用exploreRatio来对剩余的容量进行探索。&lt;/p>
+&lt;p>另外，每隔一段时间都会自动缩小max_concurrency并持续一段时间，以处理noLoadLatency上涨的情况。因为估计noLoadLatency时必须先让服务处于低负载的状态，因此对maxConcurrency的缩小是难以避免的。&lt;/p>
+&lt;p>由于 max_concurrency &amp;lt; concurrency 时，服务会拒绝掉所有的请求，限流算法将 &amp;ldquo;排空所有的经历过排队的等待请求的时间&amp;rdquo; 设置为 2*latency，以确保 minLatency 的样本绝大部分时没有经过排队等待的。&lt;/p></description></item></channel></rss>

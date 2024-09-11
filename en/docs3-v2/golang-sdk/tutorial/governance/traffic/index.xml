@@ -1,0 +1,115 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – Traffic Management</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/traffic/</link><description>Recent content in Traffic Management on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs3-V2: routing rules</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/traffic/mesh_router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/traffic/mesh_router/</guid><description>
+&lt;h2 id="introduction-to-routing-rules">Introduction to routing rules&lt;/h2>
+&lt;p>&lt;a href="https://www.yuque.com/docs/share/c132d5db-0dcb-487f-8833-7c7732964bd4?#">&amp;ldquo;Microservice Mesh Routing Scheme Draft V2&amp;rdquo;&lt;/a>&lt;/p>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>Routing rules, in simple terms, are to send &lt;strong>specific request&lt;/strong> traffic to &lt;strong>specific service provider&lt;/strong> according to &lt;strong>specific conditions&lt;/strong>. Thereby realizing the distribution of flow.&lt;/p>
+&lt;p>In the definition of Dubbo3 unified routing rules, two resources in yaml format need to be provided: virtual service and destination rule. Its format is very similar to the routing rules defined by service mesh.&lt;/p>
+&lt;ul>
+&lt;li>virtual service&lt;/li>
+&lt;/ul>
+&lt;p>Define the host, which is used to establish a relationship with the destination rule. &lt;br>
+Define service matching rules&lt;br>
+Define match matching rules&lt;br>
+After matching a specific request, search and verify the target cluster, and use the fallback mechanism for empty cases.&lt;/p>
+&lt;p>-destination rule&lt;/p>
+&lt;p>Define a specific cluster subset and the tags that the subset is adapted to. The tags are obtained from the url exposed on the provider side and try to match.&lt;/p>
+&lt;h2 id="provide-capabilities">Provide capabilities&lt;/h2>
+&lt;h3 id="routing-configuration-based-on-configuration-center">Routing configuration based on configuration center&lt;/h3>
+&lt;p>For the sample example, see &lt;a href="https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/route/meshroute">Mesh Router&lt;/a>&lt;/p>
+&lt;h4 id="1-routing-rule-file-annotation">1. Routing rule file annotation&lt;/h4>
+&lt;p>The routing rules are only for the client. For the server, you only need to label specific parameters when the service is provided.&lt;/p>
+&lt;h5 id="11-virtual-service">1.1 virtual-service&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: VirtualService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>: {&lt;span style="color:#268bd2">name&lt;/span>: demo-route}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Use a regular expression to match the service name, only a request that satisfies the service name can be routed.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># For this example, if the request does not satisfy the service name, the provider will not be found directly&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># - services:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># - { regex: org.apache.dubbo.UserProvider* }&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">route detail&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75"># Matching rules, if (sourceLabel) client url satisfies the parameter `trafficLabel: xxx`, the match can be successful&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">sourceLabels&lt;/span>: {&lt;span style="color:#268bd2">trafficLabel&lt;/span>: xxx}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: xxx-project
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>: &lt;span style="color:#586e75"># Once the above match rule is matched, the subset named isolation defined in dest_rule will be selected&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>: {&lt;span style="color:#268bd2">host: demo, subset&lt;/span>: isolation}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">sourceLabels&lt;/span>: {&lt;span style="color:#268bd2">trafficLabel&lt;/span>: testing-trunk}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: testing-trunk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>: &lt;span style="color:#586e75"># Once the above match rule is matched, the subset named testing-trunk defined in dest_rule will be selected&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>: {&lt;span style="color:#268bd2">host: demo, subset&lt;/span>: testing-trunk}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: testing &lt;span style="color:#586e75"># There is no match, the bottom-up logic, if the above-mentioned dissatisfaction is met, it will be matched.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">destination&lt;/span>: {&lt;span style="color:#268bd2">host: demo, subset&lt;/span>: testing}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - {&lt;span style="color:#268bd2">exact&lt;/span>: com.apache.dubbo.sample.basic.IGreeter}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">hosts&lt;/span>: [demo] &lt;span style="color:#586e75"># Match the host in dest_rule.yml as demo&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h5 id="12-destination-rule">1.2 destination-rule&lt;/h5>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: service.dubbo.apache.org/v1alpha1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: DestinationRule
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>: { &lt;span style="color:#268bd2">name&lt;/span>: demo-route }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">host&lt;/span>: demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">subsets&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">labels&lt;/span>: { &lt;span style="color:#268bd2">env-sign: xxx, tag1&lt;/span>: hello }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: isolation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">labels&lt;/span>: { &lt;span style="color:#268bd2">env-sign&lt;/span>: yyy }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: testing-trunk
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">labels&lt;/span>: { &lt;span style="color:#268bd2">env-sign&lt;/span>: zzz }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: testing
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">trafficPolicy&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">loadBalancer&lt;/span>: { &lt;span style="color:#268bd2">simple&lt;/span>: ROUND_ROBIN }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-client-and-server-routing-parameter-settings">2. Client and server routing parameter settings&lt;/h4>
+&lt;ul>
+&lt;li>
+&lt;p>client side&lt;/p>
+&lt;p>dubbogo.yml&lt;/p>
+&lt;p>Define configuration center&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config-center&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">data-id&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;dubbo-go-samples-configcenter-zookeeper-client&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Publish the configuration to the configuration center through the API in the code, or manually configure it in advance.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>dynamicConfiguration, err &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">GetRootConfig&lt;/span>().ConfigCenter.&lt;span style="color:#268bd2">GetDynamicConfiguration&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// publish mesh route config
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>err = dynamicConfiguration. &lt;span style="color:#268bd2">PublishConfig&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;dubbo.io. MESHAPPRULE&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>, MeshRouteConf)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>server side&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">demoZK&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterProvider&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.apache.dubbo.sample.basic.IGreeter &lt;span style="color:#586e75"># must be compatible with grpc or dubbo-java&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">params&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">env-sign&lt;/span>: zzz &lt;span style="color:#586e75"># server label, corresponding to the testing in the destination Rule, that is, the bottom-up logic&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="3-run-method">3. Run method&lt;/h4>
+&lt;p>Run this example directly using goland&lt;/p>
+&lt;p>After running, it can be observed that all client traffic is routed to the server. According to the source label, there is no virtualService hit, so it is routed to the bottom-up test.&lt;/p></description></item><item><title>Docs3-V2: Elegant online and offline</title><link>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/</guid><description>
+&lt;h1 id="gracefully-log-in-and-out">Gracefully log in and out&lt;/h1>
+&lt;h2 id="introduction">Introduction&lt;/h2>
+&lt;p>In the process of stable production, container scheduling is completely controlled by k8s, and microservice governance is completely maintained and managed by service framework or operation and maintenance personnel. In the case of releasing a new version or expanding or shrinking the capacity, the old container instance will be terminated and replaced with a new container instance. For an online production environment carrying high traffic, if the connection of this replacement process is unreasonable, the A large number of wrong requests are caused in a short period of time, triggering alarms and even affecting normal business. For larger manufacturers, the loss caused by problems in the release process will be huge.&lt;/p>
+&lt;p>Therefore, the appeal of graceful online and offline is put forward. This requires that the service framework, on the basis of having stable service invocation capabilities and traditional service governance capabilities, should provide stable guarantees during the process of going online and offline, thereby reducing operation and maintenance costs and improving application stability.&lt;/p>
+&lt;h2 id="expected-effect">Expected effect&lt;/h2>
+&lt;p>Ideally, the effect of graceful offline and offline is that in a distributed system carrying a large amount of traffic, all component instances can be expanded, reduced, and rolled over at will. In this case, it is necessary to ensure stable tps and rt, to ensure that no request errors are caused by the application going offline.&lt;/p>
+&lt;h2 id="how-to-use">How to use&lt;/h2>
+&lt;p>The Dubbo-go app enables graceful log-off and offline by default.&lt;/p>
+&lt;p>Related reading: &lt;a href="https://developer.aliyun.com/article/860775">[Design and Practice of Dubbo-go Elegant Online and Offline]&lt;/a>&lt;/p></description></item></channel></rss>
