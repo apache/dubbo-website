@@ -188,3 +188,5 @@ Dubbo 3.3 提供了对 **Project Loom** 的支持，通过虚拟线程优化了�
 **Apache Dubbo 3.3** 的发布标志着微服务通信技术迈向新高度。通过 **Triple X**，Dubbo 不仅实现了对南北向与东西向流量的全面支持，还通过与 gRPC 的无缝集成、基于 HTTP 协议的云原生支持以及高性能优化，为开发者提供了更强大、灵活的工具，帮助他们构建现代分布式系统。
 
 无论是提升服务间通信的高效性、实现跨语言兼容，还是优化云原生环境下的通信性能，Dubbo 3.3 都是开发者应对现代分布式系统挑战的理想选择。立即升级至 Dubbo 3.3，体验 **Triple X** 带来的变革，开启微服务通信的新时代！
+
+更多升级指南和兼容性说明，请参考[Dubbo 3.2 升级 3.3 指南](/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/version/3.2-to-3.3-compatibility-guide/)。
