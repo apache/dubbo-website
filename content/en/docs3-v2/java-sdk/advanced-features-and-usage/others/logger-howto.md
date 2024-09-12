@@ -10,7 +10,7 @@ weight: 7
 
 ## Feature Description
 
-Prior to dubbo 3.3.0-beta.3, dubbo and dubbo-samples were using a mix of log4j and logback, leading to frequent conflicts and errors due to some modules lacking log configuration. Therefore, after 3.3.0-beta.3, the logging components have been upgraded to log4j2 for simplicity and reduced maintenance costs. This document explains how to configure and use the logging framework to avoid conflicts caused by indirectly introducing multiple logging frameworks.
+Prior to dubbo 3.3.0, dubbo and dubbo-samples were using a mix of log4j and logback, leading to frequent conflicts and errors due to some modules lacking log configuration. Therefore, after 3.3.0-beta.3, the logging components have been upgraded to log4j2 for simplicity and reduced maintenance costs. This document explains how to configure and use the logging framework to avoid conflicts caused by indirectly introducing multiple logging frameworks.
 
 ## How To Use
 

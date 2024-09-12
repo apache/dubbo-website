@@ -22,19 +22,19 @@ weight: 3
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
 <!-- 仅当 Zookeeper Server 版本是 3.4.x 及以下时，使用此依赖 -->
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-zookeeper-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
 <!-- 仅当 Zookeeper Server 版本是 3.5.x 及以上时，使用此依赖
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-zookeeper-curator5-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
 -->
 ```
@@ -50,21 +50,21 @@ weight: 3
     <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo</artifactId>
-        <version>3.3.0-beta.1</version>
+        <version>3.3.0</version>
     </dependency>
     <!-- This dependency helps to introduce Curator and Zookeeper dependencies that are necessary for Dubbo to work with zookeeper as transitive dependencies. -->
     <!-- 仅当 Zookeeper Server 版本是 3.4.x 及以下时，使用此依赖 -->
     <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo-dependencies-zookeeper</artifactId>
-        <version>3.3.0-beta.1</version>
+        <version>3.3.0</version>
         <type>pom</type>
     </dependency>
     <!-- 仅当 Zookeeper Server 版本是 3.5.x 及以上时，使用此依赖
 	<dependency>
 		<groupId>org.apache.dubbo</groupId>
 		<artifactId>dubbo-dependencies-zookeeper-curator5</artifactId>
-		<version>3.3.0-beta.1</version>
+		<version>3.3.0</version>
 		<type>pom</type>
 	</dependency>
 	-->

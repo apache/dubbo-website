@@ -28,7 +28,7 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-bom</artifactId>
-                <version>3.3.0-beta.1</version>
+                <version>3.3.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

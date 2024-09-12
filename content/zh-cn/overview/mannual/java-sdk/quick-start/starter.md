@@ -15,7 +15,7 @@ weight: 2
 ## 快速创建应用
 通过访问 <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务创建 Dubbo 微服务应用。如下图所示依次添加组件，您可以在几十秒之内快速创建一个 Dubbo 应用。下载生成的示例应用并解压源码即可。
 
-<img style="max-width:800px;height:auto;margin-bottom:10px;" alt="项目结构截图" src="/imgs/v3/quickstart/initializer-provider.png"/>
+<img style="max-width:800px;height:auto;margin-bottom:10px;" alt="项目结构截图" src="/imgs/v3/quickstart/start.jpg"/>
 
 {{% alert title="直接使用官方准备好的示例" color="info" %}}
 您还可以直接下载官方预先准备好的示例项目：
@@ -52,7 +52,7 @@ curl \
 ## 源码解析
 将以上准备好的示例项目导入最喜欢的 IDE 开发工具（以 IntelliJ IDEA 为例），项目结构如下：
 
-<img style="max-width:400px;height:auto;" alt="项目结构截图" src="/imgs/v3/quickstart/project-structure2.png"/>
+<img style="max-width:400px;height:auto;" alt="项目结构截图" src="/imgs/v3/quickstart/samples.jpg"/>
 
 ### Maven 依赖
 打开 pom.xml，可以看到示例项目中 Dubbo 相关核心依赖如下：
@@ -63,7 +63,7 @@ curl \
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-bom</artifactId>
-                <version>3.3.0-beta.1</version>
+                <version>3.3.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -16,7 +16,7 @@ weight: 1
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
 
 <!-- 为了避免 Netty 依赖冲突，您也可以是选择使用 dubbo-shaded 版本！-->
@@ -24,7 +24,7 @@ weight: 1
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-shaded</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
 -->
 ```

@@ -191,29 +191,29 @@ dubbo:
 
 ### 序列化组件
 
-| 组件名称     | 所需的插件          | 插件版本                                | 备注                         |
-| ------------ | ------------------- | --------------------------------------- | ---------------------------- |
-| FastJson2    | dubbo-maven-plugin  | 3.3.0-beta.1-SNAPSHOT (Preview)及其以上 |                              |
-| JDK          | native-maven-plugin | 0.9.24 及其以上                         |                              |
-| Hessian-Lite |                     |                                         | 对JDK 17支持不友好，暂不支持 |
+| 组件名称     | 所需的插件          | 插件版本        | 备注                         |
+| ------------ | ------------------- |-------------| ---------------------------- |
+| FastJson2    | dubbo-maven-plugin  | 3.3.0 及其以上  |                              |
+| JDK          | native-maven-plugin | 0.9.24 及其以上 |                              |
+| Hessian-Lite |                     |             | 对JDK 17支持不友好，暂不支持 |
 
 ### 注册中心组件
 
 | 组件名称  | 所需的插件         | 插件版本                        | 备注                     |
 | --------- | ------------------ | ------------------------------- | ------------------------ |
-| Zookeeper | dubbo-maven-plugin | 3.3.0-beta.1-SNAPSHOT (Preview) | 仅支持Zookeeper Curator5 |
+| Zookeeper | dubbo-maven-plugin | 3.3.0 | 仅支持Zookeeper Curator5 |
 
 ### 元数据中心组件
 
 | 组件名称  | 所需的插件         | 插件版本                        | 备注                     |
 | --------- | ------------------ | ------------------------------- | ------------------------ |
-| Zookeeper | dubbo-maven-plugin | 3.3.0-beta.1-SNAPSHOT (Preview) | 仅支持Zookeeper Curator5 |
+| Zookeeper | dubbo-maven-plugin | 3.3.0 | 仅支持Zookeeper Curator5 |
 
 ### 配置中心组件
 
-| 组件名称  | 所需的插件         | 插件版本                        | 备注                     |
-| --------- | ------------------ | ------------------------------- | ------------------------ |
-| Zookeeper | dubbo-maven-plugin | 3.3.0-beta.1-SNAPSHOT (Preview) | 仅支持Zookeeper Curator5 |
+| 组件名称  | 所需的插件         | 插件版本  | 备注                     |
+| --------- | ------------------ |-------| ------------------------ |
+| Zookeeper | dubbo-maven-plugin | 3.3.0 | 仅支持Zookeeper Curator5 |
 
 ### 可观测性组件
 

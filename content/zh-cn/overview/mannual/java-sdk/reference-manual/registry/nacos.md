@@ -22,12 +22,12 @@ weight: 4
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
 <dependency>
     <groupId>org.apache.dubbo</groupId>
     <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
-    <version>3.3.0-beta.1</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -37,7 +37,7 @@ weight: 4
     <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo</artifactId>
-        <version>3.3.0-beta.1</version>
+        <version>3.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.alibaba.nacos</groupId>
