@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>安全策略 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/</link><description>Recent content in 安全策略 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/index.xml" rel="self" type="application/rss+xml"/><item><title>类检查机制</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/class-check/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/class-check/</guid><description>特性说明 该机制保证服务提供方和服务消费方类之间的兼容性和安全。
+使用场景 防止由于类版本不匹配、方法签名不兼容或缺少类而可能发生的潜在问题。
+使用方式 支持版本 Dubbo &amp;gt;= 3.1.6
+适用范围 目前序列化检查支持 Hessian2、Fastjson2 序列化以及泛化调用。其他的序列化方式暂不支持。
+检查模式 检查模式分为三个级别：STRICT 严格检查，WARN 告警，DISABLE 禁用。 STRICT 严格检查：禁止反序列化所有不在允许序列化列表（白名单）中的类。 WARN 告警：仅禁止序列化所有在不允许序列化列表中（黑名单）的类，同时在反序列化不在允许序列化列表（白名单）中类的时候通过日志进行告警。 DISABLE 禁用：不进行任何检查。
+3.1 版本中默认为 WARN 告警级别，3.2 版本中默认为 STRICT 严格检查级别。
+通过 ApplicationConfig 配置：
+ApplicationConfig applicationConfig = new ApplicationConfig(); applicationConfig.setSerializeCheckStatus(&amp;#34;STRICT&amp;#34;); 通过 Spring XML 配置：
+&amp;lt;dubbo:application name=&amp;#34;demo-provider&amp;#34; serialize-check-status=&amp;#34;STRICT&amp;#34;/&amp;gt; 通过 Spring Properties / dubbo.properties 配置：
+dubbo.application.serialize-check-status=STRICT 通过 System Property 配置：
+-Ddubbo.application.serialize-check-status=STRICT 配置成功后可以在日志中看到如下的提示：
+INFO utils.SerializeSecurityManager: [DUBBO] Serialize check level: STRICT 注：在同一个进程（Dubbo Framework Model）下的多个应用如果同时配置不同的检查模式，最终会生效“最宽松”的级别。如两个 Spring Context 同时启动，一个配置为 STRICT，另外一个配置为 WARN，则最终生效 WARN 级别的配置。</description></item><item><title>权限控制</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/token-authorization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/token-authorization/</guid><description>特性说明 通过令牌验证在注册中心控制权限，以决定要不要下发令牌给消费者， 可以防止消费者绕过注册中心访问提供者， 另外通过注册中心可灵活改变授权方式，而不需修改或升级提供者。
+使用场景 在一定程度上实现客户端和服务端的可信鉴权，避免任意客户端都可以访问，降低出现安全问题的风险。
+使用方式 全局设置 开启令牌验证
+&amp;lt;!--随机token令牌，使用UUID生成--&amp;gt; &amp;lt;dubbo:provider token=&amp;#34;true&amp;#34; /&amp;gt; 或
+&amp;lt;!--固定token令牌，相当于密码--&amp;gt; &amp;lt;dubbo:provider token=&amp;#34;123456&amp;#34; /&amp;gt; 服务级别设置 &amp;lt;!--随机token令牌，使用UUID生成--&amp;gt; &amp;lt;dubbo:service interface=&amp;#34;com.foo.BarService&amp;#34; token=&amp;#34;true&amp;#34; /&amp;gt; 或
+&amp;lt;!--固定token令牌，相当于密码--&amp;gt; &amp;lt;dubbo:service interface=&amp;#34;com.foo.BarService&amp;#34; token=&amp;#34;123456&amp;#34; /&amp;gt;</description></item><item><title>TLS支持</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/tls/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/tls/</guid><description>特性说明 内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。
+TLS 的配置都有统一的入口。
+使用场景 对全链路有加密需求的用户可以使用 TLS。
+参考用例 https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl
+使用方式 Provider 端 SslConfig sslConfig = new SslConfig(); sslConfig.setServerKeyCertChainPath(&amp;#34;path to cert&amp;#34;); sslConfig.setServerPrivateKeyPath(args[1]); // 如果开启双向 cert 认证 if (mutualTls) { sslConfig.setServerTrustCertCollectionPath(args[2]); } ProtocolConfig protocolConfig = new ProtocolConfig(&amp;#34;dubbo/grpc&amp;#34;); protocolConfig.setSslEnabled(true); 如果要使用的是 gRPC 协议，在开启 TLS 时会使用到协议协商机制，因此必须使用支持 ALPN 机制的 Provider，推荐使用的是 netty-tcnative，具体可参见 gRPC Java 社区的 总结
+Consumer 端 if (!mutualTls) {} sslConfig.setClientTrustCertCollectionPath(args[0]); } else { sslConfig.setClientTrustCertCollectionPath(args[0]); sslConfig.setClientKeyCertChainPath(args[1]); sslConfig.setClientPrivateKeyPath(args[2]); } 为尽可能保证应用启动的灵活性，TLS Cert 的指定还能通过 -D 参数或环境变量等方式来在启动阶段根据部署环境动态指定，参考 Dubbo 配置读取规则</description></item><item><title>服务鉴权</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/auth/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/security/auth/</guid><description>特性说明 类似支付之类的对安全性敏感的业务可能会有限制匿名调用的需求。在加固安全性方面，2.7.5 引入了基于 AK/SK 机制的认证鉴权机制，并且引入了鉴权服务中心，主要原理是消费端在请求需要鉴权的服务时，会通过 SK、请求元数据、时间戳、参数等信息来生成对应的请求签名，通过 Dubbo 的 Attahcment 机制携带到对端进行验签，验签通过才进行业务逻辑处理。如下图所示：
+使用场景 部署新服务时，使用身份验证来确保只部署正确的服务,如果部署了未经授权的服务，则使用身份验证来拒绝访问并防止使用未经授权服务。
+使用方式 接入方式 使用者需要在微服务站点上填写自己的应用信息，并为该应用生成唯一的证书凭证。
+之后在管理站点上提交工单，申请某个敏感业务服务的使用权限，并由对应业务管理者进行审批，审批通过之后，会生成对应的 AK/SK 到鉴权服务中心。
+导入该证书到对应的应用下，并且进行配置。配置方式也十分简单，以注解方式为例：
+服务提供端 只需要设置 service.auth 为 true，表示该服务的调用需要鉴权认证通过。param.sign 为 true 表示需要对参数也进行校验。
+@Service(parameters = {&amp;#34;service.auth&amp;#34;,&amp;#34;true&amp;#34;,&amp;#34;param.sign&amp;#34;,&amp;#34;true&amp;#34;}) public class AuthDemoServiceImpl implements AuthService { } 服务消费端 只需要配置好对应的证书等信息即可，之后会自动地在对这些需要认证的接口发起调用前进行签名操作，通过与鉴权服务的交互，用户无需在代码中配置 AK/SK 这些敏感信息，并且在不重启应用的情况下刷新 AK/SK，达到权限动态下发的目的。
+该方案目前已经提交给 Dubbo 开源社区，并且完成了基本框架的合并，除了 AK/SK 的鉴权方式之外，通过 SPI 机制支持用户可定制化的鉴权认证以及适配公司内部基础设施的密钥存储。</description></item></channel></rss>

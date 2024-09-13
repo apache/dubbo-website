@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Admin 控制台操作手册 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/</link><description>Recent content in Admin 控制台操作手册 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/index.xml" rel="self" type="application/rss+xml"/><item><title>Admin 整体架构与安装步骤</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/architecture/</guid><description>回顾 Dubbo 服务治理体系的总体架构，Admin 是服务治理控制面中的一个核心组件，负责微服务集群的服务治理、可视化展示等。
+Admin 部署架构 总体上来说，Admin 部署架构分为以下几个部分：
+Admin 主进程，包括服务发现元数据管理、可视化控制台、安全认证策略管控、其他定制化服务治理能力等组件。 强依赖组件，包括 Mysql 数据库、注册/配置/元数据中心（可以是 Kubernetes、Nacos、Zookeeper 等） 可选依赖组件，包括 Prometheus、Grafana、Zipkin 等 安装 Admin Dubboctl 安装 Download 当前Dubboctl未正式发行，可按以下方式进行尝试。 拉取Dubbo Admin并编译Dubboctl
+git clone https://github.com/apache/dubbo-admin.git cd dubbo-admin/cmd/dubboctl go build -o dubboctl . 将 dubboctl 放入可执行路径
+ln -s dubbo-admin/cmd/dubboctl/dubboctl /usr/local/bin/dubboctl Install 安装过程会依次：
+将用户自定义的配置profile以及set参数覆盖于默认profile，得到最终的profile # default profile apiVersion: dubbo.apache.org/v1alpha1 kind: DubboOperator metadata: namespace: dubbo-system spec: profile: default namespace: dubbo-system componentsMeta: admin: enabled: true grafana: enabled: true repoURL: https://grafana.github.io/helm-charts version: 6.</description></item><item><title>Admin 服务查询</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/search/</guid><description>Admin 支持可视化的展示 Dubbo 微服务集群的状态，方便用户从全局掌握集群的应用、服务和实例分布，Admin 还可以通过查询的方式了解某一个服务更详细的信息：
+首页集群大盘，展示集群应用、服务、示例的总体分布，集群总体流量情况等 支持根据应用名、服务名(可包含版本&amp;amp;分组)、实例 IP 查询详细信息 支持服务名/应用名的自动补全 支持查看单条服务实例的详情 首页大盘 根据 Dubbo 服务名查询 精确输入接口名:版本 查询服务
+通过 * 通配符模糊查询服务
+根据应用名查询 输入应用名查询某应用关联的所有服务（包含提供和消费的服务）
+根据实例 IP 名查询 输入实例 IP 查询某实例关联的所有服务（包含提供和消费的服务）
+支持基于端口过滤服务
+查看服务实例详情 在服务列表点击 详情 查看服务详细情况</description></item><item><title>Admin 服务测试功能简介</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/test/</guid><description>服务测试功能通常提供给 Dubbo 服务的开发者使用，用来对自己发布的服务进行自测。通过在 Admin 控制台上模拟真实的消费端进程，对服务提供者发起调用，并验证调用结果是否符合预期。
+使用方式 准备用例 启动用例
+可以参考 快速开始 启动一个简单的 Dubbo 服务，对于服务测试来说，只需要启动 provider 即可。
+查询服务
+完成服务端部署后，可以到 Admin 的 服务测试 页面查询对应的服务:
+这里的信息和元数据类似，包含方法名，参数类型和返回值信息，点击右边的标签就可以进入服务测试页面
+执行服务测试 服务测试页面包含了两个 json 编辑器，参数类型的信息都是以 json 格式保存。
+如以下示例所示，在左侧编辑器中填入对应的参数值(本例中数类型是 String )，填写完成后点击 执行 即可对服务端发起调用，调用结果展示在右边的编辑器中。
+如果调用失败，会显示详细的失败原因，下面来看一下调用失败的例子：
+本例中，先关掉 Dubbo 服务提供者的进程，再执行服务测试，可以看到返回的结果是找不到服务提供者的异常。和普通调用一样，业务和框架的异常都会返回在结果中，方便业务排查。
+复合类型参数的填写 考虑 UserService 中的以下方法和类型：
+//org.apache.dubbo.demo.api.UserService Result getUser(String name, UserInfoDO userInfoDO); public class UserInfoDO { private int id; private LocationDO locationDO; private DepartmentDO departmentDO; @Override public String toString() { return &amp;#34;UserInfoDO{&amp;#34; + &amp;#34;id=&amp;#34; + id + &amp;#34;, locationDO=&amp;#34; + locationDO.</description></item><item><title>Admin 服务 Mock 功能简介</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/mock/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/mock/</guid><description>Mock 功能是设计用来提升微服务研发与测试效率的，它可以短路 Consumer 侧发起的远程调用，提前返回预先设定好的 Mock 值，这样即使在没有 Provider 可用的情况下，消费端也能正常的推进开发、测试进程。除此之外，mock 也可用于快速模拟负责返回值的测试数据、模拟服务端异常等场景
+需要注意的是，Mock 能力仅限用于测试环境，应避免将其用于生产环境。
+设计背景 在跨团队或是多应用开发时，在前期开发中往往会出现依赖的服务还未开发完成的情况，这样就会导致流程的阻塞，影响研发效率。基于这种情况，Dubbo Admin 提供了 mock 能力来解耦 Consumer 与 Provider 之间的依赖，以确保在 Provider 未就绪的情况下 Consumer 仍能正常开展测试，提高研发效率。
+Dubbo 框架本身设计有服务降级（有时也称为 mock）能力，通过配置 org.apache.dubbo.config.ReferenceConfig 的 mock 字段（可设置为true或是对应接口的Mock实现）或动态配置规则，此时就可以启动服务降级能力。这种服务降级能力是为生产环境的限流降级准备的，虽然也可以用于本地开发测试场景，但灵活度并不高，基于提升开发效率的根本诉求，我们设计了基于 Admin 的服务降级能力。
+Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用于开发测试阶段的，目标是提升微服务场景下的整体研发效率。需求详见：Dubbo Admin Mock需求。
+架构设计 实现 Mock 能力，Dubbo 框架与 Admin 侧要支持的能力
+Dubbo Admin 规则管理 规则新增 规则查询 规则修改 规则删除 请求历史记录 Mock 请求数据查询 MockService Provider 根据规则生成 Mock 数据 响应 Consumer Mock 请求 保存请求和返回数据 Dubbo 根据 mock 开关配置，转发请求到 Admin 注册的 MockService 处理 mock 返回值并转换为匹配方法签名的强类型数据 Mock 请求原理时序图</description></item><item><title>Admin 文档管理功能介绍</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/documentation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/control-plane/documentation/</guid><description>// TBD</description></item></channel></rss>
