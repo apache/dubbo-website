@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>用户文档 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/</link><description>Recent content in 用户文档 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/quickstart/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/quickstart/</guid><description>让我们从将 HTTP 请求转换为 Dubbo2 请求的案例来快速展示 Pixiu 的能力。
+用例 Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后的 Dubbo Server，然后将 Dubbo Server 的响应转换为 HTTP 响应，最后返回给 Client。
+架构图 案例 案例路径请查看 /samples/dubbogo/simple/resolve
+Dubbo Server 实现和启动 Dubbo Server 提供用户增删改查的相关接口，其具体的代码实现见案例路径下的 server
+Dubbo Server 的配置如下所示，注册了 Dubbo2 协议的 interface com.dubbogo.pixiu.UserService。
+dubbo: registries: zk: protocol: zookeeper timeout: 3s address: 127.0.0.1:2181 protocols: dubbo: name: dubbo port: 20000 provider: registry-ids: zk services: UserProvider: group: test version: 1.0.0 cluster: test_dubbo serialization: hessian2 interface: com.</description></item><item><title>启动和配置</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/configurations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/configurations/</guid><description>Pixiu 启动命令 Pixiu 分为两个形态 Gateway 和 Sidecar，目前 Pixiu 可执行程序的命令如下所示，其中 pixiu 是可执行文件名称。注意，-c 后是本地配置文件的绝对路径。
+pixiu gateway start -c /config/conf.yaml 配置详解 Pixiu 接受 yaml 格式的文件作为其主配置文件，其中对 Pixiu 的各类组件进行配置。我们以快速开始中的配置文件为例，详细讲解其中的组成部分，并且列出可能的扩展。
+static_resources: listeners: - name: &amp;#34;net/http&amp;#34; protocol_type: &amp;#34;HTTP&amp;#34; address: socket_address: address: &amp;#34;0.0.0.0&amp;#34; port: 8883 filter_chains: filters: - name: dgp.filter.httpconnectionmanager config: route_config: routes: - match: prefix: &amp;#34;*&amp;#34; http_filters: - name: dgp.filter.http.dubboproxy config: dubboProxyConfig: auto_resolve: true registries: &amp;#34;zookeeper&amp;#34;: protocol: &amp;#34;zookeeper&amp;#34; timeout: &amp;#34;3s&amp;#34; address: &amp;#34;127.0.0.1:2181&amp;#34; username: &amp;#34;&amp;#34; password: &amp;#34;&amp;#34; 首先，类似 envoy的配置，static_resources 表示如下都是静态配置。在静态配置中包括 Listener，NetworkFilter，Route，HttpFilter等组件，它们之间并不是完全独立的。</description></item><item><title>部署操作</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/deployment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/user/deployment/</guid><description>一、Docker镜像部署 注：首先确认本机已经安装好docker并且启动
+1、从docker hub 拉取 pixiu 镜像 docker pull phial3/dubbo-go-pixiu:latest
+2、按照需求准备pixiu配置 pixiu配置参数详解 准备 log.yml 和 conf.yaml 配置文件，将这两个配置文件在pixiu启动的时候挂在到本地
+3、启动 pixiu 前台启动：，可方便查看服务信息运行是否正常
+docker run --name dubbo-go-pixiu -p 8883:8883 \ -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml \ -v /yourpath/log.yml:/etc/pixiu/log.yml \ apache/dubbo-go-pixiu:latest 后台启动：
+docker run -itd --name dubbo-go-pixiu -p 8883:8883 \ -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml \ -v /yourpath/log.yml:/etc/pixiu/log.yml \ apache/dubbo-go-pixiu:latest 注：
+(1) --name命令后面的dubbo-go-pixiu为你的pixiu实例的名称，可自行修改
+(2)命令中的/yourpath/**路径为你本地存放pixiu配置文件的绝对路径
+4、查看 pixiu 实例 docker ps | grep dubbo-go-pixiu 正在运行的pixiu实例
+docker exec -it dubbo-go-pixiu /bin/bash 进入pixiu
+5、停止pixiu docker stop dubbo-go-pixiu 停止pixiu</description></item></channel></rss>
