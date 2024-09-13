@@ -1,42 +1,297 @@
-<!doctype html><html lang=zh-cn class=no-js><head><meta name=ROBOTS content="INDEX, FOLLOW"><link rel=canonical href=https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/><script>var _hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="https://hm.baidu.com/hm.js?3b78f49ba47181e4d998a66b689446e9",e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=generator content="Hugo 0.127.0"><link rel="shortcut icon" type=image/png href=/imgs/favicon.png><link rel=apple-touch-icon href=/favicons/apple-touch-icon-180x180.png sizes=180x180><link rel=manifest href=/manifest.webmanifest><title>RPC 协议 Triple&amp;Dubbo 基准测试 | Apache Dubbo</title><meta property="og:url" content="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/">
-<meta property="og:site_name" content="Apache Dubbo"><meta property="og:title" content="RPC 协议 Triple&amp;Dubbo 基准测试"><meta property="og:description" content="Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
+<!doctype html><html lang=zh-cn class=no-js><head><meta name=ROBOTS content="INDEX, FOLLOW"><link rel=canonical href=https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/><script>var _hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="https://hm.baidu.com/hm.js?3b78f49ba47181e4d998a66b689446e9",e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=generator content="Hugo 0.134.2"><link rel="shortcut icon" type=image/png href=/imgs/favicon.png><link rel=apple-touch-icon href=/favicons/apple-touch-icon-180x180.png sizes=180x180><link rel=manifest href=/manifest.webmanifest><title>RPC 协议 Triple&amp;Dubbo 基准测试 | Apache Dubbo</title><meta property="og:url" content="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/">
+<meta property="og:site_name" content="Apache Dubbo"><meta property="og:title" content="RPC 协议 Triple&Dubbo 基准测试"><meta property="og:description" content=" Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
 2.7 版本 Dubbo 协议（Hessian2 序列化）
 3.0 版本 Dubbo 协议（Hessian2 序列化）
 3.0 版本 Dubbo 协议（Protobuf 序列化）
 3.0 版本 Triple 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="overview"><meta property="article:modified_time" content="2023-03-02T10:12:02+08:00"><meta itemprop=name content="RPC 协议 Triple&amp;Dubbo 基准测试"><meta itemprop=description content="Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
+3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据
+压测数据通过 https://github.com/apache/dubbo-benchmark 得出 1.2 数据分析 Dubbo + Hessian2
+2.7 Dubbo + Hessian2
+3.0 Dubbo + Protobuf
+3.0 Triple + Protobuf
+3.0 Triple + Protobuf(Hessian)
+3.0 无参方法 30333 ops/s
+2.5ms P99 30414 ops/s
+2.4ms P99 24123 ops/s
+3.2ms P99 7016 ops/s
+8.7ms P99 6635 ops/s
+9.1ms P99 pojo返回值 8984 ops/s
+6.1 ms P99 12279 ops/s
+5.7 ms P99 21479 ops/s
+3.0 ms P99 6255 ops/s
+8.9 ms P99 6491 ops/s
+10 ms P99 pojo列表返回值 1916 ops/s
+34 ms P99 2037 ops/s
+34 ms P99 12722 ops/s
+7.7 ms P99 6920 ops/s
+9.6 ms P99 2833 ops/s
+27 ms P99 1.2.1 Dubbo 协议不同版本实现对比 "><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="overview"><meta property="article:modified_time" content="2023-03-02T10:12:02+08:00"><meta itemprop=name content="RPC 协议 Triple&Dubbo 基准测试"><meta itemprop=description content=" Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
 2.7 版本 Dubbo 协议（Hessian2 序列化）
 3.0 版本 Dubbo 协议（Hessian2 序列化）
 3.0 版本 Dubbo 协议（Protobuf 序列化）
 3.0 版本 Triple 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据"><meta itemprop=dateModified content="2023-03-02T10:12:02+08:00"><meta itemprop=wordCount content="226"><meta name=twitter:card content="summary"><meta name=twitter:title content="RPC 协议 Triple&amp;Dubbo 基准测试"><meta name=twitter:description content="Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
+3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据
+压测数据通过 https://github.com/apache/dubbo-benchmark 得出 1.2 数据分析 Dubbo + Hessian2
+2.7 Dubbo + Hessian2
+3.0 Dubbo + Protobuf
+3.0 Triple + Protobuf
+3.0 Triple + Protobuf(Hessian)
+3.0 无参方法 30333 ops/s
+2.5ms P99 30414 ops/s
+2.4ms P99 24123 ops/s
+3.2ms P99 7016 ops/s
+8.7ms P99 6635 ops/s
+9.1ms P99 pojo返回值 8984 ops/s
+6.1 ms P99 12279 ops/s
+5.7 ms P99 21479 ops/s
+3.0 ms P99 6255 ops/s
+8.9 ms P99 6491 ops/s
+10 ms P99 pojo列表返回值 1916 ops/s
+34 ms P99 2037 ops/s
+34 ms P99 12722 ops/s
+7.7 ms P99 6920 ops/s
+9.6 ms P99 2833 ops/s
+27 ms P99 1.2.1 Dubbo 协议不同版本实现对比 "><meta itemprop=dateModified content="2023-03-02T10:12:02+08:00"><meta itemprop=wordCount content="226"><meta name=twitter:card content="summary"><meta name=twitter:title content="RPC 协议 Triple&Dubbo 基准测试"><meta name=twitter:description content=" Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
 2.7 版本 Dubbo 协议（Hessian2 序列化）
 3.0 版本 Dubbo 协议（Hessian2 序列化）
 3.0 版本 Dubbo 协议（Protobuf 序列化）
 3.0 版本 Triple 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据"><script async src="https://www.googletagmanager.com/gtag/js?id=G-NM6FFMT51J"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NM6FFMT51J")}</script><link rel=preload href=/scss/main.min.cdbb770c4d0b98ba77ede423016a3c5566782615d547215ed59765969d976244.css as=style><link href=/scss/main.min.cdbb770c4d0b98ba77ede423016a3c5566782615d547215ed59765969d976244.css rel=stylesheet integrity><script src=/js/jquery-3.5.1.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@docsearch/css@3><meta name=theme-color content="#326ce5"><link rel=stylesheet href=/css/feature-states.css><meta name=description content="Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
-2.7 版本 Dubbo 协议（Hessian2 序列化）
-3.0 版本 Dubbo 协议（Hessian2 序列化）
-3.0 版本 Dubbo 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据"><meta property="og:description" content="Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
-2.7 版本 Dubbo 协议（Hessian2 序列化）
-3.0 版本 Dubbo 协议（Hessian2 序列化）
-3.0 版本 Dubbo 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据"><meta name=twitter:description content="Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。 Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。 1.1 环境 描述 机器 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） 压测用例 RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值
-2.7 版本 Dubbo 协议（Hessian2 序列化）
-3.0 版本 Dubbo 协议（Hessian2 序列化）
-3.0 版本 Dubbo 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 序列化）
-3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据"><meta property="og:url" content="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/"><meta property="og:title" content="RPC 协议 Triple&amp;Dubbo 基准测试"><meta name=twitter:title content="RPC 协议 Triple&amp;Dubbo 基准测试"><meta name=twitter:image:alt content="Apache Dubbo"><meta property="og:type" content="article"><meta name=viewport content="width=device-width"><script async defer src=/js/github-buttons.js></script><link href=/css/community.css rel=stylesheet><link href=/css/contactus.css rel=stylesheet><link href=/css/language.css rel=stylesheet><script src=/js/script.js></script></head><body class="td-page td-documentation"><header><nav class="js-navbar-scroll navbar navbar-expand navbar-link flex-column flex-md-row td-navbar navbar-parent" data-auto-burger=primary><div class=container-navbar><a class=navbar-brand href=/zh-cn/><span class=navbar-logo></span><span class="text-uppercase font-weight-bold">Apache Dubbo</span></a><div class="td-navbar-nav-scroll menu_navbar_list" id=main_navbar><ul class="navbar-nav mt-2 mt-lg-0"><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/overview/home/><span>文档</span></a></li><li class="nav-item dropdown d-lg-block community_after"><a class="nav-link dropdown-toggle" href=# id=navbarDropdown role=button data-toggle=dropdown aria-haspopup=true aria-expanded=false></a><div class="dropdown-menu dropdown-menu-right" aria-labelledby=navbarDropdownMenuLink></div></li><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/blog/><span>博客</span></a></li><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/download/><span>下载</span></a></li><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=https://start.dubbo.apache.org/bootstrap.html target=_blank><span>Initializer</span>
+3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） 压测方法 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据
+压测数据通过 https://github.com/apache/dubbo-benchmark 得出 1.2 数据分析 Dubbo + Hessian2
+2.7 Dubbo + Hessian2
+3.0 Dubbo + Protobuf
+3.0 Triple + Protobuf
+3.0 Triple + Protobuf(Hessian)
+3.0 无参方法 30333 ops/s
+2.5ms P99 30414 ops/s
+2.4ms P99 24123 ops/s
+3.2ms P99 7016 ops/s
+8.7ms P99 6635 ops/s
+9.1ms P99 pojo返回值 8984 ops/s
+6.1 ms P99 12279 ops/s
+5.7 ms P99 21479 ops/s
+3.0 ms P99 6255 ops/s
+8.9 ms P99 6491 ops/s
+10 ms P99 pojo列表返回值 1916 ops/s
+34 ms P99 2037 ops/s
+34 ms P99 12722 ops/s
+7.7 ms P99 6920 ops/s
+9.6 ms P99 2833 ops/s
+27 ms P99 1.2.1 Dubbo 协议不同版本实现对比 "><script async src="https://www.googletagmanager.com/gtag/js?id=G-NM6FFMT51J"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NM6FFMT51J")}</script><link rel=preload href=/scss/main.min.cdbb770c4d0b98ba77ede423016a3c5566782615d547215ed59765969d976244.css as=style><link href=/scss/main.min.cdbb770c4d0b98ba77ede423016a3c5566782615d547215ed59765969d976244.css rel=stylesheet integrity><script src=/js/jquery-3.5.1.min.js integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin=anonymous></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@docsearch/css@3><meta name=theme-color content="#326ce5"><link rel=stylesheet href=/css/feature-states.css><meta name=description content="
+Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。
+由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。
+Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。
+
+1.1 环境
+
+  
+      
+          
+          描述
+      
+  
+  
+      
+          机器
+          4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer）
+      
+      
+          压测用例
+          RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值2.7 版本 Dubbo 协议（Hessian2 序列化）3.0 版本 Dubbo 协议（Hessian2 序列化）3.0 版本 Dubbo 协议（Protobuf 序列化）3.0 版本 Triple 协议（Protobuf 序列化）3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化）
+      
+      
+          压测方法
+          单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据 压测数据通过 https://github.com/apache/dubbo-benchmark 得出
+      
+  
+
+
+1.2 数据分析
+
+  
+      
+          
+          Dubbo + Hessian22.7
+          Dubbo + Hessian23.0
+          Dubbo + Protobuf3.0
+          Triple + Protobuf3.0
+          Triple + Protobuf(Hessian)3.0
+      
+  
+  
+      
+          无参方法
+          30333 ops/s2.5ms P99
+          30414 ops/s2.4ms P99
+          24123 ops/s3.2ms P99
+          7016 ops/s8.7ms P99
+          6635 ops/s9.1ms P99
+      
+      
+          pojo返回值
+          8984 ops/s6.1 ms P99
+          12279 ops/s5.7 ms P99
+          21479 ops/s3.0 ms P99
+          6255 ops/s8.9 ms P99
+          6491 ops/s10 ms P99
+      
+      
+          pojo列表返回值
+          1916 ops/s34 ms P99
+          2037 ops/s34 ms P99
+          12722 ops/s7.7 ms P99
+          6920 ops/s9.6 ms P99
+          2833 ops/s27 ms P99
+      
+  
+
+1.2.1 Dubbo 协议不同版本实现对比
+"><meta property="og:description" content="
+Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。
+由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。
+Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。
+
+1.1 环境
+
+  
+      
+          
+          描述
+      
+  
+  
+      
+          机器
+          4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer）
+      
+      
+          压测用例
+          RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值2.7 版本 Dubbo 协议（Hessian2 序列化）3.0 版本 Dubbo 协议（Hessian2 序列化）3.0 版本 Dubbo 协议（Protobuf 序列化）3.0 版本 Triple 协议（Protobuf 序列化）3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化）
+      
+      
+          压测方法
+          单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据 压测数据通过 https://github.com/apache/dubbo-benchmark 得出
+      
+  
+
+
+1.2 数据分析
+
+  
+      
+          
+          Dubbo + Hessian22.7
+          Dubbo + Hessian23.0
+          Dubbo + Protobuf3.0
+          Triple + Protobuf3.0
+          Triple + Protobuf(Hessian)3.0
+      
+  
+  
+      
+          无参方法
+          30333 ops/s2.5ms P99
+          30414 ops/s2.4ms P99
+          24123 ops/s3.2ms P99
+          7016 ops/s8.7ms P99
+          6635 ops/s9.1ms P99
+      
+      
+          pojo返回值
+          8984 ops/s6.1 ms P99
+          12279 ops/s5.7 ms P99
+          21479 ops/s3.0 ms P99
+          6255 ops/s8.9 ms P99
+          6491 ops/s10 ms P99
+      
+      
+          pojo列表返回值
+          1916 ops/s34 ms P99
+          2037 ops/s34 ms P99
+          12722 ops/s7.7 ms P99
+          6920 ops/s9.6 ms P99
+          2833 ops/s27 ms P99
+      
+  
+
+1.2.1 Dubbo 协议不同版本实现对比
+"><meta name=twitter:description content="
+Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。
+由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。
+Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。
+
+1.1 环境
+
+  
+      
+          
+          描述
+      
+  
+  
+      
+          机器
+          4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer）
+      
+      
+          压测用例
+          RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值2.7 版本 Dubbo 协议（Hessian2 序列化）3.0 版本 Dubbo 协议（Hessian2 序列化）3.0 版本 Dubbo 协议（Protobuf 序列化）3.0 版本 Triple 协议（Protobuf 序列化）3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化）
+      
+      
+          压测方法
+          单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据 压测数据通过 https://github.com/apache/dubbo-benchmark 得出
+      
+  
+
+
+1.2 数据分析
+
+  
+      
+          
+          Dubbo + Hessian22.7
+          Dubbo + Hessian23.0
+          Dubbo + Protobuf3.0
+          Triple + Protobuf3.0
+          Triple + Protobuf(Hessian)3.0
+      
+  
+  
+      
+          无参方法
+          30333 ops/s2.5ms P99
+          30414 ops/s2.4ms P99
+          24123 ops/s3.2ms P99
+          7016 ops/s8.7ms P99
+          6635 ops/s9.1ms P99
+      
+      
+          pojo返回值
+          8984 ops/s6.1 ms P99
+          12279 ops/s5.7 ms P99
+          21479 ops/s3.0 ms P99
+          6255 ops/s8.9 ms P99
+          6491 ops/s10 ms P99
+      
+      
+          pojo列表返回值
+          1916 ops/s34 ms P99
+          2037 ops/s34 ms P99
+          12722 ops/s7.7 ms P99
+          6920 ops/s9.6 ms P99
+          2833 ops/s27 ms P99
+      
+  
+
+1.2.1 Dubbo 协议不同版本实现对比
+"><meta property="og:url" content="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/"><meta property="og:title" content="RPC 协议 Triple&amp;Dubbo 基准测试"><meta name=twitter:title content="RPC 协议 Triple&amp;Dubbo 基准测试"><meta name=twitter:image:alt content="Apache Dubbo"><meta property="og:type" content="article"><meta name=viewport content="width=device-width"><script async defer src=/js/github-buttons.js></script><link href=/css/community.css rel=stylesheet><link href=/css/contactus.css rel=stylesheet><link href=/css/language.css rel=stylesheet><script src=/js/script.js></script></head><body class="td-page td-documentation"><header><nav class="js-navbar-scroll navbar navbar-expand navbar-link flex-column flex-md-row td-navbar navbar-parent" data-auto-burger=primary><div class=container-navbar><a class=navbar-brand href=/zh-cn/><span class=navbar-logo></span><span class="text-uppercase font-weight-bold">Apache Dubbo</span></a><div class="td-navbar-nav-scroll menu_navbar_list" id=main_navbar><ul class="navbar-nav mt-2 mt-lg-0"><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/overview/home/><span>文档</span></a></li><li class="nav-item dropdown d-lg-block community_after"><a class="nav-link dropdown-toggle" href=# id=navbarDropdown role=button data-toggle=dropdown aria-haspopup=true aria-expanded=false></a><div class="dropdown-menu dropdown-menu-right" aria-labelledby=navbarDropdownMenuLink></div></li><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/blog/><span>博客</span></a></li><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/download/><span>下载</span></a></li><li class="nav-item nav-item-line px-2 mb-2 mb-lg-0"><a class=nav-link href=https://start.dubbo.apache.org/bootstrap.html target=_blank><span>Initializer</span>
 <i class='fas fa-external-link-alt'></i></a></li><li class="nav-item dropdown d-lg-block"><a class="nav-link dropdown-toggle" href=# id=navbarDropdown role=button data-toggle=dropdown aria-haspopup=true aria-expanded=false>生态</a><div class="dropdown-menu dropdown-menu-right" aria-labelledby=navbarDropdownMenuLink><a class=dropdown-item href=/zh-cn/blog>Launch A Project</a>
 <a class=dropdown-item href=/zh-cn/download>可视化控制台</a>
 <a class=dropdown-item href=/option-3>商城系统</a>
 <a class=dropdown-item href=/option-3>Benchmark</a>
 <a class=dropdown-item href=/option-3>Proxyless Mesh</a></div></li></ul></div><div class="td-navbar-nav-scroll menu_navbar_language_change"><ul class="navbar-nav mt-2 mt-lg-0 language_change_btn_pc"><li class="nav-item d-lg-block"><div class="nav nav-tabs languagetab-contain" id=languageTabs role=tablist><a class="languagetab-btn nav-item nav-link" href=/en/ role=tab aria-selected=false>EN
-</a><a class="languagetab-btn nav-item nav-link active" href=/zh-cn/ role=tab aria-selected=true>中文</a></div><style>.languagetab-contain{width:135px;height:40px;border-radius:32px;background-color:#ebecef;padding:3px 6px}.languagetab-btn{width:60px!important;height:32px!important;border-radius:32px!important;text-decoration:none;display:flex;justify-content:center;align-items:center;font-size:12px!important}.languagetab-btn.active{background-color:#dddee4!important;border:0}</style></li><li class="nav-item d-lg-block"><div class="nav-item d-none d-lg-block"><div id=docsearch></div></div></li></ul><ul class="navbar-nav mt-lg-0 language_change_btn_mobile"><button type=button data-toggle=collapse data-target=#main_navbar aria-controls=main_navbar aria-expanded=false aria-label="Toggle navigation" style=border:0;margin-right:16px><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentcolor" class="bi bi-menu-app" viewBox="0 0 16 16"><path d="M0 1.5A1.5 1.5.0 011.5.0h2A1.5 1.5.0 015 1.5v2A1.5 1.5.0 013.5 5h-2A1.5 1.5.0 010 3.5zM1.5 1a.5.5.0 00-.5.5v2a.5.5.0 00.5.5h2a.5.5.0 00.5-.5v-2A.5.5.0 003.5 1zM0 8a2 2 0 012-2h12a2 2 0 012 2v5a2 2 0 01-2 2H2a2 2 0 01-2-2zm1 3v2a1 1 0 001 1h12a1 1 0 001-1v-2zm14-1V8a1 1 0 00-1-1H2A1 1 0 001 8v2zM2 8.5a.5.5.0 01.5-.5h9a.5.5.0 010 1h-9A.5.5.0 012 8.5m0 4a.5.5.0 01.5-.5h6a.5.5.0 010 1h-6a.5.5.0 01-.5-.5"/></svg></button><li class=nav-item><div class="nav-item d-block"><div id=docsearch></div></div></li></ul><a class="btn btn-dark ml-2 github-btn" href=https://github.com/apache/dubbo/>GITHUB</a></div></div></nav><div class="collapse navbar-collapse mobile_navbar_menu" id=main_navbar><ul class="navbar-nav mt-2 mt-lg-0 navbar-menus-list-mobile"><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/overview/home/><span>文档</span></a></li><li class="nav-item d-lg-block" style=position:relative><a class=nav-link data-toggle=collapse href=#collapseCommunity role=button aria-expanded=false aria-controls=collapseMenu><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentcolor" class="bi bi-caret-down-fill svg_arrow_down_community" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 01.753 1.659l-4.796 5.48a1 1 0 01-1.506.0z"/></svg></a><div class=collapse id=collapseCommunity><div class="card card-body" style="background-color:#f4f4f6;padding:10px 0;border:0"></div></div></li><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/blog/><span>博客</span></a></li><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/download/><span>下载</span></a></li><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=https://start.dubbo.apache.org/bootstrap.html target=_blank><span>Initializer</span>
-<i class='fas fa-external-link-alt'></i></a></li><li class="nav-item d-lg-block" style=position:relative><a class=nav-link data-toggle=collapse href=#collapseEcosystem role=button aria-expanded=false aria-controls=collapseMenu>生态<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentcolor" class="bi bi-caret-down-fill svg_arrow_down_ecosystem" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 01.753 1.659l-4.796 5.48a1 1 0 01-1.506.0z"/></svg></a><div class=collapse id=collapseEcosystem><div class="card card-body" style="background-color:#f4f4f6;padding:10px 0;border:0"><a class=dropdown-item href=/zh-cn/blog>Launch A Project</a>
+</a><a class="languagetab-btn nav-item nav-link active" href=/zh-cn/ role=tab aria-selected=true>中文</a></div><style>.languagetab-contain{width:135px;height:40px;border-radius:32px;background-color:#ebecef;padding:3px 6px}.languagetab-btn{width:60px!important;height:32px!important;border-radius:32px!important;text-decoration:none;display:flex;justify-content:center;align-items:center;font-size:12px!important}.languagetab-btn.active{background-color:#dddee4!important;border:0}</style></li><li class="nav-item d-lg-block"><div class="nav-item d-none d-lg-block"><div id=docsearch></div></div></li></ul><ul class="navbar-nav mt-lg-0 language_change_btn_mobile"><button type=button data-toggle=collapse data-target=#main_navbar aria-controls=main_navbar aria-expanded=false aria-label="Toggle navigation" style=border:0;margin-right:16px><svg width="16" height="16" fill="currentcolor" class="bi bi-menu-app" viewBox="0 0 16 16"><path d="M0 1.5A1.5 1.5.0 011.5.0h2A1.5 1.5.0 015 1.5v2A1.5 1.5.0 013.5 5h-2A1.5 1.5.0 010 3.5zM1.5 1a.5.5.0 00-.5.5v2a.5.5.0 00.5.5h2a.5.5.0 00.5-.5v-2A.5.5.0 003.5 1zM0 8a2 2 0 012-2h12a2 2 0 012 2v5a2 2 0 01-2 2H2a2 2 0 01-2-2zm1 3v2a1 1 0 001 1h12a1 1 0 001-1v-2zm14-1V8a1 1 0 00-1-1H2A1 1 0 001 8v2zM2 8.5a.5.5.0 01.5-.5h9a.5.5.0 010 1h-9A.5.5.0 012 8.5m0 4a.5.5.0 01.5-.5h6a.5.5.0 010 1h-6a.5.5.0 01-.5-.5"/></svg></button><li class=nav-item><div class="nav-item d-block"><div id=docsearch></div></div></li></ul><a class="btn btn-dark ml-2 github-btn" href=https://github.com/apache/dubbo/>GITHUB</a></div></div></nav><div class="collapse navbar-collapse mobile_navbar_menu" id=main_navbar><ul class="navbar-nav mt-2 mt-lg-0 navbar-menus-list-mobile"><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/overview/home/><span>文档</span></a></li><li class="nav-item d-lg-block" style=position:relative><a class=nav-link data-toggle=collapse href=#collapseCommunity role=button aria-expanded=false aria-controls=collapseMenu><svg width="10" height="10" fill="currentcolor" class="bi bi-caret-down-fill svg_arrow_down_community" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 01.753 1.659l-4.796 5.48a1 1 0 01-1.506.0z"/></svg></a><div class=collapse id=collapseCommunity><div class="card card-body" style="background-color:#f4f4f6;padding:10px 0;border:0"></div></div></li><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/blog/><span>博客</span></a></li><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=/zh-cn/download/><span>下载</span></a></li><li class="nav-item nav-item-line mb-2 mb-lg-0"><a class=nav-link href=https://start.dubbo.apache.org/bootstrap.html target=_blank><span>Initializer</span>
+<i class='fas fa-external-link-alt'></i></a></li><li class="nav-item d-lg-block" style=position:relative><a class=nav-link data-toggle=collapse href=#collapseEcosystem role=button aria-expanded=false aria-controls=collapseMenu>生态<svg width="10" height="10" fill="currentcolor" class="bi bi-caret-down-fill svg_arrow_down_ecosystem" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 01.753 1.659l-4.796 5.48a1 1 0 01-1.506.0z"/></svg></a><div class=collapse id=collapseEcosystem><div class="card card-body" style="background-color:#f4f4f6;padding:10px 0;border:0"><a class=dropdown-item href=/zh-cn/blog>Launch A Project</a>
 <a class=dropdown-item href=/zh-cn/download>可视化控制台</a>
 <a class=dropdown-item href=/option-3>商城系统</a>
 <a class=dropdown-item href=/option-3>Benchmark</a>
@@ -655,7 +910,7 @@
 <label for=m-zh-cnoverviewnoticesprotocol-check><a href=/zh-cn/overview/notices/protocol/ class="align-left pl-0 td-sidebar-link td-sidebar-link__page" id=m-zh-cnoverviewnoticesprotocol><span>RPC 协议安全</span></a></label></li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id=m-zh-cnoverviewnoticesregistry-li><input type=checkbox id=m-zh-cnoverviewnoticesregistry-check>
 <label for=m-zh-cnoverviewnoticesregistry-check><a href=/zh-cn/overview/notices/registry/ class="align-left pl-0 td-sidebar-link td-sidebar-link__page" id=m-zh-cnoverviewnoticesregistry><span>注册中心安全</span></a></label></li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id=m-zh-cnoverviewnoticesadmin-li><input type=checkbox id=m-zh-cnoverviewnoticesadmin-check>
 <label for=m-zh-cnoverviewnoticesadmin-check><a href=/zh-cn/overview/notices/admin/ class="align-left pl-0 td-sidebar-link td-sidebar-link__page" id=m-zh-cnoverviewnoticesadmin><span>Dubbo Admin 安全</span></a></label></li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id=m-zh-cnoverviewnoticeslog4j-li><input type=checkbox id=m-zh-cnoverviewnoticeslog4j-check>
-<label for=m-zh-cnoverviewnoticeslog4j-check><a href=/zh-cn/overview/notices/log4j/ class="align-left pl-0 td-sidebar-link td-sidebar-link__page" id=m-zh-cnoverviewnoticeslog4j><span>Log4j 漏洞影响</span></a></label></li></ul></li></ul></li></ul></nav></div></div><main class="col-12 col-md-9 col-xl-8 pl-md-5" role=main><nav aria-label=breadcrumb class=td-breadcrumbs><ol class=breadcrumb><li class=breadcrumb-item><a href=/zh-cn/overview/>文档</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/>用户手册</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/java-sdk/>Java SDK</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/java-sdk/reference-manual/>参考手册</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/java-sdk/reference-manual/performance/>性能Benchmark</a></li><li class="breadcrumb-item active" aria-current=page>RPC 基准</li></ol></nav><div class=td-content><h1>RPC 协议 Triple&amp;Dubbo 基准测试</h1><header class=article-meta></header><ul><li>Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。</li><li>由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。</li><li>Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。</li></ul><h2 id=11-环境>1.1 环境</h2><table><thead><tr><th></th><th>描述</th></tr></thead><tbody><tr><td><strong>机器</strong></td><td>4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer）</td></tr><tr><td><strong>压测用例</strong></td><td>RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值<br><br>2.7 版本 Dubbo 协议（Hessian2 序列化）<br>3.0 版本 Dubbo 协议（Hessian2 序列化）<br>3.0 版本 Dubbo 协议（Protobuf 序列化）<br>3.0 版本 Triple 协议（Protobuf 序列化）<br>3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化）</td></tr><tr><td><strong>压测方法</strong></td><td>单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据<br>压测数据通过 <a href=https://github.com/apache/dubbo-benchmark>https://github.com/apache/dubbo-benchmark</a> 得出</td></tr></tbody></table><br><h2 id=12-数据分析>1.2 数据分析</h2><table><thead><tr><th></th><th><strong>Dubbo + Hessian2<br>2.7</strong></th><th><strong>Dubbo + Hessian2<br>3.0</strong></th><th><strong>Dubbo + Protobuf<br>3.0</strong></th><th><strong>Triple + Protobuf<br>3.0</strong></th><th><strong>Triple + Protobuf(Hessian)<br>3.0</strong></th></tr></thead><tbody><tr><td><strong>无参方法</strong></td><td>30333 ops/s<br>2.5ms P99</td><td>30414 ops/s<br>2.4ms P99</td><td>24123 ops/s<br>3.2ms P99</td><td>7016 ops/s<br>8.7ms P99</td><td>6635 ops/s<br>9.1ms P99</td></tr><tr><td><strong>pojo返回值</strong></td><td>8984 ops/s<br>6.1 ms P99</td><td>12279 ops/s<br>5.7 ms P99</td><td>21479 ops/s<br>3.0 ms P99</td><td>6255 ops/s<br>8.9 ms P99</td><td>6491 ops/s<br>10 ms P99</td></tr><tr><td><strong>pojo列表返回值</strong></td><td>1916 ops/s<br>34 ms P99</td><td>2037 ops/s<br>34 ms P99</td><td>12722 ops/s<br>7.7 ms P99</td><td>6920 ops/s<br>9.6 ms P99</td><td>2833 ops/s<br>27 ms P99</td></tr></tbody></table><h3 id=121-dubbo-协议不同版本实现对比>1.2.1 Dubbo 协议不同版本实现对比</h3><p><img alt=//imgs/v3/performance/rpc-dubbo.svg src=/imgs/v3/performance/rpc-dubbo.svg></p><p><br>图三 Dubbo协议在不同版本的实现对比<br></p><ul><li>就 Dubbo RPC + Hessian 的默认组合来说，Dubbo3 与 Dubbo2 在性能上在不同调用场景下基本持平</li></ul><h3 id=122-dubbo协议-vs-triple协议>1.2.2 Dubbo协议 vs Triple协议</h3><p><img alt=//imgs/v3/performance/rpc-triple.svg src=/imgs/v3/performance/rpc-triple.svg></p><p><br>图四 Triple vs Dubbo<br></p><ul><li>单纯看 Consumer &lt;-> Provider 的点对点调用，可以看出 Triple 协议本身并不占优势，同样使用 Protobuf 序列化方式，Dubbo RPC 协议总体性能还是要优于 Triple。<br><br></li><li>Triple 实现在 3.0 版本中将会得到持续优化，但不能完全改变在某些场景下“基于 HTTP/2 的 RPC 协议”对比“基于 TCP 的 RPC 协议”处于劣势的局面</li></ul><h3 id=123-补充网关场景>1.2.3 补充网关场景</h3><p>TBD<br><br></p><h3 id=124-模拟-stream-通信场景的吞吐量提升>1.2.4 模拟 Stream 通信场景的吞吐量提升</h3><p>TBD</p><div id=pre-footer><h2>反馈</h2><p class=feedback--prompt>此页是否对您有帮助？</p><button class="btn btn-primary mb-4 feedback--yes">是</button>
+<label for=m-zh-cnoverviewnoticeslog4j-check><a href=/zh-cn/overview/notices/log4j/ class="align-left pl-0 td-sidebar-link td-sidebar-link__page" id=m-zh-cnoverviewnoticeslog4j><span>Log4j 漏洞影响</span></a></label></li></ul></li></ul></li></ul></nav></div></div><main class="col-12 col-md-9 col-xl-8 pl-md-5" role=main><nav aria-label=breadcrumb class=td-breadcrumbs><ol class=breadcrumb><li class=breadcrumb-item><a href=/zh-cn/overview/>文档</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/>用户手册</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/java-sdk/>Java SDK</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/java-sdk/reference-manual/>参考手册</a></li><li class=breadcrumb-item><a href=/zh-cn/overview/mannual/java-sdk/reference-manual/performance/>性能Benchmark</a></li><li class="breadcrumb-item active" aria-current=page>RPC 基准</li></ol></nav><div class=td-content><h1>RPC 协议 Triple&amp;Dubbo 基准测试</h1><header class=article-meta></header><ul><li>Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。</li><li>由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。</li><li>Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。</li></ul><h2 id=11-环境>1.1 环境</h2><table><thead><tr><th style=text-align:left></th><th style=text-align:left>描述</th></tr></thead><tbody><tr><td style=text-align:left><strong>机器</strong></td><td style=text-align:left>4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer）</td></tr><tr><td style=text-align:left><strong>压测用例</strong></td><td style=text-align:left>RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值<br><br>2.7 版本 Dubbo 协议（Hessian2 序列化）<br>3.0 版本 Dubbo 协议（Hessian2 序列化）<br>3.0 版本 Dubbo 协议（Protobuf 序列化）<br>3.0 版本 Triple 协议（Protobuf 序列化）<br>3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化）</td></tr><tr><td style=text-align:left><strong>压测方法</strong></td><td style=text-align:left>单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据<br>压测数据通过 <a href=https://github.com/apache/dubbo-benchmark>https://github.com/apache/dubbo-benchmark</a> 得出</td></tr></tbody></table><br><h2 id=12-数据分析>1.2 数据分析</h2><table><thead><tr><th style=text-align:left></th><th style=text-align:left><strong>Dubbo + Hessian2<br>2.7</strong></th><th style=text-align:left><strong>Dubbo + Hessian2<br>3.0</strong></th><th style=text-align:left><strong>Dubbo + Protobuf<br>3.0</strong></th><th style=text-align:left><strong>Triple + Protobuf<br>3.0</strong></th><th style=text-align:left><strong>Triple + Protobuf(Hessian)<br>3.0</strong></th></tr></thead><tbody><tr><td style=text-align:left><strong>无参方法</strong></td><td style=text-align:left>30333 ops/s<br>2.5ms P99</td><td style=text-align:left>30414 ops/s<br>2.4ms P99</td><td style=text-align:left>24123 ops/s<br>3.2ms P99</td><td style=text-align:left>7016 ops/s<br>8.7ms P99</td><td style=text-align:left>6635 ops/s<br>9.1ms P99</td></tr><tr><td style=text-align:left><strong>pojo返回值</strong></td><td style=text-align:left>8984 ops/s<br>6.1 ms P99</td><td style=text-align:left>12279 ops/s<br>5.7 ms P99</td><td style=text-align:left>21479 ops/s<br>3.0 ms P99</td><td style=text-align:left>6255 ops/s<br>8.9 ms P99</td><td style=text-align:left>6491 ops/s<br>10 ms P99</td></tr><tr><td style=text-align:left><strong>pojo列表返回值</strong></td><td style=text-align:left>1916 ops/s<br>34 ms P99</td><td style=text-align:left>2037 ops/s<br>34 ms P99</td><td style=text-align:left>12722 ops/s<br>7.7 ms P99</td><td style=text-align:left>6920 ops/s<br>9.6 ms P99</td><td style=text-align:left>2833 ops/s<br>27 ms P99</td></tr></tbody></table><h3 id=121-dubbo-协议不同版本实现对比>1.2.1 Dubbo 协议不同版本实现对比</h3><p><img alt=//imgs/v3/performance/rpc-dubbo.svg src=/imgs/v3/performance/rpc-dubbo.svg></p><p><br>图三 Dubbo协议在不同版本的实现对比<br></p><ul><li>就 Dubbo RPC + Hessian 的默认组合来说，Dubbo3 与 Dubbo2 在性能上在不同调用场景下基本持平</li></ul><h3 id=122-dubbo协议-vs-triple协议>1.2.2 Dubbo协议 vs Triple协议</h3><p><img alt=//imgs/v3/performance/rpc-triple.svg src=/imgs/v3/performance/rpc-triple.svg></p><p><br>图四 Triple vs Dubbo<br></p><ul><li>单纯看 Consumer &lt;-> Provider 的点对点调用，可以看出 Triple 协议本身并不占优势，同样使用 Protobuf 序列化方式，Dubbo RPC 协议总体性能还是要优于 Triple。<br><br></li><li>Triple 实现在 3.0 版本中将会得到持续优化，但不能完全改变在某些场景下“基于 HTTP/2 的 RPC 协议”对比“基于 TCP 的 RPC 协议”处于劣势的局面</li></ul><h3 id=123-补充网关场景>1.2.3 补充网关场景</h3><p>TBD<br><br></p><h3 id=124-模拟-stream-通信场景的吞吐量提升>1.2.4 模拟 Stream 通信场景的吞吐量提升</h3><p>TBD</p><div id=pre-footer><h2>反馈</h2><p class=feedback--prompt>此页是否对您有帮助？</p><button class="btn btn-primary mb-4 feedback--yes">是</button>
 <button class="btn btn-primary mb-4 feedback--no">否</button></div><script>const yes=document.querySelector(".feedback--yes"),no=document.querySelector(".feedback--no");document.querySelectorAll(".feedback--link").forEach(e=>{e.href=e.href+window.location.pathname});const sendFeedback=e=>{gtag||console.log("!gtag"),gtag("event","click",{event_category:"Helpful",event_label:window.location.pathname,value:e})},disableButtons=()=>{yes.disabled=!0,yes.classList.add("feedback--button__disabled"),no.disabled=!0,no.classList.add("feedback--button__disabled")};yes.addEventListener("click",()=>{sendFeedback(1),disableButtons(),document.querySelector(".feedback--response").classList.remove("feedback--response__hidden")}),no.addEventListener("click",()=>{sendFeedback(0),disableButtons(),document.querySelector(".feedback--response").classList.remove("feedback--response__hidden")})</script><div class=td-page-meta__lastmod>最后修改 March 2, 2023: <a href=https://github.com/apache/dubbo-website/commit/f16c1535592b73754a93fcd0e65b78865ce84ca3>Fix alias forward in docs3-v2 (#2342) (f16c1535592)</a></div></div></main><div class="d-none d-xl-block col-xl-2 td-toc d-print-none"><div class="td-page-meta ml-2 pb-1 pt-2 mb-0"><a href=https://github.com/apache/dubbo-website/edit/master/content/zh-cn//overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking target=_blank><i class="fa fa-edit fa-fw"></i> 编辑此页</a>
 <a href="https://github.com/apache/dubbo-website/new/master/content/zh-cn//overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking?filename=change-me.md&amp;value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60getting-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A" target=_blank><i class="fa fa-edit fa-fw"></i> 创建子页面</a>
 <a href="https://github.com/apache/dubbo-website/issues/new?title=RPC%20%e5%8d%8f%e8%ae%ae%20Triple&amp;amp;Dubbo%20%e5%9f%ba%e5%87%86%e6%b5%8b%e8%af%95" target=_blank><i class="fab fa-github fa-fw"></i> 登记问题</a>

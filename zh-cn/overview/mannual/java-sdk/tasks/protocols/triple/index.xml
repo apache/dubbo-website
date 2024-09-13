@@ -1,28 +1,115 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>基于 HTTP1/2 的 RPC 通信协议 - triple on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/</link><description>Recent content in 基于 HTTP1/2 的 RPC 通信协议 - triple on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Java 接口方式开发 triple 通信服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/</guid><description>不同于谷歌官方 gRPC 实现，Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），你可以继续使用 Java 接口 直接定义服务。对于期望平滑升级、没有多语言业务或者不熟悉 Protobuf 的用户而言，Java 接口方式是最简单的使用 triple 的方式。
-以下是一个使用Java 接口开发 Dubbo 服务的基本示例，示例使用 triple 协议通信，可在此查看 本示例的完整代码。
-注意 本文使用的示例是基于原生 API 编码的，这里还有一个 Spring Boot 版本的示例 供参考，同样是 Java接口+triple 的模式，此示例还额外加入了服务发现配置。 运行示例 首先，可通过以下命令下载示例源码
-git clone --depth=1 https://github.com/apache/dubbo-samples.git 进入示例源码目录：
-cd dubbo-samples/1-basic/dubbo-samples-api 启动Server 运行以下命令启动 server
-mvn -Dexec.mainClass=org.apache.dubbo.samples.provider.Application exec:java 启动Client 有两种方式可以调用 server 发布的服务
-使用标准的 http 工具，如 cURL 使用 Dubbo SDK 开发一个 client cURL curl \ --header &amp;#34;Content-Type: application/json&amp;#34; \ --data &amp;#39;[&amp;#34;Dubbo&amp;#34;]&amp;#39; \ http://localhost:50052/org.</description></item><item><title>使用 Protobuf(IDL) 开发 triple 通信服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</guid><description>本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑上一篇基于Java接口的 triple 开发模式。
-可在此查看 本示例的完整代码。
-注意 本文使用的示例是基于原生 API 编码的，这里还有一个 Spring Boot 版本的示例 供参考，同样是 protobuf+triple 的模式，但额外加入了服务发现配置。 运行示例 首先，可通过以下命令下载示例源码：
-git clone --depth=1 https://github.com/apache/dubbo-samples.git 进入示例源码目录：
-cd dubbo-samples/1-basic/dubbo-samples-api-idl 编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：
-mvn clean compile 生成代码如下
-├── build │ └── generated │ └── source │ └── proto │ └── main │ └── java │ └── org │ └── apache │ └── dubbo │ └── samples │ └── tri │ └── unary │ ├── DubboGreeterTriple.</description></item><item><title>Streaming 通信</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</guid><description>在 选择 RPC 通信协议 一节提到，Streaming 是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:
-接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的 推送类场景，多个消息在同一个调用的上下文中被发送和处理 Streaming 分为以下三种:
-SERVER_STREAM(服务端流) CLIENT_STREAM(客户端流) BIDIRECTIONAL_STREAM(双向流) 以下示例演示 triple streaming 流式通信的基本使用方法，涵盖了客户端流、服务端流、双向流等三种模式，示例使用 Protocol Buffers 的服务开发模式，对于 Java 接口模式的开发者可以在本文最后查看相应说明。可在此查看 本示例完整代码。
-运行示例 首先，可通过以下命令下载示例源码：
-git clone --depth=1 https://github.com/apache/dubbo-samples.git 进入示例源码目录：
-cd dubbo-samples/2-advanced/dubbo-samples-triple-streaming 编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：
-mvn clean compile 启动server 运行以下命令，启动 server：
-$ mvn compile exec:java -Dexec.mainClass=&amp;#34;org.apache.dubbo.samples.tri.streaming.TriStreamServer&amp;#34; 启动client 运行以下命令，启动 client：
-$ mvn compile exec:java -Dexec.mainClass=&amp;#34;org.apache.dubbo.samples.tri.streaming.TriStreamClient&amp;#34; 源码解读 与 使用 Protobuf(IDL) 开发 triple 协议服务 一节中提到的一样，这个示例使用 protobuf 定义服务，因此示例需要的依赖、配置等基本是一致的，请参考那一节了解完整详情。接下来，我们将重点讲解流式通信部分的内容。</description></item><item><title>使用 Dubbo 开发 gRPC 服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/grpc/</guid><description>这个示例演示了如何使用 triple 协议实现 Dubbo 服务与标准 gRPC 服务的互相调用，可在此查看 示例完整源码
-就像在 Triple协议规范 中所描述的，triple 协议与 gRPC 协议保持 100% 兼容，同时在易用性方面有了非常大的提升（比如支持 cURL、浏览器直接访问等），可以说 triple 是一个更好用的 gRPC 设计与实现。
-运行示例 首先，可通过以下命令下载示例源码
-git clone --depth=1 https://github.com/apache/dubbo-samples.git 进入示例源码目录：
-cd dubbo-samples/2-advanced/dubbo-samples-triple-grpc 接下来，我们分别从 dubbo 调用 grpc、grpc 调用 dubbo 两个不同的方向，看一下如何基于 triple 协议实现互调。
-作为标准的 gRPC Server 在这一部分，我们会发布一个 Dubbo Triple Server，然后启动一个标准的 gRPC 消费端（示例采用谷歌官方发布的 grpc-java 编码）来调用 Triple 服务。
-启动 Dubbo server 确保你在 dubbo-samples-triple-grpc 目录，运行以下命令：
-$ mvn compile exec:java -Dexec.mainClass=&amp;#34;org.apache.dubbo.samples.tri.grpc.interop.server.TriOpServer&amp;#34; 使用标准 gRPC client 调用 Triple 服务 打开一个新的终端，在 dubbo-samples-triple-grpc 目录运行以下命令：</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>基于 HTTP1/2 的 RPC 通信协议 - triple on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/</link><description>Recent content in 基于 HTTP1/2 的 RPC 通信协议 - triple on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Java 接口方式开发 triple 通信服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/</guid><description>&lt;p>&lt;strong>不同于谷歌官方 gRPC 实现，Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），你可以继续使用 &lt;code>Java 接口&lt;/code> 直接定义服务。对于期望平滑升级、没有多语言业务或者不熟悉 Protobuf 的用户而言，&lt;code>Java 接口&lt;/code>方式是最简单的使用 triple 的方式。&lt;/strong>&lt;/p>
+&lt;p>以下是一个使用&lt;code>Java 接口&lt;/code>开发 Dubbo 服务的基本示例，示例使用 triple 协议通信，可在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api">本示例的完整代码&lt;/a>。&lt;/p>
+
+
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+
+ 本文使用的示例是基于原生 API 编码的，这里还有一个 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot">Spring Boot 版本的示例&lt;/a> 供参考，同样是 &lt;code>Java接口+triple&lt;/code> 的模式，此示例还额外加入了服务发现配置。
+
+&lt;/div>
+
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/1-basic/dubbo-samples-api
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动Server&lt;/h3>
+&lt;p>运行以下命令启动 server&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.provider.Application exec:java
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动client">启动Client&lt;/h3>
+&lt;p>有两种方式可以调用 server 发布的服务&lt;/p>
+&lt;ul>
+&lt;li>使用标准的 http 工具，如 cURL&lt;/li>
+&lt;li>使用 Dubbo SDK 开发一个 client&lt;/li>
+&lt;/ul>
+&lt;h4 id="curl">cURL&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;[&amp;#34;Dubbo&amp;#34;]&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:50052/org.apache.dubbo.samples.api.GreetingsService/sayHi/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="sdk-client">SDK Client&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.client.Application exec:java
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="源码讲解">源码讲解&lt;/h2>
+&lt;p>如果您是 Dubbo 老用户，你会发现以下内容与之前 Dubbo2 的开发模式基本一样，只是协议名称从 &lt;code>dubbo&lt;/code> 换成了 &lt;code>tri&lt;/code>。&lt;/p></description></item><item><title>使用 Protobuf(IDL) 开发 triple 通信服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</guid><description>&lt;p>本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑上一篇基于Java接口的 triple 开发模式。&lt;/p>
+&lt;p>可在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl">本示例的完整代码&lt;/a>。&lt;/p>
+
+
+&lt;div class="alert alert-info" role="alert">
+&lt;h4 class="alert-heading">注意&lt;/h4>
+
+ 本文使用的示例是基于原生 API 编码的，这里还有一个 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl">Spring Boot 版本的示例&lt;/a> 供参考，同样是 &lt;code>protobuf+triple&lt;/code> 的模式，但额外加入了服务发现配置。
+
+&lt;/div>
+
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/1-basic/dubbo-samples-api-idl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn clean compile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>生成代码如下&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>├── build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── generated
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── source
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── org
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── apache
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── samples
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── tri
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── unary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── DubboGreeterTriple.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── Greeter.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterOuterClass.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterReply.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterReplyOrBuilder.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterRequest.java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── GreeterRequestOrBuilder.java
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动Server&lt;/h3>
+&lt;p>运行以下命令启动 server。&lt;/p></description></item><item><title>Streaming 通信</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</guid><description>&lt;p>在 &lt;a href="../../protocol/">选择 RPC 通信协议&lt;/a> 一节提到，Streaming 是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:&lt;/p>
+&lt;ul>
+&lt;li>接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送&lt;/li>
+&lt;li>流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的&lt;/li>
+&lt;li>推送类场景，多个消息在同一个调用的上下文中被发送和处理&lt;/li>
+&lt;/ul>
+&lt;p>Streaming 分为以下三种:&lt;/p>
+&lt;ul>
+&lt;li>SERVER_STREAM(服务端流)&lt;/li>
+&lt;li>CLIENT_STREAM(客户端流)&lt;/li>
+&lt;li>BIDIRECTIONAL_STREAM(双向流)&lt;/li>
+&lt;/ul>
+&lt;p>以下示例演示 triple streaming 流式通信的基本使用方法，涵盖了客户端流、服务端流、双向流等三种模式，示例使用 Protocol Buffers 的服务开发模式，对于 Java 接口模式的开发者可以在本文最后查看相应说明。可在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-streaming">本示例完整代码&lt;/a>。&lt;/p>
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/2-advanced/dubbo-samples-triple-streaming
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn clean compile
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动server&lt;/h3>
+&lt;p>运行以下命令，启动 server：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.streaming.TriStreamServer&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动client">启动client&lt;/h4>
+&lt;p>运行以下命令，启动 client：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.streaming.TriStreamClient&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="源码解读">源码解读&lt;/h2>
+&lt;p>与 &lt;a href="../idl/">使用 Protobuf(IDL) 开发 triple 协议服务&lt;/a> 一节中提到的一样，这个示例使用 protobuf 定义服务，因此示例需要的依赖、配置等基本是一致的，请参考那一节了解完整详情。接下来，我们将重点讲解流式通信部分的内容。&lt;/p></description></item><item><title>使用 Dubbo 开发 gRPC 服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/grpc/</guid><description>&lt;p>这个示例演示了如何使用 triple 协议实现 Dubbo 服务与标准 gRPC 服务的互相调用，可在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-grpc">示例完整源码&lt;/a>&lt;/p>
+&lt;p>&lt;img alt="triple-grpc.png" src="https://cn.dubbo.apache.org/imgs/v3/tasks/protocol/triple-grpc.png">&lt;/p>
+&lt;p>就像在 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/protocols/triple/">Triple协议规范&lt;/a> 中所描述的，triple 协议与 gRPC 协议保持 100% 兼容，同时在易用性方面有了非常大的提升（比如支持 cURL、浏览器直接访问等），可以说 triple 是一个更好用的 gRPC 设计与实现。&lt;/p>
+&lt;h2 id="运行示例">运行示例&lt;/h2>
+&lt;p>首先，可通过以下命令下载示例源码&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/2-advanced/dubbo-samples-triple-grpc
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来，我们分别从 dubbo 调用 grpc、grpc 调用 dubbo 两个不同的方向，看一下如何基于 triple 协议实现互调。&lt;/p>
+&lt;h3 id="作为标准的-grpc-server">作为标准的 gRPC Server&lt;/h3>
+&lt;p>在这一部分，我们会发布一个 Dubbo Triple Server，然后启动一个标准的 gRPC 消费端（示例采用谷歌官方发布的 grpc-java 编码）来调用 Triple 服务。&lt;/p>
+&lt;h4 id="启动-dubbo-server">启动 Dubbo server&lt;/h4>
+&lt;p>确保你在 &lt;code>dubbo-samples-triple-grpc&lt;/code> 目录，运行以下命令：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ mvn compile exec:java -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.tri.grpc.interop.server.TriOpServer&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="使用标准-grpc-client-调用-triple-服务">使用标准 gRPC client 调用 Triple 服务&lt;/h4>
+&lt;p>打开一个新的终端，在 &lt;code>dubbo-samples-triple-grpc&lt;/code> 目录运行以下命令：&lt;/p></description></item></channel></rss>

@@ -1,25 +1,172 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo Developer Guide on Apache Dubbo</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/</link><description>Recent content in Dubbo Developer Guide on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/docs/v2.7/dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Source Code Build</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/build/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/build/</guid><description>Checkout checkout the lastest project source code with commands blow:
-git clone https://github.com/apache/dubbo.git dubbo Branches We use master as the major branch for new feature development, and use other branches for maintenance. Tags for all versions can be checked via https://github.com/apache/dubbo/tags.
-Building Dubbo relies on maven as the building tool.
-Requirements:
-Java above 1.8 version Maven version 2.2.1 or above The following MAVEN_OPTSshould be configured before building:
-export MAVEN_OPTS=-Xmx1024m -XX:MaxPermSize=512m build with below command:</description></item><item><title>Framework Design</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/design/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/design/</guid><description>Overall design Image description:
-Left area with light blue background shows service consumer interfaces, Right area with light green background shows service provider interfaces, center area shows both side interfaces. The image is divided into 10 layers from the bottom to the top, and the layers are one-way dependence. The black arrow on the right represents the dependency between layers, and each layer can be stripped from the upper layer to be reused, the Service and Config layers are API, and the other layers are SPI.</description></item><item><title>SPI Loading</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/spi/</guid><description>SPI Config Source: Dubbo SPI is inherited from standard JDK SPI(Service Provider Interface) and makes it more powerful.
-Dubbo fixed below issues of the standard JDK SPI:
-The standard JDK SPI will load and instantize all the implementations at once. It will be a waste of resources if one implementation is timecosted, but never be used. We can&amp;rsquo;t accquire the SPI name, if loading the SPI implementation is failed.For example: standard JDK ScriptEngine, get script type by invoking method getName().</description></item><item><title>Implementation details</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/implementation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/implementation/</guid><description>Initialization details Service parsing Based on META-INF/spring.handlers config in dubbo.jar, Spring calls DubboNamespaceHandler when meeting dubbo namespace.
-All Dubbo tags are parsed by DubboBeanDefinitionParser, based on one to one attribute mapping, the XML label is parsed as a Bean object.
-Transfer Bean object to URL, and transfer all attributes of Bean to URL parameters when ServiceConfig.export() or ReferenceConfig.get() initialization.
-Then pase URL to Protocol extension point, based on Extension point adaptive mechanism of extension point, processing service exposure or reference for different protocols according to URL protocol header.</description></item><item><title>Public Agreement</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/contract/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/contract/</guid><description>This document is Dubbo public agreement, we expect all extension points comply with it.
-URL All extension points must include URL parameter, design URL as a context information which throughouts the whole extension point design system. URL standard style: protocol://username:password@host:port/path?key=value&amp;amp;key=value Logging Print ERROR log for unrecoverable and NEED TO ALARM situation. Print WARN log for recoverable exception or transient state inconsistency. Print INFO log for normally status.</description></item><item><title>Versions</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/release/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/release/</guid><description>New feature development and stability improvement are equally important to product. But adding new features will affect stability, dubbo uses the following version development pattern to achieve a good balance.
-Two versions evolving at the same time BugFix Version：low version，e.g. 2.4.x. This is called the GA version, which can be applied in production. We are supposed only to fix bugs in this version, and increase the third version number when release.</description></item><item><title>Checklist</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/checklist/</guid><description>Checklist before release github milestones github change lists Travis CI test code find bugs Checklist for bigfix versions Create a github issue before coding Create unit test before bugfix Review Test your code (Normal process / Abnormal process) Record your design on github issue Complete javadoc and comment in code Manager for every version, responsible for scope and check</description></item><item><title>Bad Smell</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/code-smell/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/code-smell/</guid><description>Ugly Dubbo design or implementation will be record here.
-URL Convertion 1. Point to Point Service export and refer service directly export：
-EXPORT(dubbo://provider-address/com.xxx.XxxService?version=1.0.0&amp;#34;) service directly refer：
-REFER(dubbo://provider-address/com.xxx.XxxService?version=1.0.0) 2. Export servie by registry export service to registry：
-EXPORT(registry://registry-address/org.apache.dubbo.registry.RegistrySerevice?registry=dubbo&amp;amp;export=ENCODE(dubbo://provider-address/com.xxx.XxxService?version=1.0.0)) accquire registry：
-url.setProtocol(url.getParameter(&amp;#34;registry&amp;#34;, &amp;#34;dubbo&amp;#34;)) GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice) registry service address：
-url.getParameterAndDecoded(&amp;#34;export&amp;#34;)) REGISTER(dubbo://provider-address/com.xxx.XxxService?version=1.0.0) 3. Refer service from registry refer service from registry：
-REFER(registry://registry-address/org.apache.dubbo.registry.RegistrySerevice?registry=dubbo&amp;amp;refer=ENCODE(version=1.0.0)) accquire registry：
-url.setProtocol(url.getParameter(&amp;#34;registry&amp;#34;, &amp;#34;dubbo&amp;#34;)) GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice) subscribe service address：
-url.addParameters(url.getParameterAndDecoded(&amp;#34;refer&amp;#34;)) SUBSCRIBE(dubbo://registry-address/com.xxx.XxxService?version=1.0.0) notify service address：</description></item><item><title>Coding Convention</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/coding/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/coding/</guid><description>Code style The source and JavaDoc of Dubbo follow below specifications:
-Code Conventions for the Java Programming Language How to Write Doc Comments for the Javadoc Tool Exception and Logging Log more context information as possible, such as error reason, error server address, client address, registry center address, dubbo version and so on. Try to put the main cause at the front, and display all other context information with key-value paris after it.</description></item><item><title>Compatibility Test</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/tck/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/tck/</guid><description>Dubbo&amp;rsquo;s protocol, communication, serialization, registry, load balancing and other SPI all offer alternative strategies for different application scenarios while our test cases are very scattered. Ours is always uncertain whether it can satisfy the complete contract of the extension point when users need to add a new implementation.
-Thus we need to use TCK (Technology Compatibility Kit) for the core extension points. When users add a new implementaion, compatibility with the rest of the framework can be ensured with TCK.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo Developer Guide on Apache Dubbo</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/</link><description>Recent content in Dubbo Developer Guide on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/docs/v2.7/dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Source Code Build</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/build/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/build/</guid><description>&lt;h2 id="checkout">Checkout&lt;/h2>
+&lt;p>checkout the lastest project source code with commands blow:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>git clone https://github.com/apache/dubbo.git dubbo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="branches">Branches&lt;/h2>
+&lt;p>We use &lt;code>master&lt;/code> as the major branch for new feature development, and use other branches for maintenance. Tags for all versions can be checked via &lt;a href="https://github.com/apache/dubbo/tags">https://github.com/apache/dubbo/tags&lt;/a>.&lt;/p>
+&lt;h2 id="building">Building&lt;/h2>
+&lt;p>Dubbo relies on &lt;a href="http://maven.apache.org">maven&lt;/a> as the building tool.&lt;/p>
+&lt;p>Requirements:&lt;/p>
+&lt;ul>
+&lt;li>Java above 1.8 version&lt;/li>
+&lt;li>Maven version 2.2.1 or above&lt;/li>
+&lt;/ul>
+&lt;p>The following &lt;code>MAVEN_OPTS&lt;/code>should be configured before building:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">MAVEN_OPTS&lt;/span>&lt;span style="color:#719e07">=&lt;/span>-Xmx1024m -XX:MaxPermSize&lt;span style="color:#719e07">=&lt;/span>512m
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>build with below command:&lt;/p></description></item><item><title>Framework Design</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/design/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/design/</guid><description>&lt;h2 id="overall-design">Overall design&lt;/h2>
+&lt;p>&lt;img alt="/dev-guide/images/dubbo-framework.jpg" src="https://cn.dubbo.apache.org/imgs/dev/dubbo-framework.jpg">&lt;/p>
+&lt;p>Image description:&lt;/p>
+&lt;ul>
+&lt;li>Left area with light blue background shows service consumer interfaces, Right area with light green background shows service provider interfaces, center area shows both side interfaces.&lt;/li>
+&lt;li>The image is divided into 10 layers from the bottom to the top, and the layers are one-way dependence. The black arrow on the right represents the dependency between layers, and each layer can be stripped from the upper layer to be reused, the Service and Config layers are API, and the other layers are SPI.&lt;/li>
+&lt;li>Green boxes are extension interfaces, blue boxes are implementation classes, image only shows implementation class of associated layers.&lt;/li>
+&lt;li>The blue dashed line is the initialization process, which is assembly chain when starting, red line for the method call process, which is calling chain when running, purple triangle arrow is inherited, can treat subclass as the same node of parent class, text of lines are the method invocation.&lt;/li>
+&lt;/ul>
+&lt;h2 id="layer-description">Layer description&lt;/h2>
+&lt;ul>
+&lt;li>&lt;strong>config layer&lt;/strong>: external config interface, &lt;code>ServiceConfig&lt;/code> and &lt;code>ReferenceConfig&lt;/code> is the center of the layer, you can directly initialize config class, also can generate config class by spring.&lt;/li>
+&lt;li>&lt;strong>proxy layer&lt;/strong>: transparent proxy of service interface, generate client Stub of service and server Skeletion of service, &lt;code>ServiceProxy&lt;/code> is the center, extension interface is &lt;code>ProxyFactory&lt;/code>.&lt;/li>
+&lt;li>&lt;strong>registry layer&lt;/strong>: encapsulation of service registry and discovery, service URL is the center, extension interfaces are &lt;code>RegistryFactory&lt;/code>, &lt;code>Registry&lt;/code> and &lt;code>RegistryService&lt;/code>.&lt;/li>
+&lt;li>&lt;strong>cluster layer&lt;/strong>: encapsulation of cluster of muliple providers and load balance, and bridging registration center, &lt;code>Invoker&lt;/code> is the center, extension interfaces are &lt;code>Cluster&lt;/code>, &lt;code>Directory&lt;/code>, &lt;code>Router&lt;/code>, &lt;code>LoadBalance&lt;/code>.&lt;/li>
+&lt;li>&lt;strong>monitor layer&lt;/strong>: monitor of RPC call times and call execute time, &lt;code>Statistics&lt;/code> is the center, extension interface are &lt;code>MonitorFactory&lt;/code>, &lt;code>Monitor&lt;/code>, &lt;code>MonitorService&lt;/code>&lt;/li>
+&lt;li>&lt;strong>protocol layer&lt;/strong>: encapsulation of RPC, &lt;code>Invocation&lt;/code> and &lt;code>Result&lt;/code> are the center, extension interfaces are &lt;code>Protocol&lt;/code>, &lt;code>Invoker&lt;/code>, &lt;code>Exporter&lt;/code>&lt;/li>
+&lt;li>&lt;strong>exchange layer&lt;/strong>: encapsulation of request and response, synchronous transfer asynchronous, &lt;code>Request&lt;/code> and &lt;code>Response&lt;/code> are the center, extension interfaces are &lt;code>Exchanger&lt;/code>, &lt;code>ExchangeChannel&lt;/code>, &lt;code>ExchangeClient&lt;/code>, &lt;code>ExchangeServer&lt;/code>&lt;/li>
+&lt;li>&lt;strong>transport layer&lt;/strong>: abstraction of mina and netty, &lt;code>Message&lt;/code> is the center, extension interfaces are &lt;code>Channel&lt;/code>, &lt;code>Transporter&lt;/code>, &lt;code>Client&lt;/code>, &lt;code>Server&lt;/code>, &lt;code>Codec&lt;/code>&lt;/li>
+&lt;li>&lt;strong>serialize layer&lt;/strong>: reusable tools, extension interfaces are &lt;code>Serialization&lt;/code>, &lt;code>ObjectInput&lt;/code>, &lt;code>ObjectOutput&lt;/code>, &lt;code>ThreadPool&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="relationship-description">Relationship description&lt;/h2>
+&lt;ul>
+&lt;li>In RPC, Protocol is the core layer, it means that you can complete RPC calling by Protocol + Invoker + Exporter, then filter at the main process of Invoker.&lt;/li>
+&lt;li>Consumer and Provider are abstraction concepts, just want you have a more intuitive understanding of which classes belong to the client and server side, the reason not use Client and Server is that Dubbo uses Provider, Consumer, Registry, Monitor divide logical topology node in many scenes, keep the concept of unity.&lt;/li>
+&lt;li>Cluster is external concept, the purpose of Cluster is that make various Invoker disguise to one Invoker, so that we just pay attention to the Invoker in Protocol layer, adding Cluster or removing Cluster will not affect other layers, because we don&amp;rsquo;t need Cluster when only have one provider.&lt;/li>
+&lt;li>The Proxy layer encapsulates the transparent proxy for all interfaces, and in other layers with Invoker as the center, turn Invoker into interface, or turn interface implementation into Invoker by Proxy only when exposuring to user. RPC still work even removing Proxy layer, but not so transparent, making remote service calling don&amp;rsquo;t look like local service calling.&lt;/li>
+&lt;li>Remoting is the implemetation of Dubbo protocols, you can remove Remoting if choosing RMI. The Remoting is divided into Transport layer and Exchange layer, Transport layer is responsible for one-way message transmission, it&amp;rsquo;s abstraction of Mina, Netty, Grizzly, it also can extend UDP transmission. The Exchange layer encapsulates the Request-Response semantics over the transport layer.&lt;/li>
+&lt;li>Actually Registry and Monitor are not at the same layer, they are independent nodes, draw them together by layer just for global view.&lt;/li>
+&lt;/ul>
+&lt;h2 id="modules-packaging">Modules packaging&lt;/h2>
+&lt;p>&lt;img alt="/dev-guide/images/dubbo-modules.jpg" src="https://cn.dubbo.apache.org/imgs/dev/dubbo-modules.jpg">&lt;/p></description></item><item><title>SPI Loading</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/spi/</guid><description>&lt;h2 id="spi-config">SPI Config&lt;/h2>
+&lt;h3 id="source">Source:&lt;/h3>
+&lt;p>Dubbo SPI is inherited from standard JDK SPI(Service Provider Interface) and makes it more powerful.&lt;/p>
+&lt;p>Dubbo fixed below issues of the standard JDK SPI:&lt;/p>
+&lt;ul>
+&lt;li>The standard JDK SPI will load and instantize all the implementations at once. It will be a waste of resources if one implementation is timecosted, but never be used.&lt;/li>
+&lt;li>We can&amp;rsquo;t accquire the SPI name, if loading the SPI implementation is failed.For example: standard JDK ScriptEngine, get script type by invoking method getName(). RubyScriptEngine class will load failed if the depenency jar jruby.jar is missing, and the real error info will be lost. When user executes ruby scripts, the program throws exception that doesn&amp;rsquo;t support ruby, but it is not the real cause.&lt;/li>
+&lt;li>Enhance the SPI functionality by supporting IoC and AOP, one SPI can be easily injected by another SPI simply using setter.&lt;/li>
+&lt;/ul>
+&lt;h3 id="appointment">Appointment:&lt;/h3>
+&lt;p>In the jar file containing extension class &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>, places a config file &lt;code>META-INF/dubbo/full interface name&lt;/code>, file content pattern: &lt;code>SPI name=the fully qualified name for the extension class&lt;/code>, use new line seperator for multiple implementation.&lt;/p></description></item><item><title>Implementation details</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/implementation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/implementation/</guid><description>&lt;h2 id="initialization-details">Initialization details&lt;/h2>
+&lt;h3 id="service-parsing">Service parsing&lt;/h3>
+&lt;p>Based on &lt;code>META-INF/spring.handlers&lt;/code> config in dubbo.jar, Spring calls &lt;code>DubboNamespaceHandler&lt;/code> when meeting dubbo namespace.&lt;/p>
+&lt;p>All Dubbo tags are parsed by &lt;code>DubboBeanDefinitionParser&lt;/code>, based on one to one attribute mapping, the XML label is parsed as a Bean object.&lt;/p>
+&lt;p>Transfer Bean object to URL, and transfer all attributes of Bean to URL parameters when &lt;code>ServiceConfig.export()&lt;/code> or &lt;code>ReferenceConfig.get()&lt;/code> initialization.&lt;/p>
+&lt;p>Then pase URL to &lt;a href="../impls/protocol">Protocol extension point&lt;/a>, based on &lt;a href="../spi/">Extension point adaptive mechanism&lt;/a> of extension point, processing service exposure or reference for different protocols according to URL protocol header.&lt;/p></description></item><item><title>Public Agreement</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/contract/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/contract/</guid><description>&lt;p>This document is Dubbo public agreement, we expect all extension points comply with it.&lt;/p>
+&lt;h2 id="url">URL&lt;/h2>
+&lt;ul>
+&lt;li>All extension points must include URL parameter, design URL as a context information which throughouts the whole extension point design system.&lt;/li>
+&lt;li>URL standard style: &lt;code>protocol://username:password@host:port/path?key=value&amp;amp;key=value&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="logging">Logging&lt;/h2>
+&lt;ul>
+&lt;li>Print &lt;code>ERROR&lt;/code> log for unrecoverable and NEED TO ALARM situation.&lt;/li>
+&lt;li>Print &lt;code>WARN&lt;/code> log for recoverable exception or transient state inconsistency.&lt;/li>
+&lt;li>Print &lt;code>INFO&lt;/code> log for normally status.&lt;/li>
+&lt;/ul></description></item><item><title>Versions</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/release/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/release/</guid><description>&lt;p>&lt;strong>New feature development&lt;/strong> and &lt;strong>stability improvement&lt;/strong> are equally important to product. But adding new features will affect stability, dubbo uses the following version development pattern to achieve a good balance.&lt;/p>
+&lt;h2 id="two-versions-evolving-at-the-same-time">Two versions evolving at the same time&lt;/h2>
+&lt;ul>
+&lt;li>BugFix Version：low version，e.g. &lt;code>2.4.x&lt;/code>. This is called the GA version, which can be applied in production. We are supposed only to fix bugs in this version, and increase the third version number when release.&lt;/li>
+&lt;li>Feature Version：high version, e.g. &lt;code>2.5.x&lt;/code>. We add new features to this version, so applications have opportunities try new features.&lt;/li>
+&lt;/ul>
+&lt;p>When features in &lt;code>2.5.x&lt;/code> are proved stable enough, we will announce &lt;code>2.5.x&lt;/code> as a beta release.&lt;/p></description></item><item><title>Checklist</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/checklist/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/checklist/</guid><description>&lt;h2 id="checklist-before-release">Checklist before release&lt;/h2>
+&lt;ul>
+&lt;li>github milestones&lt;/li>
+&lt;li>github change lists&lt;/li>
+&lt;li>Travis CI&lt;/li>
+&lt;li>test code&lt;/li>
+&lt;li>find bugs&lt;/li>
+&lt;/ul>
+&lt;h2 id="checklist-for-bigfix-versions">Checklist for bigfix versions&lt;/h2>
+&lt;ul>
+&lt;li>Create a &lt;em>github issue&lt;/em> before coding&lt;/li>
+&lt;li>Create &lt;em>unit test&lt;/em> before bugfix&lt;/li>
+&lt;li>Review&lt;/li>
+&lt;li>Test your code (Normal process / Abnormal process)&lt;/li>
+&lt;li>Record your design on &lt;em>github issue&lt;/em>&lt;/li>
+&lt;li>Complete javadoc and comment in code&lt;/li>
+&lt;li>Manager for every version, responsible for scope and check&lt;/li>
+&lt;/ul></description></item><item><title>Bad Smell</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/code-smell/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/code-smell/</guid><description>&lt;p>Ugly Dubbo design or implementation will be record here.&lt;/p>
+&lt;h2 id="url-convertion">URL Convertion&lt;/h2>
+&lt;h3 id="1-point-to-point-service-export-and-refer">1. Point to Point Service export and refer&lt;/h3>
+&lt;p>service directly export：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>EXPORT(dubbo://provider-address/com.xxx.XxxService?version=1.0.0&amp;#34;)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>service directly refer：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>REFER(dubbo://provider-address/com.xxx.XxxService?version=1.0.0)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-export-servie-by-registry">2. Export servie by registry&lt;/h3>
+&lt;p>export service to registry：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>EXPORT(registry:&lt;span style="color:#719e07">//&lt;/span>registry&lt;span style="color:#719e07">-&lt;/span>address&lt;span style="color:#719e07">/&lt;/span>org&lt;span style="color:#719e07">.&lt;/span>apache&lt;span style="color:#719e07">.&lt;/span>dubbo&lt;span style="color:#719e07">.&lt;/span>registry&lt;span style="color:#719e07">.&lt;/span>RegistrySerevice?registry&lt;span style="color:#719e07">=&lt;/span>dubbo&lt;span style="color:#719e07">&amp;amp;&lt;/span>&lt;span style="color:#719e07">export&lt;/span>&lt;span style="color:#719e07">=&lt;/span>ENCODE(dubbo:&lt;span style="color:#719e07">//&lt;/span>provider&lt;span style="color:#719e07">-&lt;/span>address&lt;span style="color:#719e07">/&lt;/span>com&lt;span style="color:#719e07">.&lt;/span>xxx&lt;span style="color:#719e07">.&lt;/span>XxxService?version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>))
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>accquire registry：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>url.setProtocol(url.getParameter(&amp;#34;registry&amp;#34;, &amp;#34;dubbo&amp;#34;))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>registry service address：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>url&lt;span style="color:#719e07">.&lt;/span>getParameterAndDecoded(&lt;span style="color:#2aa198">&amp;#34;export&amp;#34;&lt;/span>))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>REGISTER(dubbo:&lt;span style="color:#719e07">//&lt;/span>provider&lt;span style="color:#719e07">-&lt;/span>address&lt;span style="color:#719e07">/&lt;/span>com&lt;span style="color:#719e07">.&lt;/span>xxx&lt;span style="color:#719e07">.&lt;/span>XxxService?version&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1.0&lt;/span>&lt;span style="color:#719e07">.&lt;/span>&lt;span style="color:#2aa198">0&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-refer-service-from-registry">3. Refer service from registry&lt;/h3>
+&lt;p>refer service from registry：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>REFER(registry://registry-address/org.apache.dubbo.registry.RegistrySerevice?registry=dubbo&amp;amp;refer=ENCODE(version=1.0.0))
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>accquire registry：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>url.setProtocol(url.getParameter(&amp;#34;registry&amp;#34;, &amp;#34;dubbo&amp;#34;))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GETREGISTRY(dubbo://registry-address/org.apache.dubbo.registry.RegistrySerevice)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>subscribe service address：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>url.addParameters(url.getParameterAndDecoded(&amp;#34;refer&amp;#34;))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>SUBSCRIBE(dubbo://registry-address/com.xxx.XxxService?version=1.0.0)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>notify service address：&lt;/p></description></item><item><title>Coding Convention</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/coding/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/coding/</guid><description>&lt;h2 id="code-style">Code style&lt;/h2>
+&lt;p>The source and JavaDoc of Dubbo follow below specifications:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="http://www.oracle.com/technetwork/java/codeconvtoc-136057.html">Code Conventions for the Java Programming Language&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html">How to Write Doc Comments for the Javadoc Tool&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="exception-and-logging">Exception and Logging&lt;/h2>
+&lt;ul>
+&lt;li>Log more context information as possible, such as error reason, error server address, client address, registry center address, dubbo version and so on.&lt;/li>
+&lt;li>Try to put the main cause at the front, and display all other context information with key-value paris after it.&lt;/li>
+&lt;li>Log is not printed where the exception is thrown, log level is determined by the final exception handler, and must print log when dicarding exception.&lt;/li>
+&lt;li>&lt;code>ERROR&lt;/code> log means NEED TO ALARM, &lt;code>WARN&lt;/code> log means COULD AUTO RECOVERY, &lt;code>INFO&lt;/code> long mean NORMAL.&lt;/li>
+&lt;li>Suggestion: config &lt;code>ERROR&lt;/code> log in Monitor center for real-time alarm, summary and send &lt;code>WARN&lt;/code> log weekly.&lt;/li>
+&lt;li>&lt;code>RpcException&lt;/code> is the ONLY external exception of Dubbo，all internal exceptions mush be transfered to &lt;code>RpcException&lt;/code> if need to throw out to user.&lt;/li>
+&lt;li>&lt;code>RpcException&lt;/code> CAN NOT have sub-class, all types of information are identified with ErrorCode in order to keep compatible.&lt;/li>
+&lt;/ul>
+&lt;h2 id="configuration-and-url">Configuration and URL&lt;/h2>
+&lt;ul>
+&lt;li>Use initials and camelCase for multiple words for object properties &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.&lt;/li>
+&lt;li>Use lowercase and split by &amp;lsquo;-&amp;rsquo; for multiple words for config properties &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>.&lt;/li>
+&lt;li>Use lowercase and split by &amp;lsquo;.&amp;rsquo; for multiple words for URL properties &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>.&lt;/li>
+&lt;li>Use URL transfer parameters as possible, Don&amp;rsquo;t define Map or other types, config information also transfer to URL style.&lt;/li>
+&lt;li>Minimize URL nesting to keep URL simplicity.&lt;/li>
+&lt;/ul>
+&lt;h2 id="unit-testing-and-integration-testing">Unit testing and integration testing&lt;/h2>
+&lt;ul>
+&lt;li>Use JUnit and EasyMock for unit testing, use TestNG for integration testing, use DBUnit for database testing.&lt;/li>
+&lt;li>Don&amp;rsquo;t put large integration test case in unit testing for running speed of unit test case.&lt;/li>
+&lt;li>Use &lt;code>try...finally&lt;/code> or &lt;code>tearDown&lt;/code> to release resource for all test cases of unit testing.&lt;/li>
+&lt;li>Minimize test case that with &lt;code>while&lt;/code> loop which need waiting repsonse, use to make the logic in timer as function for timer and net testing.&lt;/li>
+&lt;li>For fail-safe testing, unified use &lt;code>LogUtil&lt;/code> assertion log output.&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-point-base-class-and-aop">Extension point base class and AOP&lt;/h2>
+&lt;ul>
+&lt;li>AOP class should be named as &lt;code>XxxWrapper&lt;/code>，Base class should be named as &lt;code>AbstractXxx&lt;/code>.&lt;/li>
+&lt;li>Use AOP for combine relationship between extension points, &lt;code>ExtensionLoader&lt;/code> only loads extension points, including AOP extension.&lt;/li>
+&lt;li>Try to use Ioc inject dependency of extension points, Don&amp;rsquo;t direct dependent on factory method of &lt;code>ExtensionLoader&lt;/code>.&lt;/li>
+&lt;li>Try to use AOP implement the common action of extension points, instead of using base class, such as the &lt;code>isAvailable&lt;/code> checking before load balancing, which is independent of load balance. Close the URL paramters which no need to check.&lt;/li>
+&lt;li>Use base class for abstaction for a variety of similar types, such as RMI, Hessian 3rd protocols which have generated interface proxy, only transfer interface proxy to &lt;code>Invoker&lt;/code> to complete bridging, and public base class can do the logic.&lt;/li>
+&lt;li>The base class is also part of the SPI, and each extension should have a convenient base class support.&lt;/li>
+&lt;/ul>
+&lt;h2 id="module-and-packaging">Module and packaging&lt;/h2>
+&lt;ul>
+&lt;li>Base on reusability for packaging, dividing the interface, base class and large implementation into separate modules.&lt;/li>
+&lt;li>Put all interfaces under the base package of module, and put base classes in support subpackage, different implementations are placed under the subpackage named by extension point.&lt;/li>
+&lt;li>Try to keep subpackage dependent on parent package, NOT reverse.&lt;/li>
+&lt;/ul>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>Java convention&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p></description></item><item><title>Compatibility Test</title><link>https://cn.dubbo.apache.org/en/docs/v2.7/dev/tck/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/docs/v2.7/dev/tck/</guid><description>&lt;p>Dubbo&amp;rsquo;s protocol, communication, serialization, registry, load balancing and other SPI all offer alternative strategies for different application scenarios while our test cases are very scattered. Ours is always uncertain whether it can satisfy the complete contract of the extension point when users need to add a new implementation.&lt;/p>
+&lt;p>Thus we need to use TCK (Technology Compatibility Kit) for the core extension points. When users add a new implementaion, compatibility with the rest of the framework can be ensured with TCK. This can effectively improve the overall health and also facilitate the access of the third party extenders, which accelerates the maturity of the open source community.&lt;/p></description></item></channel></rss>
