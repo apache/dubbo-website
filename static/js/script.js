@@ -130,7 +130,8 @@ var kub = (function () {
             toggleToc();
         }
 
-        classOnCondition(html, 'flip-nav', window.pageYOffset > 0);
+
+        classOnCondition(html, 'flip-nav', window.pageYOffset >= 0);
 
         if (html[0].id == 'home') {
             setHomeHeaderStyles();

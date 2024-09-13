@@ -2,7 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/qos/overview/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/overview/
-description: dubbo 2.5.8 新版本增加了 QOS 模块，提供了新的 telnet 命令支持。
+description: "QoS 命令的设计目的、使用方法说明，包括如何开启、关闭 qos 命令等，支持 HTTP/Telnet 访问方式，"
 linkTitle: QOS 概述
 title: QOS 概述
 type: docs
@@ -10,11 +10,7 @@ weight: 1
 ---
 
 
-
-
-
-
-## 参数说明
+## 如何使用
 QoS 提供了一些启动参数，来对启动进行配置，他们主要包括：
 
 | 参数                              | 说明             | 默认值       |
@@ -27,7 +23,6 @@ QoS 提供了一些启动参数，来对启动进行配置，他们主要包括�
 
 > 注意，从2.6.4/2.7.0开始，qos-accept-foreign-ip默认配置改为false，如果qos-accept-foreign-ip设置为true，有可能带来安全风险，请仔细评估后再打开。
 
-## 协议
 ### telnet 与 http 协议
 
 telnet 模块现在同时支持 http 协议和 telnet 协议，方便各种情况的使用
@@ -63,8 +58,6 @@ As Consumer side:
 
 dubbo>
 ```
-
-## 其他方式
 
 ### 端口
 新版本的 telnet 端口 与 dubbo 协议的端口是不同的端口，默认为 `22222`
@@ -147,8 +140,6 @@ dubbo.application.qos-anonymous-access-permission-level=PROTECTED
 来允许匿名访问更高级别的权限的命令。
 
 
-
-
 ```
 ➜  ~ curl "localhost:22222/ls?arg1=xxx&arg2=xxxx"
 As Provider side:
@@ -217,4 +208,4 @@ dubbo.application.qos-port=33333
 dubbo.application.qos-accept-foreign-ip=false
 dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
 dubbo.application.qos-anonymous-access-permission-level=NONE
-```
+

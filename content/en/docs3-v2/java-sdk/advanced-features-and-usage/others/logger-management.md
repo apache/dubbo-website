@@ -35,7 +35,7 @@ dubbo.application.logger=log4j
 <dubbo:application logger="log4j" />
 ```
 
-For custom extensions, please refer to [Log Adapter Extension](../../../reference-manual/spi/description/logger-adapter)
+For custom extensions, please refer to [Log Adapter Extension](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/logger-adapter)
 
 ## Logging framework runtime management
 ### 1. Query log configuration

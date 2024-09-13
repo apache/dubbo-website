@@ -228,7 +228,7 @@ pluginArtifact 指定了 Dubbo 定制版本的 Java Protobuf Compiler 插件，�
  <pluginArtifact>org.apache.dubbo:protoc-gen-dubbo-java:1.19.0-SNAPSHOT:exe:${os.detected.classifier}</pluginArtifact>
 ```
 
-由于 `protoc-gen-dubbo-java` 支持 gRPC 和 Dubbo 两种协议，可生成的 stub 类型，默认值是 gRPC，关于 dubbo 协议的使用可参见 [使用 Protobuf 开发 Dubbo 服务](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)。
+由于 `protoc-gen-dubbo-java` 支持 gRPC 和 Dubbo 两种协议，可生成的 stub 类型，默认值是 gRPC，关于 dubbo 协议的使用可参见 [使用 Protobuf 开发 Dubbo 服务](/zh-cn/overview/mannual/java-sdk/quick-start/)。
 
 ```xml
 <pluginParameter>grpc</pluginParameter>
@@ -515,7 +515,7 @@ default=org.apache.dubbo.samples.basic.comtomize.MyGrpcConfigurator
 
 **三、TLS 配置**
 
-配置方式和 Dubbo 提供的通用的 [TLS 支持](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/tls/)一致，具体请参见文档
+配置方式和 Dubbo 提供的通用的 [TLS 支持](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/tls/)一致，具体请参见文档
 
 
 

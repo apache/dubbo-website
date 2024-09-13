@@ -20,7 +20,7 @@ Scenarios that need to collect and analyze the precise time consumption of Dubbo
 
 ## How to use
 
-`simple profiler` is automatically enabled by default, and for requests whose processing time exceeds 3/4 of the timeout time, the slow call information will be printed out through the log. If you need to enable the `detail profiler` mode or modify the timeout alarm ratio, you can refer to the [performance sampling command](../../../reference-manual/qos/profiler/) document.
+`simple profiler` is automatically enabled by default, and for requests whose processing time exceeds 3/4 of the timeout time, the slow call information will be printed out through the log. If you need to enable the `detail profiler` mode or modify the timeout alarm ratio, you can refer to the [performance sampling command](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/profiler/) document.
 
 ### output example
 

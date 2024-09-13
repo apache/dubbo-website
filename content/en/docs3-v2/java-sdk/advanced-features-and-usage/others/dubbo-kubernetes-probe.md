@@ -31,18 +31,18 @@ For an introduction to more extensions of Dubbo3 SPI, see [Dubbo SPI Extensions]
 
 For the livenessProbe liveness detection, since the Dubbo3 framework itself cannot obtain the liveness status of the application, this interface has no default implementation and returns success by default. Developers can expand this SPI interface according to the SPI definition, and judge whether it is alive or not from the application level.
 
-About [liveness liveness probe](../../../reference-manual/spi/description/liveness/) extension example
+About [liveness liveness probe](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/liveness/) extension example
 ### Readiness check
 
 For the readinessProbe readiness detection, Dubbo3 currently provides two detection dimensions by default. One is to judge whether the Dubbo3 service itself is started or stopped, and the other is to check whether all services have registered interfaces. If all services have been offline from the registration center (you can Operate via QOS Operations) will return Not Ready.
 
-About the [readiness readiness probe](../../../reference-manual/spi/description/readiness/) extended example
+About the [readiness readiness probe](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/readiness/) extended example
 
 ### Start detection
 
 For startupProbe startup detection, Dubbo3 currently provides a detection dimension by default, which is to return to the ready state after all startup processes (interface exposure, registration center writing, etc.) are completed.
 
-About the [startup startup probe](../../../reference-manual/spi/description/startup/) extended example
+About the [startup startup probe](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/startup/) extended example
 
 ### Reference example
 ```yaml

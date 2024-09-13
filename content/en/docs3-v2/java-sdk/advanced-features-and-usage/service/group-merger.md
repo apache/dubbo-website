@@ -48,7 +48,7 @@ One method does not combine results, others combine results
 ```
 ### Specify merge strategy
 
-Specify the merge strategy, the default is to automatically match according to the return value type, if there are two combiners of the same type, you need to specify the name of the combiner [Merge result extension](../../../reference-manual/spi/ description/merger)
+Specify the merge strategy, the default is to automatically match according to the return value type, if there are two combiners of the same type, you need to specify the name of the combiner [Merge result extension](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/ description/merger)
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">

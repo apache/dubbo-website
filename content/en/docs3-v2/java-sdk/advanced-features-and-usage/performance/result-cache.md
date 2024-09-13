@@ -13,7 +13,7 @@ description: "Speed up access by caching results"
 * `threadlocal` The current thread cache, such as a page rendering, uses many portals, and each portal needs to check user information. Through thread caching, this redundant access can be reduced.
 * `jcache` integrates with [JSR107](http://jcp.org/en/jsr/detail?id=107%27) to bridge various cache implementations.
 
-Cache Type Extensible [Cache Extensions](../../../reference-manual/spi/description/cache)
+Cache Type Extensible [Cache Extensions](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/cache)
 
 About [sample code](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
 

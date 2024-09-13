@@ -1,0 +1,48 @@
+<ul class="navbar-nav mt-2 mt-lg-0 navbar-menus-list-mobile">
+  {{ $p := . }}
+  {{ $insertDone := false }}
+  {{ with .Site.Menus.main }}
+  {{ range . }}
+  <li class="nav-item nav-item-line mb-2 mb-lg-0">
+    {{ $active := or ($p.IsMenuCurrent "main" .) ($p.HasMenuCurrent "main" .) }}
+    {{ with .Page }}
+    {{ $active = or $active ( $.IsDescendant .) }}
+    {{ end }}
+    {{ $pre := .Pre }}
+    {{ $post := .Post }}
+    {{ $url := urls.Parse .URL }}
+    {{ $baseurl := urls.Parse $.Site.Params.Baseurl }}
+    <a class="nav-link{{if $active }} active{{end}}"
+      href="{{ with .Page }}{{ .RelPermalink }}{{ else }}{{ .URL | relLangURL }}{{ end }}" {{ if ne $url.Host
+      $baseurl.Host }}target="_blank" {{ end }}>
+      {{ with .Pre }}{{ $pre }}{{ end }}
+      <span{{if $active }} class="active mr-1" {{ end }}>{{ .Name }}</span>
+        {{ with .Post }}{{ $post }}{{ end }}
+    </a>
+  </li>
+  {{ if not $insertDone }}
+  <!-- 插入的部分 -->
+  <li class="nav-item d-lg-block " style="position: relative;">
+    {{ partial "navbar-collapse-commuity.html" $p }}
+  </li>
+  {{ $insertDone = true }}
+  {{ end }}
+  {{ end }}
+  {{ end }}
+  {{ if .Site.Params.versions }}
+  <li class="nav-item dropdown mx-2 d-none d-lg-block">
+    {{ partial "navbar-version-selector.html" . }}
+  </li>
+  {{ end }}
+  <li class="nav-item d-lg-block" style="position: relative;">
+    {{ partial "navbar-collapse-ecosystem.html" . }}
+  </li>
+</ul>
+<style>
+  .navbar-menus-list-mobile {
+    a {
+      color: #121316 !important;
+    }
+
+  }
+</style>

@@ -6,7 +6,7 @@ weight: 6
 description: "Store the environment information required in the current calling process through the context"
 ---
 ## Feature description
-The context stores the environment information needed in the current calling process. All configuration information will be converted to URL parameters, see the **corresponding URL parameters** column in [schema configuration reference manual](../../../reference-manual/config/properties/).
+The context stores the environment information needed in the current calling process. All configuration information will be converted to URL parameters, see the **corresponding URL parameters** column in [schema configuration reference manual](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties//).
 
 RpcContext is a temporary state recorder for ThreadLocal. When RPC requests are received or RPC requests are initiated, the state of RpcContext will change. For example: A tunes B, B then tunes C, then on machine B, before B tunes C, RpcContext records the information of A's tune to B, after B tunes C, RpcContext records the information of B's tune to C.
 

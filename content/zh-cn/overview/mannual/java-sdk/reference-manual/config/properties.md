@@ -2,6 +2,15 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/properties/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/dump/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/lazy-connect/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/stickiness/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/delay-publish/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/preflight-check/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/registry-only/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/
+    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/
 description: 包含 Dubbo 支持的所有配置组件及每个配置组件支持的所有配置项
 linkTitle: 配置项手册
 title: 配置项参考手册
@@ -10,492 +19,708 @@ weight: 6
 ---
 
 
+## JVM(-D) 参数
+
+
+| JVM 参数 | 示例值 | 说明 |
+| --- | --- | --- |
+| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo支持 [所有的配置项](aaa) 以JVM参数格式指定。其中`config` 是指如 application、registry、protocol 等配置项，而`property`则是指每个配置项中的具体属性。 |
+| dubbo.resolve.file | -Ddubbo.resolve.file=/home/ken/.../dubbo-resolve.properties | 在文件中指定每个接口的直连地址url，如：org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx |
+| org.graalvm.nativeimage.imagecode || [https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java](https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java) |
+| dubbo.properties.file | -Ddubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
+| dubbo.jstack-dump.max-line | -Ddubbo.jstack-dump.max-line=20 | Dubbo 支持自动打印调用堆栈，这个参数可以控制堆栈行数，如示例中只会打印前20行堆栈 |
+| dubbo.json-framework.prefer| -Ddubbo.json-framework.prefer=gson | 设置框架中 json 序列化的具体实现，目前可选实现有 `fastjson2`、`fastjson`、`gson`、`jackson`。默认情况，框架会自动查找可用实现，以上按顺序优先级依次降低 |
+| dubbo.network.interface.ignored | -Ddubbo.network.interface.ignored=eth1,eth2 | 在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于排除某些网卡 |
+| dubbo.network.interface.preferred | -Ddubbo.network.interface.ignored=eth0 | 在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于指定一个特定网卡 |
+| sun.rmi.transport.tcp.responseTimeout | -Dsun.rmi.transport.tcp.responseTimeout=5000 | 用于设置 RMI 协议下的超时时间，单位ms |
+| env |  | Apollo 配置中心特有参数 |
+| app.id |  | Apollo 配置中心特有参数 |
+| apollo.cluster |  | Apollo 配置中心特有参数 |
+| apollo.meta |  | Apollo 配置中心特有参数 |
+| dubbo.mapping.cache.filePath | -Ddubbo.mapping.cache.filePath=~/.dubbo/mapping/ | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件绝对路径地址 |
+| dubbo.mapping.cache.fileName | -Ddubbo.mapping.cache.fileName=dubbo-mapping | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-mapping.dubbo.cache |
+| dubbo.mapping.cache.entrySize | -Ddubbo.mapping.cache.maxFileSize=300 | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件名中内容最大条目数限制 |
+| dubbo.mapping.cache.maxFileSize | -Ddubbo.mapping.cache.maxFileSize=104857600 | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte |
+| dubbo.meta.cache.filePath | -Ddubbo.meta.cache.filePath=~/.dubbo/meta/ | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件绝对路径地址 |
+| dubbo.meta.cache.fileName | -Ddubbo.meta.cache.fileName=dubbo-meta | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-meta.dubbo.cache |
+| dubbo.meta.cache.entrySize | -Ddubbo.meta.cache.maxFileSize=300 | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件名中内容最大条目数限制 |
+| dubbo.meta.cache.maxFileSize | -Ddubbo.meta.cache.maxFileSize=104857600 | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte |
+| dubbo.application.use-secure-random-request-id | -Ddubbo.application.use-secure-random-request-id=true | 设置每次 rpc 调用 request id 的生成规则，是不是用随机值。如不设置则使用递增值。 |
+| dubbo.protocol.default-close-timeout | -Ddubbo.protocol.default-close-timeout=10000 | 设置 tcp server 关闭等待时间，单位毫秒ms |
+| dubbo.protocol.default-heartbeat | -Ddubbo.protocol.default-heartbeat=10000 | 设置发起心跳 heartbeat 的间隔，单位毫秒ms |
+| dubbo.hessian.allowNonSerializable |  | 是否允许对没有实现 Serializable 接口的类进行序列化，对hessian序列化有效 |
+| dubbo.application.hessian2.whitelist | -Ddubbo.application.hessian2.whitelist=true | 设置是否启用白名单机制，对hessian序列化有效。如果设置 true，则继续配置下面的 allow 规则；否则，配置 deny 规则 |
+| dubbo.application.hessian2.allow | -Ddubbo.application.hessian2.allow=org.apache.dubbo.*;com.company.* | 如果设置 true，则继续配置配置 allow 规则，参见文档说明 |
+| dubbo.application.hessian2.deny | -Ddubbo.application.hessian2.deny=org.apache.dubbo.*;io.commons.* | 如果设置 false，则继续配置配置 deny 规则，参见文档说明 |
+| dubbo.application.manual-register | -Ddubbo.application.manual-register=true | 设置之后，所有服务都不会被自动注册到注册中心，直到用户调用 online 等命令手动完成注册 |
+| dubbo.compact.enable |  |  |
+| dubbo.migration-file.enable | -Ddubbo.migration-file.enable=true | 在往应用级地址发现迁移时，是否启用规则文件读取 |
+| dubbo.migration.file | -Ddubbo.migration.file=dubbo-migration.yaml | 指定往应用级地址发现迁移的规则文件路径，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml |
+| dubbo.application.logger | -Ddubbo.application.logger=slf4j | 设置dubbo框架使用的日志组件，设置后，dubbo框架自身的日志将打印到这里（不影响应用自身）；目前支持的 slf4j、log4j、log4j2 等，设置之后须确保相应的组件依赖已经加入应用。 |
+| dubbo.properties.file | -Ddubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
+
+
+## 环境变量
+
+| 环境变量 | 示例值 | 说明 |
+| --- | --- | --- |
+| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo支持[所有的配置项](aaa)以环境变量格式指定。其中`CONFIG-NAME` 是指如 application、registry、protocol 等配置项，而 `PROPERTY`则是指每个配置项中的具体属性。 |
+| DUBBO_DEFAULT_SERIALIZATION | DUBBO_DEFAULT_SERIALIZATION="hessan2" | 设置框架的默认序列化方式，如hessian2、fastjson2、msgpack等 |
+| DUBBO2_COMPACT_ENABLE | DUBBO2_COMPAT_ENABLE="true" |  |
+| DUBBO_ENV_KEYS| DUBBO_LABELS="tag1=value1; tag2=value2" | `tag1=value1`会作为附加参数上报到地址 URL，作为系统环境变量可用于为实例打标等。 |
+| DUBBO_LABELS | DUBBO_ENV_KEYS="DUBBO_TAG1, DUBBO_TAG2" | Dubbo 会读取 `DUBBO_TAG1`、`DUBBO_TAG2`两个环境变量，并将读取的值 value `DUBBO_TAG1=value` 作为附加参数上报到地址 URL。 |
+| POD_NAMESPACE |  | 用于 Kubernetes Service 场景，指定命名空间 |
+| CLUSTER_DOMAIN |  | 用于 Kubernetes Service 场景，指定集群名称，默认 default |
+| DUBBO_IP_TO_REGISTRY | DUBBO_IP_TO_REGISTRY=30.123.45.187 | 指定注册到注册中心 URL 中的 ip 地址 |
+| DUBBO_PORT_TO_REGISTRY | DUBBO_PORT_TO_REGISTRY=20880 | 指定注册到注册中心 URL 中的 port 端口号 |
+| DUBBO_{PROTOCOL}_PORT_TO_REGISTRY | DUBBO_DUBBO_IP_TO_REGISTRY=30.123.45.187<br/><br/>DUBBO_TRI_IP_TO_REGISTRY=30.123.45.187 | 指定注册到注册中心 URL 中的 ip 地址，可以为不同协议指定不同 ip |
+| DUBBO_{PROTOCOL}_PORT_TO_REGISTRY | DUBBO_DUBBO_PORT_TO_REGISTRY=20880<br/><br/>DUBBO_TRI_PORT_TO_REGISTRY=50051 | 指定注册到注册中心 URL 中的 port 端口，可以为不同协议指定不同 port |
+| DUBBO_IP_TO_BIND | DUBBO_IP_TO_BIND=30.123.45.187 | 指定 tcp 监听绑定的 ip 地址 |
+| DUBBO_PORT_TO_BIND | DUBBO_PORT_TO_BIND=20880 | 指定 tcp 监听绑定的 port 端口 |
+| DUBBO_{PROTOCOL}_IP_TO_BIND | DUBBO_DUBBO_IP_TO_BIND=30.123.45.187<br/><br/>DUBBO_TRI_IP_TO_BIND=30.123.45.187 | 指定 tcp 监听绑定的 ip 地址，可以为不同协议指定不同 ip |
+| DUBBO_{PROTOCOL}_PORT_TO_BIND | DUBBO_DUBBO_PORT_TO_BIND=20880<br/><br/>DUBBO_TRI_PORT_TO_BIND=50051 | 指定 tcp 监听绑定的 port 端口，可以为不同协议指定不同 port |
+| dubbo.properties.file | dubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
+| dubbo.migration.file | dubbo.migration.file=dubbo-migration.yaml | 指定应用级地址发现的迁移规则的文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml |
+
+
+## 配置项手册
+不论您是使用 Spring Boot、XML、注解还是 API 编写 Dubbo 应用，都可以通过以下表格参考每一项的具体含义。
+
+### dubbo.tracing.baggage.correlation
+**Class:** `org.apache.dubbo.config.nested.BaggageConfig$Correlation`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| enabled| java.lang.Boolean| Whether to enable correlation of the baggage context with logging contexts.| true| |
+| fields| java.util.List&lt;java.lang.String&gt;| List of fields that should be correlated with the logging context. That means that these fields would end up as key-value pairs in e.g. MDC.| | |
+### dubbo.tracing.tracing-exporter.otlp-config
+**Class:** `org.apache.dubbo.config.nested.ExporterConfig$OtlpConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| compression-method| java.lang.String| The method used to compress payloads. If unset, compression is disabled. Currently supported compression methods include &quot;gzip&quot; and &quot;none&quot;.| none| |
+| endpoint| java.lang.String| URL to the Otlp API.| | |
+| headers| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| timeout| java.time.Duration| The maximum time to wait for the collector to process an exported batch of spans. (seconds)| 10| |
+### dubbo.tracing.tracing-exporter.zipkin-config
+**Class:** `org.apache.dubbo.config.nested.ExporterConfig$ZipkinConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| connect-timeout| java.time.Duration| Connection timeout for requests to Zipkin. (seconds)| 1| |
+| endpoint| java.lang.String| URL to the Zipkin API.| | |
+| read-timeout| java.time.Duration| Read timeout for requests to Zipkin. (seconds)| 10| |
+### dubbo.metrics.prometheus.exporter
+**Class:** `org.apache.dubbo.config.nested.PrometheusConfig$Exporter`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| enable-http-service-discovery| java.lang.Boolean| Enable http service discovery for prometheus| | |
+| enabled| java.lang.Boolean| Enable prometheus exporter| | |
+| http-service-discovery-url| java.lang.String| Http service discovery url| | |
+### dubbo.metrics.prometheus.pushgateway
+**Class:** `org.apache.dubbo.config.nested.PrometheusConfig$Pushgateway`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| base-url| java.lang.String| Base URL for the Pushgateway| | |
+| enabled| java.lang.Boolean| Enable publishing via a Prometheus Pushgateway| | |
+| job| java.lang.String| Job identifier for this application instance| | |
+| password| java.lang.String| Login password of the Prometheus Pushgateway| | |
+| push-interval| java.lang.Integer| Frequency with which to push metrics| | |
+| username| java.lang.String| Login user of the Prometheus Pushgateway| | |
+### Unknown group
+**Class:** `Unknown`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| dubbo.config-center.include-spring-env| java.lang.Boolean| Whether to include Spring Environment.| | |
+| dubbo.config.mode| org.apache.dubbo.config.context.ConfigMode| Config processing mode. See &lt;code&gt;org.apache.dubbo.config.context.ConfigMode&lt;/code&gt;.| | |
+| dubbo.config.multiple| java.lang.Boolean| Whether to enable multiple configurations in Dubbo, allowing multiple configurations to be loaded and used, default value is &lt;code&gt;true&lt;/code&gt;.| | |
+| dubbo.config.override| java.lang.Boolean|  Whether to allow configuration override in Dubbo, default value is &lt;code&gt;true&lt;/code&gt;.| | |
+| dubbo.enabled| java.util.Set&lt;java.lang.String&gt;| Whether enable autoconfiguration of dubbo, default value is &lt;code&gt;true&lt;/code&gt;.| | |
+| dubbo.env.keys| java.lang.String| The keys for specify environment-specific keys, allowing for differentiation and utilization of various runtime environments (e.g., development, testing, production), the multiple-value is delimited by comma.| | |
+| dubbo.labels| java.lang.String| The labels for these service providers, enabling categorization and grouping, thereby enhancing their management and monitoring, the multiple-value is delimited by &#x27;;&#x27;.| | |
+| dubbo.scan.base-packages| java.util.Set&lt;java.lang.String&gt;| The basePackages to scan, the multiple-value is delimited by comma @see EnableDubbo#scanBasePackages().| | |
+### dubbo.tracing.baggage
+**Class:** `org.apache.dubbo.config.nested.BaggageConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| enabled| java.lang.Boolean| Whether baggage is enabled or not.| true| |
+| remote-fields| java.util.List&lt;java.lang.String&gt;| List of fields that are referenced the same in-process as it is on the wire. For example, the field &quot;x-vcap-request-id&quot; would be set as-is including the prefix.| | |
+### dubbo.tracing.propagation
+**Class:** `org.apache.dubbo.config.nested.PropagationConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| type| java.lang.String| Tracing context propagation type.| W3C| |
+### dubbo.tracing.sampling
+**Class:** `org.apache.dubbo.config.nested.SamplingConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| probability| java.lang.Float| Probability in the range from 0.0 to 1.0 that a trace will be sampled.| 0.1| |
+### dubbo.tracing.tracing-exporter
+**Class:** `org.apache.dubbo.config.nested.ExporterConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+### dubbo.rpc.tri
+**Class:** `org.apache.dubbo.config.TripleConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| enable-push| java.lang.Boolean| Whether to enable push, default is false.| | |
+| header-table-size| java.lang.String| The header table size.| | |
+| initial-window-size| java.lang.String| Initial window size.| | |
+| max-concurrent-streams| java.lang.String| Maximum concurrent streams.| | |
+| max-frame-size| java.lang.String| Maximum frame size.| | |
+| max-header-list-size| java.lang.String| Maximum header list size.| | |
+### dubbo
+**Class:** `org.apache.dubbo.spring.boot.autoconfigure.DubboConfigurationProperties`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| config-centers| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ConfigCenterConfig&gt;| Multiple configurations for ConfigCenterBean.| | |
+| consumers| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ConsumerConfig&gt;| Multiple configurations for Consumer.| | |
+| metadata-reports| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.MetadataReportConfig&gt;| Multiple configurations for MetadataReportConfig.| | |
+| metricses| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.MetricsConfig&gt;| Multiple configurations for MetricsConfig.| | |
+| modules| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ModuleConfig&gt;| Multiple configurations for Module.| | |
+| monitors| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.MonitorConfig&gt;| Multiple configurations for Monitor.| | |
+| protocols| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ProtocolConfig&gt;| Multiple configurations for Protocol.| | |
+| providers| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ProviderConfig&gt;| Multiple configurations for Provider.| | |
+| registries| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.RegistryConfig&gt;| Multiple configurations for Registry.| | |
+| tracings| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.TracingConfig&gt;| Multiple configurations for TracingConfig.| | |
+### dubbo.application
+**Class:** `org.apache.dubbo.config.ApplicationConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| architecture| java.lang.String| Architecture layer.| | |
+| auto-trust-serialize-class| java.lang.Boolean| Whether to automatically trust serialized classes.| | |
+| check-serializable| java.lang.Boolean| Whether to check serializable.| | |
+| compiler| java.lang.String| Java compiler.| | |
+| default| java.lang.Boolean| | | |
+| dump-directory| java.lang.String| Directory for saving thread dump.| | |
+| dump-enable| java.lang.Boolean| Whether to enable saving thread dump or not.| | |
+| enable-empty-protection| java.lang.Boolean| Whether to enable protection against empty objects.| | |
+| enable-file-cache| java.lang.Boolean| Whether to enable file caching.| | |
+| environment| java.lang.String| Environment, e.g., dev, test, or production.| | |
+| executor-management-mode| java.lang.String| Thread pool management mode: &#x27;default&#x27; or &#x27;isolation&#x27;.| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| liveness-probe| java.lang.String| Used to set extensions of the probe in QoS.| | |
+| logger| java.lang.String| The type of log access.| | |
+| mapping-retry-interval| java.lang.Integer| The retry interval of service name mapping.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| metadata-service-port| java.lang.Integer| Metadata Service, used in Service Discovery.| | |
+| metadata-service-protocol| java.lang.String| The protocol used for peer-to-peer metadata transmission.| | |
+| metadata-type| java.lang.String| Metadata type, local or remote. If &#x27;remote&#x27; is chosen, you need to specify a metadata center further.| | |
+| monitor| org.apache.dubbo.config.MonitorConfig| Monitor center.| | |
+| name| java.lang.String| The Application name.| | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| organization| java.lang.String| The application&#x27;s organization (BU).| | |
+| owner| java.lang.String| The application owner.| | |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Customized parameters.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| protocol| java.lang.String| The preferred protocol (name) of this application, convenient for places where it&#x27;s hard to determine the preferred protocol.| | |
+| qos-accept-foreign-ip| java.lang.Boolean| Should we accept foreign IP or not?| | |
+| qos-accept-foreign-ip-compatible| java.lang.Boolean| | | |
+| qos-accept-foreign-ip-whitelist| java.lang.String| When we disable accepting foreign IP, support specifying foreign IPs in the whitelist.| | |
+| qos-accept-foreign-ip-whitelist-compatible| java.lang.String| | | |
+| qos-anonymous-access-permission-level| java.lang.String| The anonymous (any foreign IP) access permission level, default is NONE, which means no access to any command.| | |
+| qos-anonymous-access-permission-level-compatible| java.lang.String| | | |
+| qos-anonymous-allow-commands| java.lang.String| The anonymous (any foreign IP) allowed commands, default is empty, which means no access to any command.| | |
+| qos-check| java.lang.Boolean| Whether QoS should start successfully or not, will check qosEnable first.| | |
+| qos-enable| java.lang.Boolean| Whether to enable Quality of Service (QoS) or not.| | |
+| qos-enable-compatible| java.lang.Boolean| | | |
+| qos-host| java.lang.String| The QoS host to listen.| | |
+| qos-host-compatible| java.lang.String| | | |
+| qos-port| java.lang.Integer| The QoS port to listen.| | |
+| qos-port-compatible| java.lang.Integer| | | |
+| readiness-probe| java.lang.String| The probe for checking the readiness of the application.| | |
+| register-consumer| java.lang.Boolean| Used to control whether to register the instance with the registry or not. Set to &#x27;false&#x27; only when the instance is a pure consumer.| | |
+| register-mode| java.lang.String| Register mode.| | |
+| registries| java.util.List&lt;org.apache.dubbo.config.RegistryConfig&gt;| Registry centers.| | |
+| registry| org.apache.dubbo.config.RegistryConfig| | | |
+| registry-ids| java.lang.String| The comma-separated list of registry IDs to which the service will be registered.| | |
+| repository| java.lang.String| Repository.| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| serialize-check-status| java.lang.String| The status of class serialization checking.| | |
+| shutwait| java.lang.String| Config the shutdown wait.| | |
+| startup-probe| java.lang.String| The probe for checking the startup of the application.| | |
+| trust-serialize-class-level| java.lang.Integer| The trust level for serialized classes.| | |
+| version| java.lang.String| The application version.| | |
+### dubbo.config-center
+**Class:** `org.apache.dubbo.config.ConfigCenterConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| address| java.lang.String| The address (URL or hostname) of the config center server.| | |
+| app-config-file| java.lang.String| The properties file under &#x27;configFile&#x27; is global shared, while &#x27;.properties&#x27; under this one is limited only to this application.| | |
+| app-external-configuration| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Application-specific external configuration for the config center.| | |
+| check| java.lang.Boolean| Behavior when the initial connection attempt to the config center fails. &#x27;true&#x27; means interrupt the whole process once a failure occurs. Default value is true.| | |
+| cluster| java.lang.String| The config center cluster, its actual meaning may vary depending on the specific config center product.| | |
+| config-file| java.lang.String| Key mapping for properties files. Most of the time, you do not need to change this parameter. Default value is CommonConstants.DEFAULT_DUBBO_PROPERTIES.| | |
+| default| java.lang.Boolean| | | |
+| external-configuration| java.util.Map&lt;java.lang.String,java.lang.String&gt;| External configuration for the config center.| | |
+| group| java.lang.String| The group of the config center, often used to identify an isolated space for a batch of config items. Its actual meaning depends on the specific config center you use. Default value is CommonConstants.DUBBO.| | |
+| highest-priority| java.lang.Boolean| If the config center should have the highest priority and override all other configurations. Deprecated and no longer used. Default value is true.| | Reason: null, use for replacement: null|
+| id| java.lang.String| Identifier for this configuration.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| namespace| java.lang.String| The namespace of the config center, generally used for multi-tenancy. Its actual meaning depends on the specific config center you use. Default value is CommonConstants.DUBBO.| | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Additional parameters specific to your config center product can be added here. For example, with XML: &lt;dubbo:config-center&gt; &lt;dubbo:parameter key&#x3D;&quot;{your key}&quot; value&#x3D;&quot;{your value}&quot; /&gt; &lt;/dubbo:config-center&gt;| | |
+| password| java.lang.String| Password for authentication with the config center.| | |
+| port| java.lang.Integer| The port number for the config center server.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| protocol| java.lang.String| The protocol used for accessing the config center.| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| timeout| java.lang.Long| The timeout for accessing the config center. Default value is 30000L.| | |
+| username| java.lang.String| Username for authentication with the config center.| | |
+### dubbo.consumer
+**Class:** `org.apache.dubbo.config.ConsumerConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| actives| java.lang.Integer| Maximum concurrent invocations allowed.| | |
+| application| org.apache.dubbo.config.ApplicationConfig| Application configuration for the service.| | Reason: null, use for replacement: null|
+| async| java.lang.Boolean| Enable asynchronous invocation. Note that it is unreliable asynchronous, ignoring return values and not blocking threads.| | |
+| auth| java.lang.Boolean| Enable service authentication.| | |
+| cache| java.lang.String| Cache provider for caching return results. available options: lru, threadlocal, jcache etc.| | |
+| callbacks| java.lang.Integer| Callback limits for the service.| | |
+| check| java.lang.Boolean| Check if service provider exists, if not exists, it will be fast fail| | |
+| client| java.lang.String| client type| | |
+| cluster| java.lang.String| Cluster type for service.| | |
+| config-center| org.apache.dubbo.config.ConfigCenterConfig| Configuration center settings.| | Reason: null, use for replacement: null|
+| connections| java.lang.Integer| Connection limits: 0 for shared connection, otherwise specifying connections for the service.| | |
+| corethreads| java.lang.Integer| Consumer threadpool core thread size| | |
+| default| java.lang.Boolean| | | |
+| exported-urls| java.util.List&lt;org.apache.dubbo.common.URL&gt;| | | |
+| filter| java.lang.String| Filters for service exposure or reference (multiple filters can be separated by commas).| | |
+| forks| java.lang.Integer| Forks for forking cluster.| | |
+| generic| java.lang.String| Whether to use generic interface| | |
+| group| java.lang.String| Group of the remote service referenced by the consumer/provider.| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| init| java.lang.Boolean| Whether to eagle-init| | |
+| injvm| java.lang.Boolean| Whether to find reference&#x27;s instance from the current JVM| | Reason: null, use for replacement: null|
+| interface| java.lang.String| | | |
+| layer| java.lang.String| Layer of service providers.| | |
+| lazy| java.lang.Boolean| Lazy create connection| | |
+| listener| java.lang.String| Listeners for service exposure or reference (multiple listeners can be separated by commas).| | |
+| loadbalance| java.lang.String| Load balancing strategy for service invocation.| | |
+| local| java.lang.String| Local implementation class name for the service interface.| | Reason: null, use for replacement: null|
+| merger| java.lang.String| Merger for result data.| | |
+| mesh-enable| java.lang.Boolean| enable mesh mode @since 3.1.0| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| metadata-report-config| org.apache.dubbo.config.MetadataReportConfig| Metadata report configuration.| | Reason: null, use for replacement: null|
+| methods| java.util.List&lt;org.apache.dubbo.config.MethodConfig&gt;| Method-specific configuration.| | |
+| mock| java.lang.String| Mock class name to be called when a service fails to execute. The mock doesn&#x27;t support on the provider side, and it is executed when a non-business exception occurs after a remote service call.| | |
+| module| org.apache.dubbo.config.ModuleConfig| Module configuration for the service.| | Reason: null, use for replacement: null|
+| monitor| org.apache.dubbo.config.MonitorConfig| Service monitoring configuration.| | Reason: null, use for replacement: null|
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| onconnect| java.lang.String| Event handler for connection establishment.| | |
+| ondisconnect| java.lang.String| Event handler for disconnection.| | |
+| owner| java.lang.String| Owner of the service providers.| | |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Customized parameters for configuration.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| protocol| java.lang.String| Only the service provider of the specified protocol is invoked, and other protocols are ignored.| | |
+| provided-by| java.lang.String| declares which app or service this interface belongs to| | |
+| provider-namespace| java.lang.String| assign the namespace that provider belong to @since 3.1.1| | |
+| provider-port| java.lang.Integer| By VirtualService and DestinationRule, envoy will generate a new route rule,such as &#x27;demo.default.svc.cluster.local:80&#x27;,the default port is 80. When you want to specify the provider port,you can use this config. @since 3.1.0| | |
+| proxy| java.lang.String| Strategy for generating dynamic agents (options: &quot;jdk&quot; or &quot;javassist&quot;).| | |
+| queues| java.lang.Integer| Consumer threadpool queue size| | |
+| reconnect| java.lang.String| | | |
+| refer-async| java.lang.Boolean| Weather the reference is referred asynchronously @see ModuleConfig#referAsync @deprecated| | Reason: null, use for replacement: null|
+| refer-background| java.lang.Boolean| Whether refer should run in background or not. @see ModuleConfig#setBackground(Boolean) @deprecated replace with {@link ModuleConfig#setBackground(Boolean)}| | Reason: null, use for replacement: null|
+| refer-thread-num| java.lang.Integer| Thread num for asynchronous refer pool size| | |
+| registries| java.util.List&lt;org.apache.dubbo.config.RegistryConfig&gt;| Registries where the service will be registered (use this or registryIds, not both).| | |
+| registry| org.apache.dubbo.config.RegistryConfig| | | |
+| registry-ids| java.lang.String| Registry IDs for service registration (use this or registries, not both).| | |
+| retries| java.lang.Integer| Retry times for failed invocations.| | |
+| router| java.lang.String| | | |
+| scope| java.lang.String| Service scope (&quot;local&quot; implies searching in the current JVM only).| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| sent| java.lang.Boolean| Acknowledge asynchronous-sent invocations.| | |
+| shareconnections| java.lang.Integer| By default, a TCP long-connection communication is shared between the consumer process and the provider process. This property can be set to share multiple TCP long-connection communications. Note that only the dubbo protocol takes effect.| | |
+| singleton| java.lang.Boolean| Use separate instances for services with the same serviceKey (applies when using ReferenceConfig and SimpleReferenceCache together). Directly calling ReferenceConfig.get() will not check this attribute.| | |
+| sticky| java.lang.Boolean| | | |
+| stub| java.lang.String| Local stub class name for the service interface.| | |
+| tag| java.lang.String| Custom tag for the service configuration.| | |
+| threadpool| java.lang.String| Consumer thread pool type: cached, fixed, limit, eager| | |
+| threads| java.lang.Integer| Consumer threadpool thread size| | |
+| timeout| java.lang.Integer| Timeout for remote invocation in milliseconds.| | |
+| url-merge-processor| java.lang.String| Url Merge Processor Used to customize the URL merge of consumer and provider| | |
+| validation| java.lang.String| Enable JSR303 standard annotation validation for method parameters.| | |
+| version| java.lang.String| Version of the remote service referenced by the consumer/provider.| | |
+### dubbo.metadata-report
+**Class:** `org.apache.dubbo.config.MetadataReportConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| address| java.lang.String| The address of the metadata center.| | |
+| check| java.lang.Boolean| Decide the behavior when the initial connection attempt fails, where &#x27;true&#x27; means interrupt the whole process once it fails. The default value is true.| | |
+| cluster| java.lang.Boolean| Whether to use a cluster configuration for the metadata center.| | |
+| cycle-report| java.lang.Boolean| By default, the metadata store will store full metadata repeatedly every day.| | |
+| default| java.lang.Boolean| | | |
+| file| java.lang.String| The file path for saving the metadata center&#x27;s dynamic list.| | |
+| group| java.lang.String| The group for the metadata center, which is similar to the registry group.| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Customized parameters for the metadata center.| | |
+| password| java.lang.String| The password used to log in to the metadata center.| | |
+| port| java.lang.Integer| The default port for the metadata center.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| protocol| java.lang.String| The protocol for the metadata center.| | |
+| registry| java.lang.String| The registry ID for the metadata center.| | |
+| report-definition| java.lang.Boolean| Whether to report definition.| | |
+| report-metadata| java.lang.Boolean| Whether to report metadata.| | |
+| retry-period| java.lang.Integer| The retry period in milliseconds when connecting to the metadata center.| | |
+| retry-times| java.lang.Integer| The number of retry times when connecting to the metadata center.| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| sync-report| java.lang.Boolean| Synchronization report, with the default value as asynchronous.| | |
+| timeout| java.lang.Integer| The request timeout in milliseconds for the metadata center.| | |
+| username| java.lang.String| The username used to log in to the metadata center.| | |
+### dubbo.metrics
+**Class:** `org.apache.dubbo.config.MetricsConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| collector-sync-period| java.lang.Integer| Collector synchronization period.| | |
+| default| java.lang.Boolean| | | |
+| enable-collector-sync| java.lang.Boolean| Whether to enable collector synchronization.| | |
+| enable-jvm| java.lang.Boolean| Whether to enable JVM metrics collection.| | |
+| enable-metadata| java.lang.Boolean| Whether to enable metadata metrics collection.| | |
+| enable-metrics-init| java.lang.Boolean| Whether to enable metrics initialization.| | |
+| enable-netty| java.lang.Boolean| Whether to enable Netty metrics collection.| | |
+| enable-registry| java.lang.Boolean| Whether to enable registry metrics collection.| | |
+| enable-rpc| java.lang.Boolean| Whether to enable RPC (Remote Procedure Call) metrics collection.| | |
+| enable-threadpool| java.lang.Boolean| Whether to enable thread pool metrics collection.| | |
+| export-metrics-service| java.lang.Boolean| Whether to export metrics service.| | |
+| export-service-port| java.lang.Integer| Port used for exporting metrics services.| | |
+| export-service-protocol| java.lang.String| Protocol used for metrics collection and export.| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| port| java.lang.String| Deprecated: This parameter should no longer be used and will be removed in the future.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| protocol| java.lang.String| Protocol used for metrics.| | |
+| rpc-level| java.lang.String| The level of metrics collection, which can be &quot;SERVICE&quot; or &quot;METHOD&quot;. The default is &quot;METHOD&quot;.| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| use-global-registry| java.lang.Boolean| Decide whether to use the global registry of Micrometer.| | |
+### dubbo.module
+**Class:** `org.apache.dubbo.config.ModuleConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| background| java.lang.Boolean| Whether to start the module in the background. If started in the background, it does not await finish on Spring ContextRefreshedEvent. @see org.apache.dubbo.config.spring.context.DubboDeployApplicationListener| | |
+| check-reference-timeout| java.lang.Long| The timeout to check references.| | |
+| default| java.lang.Boolean| | | |
+| export-async| java.lang.Boolean| Whether the service is exported asynchronously.| | |
+| export-thread-num| java.lang.Integer| The thread number for asynchronous export pool size.| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| monitor| org.apache.dubbo.config.MonitorConfig| Monitor center| | |
+| name| java.lang.String| The module name| | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| organization| java.lang.String| The module&#x27;s organization| | |
+| owner| java.lang.String| The module owner| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| refer-async| java.lang.Boolean| Whether the reference is referred asynchronously.| | |
+| refer-thread-num| java.lang.Integer| The thread number for asynchronous reference pool size.| | |
+| registries| java.util.List&lt;org.apache.dubbo.config.RegistryConfig&gt;| Registry centers| | |
+| registry| org.apache.dubbo.config.RegistryConfig| | | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| version| java.lang.String| The module version| | |
+### dubbo.monitor
+**Class:** `org.apache.dubbo.config.MonitorConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| address| java.lang.String| The monitor address| | |
+| default| java.lang.Boolean| | | |
+| group| java.lang.String| The monitor group| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| interval| java.lang.String| The monitor reporting interval| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Customized parameters| | |
+| password| java.lang.String| The monitor password| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| protocol| java.lang.String| The protocol of the monitor. If the value is &quot;registry&quot; it will search the monitor address from the registry center. Otherwise, it will directly connect to the monitor center.| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| username| java.lang.String| The monitor username| | |
+| version| java.lang.String| The monitor version| | |
+### dubbo.protocol
+**Class:** `org.apache.dubbo.config.ProtocolConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| accepts| java.lang.Integer| The maximum acceptable connections.| | |
+| accesslog| java.lang.String| The access log configuration.| | |
+| alive| java.lang.Integer| The keep-alive time for threads in the thread pool (default unit is TimeUnit.MILLISECONDS).| | |
+| buffer| java.lang.Integer| The buffer size.| | |
+| charset| java.lang.String| The character set used for communication.| | |
+| client| java.lang.String| The client implementation.| | |
+| codec| java.lang.String| The protocol codec.| | |
+| contextpath| java.lang.String| The context path for the service.| | |
+| corethreads| java.lang.Integer| The core thread size of the thread pool.| | |
+| default| java.lang.Boolean| | | |
+| dispatcher| java.lang.String| The thread dispatch mode.| | |
+| dispather| java.lang.String| | | Reason: null, use for replacement: null|
+| exchanger| java.lang.String| The method of information exchange.| | |
+| ext-protocol| java.lang.String| Extra protocol for this service, using Port Unification Server.| | |
+| extension| java.lang.String| Additional extensions.| | |
+| heartbeat| java.lang.Integer| The interval for sending heartbeats.| | |
+| host| java.lang.String| The service&#x27;s IP address (useful when there are multiple network cards available).| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| iothreads| java.lang.Integer| The fixed size of the IO thread pool.| | |
+| json-check-level| java.lang.String| JSON check level for serialization.| | |
+| keep-alive| java.lang.Boolean| Indicates whether it is a persistent connection.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| name| java.lang.String| The name of the protocol.| | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| networker| java.lang.String| The networker implementation.| | |
+| optimizer| java.lang.String| The optimizer used for dubbo protocol.| | |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Custom parameters.| | |
+| path| java.lang.String| | | Reason: null, use for replacement: null|
+| payload| java.lang.Integer| The maximum payload length.| | |
+| port| java.lang.Integer| The service&#x27;s port number.| | |
+| prefer-serialization| java.lang.String| Specifies the preferred serialization method for the consumer.  If specified, the consumer will use this parameter first. If the Dubbo Sdk you are using contains the serialization type, the serialization method specified by the argument is used. &lt;p&gt; When this parameter is null or the serialization type specified by this parameter does not exist in the Dubbo SDK, the serialization type specified by serialization is used. If the Dubbo SDK if still does not exist, the default type of the Dubbo SDK is used. For Dubbo SDK &gt;&#x3D; 3.2, &lt;code&gt;preferSerialization&lt;/code&gt; takes precedence over &lt;code&gt;serialization&lt;/code&gt; &lt;p&gt; Supports multiple values separated by commas, e.g., &quot;fastjson2,fastjson,hessian2&quot;.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| prompt| java.lang.String| The command line prompt.| | |
+| queues| java.lang.Integer| The length of the thread pool&#x27;s queue.| | |
+| register| java.lang.Boolean| Indicates whether the service should be registered.| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| serialization| java.lang.String| The serialization method.| | |
+| server| java.lang.String| The server implementation.| | |
+| ssl-enabled| java.lang.Boolean| Indicates whether SSL is enabled.| | |
+| status| java.lang.String| The status check configuration.| | |
+| telnet| java.lang.String| Supported Telnet commands, separated by commas.| | |
+| thread-pool-exhausted-listeners| java.lang.String| Listeners for exhausted thread pool.| | |
+| threadpool| java.lang.String| The name of the thread pool.| | |
+| threads| java.lang.Integer| The fixed size of the thread pool.| | |
+| transporter| java.lang.String| The transporter used for communication.| | |
+### dubbo.provider
+**Class:** `org.apache.dubbo.config.ProviderConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| accepts| java.lang.Integer| The maximum number of acceptable connections.| | |
+| accesslog| java.lang.String| Whether to export access logs to logs.| | |
+| actives| java.lang.Integer| Maximum concurrent invocations allowed.| | |
+| alive| java.lang.Integer| The keep-alive time of the thread pool, default unit: TimeUnit.MILLISECONDS.| | |
+| application| org.apache.dubbo.config.ApplicationConfig| Application configuration for the service.| | Reason: null, use for replacement: null|
+| async| java.lang.Boolean| Enable asynchronous invocation. Note that it is unreliable asynchronous, ignoring return values and not blocking threads.| | |
+| auth| java.lang.Boolean| Enable service authentication.| | |
+| buffer| java.lang.Integer| The size of the network I/O buffer.| | |
+| cache| java.lang.String| Cache provider for caching return results. available options: lru, threadlocal, jcache etc.| | |
+| callbacks| java.lang.Integer| Callback limits for the service.| | |
+| charset| java.lang.String| The charset used for serialization.| | |
+| client| java.lang.String| The client-side implementation model of the protocol.| | |
+| cluster| java.lang.String| Cluster type for service.| | |
+| codec| java.lang.String| The codec used by the protocol.| | |
+| config-center| org.apache.dubbo.config.ConfigCenterConfig| Configuration center settings.| | Reason: null, use for replacement: null|
+| connections| java.lang.Integer| Connection limits: 0 for shared connection, otherwise specifying connections for the service.| | |
+| contextpath| java.lang.String| The context path of the service.| | |
+| default| java.lang.Boolean| | | |
+| delay| java.lang.Integer| The time delay to register the service (in milliseconds).| | |
+| deprecated| java.lang.Boolean| Whether the service is deprecated.| | |
+| dispatcher| java.lang.String| The mode of thread dispatching.| | |
+| dispather| java.lang.String| | | Reason: null, use for replacement: null|
+| document| java.lang.String| Document center for the service.| | |
+| dynamic| java.lang.Boolean| Whether to register the service as a dynamic service on the registry. If true, the service will be enabled automatically after registration, and manual disabling is required to stop it.| | |
+| exchanger| java.lang.String| The method of information exchange.| | |
+| executes| java.lang.Integer| Max allowed executing times.| | |
+| executor| java.util.concurrent.Executor| used for thread pool isolation between services| | |
+| export| java.lang.Boolean| Whether to export the service.| | |
+| export-async| java.lang.Boolean| Weather the service is export asynchronously @deprecated @see ModuleConfig#exportAsync| | Reason: null, use for replacement: null|
+| export-background| java.lang.Boolean| Whether the export should run in the background or not. @deprecated Replace with {@link ModuleConfig#setBackground(Boolean)} @see ModuleConfig#setBackground(Boolean)| | Reason: null, use for replacement: null|
+| export-thread-num| java.lang.Integer| The number of threads for the asynchronous export pool.| | Reason: null, use for replacement: null|
+| exported-urls| java.util.List&lt;org.apache.dubbo.common.URL&gt;| | | |
+| filter| java.lang.String| Filters for service exposure or reference (multiple filters can be separated by commas).| | |
+| forks| java.lang.Integer| Forks for forking cluster.| | |
+| group| java.lang.String| The service group.| | |
+| host| java.lang.String| The IP addresses of the service (used when there are multiple network cards available).| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| interface| java.lang.String| | | |
+| iothreads| java.lang.Integer| The size of the I/O thread pool (fixed size).| | |
+| layer| java.lang.String| Layer of service providers.| | |
+| listener| java.lang.String| Listeners for service exposure or reference (multiple listeners can be separated by commas).| | |
+| loadbalance| java.lang.String| Load balancing strategy for service invocation.| | |
+| local| java.lang.String| Local implementation class name for the service interface.| | Reason: null, use for replacement: null|
+| merger| java.lang.String| Merger for result data.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| metadata-report-config| org.apache.dubbo.config.MetadataReportConfig| Metadata report configuration.| | Reason: null, use for replacement: null|
+| methods| java.util.List&lt;org.apache.dubbo.config.MethodConfig&gt;| Method-specific configuration.| | |
+| mock| java.lang.String| Mock class name to be called when a service fails to execute. The mock doesn&#x27;t support on the provider side, and it is executed when a non-business exception occurs after a remote service call.| | |
+| module| org.apache.dubbo.config.ModuleConfig| Module configuration for the service.| | Reason: null, use for replacement: null|
+| monitor| org.apache.dubbo.config.MonitorConfig| Service monitoring configuration.| | Reason: null, use for replacement: null|
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| networker| java.lang.String| The networker used by the protocol.| | |
+| onconnect| java.lang.String| Event handler for connection establishment.| | |
+| ondisconnect| java.lang.String| Event handler for disconnection.| | |
+| owner| java.lang.String| Owner of the service providers.| | |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Customized parameters for configuration.| | |
+| path| java.lang.String| | | Reason: null, use for replacement: null|
+| payload| java.lang.Integer| The maximum payload length.| | |
+| port| java.lang.Integer| The port of the service.| | Reason: null, use for replacement: null|
+| prefer-serialization| java.lang.String| Specifies the preferred serialization method for the consumer.  If specified, the consumer will use this parameter first. If the Dubbo Sdk you are using contains the serialization type, the serialization method specified by the argument is used. &lt;p&gt; When this parameter is null or the serialization type specified by this parameter does not exist in the Dubbo SDK, the serialization type specified by serialization is used. If the Dubbo SDK if still does not exist, the default type of the Dubbo SDK is used. For Dubbo SDK &gt;&#x3D; 3.2, &lt;code&gt;preferSerialization&lt;/code&gt; takes precedence over &lt;code&gt;serialization&lt;/code&gt; &lt;p&gt; Supports multiple values separated by commas, e.g., &quot;fastjson2,fastjson,hessian2&quot;.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| prompt| java.lang.String| The command line prompt.| | |
+| protocol| org.apache.dubbo.config.ProtocolConfig| | | |
+| protocol-ids| java.lang.String| Id list of protocols the service will export with (use this or protocols, not both).| | |
+| protocols| java.util.List&lt;org.apache.dubbo.config.ProtocolConfig&gt;| List of protocols the service will export with (use this or protocolIds, not both).| | |
+| proxy| java.lang.String| Strategy for generating dynamic agents (options: &quot;jdk&quot; or &quot;javassist&quot;).| | |
+| queues| java.lang.Integer| The length of the thread pool queue.| | |
+| register| java.lang.Boolean| Whether to register the service.| | |
+| registries| java.util.List&lt;org.apache.dubbo.config.RegistryConfig&gt;| Registries where the service will be registered (use this or registryIds, not both).| | |
+| registry| org.apache.dubbo.config.RegistryConfig| | | |
+| registry-ids| java.lang.String| Registry IDs for service registration (use this or registries, not both).| | |
+| retries| java.lang.Integer| Retry times for failed invocations.| | |
+| scope| java.lang.String| Service scope (&quot;local&quot; implies searching in the current JVM only).| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| sent| java.lang.Boolean| Acknowledge asynchronous-sent invocations.| | |
+| serialization| java.lang.String| Serialization type for service communication.| | |
+| server| java.lang.String| The server-side implementation model of the protocol.| | |
+| singleton| java.lang.Boolean| Use separate instances for services with the same serviceKey (applies when using ReferenceConfig and SimpleReferenceCache together). Directly calling ReferenceConfig.get() will not check this attribute.| | |
+| status| java.lang.String| The status check configuration.| | |
+| stub| java.lang.String| Local stub class name for the service interface.| | |
+| tag| java.lang.String| Custom tag for the service configuration.| | |
+| telnet| java.lang.String| Supported telnet commands, separated by commas.| | |
+| threadname| java.lang.String| The name of the thread pool.| | |
+| threadpool| java.lang.String| The thread pool configuration.| | |
+| threads| java.lang.Integer| The size of the thread pool (fixed size).| | |
+| timeout| java.lang.Integer| Timeout for remote invocation in milliseconds.| | |
+| token| java.lang.String| Whether to use a token for authentication.| | |
+| transporter| java.lang.String| The transporter used by the protocol.| | |
+| use-java-package-as-path| java.lang.Boolean| Whether to use java_package in IDL as path. Default use package. This param only available when service using native stub.| | |
+| validation| java.lang.String| Enable JSR303 standard annotation validation for method parameters.| | |
+| version| java.lang.String| The service version.| | |
+| wait| java.lang.Integer| The wait time when stopping the service.| | |
+| warmup| java.lang.Integer| Warm-up period for the service.| | |
+| weight| java.lang.Integer| The service weight.| | |
+### dubbo.registry
+**Class:** `org.apache.dubbo.config.RegistryConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| accepts| java.lang.String| List of RPC protocols accepted by this registry, e.g., &quot;dubbo,rest&quot;.| | |
+| address| java.lang.String| Register center address.| | |
+| check| java.lang.Boolean| Whether to check if the register center is available when booting up.| | |
+| client| java.lang.String| Client implementation.| | |
+| cluster| java.lang.String| Affects how traffic distributes among registries, useful when subscribing to multiple registries. Available options: - &quot;zone-aware&quot;: A certain type of traffic always goes to one Registry according to where the traffic is originated.| | |
+| default| java.lang.Boolean| | | |
+| dynamic| java.lang.Boolean| Whether to allow dynamic service registration on the register center.| | |
+| enable-empty-protection| java.lang.Boolean| Enable empty protection.| | |
+| extra-keys| java.lang.String| After simplifying the registry, add some parameters individually, useful for providers. Example: extra-keys &#x3D; &quot;A, b, c, d&quot;. @since 2.7.0| | |
+| file| java.lang.String| File for saving the register center dynamic list.| | |
+| group| java.lang.String| The group that services registry belongs to.| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| parameters| java.util.Map&lt;java.lang.String,java.lang.String&gt;| Customized parameters.| | |
+| password| java.lang.String| Password to login the register center.| | |
+| port| java.lang.Integer| Default port for the register center.| | |
+| preferred| java.lang.Boolean| Always use this registry first if set to true, useful when subscribing to multiple registries.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| protocol| java.lang.String| Protocol used for the register center.| | |
+| register| java.lang.Boolean| Whether to allow exporting service on the register center.| | |
+| register-mode| java.lang.String| Register mode.| | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| secure| java.lang.String| Security settings.| | |
+| server| java.lang.String| Server implementation.| | |
+| session| java.lang.Integer| Session timeout in milliseconds for the register center.| | |
+| simplified| java.lang.Boolean| Simplify the registry, useful for both providers and consumers. @since 2.7.0| | |
+| subscribe| java.lang.Boolean| Whether to allow subscribing to services on the register center.| | |
+| timeout| java.lang.Integer| Connect timeout in milliseconds for the register center.| | |
+| transport| java.lang.String| | | Reason: null, use for replacement: null|
+| transporter| java.lang.String| Network transmission type.| | |
+| use-as-config-center| java.lang.Boolean| Indicates whether the address works as a configuration center or not.| | |
+| use-as-metadata-center| java.lang.Boolean| Indicates whether the address works as a remote metadata center or not.| | |
+| username| java.lang.String| Username to login the register center.| | |
+| version| java.lang.String| Version of the registry.| | |
+| wait| java.lang.Integer| Wait time before stopping.| | Reason: null, use for replacement: null|
+| weight| java.lang.Integer| Affects traffic distribution among registries, useful when subscribing to multiple registries. Takes effect only when no preferred registry is specified.| | |
+| zone| java.lang.String| The region where the registry belongs, usually used to isolate traffics.| | |
+### dubbo.rpc
+**Class:** `org.apache.dubbo.spring.boot.autoconfigure.DubboConfigurationProperties$RpcConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+### dubbo.ssl
+**Class:** `org.apache.dubbo.config.SslConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| ca-address| java.lang.String| Address for Certificate Authority (CA).| | |
+| ca-cert-path| java.lang.String| Path to the CA certificate file.| | |
+| client-key-cert-chain-path| java.lang.String| Path to the client&#x27;s key certificate chain file.| | |
+| client-key-cert-chain-path-stream| java.io.InputStream| Input stream for the client&#x27;s key certificate chain (if provided).| | |
+| client-key-password| java.lang.String| Password for the client&#x27;s private key (if applicable).| | |
+| client-private-key-path| java.lang.String| Path to the client&#x27;s private key file.| | |
+| client-private-key-path-stream| java.io.InputStream| Input stream for the client&#x27;s private key (if provided).| | |
+| client-trust-cert-collection-path| java.lang.String| Path to the client&#x27;s trust certificate collection file.| | |
+| client-trust-cert-collection-path-stream| java.io.InputStream| Input stream for the client&#x27;s trust certificate collection (if provided).| | |
+| default| java.lang.Boolean| | | |
+| env-type| java.lang.String| Environment type for SSL configuration.| | |
+| id| java.lang.String| Identifier for this configuration.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| oidc-token-path| java.lang.String| Path to the OIDC (OpenID Connect) token file.| | |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+| server-key-cert-chain-path| java.lang.String| Path to the server&#x27;s key certificate chain file.| | |
+| server-key-cert-chain-path-stream| java.io.InputStream| Input stream for the server&#x27;s key certificate chain (if provided).| | |
+| server-key-password| java.lang.String| Password for the server&#x27;s private key (if applicable).| | |
+| server-private-key-path| java.lang.String| Path to the server&#x27;s private key file.| | |
+| server-private-key-path-stream| java.io.InputStream| Input stream for the server&#x27;s private key (if provided).| | |
+| server-trust-cert-collection-path| java.lang.String| Path to the server&#x27;s trust certificate collection file.| | |
+| server-trust-cert-collection-path-stream| java.io.InputStream| Input stream for the server&#x27;s trust certificate collection (if provided).| | |
+### dubbo.tracing
+**Class:** `org.apache.dubbo.config.TracingConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| default| java.lang.Boolean| | | |
+| enabled| java.lang.Boolean| Indicates whether the feature is enabled (default is false).| false| |
+| id| java.lang.String| Identifier for this configuration.| | |
+| meta-data| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
+| need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
+| prefixes| java.util.List&lt;java.lang.String&gt;| | | |
+| scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+### dubbo.metrics.aggregation
+**Class:** `org.apache.dubbo.config.nested.AggregationConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| bucket-num| java.lang.Integer| The number of buckets for time window quantile.| | |
+| enable-qps| java.lang.Boolean| Enable QPS (Queries Per Second) aggregation or not.| | |
+| enable-request| java.lang.Boolean| Enable Request aggregation or not.| | |
+| enable-rt| java.lang.Boolean| Enable Response Time aggregation or not.| | |
+| enable-rt-pxx| java.lang.Boolean| Enable Response Time Percentile (Pxx) aggregation or not.| | |
+| enabled| java.lang.Boolean| Enable aggregation or not.| | |
+| qps-time-window-mill-seconds| java.lang.Integer| The time window in milliseconds for QPS (Queries Per Second) aggregation.| | |
+| time-window-seconds| java.lang.Integer| The time window in seconds for time window quantile.| | |
+### dubbo.metrics.histogram
+**Class:** `org.apache.dubbo.config.nested.HistogramConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
+| buckets-ms| java.lang.Integer[]| Buckets in milliseconds for the histograms. Defines the histogram bucket boundaries.| | |
+| distribution-statistic-expiry-min| java.lang.Integer| Expiry time in minutes for distribution statistics. After this time, the statistics are expired.| | |
+| enabled| java.lang.Boolean| Whether histograms are enabled or not. Default is not enabled (false).| | |
+| enabled-percentiles| java.lang.Boolean| Whether enabledPercentiles are enabled or not. Default is not enabled (false).| | |
+| max-expected-ms| java.lang.Integer| Maximum expected value in milliseconds for the histograms. Values higher than this will be considered outliers.| | |
+| min-expected-ms| java.lang.Integer| Minimum expected value in milliseconds for the histograms. Values lower than this will be considered outliers.| | |
+| percentiles| java.lang.Double[]| Array of percentiles to be calculated for the histograms. Each percentile is a double value.| | |
+### dubbo.metrics.prometheus
+**Class:** `org.apache.dubbo.config.nested.PrometheusConfig`
+
+|Key|Type|Description|Default value|Deprecation|
+|---|----|-----------|-------------|-----------|
 
-
-
-
-## 配置选项
-### application
-
-每个应用必须要有且只有一个 application 配置
-
-> 对应的配置类：`org.apache.dubbo.config.ApplicationConfig`
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| name | application | string | <b>必填</b> | | 服务治理 | 当前应用名称，用于注册中心计算应用间依赖关系，注意：消费者和提供者应用名不要一样，此参数不是匹配条件，你当前项目叫什么名字就填什么，和提供者消费者角色无关，比如：kylin应用调用了morgan应用的服务，则kylin项目配成kylin，morgan项目配成morgan，可能kylin也提供其它服务给别人使用，但kylin项目永远配成kylin，这样注册中心将显示kylin依赖于morgan | 2.7.0以上版本 |
-| compiler | compiler | string | 可选 | javassist | 性能优化 | Java字节码编译器，用于动态类的生成，可选：jdk或javassist | 2.7.0以上版本 |
-| logger | logger | string | 可选 | slf4j | 性能优化 | 日志输出方式，可选：slf4j,jcl,log4j,log4j2,jdk | 2.7.0以上版本 |
-| owner | owner | string | 可选 | | 服务治理 | 应用负责人，用于服务治理，请填写负责人公司邮箱前缀 | 2.0.5以上版本 |
-| organization | organization | string | 可选 | | 服务治理 | 组织名称(BU或部门)，用于注册中心区分服务来源，此配置项建议不要使用autoconfig，直接写死在配置中，比如china,intl,itu,crm,asc,dw,aliexpress等 | 2.0.0以上版本 |
-| architecture <br class="atl-forced-newline" /> | architecture <br class="atl-forced-newline" /> | string | 可选 | | 服务治理 | 用于服务分层对应的架构。如，intl、china。不同的架构使用不同的分层。 | 2.0.7以上版本 |
-| environment | environment | string | 可选 | | 服务治理 | 应用环境，如：develop/test/product，不同环境使用不同的缺省值，以及作为只用于开发测试功能的限制条件 | 2.0.0以上版本 |
-| version | application.version | string | 可选 | | 服务治理 | 当前应用的版本 | 2.7.0以上版本 |
-| dumpDirectory | dump.directory | string | 可选 | | 服务治理 | 当进程出问题如线程池满时，框架自动dump文件的存储路径 | 2.7.0以上版本 |
-| qosEnable | qos.enable | boolean | 可选 | | 服务治理 | 是否启用 qos 运维端口 | 2.7.0以上版本 |
-| qosHost | qos.host | string | 可选 | | 服务治理 | 监听的网络接口地址，默认 0.0.0.0 | 2.7.3以上版本 |
-| qosPort | qos.port | int | 可选 | | 服务治理 | 监听的网络端口 | 2.7.0以上版本 |
-| qosAcceptForeignIp | qos.accept.foreign.ip | boolean | 可选 | | 服务治理 | 安全配置，是否接收除localhost本机访问之外的外部请求 | 2.7.0以上版本 |
-| shutwait | dubbo.service.shutdown.wait | string | 可选 | | 服务治理 | 优雅停机时 shutdown 的等待时间(ms) | 2.7.0以上版本 |
-| hostname | | string | 可选 | 本机主机名 | 服务治理 | 主机名 | 2.7.5以上版本 |
-| registerConsumer | registerConsumer | boolean | 可选 | true | 服务治理 | 是否注册实例到注册中心。当时实例为纯消费者时才设置为`false` | 2.7.5以上版本 |
-| repository | application.version | string | 可选 | | 服务治理 | 当前应用的版本 | 2.7.6以上版本 |
-| enableFileCache | file.cache | boolean | 可选 | true | 服务治理 | 是否开启本地缓存 | 3.0.0以上版本 |
-| protocol | | string | 可选 | dubbo | 服务治理 | 首选协议，适用于无法确定首选协议的时候 | 3.0.0以上版本 |
-| metadataType | metadata-type |String| 可选 | local | 服务治理 | 应用级服务发现 metadata 传递方式，是以 Provider 视角而言的，Consumer 侧配置无效，可选值有：<br>* remote - Provider 把 metadata 放到远端注册中心，Consumer 从注册中心获取；<br/>* local - Provider 把 metadata 放在本地，Consumer 从 Provider 处直接获取；| 2.7.5以上版本 |
-| metadataServiceProtocol | metadata-service-protocol | string | 可选 | dubbo | 服务治理 | 如 metadataType 配置为 local，则该属性设置 MetadataService 服务所用的通信协议，默认为 dubbo| 3.0.0以上版本 |
-| metadataServicePort | metadata-service-port | int | 可选 | | 服务治理 | 如 metadataType 配置为 local，则该属性设置 MetadataService 服务所用的端口号| 2.7.9以上版本 |
-| livenessProbe | liveness-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 liveness probe | 3.0.0以上版本 |
-| readinessProbe | readiness-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 readiness probe | 3.0.0以上版本 |
-| startupProbe | startup-probe | string | 可选 | | 服务治理 | 概念和格式对应 k8s 体系 startup probe | 3.0.0以上版本 |
-| registerMode | register-mode | string | 可选 | all | 服务治理 | 控制地址注册行为，应用级服务发现迁移用。<br/>* instance 只注册应用级地址；<br/>* interface 只注册接口级地址；<br/>* all(默认) 同时注册应用级和接口级地址； | 3.0.0以上版本 |
-| enableEmptyProtection | enable-empty-protection | boolean | 可选 | true | 服务治理 | 是否全局启用消费端的空地址列表保护，开启后注册中心的空地址推送将被忽略，默认 true | 3.0.0以上版本 |
-| parameters | 无 | Map<string, string> | 可选 | | 服务治理 | 扩展预留，可扩展定义任意参数，所有扩展参数都将原样反映在 URL 配置上 | 2.7.0以上版本 |
-
-
-### service
-
-服务提供者暴露服务配置。
-
-> 对应的配置类：`org.apache.dubbo.config.ServiceConfig`
-
-|  属性 |  对应URL参数 |  类型 |  是否必填 |  缺省值 |  作用 |  描述 |  兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| interface | | class | <b>必填</b> | | 服务发现 | 服务接口名 | 1.0.0以上版本 |
-| ref | | object | <b>必填</b> | | 服务发现 | 服务对象实现引用 | 1.0.0以上版本 |
-| version | version | string | 可选 | 0.0.0 | 服务发现 | 服务版本，建议使用两位数字版本，如：1.0，通常在接口不兼容时版本号才需要升级 | 1.0.0以上版本 |
-| group | group | string | 可选 | | 服务发现 | 服务分组，当一个接口有多个实现，可以用分组区分 | 1.0.7以上版本 |
-| path | &lt;path&gt; | string | 可选 | 缺省为接口名 | 服务发现 | 服务路径 (注意：1.0不支持自定义路径，总是使用接口名，如果有1.0调2.0，配置服务路径可能不兼容) | 1.0.12以上版本 |
-| delay | delay | int | 可选 | 0 | 性能调优 | 延迟注册服务时间(毫秒) ，设为-1时，表示延迟到Spring容器初始化完成时暴露服务 | 1.0.14以上版本 |
-| timeout | timeout | int | 可选 | 1000 | 性能调优 | 远程服务调用超时时间(毫秒) | 2.0.0以上版本 |
-| retries | retries | int | 可选 | 2 | 性能调优 | 远程服务调用重试次数，不包括第一次调用，不需要重试请设为0 | 2.0.0以上版本 |
-| connections | connections | int | 可选 | 100 | 性能调优 | 对每个提供者的最大连接数，rmi、http、hessian等短连接协议表示限制连接数，dubbo等长连接协表示建立的长连接个数 | 2.0.0以上版本 |
-| loadbalance | loadbalance | string | 可选 | random | 性能调优 | 负载均衡策略，可选值：<br/>* random - 随机; <br/>* roundrobin - 轮询; <br/>* leastactive - 最少活跃调用; <br/>* consistenthash - 哈希一致 (2.1.0以上版本); <br/>* shortestresponse - 最短响应 (2.7.7以上版本);| 2.0.0以上版本 |
-| async | async | boolean | 可选 | false | 性能调优 | 是否缺省异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 2.0.0以上版本 |
-| local | local | class/boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省代理类名，即：接口名 + Local后缀，已废弃，请使用stub| 2.0.0以上版本 |
-| stub | stub | class/boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省代理类名，即：接口名 + Stub后缀，服务接口客户端本地代理类名，用于在客户端执行本地逻辑，如本地缓存等，该本地代理类的构造函数必须允许传入远程代理对象，构造函数如：public XxxServiceStub(XxxService xxxService) | 2.0.0以上版本 |
-| mock | mock | class/boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省Mock类名，即：接口名 + Mock后缀，服务接口调用失败Mock实现类，该Mock类必须有一个无参构造函数，与Local的区别在于，Local总是被执行，而Mock只在出现非业务异常(比如超时，网络异常等)时执行，Local在远程调用之前执行，Mock在远程调用后执行。 | 2.0.0以上版本 |
-| token | token | string/boolean | 可选 |  | 服务治理 | 令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌，否则使用静态令牌，令牌的作用是防止消费者绕过注册中心直接访问，保证注册中心的授权功能有效，如果使用点对点调用，需关闭令牌功能 | 2.0.0以上版本 |
-| registry | | string | 可选 | 缺省向所有registry注册 | 配置关联 | 向指定注册中心注册，在多个注册中心时使用，值为&lt;dubbo:registry&gt;的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A | 2.0.0以上版本 |
-| provider | | string | 可选 | 缺省使用第一个provider配置 | 配置关联 | 指定provider，值为&lt;dubbo:provider&gt;的id属性 | 2.0.0以上版本 |
-| deprecated | deprecated | boolean | 可选 | false | 服务治理 | 服务是否过时，如果设为true，消费方引用时将打印服务过时警告error日志 | 2.0.5以上版本 |
-| dynamic | dynamic | boolean | 可选 | true | 服务治理 | 服务是否动态注册，如果设为false，注册后将显示后disable状态，需人工启用，并且服务提供者停止时，也不会自动取消册，需人工禁用。 | 2.0.5以上版本 |
-| accesslog | accesslog | string/boolean | 可选 | false | 服务治理 | 设为true，将向logger中输出访问日志，也可填写访问日志文件路径，直接把访问日志输出到指定文件 | 2.0.5以上版本 |
-| owner | owner | string | 可选 | | 服务治理 | 服务负责人，用于服务治理，请填写负责人公司邮箱前缀 | 2.0.5以上版本 |
-| document | document | string | 可选 | | 服务治理 | 服务文档URL | 2.0.5以上版本 |
-| weight | weight | int | 可选 | | 性能调优 | 服务权重 | 2.0.5以上版本 |
-| executes | executes | int | 可选 | 0 | 性能调优 | 服务提供者每服务每方法最大可并行执行请求数 | 2.0.5以上版本 | 
-| actives | actives | int | 可选 | 0 | 性能调优 | 每服务消费者每服务每方法最大并发调用数 | 2.0.5以上版本 |
-| proxy | proxy | string | 可选 | javassist | 性能调优 | 生成动态代理方式，可选：jdk/javassist | 2.0.5以上版本 |
-| cluster | cluster | string | 可选 | failover | 性能调优 | 集群方式，可选：failover/failfast/failsafe/failback/forking/available/mergeable(2.1.0以上版本)/broadcast(2.1.0以上版本)/zone-aware(2.7.5以上版本) | 2.0.5以上版本 |
-| filter | service.filter | string | 可选 | default | 性能调优 | 服务提供方远程调用过程拦截器名称，多个名称用逗号分隔 | 2.0.5以上版本 |
-| listener | exporter.listener | string | 可选 | default | 性能调优 | 服务提供方导出服务监听器名称，多个名称用逗号分隔 | |
-| protocol | | string | 可选 | | 配置关联 | 使用指定的协议暴露服务，在多协议时使用，值为&lt;dubbo:protocol&gt;的id属性，多个协议ID用逗号分隔 | 2.0.5以上版本 |
-| layer | layer | string | 可选 | | 服务治理 | 服务提供者所在的分层。如：biz、dao、intl:web、china:acton。 | 2.0.7以上版本 |
-| register | register | boolean | 可选 | true | 服务治理 | 该协议的服务是否注册到注册中心 | 2.0.8以上版本 |
-| validation | validation | string | 可选 | | 服务治理 | 是否启用JSR303标准注解验证，如果启用，将对方法参数上的注解进行校验 | 2.7.0以上版本 |
-| parameters | 无 | Map<string, string> | 可选 | | 服务治理 | 扩展预留，可扩展定义任意参数，所有扩展参数都将原样反映在 URL 配置上 | 2.0.0以上版本 |
-
-### reference
-
-
-服务消费者引用服务配置。
-
-> 对应的配置类： `org.apache.dubbo.config.ReferenceConfig`
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| id | | string | <b>必填</b> | | 配置关联 | 服务引用BeanId | 1.0.0以上版本  |
-| interface | | class | <b>必填</b> | | 服务发现 | 服务接口名 | 1.0.0以上版本  |
-| version | version | string | 可选 | | 服务发现 | 服务版本，与服务提供者的版本一致 | 1.0.0以上版本  |
-| group | group | string | 可选 | | 服务发现 | 服务分组，当一个接口有多个实现，可以用分组区分，必需和服务提供方一致 | 1.0.7以上版本  |
-| timeout | timeout | long | 可选 | 缺省使用&lt;dubbo:consumer&gt;的timeout | 性能调优 | 服务方法调用超时时间(毫秒) | 1.0.5以上版本  |
-| retries | retries | int | 可选 | 缺省使用&lt;dubbo:consumer&gt;的retries | 性能调优 | 远程服务调用重试次数，不包括第一次调用，不需要重试请设为0 | 2.0.0以上版本  |
-| connections | connections | int | 可选 | 缺省使用&lt;dubbo:consumer&gt;的connections | 性能调优 | 对每个提供者的最大连接数，rmi、http、hessian等短连接协议表示限制连接数，dubbo等长连接协表示建立的长连接个数 | 2.0.0以上版本  |
-| loadbalance | loadbalance | string | 可选 | 缺省使用&lt;dubbo:consumer&gt;的loadbalance | 性能调优 | 负载均衡策略，可选值：<br/>* random - 随机; <br/>* roundrobin - 轮询; <br/>* leastactive - 最少活跃调用; <br/>* consistenthash - 哈希一致 (2.1.0以上版本); <br/>* shortestresponse - 最短响应 (2.7.7以上版本); | 2.0.0以上版本 |
-| async | async | boolean | 可选 | 缺省使用&lt;dubbo:consumer&gt;的async | 性能调优 | 是否异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 2.0.0以上版本  |
-| generic | generic | boolean | 可选 | 缺省使用&lt;dubbo:consumer&gt;的generic | 服务治理 | 是否缺省泛化接口，如果为泛化接口，将返回GenericService | 2.0.0以上版本  |
-| check | check | boolean | 可选 | 缺省使用&lt;dubbo:consumer&gt;的check | 服务治理 | 启动时检查提供者是否存在，true报错，false忽略 | 2.0.0以上版本  |
-| url | url | string | 可选 | | 服务治理 | 点对点直连服务提供者地址，将绕过注册中心 | 1.0.6以上版本  |
-| stub | stub | class/boolean | 可选 | | 服务治理 | 服务接口客户端本地代理类名，用于在客户端执行本地逻辑，如本地缓存等，该本地代理类的构造函数必须允许传入远程代理对象，构造函数如：public XxxServiceLocal(XxxService xxxService) | 2.0.0以上版本  |
-| mock | mock | class/boolean | 可选 | | 服务治理 | 服务接口调用失败Mock实现类名，该Mock类必须有一个无参构造函数，与Local的区别在于，Local总是被执行，而Mock只在出现非业务异常(比如超时，网络异常等)时执行，Local在远程调用之前执行，Mock在远程调用后执行。 | Dubbo1.0.13及其以上版本支持  |
-| cache | cache | string/boolean | 可选 | | 服务治理 | 以调用参数为key，缓存返回结果，可选：lru, threadlocal, jcache等 | Dubbo2.1.0及其以上版本支持  |
-| validation | validation | boolean | 可选 | | 服务治理 | 是否启用JSR303标准注解验证，如果启用，将对方法参数上的注解进行校验 | Dubbo2.1.0及其以上版本支持  |
-| proxy | proxy | boolean | 可选 | javassist | 性能调优 | 选择动态代理实现策略，可选：javassist, jdk | 2.0.2以上版本  |
-| client | client | string | 可选 | | 性能调优 | 客户端传输类型设置，如Dubbo协议的netty或mina。 | Dubbo2.0.0以上版本支持  |
-| registry | | string | 可选 | 缺省将从所有注册中心获服务列表后合并结果 | 配置关联 | 从指定注册中心注册获取服务列表，在多个注册中心时使用，值为&lt;dubbo:registry&gt;的id属性，多个注册中心ID用逗号分隔 | 2.0.0以上版本  |
-| owner | owner | string | 可选 | | 服务治理 | 调用服务负责人，用于服务治理，请填写负责人公司邮箱前缀 | 2.0.5以上版本  |
-| actives | actives | int | 可选 | 0 | 性能调优 | 每服务消费者每服务每方法最大并发调用数 | 2.0.5以上版本  |
-| cluster | cluster | string | 可选 | failover | 性能调优 | 集群方式，可选：failover/failfast/failsafe/failback/forking/available/mergeable(2.1.0以上版本)/broadcast(2.1.0以上版本)/zone-aware(2.7.5以上版本) | 2.0.5以上版本  |
-| filter | reference.filter | string | 可选 | default | 性能调优 | 服务消费方远程调用过程拦截器名称，多个名称用逗号分隔 | 2.0.5以上版本  |
-| listener | invoker.listener | string | 可选 | default | 性能调优 | 服务消费方引用服务监听器名称，多个名称用逗号分隔 | 2.0.5以上版本  |
-| layer | layer | string | 可选 | | 服务治理 | 服务调用者所在的分层。如：biz、dao、intl:web、china:acton。 | 2.0.7以上版本  |
-| init | init | boolean | 可选 | false | 性能调优 | 是否在afterPropertiesSet()时饥饿初始化引用，否则等到有人注入或引用该实例时再初始化。 | 2.0.10以上版本  |
-| protocol | protocol | string | 可选 | | 服务治理 | 只调用指定协议的服务提供方，其它协议忽略。 | 2.7.0以上版本 |
-| client | client | string | 可选 | dubbo协议缺省为netty | 服务发现 | 协议的客户端实现类型，比如：dubbo协议的mina,netty等 | 2.7.0以上版本 |
-| providerPort | provider-port | int | 可选 | | Service Mesh | 当dubbo.consumer.meshEnable=true，Dubbo默认会将请求转换成K8S标准格式，结合VirtualService和DestinationRule进行流量治理，此时consumer端可以感知到provider。如果不想使用VirtualService和DestinationRule，请设置providerPort，使consumer端感知provider暴露的服务端口 | 3.1.0以上版本 |
-| unloadClusterRelated | unloadClusterRelated | boolean | 可选 | false | Service Mesh | 当dubbo.consumer.meshEnable=true，在Service Mesh模式下，设置为true，可在当前调用中卸载与Cluster相关的Directory、Router和Load Balance，将重试、负载平衡、超时和其他流量管理功能下放至Sidecar，使用VirtualService和DestinationRule进行流量治理 | 3.1.0以上版本 |
-| parameters | 无 | Map<string, string> | 可选 | | 服务治理 | 扩展预留，可扩展定义任意参数，所有扩展参数都将原样反映在 URL 配置上 | 2.0.0以上版本 |
-| providedBy | provided-by | string | 可选 | | Service Mesh | 当dubbo.consumer.meshEnable=true，Dubbo默认会将请求转换成K8S标准格式，结合VirtualService和DestinationRule进行流量治理，此时consumer端可以感知到provider。该值应当与声明的`k8s service`一致 | 3.1.0以上版本 |
-| providerNamespace | provider-namespace | string | 可选 | | Service Mesh | 当dubbo.consumer.meshEnable=true，Dubbo默认会将请求转换成K8S标准格式，结合VirtualService和DestinationRule进行流量治理，此时consumer端可以感知到provider。请设置providerNamespace，使consumer端按照此配置寻址provider dns，默认`default` | 3.1.2以上版本 |
-
-
-### registry
-
-注册中心配置。
-
-> 对应的配置类： `org.apache.dubbo.config.RegistryConfig`。同时如果有多个不同的注册中心，可以声明多个 `<dubbo:registry>` 标签，并在 `<dubbo:service>` 或 `<dubbo:reference>` 的 `registry` 属性指定使用的注册中心。
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| id | | string | 可选 | | 配置关联 | 注册中心引用BeanId，可以在&lt;dubbo:service registry=""&gt;或&lt;dubbo:reference registry=""&gt;中引用此ID | 1.0.16以上版本 |
-| address | &lt;host:port&gt; | string | <b>必填</b> | | 服务发现 | 注册中心服务器地址，如果地址没有端口缺省为9090，同一集群内的多个地址用逗号分隔，如：ip:port,ip:port，不同集群的注册中心，请配置多个&lt;dubbo:registry&gt;标签 | 1.0.16以上版本 |
-| protocol | &lt;protocol&gt; | string | 可选 | dubbo | 服务发现 | 注册中心地址协议，支持`dubbo`, `multicast`, `zookeeper`, `redis`, `consul(2.7.1)`, `sofa(2.7.2)`, `etcd(2.7.2)`, `nacos(2.7.2)`等协议 | 2.0.0以上版本 |
-| port | &lt;port&gt; | int | 可选 | 9090 | 服务发现 | 注册中心缺省端口，当address没有带端口时使用此端口做为缺省值 | 2.0.0以上版本 |
-| username | &lt;username&gt; | string | 可选 | | 服务治理 | 登录注册中心用户名，如果注册中心不需要验证可不填 | 2.0.0以上版本 |
-| password | &lt;password&gt; | string | 可选 | | 服务治理 | 登录注册中心密码，如果注册中心不需要验证可不填 | 2.0.0以上版本 |
-| transport | registry.transporter | string | 可选 | netty | 性能调优 | 网络传输方式，可选mina,netty | 2.0.0以上版本 |
-| timeout | registry.timeout | int | 可选 | 5000 | 性能调优 | 注册中心请求超时时间(毫秒) | 2.0.0以上版本 |
-| session | registry.session | int | 可选 | 60000 | 性能调优 | 注册中心会话超时时间(毫秒)，用于检测提供者非正常断线后的脏数据，比如用心跳检测的实现，此时间就是心跳间隔，不同注册中心实现不一样。 | 2.1.0以上版本 |
-| zone | zone | string | 可选 | | 服务治理 | 注册表所属区域，通常用于流量隔离 | 2.7.5以上版本
-| file | registry.file | string | 可选 | | 服务治理 | 使用文件缓存注册中心地址列表及服务提供者列表，应用重启时将基于此文件恢复，注意：两个注册中心不能使用同一文件存储 | 2.0.0以上版本 |
-| wait | registry.wait | int | 可选 | 0 | 性能调优 | 停止时等待通知完成时间(毫秒) | 2.0.0以上版本 |
-| check | check | boolean | 可选 | true | 服务治理 | 注册中心不存在时，是否报错 | 2.0.0以上版本 |
-| register | register | boolean | 可选 | true | 服务治理 | 是否向此注册中心注册服务，如果设为false，将只订阅，不注册 | 2.0.5以上版本 |
-| subscribe | subscribe | boolean | 可选 | true | 服务治理 | 是否向此注册中心订阅服务，如果设为false，将只注册，不订阅 | 2.0.5以上版本 |
-| dynamic | dynamic | boolean | 可选 | true | 服务治理 | 服务是否动态注册，如果设为false，注册后将显示为disable状态，需人工启用，并且服务提供者停止时，也不会自动取消注册，需人工禁用。 | 2.0.5以上版本 |
-| group | group | string | 可选 | dubbo | 服务治理 | 服务注册分组，跨组的服务不会相互影响，也无法相互调用，适用于环境隔离。 | 2.0.5以上版本 |
-| version | version | string | 可选 | | 服务发现 | 服务版本 | 1.0.0以上版本  |
-| simplified | simplified | boolean | 可选 | false | 服务治理 | 注册到注册中心的URL是否采用精简模式的（与低版本兼容） | 2.7.0以上版本 |
-| extra-keys | extraKeys | string | 可选 |  | 服务治理 | 在simplified=true时，extraKeys允许你在默认参数外将额外的key放到URL中，格式："interface,key1,key2"。 | 2.7.0以上版本 |
-| useAsConfigCenter | | boolean | 可选 | | 服务治理 | 该注册中心是否作为配置中心使用 | 2.7.5以上版本 |
-| useAsMetadataCenter | | boolean | 可选 | | 服务治理 | 该注册中心是否作为元数据中心使用 | 2.7.5以上版本 |
-| accepts | accepts | string | 可选 | | 服务治理 | 该注册中心接收rpc协议列表，多协议用逗号隔开，例如dubbo,rest | 2.7.5以上版本 |
-| preferred | preferred | boolean | 可选 | | 服务治理 | 是否作为首选注册中心。当订阅多注册中心时，如果设为true，该注册中心作为首选 | 2.7.5以上版本 |
-| weight | weight | int | 可选 | | 性能调优 | 注册流量权重。使用多注册中心时，可通过该值调整注册流量的分布，当设置首选注册中心时该值不生效 | 2.7.5以上版本 |
-| registerMode | register-mode | string | 可选 | all | 服务治理 | 控制地址注册行为，应用级服务发现迁移用。<br/>* instance 只注册应用级地址；<br/>* interface 只注册接口级地址；<br/>* all(默认) 同时注册应用级和接口级地址； | 3.0.0以上版本 |
-| enableEmptyProtection | enable-empty-protection | boolean | 可选 | true | 服务治理 | 是否全局启用消费端的空地址列表保护，开启后注册中心的空地址推送将被忽略，默认 true | 3.0.0以上版本 |
-| parameters | 无 | Map<string, string> | 可选 | | 服务治理 | 扩展预留，可扩展定义任意参数，所有扩展参数都将原样反映在 URL 配置上 | 2.0.0以上版本 |
-
-### config-center
-
-配置中心。
-
-> 对应的配置类：`org.apache.dubbo.config.ConfigCenterConfig`
-
-| 属性             | 对应URL参数            | 类型                | 是否必填 | 缺省值           | 描述                                                         | 兼容性 |
-| ---------------- | ---------------------- | ------------------- | -------- | ---------------- | ------------------------------------------------------------ | ------ |
-| protocol         | protocol        | string              | 可选     | zookeeper        | 使用哪个配置中心：apollo、zookeeper、nacos等。<br />以zookeeper为例<br />1. 指定protocol，则address可以简化为`127.0.0.1:2181`；<br />2. 不指定protocol，则address取值为`zookeeper://127.0.0.1:2181` | 2.7.0以上版本 |
-| address          | address         | string              | 必填     |                  | 配置中心地址。<br />取值参见protocol说明                     | 2.7.0以上版本 |
-| highestPriority  | highest-priority| boolean             | 可选     | true             | 来自配置中心的配置项具有最高优先级，即会覆盖本地配置项。     | 2.7.0以上版本 |
-| namespace        | namespace       | string              | 可选     | dubbo            | 通常用于多租户隔离，实际含义视具体配置中心而不同。<br />如：<br />zookeeper - 环境隔离，默认值`dubbo`；<br />apollo - 区分不同领域的配置集合，默认使用`dubbo`和`application` | 2.7.0以上版本 |
-| cluster          | cluster         | string              | 可选     |                  | 含义视所选定的配置中心而不同。<br />如Apollo中用来区分不同的配置集群 | 2.7.0以上版本 |
-| group            | group           | string              | 可选     | dubbo            | 含义视所选定的配置中心而不同。<br />nacos - 隔离不同配置集<br />zookeeper - 隔离不同配置集 | 2.7.0以上版本 |
-| check            | check           | boolean             | 可选     | true             | 当配置中心连接失败时，是否终止应用启动。                     | 2.7.0以上版本 |
-| configFile       | config-file     | string              | 可选     | dubbo.properties | 全局级配置文件所映射到的key<br />zookeeper - 默认路径/dubbo/config/dubbo/dubbo.properties<br />apollo - dubbo namespace中的dubbo.properties键 | 2.7.0以上版本 |
-| appConfigFile    | app-config-file | string              | 可选     |                  | “configFile”是全局级共享的。此项仅限于此应用程序配置的属性 | 2.7.0以上版本 |
-| timeout          | timeout         | int                 | 可选     | 3000ms           | 获取配置的超时时间                                           | 2.7.0以上版本 |
-| username         | username        | string              | 可选     |                  | 如果配置中心需要做校验，用户名<br />Apollo暂未启用           | 2.7.0以上版本 |
-| password         | password        | string              | 可选     |                  | 如果配置中心需要做校验，密码<br />Apollo暂未启用             | 2.7.0以上版本 |
-| parameters       | parameters      | Map<string, string> | 可选     |                  | 扩展参数，用来支持不同配置中心的定制化配置参数               | 2.7.0以上版本 |
-| includeSpringEnv |include-spring-env| boolean            | 可选     | false            | 使用Spring框架时支持，为true时，会自动从Spring Environment中读取配置。<br />默认依次读取<br />key为dubbo.properties的配置<br />key为dubbo.properties的PropertySource | 2.7.0以上版本 |
-
-### metadata-report-config
-
-元数据中心。
-
-> 对应的配置类：`org.apache.dubbo.config.MetadataReportConfig`
-
-| 属性            | 对应URL参数 | 类型   | 是否必填 | 缺省值     | 描述                                                         | 兼容性 |
-| --------------- | --------- | ------ | -------- | --------- | ------------------------------------------------------------ | ------ |
-| address         | address   | string | 必填     |           | 元数据中心地址。                     | 2.7.0以上版本 |
-| protocol        | protocol  | string | 可选     | zookeeper | 元数据中心协议：zookeeper、nacos、redis等。<br />以zookeeper为例<br />1. 指定protocol，则address可以简化为`127.0.0.1:2181`；<br />2. 不指定protocol，则address取值为`zookeeper://127.0.0.1:2181` | 2.7.13以上版本 |
-| port            | port      | int    | 可选     |           | 元数据中心端口号。指定port，则address可简化，不用配置端口号 | 2.7.13以上版本 |
-| username        | username  | string | 可选     |           | 元数据中心需要做校验，用户名<br />Apollo暂未启用           | 2.7.0以上版本 |
-| password        | password  | string | 可选     |           | 元数据中心需要做校验，密码<br />Apollo暂未启用             | 2.7.0以上版本 |
-| timeout         | timeout   | int    | 可选     |           | 获取元数据超时时间(ms)                                    | 2.7.0以上版本 |
-| group           | group     | string | 可选     | dubbo     | 元数据分组，适用于环境隔离。与注册中心group意义相同         | 2.7.0以上版本 |
-| retryTimes      | retry-times| int   | 可选     | 100       | 重试次数                                                 | 2.7.0以上版本 |  
-| retryPeriod     | retry-period | int | 可选     | 3000ms    | 重试间隔时间(ms)                                         | 2.7.0以上版本 |
-| cycleReport     | cycle-report | boolean| 可选  | true      | 是否每天更新完整元数据                                    | 2.7.0以上版本 |
-| syncReport      | sync-report | boolean| 可选  | false      | 是否同步更新元数据，默认为异步                             | 2.7.0以上版本 |
-| cluster         | cluster  | string | 可选    |            | 含义视所选定的元数据中心而不同。<br />如Apollo中用来区分不同的配置集群 | 2.7.0以上版本 |
-| file            | file      | string | 可选   |            | 使用文件缓存元数据中心列表，应用重启时将基于此文件恢复，注意：两个元数据中心不能使用同一文件存储 | 2.7.0以上版本 |
-| check           | check   | boolean | 可选   | true       | 当元数据中心连接失败时，是否终止应用启动。                     | 3.0.0以上版本 |
-| reportMetadata  | report-metadata | boolean | 可选 | false | 是否上报地址发现中的接口配置报元数据，`dubbo.application.metadata-type=remote` 该配置不起作用即一定会上报，`dubbo.application.metadata-type=local` 时是否上报由该配置值决定 | 3.0.0以上版本 |
-| reportDefinition | report-definition | boolean | 可选 | true | 是否上报服务运维用元数据                                   | 3.0.0以上版本 |
-| reportConsumerDefinition | report-consumer-definition | boolean | 可选 | true | 是否在消费端上报服务运维用元数据                                    | 3.0.0以上版本 |
-| parameters      | parameters | Map<string, string> | 可选     |  | 扩展参数，用来支持不同元数据中心的定制化配置参数         | 2.7.0以上版本 |
-
-### protocol
-
-服务提供者协议配置。
-
-> 对应的配置类： `org.apache.dubbo.config.ProtocolConfig`。同时，如果需要支持多协议，可以声明多个 `<dubbo:protocol>` 标签，并在 `<dubbo:service>` 中通过 `protocol` 属性指定使用的协议。
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| id | | string | 可选 | dubbo | 配置关联 | 协议BeanId，可以在&lt;dubbo:service protocol=""&gt;中引用此ID，如果ID不填，缺省和name属性值一样，重复则在name后加序号。 | 2.0.5以上版本 |
-| name | &lt;protocol&gt; | string | <b>必填</b> | dubbo | 性能调优 | 协议名称 | 2.0.5以上版本 |
-| port | &lt;port&gt; | int | 可选 | dubbo协议缺省端口为20880，rmi协议缺省端口为1099，http和hessian协议缺省端口为80；如果<b>没有</b>配置port，则自动采用默认端口，如果配置为<b>-1</b>，则会分配一个没有被占用的端口。Dubbo 2.4.0+，分配的端口在协议缺省端口的基础上增长，确保端口段可控。 | 服务发现 | 服务端口 | 2.0.5以上版本 |
-| host | &lt;host&gt; | string | 可选 | 自动查找本机IP | 服务发现 | &#45;服务主机名，多网卡选择或指定VIP及域名时使用，为空则自动查找本机IP，&#45;建议不要配置，让Dubbo自动获取本机IP | 2.0.5以上版本 |
-| threadpool | threadpool | string | 可选 | fixed | 性能调优 | 线程池类型，可选：fixed/cached/limit(2.5.3以上)/eager(2.6.x以上) | 2.0.5以上版本 |
-| threadname | threadname | string | 可选 |       | 性能调优 | 线程池名称 | 2.7.6以上版本 |
-| threads | threads | int | 可选 | 200 | 性能调优 | 服务线程池大小(固定大小) | 2.0.5以上版本 |
-| corethreads | corethreads | int | 可选 | 200 | 性能调优 | 线程池核心线程大小 | 2.0.5以上版本 |
-| iothreads | threads | int | 可选 | cpu个数+1 | 性能调优 | io线程池大小(固定大小) | 2.0.5以上版本 |
-| accepts | accepts | int | 可选 | 0 | 性能调优 | 服务提供方最大可接受连接数 | 2.0.5以上版本 |
-| payload | payload | int | 可选 | 8388608(=8M) | 性能调优 | 请求及响应数据包大小限制，单位：字节 | 2.0.5以上版本 |
-| codec | codec | string | 可选 | dubbo | 性能调优 | 协议编码方式 | 2.0.5以上版本 |
-| serialization | serialization | string | 可选 | dubbo协议缺省为hessian2，rmi协议缺省为java，http协议缺省为json | 性能调优 | 协议序列化方式，当协议支持多种序列化方式时使用，比如：dubbo协议的dubbo,hessian2,java,compactedjava，以及http协议的json等 | 2.0.5以上版本 |
-| accesslog | accesslog | string/boolean | 可选 | | 服务治理 | 设为true，将向logger中输出访问日志，也可填写访问日志文件路径，直接把访问日志输出到指定文件 | 2.0.5以上版本 |
-| path | &lt;path&gt; | string | 可选 | | 服务发现 | 提供者上下文路径，为服务path的前缀 | 2.0.5以上版本 |
-| transporter | transporter | string | 可选 | dubbo协议缺省为netty | 性能调优 | 协议的服务端和客户端实现类型，比如：dubbo协议的mina,netty等，可以分拆为server和client配置 | 2.0.5以上版本 |
-| server | server | string | 可选 | dubbo协议缺省为netty，http协议缺省为servlet | 性能调优 | 协议的服务器端实现类型，比如：dubbo协议的mina,netty等，http协议的jetty,servlet等 | 2.0.5以上版本 |
-| client | client | string | 可选 | dubbo协议缺省为netty | 性能调优 | 协议的客户端实现类型，比如：dubbo协议的mina,netty等 | 2.0.5以上版本 |
-| dispatcher | dispatcher | string | 可选 | dubbo协议缺省为all | 性能调优 | 协议的消息派发方式，用于指定线程模型，比如：dubbo协议的all, direct, message, execution, connection等 | 2.1.0以上版本 |
-| queues | queues | int | 可选 | 0 | 性能调优 | 线程池队列大小，当线程池满时，排队等待执行的队列大小，建议不要设置，当线程池满时应立即失败，重试其它服务提供机器，而不是排队，除非有特殊需求。 | 2.0.5以上版本 |
-| charset | charset | string | 可选 | UTF-8 | 性能调优 | 序列化编码 | 2.0.5以上版本 |
-| buffer | buffer | int | 可选 | 8192 | 性能调优 | 网络读写缓冲区大小 | 2.0.5以上版本 |
-| heartbeat | heartbeat | int | 可选 | 0 | 性能调优 | 心跳间隔，对于长连接，当物理层断开时，比如拔网线，TCP的FIN消息来不及发送，对方收不到断开事件，此时需要心跳来帮助检查连接是否已断开 | 2.0.10以上版本 |
-| telnet | telnet | string | 可选 | | 服务治理 | 所支持的telnet命令，多个命令用逗号分隔 | 2.0.5以上版本 |
-| register | register | boolean | 可选 | true | 服务治理 | 该协议的服务是否注册到注册中心 | 2.0.8以上版本 |
-| contextpath | contextpath | String | 可选 | 缺省为空串 | 服务治理 | 上下文路径 | 2.0.6以上版本 |
-| sslEnabled | ssl-enabled | boolean | 可选 | false | 服务治理 | 是否启用ssl | 2.7.5以上版本 |
-| parameters | parameters | Map<string, string> | 可选 |  | 扩展参数 | 2.0.0以上版本 |
-
-### provider
-
-服务提供者缺省值配置。
-
-> 对应的配置类： `org.apache.dubbo.config.ProviderConfig`。同时该标签为 `<dubbo:service>` 和 `<dubbo:protocol>` 标签的缺省值设置。
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| id | | string | 可选 | dubbo | 配置关联 | 协议BeanId，可以在&lt;dubbo:service proivder=""&gt;中引用此ID | 1.0.16以上版本 |
-| protocol | &lt;protocol&gt; | string | 可选 | dubbo | 性能调优 | 协议名称 | 1.0.16以上版本 |
-| host | &lt;host&gt; | string | 可选 | 自动查找本机IP | 服务发现 | 服务主机名，多网卡选择或指定VIP及域名时使用，为空则自动查找本机IP，建议不要配置，让Dubbo自动获取本机IP | 1.0.16以上版本 |
-| threads | threads | int | 可选 | 200 | 性能调优 | 服务线程池大小(固定大小) | 1.0.16以上版本 |
-| payload | payload | int | 可选 | 8388608(=8M) | 性能调优 | 请求及响应数据包大小限制，单位：字节 | 2.0.0以上版本 |
-| path | &lt;path&gt; | string | 可选 | | 服务发现 | 提供者上下文路径，为服务path的前缀 | 2.0.0以上版本 |
-| transporter | transporter | string | 可选 | dubbo协议缺省为netty | 性能调优 | 协议的服务端和客户端实现类型，比如：dubbo协议的mina,netty等，可以分拆为server和client配置 | 2.0.5以上版本 |
-| server | server | string | 可选 | dubbo协议缺省为netty，http协议缺省为servlet | 性能调优 | 协议的服务器端实现类型，比如：dubbo协议的mina,netty等，http协议的jetty,servlet等 | 2.0.0以上版本 |
-| client | client | string | 可选 | dubbo协议缺省为netty | 性能调优 | 协议的客户端实现类型，比如：dubbo协议的mina,netty等 | 2.0.0以上版本 |
-| dispatcher | dispatcher | string | 可选 | dubbo协议缺省为all | 性能调优 | 协议的消息派发方式，用于指定线程模型，比如：dubbo协议的all, direct, message, execution, connection等 | 2.1.0以上版本 |
-| codec | codec | string | 可选 | dubbo | 性能调优 | 协议编码方式 | 2.0.0以上版本 |
-| serialization | serialization | string | 可选 | dubbo协议缺省为hessian2，rmi协议缺省为java，http协议缺省为json | 性能调优 | 协议序列化方式，当协议支持多种序列化方式时使用，比如：dubbo协议的dubbo,hessian2,java,compactedjava，以及http协议的json,xml等 | 2.0.5以上版本 |
-| default | | boolean | 可选 | false | 配置关联 | 是否为缺省协议，用于多协议 | 1.0.16以上版本 |
-| filter | service.filter | string | 可选 | | 性能调优 | 服务提供方远程调用过程拦截器名称，多个名称用逗号分隔 | 2.0.5以上版本 |
-| listener | exporter.listener | string | 可选 | | 性能调优 | 服务提供方导出服务监听器名称，多个名称用逗号分隔 | 2.0.5以上版本 |
-| threadpool | threadpool | string | 可选 | fixed | 性能调优 | 线程池类型，可选：fixed/cached/limit(2.5.3以上)/eager(2.6.x以上) | 2.0.5以上版本 |
-| threadname | threadname | string | 可选 |       | 性能调优 | 线程池名称 | 2.7.6以上版本 |
-| accepts | accepts | int | 可选 | 0 | 性能调优 | 服务提供者最大可接受连接数 | 2.0.5以上版本 |
-| version | version | string | 可选 | 0.0.0 | 服务发现 | 服务版本，建议使用两位数字版本，如：1.0，通常在接口不兼容时版本号才需要升级 | 2.0.5以上版本 |
-| group | group | string | 可选 |   | 服务发现 | 服务分组，当一个接口有多个实现，可以用分组区分 | 2.0.5以上版本 |
-| delay | delay | int | 可选 | 0 | 性能调优 | 延迟注册服务时间(毫秒)&#45; ，设为-1时，表示延迟到Spring容器初始化完成时暴露服务 | 2.0.5以上版本 |
-| timeout | default.timeout | int | 可选 | 1000 | 性能调优 | 远程服务调用超时时间(毫秒) | 2.0.5以上版本 |
-| retries | default.retries | int | 可选 | 2 | 性能调优 | 远程服务调用重试次数，不包括第一次调用，不需要重试请设为0 | 2.0.5以上版本 |
-| connections | default.connections | int | 可选 | 0 | 性能调优 | 对每个提供者的最大连接数，rmi、http、hessian等短连接协议表示限制连接数，dubbo等长连接协表示建立的长连接个数 | 2.0.5以上版本 |
-| loadbalance | default.loadbalance | string | 可选 | random | 性能调优 | 负载均衡策略，可选值：<br/>* random - 随机; <br/>* roundrobin - 轮询; <br/>* leastactive - 最少活跃调用; <br/>* consistenthash - 哈希一致 (2.1.0以上版本); <br/>* shortestresponse - 最短响应 (2.7.7以上版本); | 2.0.5以上版本 |
-| async | default.async | boolean | 可选 | false | 性能调优 | 是否缺省异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 2.0.5以上版本 |
-| stub | stub | boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省代理类名，即：接口名 + Local后缀。 | 2.0.5以上版本 |
-| mock | mock | boolean | 可选 | false | 服务治理 | 设为true，表示使用缺省Mock类名，即：接口名 + Mock后缀。 | 2.0.5以上版本 |
-| token | token | boolean | 可选 | | 服务治理 | 令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌 | 2.0.5以上版本 |
-| registry | registry | string | 可选 | 缺省向所有registry注册 | 配置关联 | 向指定注册中心注册，在多个注册中心时使用，值为&lt;dubbo:registry&gt;的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A | 2.0.5以上版本 |
-| dynamic | dynamic | boolean | 可选 | true | 服务治理 | 服务是否动态注册，如果设为false，注册后将显示后disable状态，需人工启用，并且服务提供者停止时，也不会自动取消册，需人工禁用。 | 2.0.5以上版本 |
-| accesslog | accesslog | string/boolean | 可选 | false | 服务治理 | 设为true，将向logger中输出访问日志，也可填写访问日志文件路径，直接把访问日志输出到指定文件 | 2.0.5以上版本 |
-| owner | owner | string | 可选 | | 服务治理 | 服务负责人，用于服务治理，请填写负责人公司邮箱前缀 | 2.0.5以上版本 |
-| document | document | string | 可选 | | 服务治理 | 服务文档URL | 2.0.5以上版本 |
-| weight | weight | int | 可选 | | 性能调优 | 服务权重 | 2.0.5以上版本 |
-| executes | executes | int | 可选 | 0 | 性能调优 | 服务提供者每服务每方法最大可并行执行请求数 | 2.0.5以上版本 |
-| actives | default.actives | int | 可选 | 0 | 性能调优 | 每服务消费者每服务每方法最大并发调用数 | 2.0.5以上版本 |
-| proxy | proxy | string | 可选 | javassist | 性能调优 | 生成动态代理方式，可选：jdk/javassist | 2.0.5以上版本 |
-| cluster | default.cluster | string | 可选 | failover | 性能调优 | 集群方式，可选：failover/failfast/failsafe/failback/forking | 2.0.5以上版本 |
-| deprecated | deprecated | boolean | 可选 | false | 服务治理 | 服务是否过时，如果设为true，消费方引用时将打印服务过时警告error日志 | 2.0.5以上版本 |
-| queues | queues | int | 可选 | 0 | 性能调优 | 线程池队列大小，当线程池满时，排队等待执行的队列大小，建议不要设置，当线程池满时应立即失败，重试其它服务提供机器，而不是排队，除非有特殊需求。 | 2.0.5以上版本 |
-| charset | charset | string | 可选 | UTF-8 | 性能调优 | 序列化编码 | 2.0.5以上版本 |
-| buffer | buffer | int | 可选 | 8192 | 性能调优 | 网络读写缓冲区大小 | 2.0.5以上版本 |
-| iothreads | iothreads | int | 可选 | CPU + 1 | 性能调优 | IO线程池，接收网络读写中断，以及序列化和反序列化，不处理业务，业务线程池参见threads配置，此线程池和CPU相关，不建议配置。 | 2.0.5以上版本 |
-| alive | alive | int | 可选 | | 服务治理 | 线程池keepAliveTime，默认单位为ms | 2.0.5以上版本 |
-| telnet | telnet | string | 可选 | | 服务治理 | 所支持的telnet命令，多个命令用逗号分隔 | 2.0.5以上版本 |
-| wait | wait | int | 可选 | | 服务治理 | 停服务时等待时间 | 2.0.5以上版本 |
-| contextpath | contextpath | String | 可选 | 缺省为空串 | 服务治理 | 上下文路径 | 2.0.6以上版本 |
-| layer | layer | string | 可选 | | 服务治理 | 服务提供者所在的分层。如：biz、dao、intl:web、china:acton。 | 2.0.7以上版本 |
-| parameters | parameters | Map<string, string> | 可选 | | 服务治理 | 扩展参数 | 2.0.0以上版本 |
-
-### consumer
-
-服务消费者缺省值配置。
-
-> 配置类： `org.apache.dubbo.config.ConsumerConfig` 。同时该标签为 `<dubbo:reference>` 标签的缺省值设置。
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| timeout | default.timeout | int | 可选 | 1000 | 性能调优 | 远程服务调用超时时间(毫秒) | 1.0.16以上版本 |
-| retries | default.retries | int | 可选 | 2 | 性能调优 | 远程服务调用重试次数，不包括第一次调用，不需要重试请设为0,仅在cluster为failback/failover时有效 | 1.0.16以上版本 |
-| loadbalance | default.loadbalance | string | 可选 | random | 性能调优 | 负载均衡策略，可选值：<br/>* random - 随机; <br/>* roundrobin - 轮询; <br/>* leastactive - 最少活跃调用; <br/>* consistenthash - 哈希一致 (2.1.0以上版本); <br/>* shortestresponse - 最短响应 (2.7.7以上版本); | 1.0.16以上版本 |
-| async | default.async | boolean | 可选 | false | 性能调优 | 是否缺省异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 2.0.0以上版本 |
-| sent | default.sent | boolean | 可选 | true | 服务治理 | 异步调用时，标记sent=true时，表示网络已发出数据 | 2.0.6以上版本 |
-| connections | default.connections | int | 可选 | 100 | 性能调优 | 每个服务对每个提供者的最大连接数，rmi、http、hessian等短连接协议支持此配置，dubbo协议长连接不支持此配置 | 1.0.16以上版本 |
-| generic | generic | boolean | 可选 | false | 服务治理 | 是否缺省泛化接口，如果为泛化接口，将返回GenericService | 2.0.0以上版本 |
-| check | check | boolean | 可选 | true | 服务治理 | 启动时检查提供者是否存在，true报错，false忽略 | 1.0.16以上版本 |
-| proxy | proxy | string | 可选 | javassist | 性能调优 | 生成动态代理方式，可选：jdk/javassist | 2.0.5以上版本 |
-| owner | owner | string | 可选 | | 服务治理 | 调用服务负责人，用于服务治理，请填写负责人公司邮箱前缀 | 2.0.5以上版本 |
-| actives | default.actives | int | 可选 | 0 | 性能调优 | 每服务消费者每服务每方法最大并发调用数 | 2.0.5以上版本 |
-| cluster | default.cluster | string | 可选 | failover | 性能调优 | 集群方式，可选：failover/failfast/failsafe/failback/forking/available/mergeable(2.1.0以上版本)/broadcast(2.1.0以上版本)/zone-aware(2.7.5以上版本) | 2.0.5以上版本 |
-| filter | reference.filter | string | 可选 |   | 性能调优 | 服务消费方远程调用过程拦截器名称，多个名称用逗号分隔 | 2.0.5以上版本 |
-| listener | invoker.listener | string | 可选 | | 性能调优 | 服务消费方引用服务监听器名称，多个名称用逗号分隔 | 2.0.5以上版本 |
-| registry | | string | 可选 | 缺省向所有registry注册 | 配置关联 | 向指定注册中心注册，在多个注册中心时使用，值为&lt;dubbo:registry&gt;的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A | 2.0.5以上版本 |
-| layer | layer | string | 可选 | | 服务治理 | 服务调用者所在的分层。如：biz、dao、intl:web、china:acton。 | 2.0.7以上版本 |
-| init | init | boolean | 可选 | false | 性能调优 | 是否在afterPropertiesSet()时饥饿初始化引用，否则等到有人注入或引用该实例时再初始化。 | 2.0.10以上版本 |
-| cache | cache | string/boolean | 可选 | | 服务治理 | 以调用参数为key，缓存返回结果，可选：lru, threadlocal, jcache等 | 2.1.0及其以上版本支持 |
-| validation | validation | boolean | 可选 | | 服务治理 | 是否启用JSR303标准注解验证，如果启用，将对方法参数上的注解进行校验 | 2.1.0及其以上版本支持 |
-| version | version | string | 可选 | | 服务治理 | 在 Dubbo 中为同一个服务配置多个版本 | 2.2.0及其以上版本支持 |
-| client | client | string | 可选 | dubbo协议缺省为netty | 性能调优 | 协议的客户端实现类型，比如：dubbo协议的mina,netty等 | 2.0.0以上版本 |
-| threadpool | threadpool | string | 可选 | fixed | 性能调优 | 线程池类型，可选：fixed/cached/limit(2.5.3以上)/eager(2.6.x以上) | 2.0.5以上版本 |
-| corethreads | corethreads | int | 可选 | 200 | 性能调优 | 线程池核心线程大小 | 2.0.5以上版本 |
-| threads | threads | int | 可选 | 200 | 性能调优 | 服务线程池大小(固定大小) | 2.0.5以上版本 |
-| queues | queues | int | 可选 | 0 | 性能调优 | 线程池队列大小，当线程池满时，排队等待执行的队列大小，建议不要设置，当线程池满时应立即失败，重试其它服务提供机器，而不是排队，除非有特殊需求。 | 2.0.5以上版本 |
-| shareconnections | shareconnections | int | 可选 | 1 | 性能调优| 共享连接数。当connection参数设置为0时，会启用共享方式连接，默认只有一个连接。仅支持dubbo协议 | 2.7.0以上版本 |
-| referThreadNum | | int | 可选 | | 性能优化 | 异步调用线程池大小 | 3.0.0以上版本 |
-| meshEnable | mesh-enable| boolean | 可选 | false | Service Mesh | Dubbo Mesh模式的开关。开启后，可适配SideCar模式，将Dubbo服务调用转换为K8S标准调用。仅支持Triple协议，兼容GRPC。设置为true后，原生对接K8S，无需第三方注册中心，设置dubbo.registry.address=N/A即可 | 3.1.0以上版本 |
-| parameters | parameters | Map<string, string> | 可选 | | 服务治理 | 扩展参数 | 2.0.0以上版本 |
-
-### metrics
-
-指标配置。
-
-> 配置类： `org.apache.dubbo.config.MetricsConfig`
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| protocol | protocol | string | 可选 | prometheus | 性能调优 | 协议名称，默认使用prometheus | 3.0.0以上版本 |
-| prometheus | | PrometheusConfig | 可选 | | 配置关联 | prometheus相关配置 | 3.0.0以上版本 |
-| aggregation | | AggregationConfig | 可选 | | 配置关联 | 指标聚合相关配置 | 3.0.0以上版本 |
-
-- PrometheusConfig 对应类：`org.apache.dubbo.config.nested.PrometheusConfig`
-
-| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
-| --- | --- | ---- | --- | --- |
-| exporter.enabled | boolean | 可选 | | 是否启用prometheus exporter | 
-| exporter.enableHttpServiceDiscovery | boolean | 可选 | | 是否启用http服务发现 |
-| exporter.httpServiceDiscoveryUrl | string | 可选 | | http服务发现地址 |
-| exporter.metricsPort | int | 可选 | | 当使用pull方法时，暴露的端口号 |
-| exporter.metricsPath | string | 可选 | | 当使用pull方法时，暴露指标的路径 |
-| pushgateway.enabled | boolean | 可选 | | 是否可以通过prometheus的Pushgateway发布指标 |
-| pushgateway.baseUrl | string | 可选 | | Pushgateway地址 |
-| pushgateway.username | string | 可选 | | Pushgateway用户名 |
-| pushgateway.password | string | 可选 | | Pushgateway密码 |
-| pushgateway.pushInterval | int | 可选 | | 推送指标间隔时间 |
-
-- AggregationConfig 对应类：`org.apache.dubbo.config.nested.AggregationConfig`
-
-| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
-| --- | --- | ---- | --- | --- |
-| enabled | boolean | 可选 | | 是否开启本地指标聚合功能 |
-| bucketNum | int | 可选 | | 时间窗口存储桶个数 |
-| timeWindowSeconds | int | 可选 | | 时间窗口时长（s） |
-
-### tracing
-
-指标配置。
-
-> 配置类： `org.apache.dubbo.config.TracingConfig`
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| enabled | | boolean | 可选 | false | 服务治理 | 是否开启tracing相关功能 | 3.2.3以上版本 |
-| sampling | | SamplingConfig | 可选 | | 性能调优 | tracing 采样相关配置 | 3.2.3以上版本 |
-| propagation | | PropagationConfig | 可选 | | 服务治理 | tracing 传播协议相关配置 | 3.2.3以上版本 |
-| tracingExporter | | ExporterConfig | 可选 | | 服务治理 | tracing 信息导出相关配置 | 3.2.3以上版本 |
-
-- SamplingConfig 对应类：`org.apache.dubbo.config.nested.SamplingConfig`
-
-| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
-| --- | --- | ---- | --- | --- |
-| probability | float | 可选 | 0.1 | 采样率 |
-
-- PropagationConfig 对应类：`org.apache.dubbo.config.nested.PropagationConfig`
-
-| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
-| --- | --- | ---- | --- | --- |
-| type | string | 可选 | W3C | 可选 B3/W3C |
-
-- ExporterConfig 对应类：`org.apache.dubbo.config.nested.ExporterConfig`
-
-| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
-| --- | --- | ---- | --- | --- |
-| zipkinConfig | ZipkinConfig | 可选 | | zipkin 作为 exporter 的配置信息 |
-| otlpConfig | OtlpConfig | 可选 | | OTlp Colletcor 作为exporter的配置信息 |
-
-- ZipkinConfig 对应类：`org.apache.dubbo.config.nested.ExporterConfig.ZipkinConfig`
-
-| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
-| --- | --- | ---- | --- | --- |
-| endpoint | string | 可选 | | zipkin server 地址 |
-| connectTimeout | duration | 可选 | 10s | 连接到 zipkin server 的超时时间 |
-| readTimeout | duration | 可选 | 10s | zipkin server 读取超时时间 |
-
-- OtlpConfig 对应类：`org.apache.dubbo.config.nested.ExporterConfig.OtlpConfig`
-
-| 属性 | 类型 | 是否必填 | 缺省值 | 描述 |
-| --- | --- | ---- | --- | --- |
-| endpoint | string | 可选 | | zipkin server 地址 |
-| timeout | duration | 可选 | 10s | 等待收集器处理导出的一批 spans 的最大时间 |
-| compressionMethod | string | 可选 | none | 用于传输中压缩 tracing 信息的方法，支持 gzip/none |
-| headers | Map<string, string> | 可选 | | 向 OTlp Collector 上报信息时，添加自定义的 header 头 |
-
-### ssl
-
-TLS认证配置。
-
-> 配置类： `org.apache.dubbo.config.SslConfig`
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| serverKeyCertChainPath | server-key-cert-chain-path | string | 可选 | | 安全配置 | 服务端签名证书路径 | 2.7.5以上版本 |
-| serverPrivateKeyPath | server-private-key-path | string | 可选 | | 安全配置 | 服务端私钥路径 | 2.7.5以上版本 |
-| serverKeyPassword | server-key-password | string | 可选 | | 安全配置 | 服务端密钥密码 | 2.7.5以上版本 |
-| serverTrustCertCollectionPath | server-trust-cert-collection-path | string | 可选 | | 安全配置 | 服务端信任证书路径 | 2.7.5以上版本 |
-| clientKeyCertChainPath | client-key-cert-chain-path | string | 可选 | | 安全配置 | 客户端签名证书路径 | 2.7.5以上版本 |
-| clientPrivateKeyPath | client-private-key-path | string | 可选 | | 安全配置 | 客户端私钥路径 | 2.7.5以上版本 |
-| clientKeyPassword | client-key-password | string | 可选 | | 安全配置 | 客户端密钥密码 | 2.7.5以上版本 |
-| clientTrustCertCollectionPath | client-trust-cert-collection-path | string | 可选 | | 安全配置 | 客户端信任证书路径 | 2.7.5以上版本 |
-
-### module
-
-模块信息配置。
-
-> 对应的配置类 `org.apache.dubbo.config.ModuleConfig`
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| name | module | string | <b>必填</b> | | 服务治理 | 当前模块名称，用于注册中心计算模块间依赖关系 | 2.2.0以上版本 |
-| version | module.version | string | 可选 | | 服务治理 | 当前模块的版本 | 2.2.0以上版本 |
-| owner | module.owner | string | 可选 | | 服务治理 | 模块负责人，用于服务治理，请填写负责人公司邮箱前缀 | 2.2.0以上版本 |
-| organization | module.organization | string | 可选 | | 服务治理 | 组织名称(BU或部门)，用于注册中心区分服务来源，此配置项建议不要使用autoconfig，直接写死在配置中，比如china,intl,itu,crm,asc,dw,aliexpress等 | 2.2.0以上版本 |
-| background | background | boolean | 可选 | | 性能调优 | 是否开启后台启动模式。如果开启，无需等待spring ContextRefreshedEvent事件完成 | 3.0.0以上版本 |
-| referAsync | referAsync | boolean | 可选 | | 性能调优 | 消费端是否开启异步调用 | 3.0.0以上版本 |
-| referThreadNum | referThreadNum | int | 可选 | | 性能调优 | 异步调用线程池大小 | 3.0.0以上版本 |
-| exportAsync | exportAsync | boolean | 可选 | | 性能调优 | 服务端是否开启导出 | 3.0.0以上版本 |
-| exportThreadNum | exportThreadNum | int | 可选 | | 异步导出线程池大小 | | 3.0.0以上版本 |
-
-### monitor
-
-监控中心配置。
-
-> 对应的配置类： `org.apache.dubbo.config.MonitorConfig`
-
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
-| --- | --- | ---- | --- | --- | --- | --- | --- |
-| protocol | protocol | string | 可选 | dubbo | 服务治理 | 监控中心协议，如果为protocol="registry"，表示从注册中心发现监控中心地址，否则直连监控中心。 | 2.0.9以上版本 |
-| address | &lt;url&gt; | string | 可选 | | 服务治理 | 直连监控中心服务器地址，address="10.20.130.230:12080" | 1.0.16以上版本 |
-| username | username | string | 可选 | | 服务治理 | 监控中心用户名 | 2.0.9以上版本 |
-| password | password | string | 可选 | | 服务治理 | 监控中心密码 | 2.0.9以上版本 |
-| group | group | string | 可选 | | 服务治理 | 分组 | 2.0.9以上版本 |
-| version | version | string | 可选 | | 服务治理 | 版本号 | 2.0.9以上版本 |
-| interval | interval | string | 可选 | | 服务治理 | 间隔时间 | 2.0.9以上版本 |
-| parameters | parameters | Map<string, string> | 可选 |  | 自定义参数 | 2.0.0以上版本 |
 
 ### method
 
@@ -516,7 +741,7 @@ TLS认证配置。
 | name | | string | <b>必填</b> | | 标识 | 方法名 | 1.0.8以上版本 |
 | timeout | &lt;methodName&gt;.timeout | int | 可选 | 缺省为的timeout | 性能调优 | 方法调用超时时间(毫秒) | 1.0.8以上版本 |
 | retries | &lt;methodName&gt;.retries | int | 可选 | 缺省为&lt;dubbo:reference&gt;的retries | 性能调优 | 远程服务调用重试次数，不包括第一次调用，不需要重试请设为0 | 2.0.0以上版本 |
-| loadbalance | &lt;methodName&gt;.loadbalance | string | 可选 | 缺省为的loadbalance | 性能调优 | 负载均衡策略，可选值：<br/>* random - 随机; <br/>* roundrobin - 轮询; <br/>* leastactive - 最少活跃调用; <br/>* consistenthash - 哈希一致 (2.1.0以上版本); <br/>* shortestresponse - 最短响应 (2.7.7以上版本); | 2.0.0以上版本 |
+| loadbalance | &lt;methodName&gt;.loadbalance | string | 可选 | 缺省为的loadbalance | 性能调优 | 负载均衡策略，可选值：<br/><br/>* random - 随机; <br/><br/>* roundrobin - 轮询; <br/><br/>* leastactive - 最少活跃调用; <br/><br/>* consistenthash - 哈希一致 (2.1.0以上版本); <br/><br/>* shortestresponse - 最短响应 (2.7.7以上版本); | 2.0.0以上版本 |
 | async | &lt;methodName&gt;.async | boolean | 可选 | 缺省为&lt;dubbo:reference&gt;的async | 性能调优 | 是否异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 1.0.9以上版本 |
 | sent | &lt;methodName&gt;.sent | boolean | 可选 | true | 性能调优 | 异步调用时，标记sent=true时，表示网络已发出数据 | 2.0.6以上版本 |
 | actives | &lt;methodName&gt;.actives | int | 可选 | 0 | 性能调优 | 每服务消费者最大并发调用限制 | 2.0.5以上版本 |
@@ -576,72 +801,4 @@ TLS认证配置。
 | key | key | string | <b>必填</b> | | 服务治理 | 路由参数键 | 2.0.0以上版本 |
 | value | value | string | <b>必填</b> | | 服务治理 | 路由参数值 | 2.0.0以上版本 |
 
-### environment variable
-支持的 key 有以下两个：
 
-1. `dubbo.labels`，指定一些列配置到 URL 中的键值对，通常通过 JVM -D 或系统环境变量指定。
-
-增加以下配置：
-
-```properties
-# JVM
--Ddubbo.labels = "tag1=value1; tag2=value2"
-
-# 环境变量
-DUBBO_LABELS = "tag1=value1; tag2=value2"
-```
-
-   最终生成的 URL 会包含 tag1、tag2 两个 key: `dubbo://xxx?tag1=value1&tag2=value2`
-
-2. `dubbo.env.keys`，指定环境变量 key 值，Dubbo 会尝试从环境变量加载每个 key
-
-```properties
-# JVM
--Ddubbo.env.keys = "DUBBO_TAG1, DUBBO_TAG2"
-
-# 环境变量
-DUBBO_ENV_KEYS = "DUBBO_TAG1, DUBBO_TAG2"
-```
-
-   最终生成的 URL 会包含 DUBBO_TAG1、DUBBO_TAG2 两个 key: `dubbo://xxx?DUBBO_TAG1=value1&DUBBO_TAG2=value2`
-
-## 其他配置
-### config-mode
-**背景**
-
-在每个dubbo应用中某些种类的配置类实例只能出现一次（比如`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`），有些能出现多次（比如`RegistryConfig`、`ProtocolConfig`等）。
-
-如果应用程序意外的扫描到了多个唯一配置类实例（比如用户在一个dubbo应用中错误了配置了两个`ApplicationConfig`），应该以哪种策略来处理这种情况呢？是直接抛异常？是保留前者忽略后者？是忽略前者保留后者？还是允许某一种形式的并存（比如后者的属性覆盖到前者上）？
-
-目前dubbo中的唯一配置类类型和以及某唯一配置类型找到多个实例允许的配置模式/策略如下。
-
-**唯一配置类类型**
-
-`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`。
-
-前四个属于应用级别的，最后一个属于模块级别的。
-
-**配置模式**
-
-- `strict`：严格模式。直接抛异常。
-- `override`：覆盖模式。忽略前者保留后者。
-- `ignore`：忽略模式。忽略后者保留前者。
-- `override_all`：属性覆盖模式。不管前者的属性值是否为空，都将后者的属性覆盖/设置到前者上。
-- `override_if_absent`：若不存在则属性覆盖模式。只有前者对应属性值为空，才将后者的属性覆盖/设置到前者上。
-
-注：后两种还影响配置实例的属性覆盖。因为dubbo有多种配置方式，即存在多个配置源，配置源也有优先级。比如通过xml方式配置了一个`ServiceConfig`且指定属性`version=1.0.0`，同时我们又在外部配置(配置中心)中配置了`dubbo.service.{interface}.version=2.0.0`，在没有引入`config-mode`配置项之前，按照原有的配置源优先级，最终实例的`version=2.0.0`。但是引入了`config-mode`配置项之后，配置优先级规则也不再那么严格，即如果指定`config-mode为override_all`则为`version=2.0.0`，如果`config-mode为override_if_absent`则为`version=1.0.0`，`config-mode`为其他值则遵循原有配置优先级进行属性设值/覆盖。
-
-**配置方式**
-
-配置的key为`dubbo.config.mode`，配置的值为如上描述的几种，默认的策略值为`strict`。下面展示了配置示例
-
-```properties
-# JVM -D
--Ddubbo.config.mode=strict
-
-# 环境变量
-DUBBO_CONFIG_MODE=strict
-
-# 外部配置(配置中心)、Spring应用的Environment、dubbo.properties
-dubbo.config.mode=strict
-```

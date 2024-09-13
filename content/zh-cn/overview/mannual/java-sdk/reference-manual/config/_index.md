@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/java-sdk/reference-manual/config/
     - /zh-cn/docs3-v2/java-sdk/reference-manual/config/
+    - /zh-cn/overview/mannual/java-sdk/reference-manual/config/overview/
 description: Dubbo 配置指南
 linkTitle: 配置说明
 title: 配置手册

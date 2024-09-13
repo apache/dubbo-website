@@ -13,14 +13,14 @@ weight: 3
 
 ## 1 预备工作
 - 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/spring-boot/)
-- 安装并启动 [Zookeeper](https://zookeeper.apache.org/)
+- 安装并启动 [Zookeeper](/zh-cn/overview/reference/integrations/zookeeper/)
 
 ## 2 使用说明
 
 ### 2.1 增加 Maven 依赖
 如果项目已经启用 Zookeeper 作为注册中心，则无需增加任何额外配置。
 
-如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](../../registry/zookeeper/#21-增加-maven-依赖)。
+如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-增加-maven-依赖)。
 
 ### 2.2 启用 Zookeeper 配置中心
 ```xml
@@ -52,7 +52,7 @@ metadataConfig.setAddress("zookeeper://127.0.0.1:2181");
 
 ## 3 高级配置
 
-完整配置参数请参考 [metadata-report-config](../../config/properties/#metadata-report-config)。
+完整配置参数请参考 [metadata-report-config](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#dubbometadata-report)。
 
 ## 4 工作原理
 

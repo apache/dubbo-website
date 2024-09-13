@@ -193,4 +193,4 @@ public class ValidationConsumer {
 }
 ```
 
-> **The validation method can be extended, see [Validation Extension](../../../reference-manual/spi/description/validation) in the developer manual for the extension method**
+> **The validation method can be extended, see [Validation Extension](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/validation) in the developer manual for the extension method**

@@ -1,6 +1,6 @@
 ---
 title: "Apache Dubbo Blog"
-linkTitle: "Blog"
+linkTitle: "BLOG"
 menu:
   main:
     weight: 30

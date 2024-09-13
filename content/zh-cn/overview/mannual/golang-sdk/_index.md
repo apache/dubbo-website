@@ -4,7 +4,7 @@ aliases:
     - /zh-cn/docs3-v2/golang-sdk/
 description: Golang SDK 手册
 linkTitle: Golang SDK
-title: Golang SDK 手册
+title: Golang SDK
 type: docs
 weight: 2
 ---
