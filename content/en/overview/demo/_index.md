@@ -1,6 +1,6 @@
 ---
 title: "Demo"
-layout: "shortcodes/blocks/demo-en"
+layout: "shortcodes/blocks/demo-zh"
 toc_hide: true
 ---
-  {{< blocks/demo-en >}}
+  {{< blocks/demo-zh >}}

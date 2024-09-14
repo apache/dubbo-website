@@ -1,39 +1,37 @@
 ---
-title: "RPC Protocol Security"
-linkTitle: "RPC protocol security"
+title: "RPC 协议安全"
+linkTitle: "RPC 协议安全"
 weight: 2
-description: "Use RPC protocol more securely in Dubbo"
 type: docs
+description: "在 Dubbo 中更安全的使用 RPC 协议"
 ---
 
-Dubbo supports the extension of the RPC protocol. In theory, users can enable any RPC protocol based on this extension mechanism. This brings great flexibility, but at the same time, users must be aware of the hidden security risks.
+Dubbo 支持 RPC 协议的扩展，理论上用户可以基于该扩展机制启用任意的 RPC 协议，这带来了极大的灵活的，但同时也要意识到其中潜藏的安全性风险。
 
-The serialization protocols provided by the official version of Dubbo 2.7 are as follows:
+Dubbo 2.7 官方版本提供的序列化协议有如下几种：
 * Dubbo
 * RMI
 * Hessian
-* Http/Rest
+* Http / Rest
 * Webservice
 * Thrift
 * gRPC
-* …
+* ……
 
-Starting from Dubbo 3.0, only the following serialization protocol support is provided by default:
+从 Dubbo 3.0 开始默认仅提供以下序列化协议支持：
 * Dubbo
-* Triple/gRPC
-* Http/Rest
+* Triple / gRPC
+* Http / Rest
 
-The Triple, gRPC, Http, and Rest protocols are all built based on the HTTP protocol. The format of the request can be strictly distinguished. For example, the header is plain text to avoid risks such as RCE when reading the Token.
-For the Dubbo protocol, since it is designed based on TCP binary directly, except for a few specific fields, it is written using the serialization protocol. Therefore, if a risky serialization protocol is turned on, there will still be risks such as RCE.
-For the RMI protocol, since it is based on the Java serialization mechanism, there are risks such as RCE.
-For the Hessian protocol, because it is based on the Hessian serialization mechanism, and the default Hessian protocol (non-Dubbo Shade's Hessian-Lite protocol) cannot configure a black and white list and has no default black list, there are risks such as RCE.
+对于 Triple、gRPC、Http、Rest 协议都是基于 HTTP 协议构建的，可以严格区分请求的格式，如 Header 为纯文本，避免在读取 Token 时带来的 RCE 等风险。
+对于 Dubbo 协议，由于其基于 TCP 二进制直接设计，除了特定几个字段外均使用序列化协议写入，因此如果开启了有风险的序列化协议，仍然会存在 RCE 等风险。
+对于 RMI 协议，由于其基于 Java 序列化机制，存在 RCE 等风险。
+对于 Hessian 协议，由于其基于 Hessian 序列化机制，且默认 Hessian 协议（非 Dubbo Shade 的 Hessian-Lite 协议）无法配置黑白名单且无默认黑名单，存在 RCE 等风险。
 
-1. If the user wants to use the Token authentication mechanism to prevent unauthenticated and untrusted request sources from threatening the security of the Provider, they should use protocols based on HTTP standard extensions such as Triple to avoid security risks when reading token parameters.
+（1）如果用户希望使用 Token 鉴权机制，防止未鉴权的不可信请求来源威胁 Provider 的安全性，应使用 Triple 等基于 Http 标准扩展的协议，避免 token 参数读取时的安全风险。
 
-2. In particular, the Dubbo community **strongly does not recommend** exposing the Dubbo protocol, RMI protocol, Hessian protocol and other protocols that are not based on HTTP standard extensions to the public network environment, because the original intention of the Dubbo protocol is to be used on the intranet Provide high-performance RPC services in the environment, rather than in the public network environment.
+（2）特别的，Dubbo 社区**非常不推荐**将 Dubbo 协议、RMI 协议、Hessian 协议等非基于 Http 标准扩展的协议暴露在公网环境下，因为 Dubbo 协议的设计初衷是为了在内网环境下提供高性能的 RPC 服务，而非公网环境下的服务。
 
-3. If your application needs to expose public network access, the Dubbo community recommends that you use the Triple protocol and avoid using non-Protobuf mode or services based on Dubbo 3.3 and above that only expose standard application/json format services.
+（3）如果您的应用有暴露公网访问的需求，Dubbo 社区建议您使用 Triple 协议，并且避免使用非 Protobuf 模式或者是基于 Dubbo 3.3 及以上的版本仅暴露标准 application/json 格式的服务。
 
-4. Please be advised that all networked servers are susceptible to Denial of Service (DoS) attacks. We are unable to provide **magic** solutions for common issues, such as clients transmitting large amounts of data to your server or repeatedly requesting the same URL. Generally, Apache Dubbo aims to defend against attacks that could cause server resource consumption to become disproportionate to the size or structure of the input data. Therefore, to safeguard your server, ensure you have a Web Application Firewall (WAF) or other security devices in place before exposing your Dubbo services to the public internet, in order to prevent such attacks.
-
-
+（4）请注意，所有联网服务器都可能遭受拒绝服务（DoS）攻击，我们无法对通用问题（例如客户端向您的服务器传输大量数据或重复请求相同的URL）提供**特殊**的解决方法。Apache Dubbo 的目标是避免任何会导致服务器资源消耗与输入数据大小或结构不成线性关系的攻击。因此，为了保护您的服务器，在您将 Dubbo 服务暴露到公网之前，请确保您的服务前置有网页应用程序防火墙（WAF）或其他安全设备，以防止这些攻击。

@@ -1,38 +1,30 @@
 ---
-title: "Dubbo Admin Security"
-linkTitle: "Dubbo Admin Security"
+title: "Dubbo Admin 安全"
+linkTitle: "Dubbo Admin 安全"
 weight: 4
 type: docs
-description: "Use Dubbo Admin more securely"
+description: "更安全地使用 Dubbo Admin"
 ---
 
-In order to facilitate the use of Dubbo, Dubbo officially provides the Dubbo Admin console to facilitate the management of Dubbo applications.
+为了便于使用 Dubbo，Dubbo 官方提供了 Dubbo Admin 控制台，以便于管理 Dubbo 应用。
 
-## Risk
+## 风险
 
-Dubbo Admin has query and call permissions for the entire cluster by default, so it needs to be used with more caution in the online environment.
-In addition, in order to reduce the risk of arbitrary access to Dubbo Admin, Dubbo Admin also provides a simple authentication mechanism.
-To make Dubbo Admin more secure, please refer to the documentation below.
+Dubbo Admin 默认拥有整个集群的查询、调用权限，因此对于线上环境，需要更加谨慎地使用。
+此外，为了减低任意访问 Dubbo Admin 的风险，Dubbo Admin 还提供了简易的鉴权机制。
+为了使 Dubbo Admin 更安全，请参考下面的文档。
 
-## Authentication scheme
+## 鉴权方案
 
-Dubbo Admin provides a login mechanism based on username and password by default, and authenticates based on JWT Token during the request process.
-From the perspective of convenience for beginners, Dubbo Admin includes a default username, password, and JWT Secret Token.
+Dubbo Admin 默认提供基于用户名密码的登陆机制，在请求过程中基于 JWT Token 进行鉴权。
+从便于初学者的角度出发，Dubbo Admin 包含了一个默认的用户名密码、JWT Secret Token。
 
-> **Since Dubbo Admin is publicly released, the default username, password, and JWT Secret Token are all public.
-In your production environment, be sure to change the default username, password, and JWT Secret Token.**
+> **由于 Dubbo Admin 是公开发行的，因此默认的用户名密码、JWT Secret Token 都是公开的。
+在您的生产环境中，请务必更换默认的用户名密码、JWT Secret Token。**
 
-## How to change the default username, password, and JWT Secret Token
+## 如何更换默认的用户名密码、JWT Secret Token
 
-For users who package and deploy directly based on Java code, they can directly modify the following configuration in `dubbo-admin-server/src/main/resources/application.properties`:
-
-```properties
-admin.root.user.name=root
-admin.root.user.password=root
-admin.check.signSecret=86295dd0c4ef69a1036b0b0c15158d77
-```
-
-For users deployed through Docker, you can modify the following configuration in `/dubbo/dubbo-admin/properties`:
+对于直接基于 Java 代码打包部署的用户，可以直接修改 `dubbo-admin-server/src/main/resources/application.properties` 中以下配置：
 
 ```properties
 admin.root.user.name=root
@@ -40,7 +32,7 @@ admin.root.user.password=root
 admin.check.signSecret=86295dd0c4ef69a1036b0b0c15158d77
 ```
 
-For users deployed via Kubernetes, the following configurations in ConfigMap can be modified:
+对于通过 Docker 部署的用户，可以修改 `/dubbo/dubbo-admin/properties` 中以下配置：
 
 ```properties
 admin.root.user.name=root
@@ -48,7 +40,15 @@ admin.root.user.password=root
 admin.check.signSecret=86295dd0c4ef69a1036b0b0c15158d77
 ```
 
-For users deploying via Helm, you can specify the following configuration:
+对于通过 Kubernetes 部署的用户，可以修改 ConfigMap 中以下配置：
+
+```properties
+admin.root.user.name=root
+admin.root.user.password=root
+admin.check.signSecret=86295dd0c4ef69a1036b0b0c15158d77
+```
+
+对于通过 Helm 部署的用户，可以指定以下配置：
 
 ```yaml
 properties:
@@ -57,7 +57,7 @@ properties:
   admin.check.signSecret: 86295dd0c4ef69a1036b0b0c15158d77
 ```
 
-## Best Practices
+## 最佳实践
 
-1. Please update the default username, password, and JWT Secret Token during privatized deployment. It is recommended to modify the authentication logic of Dubbo Admin and connect it to your organization's personnel management system.
-2. Do not directly expose the Dubbo Admin port to the Internet.
+1. 请在私有化部署时更新默认的用户名密码、JWT Secret Token。建议修改 Dubbo Admin 的鉴权逻辑接入您所在组织的人员管理系统。
+2. 请勿直接把 Dubbo Admin 的端口暴露到互联网上。

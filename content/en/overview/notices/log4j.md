@@ -1,53 +1,53 @@
+
 ---
-title: "Log4j vulnerability impact"
-linkTitle: "Log4j vulnerability impact"
-description: "Log4j CVE-2021-44228 vulnerability impact"
+title: "Log4j 漏洞影响"
+linkTitle: "Log4j 漏洞影响"
+description: "Log4j CVE-2021-44228 漏洞影响"
 aliases:
-- /zh-cn/blog/1/01/01/Security Vulnerability/
+- /zh-cn/blog/1/01/01/安全漏洞/
 weight: 90
 type: docs
 ---
 
-Recently, the mainstream logging component [log4j2](https://logging.apache.org/log4j/2.x/) broke out [security vulnerability CVE-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228).
+最近，主流日志组件 [log4j2](https://logging.apache.org/log4j/2.x/) 爆出[安全漏洞 CVE-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228)。
 
-The following is a summary of the impact of vulnerability CVE-2021-44228 on the Apache Dubbo framework and user response guidelines.
+以下是漏洞 CVE-2021-44228 对 Apache Dubbo 框架的影响总结及用户应对指南。
 
-## Dubbo scope of influence
+## Dubbo 影响范围
+**该漏洞对 Dubbo 框架使用安全并无影响。**
 
-**This vulnerability has no impact on the security of Dubbo framework. **
+Dubbo 本身不强依赖 log4j2 框架，也不会通过依赖传递将 log4j2 带到业务工程中去，因此，正在使用 Dubbo 2.7.x、3.0.x 等版本的用户均无需强制升级 Dubbo 版本。
 
-Dubbo itself does not rely heavily on the log4j2 framework, nor does it bring log4j2 to business projects through dependency transfer. Therefore, users who are using Dubbo 2.7.x, 3.0.x and other versions do not need to be forced to upgrade the Dubbo version.
+以下是 Dubbo 各组件对 log4j2 的依赖分析，涉及 `dubbo-common`、`dubbo-spring-boot-starter`、`dubbo-spring-boot-actuator`：
 
-The following is an analysis of the dependence of Dubbo components on log4j2, involving `dubbo-common`, `dubbo-spring-boot-starter`, and `dubbo-spring-boot-actuator`:
-
-* dubbo-common includes an optional dependency on `log4j-core`. Please check whether the log4j dependency is enabled in the project itself. If so, upgrade accordingly.
+* dubbo-common 包含对 `log4j-core` 的可选依赖，请检查项目自身是否启用了 log4j 依赖，如启用则对应升级即可。
 ```xml
-[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @dubbo-common ---
+[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ dubbo-common ---
 [INFO] org.apache.dubbo:dubbo-common:jar:2.7.14-SNAPSHOT
 [INFO] +- org.apache.logging.log4j:log4j-api:jar:2.11.1:provided
 [INFO] \- org.apache.logging.log4j:log4j-core:jar:2.11.1:provided
 
 ```
 
-* dubbo-spring-boot-starter passes the log4j-api dependency through the spring-boot component. Log4j-api itself has no security issues. When upgrading the log4j-core component, pay attention to compatibility with log4j-api.
+* dubbo-spring-boot-starter 通过 spring-boot 组件传递了 log4j-api 依赖，log4j-api 本身并无安全问题，升级 log4j-core 组件时注意与 log4j-api 的兼容性
 
 ```xml
-[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @dubbo-spring-boot-starter ---
+[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ dubbo-spring-boot-starter ---
 [INFO] org.apache.dubbo:dubbo-spring-boot-starter:jar:2.7.14-SNAPSHOT
-[INFO] \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile (optional)
-[INFO] \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile (optional)
-[INFO] \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile (optional)
-[INFO] \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile (optional)
+[INFO] \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile (optional) 
+[INFO]    \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile (optional) 
+[INFO]       \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile (optional) 
+[INFO]          \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile (optional) 
 
 ```
 
-* dubbo-spring-boot-actuator passes the log4j-api dependency through the spring-boot component. Log4j-api itself has no security issues. When upgrading the log4j-core component, attention should be paid to compatibility with log4j-api
+* dubbo-spring-boot-actuator 通过 spring-boot 组件传递了 log4j-api 依赖，log4j-api 本身并无安全问题，升级 log4j-core 组件时应注意与 log4j-api 的兼容性
 
 ```xml
 [INFO] org.apache.dubbo:dubbo-spring-boot-actuator:jar:2.7.14-SNAPSHOT
-[INFO] \- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:compile (optional)
-[INFO] \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
-[INFO] \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile
-[INFO] \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile
-[INFO] \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile
+[INFO] \- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:compile (optional) 
+[INFO]    \- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
+[INFO]       \- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile
+[INFO]          \- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile
+[INFO]             \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile
 ```
