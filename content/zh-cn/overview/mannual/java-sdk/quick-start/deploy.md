@@ -17,7 +17,7 @@ weight: 3
 {{% /alert %}}
 
 ## 部署应用
-我们为您提前准备好了示例项目的镜像与部署文件，您可以使用如下命令将示例快速部署到 Kubernetes 集群：
+我们为您提前准备好了示例项目的镜像与部署文件，您可以使用如下命令将示例快速部署到 Kubernetes 集群（请确保在示例源码根目录执行如下命令）：
 
 ```shell
 kubectl apply -f ./Kubernetes-manifests.yaml
@@ -52,7 +52,7 @@ kubectl get services -n dubbo-quickstart
 执行以下命令进行本地端口映射：
 
 ```shell
-kubectl port-forward <pod-name> 50051:50051
+kubectl port-forward <pod-name> 50051:50051 -n dubbo-quickstart
 ```
 
 通过 curl 访问服务：

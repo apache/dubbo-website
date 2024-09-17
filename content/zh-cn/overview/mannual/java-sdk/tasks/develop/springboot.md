@@ -9,11 +9,15 @@ weight: 1
 Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供的 `dubbo-spring-boot-starter` 高效开发 Dubbo 微服务应用。
 
 ## 创建项目
-创建 Dubbo 应用最快捷的方式就是使用官方项目脚手架工具 - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务。它可以帮助开发者创建 Spring Boot 结构应用，自动管理 `dubbo-spring-boot-starter` 等依赖和必要配置。
+创建 Dubbo 应用最快捷的方式就是直接复制快速开始中的示例并进行定制化修改。
+
+另一种更灵活的方式是使用官方项目脚手架工具 - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务。它可以帮助开发者创建 Spring Boot 结构应用，根据用户的选择自动管理 `dubbo-spring-boot-starter` 等依赖和必要配置。
 
 <img style="max-width:800px;height:auto;margin-bottom:10px;" alt="项目结构截图" src="/imgs/v3/quickstart/start.jpg"/>
 
+{{% alert title="注意" color="info" %}}
 另外，Jetbrain 官方也提供了 Apache Dubbo 项目插件，可用于快速创建 Dubbo Spring Boot 项目，能力与 start.dubbo.apache.org 对等，具体安装使用请查看 [博客文章](/zh-cn/blog/2023/10/23/intellij-idea%EF%B8%8Fapache-dubboidea官方插件正式发布/)
+{{% /alert %}}
 
 ## dubbo-spring-boot-starter
 在 [快速开始](/zh-cn/overview/mannual/java-sdk/quick-start/) 中，我们已经详细介绍了典型的 Dubbo Spring Boot 工程源码及其项目结构，不熟悉的开发者可以前往查看。
@@ -52,7 +56,7 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
     </dependencies>
 ```
 
-`dubbo-spring-boot-starter` 和 `dubbo-zookeeper-spring-boot-starter` 是官方提供的 starter，提供了 Spring Boot 的集成适配，它们的版本号与 Dubbbo 主框架版本号完全一致。
+`dubbo-spring-boot-starter` 和 `dubbo-zookeeper-spring-boot-starter` 是官方提供的 starter，提供了 Spring Boot 的集成适配，它们的版本号与 Dubbbo 主框架版本号完全一致。Dubbo 还支持 `dubbo-nacos-spring-boot-starter` 等 starter，具体可查看参见 [starter 列表](overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#starter列表)。
 
 ### application.yml 配置文件
 以下是一个示例文件配置
@@ -69,7 +73,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-除 service、reference 之外的组件都可以在 application.yml 文件中设置，具体可参考 [配置列表](/zh-cn/overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml)。
+除 service、reference 之外的组件都可以在 application.yml 文件中设置，具体可参考 [配置列表](overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml)。
 
 service、reference 组件也可以通过 `id` 与 application 中的全局组件做关联，以下面配置为例。如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
 
