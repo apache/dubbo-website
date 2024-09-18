@@ -21,7 +21,7 @@ unzip dubbo-quickstart
 cd dubbo-quickstart/quickstart-service
 ````
 {{% alert title="提示" color="info" %}}
-本项目源码在 Dubbo Github 示例仓库中维护 [https://github.com/apache/dubbo-samples/dubbo-quickstart](https://github.com/apache/dubbo-samples/dubbo-quickstart)
+本项目源码在 Dubbo Github 示例仓库中维护 [https://github.com/apache/dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/11-quickstart)
 {{% /alert %}}
 
 ## 本地启动应用
