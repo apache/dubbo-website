@@ -18,7 +18,7 @@ weight: 2
 ```shell
 curl -O -# https://dubbo-demo.oss-cn-hangzhou.aliyuncs.com/quickstart/dubbo-quickstart.zip
 unzip dubbo-quickstart
-cd dubbo-quickstart/quickstart-service
+cd dubbo-quickstart
 ````
 {{% alert title="提示" color="info" %}}
 本项目源码在 Dubbo Github 示例仓库中维护 [https://github.com/apache/dubbo-samples](https://github.com/apache/dubbo-samples/tree/master/11-quickstart)
@@ -34,7 +34,8 @@ chmod a+x ./mvnw
 ```
 
 {{% alert title="注意" color="warning" %}}
-由于配置文件中启用了注册中心，为了能够成功启动应用，您需要首先在本地启动 <a href="/zh-cn/overview/reference/integrations/nacos/" target="_blank_">Nacos</a> 注册中心 server。
+* 运行示例要求 JDK 17+ 版本。
+* 由于配置文件中启用了注册中心，您需要首先在本地启动 <a href="/zh-cn/overview/reference/integrations/nacos/" target="_blank_">Nacos</a> 注册中心 server。或者参考下一篇 Kubernetes 部署方式。
 {{% /alert %}}
 
 在应用启动成功后，本地进程使用 <a href="/zh-cn/overview/reference/protocols/triple/" target="_blank_">Triple </a>协议在指定端口发布了服务。同时可以看到消费端持续对提供端发起调用调用：
