@@ -51,7 +51,7 @@ Full link tracing is of great value for monitoring the running status of distrib
 
 * [Implement Full Link Tracing with Skywalking](../../tasks/observability/tracing/skywalking/)
 * [Implement Full Link Tracing with Zipkin](../../tasks/observability/tracing/zipkin/)
-* [Associate Logs with Link Tracing](../../mannual/java-sdk/advanced-features-and-usage/observability/tracing#关联日志)
+* [Associate Logs with Link Tracing](../../mannual/java-sdk/advanced-features-and-usage/observability/tracing/)
 
 ## Logging
 Access logs can help analyze the system's traffic situation. In some scenarios, enabling access logs is also very helpful for troubleshooting issues.

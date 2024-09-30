@@ -3,8 +3,6 @@ title: "Serialization Security"
 linkTitle: "Serialization Security"
 weight: 1
 type: docs
-aliases:
-  - /en/blog/1/01/01/序列化协议安全/
 description: "Using Serialization Protocols More Securely in Dubbo"
 ---
 

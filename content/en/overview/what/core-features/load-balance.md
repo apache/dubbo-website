@@ -82,12 +82,12 @@ The Power of Two Choice algorithm is simple yet classic, with the main idea as f
 1. For each call, make two random selections from the list of available providers, selecting two nodes: providerA and providerB.
 2. Compare providerA and providerB, and choose the node with the smaller "current number of connections being processed."
 
-Here is the [Dubbo P2C Algorithm Implementation Proposal](../../reference/proposals/heuristic-flow-control/#p2c算法)
+Here is the [Dubbo P2C Algorithm Implementation Proposal](../../reference/proposals/heuristic-flow-control/)
 
 ### Adaptive Load Balance
 Adaptive load balancing is an algorithm that automatically adjusts traffic distribution based on the load of backend instances. It always tries to forward requests to the node with the least load.
 
-Here is the [Dubbo Adaptive Algorithm Implementation Proposal](../../reference/proposals/heuristic-flow-control/#adaptive算法)
+Here is the [Dubbo Adaptive Algorithm Implementation Proposal](../../reference/proposals/heuristic-flow-control/)
 
 ## Configuration Method
 Dubbo supports configuring the default load balancing strategy on the provider side, so all consumers will use the provider-specified load balancing strategy by default. Consumers can configure the load balancing strategy they want to use. If neither is configured, the default random load balancing strategy is used.
@@ -96,7 +96,7 @@ Within the same application, different services can be configured to use differe
 
 For specific configuration methods, refer to the following multi-language implementations:
 
-* [Java](../../mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/#使用方式)
+* [Java](../../mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/)
 * [Golang](../../mannual/golang-sdk/)
 
 ## Custom Extension

@@ -106,7 +106,7 @@ tags:
           exact: gray
 ```
 
-> This involves how to label your instances with various raw labels, such as `env` in the example above. One way is to write it directly in the configuration file, as shown in the provider section of the static rule example above. Another way is to specify it through preset environment variables. For more details, please refer to the section [How to Label Instances](#如何给实例打标) below.
+> This involves how to label your instances with various raw labels, such as `env` in the example above. One way is to write it directly in the configuration file, as shown in the provider section of the static rule example above. Another way is to specify it through preset environment variables. For more details, please refer to the section How to Label Instances below.
 
 ##### Consumer
 
@@ -220,7 +220,7 @@ script: |
           }
       }
       return result;
-  } (invokers, invocation, context)); // 表示立即执行方法
+  } (invokers, invocation, context));
 ```
 
 ## How to Tag Instances

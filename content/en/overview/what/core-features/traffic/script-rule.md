@@ -31,7 +31,7 @@ script: |
           }
       }
       return result;
-  } (invokers, invocation, context)); // 表示立即执行方法
+  } (invokers, invocation, context));
 ```
 
 ## ScriptRule
@@ -60,5 +60,5 @@ The following is an example of a script rule with `type: javascript`:
           }
       }
       return result;
-  } (invokers, invocation, context)); // 表示立即执行方法
+  } (invokers, invocation, context));
 ```

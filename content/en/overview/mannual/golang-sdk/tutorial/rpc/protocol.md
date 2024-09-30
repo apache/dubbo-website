@@ -38,7 +38,7 @@ service GreetService {
 }
 ```
 
-2. [Install the protoc plugin](/en/overview/mannual/golang-sdk/quickstart/rpc/#前置条件), compile and generate the code:
+2. [Install the protoc plugin](/en/overview/mannual/golang-sdk/quickstart/rpc/), compile and generate the code:
 ```shell
 protoc --go_out=. --go_opt=paths=source_relative \
     --go-triple_out=. --go-triple_opt=paths=source_relative \

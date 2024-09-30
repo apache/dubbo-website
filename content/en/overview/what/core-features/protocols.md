@@ -75,9 +75,6 @@ In addition to the protocols introduced above, you can also run the following pr
 * Thrift
 * JsonRPC
 
-## Interoperability with Heterogeneous Microservice Systems
-For practical solutions on protocol migration and coexistence of multiple protocol technology stacks, please refer to this [blog post](/en/blog/2023/01/05/dubbo-连接异构微服务体系-多协议多注册中心/).
-
 ## Configuration Methods
 For the configuration and usage methods of the above protocols, including how to configure `single-port multi-protocol` support, please refer to the following SDK example documents:
 

@@ -34,7 +34,7 @@ metadata:
   name: demo-route
 spec:
   hosts:
-  - demo  // 统一定义为应用名
+  - demo
   dubbo:
   - service:
     - exact: com.taobao.hsf.demoService:1.0.0
@@ -146,7 +146,7 @@ metadata:
   name: demo-route
 spec:
   hosts:
-  - demo  // 统一定义为应用名
+  - demo
   dubbo:
   - service:
     - exact: com.taobao.hsf.demoService:1.0.0
@@ -269,7 +269,7 @@ DestinationRule C
 
 ### Example: Proportional Traffic Routing Rules
 
-> Note, although the following rules are very similar to Istio's VirtualService and DestinationRule, there are some differences in the working process and specific rules compared to Istio. Dubbo only references Istio's design. If you want to integrate with the native Istio service mesh governance system, please refer to [Integrating Service Mesh Traffic Governance](#接入服务网格流量治理).
+> Note, although the following rules are very similar to Istio's VirtualService and DestinationRule, there are some differences in the working process and specific rules compared to Istio. Dubbo only references Istio's design. If you want to integrate with the native Istio service mesh governance system, please refer to Integrating Service Mesh Traffic Governance.
 
 In some scenarios, we need to distribute traffic with the same attributes proportionally to different instance groups. A typical example scenario is A/B testing, where we need to forward 20% of the traffic to the new version v2 of the service to verify the stability of the new version, or to direct a portion of internal company users to the new version v2 for testing and verification. Another application scenario is to achieve canary releases of services, gradually adjusting the traffic distribution ratio so that the new version's traffic gradually increases and eventually fully migrates all traffic to the new version.
 
@@ -361,6 +361,6 @@ subsets:
      detail_version: v2 # 'version' is a reserved key in Dubbo, so must not be used.
 ```
 
-> Similar to label routing, this involves how to label your instances (here it is `detail_version`). Please refer to the section [How to Label Instances](#如何给实例打标) below.
+> Similar to label routing, this involves how to label your instances (here it is `detail_version`). Please refer to the section How to Label Instances below.
 
 In addition to the functions introduced above that are very similar to Istio's traffic rules, Dubbo's VirtualService and DestinationRule can also achieve things that Istio rules cannot, such as method parameter routing. For details, see the [Reference Manual]().
