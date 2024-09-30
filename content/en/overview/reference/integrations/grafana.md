@@ -1,44 +1,44 @@
 ---
 aliases:
     - /en/overview/reference/integrations/grafana/
-description: 配置 Grafana 与 Dubbo 一起工作
+description: Configuring Grafana to Work with Dubbo
 linkTitle: Grafana
 title: Grafana
 type: docs
 weight: 2
 ---
 
-Grafana 是一种开源的监控解决方案，可用于为 Dubbo 配置可视化仪表板，您可以使用 Grafana 来监控 Dubbo 集群的运行状况。
+Grafana is an open-source monitoring solution that can be used to configure visual dashboards for Dubbo, allowing you to monitor the health of your Dubbo cluster.
 
-## 配置可视化控制面板
+## Configuring Visual Dashboards
 
-以下是 Dubbo 社区提供的默认指标面板，您配置好数据源并直接导入使用即可。如果默认面板不能满足要求，您还可以自定义 Grafana 面板。
+Here are the default metrics dashboards provided by the Dubbo community. You can quickly use them after configuring the data source and importing directly. If the default dashboards do not meet your requirements, you can customize your Grafana dashboards.
 
-* [**Apache Dubbo Observability Dashboard：**](https://grafana.com/grafana/dashboards/18469)
-* [**JVM (Micrometer) Dashboard：**](https://grafana.com/grafana/dashboards/4701)
+* [**Apache Dubbo Observability Dashboard:**](https://grafana.com/grafana/dashboards/18469)
+* [**JVM (Micrometer) Dashboard:**](https://grafana.com/grafana/dashboards/4701)
 
-您可以通过以下几种方式快速的导入 Grafana 监控面板。
+You can quickly import Grafana monitoring dashboards in the following ways.
 
-### 方式一：Kubernetes 安装
+### Method 1: Kubernetes Installation
 
-你可以使用 Dubbo 社区提供的示例配置快速安装 Grafana，安装后的 Grafana 提供了社区默认指标面板视图。
+You can quickly install Grafana using the sample configuration provided by the Dubbo community, which comes with the default community metrics dashboards.
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/grafana.yaml
 ```
 
-你可能需要端口映射获得访问地址 `$ kubectl port-forward service/grafana 3000:3000`，打开浏览器访问页面 `http://localhost:3000`。
+You may need to port-forward to access it: `$ kubectl port-forward service/grafana 3000:3000`, then open the browser and visit `http://localhost:3000`.
 
-> 获取登录信息
+> Retrieve login information
 > ```bash
 > kubectl get secrets grafana -o jsonpath="{.data.admin-user}" | base64 --decode ; echo && kubectl get secrets grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 > ```
 
-### 方式二：向已经安装好的集群导入 dashboard
+### Method 2: Importing Dashboard into an Already Installed Cluster
 
-如果你已经有安装好的 Grafana 服务了，则还可以通过 [Grafana 控制台的导入菜单](https://grafana.com/docs/grafana/v8.4/dashboards/export-import/#importing-a-dashboard) 导入 dashboard。根据 Grafana 的要求，导入 dashboard 的过程中需要同时指定 Prometheus 数据源地址。
+If you already have Grafana installed, you can import the dashboard via the [import menu in the Grafana console](https://grafana.com/docs/grafana/v8.4/dashboards/export-import/#importing-a-dashboard). The Prometheus data source address must also be specified during the import process.
 
-你也可以选择使用以下脚本快速导入。
+You can also use the following script for quick importing.
 
 ```sh
 $ # Address of Grafana
@@ -66,7 +66,8 @@ $     echo -e "\nDone\n"
 $ done
 ```
 
-### 方式三：自定义
-Grafana 可以通过其他方法进行安装和配置，可以参阅有关安装方法的文档了解如何制作和导入 Dubbo 检测面板
-* [Grafana provisioning 官方文档](https://grafana.com/docs/grafana/latest/administration/provisioning/#dashboards)
-* [为 `stable/grafana` Helm chart 导入面板](https://github.com/helm/charts/tree/master/stable/grafana#import-dashboards)
+### Method 3: Customization
+Grafana can be installed and configured through other methods; refer to the documentation on installation methods to learn how to create and import Dubbo monitoring dashboards.
+* [Grafana provisioning official documentation](https://grafana.com/docs/grafana/latest/administration/provisioning/#dashboards)
+* [Importing dashboards for `stable/grafana` Helm chart](https://github.com/helm/charts/tree/master/stable/grafana#import-dashboards)
+

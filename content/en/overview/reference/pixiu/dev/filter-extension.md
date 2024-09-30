@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/dev/filter-extension/
     - /en/overview/reference/pixiu/dev/filter-extension/
     - /en/overview/mannual/dubbo-go-pixiu/dev/filter-extension/
-description: Pixiu Filter体系介绍
-linkTitle: Pixiu Filter体系介绍
-title: Pixiu Filter体系介绍
+description: Introduction to the Pixiu Filter System
+linkTitle: Introduction to the Pixiu Filter System
+title: Introduction to the Pixiu Filter System
 type: docs
 weight: 1
 ---
@@ -16,19 +16,19 @@ weight: 1
 
 
 
-## **怎样编写一个Filter**
-`更详细的信息，请移步Blog《谈谈Pixiu的Filter》`
+## **How to Write a Filter**
+`For more detailed information, please refer to the Blog "Talking About Pixiu's Filter"`
 
-我们来尝试写一个简单的Filter，这个Filter将会有简单的配置，在Decode阶段把请求的Body Log出来，并翻转后作为Mock的返回值。最后在Encode阶段根据配置把返回值Log出来。
+Let's try writing a simple Filter that will have a basic configuration, log the request Body during the Decode phase, and return the reversed string as a Mock response. Finally, in the Encode phase, it will log the return value based on the configuration.
 
-1.首先创建一个Filter
+1. First, create a Filter
 
 ```go
 type DemoFilter struct {
    logPrefix string
 }
 
-// Decode阶段，发生在调用Upstream之前
+// Decode phase, occurs before calling Upstream
 func (f *DemoFilter) Decode(ctx *contexthttp.HttpContext) filter.FilterStatus {
    body, _ := ioutil.ReadAll(ctx.Request.Body)
    logger.Infof("request body: %s", body)
@@ -45,7 +45,7 @@ func (f *DemoFilter) Decode(ctx *contexthttp.HttpContext) filter.FilterStatus {
    return filter.Stop
 }
 
-// Encode阶段，此时可以获取到Upstream的Response
+// Encode phase, at this point the Upstream Response can be accessed
 func (f *DemoFilter) Encode(ctx *contexthttp.HttpContext) filter.FilterStatus {
    res := ctx.SourceResp.(string)
    logger.Infof("%s: %s", f.logPrefix, res)
@@ -53,7 +53,7 @@ func (f *DemoFilter) Encode(ctx *contexthttp.HttpContext) filter.FilterStatus {
 }
 ```
 
-2.创建Filter Factory
+2. Create a Filter Factory
 
 ```go
 type (
@@ -83,7 +83,7 @@ func (f *DemoFilterFactory) Apply() error {
 }
 ```
 
-3.创建Filter Plugin，并注册自己
+3. Create a Filter Plugin and register it
 
 ```go
 //important
@@ -103,7 +103,7 @@ func (p *Plugin) CreateFilterFactory() (filter.HttpFilterFactory, error) {
 }
 ```
 
-4.配置文件中配置此Filter，并启动Pixiu
+4. Configure this Filter in the configuration file and start Pixiu
 
 ```yaml
 static_resources:
@@ -127,7 +127,7 @@ static_resources:
                     config:
 ```
 
-5.访问并查看日志与结果
+5. Access and check the logs and results
 
 ```shell
 curl localhost:8888/demo -d "eiv al tse’c"
@@ -135,9 +135,10 @@ curl localhost:8888/demo -d "eiv al tse’c"
 c’est la vie% 
 ```
 
-日志
+Logs
 
 ```
 2022-02-19T20:20:11.900+0800    INFO    demo/demo.go:62 request body: eiv al tse’c
 2022-02-19T20:20:11.900+0800    INFO    demo/demo.go:71 : eiv al tse’c
 ```
+

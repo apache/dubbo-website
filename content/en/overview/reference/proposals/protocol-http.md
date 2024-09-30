@@ -1,59 +1,56 @@
 ---
 aliases:
     - /en/overview/reference/proposals/protocol-http/
-description: 本文将介绍 Dubbo 的 REST/HTTP 协议设计。
-linkTitle: Rest 协议
-title: Rest 协议
+description: This article will introduce the REST/HTTP protocol design of Dubbo.
+linkTitle: Rest Protocol
+title: Rest Protocol
 type: docs
 weight: 1
 ---
-本文将介绍 Dubbo 的 REST/HTTP 协议设计。
+This article will introduce the REST/HTTP protocol design of Dubbo.
 
-## RestProtocol 设计
+## RestProtocol Design
 
-### 原版本dubbo rest
+### Original Version Dubbo Rest
 
 **consumer**
 
-restClient支持 依赖resteasy 不支持spring mvc 
+restClient supports relying on resteasy and does not support spring mvc.
 
-**provider(较重)**
+**provider (heavier)**
 
-依赖web container   (tomcat,jetty，)servlet 模式，jaxrs netty server
+Depends on web container (tomcat, jetty), servlet mode, jaxrs netty server.
 
-### 新版本dubbo rest 
+### New Version Dubbo Rest
 
-更加轻量，具有dubbo风格的rest，微服务体系互通（Springcloud Alibaba）
+Lighter, with a Dubbo-style REST that is interoperable in a microservices system (Springcloud Alibaba).
 
-**1.注解解析**
+**1. Annotation Parsing**
 
-**2.报文编解码**
+**2. Message Codec**
 
-**3.restClient**
+**3. RestClient**
 
-**4.restServer(netty)**
+**4. RestServer (netty)**
 
-支持程度：
+Support Levels:
 
-content-type   text json xml form(后续会扩展)
+content-type: text, json, xml, form (will be extended later)
 
-注解
+Annotations:
 
-param,header,body,pathvaribale （spring mvc & resteasy）
+param, header, body, pathvariable (spring mvc & resteasy)
 
-## Http 协议报文
+## Http Protocol Message
 
     POST /test/path?  HTTP/1.1
     Host: localhost:8080
     Connection: keep-alive
     Content-type: application/json
 
-
     {"name":"dubbo","age":10,"address":"hangzhou"}
 
-
-
-### dubbo http(header)
+### Dubbo Http (header)
 
     // service key header
     path: com.demo.TestInterface
@@ -61,29 +58,28 @@ param,header,body,pathvaribale （spring mvc & resteasy）
     port: 80
     version: 1.0.0
 
-    // 保证长连接
+    // ensure keep-alive
     Keep-Alive,Connection: keep-alive
     Keep-alive: 60
 
     // RPCContext Attachment
     userId: 123456
 
+## Support Granularity
 
-## 支持粒度
-
-|  数据位置  |  content-type  |  spring注解  |  resteasy注解  |
+|  Data Location  |  content-type  |  spring annotations  |  resteasy annotations  |
 | --- | --- | --- | --- |
-|  body  |  无要求  |  ReuqestBody  |   无注解即为body  |
-|  querystring(?test=demo)  |  无要求  |  RequestParam  |  QueryParam  |
-|  header  |  无要求  |  RequestHeader  |  PathParam  |
-|  form  |  application/x-www-form-urlencoded  |  RequestParam ReuqestBody  |  FormParam  |
-|  path  |  无要求  |  PathVariable  |  PathParam  |
-|  method  |  无要求  |  PostMapping GetMapping  |  GET POST  |
-|  url  |   |  PostMapping GetMapping path属性  |  Path  |
-|  content-type  |   |  PostMapping GetMapping consumers属性  |  Consumers  |
-|  Accept  |   |  PostMapping GetMapping produces属性  |  Produces  |
+|  body  |  No requirements  |  RequestBody  |   No annotations means body  |
+|  querystring(?test=demo)  |  No requirements  |  RequestParam  |  QueryParam  |
+|  header  |  No requirements  |  RequestHeader  |  PathParam  |
+|  form  |  application/x-www-form-urlencoded  |  RequestParam RequestBody  |  FormParam  |
+|  path  |  No requirements  |  PathVariable  |  PathParam  |
+|  method  |  No requirements  |  PostMapping GetMapping  |  GET POST  |
+|  url  |   |  PostMapping GetMapping path attribute  |  Path  |
+|  content-type  |   |  PostMapping GetMapping consumers attribute  |  Consumers  |
+|  Accept  |   |  PostMapping GetMapping produces attribute  |  Produces  |
 
-## rest注解解析
+## Rest Annotation Parsing
 ServiceRestMetadataResolver
 
     JAXRSServiceRestMetadataResolver
@@ -100,11 +96,11 @@ ServiceRestMetadata
 
         private String group;// demo
 
-        private Set<RestMethodMetadata> meta;// method 元信息
+        private Set<RestMethodMetadata> meta;// method meta information
 
-        private int port;// 端口 for provider service key
+        private int port;// port for provider service key
 
-        private boolean consumer;// consumer 标志
+        private boolean consumer;// consumer flag
 
         /**
          * make a distinction between mvc & resteasy
@@ -119,15 +115,15 @@ ServiceRestMetadata
         /**
         * for consumer
         */
-        private Map<String, Map<ParameterTypesComparator, RestMethodMetadata>> methodToServiceMa
+        private Map<String, Map<ParameterTypesComparator, RestMethodMetadata>> methodToServiceMap;
 
 RestMethodMetadata
 
     public class RestMethodMetadata implements Serializable {
 
-        private MethodDefinition method; // method 定义信息（name ,pramType,returnType）
+        private MethodDefinition method; // method definition info (name, paramType, returnType)
 
-        private RequestMetadata request;// 请求元信息
+        private RequestMetadata request;// request meta info
 
         private Integer urlIndex;
 
@@ -191,18 +187,17 @@ ArgInfo
 
         private boolean formContentType;
 
-RequestMeatadata
+RequestMetadata
 
     public class RequestMetadata implements Serializable {
 
         private static final long serialVersionUID = -240099840085329958L;
 
-        private String method;// 请求method
+        private String method;// request method
 
-        private String path;// 请求url
+        private String path;// request url
 
-
-        private Map<String, List<String>> params // param参数?拼接
+        private Map<String, List<String>> params // param parameters? concatenated
 
         private Map<String, List<String>> headers// header;
 
@@ -210,14 +205,14 @@ RequestMeatadata
 
         private Set<String> produces // Accept;
 
-### Consumer 代码
+### Consumer Code
 
 refer
 
      @Override
         protected <T> Invoker<T> protocolBindingRefer(final Class<T> type, final URL url) throws RpcException {
 
-            // restClient spi创建
+            // restClient spi creation
             ReferenceCountedClient<? extends RestClient> refClient =
                 clients.computeIfAbsent(url.getAddress(), key -> createReferenceCountedClient(url, clients));
 
@@ -231,7 +226,7 @@ refer
                 @Override
                 protected Result doInvoke(Invocation invocation) {
                     try {
-                        // 获取 method的元信息
+                        // get method meta info
                         RestMethodMetadata restMethodMetadata = metadataMap.get(invocation.getMethodName()).get(ParameterTypesComparator.getInstance(invocation.getParameterTypes()));
 
                         RequestTemplate requestTemplate = new RequestTemplate(invocation, restMethodMetadata.getRequest().getMethod(), url.getAddress(), getContextPath(url));
@@ -244,7 +239,7 @@ refer
                         httpConnectionCreateContext.setInvocation(invocation);
                         httpConnectionCreateContext.setUrl(url);
 
-    										// http 信息构建拦截器
+    										// http info build interceptor
                         for (HttpConnectionPreBuildIntercept intercept : httpConnectionPreBuildIntercepts) {
                             intercept.intercept(httpConnectionCreateContext);
                         }
@@ -253,7 +248,7 @@ refer
                         CompletableFuture<RestResult> future = finalRefClient.getClient().send(requestTemplate);
                         CompletableFuture<AppResponse> responseFuture = new CompletableFuture<>();
                         AsyncRpcResult asyncRpcResult = new AsyncRpcResult(responseFuture, invocation);
-                        // response 处理
+                        // response handling
                         future.whenComplete((r, t) -> {
                             if (t != null) {
                                 responseFuture.completeExceptionally(t);
@@ -305,7 +300,7 @@ refer
             invokers.add(invoker);
             return invoker;
 
-### provider 代码
+### Provider Code
 
 export
 
@@ -320,12 +315,10 @@ export
                 }
             }
 
-
             // TODO  addAll metadataMap to RPCInvocationBuilder metadataMap
             Map<PathMatcher, RestMethodMetadata> metadataMap = MetadataResolver.resolveProviderServiceMetadata(url.getServiceModel().getProxyObject().getClass(),url);
 
             PathAndInvokerMapper.addPathAndInvoker(metadataMap, invoker);
-
 
             final Runnable runnable = doExport(proxyFactory.getProxy(invoker, true), invoker.getInterface(), invoker.getUrl());
             exporter = new AbstractExporter<T>(invoker) {
@@ -351,14 +344,14 @@ RestHandler
 
             @Override
             public void handle(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws IOException, ServletException {
-                 // 有servlet reuqest 和nettyRequest
+                 // has servlet request and nettyRequest
                 RequestFacade request = RequestFacadeFactory.createRequestFacade(servletRequest);
                 RpcContext.getServiceContext().setRemoteAddress(request.getRemoteAddr(), request.getRemotePort());
     //            dispatcher.service(request, servletResponse);
 
                 Pair<RpcInvocation, Invoker> build = null;
                 try {
-                    // 根据请求信息创建 RPCInvocation
+                    // create RPCInvocation based on request info
                     build = RPCInvocationBuilder.build(request, servletRequest, servletResponse);
                 } catch (PathNoFoundException e) {
                     servletResponse.setStatus(404);
@@ -368,7 +361,7 @@ RestHandler
 
                 Result invoke = invoker.invoke(build.getFirst());
 
-                // TODO handling  exceptions
+                // TODO handling exceptions
                 if (invoke.hasException()) {
                     servletResponse.setStatus(500);
                 } else {
@@ -384,11 +377,9 @@ RestHandler
                         servletResponse.setStatus(500);
                     }
 
-
                 }
 
                 // TODO add Attachment header
-
 
             }
         }
@@ -397,25 +388,21 @@ RPCInvocationBuilder
 
     {
 
-
         private static final ParamParserManager paramParser = new ParamParserManager();
 
-
         public static Pair<RpcInvocation, Invoker> build(RequestFacade request, Object servletRequest, Object servletResponse) {
-
-            // 获取invoker
+            // get invoker
             Pair<Invoker, RestMethodMetadata> invokerRestMethodMetadataPair = getRestMethodMetadata(request);
 
             RpcInvocation rpcInvocation = createBaseRpcInvocation(request, invokerRestMethodMetadataPair.getSecond());
 
             ProviderParseContext parseContext = createParseContext(request, servletRequest, servletResponse, invokerRestMethodMetadataPair.getSecond());
-            // 参数构建
+            // parameter construction
             Object[] args = paramParser.providerParamParse(parseContext);
 
             rpcInvocation.setArguments(args);
 
             return Pair.make(rpcInvocation, invokerRestMethodMetadataPair.getFirst());
-
         }
 
         private static ProviderParseContext createParseContext(RequestFacade request, Object servletRequest, Object servletResponse, RestMethodMetadata restMethodMetadata) {
@@ -427,13 +414,11 @@ RPCInvocationBuilder
             parseContext.setArgs(Arrays.asList(objects));
             parseContext.setArgInfos(restMethodMetadata.getArgInfos());
 
-
             return parseContext;
         }
 
         private static RpcInvocation createBaseRpcInvocation(RequestFacade request, RestMethodMetadata restMethodMetadata) {
             RpcInvocation rpcInvocation = new RpcInvocation();
-
 
             int localPort = request.getLocalPort();
             String localAddr = request.getLocalAddr();
@@ -450,7 +435,6 @@ RPCInvocationBuilder
             String[] PARAMETER_TYPES_DESC = restMethodMetadata.getMethod().getParameterTypes();
 
             rpcInvocation.setParameterTypes(restMethodMetadata.getReflectMethod().getParameterTypes());
-
 
             rpcInvocation.setMethodName(METHOD);
             rpcInvocation.setAttachment(RestConstant.GROUP, GROUP);
@@ -474,11 +458,9 @@ RPCInvocationBuilder
                 rpcInvocation.setAttachment(split[0], split[1]);
             }
 
-
             // TODO set path,version,group and so on
             return rpcInvocation;
         }
-
 
         private static Pair<Invoker, RestMethodMetadata> getRestMethodMetadata(RequestFacade request) {
             String path = request.getRequestURI();
@@ -488,11 +470,9 @@ RPCInvocationBuilder
 
             return PathAndInvokerMapper.getRestMethodMetadata(path, version, group, port);
         }
-
-
     }
 
-## 编码示例
+## Coding Examples
 
 **API**
 
@@ -538,13 +518,11 @@ impl(service)
         private static Map<String, Object> context;
         private boolean called;
 
-
         @Override
         public String sayHello(String name) {
             called = true;
             return "Hello, " + name;
         }
-
 
         public boolean isCalled() {
             return called;
@@ -556,7 +534,6 @@ impl(service)
             return a + b;
         }
 
-
         @Override
         public String error() {
             throw new RuntimeException();
@@ -567,9 +544,9 @@ impl(service)
         }
     }
 
-## 流程图
+## Flow Chart
 
-**Consumer**  
+**Consumer**  
 
 ![image](https://static.dingtalk.com/media/lQLPJxLOtqTxs9TNA5rNBQCwci8F2QYiGAYD5sSyd4BVAA_1280_922.png)
 
@@ -577,82 +554,82 @@ impl(service)
 
 ![image](https://static.dingtalk.com/media/lQLPJxZcNUm4M9TNA1_NBMuwZUu6IC3FeYAD5sSydYADAA_1227_863.png)
 
-## 场景 
+## Scenarios 
 
-### 1.体系互通
+### 1. Interoperability of Systems
 
-**非dubbo体系互通（Springcloud alibaba  互通）**
+**Non-Dubbo System Interoperability (Springcloud Alibaba Interoperability)**
 
-互通条件：
+Interoperability Conditions:
 
-|   |  协议  |  Dubbo  |  SpringCloud Alibaba  |  互通  |
+|   |  Protocol  |  Dubbo  |  SpringCloud Alibaba  |  Interoperation  |
 | --- | --- | --- | --- | --- |
-|  通信协议  |  rest  |  spring web/resteasy  编码风格  |  集成feignclient，ribbon (spring web 编码风格)  |  是  |
+|  Communication Protocol  |  rest  |  spring web/resteasy encoding style  |  integrates feignclient, ribbon (spring web encoding style)  |  Yes  |
 |  |  triple  |   |   |   |
 |  |  dubbo  |   |   |   |
 |  |  grpc  |   |   |   |
 |  |  hessian  |   |   |   |
-|  注册中心  |  zookeeper  |   |   |   |
-|   |  nacos  |  支持  |  支持  |  应用级别注册  |
+|  Registration Center  |  zookeeper  |   |   |   |
+|   |  nacos  |  supported  |  supported  |  application-level registration  |
 
-### 2.dubbo 双注册 
+### 2. Dubbo Dual Registration 
 
- 完成应用级别注册，（dubo2-dubbo3 过度），dubbo版本升级
+Complete application-level registration (from dubbo2 to dubbo3 migration), dubbo version upgrade
 
 ![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/0ceca951-f467-4ab3-9b71-8e7d52e5e7d1.png)
 
 ![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/6bcc7aed-1d22-470f-b185-efbab32df1e5.png)
 
-### 3.多协议发布
+### 3. Multi-Protocol Publishing
 
-配置：
+Configuration:
 
-    <dubbo:service interface="org.apache.dubbo.samples.DemoService" protocol="dubbo, grpc,rest"/>
+    <dubbo:service interface="org.apache.dubbo.samples.DemoService" protocol="dubbo, grpc, rest"/>
 
-### 4.跨语言
+### 4. Cross-Language
 
 ![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/1bdf8f91-9666-4c20-9aea-8396c745f554.png)
 
-### 5.多协议交互
+### 5. Multi-Protocol Interaction
 
 ![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/af72e3df-05d5-42a2-a333-618be7ec6cb8.png)
 
-### 6.协议迁移
+### 6. Protocol Migration
 
-![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/36d30183-8d5f-494c-8ebb-b57403c88661.png)
+![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/36d30183-8d5-494c-8ebb-b57403c88661.png)
 
-rest编码风格
+Rest encoding style
 
-Http协议更通用跨语言调用
+HTTP protocol is more universally applicable for cross-language calls.
 
-dubbo rest 对其他http服务 进行调用
+Dubbo Rest calls other HTTP services.
 
-其他httpclient 对dubbo rest进行调用
+Other HttpClient calls Dubbo Rest.
 
-dubbo restServer 可以与其他web服务，浏览器等客户端直接进行http交互
+Dubbo RestServer can directly interact with other web services, browsers, and clients via HTTP.
 
-## consumer TODOLIST
-> 功能已经初步实现，可以调通解析response
+## Consumer TODO LIST
+> Features have been initially implemented and can parse responses.
 
-1. org/apache/dubbo/rpc/protocol/rest/RestProtocol.java:157  dynamic load config
+1. org/apache/dubbo/rpc/protocol/rest/RestProtocol.java:157  dynamic load config
 
-2.org/apache/dubbo/remoting/http/factory/AbstractHttpClientFactory.java:50 load config  HttpClientConfig
+2. org/apache/dubbo/remoting/http/factory/AbstractHttpClientFactory.java:50 load config HttpClientConfig
 
-3.org/apache/dubbo/rpc/protocol/rest/annotation/metadata/MetadataResolver.java:52  support Dubbo style service
+3. org/apache/dubbo/rpc/protocol/rest/annotation/metadata/MetadataResolver.java:52 support Dubbo style service
 
-4.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:120  TODO config
+4. org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:120 TODO config
 
-5.org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:140 TODO close judge
+5. org/apache/dubbo/remoting/http/restclient/HttpClientRestClient.java:140 TODO close judgment
 
-6.org/apache/dubbo/rpc/protocol/rest/message/decode/MultiValueCodec.java:35  TODO java bean  get set convert
+6. org/apache/dubbo/rpc/protocol/rest/message/decode/MultiValueCodec.java:35 TODO java bean get set convert
 
-## provider TODOLIST
-> 待实现
- 
-基于netty实现支持http协议的NettyServer
+## Provider TODO LIST
+> To be implemented 
 
-无注解协议定义
+Netty implementation supporting HTTP protocol for NettyServer.
 
-官网场景补充
+No annotation protocol definition.
 
-## Rest使用说明文档及demo
+Website scenario supplements.
+
+## Rest User Documentation and Demo

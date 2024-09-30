@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/dev/trie/
     - /en/overview/reference/pixiu/dev/trie/
     - /en/overview/mannual/dubbo-go-pixiu/dev/trie/
-description: Trie 前缀树介绍
-linkTitle: Trie 前缀树介绍
-title: Trie 前缀树介绍
+description: Introduction to Trie Prefix Tree
+linkTitle: Introduction to Trie Prefix Tree
+title: Introduction to Trie Prefix Tree
 type: docs
 weight: 2
 ---
@@ -15,18 +15,18 @@ weight: 2
 
 
 
-# 简介
+# Introduction
 
-![image.png](/imgs/pixiu/trie-1.png)<br />网关的核心之一是路由逻辑，决定一个请求需要经过怎样的加工，被转发到哪个下行服务。<br />其中 80% 的路由需求表达都以 URL 为基础。需要描述清楚具有某个特征的 URL 或者 URL 集合对应怎样的一系列下游处理策略。
+![image.png](/imgs/pixiu/trie-1.png)<br />One of the cores of the gateway is the routing logic, which determines how a request needs to be processed and which downstream service it should be forwarded to.<br />About 80% of routing requirements are URL-based. It is necessary to clearly describe how URLs or sets of URLs with certain characteristics correspond to a series of downstream processing strategies.
 
-例如，'/test/**' 开头的 URL 路由到测试环境集群，'/release/user/**' 开头的 URL 会被路由到正式环境的 user 服务集群。
+For example, URLs starting with '/test/**' route to the testing environment cluster, while URLs starting with '/release/user/**' route to the production environment's user services cluster.
 
 
-同时网关作为所有请求的入口，每一毫秒的延时都会做用在全量的业务下，在 mesh 场景下，延时还会随着调用链路的加深，被倍数放大。按照生产环境业务相应 <=7 毫秒的标准来看，规则匹配的性能要求也是十分苛刻的。一定不能随着规则数目的增加而性能退化。
+Additionally, as the entry point for all requests, every millisecond of delay accumulates across the entire business in a mesh scenario, where delays can further magnify with the depth of the call chain. According to the standard for production environments, response times of <=7 milliseconds set a very demanding performance requirement for rule matching. Performance must not degrade as the number of rules increases.
 
-# 使用介绍
+# Usage Introduction
 
-仅从使用方的角度阐述 pixiu 的配置文件如何描述 URL 相关的路由规则。（下面，我们介绍一下如何配置 URL 路由规则）<br />如下是一份 pixiu 的 api 配置文件，这份配置文件会被解析后生成一份对应的内存模型，作为 pixiu 路由相关配置的初始状态。之后由 RDS 协议修改解析后得到的内存模型，实现路由逻辑动态生效的效果。RDS 协议（RDS：xDS 协议下描述路由规则的部分）相关内容是后话不详细阐述。我们把注意力聚焦到resource部分。<br />resource 下 path 部分就是上文阐述的，URL 相关的路由描述。意思是满足 path 描述特征的 URL 会被成功匹配。
+This section describes how Pixiu's configuration file delineates URL-related routing rules from the user's perspective. (Next, we will explain how to configure URL routing rules.)<br />Below is a sample Pixiu API configuration file, which will be parsed to create a corresponding memory model as the initial state for Pixiu's routing configuration. Subsequently, the memory model obtained by parsing will be modified by the RDS protocol to achieve dynamic routing logic. The content related to the RDS protocol (RDS: the part of the xDS protocol that describes routing rules) will not be detailed here. Let’s focus on the resource section.<br />The path part under resource represents the URL-related routing description discussed above. This means that URLs that match the path description will be successfully matched.
 
 ```json
 name: server
@@ -60,88 +60,89 @@ resources:
 
 ```
 
-被匹配后的请求会被转化成 dubbo 协议转发到 test_dubbo 集群调用 com.dubbogo.server.UserService 下的 GetUserByName 服务。<br />我们继续聚焦到如下范围：
+Matched requests will be converted into the Dubbo protocol and forwarded to the test_dubbo cluster to call the GetUserByName service under com.dubbogo.server.UserService.<br />Let’s further focus on the following scope:
 ```json
 path: '/api/v1/test-dubbo/user/name/:name'
 ```
-为了描述清楚一个 URL 或者一组 URL，路由引擎需要拥有以下能力：
+To describe a URL or a group of URLs clearly, the routing engine needs to have the following capabilities:
 
-1. URL 可以包含变量，'/api/v1/test-dubbo/user/name/:name' 代表 URL 用“/”分割后，第六个部分的值作为变量 name 的值，向下游 filter 传递供filter使用。
-1. 需要有通配符
-   1. * 代表一个层级任意字符的通配 '/api/*/test-dubbo/user/name/:name' 这样的一个 path 描述代表了可能并不关心具体的版本，不论什么版本下的 URL 只要匹配都使用相同的逻辑加工数据并转发。
-   1. ** 代表多个层级的通配，从这个层级以后，子层级也可以是任意字符，**只可能存在于 URL 的末尾，不然会有二义性。'/api/v1/**' 这样的 path 表达了所有 V1 版本下的 URL 都采用相同的逻辑。
+1. URLs can include variables; '/api/v1/test-dubbo/user/name/:name' indicates that the value of the sixth segment separated by "/" is used as the value of the variable name, which is passed to the downstream filter for usage.
+1. Wildcards are required.
+   1. * represents a wildcard for any single character at one level; a path description like '/api/*/test-dubbo/user/name/:name' indicates that the specific version is not essential, and any URL that matches, regardless of the version, will be processed and forwarded using the same logic.
+   1. ** represents wildcards for multiple levels; it can only exist at the end of the URL to avoid ambiguity. A path like '/api/v1/**' indicates that all V1 version URLs will adopt the same logic.
 
-为了正确的使用 pixiu 您可能还需要了解如下内容。
+To use Pixiu correctly, you may need to understand the following content.
 
-## 优先级
+## Priority
 
-并非是独创的，类似 java 下的 spring 以及其他框架统一具有的优先级逻辑：
+This is not a novel concept; it is a priority logic commonly possessed by frameworks like Spring in Java:
 
-1. 通配的优先级低于特指 。 '/api/v1/**' 低于 '/api/v1/test-dubbo/user/name/:name' 的优先级，假设有两个 resource 分别采用了如上两个path 配置，request 为 '/api/v1/test-dubbo/user/name/yqxu' 的请求到达pixiu 后应该生效哪个 resource？按照通配低于特指的原则，'/api/v1/test-dubbo/user/name/:name' 这条规则会生效。
-1. 深度更深的，优先级更高 。 '/api/v1/**' 对比 /api/v1/test-dubbo/**' ，如果请求同时满足如上两个描述， '/api/v1/test-dubbo/**' 深度更深，会生效。
-1. 通配符之间 '/*' 优先级高于 '/**'
-1. 变量等同于通配。
+1. Wildcard priorities are lower than specific ones. The priority of '/api/v1/**' is lower than that of '/api/v1/test-dubbo/user/name/:name'. If two resources adopt the aforementioned path configurations, which resource should take effect upon receiving a request for '/api/v1/test-dubbo/user/name/yqxu' ? According to the principle that wildcards are lower than specifics, the rule '/api/v1/test-dubbo/user/name/:name' will take effect.
+1. Deeper levels have higher priorities. The comparison between '/api/v1/**' and '/api/v1/test-dubbo/**'; if both descriptions are satisfied, '/api/v1/test-dubbo/**' will take effect due to its deeper level.
+1. Wildcard '/*' has a higher priority than '/**'.
+1. Variables are equivalent to wildcards.
 
-## 冲突处理
+## Conflict Handling
 
-优先级规则只是冲突解决策略的一种，才同时匹配多个url描述时，优先级更高的那一种将会生效，然而优先级策略并不能涵盖所有的情况。<br />如果强行配置两条 resource path 完全相同，但是转发到不同的下游服务，这时候就会冲突。pixiu 下应对冲突的方案是 failfast，在 pixiu 初始化阶段，发现配置文件中有冲突的两项规则，则启动失败，让开发者今早发现问题并处理。
+The priority rule is just one way to resolve conflicts. When multiple URL descriptions match simultaneously, the one with the higher priority will take effect. However, the priority strategy cannot cover all cases.<br />If two resource paths are configured to be exactly the same but forwarded to different downstream services, a conflict will occur. Pixiu's strategy for handling conflicts is to fail fast; if conflicting rules are found during the initialization phase of Pixiu, the startup will fail, allowing developers to detect and address the issue early.
 
-# 原理介绍
+# Principle Introduction
 
-技术选型之初，以及确定使用pixiu后为了处理一些突发情况，以及应付一些pixiu自身可能存在的bug，开发者需要对pixiu 的路由原理有更深刻的了解。<br />下面，我们将详细介绍路由引擎的相关原理和实现，供感兴趣的同学了解。<br />相信阅读这部分内容的同学一定会有人下意识联想到字典树这个结构。使用字典树这个结构能实现存量规则数无关的匹配性能优化。
+Upon selecting the technology and determining the use of Pixiu to handle unforeseen situations and potential bugs, developers need to have a deeper understanding of the routing principles of Pixiu.<br />Next, we will detail the relevant principles and implementations of the routing engine for those interested.<br />Those who read this part are likely to subconsciously think of the structure of a trie. Utilizing a trie structure can achieve performance optimization in matching irrespective of the number of existing rules.
 
-一个存放字符串作为node的字典树，具有表达url 的能力。<br />![img](/imgs/pixiu/trie-2.png)<br />如上图描述等价于URL集合 '/api/v1' ，'/api/v2' ，'/web'
+A trie that stores strings as nodes can express URLs.<br />![img](/imgs/pixiu/trie-2.png)<br />This depiction is equivalent to the URL set '/api/v1', '/api/v2', '/web'.
 
-维护一个标准字典树有几个关键的操作
+Maintaining a standard trie involves several key operations:
 
-1. 字典树指定节点的查找（find）: 从root 开始遍历字典书，'/api/v2' 称之为路径，在当前层级寻找指定路径，如果存在就继续在子树下完成剩下的路径匹配。'/api/v2' 先从 logic root 找到 '/api' ，并在 '/api' 的子树下继续查找剩下的路径 '/v2' 。
-1. 字典树节点的添加（add）： 尝试查找指定节点，如果指定节点不存在则新建一个节点。假设一个空树状态下添加 '/api/v1' ，因为是空树那么logic root 下查找 '/api' 一定不存在，则在 root 下创建 '/api' ，继续在创建的 '/api' 节点下查找 '/v1' 因为 '/api' 是新建的 v1 一定也不存在，则继续创建v1
-1. 字典树url匹配（match）：在这个最简单的版本下，匹配逻辑与指定节点的查找逻辑没有区别。
+1. Trie Node Lookup (find): Starting from the root, traverse the trie; '/api/v2' is called a path that searches for the specified path in the current level. If it exists, continue matching the remaining path in the subtree. For '/api/v2', the search begins at the logic root for '/api', continuing under '/api' for the remainder '/v2'.
+1. Adding to Trie Nodes (add): Attempt to find the specified node; if it does not exist, create a new node. Assuming an empty tree state while adding '/api/v1', the logic root will not find '/api', creating it before searching under '/api' for '/v1', which also does not exist, leading to its creation.
+1. URL Matching in Trie (match): In this simplest version, the matching logic is identical to the specified node lookup logic.
 
-还有一些不涉及递归或者复用上面逻辑递归操作的简单操作
+Some simple operations that do not involve recursion or reuse the above logic:
 
-4. 修改字典树节点（modify）：通过 find 逻辑找到指定节点，调用 set 方法或者直接赋值的方式修改节点内容。
-4. 删除字典树节点（delete）: 通过 modify 逻辑修改 isdeleted 标为 true，并把节点内容 modify 为空。节点本身的内存不释放。
-4. 重建字典树（rebuild）：遍历所有节点，添加到新树，如果 isdeleted为 true 则不添加到新树，通过rebuild 操作创建副本。
+4. Modifying a Trie Node (modify): Find the specified node using the find logic and modify the node content through the set method or direct assignment.
+4. Deleting a Trie Node (delete): Using the modify logic, change isDeleted to true and modify the node content to empty. The node's memory is not released.
+4. Rebuilding the Trie (rebuild): Traverse all nodes and add them to a new tree. If isDeleted is true, it is not added to the new tree, creating a copy via the rebuild operation.
 
-由上可知，标准字典树结构距离通用的路由引擎底层数据结构能力还有一定差距，缺乏统配描述能力，缺乏变量表达的能力，下面我们来看一下如何进行改进。
+As noted, a standard trie structure still has gaps in its capabilities for a general routing engine, lacking generalized representation and variable expression abilities. Let’s look at how to improve this.
 
-添加 描述统配逻辑的子树，作为子树中默认存在的一部分<br />![img](/imgs/pixiu/trie-3.png)<br />现在我们的变种字典树多了变量表达能力<br />'/web/:appname/test/*' 这样的url 在图中应该怎么表达？<br />没错就是这个路径<br />
+Adding subordinate trees that describe generalized logic to form a default component of the subtree.<br />![img](/imgs/pixiu/trie-3.png)<br />Now our variant trie gains variable expression capability.<br />How should a URL like '/web/:appname/test/*' be represented in the diagram?<br />Correct, it should be this path.<br />
 
 ![img](/imgs/pixiu/trie-4.png)
 
 
-继续分析字典树几个关键的操作是否需要做变化？
+Continuing to analyze whether any key operations in the trie need changes:
 
-1. 字典树指定节点的查找  ：
-   1. 如果不改动使用前一版本逻辑在 '/*' 节点处理之前都不会有问题： 从root 开始遍历字典书，'/api/v2/*' 称之为路径，在当前层级寻找指定路径，如果存在就继续在子树下完成剩下的路径匹配。 /api/v2 先从  logic root 找到 '/api' ，并在 '/api' 的子树下继续查找剩下的路径 '/v2' 。
-   1. 这版本我们加上对 '/*' 节点的处理：'/v2' 后是 '/*' ，'/*' 对应单级通配节点，继续递归查找 '/v2' 节点下一级通配节点是否为空。如果 path 是 '/api/v2/*/test2' 这样的路径则继续在统配子树下完成递归过程。
-2. 字典树节点的添加   ：
-   1. 在添加 '/*' 节点之前，所有逻辑上一版本就足够处理：尝试查找指定节点，如果指定节点不存在则新建一个节点。假设一个空树状态下添加 '/api/v1/*' ，因为是空树那么 logic root 下查找 '/api' 一定不存在，则在 root 下创建 '/api' ，继续在创建的 '/api' 节点下查找 '/v1' 因为 '/api' 是新建的 v1 一定也不存在，则继续创建 v1。
-   1. 这版本加上 '/*' 的特殊处理 ：'/v1' 新建后，查看通配子树，通配子树不存在，则为V1 节点添加内容为空的单级通配子树并在子树中继续递归。
-3. 字典树url匹配：在这个版本下，对比查找逻辑需要增加回朔逻辑。
-   1. 在遇到通配节点前逻辑与find 依旧相同 ： 从root 开始遍历字典书，'/api/v2/*' 称之为路径，在当前层级寻找指定路径，如果存在就继续在子树下完成剩下的路径匹配。 '/api/v2' 先从 logic root 找到 '/api' ，并在 '/api' 的子树下继续查找剩下的路径 '/v2' 。
-   1. 在处理统配节点的时候会与 find 逻辑有所不同：'/v2' 下普通子树无匹配节点，回朔到通配子树，查看是否能匹配，这个例子中 '/v2' 下无通配子树，查询不到节点 。值得注意的是回朔逻辑的先后顺序，是先找普通子树再回朔到通配子树还是先查找通配子树再回朔到普通子树是取决于优先级规则的，按照需求必须是先查找普通子树。
+1. Lookup for a Specific Trie Node:
+   1. If the previous version logic is not modified before processing the '/*' node, there should not be any issues: Starting from the root, traverse the trie; '/api/v2/*' serves as the path. It finds the specified path in the current level. If it exists, continue matching in the subtree. For example, '/api/v2' first finds '/api' and continues searching for '/v2' in its subtree.
+   1. In this version, handling of the '/*' node is added: After '/v2' is '/*', which corresponds to a single-level wildcard node. Continue to recursively check whether the wildcard node is empty beneath '/v2'. If path is '/api/v2/*/test2', continue the recursive process in the generalized subtree.
+2. Adding a Trie Node:
+   1. Before adding a '/*' node, the previous logic is adequate: attempt to locate the specified node; if it does not exist, create a new node. Given an empty tree state while adding '/api/v1/*', the logic root will not find '/api', leading to its creation before checking for '/v1', again leading to its creation if it doesn't exist.
+   1. This version adds special handling for '/*': After creating '/v1', check for the wildcard subtree. If nonexistent, a single-level wildcard subtree representing V1 will be added, continuing the recursion.
+3. URL Matching in the Trie: In this version, the comparison for fetch logic needs to enhance backtracking.
+   1. When encountering a wildcard node, the logic prior to it remains unchanged: Starting from the root, traverse the trie; '/api/v2/*' is a designated path that searches for the specified path. If it exists, continue matching in the subtree. '/api/v2' will first find '/api' then continue with '/v2' in its subtree.
+   1. There’s a deviation in handling wildcard nodes versus the find logic: If '/v2' hosts no matching nodes in its ordinary subtree, backtrack to the wildcard subtree to check for matches. In this case, as '/v2' leads to no matches, it should be mentioned that the order in backtracking is critical — whether to search the ordinary subtree first before backtracking to the wildcard subtree depends on the priority rules, and it must search the ordinary subtree first.
 
-但是我们目前还是缺乏 '/**' 这种通配的表达能力代表了多级通配，可以分析需求得到结论，这种通配符，一定不存在子树，是一种特殊的叶子结点，仅用于 match 逻辑回朔时做特殊判断。继续加点特殊 node 后演化为：<br />![img](/imgs/pixiu/trie-5.png)<br />好了至此，需求都能满足了。<br />'/api/**' 等价路径为：<br />![img](/imgs/docs3-v2/dubbo-go-pixiu/dev/trie/1642993180981-51a0df19-bb03-49c8-9128-a6e95dbabfcd.png)<br />其他逻辑大同小异，match 逻辑回朔再多一级判断，如果一级通配子树也匹配不到结果，则再看一下多级通配子树是否为空（其实留一个标位就可以，为了统一模型好理解，还是用一个子树去描述）
+However, we currently still lack the expressiveness of multi-level wildcards represented by '/**'. Analyzing requirement conclusions indicates these wildcards should not have subtrees; they are specialized leaf nodes used for special judgments during match logic backtracking. Continuing to introduce some special nodes evolves this into:<br />![img](/imgs/pixiu/trie-5.png)<br />Now, all requirements are sufficed.<br />Equivalent paths for '/api/**':<br />![img](/imgs/docs3-v2/dubbo-go-pixiu/dev/trie/1642993180981-51a0df19-bb03-49c8-9128-a6e95dbabfcd.png)<br />Other logic is largely the same; match logic now has one more level of judgment. If the single-level wildcard subtree still finds no results, check if the multi-level wildcard subtree is empty (one flag would suffice, but a subtree is used here for model uniformity and clarity).
 
-到目前这个版本所有上文提到的能力已经都能有效支撑，回头分析一下时间复杂读。<br />url 被 '/' 分割出一个一个的段，容易理解在匹配一个url 过程中复杂度是 O(n) n= url 段数。与树中存有的规则数量无关。再分析 n 的范围，n 其实不是一个可以无限大的数字，一部分浏览器甚至约束 url 长度必须小于 2000，按照一个单词长度为 5 来计算，可以大概估计段数最多会在 400 左右，n 如果可以被视为一个常数，那么复杂读可以看作是 O（1）。
+At this point, all capabilities previously discussed can effectively support the relevant operations. Analyzing the complexity, URLs are divided into segments by '/', making matching complexity O(n), where n = number of URL segments. This complex analysis remains indifferent to the quantity of rules stored in the tree. Further analyzing scope of n reveals it is not an unlimited number; some browsers even constrain the URL length to below 2000 characters. Assuming an average segment length of 5, segments would generally be capped at around 400. If n could be considered a constant, the complexity can thus be viewed as O(1).
 
-稍微解释一下find 和 match 有什么不同，为什么需要两种查找节点的方法。看下这个例子 :假设树中已经add 了 '/api/v1/:name/add' 这个 path，那么<br />find（"/api/v1/:name/add"），find（"/api/v1/*/add"）两个调用应该能够拿到结果，在add 的过程中用于冲突判断。<br />假设有请求进来url 为 '/api/v1/:name/add' 那么match（"/api/v1/:name/list"）也应该能 match 到结果且变量name 为 :name。<br />再假设有请求进来 url 为 '/api/v1/yq/add' 那么match（"/api/v1/yq/list"）也应该能 match 到结果且变量name 为 yq 。find（"/api/v1/yq/add" ） 则不会匹配到结果。
-# 后续改进
+In brief, explain the difference between find and match, and why both node retrieval methods are necessary. Consider this example: if the tree has already added the path '/api/v1/:name/add', then<br />find("/api/v1/:name/add") and find("/api/v1/*/add") should yield results during the add process for conflict checking.<br />Assuming a request comes in with URL '/api/v1/:name/add', match("/api/v1/:name/list") should also yield results, setting the variable name to :name.<br />If a request with the URL '/api/v1/yq/add' comes in, match("/api/v1/yq/list") should produce results with name being yq, while find("/api/v1/yq/add") will yield no result.
+# Future Improvements
 
-目前实现在读树和写树之前，竞争一把全局锁，竞争失败后自旋直到竞争成功，然后完成读写。<br />解释一下为什么读都需要上锁，因为代码中大量运用了go 的 map 结构。这个结构只要并发读写直接会报如下错误：concurrent map read and map write<br />目前实现如下<br />![img](/imgs/pixiu/trie-6.png)<br />引入 command 队列，所有对 trie 的用户写操作先入列，同时做读写分离，分为读树和写树，维护一个线程负责追 log 把 command 写入到写树，读树因为只读，没有写入线程操作读树所以可以不加锁。写树因为只有一条线程向树内写入，没有竞争问题，也可以不加锁。（写入操作并不会很频繁单线程完全能负荷）<br />定义一个配置延迟生效的时间，比如3s<br />每3秒，读树和写树角色切换，每个 trie 分别维护一个 command 队列的游标，游标代表当前这个 trie，追 log 追到了哪条记录，写入线程每3s 切换写游标引用。<br />
+Currently, a global lock is acquired before reading or writing to the tree. On failure, it will spin until success before proceeding with read or write.<br />This is done because extensive use of Go's map structure is present in the code. Concurrent read-write accesses lead to this error: concurrent map read and map write.<br />The current implementation is as follows:<br />![img](/imgs/pixiu/trie-6.png)<br />A command queue is introduced, where all user write operations go in first, while separating read and write from each other. One thread is maintained to capture logs and write to the write tree. The read tree, which is purely read, does not require a write thread; hence, no locks are necessary. The write tree, written by only one thread, incurs no competition issues and, therefore, can also operate without locks (write operations are not frequent and are manageable via a single thread).<br />A configuration defining an effective delay time, say 3s, is set.<br />Every 3 seconds, the roles of the read and write trees switch. Each trie maintains a cursor for its command queue, indicating which record has been traced in the log where this trie is at, while the writing thread switches references of the writing cursor every 3 seconds.<br />
 
 ![img](/imgs/pixiu/trie-7.png)
 
-如上图，最上面部分是一个先进先出的 command 队列，追 log 线程从这个队列中读取用户写操作，这个队列维护了两个游标 index1，index2，index1 代表了trie1 追 log 追到了 index1 的位置，index2 代表了 trie2 追 log 追到了 index2 的位置。追 log 线程同一时间内只会使用一个引用进行写操作，每次写完树对应的 index 游标下移一格，另一个 trie 引用将被用于读操作，一切读请求将从读引用对应的树中读取。因为追的是同一份 log ，最终一致性是能保证的。
+In the above image, the top part represents a first-in-first-out command queue; the logging thread reads from this queue for user write operations. It maintains two cursor indices, index1 and index2; index1 indicates that trie1 has traced its logs to index1 position, while index2 shows trie2 has traced to index2. At any one moment, the logging thread will operate on one reference for write operations, shifting the corresponding index cursor down one space after completing each write. The other trie reference will be used for read operations; all read requests will come from the tree represented by the read reference. Since they are tracing the same log, eventual consistency is guaranteed.
 
-切换逻辑：
+Switching logic:
 
-1. 先使追 log 线程空转（不挂起，避免上下文切换，因为马上要恢复）
-1. 保证两个树都没有写入线程操作
-1. 切换读引用到另一个树
-1. 切换写引用到另一个树
-1. 恢复追 log 线程
+1. First, ensure that the logging thread does empty runs (not suspended, avoiding context switching as it will resume shortly).
+1. Ensure both trees are not undergoing write operations.
+1. Switch the read reference to another tree.
+1. Switch the write reference to another tree.
+1. Resume the logging thread.
 
-pr：<br />[https://github.com/apache/dubbo-go-pixiu/pull/262](https://github.com/apache/dubbo-go-pixiu/pull/262)<br />pkg/common/router/trie/trie.go:26
+pr:<br />[https://github.com/apache/dubbo-go-pixiu/pull/262](https://github.com/apache/dubbo-go-pixiu/pull/262)<br />pkg/common/router/trie/trie.go:26
+

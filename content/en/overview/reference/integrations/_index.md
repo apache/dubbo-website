@@ -2,8 +2,9 @@
 aliases:
     - /en/overview/reference/integrations/
 description: ""
-linkTitle: 集成适配
-title: 集成适配
+linkTitle: Integration Adaptation
+title: Integration Adaptation
 type: docs
 weight: 3
 ---
+

@@ -1,18 +1,19 @@
 ---
 aliases:
 - /en/overview/reference/integrations/zipkin/
-description: 配置 Zipkin 与 Dubbo 一起工作
+description: Configuring Zipkin to work with Dubbo
 linkTitle: Zipkin
 title: Zipkin
 type: docs
 weight: 4
 ---
 
-## 安装
+## Installation
 
-你可以使用 Dubbo 社区提供的示例配置快速安装 Zipkin。
+You can quickly install Zipkin using the example configuration provided by the Dubbo community.
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/zipkin.yaml
 ```
-> 本安装仅适用于测试或体验使用，生产级别的安装请参考 Zipkin 官方安装文档。
+> This installation is only suitable for testing or demonstration purposes. For production-level installations, please refer to the official Zipkin installation documentation.
+

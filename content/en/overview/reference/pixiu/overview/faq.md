@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/overview/faq/
     - /en/overview/reference/pixiu/overview/faq/
     - /en/overview/mannual/dubbo-go-pixiu/overview/faq/
-description: Pixiu 常见问题
-linkTitle: Pixiu 常见问题
-title: Pixiu 常见问题
+description: Pixiu Frequently Asked Questions
+linkTitle: Pixiu Frequently Asked Questions
+title: Pixiu Frequently Asked Questions
 type: docs
 weight: 3
 ---
@@ -17,14 +17,15 @@ weight: 3
 
 
 
-### 常见问题 Q1
-**Pixiu 目前可以用于生产环境吗？**
+### Frequently Asked Questions Q1
+**Can Pixiu currently be used in production environments?**
 
 **A:** 
- 0.4.0版本之后就可以上生产环境，欢迎已经在使用的企业参与此 issue: [who's using Pixiu](https://github.com/apache/dubbo-go-pixiu/issues/64)
+ Since version 0.4.0, it can be used in production environments. We welcome enterprises that are already using it to participate in this issue: [who's using Pixiu](https://github.com/apache/dubbo-go-pixiu/issues/64)
 
-### 常见问题 Q2
-**Pixiu 目前支持高可用吗？**
+### Frequently Asked Questions Q2
+**Does Pixiu currently support high availability?**
 
 **A:** 
- 目前 Pixiu 仅支持单实例部署，可以和 Nginx 组成无状态多实例集群。
+ Currently, Pixiu only supports single-instance deployment and can form a stateless multi-instance cluster with Nginx.
+

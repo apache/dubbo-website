@@ -2,9 +2,9 @@
 aliases:
     - /en/overview/reference/
 description: ""
-linkTitle: 其他
+linkTitle: Others
 no_list: true
-title: 其他
+title: Others
 type: docs
 weight: 7
 ---
@@ -19,7 +19,7 @@ weight: 7
                 <h4 class="card-title">
                     <a href='{{< relref "./Metrics" >}}'>Dubbo Metrics</a>
                 </h4>
-                <p>Dubbo Metrics 监控指标</p>
+                <p>Monitoring metrics for Dubbo</p>
             </div>
         </div>
     </div>
@@ -29,7 +29,7 @@ weight: 7
                 <h4 class="card-title">
                     <a href='{{< relref "./integrations" >}}'>Dubbo Integrations</a>
                 </h4>
-                <p>Dubbo Integrations 使用指南</p>
+                <p>User guide for Dubbo Integrations</p>
             </div>
         </div>
     </div>
@@ -39,7 +39,7 @@ weight: 7
                 <h4 class="card-title">
                     <a href='{{< relref "./proposals" >}}'>Dubbo Proposals</a>
                 </h4>
-                <p>Dubbo 提案</p>
+                <p>Dubbo proposals</p>
             </div>
         </div>
     </div>
@@ -49,3 +49,4 @@ weight: 7
 </div>
 
 {{< /blocks/section >}}
+

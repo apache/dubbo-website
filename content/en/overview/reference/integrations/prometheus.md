@@ -1,35 +1,35 @@
 ---
 aliases:
     - /en/overview/reference/integrations/prometheus/
-description: 配置 Prometheus 与 Dubbo 一起工作
+description: Configure Prometheus to work with Dubbo
 linkTitle: Prometheus
 title: Prometheus
 type: docs
 weight: 1
 ---
 
-## 安装
+## Installation
 
-你可以使用 Dubbo 社区提供的示例配置快速安装 Prometheus。
+You can quickly install Prometheus using the example configuration provided by the Dubbo community.
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/prometheus.yaml
 ```
-> 本安装仅适用于测试或体验使用，生产级别的安装请参考 Prometheus 官方安装文档。
+> This installation is only suitable for testing or experience purposes. For production-grade installation, please refer to the official Prometheus installation documentation.
 
-执行端口映射 `kubectl -n dubbo-system port-forward svc/prometheus-server 9090:9090`，访问页面 `http://localhost:9090`，切换到 graph 视图。
+Execute the port mapping `kubectl -n dubbo-system port-forward svc/prometheus-server 9090:9090`, and access the page at `http://localhost:9090`, then switch to the graph view.
 
 ![Prometheus](/imgs/v3/reference/integrations/prometheus.jpg)
 
-## Scrape 配置
+## Scrape Configuration
 
-Dubbo 的每个实例都会暴露一个 http 端口用于 Metrics 采集，Prometheus 通过 scraping 每个实例的 http 接口来采集统计数据。具体的 scraping 路径可以通过 Prometheus 配置文件进行调整，该文件控制 scraping 实例的端口、路径、TLS 设置等。
+Each instance of Dubbo exposes an HTTP port for Metrics collection, and Prometheus collects statistics by scraping the HTTP interface of each instance. The specific scraping path can be adjusted via the Prometheus configuration file, which controls the port, path, TLS settings, etc., for scraping instances.
 
-### Kubernetes 注解约定
+### Kubernetes Annotation Convention
 
-在 Kubernetes 部署模式下，使用官方社区维护的 [Helm Charts 安装 Prometheus](https://github.com/prometheus-community/helm-charts)，Prometheus 服务可以自动识别包含 `prometheus.io` 注解的 Dubbo Pod 实例，并将它们列入 Scraping 实例列表。
+In the Kubernetes deployment mode, install Prometheus using the [Helm Charts maintained by the official community](https://github.com/prometheus-community/helm-charts), and the Prometheus service can automatically identify Dubbo Pod instances with the `prometheus.io` annotation and include them in the scraping instance list.
 
-Dubbo 官网给出的示例即是基于 `prometheus.io` 注解实现了 scraping target 地址的自动发现，具体注解配置可参见示例中的 [Deployment 资源定义](https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml)。
+The example provided by the Dubbo official website implements automatic discovery of the scraping target address based on the `prometheus.io` annotation. The specific annotation configuration can be found in the [Deployment resource definition](https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml).
 
 ```yaml
 annotations:
@@ -38,11 +38,11 @@ annotations:
    prometheus.io/port: "22222"
 ```
 
-在此模式下，Dubbo 实例默认提供的 Prometheus Metrics 采集路径是：`/management/prometheus`。
+In this mode, the Prometheus Metrics collection path provided by default for Dubbo instances is: `/management/prometheus`.
 
-### 自定义配置
+### Custom Configuration
 
-对于已经安装好的 Prometheus 服务，可以通过 Dubbo Admin 提供的 Prometheus http_sd 服务发现接口来配置 Dubbo Metrics 采集的目标实例。可以参考 Admin 安装相关文档，安装完成后 Prometheus 侧需要调整的配置如下：
+For an already installed Prometheus service, you can configure the target instances for Dubbo Metrics collection using the Prometheus http_sd service discovery interface provided by Dubbo Admin. After the installation is complete, the configurations that need to be adjusted on the Prometheus side are as follows:
 
 ```yaml
 - job_name: 'dubbo'

@@ -3,10 +3,11 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/user/adapter/dubbo/
     - /en/docs3-v2/dubbo-go-pixiu/user/adapter/dubbo/
     - /en/overview/reference/pixiu/user/adapter/dubbo/
-    - /en/overview/mannual/dubbo-go-pixiu/user/adapter/dubbo/
-description: Dubbo 集群中心 Adapter
-linkTitle: Dubbo 集群中心 Adapter
-title: Dubbo 集群中心 Adapter
+    - /en/overview/manual/dubbo-go-pixiu/user/adapter/dubbo/
+description: Dubbo Cluster Center Adapter
+linkTitle: Dubbo Cluster Center Adapter
+title: Dubbo Cluster Center Adapter
 type: docs
 weight: 10
 ---
+

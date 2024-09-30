@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/user/samples/https/
     - /en/overview/reference/pixiu/user/samples/https/
     - /en/overview/mannual/dubbo-go-pixiu/user/samples/https/
-description: Https 案例介绍
-linkTitle: Https 案例介绍
-title: Https 案例介绍
+description: Https Case Introduction
+linkTitle: Https Case Introduction
+title: Https Case Introduction
 type: docs
 weight: 30
 ---
@@ -16,4 +16,5 @@ weight: 30
 
 
 
-欢迎认领补充此文档。
+Welcome to contribute to this document.
+

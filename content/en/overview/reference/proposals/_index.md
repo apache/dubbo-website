@@ -1,9 +1,10 @@
 ---
 aliases:
     - /en/overview/reference/proposals/
-description: "Dubbo 框架核心功能设计方案"
-linkTitle: 提案
-title: 提案
+description: "Design proposal for the core functionalities of the Dubbo framework"
+linkTitle: Proposals
+title: Proposals
 type: docs
 weight: 4
 ---
+

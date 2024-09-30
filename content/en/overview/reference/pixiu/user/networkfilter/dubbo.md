@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/user/networkfilter/dubbo/
     - /en/overview/reference/pixiu/user/networkfilter/dubbo/
     - /en/overview/mannual/dubbo-go-pixiu/user/networkfilter/dubbo/
-description: Dubbo NetWorkFilter 介绍
-linkTitle: Dubbo NetWorkFilter 介绍
-title: Dubbo NetWorkFilter 介绍
+description: Introduction to Dubbo NetWorkFilter
+linkTitle: Introduction to Dubbo NetWorkFilter
+title: Introduction to Dubbo NetWorkFilter
 type: docs
 weight: 30
 ---
@@ -16,4 +16,5 @@ weight: 30
 
 
 
-欢迎认领补充此文档。
+Welcome to contribute to this document.
+

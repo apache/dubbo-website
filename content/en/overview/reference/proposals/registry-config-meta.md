@@ -1,93 +1,90 @@
 ---
 aliases:
     - /en/overview/reference/proposals/registry-config-meta/
-description: 本文介绍三中心架构设计
-linkTitle: 注册&配置&元数据中心
-title: 注册中心、配置中心和元数据中心
+description: This article introduces the design of a three-center architecture
+linkTitle: Registry & Configuration & Metadata Center
+title: Registry Center, Configuration Center, and Metadata Center
 type: docs
 weight: 2
 ---
 
 
-## 三中心逻辑架构
-> 本节侧重描述传统模式下的 Dubbo 部署架构，在云原生背景下的部署架构会有些变化，主要体现在基础设施（Kubernetes、Service Mesh等）会承担更多的职责，
-> 中心化组件如注册中心、元数据中心、配置中心等的职责被集成、运维变得更加简单，但通过强调这些中心化的组件能让我们更容易理解 Dubbo 的工作原理。
+## Three Center Logical Architecture
+> This section focuses on describing the traditional deployment architecture of Dubbo. The deployment architecture in a cloud-native context may vary, mainly in that the infrastructure (Kubernetes, Service Mesh, etc.) takes on more responsibilities.
+> Centralized components such as registry centers, metadata centers, and configuration centers have their duties integrated, making operation and maintenance simpler. However, emphasizing these centralized components helps us better understand how Dubbo works.
 
-作为一个微服务框架，Dubbo sdk 跟随着微服务组件被部署在分布式集群各个位置，为了在分布式环境下实现各个微服务组件间的协作，
-Dubbo 定义了一些中心化组件，这包括：
-* 注册中心。协调 Consumer 与 Provider 之间的地址注册与发现
-* 配置中心。
-    * 存储 Dubbo 启动阶段的全局配置，保证配置的跨环境共享与全局一致性
-    * 负责服务治理规则（路由规则、动态配置等）的存储与推送。
-* 元数据中心。
-    * 接收 Provider 上报的服务接口元数据，为 Admin 等控制台提供运维能力（如服务测试、接口文档等）
-    * 作为服务发现机制的补充，提供额外的接口/方法级别配置信息的同步能力，相当于注册中心的额外扩展
+As a microservice framework, Dubbo SDK is deployed across distributed clusters along with microservice components. To achieve collaboration between various microservice components in a distributed environment, Dubbo defines several centralized components, including:
+* Registry Center. Coordinates address registration and discovery between Consumer and Provider.
+* Configuration Center.
+    * Stores global configurations during the Dubbo startup phase to ensure cross-environment sharing and global consistency.
+    * Responsible for storing and pushing service governance rules (routing rules, dynamic configurations, etc.).
+* Metadata Center.
+    * Receives service interface metadata reported by Providers and provides operation and maintenance capabilities for consoles like Admin (e.g., service testing, interface documentation).
+    * Acts as a supplement to the service discovery mechanism, providing synchronization capabilities for additional interface/method-level configuration information, equivalent to extra extensions of the registry center.
 
 ![threecenters](/imgs/v3/concepts/threecenters.png)
 
-上图完整的描述了 Dubbo 微服务组件与各个中心的交互过程。
+The above figure fully describes the interaction process between Dubbo microservice components and each center.
 
-以上三个中心并不是运行 Dubbo 的必要条件，用户完全可以根据自身业务情况决定只启用其中一个或多个，以达到简化部署的目的。通常情况下，所有用户都会以独立的注册中心
-以开始 Dubbo 服务开发，而配置中心、元数据中心则会在微服务演进的过程中逐步的按需被引入进来。
+The three centers mentioned above are not necessary for running Dubbo; users can decide to enable only one or more of them based on their business needs to simplify deployment. Generally, all users will start Dubbo service development with an independent registry center, while the configuration and metadata centers will be gradually introduced as needed during the evolution of microservices.
 
-### 注册中心
+### Registry Center
 
-注册中心扮演着非常重要的角色，它承载着服务注册和服务发现的职责。目前Dubbo支持以下两种粒度的服务发现和服务注册，分别是接口级别和应用级别，注册中心可以按需进行部署：
+The registry center plays a very important role, shouldering the responsibilities of service registration and service discovery. Currently, Dubbo supports two granularities of service discovery and registration: interface-level and application-level, and the registry center can be deployed as needed:
 
-- 在传统的Dubbo SDK使用姿势中，如果仅仅提供直连模式的RPC服务，不需要部署注册中心。
-- 无论是接口级别还是应用级别，如果需要Dubbo SDK自身来做服务注册和服务发现，则可以选择部署注册中心，在Dubbo中集成对应的注册中心。
+- In the traditional usage of the Dubbo SDK, if only direct connection mode RPC services are provided, it is not necessary to deploy a registry center.
+- Whether at the interface or application level, if the Dubbo SDK needs to handle service registration and discovery, a registry center can be deployed to integrate the corresponding registry.
+- In Dubbo + Mesh scenarios, as the service registration capabilities of Dubbo weaken, the registry center is no longer mandatory, and its responsibilities begin to be replaced by the control plane. If the Dubbo + Mesh deployment method is adopted, neither the ThinSDK's mesh method nor the Proxyless mesh method requires an independent registry center.
 
-- 在Dubbo + Mesh 的场景下，随着 Dubbo 服务注册能力的弱化，Dubbo内的注册中心也不再是必选项，其职责开始被控制面取代，如果采用了Dubbo + Mesh的部署方式，无论是ThinSDK的mesh方式还是Proxyless的mesh方式，都不再需要独立部署注册中心。
-
-而注册中心并不依赖于配置中心和元数据中心，如下图所示：
+The registry center does not depend on the configuration center and the metadata center, as shown in the diagram below:
 
 ![centers-registry](/imgs/v3/concepts/centers-registry.png)
 
-该图中没有部署配置中心和元数据中心，在Dubbo中会默认将注册中心的实例同时作为配置中心和元数据中心，这是Dubbo的默认行为，如果确实不需要配置中心或者元数据中心的能力，可在配置中关闭，在注册中心的配置中有两个配置分别为use-as-config-center和use-as-metadata-center，将配置置为false即可。
+This diagram shows that the configuration center and metadata center are not deployed, meaning that Dubbo will default the instance of the registry center to also serve as the configuration center and metadata center. This is the default behavior of Dubbo. If the functionalities of the configuration center or metadata center are indeed not needed, they can be disabled in the configuration. In the registry center's configuration, the two settings 'use-as-config-center' and 'use-as-metadata-center' can be set to false.
 
-### 元数据中心
+### Metadata Center
 
-元数据中心在2.7.x版本开始支持，随着应用级别的服务注册和服务发现在Dubbo中落地，元数据中心也变的越来越重要。在以下几种情况下会需要部署元数据中心：
+The metadata center started to be supported from version 2.7.x. As application-level service registration and discovery are implemented in Dubbo, the metadata center becomes increasingly important. The following scenarios may require the deployment of a metadata center:
 
-1. 对于一个原先采用老版本Dubbo搭建的应用服务，在迁移到Dubbo 3时，Dubbo 3 会需要一个元数据中心来维护RPC服务与应用的映射关系（即接口与应用的映射关系），因为如果采用了应用级别的服务发现和服务注册，在注册中心中将采用“应用 ——  实例列表”结构的数据组织形式，不再是以往的“接口 —— 实例列表”结构的数据组织形式，而以往用接口级别的服务注册和服务发现的应用服务在迁移到应用级别时，得不到接口与应用之间的对应关系，从而无法从注册中心得到实例列表信息，所以Dubbo为了兼容这种场景，在Provider端启动时，会往元数据中心存储接口与应用的映射关系。
-2. 为了让注册中心更加聚焦于地址的发现和推送能力，减轻注册中心的负担，元数据中心承载了所有的服务元数据、大量接口/方法级别配置信息等，无论是接口粒度还是应用粒度的服务发现和注册，元数据中心都起到了重要的作用。
+1. For an application service originally built with an old version of Dubbo, migrating to Dubbo 3 requires a metadata center to maintain the mapping relationship between RPC services and applications (i.e., the mapping between interfaces and applications). If application-level service discovery and registration are adopted, the registry will use an "application - instance list" structure for organizing data, rather than the previous "interface - instance list" structure, making it impossible to obtain the corresponding relationship between interfaces and applications during the migration process. To accommodate this scenario, Dubbo will store the mapping relationship between interfaces and applications in the metadata center during the Provider startup.
+2. To allow the registry center to focus more on address discovery and push capabilities, reducing its burden, the metadata center bears all service metadata and extensive interface/method-level configuration information. Regardless of whether service discovery and registration are at the interface granularity or application granularity, the metadata center plays an important role.
 
-如果有以上两种需求，都可以选择部署元数据中心，并通过Dubbo的配置来集成该元数据中心。
+If the above two needs exist, deploying a metadata center and integrating it through Dubbo's configuration is feasible.
 
-元数据中心并不依赖于注册中心和配置中心，用户可以自由选择是否集成和部署元数据中心，如下图所示：
+The metadata center does not depend on the registry center and configuration center, allowing users to freely choose whether to integrate and deploy the metadata center, as shown in the diagram below:
 
 ![centers-metadata](/imgs/v3/concepts/centers-metadata.png)
 
-该图中不配备配置中心，意味着可以不需要全局管理配置的能力。该图中不配备注册中心，意味着可能采用了Dubbo mesh的方案，也可能不需要进行服务注册，仅仅接收直连模式的服务调用。
+The absence of a configuration center in this diagram means that global configuration management capabilities are not necessary. The absence of a registry center means that Dubbo's mesh solution may be employed, or there may be no need for service registration, only direct calls are received.
 
-### 配置中心
+### Configuration Center
 
-配置中心与其他两大中心不同，它无关于接口级还是应用级，它与接口并没有对应关系，它仅仅与配置数据有关，即使没有部署注册中心和元数据中心，配置中心也能直接被接入到Dubbo应用服务中。在整个部署架构中，整个集群内的实例（无论是Provider还是Consumer）都将会共享该配置中心集群中的配置，如下图所示：
+The configuration center differs from the other two centers in that it is unrelated to interface or application levels; it does not correspond to interfaces but only to configuration data. Even without deploying a registry center and metadata center, the configuration center can be directly integrated into Dubbo application services. In the overall deployment architecture, instances across the cluster (whether Providers or Consumers) will share configurations from the configuration center cluster, as shown in the diagram below:
 ![centers-config](/imgs/v3/concepts/centers-config.png)
 
-该图中不配备注册中心，意味着可能采用了Dubbo mesh的方案，也可能不需要进行服务注册，仅仅接收直连模式的服务调用。
+The absence of a registry center in this diagram indicates the potential use of a Dubbo mesh solution, and service registration may not be required, only direct service calls are handled.
 
-该图中不配备元数据中心，意味着Consumer可以从Provider暴露的MetadataService获取服务元数据，从而实现RPC调用
+The absence of a metadata center in this diagram means that Consumers can obtain service metadata from the MetadataService exposed by Providers to facilitate RPC calls.
 
-### 保证三大中心高可用的部署架构
+### Ensure Highly Available Deployment Architecture of the Three Centers
 
-虽然三大中心已不再是Dubbo应用服务所必须的，但是在真实的生产环境中，一旦已经集成并且部署了该三大中心，三大中心还是会面临可用性问题，Dubbo需要支持三大中心的高可用方案。在Dubbo中就支持多注册中心、多元数据中心、多配置中心，来满足同城多活、两地三中心、异地多活等部署架构模式的需求。
+While the three centers are no longer mandatory for Dubbo application services, once they are integrated and deployed in a production environment, they still face availability issues. Dubbo needs to support high availability solutions for the three centers. Dubbo supports multiple registry centers, multiple metadata centers, and multiple configuration centers to meet deployment architecture models such as multi-active in the same city, two-location three centers, and cross-geography multi-active.
 
-Dubbo SDK对三大中心都支持了Multiple模式。
+Dubbo SDK supports Multiple mode for all three centers.
 
-- 多注册中心：Dubbo 支持多注册中心，即一个接口或者一个应用可以被注册到多个注册中心中，比如可以注册到ZK集群和Nacos集群中，Consumer也能够从多个注册中心中进行订阅相关服务的地址信息，从而进行服务发现。通过支持多注册中心的方式来保证其中一个注册中心集群出现不可用时能够切换到另一个注册中心集群，保证能够正常提供服务以及发起服务调用。这也能够满足注册中心在部署上适应各类高可用的部署架构模式。
-- 多配置中心：Dubbo支持多配置中心，来保证其中一个配置中心集群出现不可用时能够切换到另一个配置中心集群，保证能够正常从配置中心获取全局的配置、路由规则等信息。这也能够满足配置中心在部署上适应各类高可用的部署架构模式。
+- Multiple Registry Centers: Dubbo supports multiple registry centers, meaning an interface or application can be registered to multiple registry centers, such as both a ZK cluster and a Nacos cluster. Consumers can also subscribe to related service address information from multiple registry centers for service discovery. This support for multiple registry centers ensures that if one registry center cluster becomes unavailable, it can switch to another, ensuring continuous service provision and invocation. This also meets various high-availability deployment architecture models for the registry center.
+- Multiple Configuration Centers: Dubbo supports multiple configuration centers to ensure that if one configuration center cluster becomes unavailable, it can switch to another, ensuring that global configurations, routing rules, and other information can still be obtained from the configuration center. This also meets various high-availability deployment architecture models for the configuration center.
+- Multiple Metadata Centers: Dubbo supports multiple metadata centers to respond to situations where a metadata center cluster becomes unavailable due to disaster recovery or similar circumstances, allowing a switch to another metadata center cluster to maintain management capabilities for service metadata.
 
-- 多元数据中心：Dubbo 支持多元数据中心：用于应对容灾等情况导致某个元数据中心集群不可用，此时可以切换到另一个元数据中心集群，保证元数据中心能够正常提供有关服务元数据的管理能力。
-
-拿注册中心举例，下面是一个多活场景的部署架构示意图：
+Taking the registry center as an example, below is a schematic diagram of a multi-active deployment architecture:
 
 ![multiple-registry-deployment-architecture](/imgs/v3/concepts/multiple-registry-deployment-architecture.png)
 
-## 三中心物理部署架构
+## Physical Deployment Architecture of the Three Centers
 
-![同一集群，承担三个中心职责](#)
+![Same cluster, undertaking the responsibilities of the three centers](#)
 
-## 不同场景下的推荐使用方式
-* 只配置 registry，默认作为 metadata、config-center
-* registry、metadata、config-center 使用不同的集群甚至是不同的扩展实现，此时需要独立配置 metadata 或 config-center
+## Recommended Usage in Different Scenarios
+* Configure only the registry, defaulting to serve as the metadata and config-center.
+* Use different clusters or even different extension implementations for the registry, metadata, and config-center, requiring independent configuration for metadata or config-center.
+

@@ -4,9 +4,10 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/user/adapter/
     - /en/overview/reference/pixiu/user/adapter/
     - /en/overview/mannual/dubbo-go-pixiu/user/adapter/
-description: Adapter 介绍
-linkTitle: Adapter 介绍
-title: Adapter 介绍
+description: Introduction to Adapter
+linkTitle: Introduction to Adapter
+title: Introduction to Adapter
 type: docs
 weight: 60
 ---
+

@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/dev/dubbo-pilot/
     - /en/overview/reference/pixiu/dev/dubbo-pilot/
     - /en/overview/mannual/dubbo-go-pixiu/dev/dubbo-pilot/
-description: dubbo-pilot Control Plane 部署
-linkTitle: dubbo-pilot Control Plane 部署
-title: dubbo-pilot Control Plane 部署
+description: dubbo-pilot Control Plane Deployment
+linkTitle: dubbo-pilot Control Plane Deployment
+title: dubbo-pilot Control Plane Deployment
 type: docs
 weight: 2
 ---
@@ -16,33 +16,33 @@ weight: 2
 
 
 
-* [1.总体目标](#target)
-* [2.基本流程](#basic)
-* [3.详细步骤](#detail)
-    + [3.1 环境要求](#env)
-    + [3.2 istio 本地部署](#native_deploy)
-        - [3.2.1 编译](#nbuild)
-        - [3.2.2 部署 & debug](#ndeploy)
-    + [3.3 istio 容器部署](#docker_deploy)
-        - [3.3.1 编译](#dbuild)
-        - [3.3.2 部署 & debug](#ddeploy)
-<h2 id="target">1 总体目标</h2>
+* [1. Overall Goals](#target)
+* [2. Basic Process](#basic)
+* [3. Detailed Steps](#detail)
+    + [3.1 Environment Requirements](#env)
+    + [3.2 Local Deployment of Istio](#native_deploy)
+        - [3.2.1 Compilation](#nbuild)
+        - [3.2.2 Deployment & Debugging](#ndeploy)
+    + [3.3 Container Deployment of Istio](#docker_deploy)
+        - [3.3.1 Image Building](#dbuild)
+        - [3.3.2 Deployment](#ddeploy)
+<h2 id="target">1 Overall Goals</h2>
 
-* 控制面编译和镜像构建
-* 使用 istioctl 在 kubernetes 环境部署
-* 如何对控制面程序 debug
-
-
-
-<h2 id="basic">2 基本流程</h2>
-这个例子将演示如何在编译 dubbo-pilot 控制平面并在 kubernetes 环境下如何使用 istioctl 进行部署
-
-1. 本地启动控制平面，对 dubbo-pilot 进行启动和 debug
-2. 使用 istioctl 在 k8s 环境启动和 debug 
+* Compile the control plane and build images
+* Deploy using istioctl in a Kubernetes environment
+* How to debug the control plane program
 
 
-<h2 id="detail">3 详细步骤</h2>
-<h3 id="env">3.1 环境要求</h3>
+
+<h2 id="basic">2 Basic Process</h2>
+This example will demonstrate how to compile the dubbo-pilot control plane and how to deploy it using istioctl in a Kubernetes environment.
+
+1. Start the control plane locally, and debug dubbo-pilot.
+2. Use istioctl for starting and debugging in the k8s environment.
+
+
+<h2 id="detail">3 Detailed Steps</h2>
+<h3 id="env">3.1 Environment Requirements</h3>
 
 * Golang
 * Docker
@@ -51,10 +51,10 @@ weight: 2
 * Dlv
 
 
-<h3 id="native_deploy">3.2 本地部署</h3>
-<h4 id="nbuild">3.2.1 编译</h4>
+<h3 id="native_deploy">3.2 Local Deployment</h3>
+<h4 id="nbuild">3.2.1 Compilation</h4>
 
-1. 编译 docker-builder
+1. Compile the docker-builder
 ```
 cd dubbo-go-pixiu/tools/docker-builder && go install
 
@@ -84,31 +84,31 @@ Flags:
       --version                show build version
 ```
 
-2. 使用 docker-builder 自动编译 && 构建镜像
+2. Use docker-builder to automatically compile and build the image
 
-编译 istioctl
+Compile istioctl
 ```
 docker-builder --targets istioctl
 
-编译完成：
+Compilation completed:
 
 ls  out/linux_amd64/
 istioctl  logs  pilot-agent  pilot-discovery
 ```
 
-编译 dubbo-pilot 并推送到私有镜像仓库
+Compile dubbo-pilot and push to private image repository
 ```
 tools/docker-builder/docker-builder --targets pilot --hub docker.io/bobtthp --push
 ```
 
 
-<h4 id="ndeploy">3.2.2 本地部署</h4>
+<h4 id="ndeploy">3.2.2 Local Deployment</h4>
 
-本地启动方式：
+Local start method:
 ```
 ./out/linux_amd64/pilot-discovery
 
-启动日志：
+Startup log:
 2022-09-24T15:31:56.751245Z	info	FLAG: --caCertFile=""
 2022-09-24T15:31:56.751277Z	info	FLAG: --clusterAliases="[]"
 2022-09-24T15:31:56.751280Z	info	FLAG: --clusterID="Kubernetes"
@@ -121,13 +121,13 @@ tools/docker-builder/docker-builder --targets pilot --hub docker.io/bobtthp --pu
 2022-09-24T15:31:56.753814Z	info	initializing mesh configuration ./etc/istio/config/mesh
 ```
 
-<h3 id="docker_deploy">3.3 容器部署</h3>
+<h3 id="docker_deploy">3.3 Container Deployment</h3>
 
-<h4 id="dbuild">3.3.1 镜像构建</h4>
+<h4 id="dbuild">3.3.1 Image Building</h4>
 
-构建远程 debug 镜像
+Build remote debug image
 
-1. 下载 dlv
+1. Download dlv
 ```
 git clone https://github.com/go-delve/delve.git
 make install
@@ -136,22 +136,22 @@ which dlv
 /root/go/bin/dlv
 ```
 
-2. Dockerfile 增加dlv dubbo-go-pixiu/pilot/docker/Dockerfile.pilot:
+2. Add dlv to Dockerfile in dubbo-go-pixiu/pilot/docker/Dockerfile.pilot:
 ```
 COPY ${TARGETARCH:-amd64}/dlv /usr/local/bin/dlv
 ```
 
-3. 拷贝 dlv 至镜像挂载目录中：
+3. Copy dlv to the image mount directory:
 ```
 cp /root/go/bin/dlv out/linux_amd64/dockerx_build/build.docker.pilot/amd64/
 ```
 
-4. debug 镜像构建并推送:
+4. Build and push the debug image:
 ```
 docker-builder --targets pilot --hub docker.io/bobtthp --push --tag debug
 ```
 
-5. 本地也可以查看镜像构建情况：
+5. You can also check the image build status locally:
 
 ```
 [root~master-1] /tmp/dubbo-go-pixiu/tools/docker-builder> docker images
@@ -161,14 +161,14 @@ bobtthp/pilot                                                     latest        
 
 
 
-<h4 id="ddeploy">3.3.2 部署</h4>
+<h4 id="ddeploy">3.3.2 Deployment</h4>
 
-1. 使用刚构建的镜像部署:
+1. Deploy using the newly built image:
 ```
 out/linux_amd64/istioctl --set .values.pilot.image=bobtthp/pilot:debug install
 ```
 
-2. 查看部署情况：
+2. Check the deployment status:
 ```
 [root~master] /tmp/dubbo-go-pixiu/tools/docker-builder> kubectl  get po -n istio-system
 NAME                    READY   STATUS    RESTARTS   AGE
@@ -176,13 +176,13 @@ istiod-fd5d9f77-2ncjq   1/1     Running   0          18m
 ```
 
 
-3. 进入容器远程 debug:
+3. Enter the container for remote debugging:
 ```
 [root~master-1] /tmp/dubbo-go-pixiu> kubectl  exec -it -n istio-system istiod-fd5d9f77-2ncjq bash
 kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
 ```
 
-4. 启动 dlv:
+4. Start dlv:
 ```
 istio-proxy@istiod-fd5d9f77-2ncjq:/$ dlv --listen=:8015 --headless=true --api-version=2 --log attach `ps -ef |grep pilot-discovery| awk '{print $2}'`
 2022-11-04T15:43:14Z error layer=debugger could not create config directory: mkdir /home/istio-proxy/.config: read-only file system
@@ -192,7 +192,7 @@ API server listening at: [::]:8015
 ```
 
 
-5. 对外暴露端口：
+5. Expose ports:
 
 ```
 [root~master-1] /tmp> kubectl  port-forward -n istio-system istiod-fd5d9f77-2ncjq 8015:8015
@@ -200,4 +200,5 @@ Forwarding from 127.0.0.1:8015 -> 8015
 Forwarding from [::1]:8015 -> 8015
 ```
 
-6. 可以进行远程调试
+6. Remote debugging is now possible.
+

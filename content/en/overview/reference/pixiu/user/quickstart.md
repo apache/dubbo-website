@@ -4,34 +4,33 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/user/quickstart/
     - /en/overview/reference/pixiu/user/quickstart/
     - /en/overview/mannual/dubbo-go-pixiu/user/quickstart/
-description: 快速开始
-linkTitle: 快速开始
-title: 快速开始
+description: Quick Start
+linkTitle: Quick Start
+title: Quick Start
 type: docs
 weight: 10
 ---
 
 
-让我们从将 HTTP 请求转换为 Dubbo2 请求的案例来快速展示 Pixiu 的能力。
+Let's quickly demonstrate Pixiu's capabilities by converting an HTTP request to a Dubbo2 request.
 
-## 用例
+## Use Case
 
-Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后的 Dubbo Server，然后将 Dubbo Server 的响应转换为 HTTP
-响应，最后返回给 Client。
+Pixiu converts the Client's HTTP request into a Dubbo2 request, which is then forwarded to the Dubbo Server. It then converts the Dubbo Server's response back into an HTTP response, finally returning it to the Client.
 
-### 架构图
+### Architecture Diagram
 
 ![Architecture](/imgs/pixiu/user/quick_start_architecture.png)
 
-### 案例
+### Example
 
-案例路径请查看 `/samples/dubbogo/simple/resolve`
+The example path can be found at `/samples/dubbogo/simple/resolve`.
 
-#### Dubbo Server 实现和启动
+#### Dubbo Server Implementation and Startup
 
-Dubbo Server 提供用户增删改查的相关接口，其具体的代码实现见案例路径下的 `server`
+The Dubbo Server provides interfaces for adding, deleting, modifying, and querying users. The specific code implementations can be found in the `server` directory under the example path.
 
-Dubbo Server 的配置如下所示，注册了 Dubbo2 协议的 interface `com.dubbogo.pixiu.UserService`。
+The configuration of the Dubbo Server is as follows, registering the Dubbo2 protocol interface `com.dubbogo.pixiu.UserService`.
 
 ```yaml
 dubbo:
@@ -55,13 +54,11 @@ dubbo:
         interface: com.dubbogo.pixiu.UserService
 ```
 
-#### Pixiu 配置和启动
+#### Pixiu Configuration and Startup
 
-为了用例的场景，Pixiu 需要启动对应的 HTTP Listener 进行 HTTP 请求的监听，所以就会使用到 `httpconnectionmanager`。
-然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 `dgp.filter.http.dubboproxy`，这里我们将其`auto_resolve` 设置为true，表示开启
-HTTP to Dubbo 默认转换协议(具体定义请看[附录](../appendix/http-to-dubbo-default-stragety))。
+For the scenario of the use case, Pixiu needs to start the corresponding HTTP Listener to monitor HTTP requests, which will utilize `httpconnectionmanager`. Then, as it needs to convert HTTP requests into Dubbo requests, it requires `dgp.filter.http.dubboproxy`, where we set `auto_resolve` to true to enable the default HTTP to Dubbo conversion protocol (specific definitions can be found in the [Appendix](../appendix/http-to-dubbo-default-stragety)).
 
-Pixiu 的具体配置如下所示
+The specific configuration for Pixiu is as follows:
 
 ```
 static_resources:
@@ -94,10 +91,9 @@ static_resources:
                             password: ""
 ```
 
-#### Client 实现
+#### Client Implementation
 
-Client 就是简单的 HTTP Client 实现，但是需要按照前文提及的 HTTP to Dubbo 默认转换协议在 HTTP 请求的 Path 和 Header
-中填入对应的数据，具体如下所示。
+The Client is a simple HTTP Client implementation but needs to populate corresponding data in the HTTP request's Path and Header according to the aforementioned HTTP to Dubbo default conversion protocol, as shown below.
 
 ```
 	url := "http://localhost:8883/UserService/com.dubbogo.pixiu.UserService/GetUserByName"
@@ -114,37 +110,37 @@ Client 就是简单的 HTTP Client 实现，但是需要按照前文提及的 HT
 	resp, err := client.Do(req)
 ```
 
-#### 案例启动
+#### Example Start
 
-项目提供了快速启动脚本，需要本地先安装有 Go 语言开发环境。
+The project provides a quick start script, and the Go development environment should be installed locally.
 
 ```
-# cd 到案例总目录
+# cd to the main example directory
 cd samples/dubbogo/simple/
 
-# 进行环境准备，启动 zk 和准备对应配置文件
+# Prepare the environment, start zk, and prepare the corresponding configuration files
 ./start.sh prepare resolve
 
-# 启动 dubbo server
+# Start the dubbo server
 ./start.sh startServer resolve
 
-# 启动 pixiu 
+# Start Pixiu 
 
 ./start.sh startPixiu resolve
 
-# 启动 Client 测试用例
+# Start Client test case
 
 ./start.sh startTest resolve
 
-# 或者使用 curl 
+# Or use curl 
 
 curl -X POST 'http://localhost:8883/UserService/com.dubbogo.pixiu.UserService/GetUserByName' -d '{"types":"string","values":"tc"}' -H 'Content-Type: application/json' -H 'x-dubbo-http1.1-dubbo-version: 1.0.0' -H 'x-dubbo-service-protocol: dubbo' -H 'x-dubbo-service-version: 1.0.0' -H 'x-dubbo-service-group: test'
 
-# 返回值 {"age":15,"code":1,"iD":"0001","name":"tc","time":"2021-08-01T18:08:41+08:00"}
+# Response {"age":15,"code":1,"iD":"0001","name":"tc","time":"2021-08-01T18:08:41+08:00"}
 
 ```
 
-#### docker示例
+#### Docker Example
 
 ```shell
 docker pull phial3/dubbo-go-pixiu:latest
@@ -154,17 +150,17 @@ docker run --name pixiuname -p 8883:8883 \
     -v /yourpath/log.yml:/etc/pixiu/log.yml \
     apache/dubbo-go-pixiu:latest
 
-# http请求调用dubbo服务转换,首先启动provider，这里使用zookeeper作为注册中心
+# Start provider that uses zookeeper as the registration center first
 cd samples/dubbogo/simple/resolve/server
 
-# 添加需要的环境变量，指定provider的配置文件位置
+# Add required environment variables, specifying the location of the provider's configuration file
 export DUBBO_GO_CONFIG_PATH="../profiles/dev/server.yml"
 export APP_LOG_CONF_FILE="../profiles/dev/log.yml"
 
-# 启动provider
+# Start provider
 go run server.go user.go
 
-# 进入到test目录下，启动test示例
+# Go to the test directory and start the test example
 cd samples/dubbogo/simple/resolve/test
 
 go test  pixiu_test.go

@@ -1,35 +1,33 @@
 ---
 aliases:
     - /en/overview/reference/proposals/support-more-content-type/
-author: 武钰皓
+author: Wu Yuhao
 description: |
-    本文主要介绍Triple对更多Http标准Content-Type的支持方式，以及服务该如何接收这些请求。
-title: Triple协议Http标准能力增强-多Content-Type支持
+    This article mainly introduces how Triple supports more standard HTTP Content-Types and how services should handle these requests.
+title: Enhanced HTTP Standard Capabilities of Triple - Multi Content-Type Support
 type: docs
 working_in_progress: true
 ---
 
-### **Triple协议Http标准能力增强-多Content-Type支持**
-> 本文主要介绍Triple对更多HTTP标准Content-Type的支持方式，以及服务该如何接收这些请求。
-#### **概述**
+### **Enhanced HTTP Standard Capabilities of Triple - Multi Content-Type Support**
+> This article mainly introduces how Triple supports more standard HTTP Content-Types and how services should handle these requests.
+#### **Overview**
 
-Triple目前支持两种序列化方式：Json和protobuf，对应的ContentType：
+Triple currently supports two serialization methods: Json and protobuf, corresponding to the ContentTypes:
 
 * application/json
 * application/grpc+proto
 
-这在消费者和提供者都是后端服务时没有问题。但对于浏览器客户端，其可能发送更多类型的ContentType，需要服务端支持解码，如：
+This poses no problem when both consumers and providers are backend services. However, for browser clients, they may send more types of ContentTypes that the server needs to support for decoding, such as:
 
 * multipart/formdata
 * text/plain
 * application/x-www-form-urlencoded
 * application/xml
 
-Rest已基本实现上述解码能力，使Triple实现这些能力是让Triple服务端与浏览器客户端完全互通的重要一步。
+Rest has basically implemented the above decoding capabilities, making it an important step for Triple to achieve complete interoperability between Triple servers and browser clients.
 
-
-
-#### **用法**
+#### **Usage**
 
 ##### **multipart/formdata**
 
@@ -59,7 +57,7 @@ Content-Type: image/jpeg
 --example-part-boundary--
 ```
 
-接收：
+Receiving:
 
 ```java
     @Override
@@ -74,11 +72,9 @@ Content-Type: image/jpeg
     }
 ```
 
-* 每一个 part 根据其 Content-Type 解码
-* 若方法参数是 byte[] 或 Byte[]，对应字段不会解码
-* 响应使用 application/json 编码
-
-
+* Each part is decoded based on its Content-Type.
+* If the method parameter is byte[] or Byte[], the corresponding field will not be decoded.
+* The response is encoded using application/json.
 
 ##### application/x-www-form-urlencoded
 
@@ -91,7 +87,7 @@ Accept: application/json
 Hello=World&Apache=Dubbo&id=10086
 ```
 
-两种接收方式：
+Two receiving methods:
 
 ```java
     public ServerResponse greetUrlForm(String hello,String apache,long id){
@@ -111,11 +107,9 @@ Hello=World&Apache=Dubbo&id=10086
     }
 ```
 
-* 若参数为Map，则解码为Map<String,String>传入
-* 若参数均为String或数值类型，按照参数列表逐个解码传入
-* 响应使用 application/json 编码
-
-
+* If the parameter is a Map, it is decoded as Map<String,String>.
+* If the parameters are all String or numeric types, they are decoded one by one according to the parameter list.
+* The response is encoded using application/json.
 
 ##### text/plain
 
@@ -128,7 +122,7 @@ Accept: application/json
 World!
 ```
 
-接收：
+Receiving:
 
 ```java
     public ServerResponse greetUrlForm(String world){
@@ -137,10 +131,8 @@ World!
     }
 ```
 
-* charset支持ASCII、UTF-8、UTF-16等，默认UTF-8
-* 响应使用 application/json 编码
-
-
+* Charset supports ASCII, UTF-8, UTF-16, etc., defaulting to UTF-8.
+* The response is encoded using application/json.
 
 ##### application/xml
 
@@ -157,7 +149,7 @@ Accept: application/xml
 </User>
 ```
 
-接收：
+Receiving:
 
 ```java
     @Override
@@ -168,5 +160,6 @@ Accept: application/xml
     }
 ```
 
-* 该实现与Rest的XMLCodec相同
-* 响应使用 application/xml 编码
+* This implementation is the same as Rest's XMLCodec.
+* The response is encoded using application/xml.
+

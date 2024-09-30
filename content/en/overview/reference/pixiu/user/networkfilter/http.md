@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/dubbo-go-pixiu/user/networkfilter/http/
     - /en/overview/reference/pixiu/user/networkfilter/http/
     - /en/overview/mannual/dubbo-go-pixiu/user/networkfilter/http/
-description: Http NetWorkFilter 介绍
-linkTitle: Http NetWorkFilter 介绍
-title: Http NetWorkFilter 介绍
+description: Introduction to Http NetWorkFilter
+linkTitle: Introduction to Http NetWorkFilter
+title: Introduction to Http NetWorkFilter
 type: docs
 weight: 10
 ---
@@ -14,6 +14,5 @@ weight: 10
 
 
 
+Http NetWorkFilter is used to handle HTTP requests. It can receive HTTP requests passed from the HTTP Listener, then process them through the HTTP Filter chain it maintains, and finally return the response to the caller.
 
-
-Http NetWorkFilter 用来处理 HTTP 请求，它能接收来自 HTTP Listener 传递的 HTTP 请求，然后将其交给自身维护的 HTTP Filter 链进行处理，最后将响应返回给调用方。

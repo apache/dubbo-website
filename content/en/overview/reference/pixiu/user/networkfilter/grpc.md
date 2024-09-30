@@ -2,18 +2,18 @@
 aliases:
   - /en/docs3-v2/dubbo-go-pixiu/user/networkfilter/grpc/
   - /en/docs3-v2/dubbo-go-pixiu/user/networkfilter/grpc/
-description: Grpc NetWorkFilter 介绍
-linkTitle: Grpc NetWorkFilter 介绍
-title: Grpc NetWorkFilter 介绍
+description: Introduction to Grpc NetWorkFilter
+linkTitle: Introduction to Grpc NetWorkFilter
+title: Introduction to Grpc NetWorkFilter
 type: docs
 weight: 20
 ---
 
-# 使用 grpc 调用服务提供程序
+# Using grpc to Call Service Providers
 
-> [下面的文档符合代码](https://github.com/apache/dubbo-go-pixiu-samples/blob/main/http/grpc/pixiu/conf.yaml)
+> [The following documentation conforms to the code](https://github.com/apache/dubbo-go-pixiu-samples/blob/main/http/grpc/pixiu/conf.yaml)
 
-## 定义Pixiu配置文件
+## Define Pixiu Configuration File
 
 ```yaml
 static_resources:
@@ -64,11 +64,11 @@ static_resources:
     reject_policy: "immediacy"
 ```
 
-> Grpc 服务器在“集群”中定义
+> The Grpc server is defined in the “cluster”
 
-> 目前 http 请求仅支持 json body 解析参数
+> Currently, HTTP requests only support JSON body parsing parameters.
 
-## 准备服务器
+## Prepare the Server
 
 [generate pb files under with command:](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/http/grpc/proto) 
 
@@ -76,7 +76,7 @@ static_resources:
 protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative hello_grpc.proto
 ```
 
-## 启动 Server
+## Start the Server
 
 [Run](https://github.com/apache/dubbo-go-pixiu-samples/blob/main/http/grpc/server/app/server.go) 
 
@@ -84,15 +84,15 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 go run server.go
 ```
 
-## 启动 Pixiu
+## Start Pixiu
 
 ```shell
 ./dubbo-go-pixiu gateway start --config {CURRENT_PATH}/samples/http/grpc/pixiu/conf.yaml
 ```
 
-## 使用 curl 进行测试
+## Test Using Curl
 
-使用以下命令运行命令 curl：
+Run the curl command with the following:
 
 ```shell
 curl http://127.0.0.1:8881/api/v1/provider.UserProvider/GetUser
@@ -102,4 +102,5 @@ curl http://127.0.0.1:8881/api/v1/provider.UserProvider/GetUser
 curl http://127.0.0.1:8881/api/v1/provider.UserProvider/GetUser -X POST -d '{"userId":1}'
 ```
 
-> 如果响应正文是 json，则`Content-Type`的标头将设置为`application/json`。如果它只是一个纯文本，则`Content-Type`的标题是`text/plain`。
+> If the response body is JSON, the `Content-Type` header will be set to `application/json`. If it is just plain text, the `Content-Type` header is `text/plain`.
+
