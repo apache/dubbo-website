@@ -1,91 +1,92 @@
 ---
-title: "Advanced cloud native - Dubbo 3.2 officially released"
-linkTitle: "Advanced cloud native - Dubbo 3.2 officially released"
+title: "Advancing Cloud Native - Dubbo 3.2 Official Release"
+linkTitle: "Advancing Cloud Native - Dubbo 3.2 Official Release"
 date: 2023-04-15
+tags: ["News"]
 description: >
-  We are very happy to announce that Dubbo 3.2 has been officially released! This version brings many new features and improvements, which is also an important attempt of Dubbo in the face of cloud nativeization.
+  We are very pleased to announce that Dubbo 3.2 is officially released! This version brings many new features and improvements, marking an important attempt by Dubbo in the face of cloud-native transformation.
 ---
 
-## Background introduction
+## Background Introduction
 
-Apache Dubbo is an RPC service development framework, which is used to solve service governance and communication problems under the microservice architecture. It officially provides multi-language SDK implementations such as Java and Golang. The microservices developed using Dubbo are natively capable of remote address discovery and communication with each other. Using the rich service governance features provided by Dubbo, service governance demands such as service discovery, load balancing, and traffic scheduling can be realized. Dubbo is designed to be highly scalable, and users can easily implement various custom logics for traffic interception and location selection.
+Apache Dubbo is an RPC service development framework designed to solve service governance and communication issues in microservice architectures, with official SDK implementations in Java, Golang, and other languages. Microservices developed with Dubbo possess inherent capabilities for remote address discovery and communication, leveraging Dubbo's rich service governance features to fulfill service governance needs such as service discovery, load balancing, and traffic management. Dubbo is designed to be highly extensible, allowing users to easily implement various custom logic for traffic interception and location selection.
 
-## Rest protocol support
+## Rest Protocol Support
 
 ### 1. Why Rest?
 
-With the popularization of mobile Internet, more and more applications need to be integrated with different systems. And these systems may use different communication protocols, which requires the application program to be able to flexibly adapt to various protocols. The Rest protocol is a very flexible protocol that communicates using HTTP and can be integrated with almost any system.
+With the proliferation of mobile internet, more applications require integration with diverse systems. These systems may use different communication protocols, necessitating flexibility in application protocol adaptation. The Rest protocol is a very flexible protocol that communicates via HTTP, enabling integration with almost any system.
 
-In the past, RPC frameworks typically communicated using a binary protocol, which was very efficient but not flexible enough. In contrast, the Rest protocol uses HTTP for communication, which is more convenient to integrate with other systems, and also easier to integrate with modern web and mobile applications.
+In the past, RPC frameworks typically used binary protocols for communication, which were efficient but not flexible enough. In contrast, the Rest protocol facilitates easier integration with other systems, making it more compatible with modern web and mobile applications.
 
-Besides flexibility, the Rest protocol is also readable and easy to use. Using the Rest protocol, developers can test and debug services using common HTTP tools such as cURL or Postman, without the need for specific tools. Also, since the REST protocol uses standard HTTP methods such as GET, POST, PUT, and DELETE, it becomes easier for developers to understand and use the service.
+In addition to flexibility, the Rest protocol is also readable and easy to use. Developers can test and debug services with universal HTTP tools (such as cURL or Postman) without requiring specific tools. Furthermore, standard HTTP methods (such as GET, POST, PUT, and DELETE) make it easier for developers to understand and use services.
 
 ### 2. How To?
 
-In previous Dubbo versions, Rest protocol support was also provided, but there were the following problems:
+In previous versions of Dubbo, Rest protocol support was provided but had the following issues:
 
-- Only supports JAX-RS annotation fields, which is more complex than the more widely adopted Spring Web annotations
+- Only supported JAX-RS annotation domain, which is more complex compared to the more widely adopted Spring Web annotations.
+  
+- Required reliance on numerous external components, such as Resteasy, Tomcat, Jetty, etc., to function properly, significantly increasing usage costs.
 
-- It needs to rely on many external components, such as Resteasy, tomcat, jetty, etc., to work normally, which greatly increases the cost of use.
+Thus, in Dubbo 3.2, we introduced support for Spring Web annotations and native Rest protocol support without the need for any external components.
 
-Therefore, in Dubbo version 3.2, we introduced the support of Spring Web annotation domain and the native support of Rest protocol without relying on any external components.
+The most intuitive difference is that if you upgrade to Dubbo 3.2, services published through Spring Web can also be directly published via Dubbo. All you need to do is change the @Controller annotation to @DubboService.
 
-The most intuitive difference is that if you upgrade to Dubbo 3.2, services published through Spring Web can also be published directly through Dubbo. All you need to do is change the @Controller annotation to @DubboService annotation.
-
-In addition, for users who originally used Spring Boot or Spring Cloud as a service split, they can also migrate smoothly to Dubbo based on this function, and obtain the powerful capabilities of Dubbo at a very low cost.
+Additionally, users who previously utilized Spring Boot or Spring Cloud for service division can smoothly migrate to Dubbo based on this feature, gaining Dubbo's powerful capabilities at a minimal cost.
 
 ### 3. What's next?
 
-In the future, Dubbo will continue to improve. In addition to the existing features, we will also add the following new features to better meet the needs:
+Dubbo will continue to improve. In addition to existing features, we will introduce the following new features to better meet demands:
 
-1. Native support for HTTP/2 and HTTP/3 protocols. This means that you can use Dubbo to communicate with other systems more easily without worrying about protocol compatibility.
+1. Native support for HTTP/2 and HTTP/3 protocols. This means you can more conveniently use Dubbo to communicate with other systems without worrying about protocol compatibility issues.
 
-2. Referring to Spring Web annotations, Dubbo natively provides support for Web annotations, so that users can get the same experience as using Spring Web without relying on Spring Web.
+2. Inspired by Spring Web annotations, Dubbo natively provides Web annotation support, allowing users to obtain the same experience as using Spring Web without relying on it.
 
-3. Support zero transformation of existing services and publish them with the Rest protocol. This feature allows you to manage your services more flexibly without making any changes to existing services. You can publish your services through the Rest protocol, so that your services can be used by other systems more easily.
+3. Support for releasing existing services over the Rest protocol with zero modifications. This feature allows you to manage your services more flexibly without altering existing services.
 
-## Observable system
+## Observability System
 
-Under the microservice architecture, the business system is composed of more and more services, and the services call each other. The ensuing problem is how to quickly locate the fault and solve it in time. In order to solve this problem, we need more tools and techniques to ensure the reliability of the whole system. One of the solutions is to use logging and analytics so that you can better track how your application is doing, find potential problems and fix them in a timely manner. In addition, using visual monitoring tools can help us better understand the status of the entire system, so as to better predict and solve problems. Finally, we can also use automated testing to ensure the quality of each service, as well as the stability and reliability of the entire system, so as to better meet customer needs.
+In a microservice architecture, business systems consist of increasingly numerous services calling each other, leading to challenges in quickly locating and resolving faults. To address this, we need more tools and technologies to ensure the reliability of the entire system. One solution is to utilize logging and analysis for better tracking of application performance, identifying potential problems, and resolving them in a timely manner. Additionally, visual monitoring tools can help us understand the overall system status better, making it easier to predict and solve problems. Finally, we can employ automated testing to ensure the quality of each service and the stability and reliability of the entire system, better meeting customer needs.
 
-A complete observable system should include the following functions:
+A complete observability system should encompass the following functionalities:
 
-- Metrics indicator monitoring, used to collect and analyze various indicator data, including system performance, resource consumption, etc. Through indicator monitoring, users can keep abreast of the operation of the system, find abnormalities and take corresponding measures.
+- Metrics monitoring to collect and analyze various metrics data, including system performance and resource consumption. Through metrics monitoring, users can promptly learn about the system's operation status and address anomalies as needed.
 
-- Tracing Distributed tracing, used to trace the call links between various services in the system, to help users discover and locate potential performance problems, bottlenecks, etc. Through distributed tracing, users can deeply understand the operation process of the system, identify possible problems and make effective optimization and adjustment.
+- Tracing for distributed tracking of the invocation chains between services, helping users identify and locate potential performance issues and bottlenecks. Distributed tracing allows users to gain in-depth insights into the system's operational processes to identify possible issues and optimize them effectively.
 
-- Logging log management, used to record various events and operations in the system, including error logs, access logs, transaction logs, etc. Through log management, users can learn about the running status of the system, fault information, etc., and help users quickly locate problems and handle them accordingly.
+- Logging for managing various events and operations occurring within the system, including error logs, access logs, transaction logs, etc. Through log management, users can understand system operation, fault information, etc., helping them quickly locate and address issues.
 
-To sum up, the above three functions can not only help users quickly locate faults, improve system reliability and stability, but also help users deeply understand the operation and performance of the system, and provide users with comprehensive monitoring and protection.
+In summary, these three functionalities not only help users quickly pinpoint faults, improving system reliability and stability but also provide in-depth insights into system operation and performance, offering comprehensive monitoring and assurance.
 
-In Dubbo version 3.2, we mainly enhanced Metrics and Tracing.
+In Dubbo 3.2, we primarily enhanced Metrics and Tracing aspects.
 
 ### 1. Metrics
 
-In terms of metrics, we use Micrometer to greatly increase the buried points of indicators, including but not limited to core service indicators such as QPS, RT, total number of calls, number of successes, number of failures, and failure reason statistics. In order to better monitor the running status of services, Dubbo also provides monitoring of the status of core components, such as the number of thread pools, service health status, etc. In addition, Dubbo also supports the standard Prometheus Pull and Push modes, and provides several official native Grafana panels to achieve production-oriented Metrics all-weather observation.
+On the Metrics front, we significantly increased the metrics endpoints using Micrometer, including but not limited to QPS, RT, total calls, successful counts, failure counts, and failure reason statistics for core service metrics. To better monitor service operational status, Dubbo also provides monitoring of core component statuses, such as thread pool counts and service health statuses. Furthermore, Dubbo supports standard Prometheus Pull and Push modes and offers several official native Grafana panels for production-level Metrics 24/7 monitoring.
 
 ![img](/imgs/blog/32-release/Untitled.png)
 
-
 ![Untitled](/imgs/blog/32-release/Untitled%201.png)
 
-For all users, only need to upgrade to Dubbo 3.2 version and add dubbo-spring-boot-observability-starter dependency to get Metrics capability. After the application starts, relevant indicators will be exposed under the metrics command of Dubbo QoS, which can be obtained locally through `http://127.0.0.1:22222/metrics`. In addition, for users who use Spring Actuator, Dubbo will also expose these data by default.
+For all users, simply upgrading to Dubbo 3.2 and adding the dubbo-spring-boot-observability-starter dependency will provide Metrics capabilities. After the application starts, relevant metrics will be exposed under the Dubbo QoS metrics command, and can be accessed locally via `http://127.0.0.1:22222/metrics`. Additionally, for users utilizing Spring Actuator, Dubbo will also expose this data by default.
 
-### Tracing
+### 2. Tracing
 
-In terms of Tracing, we also implemented tracking of buried points during request runtime based on Micrometer. We implement this function natively through the Filter interceptor. We support exporting trace data to some mainstream implementations, such as Zipkin, Skywalking, Jaeger, etc. In this way, the analysis and visual display of the full link tracking data can be realized.
+In terms of Tracing, we also realized request runtime tracing based on Micrometer. We implemented this functionality via the Filter interceptor natively. We support exporting tracing data to mainstream implementations like Zipkin, Skywalking, Jaeger, etc. This enables analysis and visual display of end-to-end tracing data.
 
 ![Untitled](/imgs/blog/32-release/Untitled%202.png)
 
-### Logging
+### 3. Logging
 
-In addition, for Logging, Dubbo has introduced an error code mechanism since version 3.1, realizing full coverage of WARN and ERROR level logs. In abnormal scenarios, it supports quick indexing of official website resolution documents.
+Furthermore, regarding Logging, Dubbo introduced an error code mechanism starting from version 3.1, achieving complete coverage of WARN and ERROR level logs. In abnormal scenarios, it supports fast indexing to official documentation for solutions.
 
-## Native Image native support
+## Native Image Support
 
-In terms of Native Image, Dubbo will officially support Native Image based on GraalVM starting from 3.2. Starting from Dubbo3.0, Dubbo has already explored some Native Image support, but the ease of use and support are not ideal. From 3.2 Starting from version 1, Dubbo will simplify the way users access Native Image. It can be mainly divided into three aspects:
+In the aspect of Native Image, Dubbo will officially support Native Images based on GraalVM starting from version 3.2. Since Dubbo 3.0, there has been some exploration into Native Image support; however, usability and support levels were not ideal. From version 3.2 onwards, Dubbo will simplify user access to Native Image. This can be divided into three main areas:
 
-1. Compile plugin configuration upgrade: from the original native-image-maven-plugin to dubbo-maven-plugin +native-maven-plugin, which distinguishes the native image configuration officially provided by Graalvm from the native image configuration required by Dubbo, simplifying The native image configuration that users need to care about
+1. Plugin configuration upgrade: The previous `native-image-maven-plugin` is replaced with `dubbo-maven-plugin + native-maven-plugin`, distinguishing GraalVM's native image configurations from Dubbo's requirements, simplifying the native image configurations users need to focus on.
+
 ```xml
 <plugin>
 	<groupId>org.graalvm.nativeimage</groupId>
@@ -139,7 +140,7 @@ In terms of Native Image, Dubbo will officially support Native Image based on Gr
 </plugin>
 ```
 
-becomes：
+Changed to:
 
 ```xml
 <plugin>
@@ -173,58 +174,58 @@ becomes：
 </plugin>
 ```
 
-1. In the old version, users were required to manually generate and complete the unique Adaptive code in Dubbo. Users of the new version do not need to care about these details.
-2. The configuration file under META-INF.native-image generated by the Dubbo framework in the old version will be directly generated in the user's project directory, and the new version 3.2 will be compiled into the target without affecting the user's project structure. In addition, the Dubbo framework will no longer use the method of manually completing the native image, but will automatically detect and generate the required configuration files, which simplifies the experience of Dubbo developers. This can also reduce the size of the final compiled binary package and improve compilation speed.
+1. In older versions, users needed to manually generate and complete unique Adaptive code for Dubbo; in the new version, users won't need to worry about those details.
+2. In older versions, configuration files generated under `META-INF.native-image` by the Dubbo framework were directly created in users' project directories, while in the 3.2 new version, they will be compiled into the target directory, not affecting the user's project structure. Besides, the Dubbo framework will no longer adopt a manual completion method for native image, but instead use automated detection and generation of required configuration files, simplifying the developer experience. This can also reduce the size of the final compiled binary package and improve compilation speed.
 
-In addition to improving ease of use, Dubbo will support API, annotations, and XML configuration methods in native image scenarios in version 3.2, and support compatibility with native in SpringBoot3.
+In addition to usability improvements, Dubbo in version 3.2 will support API, annotation, and XML configuration methods under the native image scenario, and will be compatible with native configurations in Spring Boot 3.
 
-## other
+## Others
 
-### JDK 17 & Spring Boot 3 native support
+### JDK 17 & Spring Boot 3 Native Support
 
-JDK 17 is the latest LTS version of Java after JDK 11, including many new features and improvements, such as Sealed classes, garbage collector improvements, and more.
+JDK 17 is the latest LTS version of Java after JDK 11, featuring many new functionalities and improvements, such as Sealed classes, garbage collector enhancements, etc.
 
-Since JDK 16 began to restrict Java internal class reflection, Dubbo's serialization and dynamic proxy have been affected to a certain extent. In Dubbo 3.2, we solved the compatibility problem from the bottom through the optimization of Fastjson2 and Javassist. At present, Dubbo can run perfectly on JDK17, and all unit tests and most integration tests have also been tested on the JDK 17 platform.
+Since JDK 16 began restricting reflection on Java internal classes, Dubbo's serialization and dynamic proxy have been affected. In Dubbo 3.2, we resolved these compatibility issues at the underlying level through optimizations using Fastjson2 and Javassist. Currently, Dubbo can run perfectly on JDK 17, and all unit tests as well as most integration tests have passed on the JDK 17 platform.
 
-For the upcoming JDK 21 LTS, Dubbo is intensively adapting it. We will add support for JDK 21 and Dubbo coroutines (Project Loom) in version 3.3.
+In preparation for the upcoming JDK 21 LTS, Dubbo is actively adapting. We will add support for JDK 21 and Dubbo coroutines (Project Loom) in version 3.3.
 
-### RPC performance greatly improved
+### RPC Performance Improvements
 
-In version 3.2, we have optimized the performance of RPC calls, and the optimized content is as follows.
+In version 3.2, we optimized RPC invocation performance, with the following optimizations:
 
-- Eliminates synchronization lock contention and blocking code (`triple`)
-    1. When creating an HTTP/2 Stream Channel in version 3.1, the method of synchronously blocking user threads is used to wait for the Stream Channel to be created, and the remote call is initiated after the creation is completed. In 3.2, we will create the behavior of HTTP/2 Stream Channel `asynchronous` and ensure that the request is initiated after the creation is completed, so as to `reduce unnecessary waiting for user threads`.
-    2. In version 3.1, there is a synchronization lock competition between the user thread and the Netty I/O thread. The IO thread will check the Socket availability for each write request, and the Socket availability check method is also used in the user thread, but the Socket availability in the JDK The implementation of the check uses `synchronized` to ensure concurrency safety. In order to reduce this part of the time-consuming, we remove the user thread check and eliminate this part of the time-consuming.
-- Reduced request response delay with synchronous blocking calls (`dubbo`, `triple`)
+- Eliminated synchronized lock contention and blocking code (`triple`)
+1. In version 3.1, creating an HTTP/2 Stream Channel involved synchronously blocking user threads to wait for Stream Channel creation completion. In 3.2, we made stream channel creation `asynchronous` and ensured requests were initiated only after they were created, reducing unnecessary `waiting` by user threads.
+2. In version 3.1, user threads experienced synchronized lock contention with Netty's I/O threads. The I/O thread checked socket availability on every write request, and user threads utilized socket availability checks, too. However, the JDK's socket availability check implementation used `synchronized` to ensure concurrency safety, which we eliminated in user-thread checks to reduce overhead.
 
-  In the RPC call in SYNC mode in version 3.1, we use a blocking queue to wait for the response written back by the remote service. When the response is written back, it will be added to the queue and wake up the blocked user thread. In 3.2, we replaced the blocking queue with a concurrent queue, and used its CAS mechanism to greatly reduce the number of threads entering blocking, improve CPU utilization and reduce response processing delay
+- Reduced request-response latency caused by synchronous blocking calls (`dubbo`, `triple`)
+
+In version 3.1, when using SYNC mode for RPC invocation, we employed a blocking queue to wait for the response from the remote service. Upon the response's return, it would be added to the queue, waking the blocked user threads. In 3.2, we replaced blocking queues with concurrent queues, significantly reducing threads entering into blocking states by leveraging CAS mechanism, increasing CPU utilization, and reducing response processing latency.
 
 - Reduced the number of thread switches (`triple`)
 
-  In version 3.1, the RPC call in SYNC mode uses a consumer thread pool for processing when receiving the response, and wakes up the user thread to receive the response after the processing is completed. However, through the analysis of the consumer thread pool in SYNC mode is unnecessary, an additional layer of consumer thread pool processing not only wastes server resources but also reduces performance, so we removed the consumer thread pool in SYNC mode in version 3.2 , the interaction model changed from `NettyEventLoop → ConsumerThread → UserThread` to `NettyEventLoop → UserThread`, so as to reduce the waste of server resources and improve performance
+In version 3.1, SYNC mode RPC calls used a consumer thread pool for processing responses, which would wake the user thread after completion. However, analysis revealed that a consumer thread pool isn't necessary in SYNC mode. The overhead of an extra layer of consumer thread handling not only wasted server resources but also degraded performance. Therefore, we removed the consumer thread pool in version 3.2, reorganizing interaction from `NettyEventLoop → ConsumerThread → UserThread` to `NettyEventLoop → UserThread`, minimizing resource wastage and improving performance.
 
 - Optimized I/O performance (`dubbo`, `triple`)
 
-  In version 3.1, we used the Netty framework to achieve network communication, but every time we wrote a message to the peer, we directly flashed it to the peer, resulting in a very high number of system calls and reducing the communication performance. For this reason, we have optimized it in version 3.2. Every time a message is sent, the message is first submitted to a write queue, and multiple messages are written out at the right time, thereby improving I/O Utilization rate greatly improves RPC communication performance.
+In version 3.1, we utilized the Netty framework for network communication, but each message sent to the counterpart triggered a direct flush, increasing system call frequencies and diminishing communication performance. In version 3.2, we optimized this by submitting messages to a write queue and, at suitable moments, writing multiple messages at once, enhancing I/O utilization and vastly improving RPC communication performance.
 
-- Support serialization of messages on user threads (`dubbo`, `triple`)
+- Enabled message serialization on user threads (`dubbo`, `triple`)
 
-  In version 3.1, the deserialization of messages in RPC communication is performed in a single I/O thread, which makes it impossible to take advantage of the advantages of multi-core CPUs. For this reason, in version 3.2, we support time-consuming tasks such as deserialization on user threads, and evenly distribute the pressure of I/O threads to multiple CPU cores, thereby improving the performance of large packets. `Scenario RPC performance.
+In version 3.1, message deserialization in RPC communication was executed serially within a single I/O thread, failing to harness multi-core CPU advantages. Consequently, version 3.2 supports executing deserialization tasks on user threads to distribute pressure among I/O threads across multiple CPU cores, thereby improving RPC performance in scenarios involving `large messages`.
 
+The performance improvements in version 3.2 compared to 3.1 are as follows:
 
-The performance improvement of 3.2 compared with 3.1 is as follows:
+For the Triple protocol: In smaller message scenarios like createUser, existUser, and getUser, the enhancement rate is approximately `40-45%`, with post-improvement performance roughly matching gRPC's performance in the same context. For larger message scenarios like listUser, there’s an improvement of about `17%`, which is `11%` lower compared to gRPC in the same context.
 
-Triple protocol: In the scenarios of createUser, existUser, and getUser with small packets, the improvement rate is about `40-45%`, and the improved performance is basically the same as that of gRPC in the same scenario. The increase of about `17%` in the large message scenario listUser, compared to `11%` lower than that of gRPC in the same scenario.
-
-Dubbo protocol: The improvement rate is about `180%` in the case of createUser and getUser in small message scenarios. The improvement rate of the very small message existUser (only one boolean value) is about `24%`, while the improvement rate of the larger message listUser is the highest, reaching `1000%`!
+For the Dubbo protocol: In smaller message scenarios such as createUser and getUser, the improvement rate reaches around `180%`. In extremely small message scenarios like existUser (with just a boolean value), there's an enhancement of approximately `24%`, while in larger message scenarios (listUser), the performance increased maximally to `1000%`!
 
 ![Untitled](/imgs/blog/32-release/Untitled%203.png)
 
 ![Untitled](/imgs/blog/32-release/Untitled%204.png)
 
-## How to upgrade to Dubbo 3.2
+## How to Upgrade to Dubbo 3.2
 
-### Pom upgrade
+### Pom Upgrade
 
 The latest Dubbo Maven coordinates are:
 
@@ -238,25 +239,25 @@ The latest Dubbo Maven coordinates are:
 
 ### Compatibility
 
-For the vast majority of users, upgrading to Dubbo 3.2.0 is completely smooth, and only needs to modify the version of the dependent package.
+For the vast majority of users, upgrading to Dubbo 3.2.0 is completely smooth, requiring only version modifications of the dependency packages.
 
-1. Enhancement of serialization verification logic (**important**)
+1. Enhanced serialization verification logic (**Important**)
 
-   As mentioned above, in Dubbo 3.2.0 version, Dubbo will enable the strong verification of the serialization whitelist by default to improve the security of Dubbo and avoid the problem of remote command execution. The current mechanism automatically trusts some classes through the package name recursive mechanism, but for some users who use generics and may have incomplete scanning, we recommend that you upgrade to Dubbo 3.1.9 or add `-Ddubbo.application.serialize- check-status=WARN` configuration. After observing for a period of time (via logs and QoS commands), if no security alarm is triggered, you can configure the strong check mode.
+   As mentioned earlier, in Dubbo 3.2.0, serialization whitelist strong validation will be enabled by default to enhance Dubbo's security and prevent remote command execution issues. The existing mechanism automatically trusts some classes through package name recursion, but for users using generics or those who may have incomplete scans, we recommend upgrading to Dubbo 3.1.9 or adding the `-Ddubbo.application.serialize-check-status=WARN` configuration. After monitoring for a period (using logs, QoS commands), if no security alerts are triggered, you may configure the strong validation mode.
 
-   For the configuration of custom whitelist, please refer to `Documentation/SDK Manual/Java SDK/Advanced Features and Usage/Improve Security/Class Inspection Mechanism` on the official website for configuration.
+   For configuring custom whitelists, please refer to the official website’s documentation under `Documentation / SDK Manual / Java SDK / Advanced Features and Usage / Enhancing Security / Class Check Mechanism`.
 
-2. Modification of default serialization
+2. Default serialization modification
 
-   Starting from version 3.2.0 of Dubbo, the default serialization method is switched from `hessian2` to `fastjson2`. For applications upgraded to 3.2.0, Dubbo will automatically try to use `fastjson2` for serialization. Please note that whether it is the client or the server, as long as one end has not been upgraded to 3.2.0, it will be downgraded to `hessian2` serialization to ensure compatibility.
+   Starting from version 3.2.0, the default serialization method switches from `hessian2` to `fastjson2`. For applications upgrading to 3.2.0, Dubbo will try to utilize `fastjson2` for serialization automatically. Please note, if either the client or server has not yet upgraded to 3.2.0, `hessian2` serialization will be used to ensure compatibility.
 
-3. Push short protection is disabled by default
+3. Default disabling of empty push protection
 
-   The purpose of push empty protection is that when the registration center fails and actively pushes empty addresses, Dubbo keeps the last batch of provider information to ensure service availability. However, in most cases, even if the registry fails, empty addresses will not be pushed, only in some special cases. If push short protection is turned on, it will have a greater impact on Dubbo's Fallback logic, heartbeat logic, etc., and bring troubles to developers when using Dubbo.
+   The objective of empty push protection is to retain the last batch of provider information when the registry encounters issues and actively pushes empty addresses to ensure service availability. However, in most cases, even when the registry fails, empty addresses are not pushed; special circumstances are required. Enabling this protection could significantly impact Dubbo's fallback logic and heartbeat logic, causing inconvenience to developers using Dubbo.
 
-   If you need to enable empty protection in the production environment to achieve high availability, you can configure `dubbo.application.enable-empty-protection` to `true`. However, please note that it is known that turning on the push protection will cause the server application to roll back to the original version after upgrading from `2.6.x` and `2.7.x` versions that only support interface-level service discovery to `3.x` An exception occurs, which may cause the service call to fail in extreme cases.
+   If you require empty push protection for high availability in production environments, you may configure `dubbo.application.enable-empty-protection` to `true`. However, please be aware that enabling empty push protection may cause issues when rolling back server applications from only interface-level service discovery in versions `2.6.x`, `2.7.x` to the original version after upgrading to `3.x`, potentially leading to service invocation failures.
 
+## Conclusion
 
-## Summarize
+Dubbo 3.2 is a highly significant version that brings many new features and enhancements, making Dubbo more powerful and user-friendly. We express our sincere gratitude to the community for their support and contributions, and we hope everyone can experience Dubbo 3.2 soon, enjoying the conveniences and advantages it offers.
 
-Dubbo 3.2 is a very important version, it brings many new features and improvements, making Dubbo more powerful and easy to use. We are very grateful for the support and contributions of the community, and hope that everyone can experience Dubbo 3.2 as soon as possible and enjoy the convenience and advantages it brings.

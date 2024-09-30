@@ -5,16 +5,16 @@ date: 2018-11-07
 description: This article introduces how to use Nacos in Dubbo application.
 ---
 
-Nacos is an important registry in Dubbo ecosystem, and dubbo-registry-nacos is the implementation of Dubbo-integrated Nacos registry. 
+Nacos is an important registry in the Dubbo ecosystem, and dubbo-registry-nacos is the implementation of the Dubbo-integrated Nacos registry. 
 
 ## Preparation Works 
-Before you integrate dubbo-registry-nacos into your Dubbo project, make sure the Nacos service is started in the background. If you are not familiar with the basic use of Nacos, you can refer to the Quick Start for Nacos: https://nacos.io/en-us/docs/quick-start.html. Nacos versions above 0.6.1 are recommended. 
+Before you integrate dubbo-registry-nacos into your Dubbo project, ensure the Nacos service is started in the background. If you are not familiar with the basic use of Nacos, you can refer to the Quick Start for Nacos: https://nacos.io/en-us/docs/quick-start.html. Nacos versions above 0.6.1 are recommended. 
 
 ## Get Started Quickly
-The operation steps for Dubbo to integrate Nacos into a registry are simple, the general steps can be divided into "add Maven dependency" and "configure the registry." 
+The steps to integrate Dubbo with Nacos as a registry are simple, generally divided into "add Maven dependency" and "configure the registry." 
 
 ## Increase Maven Dependency 
-First, you need to add the Maven dependency of dubbo-registry-nacos to your project's pom.xml file, and it is strongly recommended that you use Dubbo 2.6.5: 
+First, add the Maven dependency of dubbo-registry-nacos to your project's pom.xml file, strongly recommending Dubbo 2.6.5: 
 
 ```xml
 <dependencies>
@@ -53,16 +53,15 @@ First, you need to add the Maven dependency of dubbo-registry-nacos to your proj
     
 </dependencies>
 ```
-When you add dubbo-registry-nacos to your project, you don't need to programmatically implement the service discovery and registration logic, the actual implementation is provided by the third-party package, and then to configure the Naocs registry. 
+Once you add dubbo-registry-nacos to your project, you won't need to programmatically implement service discovery and registration logic, as the actual implementation is provided by the third-party package. Next, configure the Nacos registry. 
 
 ## Configure the Registry 
-Assuming your Dubbo application is assembled by the Spring Framework, there are two configuration options: Dubbo Spring externalization configuration and Spring XML configuration files, I strongly recommend the former. 
+Assuming your Dubbo application is assembled with the Spring Framework, there are two configuration options: Dubbo Spring externalization configuration and Spring XML configuration files; I strongly recommend the former. 
 
 ## Dubbo Spring Externalization Configuration 
-Dubbo Spring externalization configuration is a new feature introduced by Dubbo 2.5.8, which automatically generates and binds Dubbo configuration Bean through the Spring Environment property, simplifying configuration and lowering the threshold for microservice development. 
+Dubbo Spring externalization configuration is a new feature introduced in Dubbo 2.5.8, automatically generating and binding Dubbo configuration Bean through the Spring Environment property, simplifying configuration and lowering the threshold for microservice development. 
 
-
-Assume your Dubbo application uses Zookeeper as the registry and its server IP address is 10.20.153.10, the registered address is also stored in the dubbo-config.properties file as a Dubbo externalization configuration attribute, as shown below: 
+Assuming your Dubbo application uses Zookeeper as the registry with server IP 10.20.153.10, the registered address is stored in the dubbo-config.properties file as a Dubbo externalization configuration attribute, as shown below: 
 
 ```properties
 ## application
@@ -73,21 +72,21 @@ dubbo.registry.address = zookeeper://10.20.153.10:2181
 ...
 ```
 
-Assuming your Nacos Server is also running on server 10.20.153.10 and using the default Nacos service port 8848, you can simply adjust the dubbo.registry.address property as follows: 
+Assuming your Nacos Server runs on server 10.20.153.10 using the default Nacos service port 8848, simply adjust the dubbo.registry.address property as follows: 
 ```properties
-## 其他属性保持不变
+## Other properties remain unchanged
 
 ## Nacos registry address
 dubbo.registry.address = nacos://10.20.153.10:8848
 ...
 ```
 
-Subsequently, restart your Dubbo application, and Dubbo's service delivery and consumption information can be displayed in the Nacos console: 
+Then restart your Dubbo application, and Dubbo's service delivery and consumption information will be displayed in the Nacos console: 
 
 ![image-20181213103845976](/imgs/blog/dubbo-registry-nacos-1.png)
 
 
-As shown in the figure, the service name prefixed with providers: is the meta-information for the service provider, and consumers: represents the meta-information of the service consumer. Click "Details" to view service status details: 
+As shown, the service name prefixed with providers: indicates the meta-information for the service provider, while consumers: represents the meta-information of the service consumer. Click "Details" to view service status details: 
 
 ![image-20181213104145998](/imgs/blog/dubbo-registry-nacos-2.png)
 
@@ -95,7 +94,7 @@ If you are using the Spring XML configuration file to assemble the Dubbo registr
 
 ## Spring XML Configuration File 
 
-Also, assume your Dubbo application uses Zookeeper as the registry and its server IP address is 10.20.153.10 and assemble the Spring Bean in an XML file, as shown below: 
+Assuming your Dubbo application uses Zookeeper as the registry with server IP 10.20.153.10 and assembles the Spring Bean in an XML file, as shown below: 
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -107,13 +106,13 @@ Also, assume your Dubbo application uses Zookeeper as the registry and its serve
     <!-- Provider application information for dependency calculation -->
     <dubbo:application name="dubbo-provider-xml-demo"  />
  
-    <!-- Using the Zookeeper registry Zookeeper   -->
+    <!-- Using the Zookeeper registry -->
     <dubbo:registry address="zookeeper://10.20.153.10:2181" />
  	...
 </beans>
 ```
 
-Similar to the Dubbo Spring externalization configuration, simply adjust the address property configuration: 
+Similar to the Dubbo Spring externalization configuration, adjust the address property configuration: 
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -131,15 +130,15 @@ Similar to the Dubbo Spring externalization configuration, simply adjust the add
 </beans>
 ```
 
-Once you restart the Dubbo application, you can also see that the registration meta-information for both service providers and consumers is presented in the Nacos console: 
+After restarting the Dubbo application, the registration meta-information for both service providers and consumers will also be visible in the Nacos console: 
 
 ![image-20181213113049185](/imgs/blog/dubbo-registry-nacos-3.png)
 
-Do you absolutely configure or switch Nacos registry super Easy? If you want to get more or unclear, refer to the complete example below. 
+Do you find configuring or switching the Nacos registry super easy? If you want to get more information or if anything is unclear, refer to the complete example below. 
 
 ## Complete Example 
 
-The metadata in the above image is derived from the Dubbo Spring annotation-driven example and the Dubbo Spring XML configuration-driven example, both of which will be described below, you can choose your preferred programming model. Before we get into the formal discussion, let's look at the preparations for both, as they both rely on Java service interfaces and implementations. Also, ensure that the Nacos service is started in the local (127.0.0.1) environment. 
+The metadata in the above image comes from the Dubbo Spring annotation-driven example and the Dubbo Spring XML configuration-driven example, both of which will be described below; you can choose your preferred programming model. Before we dive into the formal discussion, let's look at the preparations for both, as they both rely on Java service interfaces and implementations. Also, ensure that the Nacos service is started in the local (127.0.0.1) environment. 
 
 ### Example Interfaces and Implementations 
 
@@ -298,7 +297,7 @@ public class DemoServiceConsumerBootstrap {
     @PostConstruct
     public void init() {
         for (int i = 0; i < 10; i++) {
-            System.out.println(demoService.sayName("小马哥（mercyblitz）"));
+            System.out.println(demoService.sayName("mercyblitz"));
         }
     }
 
@@ -316,7 +315,7 @@ Similarly, the @EnableDubbo annotation activates the Dubbo annotation-driven and
 
 @Reference is a dependency injection annotation for Dubbo remote services that requires service provider and consumer contract interface, version, and group information. In the current service consumption example, the service version of DemoService is derived from the property configuration file consumer-config.properties. 
 
-The @PostConstruct code shows that when the DemoServiceConsumerBootstrap Bean is initialized, it executes ten Dubbo remote method invocation. 
+The @PostConstruct code shows that when the DemoServiceConsumerBootstrap Bean is initialized, it executes ten Dubbo remote method invocations. 
 
 ### Run the Annotation-driven Example 
 
@@ -327,16 +326,16 @@ Start DemoServiceProviderBootstrap twice locally and the registry will have two 
 Run DemoServiceConsumerBootstrap again and the results are as follows: 
 
 ```
-Service [name :demoService , port : 20880] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20881] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20880] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20880] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20881] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20881] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20880] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20880] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20881] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :demoService , port : 20881] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
+Service [name :demoService , port : 20880] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20881] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20880] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20880] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20881] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20881] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20880] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20880] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20881] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :demoService , port : 20881] sayName("mercyblitz") : Hello,mercyblitz
 ```
 
 Run correctly and the service consumer uses a load balancing strategy to allocate ten RPC calls equally to two Dubbo service provider instances. 
@@ -404,7 +403,7 @@ public class DemoServiceProviderXmlBootstrap {
 ```
 
 #### Service Consumer XML Configuration-driven 
-Define the consumer provider XML context configuration file - /META-INF/spring/dubbo- consumer-context.xml 
+Define the consumer provider XML context configuration file - /META-INF/spring/dubbo-consumer-context.xml 
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -452,7 +451,7 @@ public class DemoServiceConsumerXmlBootstrap {
         System.out.println("DemoService consumer (XML) is starting...");
         DemoService demoService = context.getBean("demoService", DemoService.class);
         for (int i = 0; i < 10; i++) {
-            System.out.println(demoService.sayName("小马哥（mercyblitz）"));
+            System.out.println(demoService.sayName("mercyblitz"));
         }
         context.close();
     }
@@ -461,29 +460,29 @@ public class DemoServiceConsumerXmlBootstrap {
 
 #### Run XML Configuration-driven Example 
 
-As such, start two DemoServiceProviderXmlBootstrap bootstraps and observe the changes in the Nacos registry service provider: 
+Thus, start two DemoServiceProviderXmlBootstrap bootstraps and observe the changes in the Nacos registry service provider: 
 
 ![image-20181213125527201](/imgs/blog/dubbo-registry-nacos-5.png)
 
-The service version driven by the XML configuration is 2.0.0, so the registration service is correct. 
+The service version driven by the XML configuration is 2.0.0, confirming the correctness of the registration service. 
 
-Run the service consumer bootstrap DemoServiceConsumerXmlBootstrap again and observe the console output: 
+Run the service consumer bootstrap DemoServiceConsumerXmlBootstrap again and check the console output: 
 
 ```
-Service [name :null , port : 20882] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20882] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20883] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20882] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20882] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20883] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20882] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20883] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20883] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
-Service [name :null , port : 20883] sayName("小马哥（mercyblitz）") : Hello,小马哥（mercyblitz）
+Service [name :null , port : 20882] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20882] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20883] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20882] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20882] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20883] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20882] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20883] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20883] sayName("mercyblitz") : Hello,mercyblitz
+Service [name :null , port : 20883] sayName("mercyblitz") : Hello,mercyblitz
 ```
 
 
-As a result, both operation and load balancing are normal due to the property demo.service.name has not been added to the current example, the "name" information is output as null. For more information, please refer to: https://github.com/apache/dubbo/tree/master/dubbo-registry/dubbo-registry-nacos. 
+As a result, both operation and load balancing are normal due to the property demo.service.name having not been added to the current example, causing the "name" information to output as null. For more information, please refer to: https://github.com/apache/dubbo/tree/master/dubbo-registry/dubbo-registry-nacos. 
 
 If you're interested in or fond of open source projects like Dubbo and Nacos, try clicking "star" to support them. The links are as follows: 
 
