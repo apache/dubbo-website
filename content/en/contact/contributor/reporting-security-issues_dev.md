@@ -1,31 +1,31 @@
 ---
 aliases:
-    - /zh/contact/contributor/reporting-security-issues_dev/
-description: 报告安全问题
-linkTitle: 反馈漏洞
-title: 报告安全问题
+    - /en/contact/contributor/reporting-security-issues_dev/
+description: Reporting Security Issues
+linkTitle: Feedback Vulnerabilities
+title: Reporting Security Issues
 type: docs
 weight: 4
 ---
 
 
 
-Apache Software Foundation 在消除其软件项目中的安全性问题方面采取严格的立场。Apache Dubbo 对与其功能和特性有关的问题非常敏感并很快提出。
+The Apache Software Foundation takes a strict stance on eliminating security issues in its software projects. Apache Dubbo is very sensitive to issues related to its functionality and features and addresses them promptly.
 
-## 报告漏洞
+## Reporting Vulnerabilities
 
-如果您对 Dubbo 的安全性有担心，或者发现漏洞或潜在威胁，请发送电子邮件至 security@dubbo.apache.org 与 Apache Dubbo 安全团队联系。在邮件中，指定问题或潜在威胁的描述。还敦促您推荐重现和复制问题的方法。Dubbo 社区会在评估和分析调查结果之后与您联系。
+If you have concerns about the security of Dubbo, or if you discover vulnerabilities or potential threats, please email the Apache Dubbo security team at security@dubbo.apache.org. In your email, specify a description of the issue or potential threat. You are also encouraged to suggest ways to reproduce and replicate the issue. The Dubbo community will reach out to you after evaluating and analyzing the investigation results.
 
-请先注意在安全电子邮件中报告安全问题，然后再在公共领域公开该问题。
+Please note to report security issues in a secure email before making the issue public.
 
 
-## 漏洞处理
+## Vulnerability Handling
 
-漏洞处理过程的概述是：
+An overview of the vulnerability handling process is:
 
-* 报告者将漏洞秘密报告给 Apache。
-* 相应项目的安全团队与报告者私下合作来解决漏洞。
-* 制作了包含该修复程序的有关 Apache 产品的新版本。
-* 该漏洞已公开宣布。
+* The reporter secretly reports the vulnerability to Apache.
+* The corresponding project's security team collaborates privately with the reporter to resolve the vulnerability.
+* A new version of the relevant Apache product containing the fix is produced.
+* The vulnerability is publicly announced.
 
-有关此过程的详细说明，请参见[此处](https://www.apache.org/security/committers.html)
+For a detailed description of this process, please see [here](https://www.apache.org/security/committers.html)  

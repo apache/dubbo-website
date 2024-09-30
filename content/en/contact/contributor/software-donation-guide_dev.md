@@ -1,31 +1,31 @@
 ---
 aliases:
-    - /zh/contact/contributor/software-donation-guide_dev/
-description: 软件捐献向导
-linkTitle: 捐献向导
-title: 软件捐献向导
+    - /en/contact/contributor/software-donation-guide_dev/
+description: Software Donation Guide
+linkTitle: Donation Guide
+title: Software Donation Guide
 type: docs
 weight: 4
 ---
 
 
 
-在您阅读这篇指南之前，请确保您已经向PMC确认了实际需要的 SGA。
+Before you read this guide, please ensure that you have confirmed the actual SGA needed with the PMC.
 
-如果您向 Apache Dubbo 捐赠了大量的代码或文档，则需要在合并代码或者文档之前签署[软件授权书](https://www.apache.org/licenses/#grants)。
+If you are donating a significant amount of code or documentation to Apache Dubbo, you will need to sign the [Software Grant](https://www.apache.org/licenses/#grants) before merging the code or documentation.
 
-### 操作步骤
+### Steps to Follow
 
-1. 下载这篇[pdf文档](https://www.apache.org/licenses/software-grant-template.pdf)
-2. 打印下载好的文档
-3. 按要求填充表格（请看下边示例）
-4. 请您的领导在上边签字
-5. 扫描
-6. 将扫描好的文档以邮件的方式发送给secretary@apache.org，并抄送给private@dubbo.apache.org
+1. Download this [pdf document](https://www.apache.org/licenses/software-grant-template.pdf)
+2. Print the downloaded document
+3. Fill out the form as required (see the example below)
+4. Have your supervisor sign above
+5. Scan the document
+6. Email the scanned document to secretary@apache.org, with a copy to private@dubbo.apache.org
 
-### 示例
+### Example
 
-下边是一个文本示例，原始文本可以在[这里](https://www.apache.org/licenses/software-grant.txt)找到
+Below is a text example; the original text can be found [here](https://www.apache.org/licenses/software-grant.txt)
 
 ```
 License Agreement

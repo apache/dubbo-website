@@ -1,25 +1,25 @@
 ---
 aliases:
-    - /zh/contact/contributor/become-a-committer_dev/
-description: 如何成为 Dubbo Committer
-linkTitle: 成为 Committer
-title: 如何成为 Dubbo Committer
+    - /en/contact/contributor/become-a-committer_dev/
+description: How to Become a Dubbo Committer
+linkTitle: Become a Committer
+title: How to Become a Dubbo Committer
 type: docs
 weight: 1
 ---
 
 
 
-每个人都可以成为 Apache 项目的贡献者。作为一个贡献者只是意味着你对项目感兴趣并以某种方式做出贡献，从提出合理的问题（这些问题记录了项目并向开发人员提供反馈）到提供新的特性作为补丁。
+Anyone can become a contributor to an Apache project. Being a contributor simply means you are interested in the project and contribute in some way, from asking reasonable questions (which document the project and provide feedback to the developers) to providing new features as patches.
 
-如果你成为对一个项目有价值的贡献者，你有可能被邀请成为一个 Committer。Committer 是 ASF（Apache 软件基金会）中用来表示提交特定项目的人的术语。它给你带来对项目仓库和资源写的权限。
+If you become a valuable contributor to a project, you may be invited to become a Committer. A Committer is a term used by the ASF (Apache Software Foundation) to refer to individuals who commit to a specific project. It grants you write access to the project's repository and resources.
 
-在 Dubbo 社区，如果一个 Committer 获得大量的优秀成绩，就可以被邀请加入项目管理委员会（PMC）。
+In the Dubbo community, if a Committer achieves a significant number of excellent contributions, they may be invited to join the Project Management Committee (PMC).
 
-当您不熟悉ASF使用的开源的开发过程时，有时难以理解的一点，就是我们更重视社区而不是代码。一个强大而健康的社区将受到尊重，成为一个有趣和有益的地方。更重要的是，一个多元化和健康的社区可以长时间的持续支持代码，即使个别公司在这个领域来来往往，也是如此。
+When you are unfamiliar with the open source development process used by ASF, it can sometimes be difficult to understand that we value community over code. A strong and healthy community will be respected and become an interesting and rewarding place. More importantly, a diverse and healthy community can support the code for a long time, even as individual companies come and go in the space.
 
-更多详细信息可以在 [这里](https://community.apache.org/contributors/) 找到。
+More detailed information can be found [here](https://community.apache.org/contributors/) .
 
-### 我可以贡献什么？
+### What can I contribute?
 
-请参阅[新的贡献者指南](../new-contributor-guide_dev/)。
+See the [new contributor guide](../new-contributor-guide_dev/) .

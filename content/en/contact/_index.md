@@ -1,40 +1,38 @@
 ---
 aliases:
-    - /zh/contact/
-    - /zh/contribution-guidelines/
-description: 联系社区，Dubbo 社区贡献指南
-linkTitle: 联系社区
+    - /en/contact/
+    - /en/contribution-guidelines/
+description: Contact the community, Dubbo community contribution guidelines
+linkTitle: Contact the Community
 # menu:
 #     main:
 #         weight: 40
-title: 联系社区
+title: Contact the Community
 type: docs
 ---
 
+## Contributing to Dubbo
 
+Dubbo is released under the permissive Apache 2.0 license, follows the standard GitHub development process, uses GitHub to track issues, and merges pull requests into master. If you want to contribute to Dubbo (even something small), please don't hesitate to follow the guidelines below.
 
-## 为 Dubbo 做贡献
+### Contact Us
 
-Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Github 开发流程，使用Github追踪处理问题，并将 pull request 合并到 master 中。如果您想为 Dubbo 做贡献（即便是一些微小的），请不要犹豫，遵循下面的指导方针。
-
-### 联系我们
-
-#### 社交媒体
+#### Social Media
 {{< cardpane >}}
-  {{< card header="微信公众号" >}}
+  {{< card header="WeChat Official Account" >}}
 <div class="community-resource">
    <a href="/">
        <img src="/imgs/contacts/wechat-account.jpg" alt="Wechat">
    </a>
-   <p>官方微信公众号（Apache Dubbo）</p>
+   <p>Official WeChat Account (Apache Dubbo)</p>
 </div>
   {{< /card >}}
-  {{< card header="钉钉群组" >}}
+  {{< card header="DingTalk Group" >}}
 <div id="slack" class="community-resource">
     <a href="/">
         <img src="/imgs/contacts/dingtalk.png" alt="Dingtalk">
     </a>
-    <p>定期举办线上社区会议或开发者双周会</p>
+    <p>Regular online community meetings or developer bi-weekly meetings</p>
 </div>
   {{< /card >}}
   {{< card header="Twitter" >}}
@@ -44,63 +42,62 @@ Dubbo 是在非限制性的 Apache 2.0 许可下发布的，遵循标准的 Gith
     </a>
     <a href="https://twitter.com/apachedubbo">Twitter&nbsp;&#9654;</a>
     <p><em>#apachedubbo</em></p>
-    <p>关于 Apache Dubbo 项目的国际社区动态与业界国际资讯</p>
+    <p>International community dynamics of the Apache Dubbo project and industry news</p>
 </div>
   {{< /card >}}
-  {{< card header="Github" >}}
+  {{< card header="GitHub" >}}
 <div id="github" class="community-resource">
     <a href="https://github.com/apache/dubbo-awesome">
         <img src="/imgs/contacts/github.png" alt="GitHub">
     </a>
     <a href="../github/">GitHub&nbsp;&#9654;</a>
-    <p>找到对应语言实现或生态项目的 GitHub 地址，即刻参与 Dubbo 项目源码贡献</p>
+    <p>Find the GitHub address of the corresponding language implementation or ecosystem project and participate in Dubbo's source code contribution</p>
 </div>
   {{< /card >}}
 {{< /cardpane >}}
 
-#### 邮件列表
+#### Mailing Lists
 
+Mailing lists are the recommended way to discuss almost everything related to Dubbo. For detailed documentation on how to subscribe, please refer to the [guide](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide).
 
-邮件列表是讨论几乎所有与 Dubbo 有关事情的推荐方式。有关如何订阅的详细文档，请参阅[指南](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide)。
+- [dev@dubbo.apache.org](mailto:dev-subscribe@dubbo.apache.org): Development mailing list, where you can raise issues if you encounter problems using or developing Dubbo.
+- [commits@dubbo.apache.org](mailto:commits-subscribe@dubbo.apache.org): All commits will be sent to this mailing list. If you're interested in the development of Dubbo, you can subscribe to it.
+- [notification@dubbo.apache.org](mailto:notification-subscribe@dubbo.apache.org): All updates on GitHub [issues](https://github.com/apache/dubbo/issues) and [pull requests](https://github.com/apache/dubbo/pulls) will be sent to this mailing list.
 
-- [dev@dubbo.apache.org](mailto:dev-subscribe@dubbo.apache.org): 开发邮件列表，如果您在使用或开发Dubbo时遇到任何问题，您可以在此提出问题。
-- [commits@dubbo.apache.org](mailto:commits-subscribe@dubbo.apache.org): 所有提交将被发送到这个邮件列表。如果您对Dubbo的发展感兴趣，您可以订阅它。
-- [notification@dubbo.apache.org](mailto:notification-subscribe@dubbo.apache.org): 所有Github  [issue](https://github.com/apache/dubbo/issues)和[pull request](https://github.com/apache/dubbo/pulls)的更新都会被发送到这个邮件列表。
+### Reporting Issues
 
-### 报告问题
+Please follow the [template](https://github.com/apache/dubbo/issues/new?template=dubbo-issue-report-template.md) when reporting any issues.
 
-在报告任何问题时请遵循[模版](https://github.com/apache/dubbo/issues/new?template=dubbo-issue-report-template.md)。
+### Code Conventions
+Our coding style is mostly aligned with standard Java conventions (the default settings of popular IDEs meet this), with the following additional restrictions:
 
-### 代码约定
-我们的代码风格几乎和标准 Java 约定一致（流行IDE的默认设置满足这一点），主要有以下附加限制：
+* Start a new line if the current line has more than 120 characters.
 
-* 如果当前行中有超过 120 个字符，则起一个新的行。
+* Ensure that all new .java files have a simple JavaDoc class comment with at least one tag indicating the creation date and ideally at least one explanation about the class.
 
-* 确保所有新的 .java 文件都有一个简单的 JavaDoc 类注释，其中至少有一个标识创建日期的标签，最好至少有一个关于该类的解释说明。
+* Add ASF license comments to all new .java files (copy from existing files in the project).
 
-* 将ASF许可注释添加到所有新的 .java 文件（从项目中的现有文件复制）
+* Please ensure that no @author tag is added to the files you contribute, as Apache does not use the @author tag; other methods (like cvs) will fairly document all your contributions.
 
-* 请确保没有将 @author 标记添加到您所贡献的文件中，因为 Apache 不使用 @author 标记，其他方式（如cvs）将公平地记录所有您的贡献。
+* Add some JavaDoc to the code, and if you change namespaces, XSD DOC elements are needed.
 
-* 为代码添加一些 JavaDoc，如果您更改命名空间，则需要一些 XSD DOC 元素。
+* Unit tests should be added for new features or significant fixes.
 
-* 对于新的特征或重要的修复程序，应该添加单元测试。
+* If no one else is using your branch, synchronize it with master (or another target branch in the main project).
 
-* 如果没有其他人使用您的分支，请将它与 master（或主项目中的其他目标分支）同步。
+* Follow these conventions when writing commit messages; if you are fixing an existing issue, add "Fixes XXX" at the end of the commit message, where XXX is the issue number.
 
-* 当编写提交消息时，请遵循这些约定，如果您正在修复一个现有问题，请在提交消息的末尾添加 Fixes XXX（其中XXX是问题编号）。
+### Contribution Process
 
-### 贡献流程
+Here is a rough outline of a contributor's workflow:
 
-这是一个贡献者工作流程的大致说明：
-
-* 克隆当前项目
-* 从希望贡献的分支上创新新的分支，通常是 master 分支。
-* 提交您的更改。
-* 确保提交消息的格式正确。
-* 将新分支推送到您克隆的代码库中。
-* 执行检查表 [pull request模版](https://github.com/apache/dubbo/blob/master/PULL_REQUEST_TEMPLATE.md)。
-* 在提交 pull request 请求前, 请将您克隆的代码和远程代码库同步，这样您的 pull request 会简单清晰。具体操作如下：
+* Clone the current project
+* Branch off from the branch you wish to contribute to, usually the master branch.
+* Commit your changes.
+* Ensure the commit message format is correct.
+* Push the new branch to your cloned repository.
+* Execute the checklist [pull request template](https://github.com/apache/dubbo/blob/master/PULL_REQUEST_TEMPLATE.md).
+* Before submitting the pull request, sync your cloned code with the remote repository so that your pull request is simple and clear. Here are the steps:
 ```
 git remote add upstream git@github.com:apache/dubbo.git
 git fetch upstream
@@ -109,24 +106,24 @@ git checkout -b your_awesome_patch
 ... add some work
 git push origin your_awesome_patch
 ```
-* 提交 pull request 请求到 apache/dubbo 并等待回复。
+* Submit the pull request to apache/dubbo and wait for a response.
 
-谢谢您的贡献！
+Thank you for your contributions!
 
-### 代码风格
+### Code Style
 
+We provide the IntelliJ IDEA template file [dubbo_codestyle_for_idea.xml](https://github.com/apache/dubbo/tree/master/codestyle/dubbo_codestyle_for_idea.xml), which you can import into the IDE.
 
-我们提供了 IntelliJ idea 的模版文件[dubbo_codestyle_for_idea.xml](https://github.com/apache/dubbo/tree/master/codestyle/dubbo_codestyle_for_idea.xml)，您可以将它导入到IDE。
+If using Eclipse, you can manually configure it by referring to this file.
 
-如果使用 Eclipse，可以通过参考该文件手动配置。
+**Note**
 
-**注意事项**
+Using dubbo_codestyle_for_idea.xml to set code formatting for your IDEA is a crucial step before contributing code; otherwise, you will not pass the code style check by Travis CI. Here are the steps to configure your code format:
 
-使用 dubbo_codestyle_for_idea.xml 为你的 IDEA 设置代码格式是贡献代码前至关重要的一个步骤，否则你将会无法通过 Travis CI 的代码风格校验，下面几个步骤给你演示了如何配置代码格式：
+1. Go to the menu page `Editor > Code Style`
+2. Click on manage profiles in the scheme menu of the Code Style page
+Select `Import Scheme` from the dropdown list, then choose `IntelliJ IDEA code style XML` to import the xml file
+3. Enter your format name for recognition across different projects, and don’t forget to ⏎ to save changes.
 
-1. 进入菜单页 `Editor > Code Style`
-2. 在 Code Style 页面的 scheme 菜单中点击 manage profiles 选项
-在下拉列表中选择 `Import Scheme`, 接着选择 `IntelliJ IDEA code style XML` 导入 xml 文件
-3. 输入你的格式名称，方便在不同工程之间进行识别，最后别忘了 ⏎ 来保存更改.
+Once set up, IDEA will help you automatically reformat the code.
 
-设置完成后，IDEA 会帮助你自动 reformat 代码

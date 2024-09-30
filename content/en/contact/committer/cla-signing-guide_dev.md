@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/contact/committer/cla-signing-guide_dev/
-description: CLA 签署向导
-linkTitle: CLA 签署向导
-title: CLA 签署向导
+    - /en/contact/committer/cla-signing-guide_dev/
+description: CLA Signing Guide
+linkTitle: CLA Signing Guide
+title: CLA Signing Guide
 type: docs
 weight: 2
 ---
@@ -11,25 +11,25 @@ weight: 2
 
 
 
-以下情况，需要您签署 Apache ICLA：
+You need to sign the Apache ICLA in the following cases:
 
-* 在 Dubbo 被捐赠给 Apache 之前，您已经为 Dubbo 作出了很多贡献，并且您以前没有签署过 Alibaba-CLA。
-* 您已经为 Dubbo 作出了很多贡献，并且您被邀请成为 Dubbo 提交者，且之前没有签署过 Alibaba-CLA 或者 Apache ICLA。
+* You have made significant contributions to Dubbo before it was donated to Apache, and you have not previously signed the Alibaba-CLA.
+* You have made significant contributions to Dubbo, and you are invited to be a Dubbo committer, and have not previously signed the Alibaba-CLA or Apache ICLA.
 
-### 步骤
+### Steps
 
-* 下载这篇 [pdf 文档](https://www.apache.org/licenses/icla.pdf)
-* 编辑该文档，在必要的空格处填上适当的内容
-* 打印
-* 在打印好的文件上签字
-* 扫描
-* 发送一封邮件到secretary@apache.org，并抄送给private@dubbo.apache.org：
-  * 邮件标题为 “ICLA submission”
-  * 请在邮件正文附上您的github账号链接
-  * 请记得将您的 ICLA 文档放入邮件的附件里
+* Download this [pdf document](https://www.apache.org/licenses/icla.pdf)
+* Edit the document, filling in the necessary information in the appropriate spaces
+* Print it
+* Sign the printed document
+* Scan it
+* Send an email to secretary@apache.org, and cc private@dubbo.apache.org:
+  * Email subject: "ICLA submission"
+  * Please include a link to your GitHub account in the body of the email
+  * Remember to attach your ICLA document to the email
 
-### 空格填写必要说明
+### Instructions for Filling Out Spaces
 
-* Mailing address：首选英文格式的公司地址
-* Preferred apache id(s)：如果您被邀请成为一名提交者，那么需要您填写一个apache账号，否则，可以不填
-* Notify project：Dubbo（意思就是Dubbo就是通知您签署ICLA的项目）
+* Mailing address: Preferably in English format of the company address
+* Preferred apache id(s): If you are invited to be a committer, you need to fill in an apache account; otherwise, it can be left blank
+* Notify project: Dubbo (meaning that Dubbo is the project notifying you to sign the ICLA)

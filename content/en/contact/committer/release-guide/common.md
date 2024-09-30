@@ -1,68 +1,66 @@
 ---
 aliases:
-    - /zh/contact/committer/release-guide/common/
-description: 通用 Release 流程
-linkTitle: 通用 Release
-title: 通用 Release 流程
+    - /en/contact/committer/release-guide/common/
+description: General Release Process
+linkTitle: General Release
+title: General Release Process
 type: docs
 weight: 1
 ---
 
 
 
-## 理解 Apache 发布的内容和流程
+## Understanding the Content and Process of Apache Releases
 
-总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。
+In general, Source Release is the primary focus of Apache and a necessary element of the release; Binary Release is optional, and Dubbo can choose whether to release binary packages to the Apache repository or publish to the Maven Central Repository.
 
-请参考以下链接，找到更多关于 ASF 的发布指南:
+Please refer to the following links for more information about the ASF release guidelines:
 
 - [Apache Release Guide](http://www.apache.org/dev/release-publishing)
 - [Apache Release Policy](http://www.apache.org/dev/release.html)
 - [Maven Release Info](http://www.apache.org/dev/publishing-maven-artifacts.html)
 
-## 发布流程
+## Release Process
 
-### 1. 准备分支
+### 1. Prepare a Branch
 
-从主干分支拉取新分支作为发布分支，如现在要发布 `${release_version}` 版本，则从开发分支拉出新分支 `${release_version}-release`，此后`${release_version}` Release Candidates 涉及的修改及打标签等都在`${release_version}-release`分支进行，最终发布完成后合入主干分支。
+Create a new branch from the trunk as a release branch. For example, to release version `${release_version}`, create a new branch `${release_version}-release` from the development branch. All modifications and tagging related to `${release_version}` Release Candidates will then occur in the `${release_version}-release` branch, merging back to the trunk after the final release is complete.
 
-例：如 Java SDK 需要发布 `3.0.10` 版本，从 `3.0` 分支拉出新分支 `3.0.10-release`，并在此分支提交从 Snapshot 替换为 `3.0.10` 版本号的 commit。
+### 2. Tag on Github and Publish Pre Release Status
 
-### 2. Github 打标签并发布 Pre Release 状态
+In the corresponding GitHub repository, tag the `${release_version}-release` branch, fill out the Release Note, and publish it as a Pre Release status. (**The release status must not be changed to formal release status until the voting process is officially passed.**)
 
-在对应 GitHub 仓库中基于 `${release_version}-release` 分支，打标签 `${release_version}-release`，填写 Release Note 并发布 Pre Release 状态。（**不允许在投票流程正式通过前把 Release 状态置为正式发布状态**）
+Note: After tagging, no commits can be made to this branch. The last commit in the branch must be the tagged commit and the commit in the vote.
 
-注：打完标签之后此分支不允许再提交任何 commit，需要保证分支中最后一个 commit 就是标签的 commit 和投票中的 commit。
+### 3. Pre-Release Binary Package (Optional)
 
-### 3. 预发布二进制包（可选）
+Push the binary package to the hosting platform using a build tool, such as releasing the Java SDK to the Maven repository in Staging.
 
-通过构建工具推送二进制包到托管平台，如 Java SDK 发布到 Maven 仓库，状态为 Staging。
+Note: If the hosting platform does not support pre-release functionality, it must be released only after the vote passes.
 
-注：如果托管平台不支持预发布功能，则需要在投票正式通过后再发布。
+### 4. Build Source Release Files
 
-### 4. 构建 Source Release 文件
+Package the source code in zip format, sign it with your personal gpg key to get the asc file, and generate the sha512 file using the shasum tool.
 
-将源码使用 zip 格式进行打包，使用个人 gpg 证书进行签名得到 asc 文件以及使用 shasum 工具生成 sha512 文件。
+Example: For releasing version `3.0.10` of the Java SDK, build `apache-dubbo-3.0.10-src.zip`, `apache-dubbo-3.0.10-src.zip.asc`, and `apache-dubbo-3.0.10-src.zip.sha512`.
 
-例：如 Java SDK 发布 `3.0.10` 版本，需要构建 `apache-dubbo-3.0.10-src.zip` 、 `apache-dubbo-3.0.10-src.zip.asc` 和 `apache-dubbo-3.0.10-src.zip.sha512` 三个文件。
+### 5. Commit Source Release Files to Apache SVN Repository
 
-### 5. 提交 Source Release 文件到 Apache SVN 仓库
+Push the Source Release files to the `https://dist.apache.org/repos/dist/dev/dubbo/` repository, storing the files in the `https://dist.apache.org/repos/dist/dev/dubbo/${component_name}/${release_version}/` directory. (Committer permission is required to push.)
 
-将 Source Release 文件推送到 `https://dist.apache.org/repos/dist/dev/dubbo/` 仓库中，文件存储到 `https://dist.apache.org/repos/dist/dev/dubbo/${component_name}/${release_version}/` 目录下。（需要 Committer 权限才能推送）
+### 6. Send Voting Email
 
-### 6. 发送投票邮件
+Send the voting email using the Apache email. The subject of the voting email is: `[VOTE] Release ${component_name} ${release_version} RC1`, and the email content must include the following:
+- Link to the Source Release
+- Link to the pre-released binary package (if any)
+- GitHub Tag
+- Hash of the last commit
+- Link to the Release Note
+- Signature file used for the Source Release
 
-使用 Apache 邮箱发送投票邮件，投票邮件的标题为：`[VOTE] Release ${component_name} ${release_version} RC1`，邮件内容需要包含以下内容：
-- Source Release 的链接
-- 二进制包预发布的链接（如有）
-- GitHub Tag 标签
-- 最后一个 Commit 的 Hash
-- Release Note 链接
-- Source Release 使用的签名文件
+The above Source Release, Tag, Hash, and Release Note must correspond completely.
 
-以上的 Source Release、Tag、Hash、Release Note 必须完全对应
-
-例：如 Java SDK 发布 `3.0.10` 版本，发送的邮件如下
+Example: For releasing version `3.0.10` of the Java SDK, the email sent would be as follows:
 
 ```
 Project: [VOTE] Release Apache Dubbo 3.0.10 RC1
@@ -103,17 +101,16 @@ Thanks,
 The Apache Dubbo Team
 ```
 
-### 7. PMC 检查版本信息，并进行投票
+### 7. PMC Checks Version Information and Votes
 
-详细的检查列表请参考官方的 [check list](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist)
+For a detailed checklist, please refer to the official [checklist](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist).
 
-### 8. 投票通过，发布投票结果
+### 8. Voting Passed, Announce Voting Results
 
-在至少等待 72 小时且至少 3 位 PMC 投 +1 approve 票之后，可以发送邮件宣布投票结果。
-投票结果邮件的标题为：`[RESULT] [VOTE] Release ${component_name} ${release_version} RC1`，邮件内容需要包含投票的 PMC 信息和投票的 thread。
-（可以通过 [https://lists.apache.org/list.html?dev@dubbo.apache.org](https://lists.apache.org/list.html?dev@dubbo.apache.org) 找到）
+After waiting at least 72 hours and receiving at least 3 +1 approve votes from PMC, an email can be sent to announce the voting results. The subject of the voting results email is: `[RESULT] [VOTE] Release ${component_name} ${release_version} RC1`, and the email content must include the voting PMC information and the voting thread.
+(You can find it through [https://lists.apache.org/list.html?dev@dubbo.apache.org](https://lists.apache.org/list.html?dev@dubbo.apache.org).)
 
-例：如 Java SDK 发布 `2.7.16` 版本，发送的邮件如下
+Example: For releasing version `2.7.16` of the Java SDK, the email sent would be as follows:
 
 ```
 Project: [RESULT] [VOTE] Release Apache Dubbo 2.7.16 RC1
@@ -134,32 +131,32 @@ Best regards,
 The Apache Dubbo Team
 ```
 
-### 9. Github 标记正式 Release
+### 9. Tag the Official Release on Github
 
-在 GitHub 上正式把前面第 2 步打的标签更新为正式发布状态。
+Officially update the tag made in step 2 to the formal release status on GitHub.
 
-### 10. 合并 Release 分支回主干
+### 10. Merge the Release Branch Back into the Main Branch
 
-将 `${release_version}-release` 合并回开发主干，并更新最新 snapshot 版本号。（`${release_version}-release` 可以不保留）
+Merge `${release_version}-release` back into the development trunk and update the latest snapshot version number. (`${release_version}-release` can be deleted.)
 
-### 11. 移动 Source Release 到 release 仓库（重要）
+### 11. Move Source Release to Release Repository (Important)
 
-将 `https://dist.apache.org/repos/dist/dev/dubbo/` 仓库中存储的 Source Release 文件移动到  `https://dist.apache.org/repos/dist/release/dubbo/` 仓库中。（仅 PMC 有权限）
-同时删除之前的 Source Release 文件。（会被自动存放在 Archive 仓库）
+Move the Source Release files stored in the `https://dist.apache.org/repos/dist/dev/dubbo/` repository to `https://dist.apache.org/repos/dist/release/dubbo/` repository. (Only PMC has permission to do this.)
+At the same time, delete the previous Source Release files. (They will automatically be stored in the Archive repository.)
 
-### 12. 正式发布二进制包（如有）
+### 12. Officially Release Binary Package (if any)
 
-将前面第 3 步发布的预发布状态的二进制包更新为正式发布状态。
+Update the pre-released binary package from step 3 to be in formal release status.
 
-### 13. 更新 Dubbo Website 文档
+### 13. Update Dubbo Website Documentation
 
-更新最新的 Source Release 等信息到 `dubbo-website` 对应文件中，至少包括 Source Release 的下载方式和二进制包的引用方式（如有），同时将历史的发布的链接更新到 archive 的域名下。
+Update the latest Source Release and other information in the corresponding file of `dubbo-website`, including at least the download method for the Source Release and the reference method for the binary package (if any), while updating historical release links to the archive domain.
 
-### 14. 发布正式发布结果通知
+### 14. Publish Official Release Result Notification
 
-投票结果邮件的标题为：`[Announce] Release ${component_name} ${release_version} released`。
+The subject of the voting result email should be: `[Announce] Release ${component_name} ${release_version} released`.
 
-注：最好等二进制包发布正式同步生效后发布此邮件。
+Note: It is best to wait until the binary package goes live in formal status before sending this email.
 
 ```
 Project: [Announce] Apache Dubbo 3.0.9 released

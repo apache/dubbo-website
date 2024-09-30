@@ -1,9 +1,10 @@
 ---
 aliases:
-    - /zh/contact/committer/
-description: Dubbo Committer 指南
-linkTitle: Committer 指南
-title: Committer 指南
+    - /en/contact/committer/
+description: Dubbo Committer Guide
+linkTitle: Committer Guide
+title: Committer Guide
 type: docs
 weight: 3
 ---
+

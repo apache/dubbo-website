@@ -1,9 +1,10 @@
 ---
 aliases:
-    - /zh/contact/contributor/
-description: Dubbo Contributor 指南
-linkTitle: Contributor 指南
-title: Contributor 指南
+    - /en/contact/contributor/
+description: Dubbo Contributor Guide
+linkTitle: Contributor Guide
+title: Contributor Guide
 type: docs
 weight: 2
 ---
+

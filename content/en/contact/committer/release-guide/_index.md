@@ -1,9 +1,10 @@
 ---
 aliases:
-    - /zh/contact/committer/release-guide/
-description: 如何准备 Apache Release
-linkTitle: 发版准备
-title: 如何准备 Apache Release
+    - /en/contact/committer/release-guide/
+description: How to Prepare an Apache Release
+linkTitle: Release Preparation
+title: How to Prepare an Apache Release
 type: docs
 weight: 2
 ---
+

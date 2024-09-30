@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/contact/committer/release-guide/java-sdk/
-description: Java SDK Release 流程
+    - /en/contact/committer/release-guide/java-sdk/
+description: Java SDK Release Process
 linkTitle: Java SDK Release
-title: Java SDK Release 流程
+title: Java SDK Release Process
 type: docs
 weight: 2
 ---
@@ -11,32 +11,32 @@ weight: 2
 
 
 
-## 理解 Apache 发布的内容和流程
+## Understanding Apache Release Content and Process
 
-总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。
+In general, the Source Release is the focus of Apache and is a necessary component of the release; the Binary Release is optional, and Dubbo can choose whether to publish binary packages to the Apache repository or to the Maven Central repository.
 
-请参考以下链接，找到更多关于 ASF 的发布指南:
+Please refer to the following links for more information about ASF's release guidelines:
 
 - [Apache Release Guide](http://www.apache.org/dev/release-publishing)
 - [Apache Release Policy](http://www.apache.org/dev/release.html)
 - [Maven Release Info](http://www.apache.org/dev/publishing-maven-artifacts.html)
 
-## 本地构建环境准备
+## Local Build Environment Preparation
 
-主要包括签名工具、Maven 仓库认证相关准备
+Mainly includes preparation for signing tools and Maven repository authentication.
 
-### 安装GPG
+### Install GPG
 
-详细文档请参见[这里](https://www.gnupg.org/download/index.html), Mac OS 下配置如下
+For detailed documentation, please refer to [here](https://www.gnupg.org/download/index.html). Configuration on Mac OS is as follows:
 
 ```sh
 $ brew install gpg
-$ gpg --version #检查版本，应该为2.x
+$ gpg --version # Check version, should be 2.x
 ```
 
-### 用gpg生成key
+### Generate Key with gpg
 
-根据提示，生成 key
+Follow the prompts to generate a key.
 
  ```shell
  $ gpg --full-gen-key
@@ -72,54 +72,52 @@ $ gpg --version #检查版本，应该为2.x
     "Robert Burrell Donkin (CODE SIGNING KEY) <rdonkin@apache.org>"
  
  Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
- You need a Passphrase to protect your secret key. # 填入密码，以后打包过程中会经常用到
+ You need a Passphrase to protect your secret key. # Enter password, which will be used frequently during the packaging process
  ```
 
-### 查看 key id 
+### View Key ID
 
 ```sh
 $ gpg --list-keys
-pub   rsa4096/28681CB1 2018-04-26 # 28681CB1就是key id
+pub   rsa4096/28681CB1 2018-04-26 # 28681CB1 is the key id
 uid       [ultimate] liujun (apache-dubbo) <liujun@apache.org>
 sub   rsa4096/D3D6984B 2018-04-26
 
-# 通过key id发送public key到keyserver
+# Send public key to keyserver via key id
 $ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
-# 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，为相互之间是自动同步的，选任意一个都可以。
+# Here, pgpkeys.mit.edu is a randomly chosen keyserver. The list of keyservers is available at: https://sks-keyservers.net/status/, which are automatically synchronized with each other, so any one can be chosen.
 ```
-如果有多个 public key，设置默认 key。修改`~/.gnupg/gpg.conf`
+If there are multiple public keys, set the default key. Modify `~/.gnupg/gpg.conf`
 
 ```sh
 # If you have more than 1 secret key in your keyring, you may want to
 # uncomment the following option and set your preferred keyid.
 default-key 28681CB1
 ```
-如果有多个 public key, 也可以删除无用的 key：
+If there are multiple public keys, you can also delete unnecessary keys:
 
 ```sh  
-### 先删除私钥，再删除公钥
-$ gpg --yes --delete-secret-keys shenglicao2@gmail.com   ###老的私钥，指明邮箱即可
+### First delete the private key, then delete the public key
+$ gpg --yes --delete-secret-keys shenglicao2@gmail.com   ### Old private key, just specify the email
 $ gpg --delete-keys 1808C6444C781C0AEA0AAD4C4D6A8007D20DB8A4
 ```
 
-> PS: 最新版本经过实测，本地没有gpg.conf这个文件，因此如果在执行过程中遇到签名失败，可以参考这个文章：https://blog.csdn.net/wenbo20182/article/details/72850810 或 https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors
+> PS: The latest version has been tested and does not have the gpg.conf file in the local environment. Therefore, if you encounter a signing failure during the execution process, you can refer to this article: https://blog.csdn.net/wenbo20182/article/details/72850810 or https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors.
 
-由于公钥服务器没有检查机制，任何人都可以用你的名义上传公钥，所以没有办法保证服务器上的公钥的可靠性。
-通常，你可以在网站上公布一个公钥指纹，让其他人核对下载到的公钥是否为真。
+Since the public key server has no verification mechanism, anyone can upload the public key in your name, so there is no way to ensure the reliability of the public keys on the server. Typically, you can publish a public key fingerprint on the website so that others can verify whether the downloaded public key is genuine.
 ```sh
-# fingerprint参数生成公钥指纹：
+# Generate public key fingerprint with fingerprint parameter:
 $ gpg --fingerprint liujun
 pub   rsa4096 2019-10-17 [SC]
       1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0
 uid           [ultimate] liujun (CODE SIGNING KEY) <liujun@apache.org>
 sub   rsa4096 2019-10-17 [E]
 ```
-登录 https://id.apache.org, 将上面的 fingerprint （即 1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0）
-粘贴到自己的用户信息中 OpenPGP Public Key Primary Fingerprint
+Log in to https://id.apache.org and paste the fingerprint above (i.e., 1376 A2FF 67E4 C477 5739  09BD 7DB6 8550 D366 E4C0) into your user information for OpenPGP Public Key Primary Fingerprint.
 
-### 设置 Apache 中央仓库
+### Set Up Apache Central Repository
 
-Dubbo 项目的父 pom 为 Apache pom(2.7.0 以上版本需要，2.6.x 发布版本不需要此操作)
+The parent POM of the Dubbo project is the Apache POM (this is required for versions above 2.7.0, not needed for 2.6.x release versions).
 
 ```xml
 <parent>
@@ -129,8 +127,7 @@ Dubbo 项目的父 pom 为 Apache pom(2.7.0 以上版本需要，2.6.x 发布版
 </parent>
 ```
 
- 添加以下内容到 .m2/settings.xml
- 所有密码请使用 [maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html)加密后再填入
+Add the following content to .m2/settings.xml. All passwords should be filled in after being encrypted using [maven-encryption-plugin](http://maven.apache.org/guides/mini/guide-encryption.html).
 
 ```xml
 <settings>
@@ -158,141 +155,142 @@ Dubbo 项目的父 pom 为 Apache pom(2.7.0 以上版本需要，2.6.x 发布版
 </settings>
 ```
 
-## 打包&上传
+## Packaging & Uploading
 
-### 准备分支
+### Prepare Branch
 
-从主干分支拉取新分支作为发布分支，如现在要发布$`{release_version}`版本，则从2.6.x拉出新分支`${release_version}-release`，此后`${release_version}` Release Candidates涉及的修改及打标签等都在`${release_version}-release`分支进行，最终发布完成后合入主干分支。
+Create a new branch from the trunk branch as the release branch. For instance, if you are going to release version `$`{release_version}`, create a new branch `${release_version}-release` from 2.6.x. All modifications and tagging related to `${release_version}` Release Candidates will be done in the `${release_version}-release` branch, and after the final release is completed, it will be merged back into the trunk branch.
 
-### 编译打包
+### Compile and Package
 
-首先，在`${release_version}-release`分支验证maven组件打包、source源码打包、签名等是否都正常工作。**2.6.x记得要使用1.6进行编译打包**
+First, validate whether Maven's component packaging, source code packaging, signing, etc., work correctly in the `${release_version}-release` branch. **Remember to use 1.6 for compiling and packaging for 2.6.x.**
 
 ```shell
 $ mvn clean install -Prelease
 $ mvn deploy
 ```
 
-上述命令将snapshot包推送到maven中央仓库
+The above commands will push the snapshot package to the Maven Central repository.
 
-### 使用mvn deploy进行deploy
+### Use mvn deploy for deployment
 
-> 要求：maven 3.5+ 
+> Requirements: Maven 3.5+
 
-修改pom文件中的版本号，从2.7.x-SNAPSHOT改为2.7.x， 目前有3个地方需要修改。建议全文搜索。
+Modify the version in the POM file from 2.7.x-SNAPSHOT to 2.7.x, currently there are 3 places that need modification. It is recommended to search the entire text.
 
 ```shell
 $ mvn clean install -Prelease
 $ mvn deploy -Prelease -DskipTests
 ```
 
-所有被deploy到远程[maven仓库](http://repository.apache.org)的Artifacts都会处于staging状态
+All artifacts that are deployed to the remote [Maven repository](http://repository.apache.org) will be in staging status.
 
-#### 注意点
+#### Notes
 
-- 在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，可以重新开始执行。
-- deploy执行到maven仓库的时候，请确认下包的总量是否正确。多次出现了包丢失的情况，特别是dubbo-parent包。
+- During the deployment process, there may be interruptions due to network issues; if so, you can restart the process.
+- Please check the total number of packages to ensure their accuracy when deploying to the Maven repository. There have been multiple occurrences of missing packages, especially the dubbo-parent package.
 
 
-## 准备Apache发布
+## Prepare for Apache Release
 
-1. 准备svn本机环境（Apache使用svn托管项目的发布内容）
+1. Prepare the SVN local environment (Apache uses SVN to host the release content of the project).
 
-2. 将dubbo checkout到本地目录
+2. Check out dubbo to the local directory.
 
    ```shell
    $ svn checkout https://dist.apache.org/repos/dist/dev/dubbo
-   # 假定本地目录为 ~/apache/dubbo
+   # Assume the local directory is ~/apache/dubbo
    ```
 
-3. 当前发布版本为${release_version}，新建目录
+3. The current release version is ${release_version}. Create a new directory.
 
    ```shell
-   $ cd ~/apache/dubbo # dubbo svn根目录
+   $ cd ~/apache/dubbo # dubbo svn root directory
    $ mkdir ${release_version}
    ```
 
-4. 添加public key到[KEYS](https://dist.apache.org/repos/dist/dev/dubbo/KEYS)文件并提交到SVN仓库（第一次做发布的人需要做这个操作，具体操作参考KEYS文件里的说明）。KEYS主要是让参与投票的人在本地导入，用来校验sign的正确性
+4. Add your public key to the [KEYS](https://dist.apache.org/repos/dist/dev/dubbo/KEYS) file and submit it to the SVN repository (first-time publishers need to perform this operation; refer to the instructions in the KEYS file for specific operations). The KEYS file allows voters to import locally to verify the correctness of the signatures.
 
    ```sh
    $ (gpg --list-sigs <your name> && gpg --armor --export <your name>) >> KEYS
    ```
 
-5. 拷贝`dubbo-distribution/dubbo-apache-release/target`下的source相关的包到svn本地仓库`dubbo/${release_version}`
+5. Copy the source-related packages from `dubbo-distribution/dubbo-apache-release/target` to the SVN local repository `dubbo/${release_version}`.
 
-6. 生成sha512签名和asc签名
+6. Generate SHA512 signatures and ASC signatures.
 
-   针对`src.zip` 进行sha512签名
+   Perform SHA512 signing for `src.zip`.
 
    ```shell
    $ shasum -a 512 apache-dubbo-${release_version}-src.zip >> apache-dubbo-${release_version}-src.zip.sha512
    ```
-  
-   针对`bin-release.zip`，需要增加`-b`参数，表明是一个二进制文件
+
+   For `bin-release.zip`, you need to add the `-b` parameter to indicate it is a binary file.
 
    ```shell
    $ shasum -b -a 512 apache-dubbo-${release_version}-bin.zip >> apache-dubbo-${release_version}-bin.zip.sha512
    ```
-   
-   针对`src.zip` 进行asc签名
+
+   Perform ASC signing for `src.zip`.
+
     ```shell
    $ gpg --armor --output apache-dubbo-${release_version}-src.zip.asc --detach-sig apache-dubbo-${release_version}-src.zip
     ```
 
 
-7. 如果有binary release要同时发布
+7. If there is a binary release to be published simultaneously.
 
-   在`dubbo-distribution/dubbo-apache-release/target`目录下，拷贝`bin.zip`以及`bin.zip.asc`到svn本地仓库`dubbo/${release_version}`，参考第6步，生成sha512签名。
+   In the `dubbo-distribution/dubbo-apache-release/target` directory, copy the `bin.zip` and `bin.zip.asc` to the SVN local repository `dubbo/${release_version}`, and reference step 6 to generate SHA512 signatures.
 
-8. 提交到Apache svn
+8. Commit to Apache SVN.
 
    ```shell
    $ svn status
    $ svn commit -m 'prepare for ${release_version} RC1'
    ```
 
-9. 关闭Maven的staging仓库
+9. Close the Maven staging repository.
 
-   此步骤为发布2.7.0及以上版本必须要的步骤。在此之前请先确保所有的artifact都是ok的。登录http://repository.apache.org，点击左侧的`Staging repositories`，然后搜索Dubbo关键字，会出现一系列的仓库，选择你最近上传的仓库，然后点击上方的Close按钮，这个过程会进行一系列检查，检查通过以后，在下方的Summary标签页上出现一个连接，请保存好这个链接，需要放在接下来的投票邮件当中。链接应该是类似这样的: `https://repository.apache.org/content/repositories/orgapachedubbo-1015`
+   This step is mandatory for releasing versions 2.7.0 and above. Please ensure all artifacts are okay beforehand. Log in to http://repository.apache.org, click on `Staging repositories` on the left, then search for the Dubbo keyword. A series of repositories will appear; select the one you recently uploaded, then click the Close button above. This process will perform a series of checks, and after passing, a link will appear on the Summary tab below. Please save this link for the upcoming voting email. The link should be something like: `https://repository.apache.org/content/repositories/orgapachedubbo-1015`.
 
-   > 请注意点击Close可能会出现失败，通常是网络原因，只要重试几次就可以了。可以点击Summary旁边的Activity标签来确认。  
+   > Please note that clicking Close might fail, usually due to network issues; just retry a few times. You can check the Activity tab next to Summary for confirmation.
 
-## 验证Release Candidates
+## Verify Release Candidates
 
-详细的检查列表请参考官方的[check list](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist)
+For a detailed checklist, refer to the official [checklist](https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklist).
 
-首先，从一下地址下载要发布的Release Candidate到本地环境：
+First, download the Release Candidate to the local environment from the following address:
 
 <pre>
 https://dist.apache.org/repos/dist/dev/dubbo/${release_version}/
 </pre>
 
-然后，开始验证环节，验证包含但不限于以下内容和形式
+Then, begin the verification process, which includes but is not limited to the following content and forms.
 
-### 检查签名和hash等信息
+### Check signatures and hash information
 
-#### 检查sha512哈希
+#### Check SHA512 hash
 
 ```sh
 $ shasum -c apache-dubbo-${release_version}-src.zip.sha512
 $ shasum -c apache-dubbo-${release_version}-bin.zip.sha512
 ```
-#### 检查asc签名
+#### Check ASC signature
 ```shell
 $  gpg --verify apache-dubbo-${release_version}-src.zip.asc
 ```
 
-#### 检查gpg签名
+#### Check GPG signature
 
-如果是第一次检查，需要首先导入公钥。 
+If it's the first time checking, you need to import the public key first.
 
 ```sh
  $ curl https://dist.apache.org/repos/dist/dev/dubbo/KEYS >> KEYS # download public keys to local directory
  $ gpg --import KEYS # import keys
- $ gpg —-edit-key liujun
+ $ gpg --edit-key liujun
    > trust # type trust command
 ```
-然后使用如下命令检查签名
+Then use the following commands to check the signatures.
 
  ```sh
 gpg --verify apache-dubbo-3.0.4-src.zip.asc apache-dubbo-3.0.4-src.zip
@@ -300,14 +298,14 @@ gpg --verify apache-dubbo-3.0.4-bin.zip.asc apache-dubbo-3.0.4-bin.zip
  ```
 
 
-### 检查源码包的文件内容
+### Check the contents of the source package files
 
-解压缩`apache-dubbo-${release_version}-src.zip`，进行如下检查:
+Unzip `apache-dubbo-${release_version}-src.zip` and check as follows:
 
 - DISCLAIMER exists
-- LICENSE and NOTICE exists and contents are good
-- All files and no binary files exist
-- All files has standard ASF License header
+- LICENSE and NOTICE exist and contents are correct
+- All files exist and there are no binary files
+- All files have a standard ASF License header
 - Can compile from source
 - All unit tests can pass  
   ```sh
@@ -315,47 +313,47 @@ gpg --verify apache-dubbo-3.0.4-bin.zip.asc apache-dubbo-3.0.4-bin.zip
   # you can also open rat and style plugin to check if every file meets requirements.
   mvn clean test -Drat.skip=false -Dcheckstyle.skip=false
   ```
-- Release candidates match with corresponding tags, you can find tag link and hash in vote email.
-  - check the version number in pom.xml are the same
-  - check there are no extra files or directories in the source package, for example, no empty directories or useless log files，这里需要注意换行符是否一致  
+- Release candidates match with corresponding tags; you can find tag links and hash in the vote email.
+  - Check the version numbers in pom.xml are the same.
+  - Check there are no extra files or directories in the source package, for example, no empty directories or useless log files; pay attention to whether the line endings are consistent.  
     `diff -r a rc_dir tag_dir`
-  - check the top n tag commits, dive into the related files and check if the source package has the same changes
+  - Check the top n tag commits, dive into the related files, and check if the source package has the same changes.
 
-### 检查三方依赖的合规性
+### Check the compliance of third-party dependencies
 
-按照Apache基金会合规性规定，源码或者是二进制分发包中均不能包含Category X的依赖，其中就常见的是包含了GPL/LGPL的依赖，即使是传递依赖也不行。因此在发版的时候需要通过以下的命令进行检查：
+According to the compliance regulations of the Apache Foundation, neither the source nor the binary distribution packages can contain Category X dependencies, which is commonly known to include GPL/LGPL dependencies, even transitive dependencies are not allowed. Therefore, during release, the following commands must be executed for compliance checks:
 
 ```sh
 mvn license:add-third-party -Dlicense.useMissingFile
 find . -name THIRD-PARTY.txt | xargs grep -E 'GPL|General Public License' | grep -v Apache | grep -v MIT | grep -v CDDL
 ```
 
-如果一个依赖提供了双协议或多重协议，可以选择与Apache最兼容的一个协议。
+If a dependency provides dual or multiple licenses, choose the one that is most compatible with Apache.
 
-你可以参考此文章：[ASF第三方许可证策](https://apache.org/legal/resolved.html)
+You can refer to this article: [ASF Third Party License Policy](https://apache.org/legal/resolved.html)
 
 
-### 检查二进制包的文件内容
+### Check the contents of the binary package files
 
-解压缩`apache-dubbo-${release_version}-bin.zip`，进行如下检查:
+Unzip `apache-dubbo-${release_version}-bin.zip` and check as follows:
 
-* Check signatures are good
-* LICENSE and NOTICE exists and contents are good
+* Check signatures are valid
+* LICENSE and NOTICE exist and contents are correct
 
-注意，如果二进制包里面引入了第三方依赖，则需要更新LICENSE，加入第三方依赖的LICENSE，如果第三方依赖的LICENSE是Apache 2.0，并且对应的项目中包含了NOTICE，还需要更新NOTICE文件
+Note that if third-party dependencies are introduced in the binary package, the LICENSE should be updated to include the LICENSE of the third-party dependencies. If the LICENSE of the third-party dependency is Apache 2.0 and the corresponding project contains NOTICE, the NOTICE file must also be updated.
 
-## 进入投票
+## Enter Voting
 
-dubbo毕业之后，投票分只需要一次：
+After the graduation of Dubbo, only one vote is needed:
 
-1. Dubbo社区投票，发起投票邮件到dev@dubbo.apache.org。在社区开发者Review，经过至少72小时并统计到3个同意发版的binding票后（只有PMC的票才是binding），即可进入下一阶段的投票。
+1. Dubbo community voting, send a voting email to dev@dubbo.apache.org. Upon review by community developers, if there are at least 3 binding votes in favor of the release after 72 hours, the voting process can proceed to the next stage (only PMC votes are binding).
 
-Dubbo社区投票邮件模板：
+Dubbo community voting email template:
 
 ```text
 Hello Dubbo Community,
 
-This is a call for vote to release Apache Dubbo version 2.7.2.
+This is a call for a vote to release Apache Dubbo version 2.7.2.
 
 The release candidates:
 https://dist.apache.org/repos/dist/dev/dubbo/2.7.2/
@@ -372,10 +370,10 @@ afab04c53edab38d52275d2a198ea1aff7a4f41e
 Release Notes:
 https://github.com/apache/dubbo/releases/tag/untagged-4775c0a22c60fca55118
 
-The artifacts have been signed with Key : 28681CB1, which can be found in the keys file:
+The artifacts have been signed with Key: 28681CB1, which can be found in the keys file:
 https://dist.apache.org/repos/dist/dev/dubbo/KEYS
 
-The vote will be open for at least 72 hours or until necessary number of votes are reached.
+The vote will be open for at least 72 hours or until the necessary number of votes are reached.
 
 Please vote accordingly:
 
@@ -388,7 +386,7 @@ The Apache Dubbo Team
 ```
 
 
-宣布投票结果模板：
+Announcement Vote Results Template:
 ```text
 We’ve received 3 +1 binding votes and one +1 non-binding vote:
 
@@ -404,18 +402,18 @@ Best regards,
 The Apache Dubbo Team
 ```
 
-## 正式发布
+## Official Release
 
-1. 将[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/dubbo)目录下，KEYS有更新的，也需要同步更新。
-2. 删除[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包
-3. 删除[release](https://dist.apache.org/repos/dist/release/dubbo)目录下上一个版本的发布包，这些包会被自动保存在[这里](https://archive.apache.org/dist/dubbo)
-4. 此步骤为发布2.7.0及以上版本必须要的步骤。在此之前请先确保所有的artifact都是ok的。登录http://repository.apache.org，点击左侧的`Staging repositories`，然后搜索Dubbo关键字，会出现一系列的仓库，选择你最近上传的仓库，然后点击上方的Release按钮.
-5. 发布GitHub上的[release notes](https://github.com/apache/dubbo/releases)
-6. 修改GitHub的Readme文件，将版本号更新到最新发布的版本
-7. 在官网下载[页面](/en/blog/2020/05/18/past-releases/)上添加最新版本的下载链接。最新的下载链接应该类似[这样](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). 同时更新以前版本的下载链接，改为类似`https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. 具体可以参考过往的[下载链接](/en/blog/2020/05/18/past-releases/) [可以参考] (https://github.com/apache/dubbo-website/pull/887)
-8. 合并`${release-version}-release`分支到对应的主干分支， 然后删除相应的release分支，例如: `git push origin --delete 2.7.0-release`
-9. 发邮件到 `dev@dubbo.apache.org`
-  宣布release邮件模板： 
+1. Move the release package from the [dev](https://dist.apache.org/repos/dist/dev/dubbo) directory to the [release](https://dist.apache.org/repos/dist/release/dubbo) directory, and if the KEYS have been updated, they need to be synchronized.
+2. Delete the release package from the [dev](https://dist.apache.org/repos/dist/dev/dubbo) directory.
+3. Delete the release package of the previous version from the [release](https://dist.apache.org/repos/dist/release/dubbo) directory. These packages will be automatically saved [here](https://archive.apache.org/dist/dubbo).
+4. This step is mandatory for releasing versions 2.7.0 and above. Ensure that all artifacts are okay beforehand. Log in to http://repository.apache.org, click on `Staging repositories` on the left, then search for the Dubbo keyword. A series of repositories will appear; select the one you recently uploaded, then click the Release button above.
+5. Publish the [release notes](https://github.com/apache/dubbo/releases) on GitHub.
+6. Update the version number in the GitHub README file to the latest released version.
+7. Add the latest download link for the version on the download [page](/en/blog/2020/05/18/past-releases/). The latest download link should be something like [this](https://www.apache.org/dyn/closer.cgi?path=dubbo/$VERSION/apache-dubbo-$VERSION-source-release.zip). Also, update the previous version’s download link to something like `https://archive.apache.org/dist/dubbo/$VERSION/apache-dubbo-$VERSION-bin-release.zip`. For specifics, please refer to past [download links](/en/blog/2020/05/18/past-releases/) and [this] (https://github.com/apache/dubbo-website/pull/887).
+8. Merge the `${release-version}-release` branch into the corresponding trunk branch, and then delete the corresponding release branch, for example: `git push origin --delete 2.7.0-release`.
+9. Send an email to `dev@dubbo.apache.org`
+  Announcement release email template: 
 
 ```text
 Hello Community,
@@ -423,9 +421,9 @@ Hello Community,
 The Apache Dubbo team is pleased to announce that the
 2.6.6 has just been released.
 
-Apache Dubbo™  is a high-performance, java based, open source
+Apache Dubbo™  is a high-performance, java-based, open-source
 RPC framework. Dubbo offers three key functionalities, which include
-interface based remote call, fault tolerance & load balancing, and
+interface-based remote call, fault tolerance & load balancing, and
 automatic service registration & discovery.
 
 Both the source release[1] and the maven binary release[2] are available
@@ -446,11 +444,11 @@ an issue on GitHub[4].
 ```
 
 
-## 完成Maven Convenient Binary发布（可选）
+## Complete Maven Convenient Binary Release (Optional)
 
-**repository.apache.org** nexus仓库的权限已经申请，参见[jira](https://issues.apache.org/jira/browse/INFRA-16451)
+Permission for the **repository.apache.org** nexus repository has been applied for, see [jira](https://issues.apache.org/jira/browse/INFRA-16451).
 
-发布jar包到maven仓库，首先访问[repository.apache.org](https://repository.apache.org), 选择`staging repository`, 点击`release`按钮。等待一段时间之后，在[这里](https://repository.apache.org/content/repositories/releases/org/apache/dubbo/)确认完整性和正确性. 发布到Maven中央仓库则还需要等待一段时间。可以在[这里](https://repo.maven.apache.org/maven2/org/apache/dubbo)进行确认。
+To publish jar packages to the Maven repository, first visit [repository.apache.org](https://repository.apache.org), select `staging repository`, then click the `release` button. After a while, confirm the integrity and correctness [here](https://repository.apache.org/content/repositories/releases/org/apache/dubbo/). Publication to the Maven Central repository may also take some time. You can confirm at [this link](https://repo.maven.apache.org/maven2/org/apache/dubbo).
 
 ## FAQ
 

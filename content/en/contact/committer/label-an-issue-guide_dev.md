@@ -1,36 +1,36 @@
 ---
 aliases:
-    - /zh/contact/committer/label-an-issue-guide_dev/
-description: 给问题打标签
-linkTitle: 问题标签
-title: 给问题打标签
+    - /en/contact/committer/label-an-issue-guide_dev/
+description: Labeling Issues
+linkTitle: Issue Labels
+title: Labeling Issues
 type: docs
 weight: 3
 ---
 
 
 
-如果您正在处理一个问题，请记得**给这个问题标记一个或者多个您认为有意义的标签**。有了标签，其他开发人员就会很轻松地识别出问题，以便对其进行分类并跟踪进度。
+If you are dealing with an issue, please remember to **label it with one or more tags that you find meaningful**. With labels, other developers can easily identify the issue for categorization and tracking progress.
 
-对于需要编码和发版修复的 issues 和 pull requests，需要您**将其标记为 [milestone](https://github.com/apache/dubbo/milestones)**。
+For issues and pull requests that require coding and release fixes, you need to **label them as [milestone](https://github.com/apache/dubbo/milestones)**.
 
-一些常用的标签：
+Some commonly used labels:
 
-* 请求帮助
+* Help Wanted
   * help wanted
   * good first issue
-* 优先级
+* Priority
   * priority/blocker
   * priority/high
   * priority/low
   * priority/normal
-* 状态
+* Status
   * status/need-triage
   * status/DO-NOT-MERGE
   * status/READY-TO-MERGE
   * status/invalid
   * status/wontfix
-* 类型
+* Type
   * type/bug
   * type/documentation
   * type/enhancement

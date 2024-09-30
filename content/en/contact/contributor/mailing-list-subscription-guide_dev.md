@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/contact/contributor/mailing-list-subscription-guide_dev/
-description: 邮件列表订阅向导
-linkTitle: 邮件组向导
-title: 邮件列表订阅向导
+    - /en/contact/contributor/mailing-list-subscription-guide_dev/
+description: Mailing List Subscription Guide
+linkTitle: Mailing Group Guide
+title: Mailing List Subscription Guide
 type: docs
 weight: 3
 ---
@@ -11,13 +11,13 @@ weight: 3
 
 
 
-Apache incubator 的 Dubbo 开发者邮件列表（dev@dubbo.apache.org）已经建立，请随时订阅并参考[^1]获取更多细节。
+The Apache Incubator's Dubbo developer mailing list (dev@dubbo.apache.org) has been established. Please feel free to subscribe and refer to [^1] for more details.
 
-你也可以直接查看[历史邮件](https://lists.apache.org/list.html?dev@dubbo.apache.org)
+You can also directly view the [archive](https://lists.apache.org/list.html?dev@dubbo.apache.org).
 
-下面是一个关于 Dubbo 邮件列表订阅的简短指南：
+Here is a brief guide on subscribing to the Dubbo mailing list:
 
-1. 发一封邮件到 dev-subscribe@dubbo.apache.org，其内容和标题均可为空。随后，您会收到一封邮件，其内容如下：
+1. Send an email to dev-subscribe@dubbo.apache.org, leaving the content and subject empty. You will receive an email with the following content:
 
 ```
 from: dev-help@dubbo.apache.org
@@ -52,7 +52,7 @@ or click here:
 ...
 ```
 
-2. 直接回复邮件，其内容和标题仍然可以为空，随后，您将再次收到一封邮件，其内容如下：
+2. Reply to the email, leaving the content and subject empty, and you will receive another email with the following content:
 
 ```
 from: dev-help@dubbo.apache.org
@@ -82,10 +82,10 @@ subscription address.
 ...
 ```
 
-3. 到此，邮件列表订阅完毕，从现在开始，您将收到很多发送到该邮件列表的邮件，如果您有更多的问题，只需发送邮件到dev@dubbo.apache.org，就会有人回答您的问题。
+3. At this point, the mailing list subscription is complete. From now on, you will receive many emails sent to this mailing list. If you have more questions, just send an email to dev@dubbo.apache.org, and someone will answer your questions.
 
-4. 如果您想取消订阅，只需发送一封邮件到dev-unsubscribe@dubbo.apache.org，收到回复后，请按其指定步骤执行。
+4. If you wish to unsubscribe, simply send an email to dev-unsubscribe@dubbo.apache.org and follow the steps specified in the reply you receive.
 
-> 请注意：dev@dubbo.apache.org是有效的。dev@dubbo.incubator.apache.org已经不再使用。
+> Note: dev@dubbo.apache.org is valid. dev@dubbo.incubator.apache.org is no longer in use.
 
 [^1] https://apache.org/foundation/mailinglists.html#subscribing

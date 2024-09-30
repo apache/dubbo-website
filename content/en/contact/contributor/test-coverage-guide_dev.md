@@ -1,26 +1,26 @@
 ---
 aliases:
-    - /zh/contact/contributor/test-coverage-guide_dev/
-description: 测试覆盖率向导
-linkTitle: 测试覆盖率向导
-title: 测试覆盖率向导
+    - /en/contact/contributor/test-coverage-guide_dev/
+description: Test Coverage Guide
+linkTitle: Test Coverage Guide
+title: Test Coverage Guide
 type: docs
 weight: 7
 ---
 
 
 
-### 写单元测试的收益 
-* 单元测试能帮助每个人深入代码细节，了解代码的功能。
-* 通过测试用例我们能发现bug，并提交代码的健壮性。
-* 测试用例同时也是代码的demo用法。
-### 单元测试用例的一些设计原则 
-* 应该精心设计好步骤，颗粒度和组合条件。
-* 注意边界条件。
-* 单元测试也应该好好设计，不要写无用的代码。
-* 当你发现一个`方法`很难写单元测试时，如果可以确认这个`方法`是`臭代码`，那么就和开发者一起重构它。
-* Dubbo中用的mock框架是: [mockito](http://site.mockito.org/). 下面是一些开发向导:[mockito tutorial](https://www.baeldung.com/bdd-mockito),[mockito refcard](https://dzone.com/refcardz/mockito)
-* TDD（可选）：当你开始写一个新的功能时，你可以试着先写测试用例。 
-### 测试覆盖率设定值
-* 在现阶段，Delta更改代码的测试覆盖设定值为：>＝60%，越高越好。
-* 我们可以在这个页面中看到测试报告: https://codecov.io/gh/apache/dubbo
+### Benefits of Writing Unit Tests 
+* Unit tests help everyone dive into the details of the code and understand its functionality.
+* Through test cases, we can discover bugs and enhance the robustness of the code.
+* Test cases also serve as demo usage of the code.
+### Some Design Principles for Unit Test Cases 
+* Steps, granularity, and combination conditions should be carefully designed.
+* Pay attention to boundary conditions.
+* Unit tests should also be well-designed; do not write useless code.
+* When you find a `method` difficult to unit test, if it can be confirmed that this `method` is `smelly code`, then refactor it together with the developer.
+* The mock framework used in Dubbo is: [mockito](http://site.mockito.org/). Below are some developer guides: [mockito tutorial](https://www.baeldung.com/bdd-mockito), [mockito refcard](https://dzone.com/refcardz/mockito)
+* TDD (optional): When you start writing a new feature, you can try to write the test cases first. 
+### Test Coverage Threshold
+* At this stage, the test coverage threshold for Delta changes is: >=60%, the higher the better.
+* We can see the test report on this page: https://codecov.io/gh/apache/dubbo
