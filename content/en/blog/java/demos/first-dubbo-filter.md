@@ -1,17 +1,17 @@
 ---
-title: "第一个 Dubbo Filter"
-linkTitle: "第一个 Dubbo Filter"
+title: "First Dubbo Filter"
+linkTitle: "First Dubbo Filter"
 tags: ["Java"]
 date: 2018-07-01
 description: >
-  本文介绍了如何开发一个 Dubbo 的 Filter
+  This article introduces how to develop a Dubbo Filter
 ---
 
-### 概述
-在Dubbo的整体设计中，Filter是一个很重要的概念，包括Dubbo本身的大多数功能，都是基于此扩展点实现的，在每次的调用过程中，Filter的拦截都会被执行。
+### Overview
+In the overall design of Dubbo, Filters are an important concept. Most of Dubbo's functionalities are realized based on this extension point, and the interception of Filters is executed during each call.
 
-#### Dubbo Filter的加载机制
-Dubbo中已经实现的Filter大概有二十几个，它们的入口都是ProtocolFilterWrapper，ProtocolFilterWrapper对Protocol做了Wrapper，会在加载扩展的时候被加载进来，下面我们来看下这个Filter链是如何构造的。
+#### Loading Mechanism of Dubbo Filter
+There are approximately twenty Filters that have been implemented in Dubbo, all entering through ProtocolFilterWrapper. ProtocolFilterWrapper wraps the Protocol and is loaded during extension loading. Let's take a look at how this Filter chain is constructed.
 
 ```java
 //ProtocolFilterWrapper.java
@@ -63,8 +63,8 @@ public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
 
 ```
 
-#### Dubbo Filter的激活机制
-通过上述代码我们可以看到，在`buildInvokerChain`中,先获取所有已经激活的调用链，这里的调用链是已经排好序的。再通过Invoker来构造出一个Filter的调用链，最后构建出的调用链大致可以表示为：Filter1->Filter2->Filter3->......->Invoker,下面我们来看一下，第一步中获取已经激活的调用链的详细流程：
+#### Activation Mechanism of Dubbo Filter
+From the above code, we can see that in `buildInvokerChain`, all activated invocation chains are first obtained, which are already sorted. The invocation chain can be roughly represented as: Filter1->Filter2->Filter3->......->Invoker. Let's look at the process of obtaining the activated invocation chain:
 
 ```java
     public List<T> getActivateExtension(URL url, String key, String group) {
@@ -114,10 +114,10 @@ public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
         return exts;
     }
 ```
-通过以上代码可以看到，用户自己配置的Filter中，有些是默认激活，有些是需要通过配置文件来激活。而所有Filter的加载顺序，也是先处理Dubbo的默认Filter，再来处理用户自己定义并且配置的Filter。通过"-"配置，可以替换掉Dubbo的原生Filter，通过这样的设计，可以灵活地替换或者修改Filter的加载顺序。
+Through the above code, it can be seen that some Filters configured by users are activated by default, while others need to be activated through configuration files. The loading order of all Filters first processes Dubbo's default Filters, followed by user-defined and configured Filters. Through the "-" configuration, Dubbo's native Filters can be replaced, allowing flexible replacement or modification of the order in which Filters are loaded.
 
-#### Dubbo原生的Filter
-Dubbo原生的Filter很多，RpcContext，accesslog等功能都可以通过Dubbo来实现，下面我们来介绍一下Consumer端用于上下文传递的ConsumerContextFilter：
+#### Native Dubbo Filters
+There are many native Filters in Dubbo, such as RpcContext, accesslog, etc. can be implemented through Dubbo. Below we introduce the ConsumerContextFilter, which is used for context passing on the Consumer side:
 
 ```java
 public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
@@ -137,12 +137,12 @@ public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcExcept
         }
     }
 ```
-此Filter记录了调用过程中的状态信息，并且通过invocation对象将客户端设置的attachments参数传递到服务端。并且在调用完成后清除这些参数，这就是为什么请求状态信息可以按次记录并且进行传递。
+This Filter records the status information during the call process and passes the attachments parameter set by the client to the server through the invocation object. After the call is completed, these parameters are cleared, which is why the request status information can be recorded and passed accordingly.
 
-#### 实现一个Dubbo Filter
-得益于Dubbo灵活的设计和良好的可扩展性，我们可以通过实现自己的Dubbo Filter来完成调用链路中的逻辑嵌入，比如，耗时统计，monitor信息统计等，下面我们来实现一个简单的Filter:
+#### Implementing a Dubbo Filter
+Thanks to Dubbo's flexible design and good scalability, we can implement our own Dubbo Filter to embed logic within the calling chain, such as time consumption statistics, monitor information statistics, etc. Below we implement a simple Filter:
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -150,14 +150,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxFilter.java (实现Filter接口)
+                |-XxxFilter.java (implementing Filter interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-com.alibaba.dubbo.rpc.Filter (纯文本文件，内容为：xxx=com.xxx.XxxFilter)
+                |-com.alibaba.dubbo.rpc.Filter (plain text file, content: xxx=com.xxx.XxxFilter)
 ```
 
-XxxFilter.java：
+XxxFilter.java:
 
 ```java
 public class XxxFilter implements Filter {
@@ -175,20 +175,20 @@ META-INF/dubbo/com.alibaba.dubbo.rpc.Filter：
 xxx=com.xxx.XxxFilter
 ```
 
-在 xml 中配置:
+Configuring in XML:
 
 ```xml
-<!-- 消费方调用过程拦截 -->
+<!-- Intercepting consumer-side calls -->
 <dubbo:reference filter="xxx" />
-<!-- 消费方调用过程缺省拦截器，将拦截所有reference -->
+<!-- Default interceptor for consumer-side calls, will intercept all references -->
 <dubbo:consumer filter="xxx"/>
-<!-- 提供方调用过程拦截 -->
+<!-- Intercepting provider-side calls -->
 <dubbo:service filter="xxx" />
-<!-- 提供方调用过程缺省拦截器，将拦截所有service -->
+<!-- Default interceptor for provider-side calls, will intercept all services -->
 <dubbo:provider filter="xxx"/>
 ```
 
-或者使用注解：
+Or use annotations:
 
 ```java
 @Activate(group = "consumer")
@@ -197,6 +197,7 @@ public class XxxFilter implements Filter {
 }
 ```
 
-使用 xml 的配置方式会更加灵活，粒度更细。
+Using XML configuration is more flexible and granular. 
 
-在before和after中，可以实现自己的业务逻辑来赋予该filter一定的功能。编写和配置完成后，该filter就会被Dubbo框架激活并且在调用链中执行。
+In before and after, you can implement your business logic to assign functionality to this filter. After writing and configuring, the filter will be activated by the Dubbo framework and executed in the calling chain.
+

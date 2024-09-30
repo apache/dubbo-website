@@ -3,97 +3,97 @@ title: "Dubbo Go 1.5.0"
 linkTitle: "dubbo-go 1.5.0"
 date: 2021-01-14
 description: >
-    Dubbo-go 发布 1.5 版，朝云原生迈出关键一步
+    Dubbo-go releases version 1.5, taking a significant step toward cloud-native.
 ---
 
-## 引语
+## Quote
 
-计算机技术浪潮每 10 年都有一次技术颠覆，相关知识体系最迟每 5 年都会革新一次，大概每两年贬值一半，在应用服务通信框架领域亦然。凡是有长期生命的通信框架，大概有 5 年的成长期和 5 年的稳定成熟期。每个时代都有其匹配的应用通信框架，在 20 年前的 2G 时代，强跨语言跨平台而弱性能的 gRPC 是不会被采用的。
+The wave of computer technology brings disruptive changes every decade, and related knowledge systems innovate at least every five years, approximately halving in value every two years. This also applies to the field of application service communication frameworks. For any communication framework with long-term viability, there is usually a five-year growth phase and a five-year stable maturity phase. Each era has its matching application communication framework; for example, in the 2G era twenty years ago, the cross-language and cross-platform gRPC, while strong, would not have been adopted due to its weak performance.
 
-每个通信框架，不同的人从不同角度看出不同的结论：初学者看重易用易学，性能测评者注重性能，应用架构师考虑其维护成本，老板则考虑则综合成本。一个应用通信框架的性能固然重要，其稳定性和进化能力更重要，得到有效维护的框架可在长时间单位内降低其综合成本：学习成本、维护成本、升级成本和更换成本。
+Different people see different conclusions from each communication framework: beginners value ease of use, performance evaluators focus on performance, application architects consider maintenance costs, and owners look at overall costs. While the performance of an application communication framework is important, its stability and evolution capability are more critical, as a well-maintained framework can reduce comprehensive costs over long periods: learning costs, maintenance costs, upgrade costs, and replacement costs.
 
-什么是 Dubbo-go？第一，它是 Dubbo 的 Go 语言版本，全面兼容 Dubbo 是其第一要义。第二，它是一个 Go 语言应用通信框架，会充分利用作为云原生时代第一语言---Go 语言的优势，扩展 dubbo 的能力。
+What is Dubbo-go? First, it is the Go language version of Dubbo, fully compatible with Dubbo as its primary goal. Second, it is an application communication framework in Go that will fully utilize the advantages of Go as the first language of the cloud-native era, expanding Dubbo's capabilities.
 
-2008 年诞生的 Dubbo 已有十多年历史，依靠阿里和其社区，历久弥新。2016 年发布的 Dubbo-go 也已进入第五个年头，如今全面兼容 Dubbo v2.7.x 的 Dubbo-go v1.5 终于发布了。
+Dubbo, born in 2008, has more than a decade of history, continually renewed with the support of Alibaba and its community. Dubbo-go, released in 2016, is now in its fifth year, and the fully compatible Dubbo-go v1.5 with Dubbo v2.7.x has finally been released.
 
-回首过往，Dubbo-go 已经具备如下能力：
+Looking back, Dubbo-go has developed the following capabilities:
 
-- 互联互通：打通了 gRPC 和 Spring Cloud 生态；
-- 可观测性：基于 OpenTracing  和 Prometheus，使得其在 Logging、Tracing 和 Metrics 方面有了长足进步；
-- 云原生：Dubbo-go 实现了基于 Kubernetes API Server 为注册中心的通信能力，做到了升级成本最低。
+- Interconnectivity: Bridging gRPC and Spring Cloud ecosystems;
+- Observability: Based on OpenTracing and Prometheus, making significant progress in Logging, Tracing, and Metrics;
+- Cloud-native: Dubbo-go has implemented communication capabilities based on Kubernetes API Server as a registry, minimizing upgrade costs.
 
-毋庸讳言，相较于现有成绩，发展阶段的 Dubbo-go 对未来有更多的期待之处：
+It goes without saying that compared to current achievements, the developing Dubbo-go has more expectations for the future:
 
-- 易用性：Dubbo-go 的入门成本并不低，把很多感兴趣者挡在了门外。但好消息是，随着 Dubbo-go 在阿里内部的逐步推开，阿里中间件团队对其进行了进一步的封装，经生产环境检验后会开放给社区使用。
-- 云原生：目前的 Dubbo-go 的基于 kubernetes 的方案，从技术分层角度来看， Kubernetes API Server 终究是系统的运维态组件，不应该暴露给应用层，否则会造成 APIServer 自身通信压力过大，且系统整体风险很高：应用层使用不当，或者框架自身的流量方面的 bug，可能会把 APIServer 打垮，后果就是造成整体后端服务能力的瘫痪！所以应用层需要感知的是 kubernetes 提供给应用层的 Operator，不断进化的 Dubbo-go 计划在 v1.6 版本中发布 Dubbo-go Operator。
+- Usability: The entry cost for Dubbo-go is high, which keeps many interested parties out. However, the good news is that as Dubbo-go is gradually implemented within Alibaba, the Alibaba middleware team is further encapsulating it, and it will be opened to the community after verification in production environments.
+- Cloud-native: The current Kubernetes-based solution of Dubbo-go, from a technical layering perspective, sees the Kubernetes API Server as a maintenance component of the system that should not be exposed to the application layer. Otherwise, it might lead to excessive communication pressure on the APIServer, putting the overall system at high risk: improper use at the application layer or bugs in the framework's traffic handling could cripple the APIServer, risking paralysis of overall backend service capabilities! Therefore, the application layer needs to perceive the Operators that Kubernetes provides. The evolving Dubbo-go plans to release the Dubbo-go Operator in version v1.6.
 
-雄关漫道真如铁，而今迈步从头越。Dubbo-go 社区【钉钉群 23331795】与 Dubbo-go 同在。
+Without a doubt, Dubbo-go community [DingTalk group 23331795] stands with Dubbo-go.
 
-## 应用维度注册模型
+## Application Dimension Registration Model
 
-经过一段时间的努力之后，我们终于完成了应用维度的服务注册与发现。和原本已有的接口维度的注册模型比起来，新的注册模型有两个突出特点：
+After a period of effort, we have finally completed application-level service registration and discovery. Compared with the existing interface-level registration model, the new registration model has two prominent features:
 
-1. 和主流的注册模型保持一致。目前的主流做法都是按照应用为基本单位来进行注册的，如Spring Cloud。在支持应用维度注册之后，对于接下来的云原生支持，奠定了基础；
-2. 大幅度减轻对注册中心的压力。在该模型之下，从注册中心的视角看过去，集群规模只和实例数量成正比，而不是现有的和服务数量成正比；
+1. Consistency with mainstream registration models. The current mainstream approach registers based on applications, like Spring Cloud. Supporting application-level registration lays the foundation for subsequent cloud-native support;
+2. Significantly reduces pressure on the registry. Under this model, from the perspective of the registry, the cluster size is only proportional to the number of instances, rather than the existing proportionality to the number of services.
 
-当然，我们在设计的时候就考虑到了用户的迁移成本。要迁移到新的注册模型，只需要将现有使用的注册中心换成新的 `ServiceDiscoveryRegistry` 就可以。
+Of course, we considered users' migration costs during the design phase. To migrate to the new registration model, simply replace the currently used registry with the new `ServiceDiscoveryRegistry`.
 
-`ServiceDiscoveryRegistry` 是支持多种实现的。目前来说，我们支持：
+`ServiceDiscoveryRegistry` supports multiple implementations. Currently, we support:
 
 1. nacos;
 2. etcd;
 3. zookeeper;
 
-我们提倡新上线的业务尽量使用 nacos 和 etcd 这种更可靠稳定的注册中心。
+We encourage new business launches to use more reliable and stable registries like nacos and etcd.
 
+## Metadata Report Center
 
-## Metadata Report 元数据中心
+In version v1.5, while supporting the application-level registration model, an important issue arises concerning the storage of metadata at the interface level. The essential difference between the service-level registration model and the application-level registration model is the inconsistency in the data dimensions registered with the registry. Although we have removed interface-level data from the registry in the application-level registration model, a consumer must obtain service information opened by the provider side to truly find the service address to call. In version v1.5, we stored this data in the metadata center.
 
-v1.5 版本在支持应用维度注册模型时，有很重要的一个问题需要解决，即接口维度的元数据存储。服务维度的注册模型和应用维度的注册模型，本质的区别是往注册中心注册的数据维度的不一致。虽然我们在应用维度注册模型中，将接口维度的数据从注册中心中剔除了，但是在rpc的框架中，一个 consumer 要想真正找到想要调用的服务地址，就必须得到 provider 端开放的服务信息。这部分数据，在 v1.5 版本中，我们将它们存储到了元数据中心中。
+The metadata center is an interface definition. It generally refers to a storage area where interface-level metadata can be stored and read, with the provider side calling for storage and the consumer side reading it. Data in the metadata center must maintain accuracy and real-time consistency.
 
-元数据中心，是一个接口定义。泛指一块存储区域，可以对接口级别的元数据进行存储、读取，provider 端调用存储，consumer 端调用读取。元数据中心中的数据需要保持准确性、实时性。
+Currently, the metadata center has two parent classes (there is no inheritance in Go; here, the parent-child class refers purely to the combination of subclasses and parents). One is the local implementation, and the other is the remote implementation. The local implementation uses the provider's memory as a virtual metadata center, while the remote implementation relies on registries like ZooKeeper, etcd, nacos, etc., as the metadata center. Currently, remote implementations include subclasses for zookeeper, nacos, etcd, and consul. Thus, users can store and distribute metadata information through the aforementioned third-party registries.
 
-目前元数据中心，有两个父类（Go 中没有继承，此处说的父子类，单纯指子类对父类的组合关系）实现，一个是 local 实现，一个是 remote 实现。local 实现是将 provider 的内存作为虚拟元数据中心，remote 实现是指依赖 ZooKeeper、etcd、nacos 等注册中心作为元数据中心。目前 remote 有 zookeeper、nacos、etcd 和 consul 的子类实现。即用户可以将元数据信息，通过以上的第三方注册中心进行数据存储和分发。
+## Invocation Interface Support for Attribute Properties
 
-## Invocation 接口支持 attribute 属性
+The invocation structure has a new attribute property for internal attribute storage. Unlike attachments, attributes do not get passed from the consumer to the provider.
 
-invocation 结构中新增 attribute 属性支持，用于流程内部的属性存储。和 attachment 不同点在于，attachment会从 consumer 传递到 provider，但 attribute 属性不会。
+## K8s Registry
 
-## k8s注册中心
+Before version v1.5, the implementation of the k8s registry directly used the List&&Watch interfaces of the Pod object from [k8s client](https://github.com/kubernetes/client-go). This iteration introduces k8s informers. The reasons for this change are twofold: first, to a certain extent, the dubbo-go k8s registry is also a k8s controller, and using the informer mode is more k8s native. More importantly, the community plans to evolve towards a CRD+Operator model, and the informer mode is an exploratory step for this evolution. Apart from this groundwork, this iteration also supports service discovery across namespaces. Additionally, to reduce pressure on the kube-apiserver List&&Watch, we have distinguished the behavior of providers and consumers, with providers no longer watching and only performing write operations on the kube-apiserver.
 
-在 v1.5 版本之前，k8s 注册中心的实现是通过直接使用 [k8s client](https://github.com/kubernetes/client-go) 中Pod对象的 List&&Watch 接口。在本次迭代中引入了 k8s informer。这样做的原因在于两点，首先一定的程度上来讲 dubbo-go 的 k8s 注册中心也是一个 k8s controller，使用 informer 的模式更加 k8s native。更重要的是社区计划后续向 CRD+Operator 的模式演进，informer 模式是对后续的演进的探索。除了这个铺垫之外，本次迭代还对跨 namespace 的服务发现做了支持。再有就是为了减少对 kube-apiserver List&&Watch 的压力，对 provider 和 consumer 的行为进行了区分，provider 不再进行 Watch 而仅对 kube-apiserver 进行写操作。
+# Optimize Routing Model
 
-# 优化路由模型
-
-在 1.5 版本之前，Router 模型中属性是包含：优先级与路由属性，Router Chain 只包含路由属性。从中能识别出其实 Router Chain 也是一种特殊 Router。1.5 版本之后，使 Router 更抽象，分离出其优先级属性，新增 Priority Router、Chain 继承 Router 使其变为特殊的 Router，使关系上看起来更加清晰。如下图：
+Before version v1.5, the Router model included properties: priority and routing properties. The Router Chain only contained routing properties. It can be inferred that the Router Chain is also a special type of Router. After version v1.5, Routers became more abstract, separating out the priority property and introducing Priority Routers. The Chain inherits from Router, making it a special type of Router to enhance clarity in relationships. As shown in the diagram:
 
 ![img](/imgs/blog/dubbo-go/1.5/router.png)
 
-# 回顾与展望
+# Review and Outlook
 
-Dubbo-go 处于一个比较稳定成熟的状态。目前新版本正处于往云原生方向的尝试，应用服务维度注册是首先推出的功能，这是一个和之前模型完全不一样的新注册模型。该版本是我们朝云原生迈进新一步的关键版本。除此之外，包含在该版本也有一些之前提到的优化。
+Dubbo-go is in a relatively stable and mature state. The current new version is an attempt toward cloud-native direction, with application service dimension registration being the first introduced feature—a completely different new registration model. This version is a key step toward our progress in cloud-native. Additionally, this version includes some previously mentioned optimizations.
 
-下一个版本 v1.5.1，虽然仍是以兼容 Dubbo 2.7.x 为主要任务，但在分布式能力的增强上，也是我们关注的重点。
+The next version, v1.5.1, still primarily focuses on compatibility with Dubbo 2.7.x, but enhancing distributed capabilities is also a focal point.
 
-在**分布式事务**方面，有一个重要的基于 Seata 扩展实现。通过增加过滤器，在服务端接收  xid 并结合 seata-golang[^2] 达到支持分布式事务的目的。 从而使 Dubbo-go 在分布式场景下，让用户有更多的选择，能适应更多的个性化场景。
+In terms of **distributed transactions**, there is an important extension implementation based on Seata. By adding filters, xid can be received on the server, combined with seata-golang[^2] to support distributed transactions. This allows Dubbo-go to offer users more choices in distributed scenarios, adapting to a wider range of personalized scenarios.
 
-与此同时，在**传输链路安全性**上，TLS 安全传输链路是该版本重要功能之一。通过提供统一入口，未来能引入更多的与传输链路安全性相关的功能，适应用户不一样的使用场景。
+Simultaneously, regarding **transport link security**, TLS secure transport links are one of the important features of this version. By providing a unified entry point, it can introduce more functionalities related to transport link security in the future, accommodating different user scenarios.
 
-**注册中心模型**上，支持多注册中心集群负载均衡。业务部署假设是双注册中心（图 1 ），从原来双注册中心中所有 Provider 一起选址。优化成选址时的多了一层注册中心集群间的负载均衡（图 2 ）。
+On the **registry model**, it supports load balancing across multiple registry clusters. Assuming business deployment involves dual registries (Figure 1), the optimization adds a layer of load balancing across registry clusters when selecting from all Providers in the original dual registry.
 
 ![img](/imgs/blog/dubbo-go/1.5/multi-registry.png)
 
 
-（图 1 ）
+(Figure 1)
 
 ![img](/imgs/blog/dubbo-go/1.5/loadbalance.png)
 
-（图 2 ）
+(Figure 2)
 
-以前的 dubbo-go RPC 层直接复用了 getty 框架 的 RPC[[^3](https://github.com/AlexStocks/getty/tree/feature/rpc)]，未能实现协议和应用通信地址的隔离。阿里中间件展图同学重构了 dubbo-go  RPC 层，实现了连接复用：可以实现 consumer 与 provider 端的同一个 TCP 连接上进行多协议通信。相关 PR 业已合并，会在 dubbo-go v1.5.1 中发布。
+Previously, the dubbo-go RPC layer reused the RPC layer of the getty framework[[^3](https://github.com/AlexStocks/getty/tree/feature/rpc)], failing to achieve isolation between protocols and application communication addresses. The Alibaba Middleware Exhibition team restructured the dubbo-go RPC layer to achieve connection reuse: enabling multi-protocol communication over the same TCP connection for both consumer and provider ends. The related PR has been merged and will be released in dubbo-go v1.5.1.
 
-目前下一个版本正在紧锣密鼓的开发中，具体规划及任务清单[^1] ，都已经在 Github 上体现。
+Currently, the next version is under intense development, and the specific plans and task lists[^1] are already reflected on GitHub.
 
 [^1]: https://github.com/apache/dubbo-go/projects/8
 [^2]: https://github.com/seata-golang/seata-golang
 [^3]: https://github.com/AlexStocks/getty/tree/feature/rpc
+

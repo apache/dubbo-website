@@ -1,113 +1,89 @@
 ---
-title: "Dubbo 一致性Hash负载均衡实现剖析"
-linkTitle: "Dubbo 一致性Hash负载均衡实现剖析"
+title: "Analysis of Dubbo Consistent Hash Load Balancing Implementation"
+linkTitle: "Analysis of Dubbo Consistent Hash Load Balancing Implementation"
 tags: ["Java"]
 date: 2019-05-01
 description: >
-    本文以一般的一致性Hash实现作为引子，详细剖析了Dubbo一致性Hash负载均衡算法的实现
+    This article uses a general consistent hash implementation as a preface to analyze in detail the implementation of Dubbo's consistent hash load balancing algorithm.
 ---
 
-需要强调的是，Dubbo的Hash映射模型与大部分网上资料描述的**环形队列Hash映射模型**是存在一些区别的。于我而言，环形队列Hash映射模型，不足以让我对一致性Hash有足够彻底的了解。直到看懂了Dubbo的一致性Hash的实现，才觉得豁然开朗。
+It should be emphasized that Dubbo's hash mapping model differs from the **circular queue hash mapping model** described in most online materials. For me, the circular queue hash mapping model is not sufficient for a thorough understanding of consistent hashing. It was only after comprehending Dubbo's consistent hash implementation that I felt enlightened.
 
+### 1. Circular Queue Hash Mapping Model
 
+This solution is fundamentally based on the modulus operation. Taking modulo 2^32, the range of hash values is [0, 2^32-1]. The next steps include two parts:
 
-### 一、环形队列Hash映射模型
+#### **a. Mapping Services**
 
-这种方案，其基础还是基于取模运算。对2^32取模，那么，Hash值的区间为[0, 2^32-1]。接下来要做的，就包括两部分：  
+Service addresses (ip+port) are constructed into specific identifiers (e.g., md5 codes) according to certain rules, and then the identifiers are used to modulo 2^32 to determine the service's corresponding position in the hash value range. Assume we have services Node1, Node2, Node3, the mapping is as follows:
 
-#### **a、映射服务**
+![Init](/imgs/blog/consistenthash/consistent-hash-init-model.jpg)
 
-将服务地址（ip+端口）按照一定规则构造出特定的识别码（如md5码），再用识别码对2^32取模，确定服务在Hash值区间对应的位置。假设有Node1、Node2、Node3三个服务，其映射关系如下：
+#### **b. Mapping Requests and Locating Services**
 
-![Init](/imgs/blog/consistenthash/consistent-hash-init-model.jpg) 
+When initiating a request, we often include parameters, which can be used to determine which service to call. Assume there are requests R1, R2, R3, after calculating specific identifiers and modulating, the mapping is as follows:
 
+![Request](/imgs/blog/consistenthash/consistent-hash-request-model.jpg)
 
+From the image, we can see that the R1 request maps between 0-Node1, R2 maps between Node1-Node2, and R3 maps between Node2-Node3. We take the **first service whose hash value is greater than or equal to the request hash value** as the actual service to call. In other words, the R1 request will call Node1 service, the R2 request will call Node2 service, and the R3 request will call Node3 service.
 
-#### **b、映射请求、定位服务**
+#### **c. Adding Service Nodes**
 
-在发起请求时，我们往往会带上参数，而这些参数，就可以被我们用来确定具体调用哪一个服务。假设有请求R1、R2、R3，对它们的参数也经过计算特定识别码、取余的一系列运算之后，有如下映射关系：
+Assuming a new service Node4 is added, mapped before Node3 and coincidentally disrupts the original mapping:
 
-![Request](/imgs/blog/consistenthash/consistent-hash-request-model.jpg) 
+![New Node](/imgs/blog/consistenthash/consistent-hash-new-node-model.jpg)
 
-从图中，我们可以看到，R1请求映射在0-Node1中间，R2请求映射在Node1-Node2中间，R3请求映射在Node2-Node3中间。我们取**服务Hash值大于等于请求Hash值**的**第一个服务**作为实际的调用服务。也就是说，R1请求将调用Node1服务，R2请求将调用Node2服务，R3请求将调用Node3服务。
+Thus, the R3 request will actually call service Node4, while requests R1 and R2 remain unaffected.
 
+#### **d. Deleting Service Nodes**
 
+Assuming service Node2 crashes, the R2 request will map to Node3:
 
-#### **c、新增服务节点**
+![Delete Node](/imgs/blog/consistenthash/consistent-hash-delete-node-model.jpg)
 
-假设新增服务Node4，映射在Node3之前，恰巧破坏了原来的一个映射关系：
+Original R1 and R3 requests remain unaffected.
 
-![New Node](/imgs/blog/consistenthash/consistent-hash-new-node-model.jpg) 
+> It can be seen that when services are added or deleted, the affected requests are limited. Unlike simple modulo mapping, where changes in services require adjustments to global mappings.
 
-这样，请求R3将会实际调用服务Node4，但请求R1、R2不受影响。
+#### **e. Balance and Virtual Nodes**
 
+In our assumptions, we have Node1, Node2, Node3 evenly dividing the circle through hash mapping, resulting in balanced request distribution. However, in reality, calculating service hash values rarely aligns so favorably. Mapping may look something like this:
 
+![Balance](/imgs/blog/consistenthash/consistent-hash-balance-model.jpg)
 
-#### **d、删除服务节点**
+This would lead to most requests mapped to Node1. Thus, the concept of virtual nodes comes into play.
 
-假设服务Node2宕机，那么R2请求将会映射到Node3：
+Virtual nodes are created by not only hashing the service's address but also processing its address (for example, in Dubbo, appending counting symbols 1, 2, 3... to the ip+port string, representing virtual nodes 1, 2, 3) to achieve multiple nodes mapping for the same service. By introducing virtual nodes, request distribution can be made more balanced.
 
-![Delete Node](/imgs/blog/consistenthash/consistent-hash-delete-node-model.jpg) 
+### 2. Using Dubbo Consistent Hash and Introduction of Load Balancing Strategies
 
-原本的R1、R3请求不受影响。
+#### **a. How to use consistent hash as Dubbo's load balancing strategy?**
 
+The configuration items dubbo:service, dubbo:reference, dubbo:provider, dubbo:consumer, and dubbo:method can all set Dubbo's load balancing strategy, where the property value for consistent hash is **consistenthash**.
 
+Taking dubbo:reference as an example:
 
-> 可以看出，当新增、删除服务时，受影响的请求是有限的。不至于像简单取模映射一般，服务发生变化时，需要调整全局的映射关系。
-
-
-
-#### **e、平衡性与虚拟节点**
-
-在我们上面的假设中，我们假设Node1、Node2、Node3三个服务在经过Hash映射后所分布的位置恰巧把环切成了均等的三分，请求的分布也基本是平衡的。但是实际上计算服务Hash值的时候，是很难这么巧的。也许一不小心就映射成了这个样子：
-
-![Balance](/imgs/blog/consistenthash/consistent-hash-balance-model.jpg) 
-
-这样，就会导致大部分请求都会被映射到Node1上。因此，引出了虚拟节点。  
-
-所谓虚拟节点，就是除了对服务本身地址进行Hash映射外，还通过在它地址上做些处理（比如Dubbo中，在ip+port的字符串后加上计数符1、2、3......，分别代表虚拟节点1、2、3），以达到同一服务映射多个节点的目的。通过引入虚拟节点，我们可以把上图中映射给Node1的请求进一步拆分：
-
-![Virtual Node](/imgs/blog/consistenthash/consistent-hash-virtual-node-model.jpg) 
-
-如上图所示，若有请求落在Node3-Node1'区间，该请求应该是调用Node1'服务，但是因为Node1'是Node1的虚拟节点，所以实际调用的是Node1服务。通过引入虚拟节点，请求的分布就会比较平衡了。
-
-
-
-### **二、Dubbo一致性Hash的使用与负载均衡策略的引入阶段**
-
-#### **a、如何使用一致性Hash作为Dubbo的负载均衡策略？**
-
-dubbo:service、dubbo:reference、dubbo:provider、dubbo:consumer、dubbo:method这几个配置项都可以配置Dubbo的负载均衡策略，其中一致性Hash的属性值是：**consistenthash**。
-
-以dubbo:reference为例：
-
-**XML配置：**
+**XML Configuration:**
 
 > <dubbo:reference loadbalance="consistenthash" /\>
 
-
-
-**Properties配置：**
+**Properties Configuration:**
 
 > dubbo.reference.loadbalance=consistenthash
 
-
-
-**注解：**
+**Annotations:**
 
 > @Reference(loadbalance = "consistenthash")
 
+#### **b. Introduction phase of Dubbo load balancing strategies**
 
+Dubbo implements client-side load balancing. The implementation of service interface proxy classes will not be described in detail here but can be referred to in the official documentation:
 
-#### **b、Dubbo负载均衡策略的引入阶段**
+> Service introduction: /zh-cn/docs/source_code_guide/refer-service.html
 
-Dubbo实现的是客户端负载均衡。关于服务接口代理类的实现，这里不做详细描述，可以参考官网：
+After the interface proxy class is generated and configured, the service invocation process is approximately: proxy -> MockClusterInvoker -> cluster strategy (e.g., FailoverClusterInvoker) -> initialize load balancing strategy -> determine Invoker according to the selected load balancing strategy.
 
-> 服务引入：/zh-cn/docs/source_code_guide/refer-service.html
-
-在接口代理类生成、并且装配好后，服务的调用基本是这样一个流程：proxy -> MockClusterInvoker -> 集群策略（如：FailoverClusterInvoker） -> 初始化负载均衡策略 -> 根据选定的负载均衡策略确定Invoker。    
-
-**负载均衡策略的初始化**是在AbstractClusterInvoker中的initLoadBalance方法中初始化的：
+**Load balancing strategy initialization** occurs in the initLoadBalance method of AbstractClusterInvoker:
 
 ```java
 protected LoadBalance initLoadBalance(List<Invoker<T>> invokers, Invocation invocation) {
@@ -120,33 +96,27 @@ protected LoadBalance initLoadBalance(List<Invoker<T>> invokers, Invocation invo
 }
 ```
 
-这部分代码逻辑分为两部分：  
+The logic here is divided into two parts:
 
-1、获取调用方法所配置的LOADBALANCE_KEY属性的值，LOADBALANCE_KEY这个常量的实际值为：loadbalance，即为我们的所配置的属性；  
+1. Retrieve the value of the LOADBALANCE_KEY attribute configured for the calling method; the actual value of LOADBALANCE_KEY is: loadbalance, which is our configured property;
 
-2、利用SPI机制来初始化并加载该值所代表的负载均衡策略。
+2. Utilize the SPI mechanism to initialize and load the load balancing strategy represented by that value.
 
+All load balancing strategies inherit from the LoadBalance interface. In various cluster strategies, the final call will reach the select method of AbstractClusterInvoker, and AbstractClusterInvoker will call LoadBalance's select method in doSelect, **which begins the execution of the load balancing strategy.**
 
+### 3. Implementation of Dubbo Consistent Hash Load Balancing
 
-所有的负载均衡策略都会继承LoadBalance接口。在各种集群策略中，最终都会调用AbstractClusterInvoker的select方法，而AbstractClusterInvoker会在doSelect中，**调用LoadBalance的select方法，这里即开始了负载均衡策略的执行。**
+One point to clarify is that what I refer to as the **execution of the load balancing strategy** means selecting one from all Providers as the remote call object for the current Consumer. In the code, Providers are encapsulated as Invoker entities, so in direct terms, the execution of the load balancing strategy is selecting an Invoker from the Invoker list.
 
+Thus, comparing with the ordinary consistent hash implementation, Dubbo's consistent hash algorithm can also be divided into two steps:
 
+**1. Mapping Providers to the hash value range (the actual mapping is Invoker);**  
 
-### 三、Dubbo一致性Hash负载均衡的实现
+**2. Mapping requests and finding the first Invoker whose hash value is greater than or equal to the request hash value.**
 
-需要说明的一点是，我所说的**负载均衡策略的执行**，即是在所有的Provider中选出一个，作为当前Consumer的远程调用对象。在代码中，Provider被封装成了Invoker实体，所以直接说来，负载均衡策略的执行就是在Invoker列表中选出一个Invoker。  
+#### **a. Mapping Invokers**
 
-所以，对比普通一致性Hash的实现，Dubbo的一致性Hash算法也可以分为两步：  
-
-**1、映射Provider至Hash值区间中（实际中映射的是Invoker）；**  
-
-**2、映射请求，然后找到大于等于请求Hash值的第一个Invoker。**  
-
-
-
-#### **a、映射Invoker**
-
-Dubbo中所有的负载均衡实现类都继承了AbstractLoadBalance，调用LoadBalance的select方法时，实际上调用的是AbstractLoadBalance的实现：
+All load balancing implementation classes in Dubbo inherit from AbstractLoadBalance. When calling the select method of LoadBalance, it actually calls the implementation in AbstractLoadBalance:
 
 ```java
 @Override
@@ -157,24 +127,24 @@ public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invo
     if (invokers.size() == 1) {
         return invokers.get(0);
     }
-    // doSelect这里进入具体负载均衡算法的执行逻辑
+    // doSelect here enters the specific load balancing algorithm execution logic
     return doSelect(invokers, url, invocation);
 }
 ```
 
-可以看到这里调用了doSelect，Dubbo一致性Hash的具体实现类名字是**ConsistentHashLoadBalance**，让我们来看看它的doSelect方法干了啥：
+From here we see the call to doSelect; the specific implementation class of Dubbo's consistent hash is **ConsistentHashLoadBalance**. Let's see what its doSelect method does:
 
 ```java
 @Override
 protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
     String methodName = RpcUtils.getMethodName(invocation);
-    // key格式：接口名.方法名
+    // key format: interface name.method name
     String key = invokers.get(0).getUrl().getServiceKey() + "." + methodName;
-    // identityHashCode 用来识别invokers是否发生过变更
+    // identityHashCode is used to identify if invokers have changed
     int identityHashCode = System.identityHashCode(invokers);
     ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(key);
     if (selector == null || selector.identityHashCode != identityHashCode) {
-        // 若不存在"接口.方法名"对应的选择器，或是Invoker列表已经发生了变更，则初始化一个选择器
+        // If the selector for "interface.method name" does not exist, or if the Invoker list has changed, initialize a new selector
         selectors.put(key, new ConsistentHashSelector<T>(invokers, methodName, identityHashCode));
         selector = (ConsistentHashSelector<T>) selectors.get(key);
     }
@@ -182,48 +152,48 @@ protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation
 }
 ```
 
-这里有个很重要的概念：**选择器——selector**。这是Dubbo一致性Hash实现中，承载着整个映射关系的数据结构。它里面主要有这么几个参数：
+Here is an important concept: **selector**. It is the data structure that carries the entire mapping relationship in Dubbo's consistent hash implementation. It primarily has the following parameters:
 
 ```java
 /**
- * 存储Hash值与节点映射关系的TreeMap
+ * TreeMap storing the mapping of hash values to nodes
  */
 private final TreeMap<Long, Invoker<T>> virtualInvokers;
 
 /**
- * 节点数目
+ * Number of nodes
  */
 private final int replicaNumber;
 
 /**
- * 用来识别Invoker列表是否发生变更的Hash码
+ * Hash code to identify if the Invoker list has changed
  */
 private final int identityHashCode;
 
 /**
- * 请求中用来作Hash映射的参数的索引
+ * Indices of the parameters used for hash mapping in the request
  */
 private final int[] argumentIndex;
 ```
 
-在新建ConsistentHashSelector对象的时候，就会遍历所有Invoker对象，然后计算出其地址（ip+port）对应的md5码，并按照配置的节点数目replicaNumber的值来初始化服务节点和所有虚拟节点：
+When initializing the ConsistentHashSelector object, it will traverse all Invoker objects, calculate the md5 code of their addresses (ip+port), and initialize service nodes and all virtual nodes according to the configured number of nodes replicaNumber:
 
 ```java
 ConsistentHashSelector(List<Invoker<T>> invokers, String methodName, int identityHashCode) {
     this.virtualInvokers = new TreeMap<Long, Invoker<T>>();
     this.identityHashCode = identityHashCode;
     URL url = invokers.get(0).getUrl();
-    // 获取配置的节点数目
+    // Get the configured number of nodes
     this.replicaNumber = url.getMethodParameter(methodName, HASH_NODES, 160);
-    // 获取配置的用作Hash映射的参数的索引
+    // Get the configured indices for parameters used for hash mapping
     String[] index = COMMA_SPLIT_PATTERN.split(url.getMethodParameter(methodName, HASH_ARGUMENTS, "0"));
     argumentIndex = new int[index.length];
     for (int i = 0; i < index.length; i++) {
         argumentIndex[i] = Integer.parseInt(index[i]);
     }
-    // 遍历所有Invoker对象
+    // Traverse all Invoker objects
     for (Invoker<T> invoker : invokers) {
-        // 获取Provider的ip+port
+        // Get Provider's ip+port
         String address = invoker.getUrl().getAddress();
         for (int i = 0; i < replicaNumber / 4; i++) {
             byte[] digest = md5(address + i);
@@ -236,28 +206,26 @@ ConsistentHashSelector(List<Invoker<T>> invokers, String methodName, int identit
 }
 ```
 
-这里值得注意的是：以replicaNumber取默认值160为例，假设当前遍历到的Invoker地址为127.0.0.1:20880，它会依次获得“127.0.0.1:208800”、“127.0.0.1:208801”、......、“127.0.0.1:2088040”的md5摘要，在每次获得摘要之后，还会对该摘要进行四次数位级别的散列。大致可以猜到其目的应该是为了加强散列效果。（希望有人能告诉我相关的理论依据。）  
+It is worth noting that, using a default value of 160 for replicaNumber, if the currently traversed Invoker address is 127.0.0.1:20880, it will successively obtain the md5 summaries of “127.0.0.1:208800”, “127.0.0.1:208801”, ..., “127.0.0.1:2088040”, and after getting each summary, it will perform four levels of hashing on that summary. The purpose is likely to enhance the hashing effect. (I hope someone can tell me the theoretical basis for this.)
 
-代码中 **virtualInvokers.put(m, invoker)** 即是存储当前计算出的Hash值与Invoker的映射关系。  
+In the code, **virtualInvokers.put(m, invoker)** is where the mapping relationship between the computed hash value and the Invoker is stored.
 
-这段代码简单说来，就是为每个Invoker都创建replicaNumber个节点，Hash值与Invoker的映射关系即象征着一个节点，这个关系存储在TreeMap中。  
+This code essentially creates replicaNumber nodes for each Invoker, and the mapping relationship of Hash values to Invokers signifies a node, which is stored in the TreeMap.
 
+#### **b. Mapping Requests**
 
-
-#### **b、映射请求**
-
-让我们重新回到ConsistentHashLoadBalance的**doSelect**方法，若没有找到selector则会新建selector，找到selector后便会调用selector的select方法：
+Let's return to the **doSelect** method of ConsistentHashLoadBalance; if no selector is found, a new selector is created, and upon finding the selector, its select method is called:
 
 ```java
 public Invoker<T> select(Invocation invocation) {
-    // 根据invocation的【参数值】来确定key，默认使用第一个参数来做hash计算
+    // Determine key based on invocation's [parameter value], default uses the first parameter for hash calculation
     String key = toKey(invocation.getArguments());
-    //  获取【参数值】的md5编码
+    // Get [parameter value]'s md5 encoding
     byte[] digest = md5(key);
     return selectForKey(hash(digest, 0));
 }
 
-// 根据参数索引获取参数，并将所有参数拼接成字符串
+// Get parameters based on indices and concatenate all parameters into a string
 private String toKey(Object[] args) {
     StringBuilder buf = new StringBuilder();
     for (int i : argumentIndex) {
@@ -268,7 +236,7 @@ private String toKey(Object[] args) {
     return buf.toString();
 }
 
-// 根据参数字符串的md5编码找出Invoker
+// Find Invoker based on the md5 encoding of the parameter string
 private Invoker<T> selectForKey(long hash) {
     Map.Entry<Long, Invoker<T>> entry = virtualInvokers.ceilingEntry(hash);
     if (entry == null) {
@@ -278,10 +246,11 @@ private Invoker<T> selectForKey(long hash) {
 }
 ```
 
-argumentIndex是在初始化Selector的时候一起赋值的，代表着需要用哪几个请求参数作Hash映射获取Invoker。比如：有方法methodA(Integer a, Integer b, Integer c)，如果argumentIndex的值为{0,2}，那么即用a和c拼接的字符串来计算Hash值。  
+argumentIndex is initialized at the same time as the Selector, representing which request parameters are used for hash mapping to obtain the Invoker. For example, with the method methodA(Integer a, Integer b, Integer c), if the value of argumentIndex is {0,2}, the hash value is calculated using the concatenated string of a and c.
 
-我们已经知道virtualInvokers是一个TreeMap，TreeMap的底层实现是红黑树。对于TreeMap的方法ceilingEntry(hash)，它的作用是用来**获取大于等于传入值的首个元素**。可以看到，这一点与一般的一致性Hash算法的处理逻辑完全是相同的。  
+We know that virtualInvokers is a TreeMap, and the underlying implementation of TreeMap is a red-black tree. The role of the ceilingEntry(hash) method in TreeMap is to **retrieve the first element that is greater than or equal to the input value**. As seen, this is identical to the handling logic of a general consistent hash algorithm.
 
-但这里的回环逻辑有点不同。对于取模运算来讲，大于最大值后，会自动回环从0开始，而这里的逻辑是：当没有比传入ceilingEntry()方法中的值大的元素的时候，virtualInvokers.ceilingEntry(hash)必然会得到null，于是，就用virtualInvokers.firstEntry()来获取整个TreeMap的第一个元素。  
+However, the wrap-around logic here is slightly different. For modulo operations, exceeding the maximum value automatically wraps back to 0, while here, the logic is: if there are no elements greater than the value input in the ceilingEntry() method, virtualInvokers.ceilingEntry(hash) will definitely yield null, so virtualInvokers.firstEntry() is used to get the first element of the entire TreeMap.
 
-从selectForKey中获取到Invoker后，负载均衡策略也就算是执行完毕了。后续获取远程调用客户端等调用流程不再赘述。
+After obtaining the Invoker from selectForKey, the load balancing strategy execution is considered complete. The subsequent processes for obtaining remote calling clients and other invocation processes are omitted.
+

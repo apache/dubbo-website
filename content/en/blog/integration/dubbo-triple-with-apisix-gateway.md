@@ -1,24 +1,24 @@
 ---
 description: |
-    本文为大家介绍了如何借助 Apache APISIX 实现 triple 协议代理，使用 nacos 作为注册中心。
-linkTitle: 使用 Apache APISIX 代理 Dubbo 服务（triple协议）
-title: 使用 Apache APISIX 代理 Dubbo 服务（triple协议）
+    This article introduces how to implement triple protocol proxy using Apache APISIX, with Nacos as the registry.
+linkTitle: Use Apache APISIX to Proxy Dubbo Services (Triple Protocol)
+title: Use Apache APISIX to Proxy Dubbo Services (Triple Protocol)
 type: docs
 date: 2024-04-22
 weight: 2
 ---
 
-关于如何用网关代理 triple 协议服务的原理介绍，请参见 [HTTP 网关接入](/en/overview/mannual/java-sdk/tasks/gateway/triple/) 一节文档。
+For a description of how to proxy triple protocol services with a gateway, please refer to the section on [HTTP Gateway Access](/en/overview/mannual/java-sdk/tasks/gateway/triple/).
 
-本文我们使用 `Apache APISIX + triple 协议 + Nacos 注册中心` 的组合，演示如何使用 Apache APISIX 代理 Dubbo 服务。
+This article demonstrates how to use the combination of `Apache APISIX + triple protocol + Nacos registry` to proxy Dubbo services.
 
-## 示例应用说明
+## Sample Application Description
 
-本示例完整源码与部署资源文件可查看 [dubbo-samples-gateway-triple-apisix](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-triple)，示例架构图如下：
+The complete source code and deployment resource files for this example can be found at [dubbo-samples-gateway-triple-apisix](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-triple), with the architecture diagram as follows:
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/apisix-nacos-dubbo.png"/>
 
-在该示例中定义并发布了一个 `org.apache.dubbo.samples.gateway.apisix.DemoService` 的 triple 服务，接口定义为：
+In this example, a triple service `org.apache.dubbo.samples.gateway.apisix.DemoService` has been defined and published, with the interface defined as:
 
 ```java
 public interface DemoService {
@@ -26,7 +26,7 @@ public interface DemoService {
 }
 ```
 
-接口实现如下：
+The interface implementation is as follows:
 
 ```java
 @DubboService
@@ -38,7 +38,7 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-Dubbo服务相关配置：
+Dubbo service-related configuration:
 
 ```yaml
 dubbo:
@@ -53,26 +53,26 @@ dubbo:
         port: 50052
 ```
 
-## 部署应用
+## Deploy Application
 
-1. 在 [本地下载并启动 Nacos](/en/overview/reference/integrations/nacos/#本地下载)
+1. Download and start Nacos [locally](/en/overview/reference/integrations/nacos/#本地下载).
 
-2. 运行以下命令，启动 Dubbo 应用。
+2. Run the following command to start the Dubbo application.
 
-下载源码：
+Download the source code:
 
 ```shell
 $ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
 $ cd dubbo-samples/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-triple
 ```
 
-在 `dubbo-samples-gateway-apisix-triple` 目录，运行以下命令启动应用：
+In the `dubbo-samples-gateway-apisix-triple` directory, run the following command to start the application:
 
 ```shell
 $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.gateway.apisix.ProviderApplication"
 ```
 
-运行以下命令，测试服务已经正常启动：
+Run the following command to test if the service has started normally:
 
 ```shell
 curl \
@@ -81,18 +81,18 @@ curl \
     http://localhost:50052/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/
 ```
 
-## 接入 APISIX 网关
+## Access APISIX Gateway
 
-本文档使用 Docker 安装 APISIX。确保本地先安装 [Docker](https://www.docker.com/) 和 [Docker Compose](https://docs.docker.com/compose/)。
+This document uses Docker to install APISIX. Ensure that [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed locally.
 
-首先，下载 [apisix-docker](https://github.com/apache/apisix-docker) 仓库。
+First, download the [apisix-docker](https://github.com/apache/apisix-docker) repository.
 
 ```shell
 $ git clone https://github.com/apache/apisix-docker.git
 $ cd apisix-docker/example
 ```
 
-由于本示例要接入到 Nacos 注册中心，因此需要修改 `apisix-docker/example` 目录下安装用的 `docker-compose.yaml`，添加如下 docker compose 配置内容：
+Since this example needs to connect to the Nacos registry, the `docker-compose.yaml` in the `apisix-docker/example` directory needs to be modified to add the following Docker Compose configuration:
 
 ```yaml
   nacos:
@@ -108,7 +108,7 @@ $ cd apisix-docker/example
       apisix:
 ```
 
-启动 APISIX 前，在 `conf/config.yaml` 文件中增加如下配置，[让 APISIX 连接到 Nacos 注册中心](https://apisix.apache.org/docs/apisix/discovery/nacos/#service-discovery-via-nacos)：
+Before starting APISIX, add the following configuration to the `conf/config.yaml` file to [connect APISIX to the Nacos registry](https://apisix.apache.org/docs/apisix/discovery/nacos/#service-discovery-via-nacos):
 
 ```yaml
 discovery:
@@ -117,11 +117,11 @@ discovery:
       - "http://192.168.33.1:8848"
 ```
 
-最后使用 `docker-compose` 启用 APISIX：`docker-compose -p docker-apisix up -d`。
+Finally, enable APISIX using `docker-compose`: `docker-compose -p docker-apisix up -d`.
 
-### 配置服务源与路由
+### Configure Service Source and Route
 
-在 APISIX 中配置 Nacos upstream 及路由，即可实现后端实例地址自动发现（假设 APISIX 端口是 9080）：
+Configure Nacos upstream and routes in APISIX to achieve automatic discovery of backend instance addresses (assuming the APISIX port is 9080):
 
 ```shell
 curl http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -i -d '
@@ -135,20 +135,17 @@ curl http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f13
 }'
 ```
 
-> 在上述命令中，请求头 X-API-KEY 是 Admin API 的访问 token，可以在 conf/config.yaml 文件中的 apisix.admin_key.key 查看。
+> In the above command, the request header X-API-KEY is the access token for the Admin API, which can be found in the apisix.admin_key.key in the conf/config.yaml file.
 
-### 验证服务调用
+### Verify Service Call
 
-使用以下命令发送请求至需要配置的路由：
+Use the following command to send a request to the route that needs to be configured:
 
 ```shell
 curl -i http://127.0.0.1:9080/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/
 ```
 
-### REST 模式
+### REST Mode
 
-如果您觉得 `/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/` 这样的 http 端口对于网关访问不够友好，可参考 [为 triple 协议发布 rest 风格 http 接口](/en/overview/mannual/java-sdk/tasks/gateway/triple/#rest-风格接口)。
-
-
-
+If you find the HTTP port `/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/` not friendly enough for gateway access, refer to [Publishing REST Style HTTP Interfaces for Triple Protocol](/en/overview/mannual/java-sdk/tasks/gateway/triple/#rest-风格接口).
 

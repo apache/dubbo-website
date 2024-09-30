@@ -1,48 +1,45 @@
 ---
-title: "第一个 Dubbo 应用"
-linkTitle: "第一个 Dubbo 应用"
+title: "First Dubbo Application"
+linkTitle: "First Dubbo Application"
 tags: ["Java"]
 slug: dubbo-101
 date: 2018-08-07
 description: >
-    现代的分布式服务框架的基本概念与 RMI 是类似的，同样是使用 Java 的 Interface 作为服务契约，通过注册中心来完成服务的注册和发现，远程通讯的细节也是通过代理类来屏蔽。
+    The basic concepts of modern distributed service frameworks are similar to RMI, using Java's Interface as the service contract, registering and discovering services through a registration center, and shielding the details of remote communication through proxy classes.
 ---
 
-## Java RMI 简介
+## Introduction to Java RMI
 
-Java RMI （Remote Method Invocation）- 远程方法调用，能够让客户端像使用本地调用一样调用服务端 Java 虚拟机中的对象方法。RMI 是面向对象语言领域对 RPC （Remote Procedure Call）的完善，用户无需依靠 IDL 的帮助来完成分布式调用，而是通过依赖接口这种更简单自然的方式。
+Java RMI (Remote Method Invocation) allows clients to invoke methods on objects in the server's Java Virtual Machine as if they were local calls. RMI is an enhancement of RPC (Remote Procedure Call) in the object-oriented language domain, enabling distributed calls without relying on IDL, using interfaces instead.
 
-### Java RMI 工作原理
+### Working Principle of Java RMI
 
-一个典型的 RMI 调用如下图所示：
+A typical RMI call proceeds as follows:
 
-1. 服务端向 RMI 注册服务绑定自己的地址，
-2. 客户端通过 RMI 注册服务获取目标地址，
-3. 客户端调用本地的 Stub 对象上的方法，和调用本地对象上的方法一致，
-4. 本地存根对象将调用信息打包，通过网络发送到服务端，
-5. 服务端的 Skeleton 对象收到网络请求之后，将调用信息解包，
-6. 然后找到真正的服务对象发起调用，并将返回结果打包通过网络发送回客户端。
+1. The server binds its service to an address in RMI.
+2. Clients obtain the target address via the RMI registry.
+3. The client invokes methods on the local Stub object as if invoking methods on a local object.
+4. The local Stub object packages the call information and sends it over the network to the server.
+5. The server's Skeleton receives the network request and unpacks the call information.
+6. The actual service object is called, and the result is sent back to the client.
 
 ![RMI Flow](/imgs/blog/rmi-flow.png)
 
-(来源：https://www.cs.rutgers.edu/~pxk/417/notes/images/rpc-rmi_flow.png)
+(Source: https://www.cs.rutgers.edu/~pxk/417/notes/images/rpc-rmi_flow.png)
 
-### Java RMI 基本概念
+### Basic Concepts of Java RMI
 
-Java RMI 是 Java 领域创建分布式应用的技术基石。后续的 EJB 技术，以及现代的分布式服务框架，其中的基本理念依旧是 Java RMI 的延续。在 RMI 调用中，有以下几个核心的概念：
+Java RMI is the technical foundation for creating distributed applications in Java. Subsequent EJB technology and modern distributed service frameworks continue the fundamental concepts of Java RMI. There are several core concepts in RMI calls:
 
-1. 通过**接口**进行远程调用
+1. Remote calls are made through **interfaces**.
+2. Client **Stub objects** and server **Skeleton objects** disguise remote calls as local calls.
+3. **RMI registry service** facilitates service registration and discovery.
 
-2. 通过客户端的 **Stub 对象**和服务端的 **Skeleton 对象**的帮助将远程调用伪装成本地调用
-3. 通过 **RMI 注册服务**完成服务的注册和发现
+For the first point, clients depend on interfaces, while servers must provide implementations. Prior to J2SE 1.5, rmic was required to compile the client Stub and server Skeleton objects beforehand; later versions no longer require this.
 
-对于第一点，客户端需要依赖接口，而服务端需要提供该接口的实现。
+The following code snippets illustrate service registration and discovery in RMI.
 
-对于第二点，在 J2SE 1.5 版本之前需要通过 rmic 预先编译好客户端的 Stub 对象和服务端的 Skeleton 对象。在之后的版本中，不再需要事先生成 Stub 和 Skeleton 对象。
-
-下面通过示例代码简单的展示 RMI 中的服务注册和发现
-
-#### 服务端的服务注册
+#### Service Registration on the Server
 
 ```java
 Hello obj = new HelloImpl(); // #1
@@ -51,14 +48,14 @@ Registry registry = LocateRegistry.createRegistry(1099); // #3
 registry.rebind("Hello", stub); // #4
 ```
 
-说明：
+Instructions:
 
-1. 初始化服务对象实例，
-2. 通过 *UnicastRemoteObject.exportObject* 生成可以与服务端通讯的 Stub 对象，
-3. 创建一个本地的 RMI 注册服务，监听端口为 1099。该注册服务运行在服务端，也可以单独启动一个注册服务的进程，
-4. 将 Stub 对象绑定到注册服务上，这样，客户端可以通过 *Hello* 这个名字查找到该远程对象。
+1. Initialize the service object instance.
+2. Generate a Stub object that can communicate with the server.
+3. Create a local RMI registry service listening on port 1099.
+4. Bind the Stub object to the registry service, enabling clients to find the remote object by the name *Hello*.
 
-#### 客户端的服务发现
+#### Service Discovery by the Client
 
 ```java
 Registry registry = LocateRegistry.getRegistry(); // #1
@@ -66,46 +63,44 @@ Hello stub = (Hello) registry.lookup("Hello"); // #2
 String response = stub.sayHello(); // #3
 ```
 
-说明：
+Instructions:
 
-1. 获取注册服务实例，在本例中，由于没有传入任何参数，假定要获取的注册服务实例部署在本机，并监听在 1099 端口上，
-2. 从注册服务中查找服务名为 *Hello* 的远程对象，
-3. 通过获取的 Stub 对象发起一次 RMI 调用并获得结果。
+1. Obtain an instance of the registry service, assuming it's deployed locally and listening on port 1099.
+2. Look up the remote object named *Hello*.
+3. Make an RMI call through the Stub object.
 
-理解 RMI 的工作原理和基本概念，对掌握现代分布式服务框架很有帮助，建议进一步的阅读 RMI 官方教材 [^1]。
+Understanding RMI's principles and concepts aids in mastering modern distributed service frameworks. Further reading on the official RMI tutorial is recommended [^1].
 
-## Dubbo 基本概念
+## Basic Concepts of Dubbo
 
-现代的分布式服务框架的基本概念与 RMI 是类似的，同样是使用 Java 的 Interface 作为服务契约，通过注册中心来完成服务的注册和发现，远程通讯的细节也是通过代理类来屏蔽。具体来说，Dubbo 在工作时有以下四个角色参与：
+The basic concepts of modern distributed service frameworks are similar to RMI. They use Java's Interface as a service contract and utilize a registration center for service registration and discovery while shielding remote communication details through proxy classes. Specifically, four roles participate when Dubbo is working:
 
-1. 服务提供者 - 启动时在指定端口上暴露服务，并将服务地址和端口注册到注册中心上
-2. 服务消费者 - 启动时向注册中心订阅自己感兴趣的服务，以便获得服务提供方的地址列表
-3. 注册中心 - 负责服务的注册和发现，负责保存服务提供方上报的地址信息，并向服务消费方推送
-4. 监控中心 - 负责收集服务提供方和消费方的运行状态，比如服务调用次数、延迟等，用于监控
-5. 运行容器 - 负责服务提供方的初始化、加载以及运行的生命周期管理
+1. Service Provider - Exposes services on a specified port and registers the service address with the registry center.
+2. Service Consumer - Subscribes to services of interest from the registry center to obtain addresses of service providers.
+3. Registry Center - Manages service registration and discovery, storing service provider addresses and pushing them to service consumers.
+4. Monitoring Center - Collects the operational status of service providers and consumers, such as service call counts and delays, for monitoring.
+5. Running Container - Manages the initialization, loading, and lifecycle of service providers.
 
 ![dubbo-architecture](/imgs/blog/dubbo-architecture.png)
 
+**Deployment Phase**
 
+* The service provider exposes services on a specified port and registers the service information with the registry center.
+* The service consumer subscribes to the list of service addresses from the registry center.
 
-**部署阶段**
+**Runtime Phase**
 
-* 服务提供者在指定端口暴露服务，并向注册中心注册服务信息。
-* 服务消费者向注册中心发起服务地址列表的订阅。
+* The registry center pushes address list information to the service consumer.
+* The service consumer selects one from the address list to invoke the target service.
+* The service consumer and provider report their operational statuses to the monitoring center.
 
-**运行阶段**
+## Dubbo Application Based on API
 
-* 注册中心向服务消费者推送地址列表信息。
-* 服务消费者收到地址列表后，从其中选取一个向目标服务发起调用。
-* 调用过程服务消费者和服务提供者的运行状态上报给监控中心。
+Dubbo applications are generally assembled using Spring. To quickly obtain a working Dubbo application, this example skips complex configurations and instead constructs service providers and consumers using the Dubbo API approach, and does not require installation and configuration of the registry center and monitoring center.
 
-## 基于 API 的 Dubbo 应用
+In a production environment, Dubbo services require a distributed service registration center like ZooKeeper. For development convenience, Dubbo provides direct connection[^2] and multicast[^3] options to avoid additional setup for the registry center. This example will use multicast for service registration and discovery.
 
-Dubbo 的应用一般都是通过 Spring 来组装的。为了快速获得一个可以工作的 Dubbo 应用，这里的示例摒弃了复杂的配置，而改用面向 Dubbo API 的方式来构建服务提供者和消费者，另外，注册中心和监控中心在本示例中也不需要安装和配置。
-
-在生产环境，Dubbo 的服务需要一个分布式的服务注册中心与之配合，比如，ZooKeeper。为了方便开发，Dubbo 提供了直连[^2]以及组播[^3]两种方式，从而避免额外搭建注册中心的工作。在本例中，将使用组播的方式来完成服务的注册和发现。
-
-### 定义服务契约
+### Define Service Contract
 
 ```java
 public interface GreetingsService {
@@ -113,11 +108,11 @@ public interface GreetingsService {
 }
 ```
 
-**说明**：
+**Explanation**:
 
-1. 定义了一个简单的服务契约 *GreetingsService*，其中只有一个方法 *sayHi* 可供调用，入参是 *String* 类型，返回值也是 *String* 类型。
+1. A simple service contract *GreetingsService* is defined, containing a method *sayHi* that takes a *String* parameter and returns a *String*.
 
-### 提供契约的实现
+### Provide Contract Implementation
 
 ```java
 public class GreetingsServiceImpl implements GreetingsService { // #1
@@ -128,12 +123,12 @@ public class GreetingsServiceImpl implements GreetingsService { // #1
 }
 ```
 
-**说明**：
+**Explanation**:
 
-1. 服务提供者需要实现服务契约 *GreetingsService* 接口。
-2. 该实现简单的返回一个欢迎信息，如果入参是 *dubbo*，则返回 *hi, dubbo*。
+1. The service provider must implement the *GreetingsService* interface.
+2. The implementation simply returns a welcome message; if the parameter is *dubbo*, it returns *hi, dubbo*.
 
-### 实现 Dubbo 服务提供方
+### Implement Dubbo Service Provider
 
 ```java
 public class Application {
@@ -149,17 +144,17 @@ public class Application {
 }
 ```
 
-**说明**：
+**Explanation**:
 
-1. 创建一个 *ServiceConfig* 的实例，泛型参数信息是服务接口类型，即 *GreetingsService*。
-2. 生成一个 *ApplicationConfig* 的实例，并将其装配进 *ServiceConfig*。
-3. 生成一个 *RegistryConfig* 实例，并将其装配进 *ServiceConfig*，这里使用的是组播方式，参数是 `multicast://224.5.6.7:1234`。合法的组播地址范围为：*224.0.0.0 - 239.255.255.255*
-4. 将服务契约 *GreetingsService* 装配进 *ServiceConfig*。
-5. 将服务提供者提供的实现 *GreetingsServiceImpl* 的实例装配进 *ServiceConfig*。
-6. *ServiceConfig* 已经具备足够的信息，开始对外暴露服务，默认监听端口是 *20880*。
-7. 为了防止服务端退出，按任意键或者 *ctrl-c* 退出。 
+1. Create an instance of *ServiceConfig*, using the service interface type *GreetingsService*.
+2. Generate an instance of *ApplicationConfig* and inject it into *ServiceConfig*.
+3. Generate an instance of *RegistryConfig* and inject it into *ServiceConfig*, using multicast with `multicast://224.5.6.7:1234`. Valid multicast addresses range from *224.0.0.0 - 239.255.255.255*.
+4. Inject the service contract *GreetingsService* into *ServiceConfig*.
+5. Inject an instance of the implementation *GreetingsServiceImpl* into *ServiceConfig*.
+6. *ServiceConfig* is now ready to expose the service, which listens on port *20880* by default.
+7. Press any key or *ctrl-c* to prevent the server from exiting. 
 
-### 实现 Dubbo 服务调用方
+### Implement Dubbo Service Consumer
 
 ```java
 public class Application {
@@ -175,26 +170,26 @@ public class Application {
 }
 ```
 
-**说明**：
+**Explanation**:
 
-1. 创建一个 *ReferenceConfig* 的实例，同样，泛型参数信息是服务接口类型，即 *GreetingService*。
-2. 生成一个 *ApplicationConfig* 的实例，并将其装配进 *ReferenceConfig*。
-3. 生成一个 *RegistryConfig* 实例，并将其装配进 *ReferenceConfig*，注意这里的组播地址信息需要与服务提供方的相同。
-4. 将服务契约 *GreetingsService* 装配进 *ReferenceConfig*。
-5. 从 *ReferenceConfig* 中获取到 *GreetingService* 的代理。
-6. 通过 *GreetingService* 的代理发起远程调用，传入的参数为 *dubbo*。
-7. 打印返回结果 *hi, dubbo*。
+1. Create an instance of *ReferenceConfig*, using the service interface type *GreetingService*.
+2. Generate an instance of *ApplicationConfig* and inject it into *ReferenceConfig*.
+3. Generate an instance of *RegistryConfig* and inject it into *ReferenceConfig*; note that the multicast address must match the service provider's.
+4. Inject the service contract *GreetingsService* into *ReferenceConfig*.
+5. Obtain a proxy for *GreetingService* from *ReferenceConfig*.
+6. Initiate a remote call through the proxy, passing in *dubbo* as an argument.
+7. Print the returned result *hi, dubbo*.
 
-### 运行
+### Running
 
-完整的示例在 https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api 上提供。在完整的示例中，由于配置了 *exec-maven-plugin*，可以很方便的在命令行下通过 maven 的方式执行。当然，您也可以在 IDE 里直接执行，但是需要注意的是，由于使用了组播的方式来发现服务，运行时需要指定 *-Djava.net.preferIPv4Stack=true*。 
+The complete example is provided at https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api. In this example, *exec-maven-plugin* is configured for convenient command-line execution via Maven. You can also run it directly in IDE, but remember to specify *-Djava.net.preferIPv4Stack=true* because multicast is used for service discovery.
 
-#### 构建示例
+#### Build the Example
 
-通过以下的命令来同步示例代码并完成构建：
+Synchronize the example code and build with the following commands:
 
-1. 同步代码：git clone https://github.com/apache/dubbo-samples.git
-2. 构建：mvn clean package
+1. Sync code: git clone https://github.com/apache/dubbo-samples.git
+2. Build: mvn clean package
 
 ```bash
 $ git clone https://github.com/apache/dubbo-samples.git
@@ -217,11 +212,11 @@ INFO] Scanning for projects...
 [INFO] ------------------------------------------------------------------------
 ```
 
-当看到 *BUILD SUCCESS* 的时候表明构建完成，下面就可以开始进入运行阶段了。
+When you see *BUILD SUCCESS*, construction is complete, and we can proceed to the runtime phase.
 
-#### 运行服务端
+#### Run the Server
 
-通过运行以下的 maven 命令来启动服务提供者：
+Start the service provider with the following Maven command:
 
 ```bash
 $ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples.server.Application exec:java
@@ -238,11 +233,11 @@ log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more in
 first-dubbo-provider is running.
 ```
 
-当 *first-dubbo-provider is running.* 出现时，代表服务提供者已经启动就绪，等待客户端的调用。
+When *first-dubbo-provider is running.* appears, the service provider is ready and awaiting client calls.
 
-#### 运行客户端
+#### Run the Client
 
-通过运行以下的 maven 命令来调用服务：
+Run the following Maven command to invoke the service:
 
 ```bash
 $ mvn -Djava.net.preferIPv4Stack=true -Dexec.mainClass=com.alibaba.dubbo.samples.client.Application exec:java
@@ -259,30 +254,30 @@ log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more in
 hi, dubbo
 ```
 
-可以看到， *hi, dubbo* 是从服务提供者返回的执行结果。 
+The output shows that *hi, dubbo* is the result returned from the service provider.
 
-## 快速生成 Dubbo 应用
+## Quickly Generate a Dubbo Application
 
-Dubbo 还提供了一个公共服务快速搭建基于 Spring Boot 的 Dubbo 应用。访问 http://start.dubbo.io 并按照下图所示来生成示例工程：
+Dubbo also offers a public service to quickly set up a Spring Boot-based Dubbo application. Visit http://start.dubbo.io and follow the instructions in the image to generate an example project:
 
 ![dubbo initializr](/imgs/blog/dubbo-initializr.png)
 
-**说明**：
+**Explanation**:
 
-1. 在 *Group* 中提供 maven groupId，默认值是 *com.example*。
-2. 在 *Artifact* 中提供 maven artifactId，默认值是 *demo*。
-3. 在 *DubboServiceName* 中提供服务名，默认值是 *com.example.HelloService*。
-4. 在 *DubboServiceVersion* 中提供服务的版本，默认值是 *1.0.0*。
-5. 在 *Client/Server* 中选取本次构建的工程是服务提供者 (Server) 还是服务消费者 (Client)，默认值是 *server*。
-6. 使用 *embeddedZookeeper* 作为服务注册发现，默认为勾选。
-7. 是否激活 qos 端口，默认为不勾选，如果勾选可以通过 *22222* 端口访问。
-8. 点击 *Generate Project* 即可下载生成好的工程。
+1. Provide the Maven groupId in *Group*, default is *com.example*.
+2. Provide the Maven artifactId in *Artifact*, default is *demo*.
+3. Provide the service name in *DubboServiceName*, default is *com.example.HelloService*.
+4. Provide the service version in *DubboServiceVersion*, default is *1.0.0*.
+5. Select whether this build will be a service provider (Server) or consumer (Client) in *Client/Server*, default is *server*.
+6. Use *embeddedZookeeper* for service registration and discovery, which is checked by default.
+7. Choose whether to activate the qos port, unchecked by default; if checked, it can be accessed via port *22222*.
+8. Click *Generate Project* to download the generated project.
 
-在本例中展示的是服务提供者，同样的，通过在生成界面选取 *client* 来生成对应的服务消费者。
+This example demonstrates a service provider; similarly, select *client* in the generation interface to create the corresponding service consumer.
 
-### 运行
+### Running
 
-用 IDE 打开生成好的工程，可以发现应用是一个典型的 Spring Boot 应用。程序的入口如下所示：
+Open the generated project in an IDE; the application is a typical Spring Boot application. The program entry point is shown below:
 
 ```java
 @SpringBootApplication
@@ -294,12 +289,12 @@ public class DemoApplication {
 }
 ```
 
-**说明**：
+**Explanation**:
 
-1. 在 *2181* 端口上启动嵌入式 *ZooKeeper*。
-2. 启动 *Spring Boot* 上下文。
+1. Start an embedded *ZooKeeper* on port *2181*.
+2. Start the *Spring Boot* context.
 
-可以直接在 IDE 中运行，输出结果如下：
+You can run it directly in the IDE, and the output will be as follows:
 
 ```bash
 2018-05-28 16:59:38.072  INFO 59943 --- [           main] a.b.d.c.e.WelcomeLogoApplicationListener : 
@@ -325,13 +320,13 @@ public class DemoApplication {
 2018-05-28 16:59:39.624  INFO 59943 --- [           main] com.example.demo.DemoApplication         : Started DemoApplication in 1.746 seconds (JVM running for 2.963)
 ```
 
-**说明**：
+**Explanation**:
 
-1. 输出中打印的以 *dubbo.* 开头的配置信息，定义在 *main/resources/application.properties* 中。
+1. The printed configuration info starting with *dubbo.* is defined in *main/resources/application.properties*.
 
-### 通过 Telnet 管理服务
+### Manage Services via Telnet
 
-生成工程的时候如果选择了激活 *qos* 的话，就可以通过 *telnet* 或者 *nc* 来管理服务、查看服务状态。
+If you selected to activate *qos* when generating the project, you can manage services and view their status through *telnet* or *nc*.
 
 ```bash
 $ telnet localhost 22222
@@ -362,22 +357,23 @@ As Consumer side:
 +---------------------+---+
 ```
 
-目前 *qos* 支持以下几个命令，更详细的信息请查阅官方文档[^4]：
+Currently, *qos* supports the following commands; for more detailed information, please refer to the official documentation [^4]:
 
-* *ls*：列出消费者、提供者信息
-* *online*：上线服务
-* *offline*：下线服务
-* *help*：联机帮助
+* *ls*: List consumer and provider info.
+* *online*: Bring service online.
+* *offline*: Take service offline.
+* *help*: Online help.
 
-## 总结
+## Summary
 
-在本文中，从 RMI 开始，介绍了 Java 领域分布式调用的基本概念，也就是基于接口编程、通过代理将远程调用伪装成本地、通过注册中心完成服务的注册和发现。
+This article introduced the basic concepts of distributed calls in the Java domain, starting with RMI, specifically interface-based programming and using proxies to disguise remote calls as local, with registration centers facilitating service registration and discovery.
 
-然后为了简单起见，使用简单的组播注册方式和直接面向 Dubbo API 编程的方式介绍了如何开发一个 Dubbo 的完整应用。深入的了解 *ServiceConfig* 和 *ReferenceConfig* 的用法，对于进一步的使用 Spring XML 配置、乃至 Spring Boot 的编程方式有这很大的帮助。
+For simplicity, it showed how to develop a complete Dubbo application using multicast registration and a direct API-based approach. A deeper understanding of *ServiceConfig* and *ReferenceConfig* significantly aids in further use of Spring XML configurations or even Spring Boot programming.
 
-最后，简单的介绍了如何通过 Dubbo 团队提供的公共服务 start.dubbo.io 快速搭建基于 Spring Boot 的 Dubbo 应用，并通过 *qos* 来做 Dubbo 服务的简单运维。
+Finally, it briefly introduced how to quickly set up a Spring Boot-based Dubbo application using the public service provided by the Dubbo team at start.dubbo.io and perform basic operations via *qos*.
 
 [^1]: [Getting Started Using JavaTM RMI](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/hello/hello-world.html)
-[^2]: [直连提供者](/en/docsv2.7/user/examples/explicit-target/)
-[^3]: [Multicast 注册中心](/en/docsv2.7/user/references/registry/multicast/)
-[^4]: [在线运维命令](/en/docsv2.7/user/references/qos/)
+[^2]: [Direct Connection to Provider](/en/docsv2.7/user/examples/explicit-target/)
+[^3]: [Multicast Registry](/en/docsv2.7/user/references/registry/multicast/)
+[^4]: [Online Operations Commands](/en/docsv2.7/user/references/qos/)
+

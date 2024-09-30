@@ -1,9 +1,7 @@
-
 ---
 title: "Web"
 linkTitle: "Web"
 weight: 32
-description: "使用 Javascript 开发运行在浏览器上的 Dubbo Web 应用"
+description: "Developing Dubbo Web applications running in the browser using Javascript"
 ---
-
 

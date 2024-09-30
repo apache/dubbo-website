@@ -1,61 +1,55 @@
 ---
-title: "Dubbo-Api-Docs -- Apache Dubbo文档展示&测试工具"
-linkTitle: "Dubbo-Api-Docs -- Apache Dubbo文档展示&测试工具"
+title: "Dubbo-Api-Docs -- Apache Dubbo Documentation Display & Testing Tool"
+linkTitle: "Dubbo-Api-Docs -- Apache Dubbo Documentation Display & Testing Tool"
 tags: ["Java"]
 date: 2020-12-22
 description: >
-  本文将向你介绍Dubbo-Api-Docs
+  This article will introduce you to Dubbo-Api-Docs
 ---
 # Dubbo-Api-Docs 
-## 背景
-Swagger 是一个规范和完整的前端框架,用于生成,描述,调用和可视化 RESTful 风格的 Web 服务.
-Swagger 规范也逐渐发展成为了 OpenAPI 规范.
+## Background
+Swagger is a specification and complete front-end framework used to generate, describe, call, and visualize RESTful style web services. The Swagger specification has gradually evolved into the OpenAPI specification.
 
-Springfox 是一个集成了Swagger,基于 Sring MVC/Spring Webflux 实现的一个 Swagger 描述文件生成框架,通过使用它定义的
-一些描述接口的注解自动生成Swagger的描述文件, 使 Swagger 能够展示并调用接口.
+Springfox is a framework that integrates Swagger, implemented based on Spring MVC/Spring Webflux, which automatically generates Swagger description files through the use of some annotations defined to describe interfaces, allowing Swagger to display and call interfaces.
 
-相信很多人都听说和使用过Swagger和Springfox, 这里就不再赘述了.
+I believe many people have heard of and used Swagger and Springfox, so I won't elaborate further.
 
-Dubbo-Admin中有接口测试功能,但是缺少接口描述的文档,所以该测试功能比较适合接口开发人员用于测试接口.而其他人想要使用该功能就必须
-先通过接口开发者编写的文档或者其他方式了解清楚接口信息才能使用该功能测试接口.
-Dubbo这边有没有集合文档展示和测试功能,能不用写文档就能把接口直接给调用方,类似Swagger/Springfox的工具呢?
-之前做过一些调研,找到一些类似的工具:
-* 有些是基于Springfox做的,直接一个文本域放JSON, 与目前Admin中的测试功能大同小异
-* 有些是直接基于Swagger的Java版OpenApi规范生成工具做的,能把一些基础数据类型的简单参数作为表单项展示
+Dubbo-Admin has an interface testing feature, but it lacks documentation for interface descriptions, making this testing feature more suitable for interface developers to test interfaces. Others who want to use this feature must first understand the interface information through documentation written by the interface developers or other means. Is there a tool on the Dubbo side that combines documentation display and testing functions, allowing the interface to be provided directly to the caller without writing documentation, similar to Swagger/Springfox? 
 
-它们都有一个共同点: 会把你的提供者变为Web项目. 当然有些提供者是通过web容器加载启动的,甚至也有和web工程在一起的,那就无所谓了.
-但也有非web的提供者. 为了文档我得把它变为web项目吗?(还要引入一堆Web框架的依赖?比如Spring MVC)或者说生产环境打包时删除它的引用
-和代码里的相关注解? 有没有简单点的方式呢?
+Previously, some research was conducted, finding similar tools:
+* Some are based on Springfox, simply placing JSON in a text area, similar to the testing feature in Admin.
+* Others are based on Swagger’s Java version OpenAPI specification generation tools, able to display some simple parameters of basic data types as form items.
 
-OpenAPI中没有RPC的规范,Swagger是OpenAPI的实现,所以也不支持RPC相关调用.Springfox是通过Swagger实现的 RESTful API的工具,
-而RESTful又是基于Web的,Dubbo没法直接使用.我们最终选择了自己实现:
-* 提供一些描述接口信息的简单注解
-* 在提供者启动时解析注解并缓存解析结果
-* 在提供者增加几个Dubbo-Api-Docs使用的获取接口信息的接口
-* 在Dubbo Admin侧通过Dubbo泛化调用实现Http方式调用Dubbo接口的网关
-* 在Dubbo Admin侧实现接口信息展示和调用接口功能
-* 下列情况中的参数直接展示为表单项,其他的展示为JSON: 
-  * 方法参数为基础数据类型的
-  * 方法参数为一个Bean,Bena中属性为基础数据类型的
-* 很少的第三方依赖,甚至大部分都是你项目里本身就使用的
-* 可以通过profile决定是否加载, 打包时简单的修改profile就能区分生产和测试,甚至profile你本来就使用了
+They all share a common point: they turn your provider into a web project. Of course, some providers are loaded and started via a web container, and there are even those integrated with web projects, which is fine. But there are also non-web providers. Do I have to turn it into a web project for documentation? (And introduce a bunch of Web framework dependencies? For example, Spring MVC) Or delete its references and related annotations from the code during production packaging? Is there a simpler way?
+
+There is no RPC specification in OpenAPI, and Swagger is an implementation of OpenAPI, so it does not support RPC-related calls. Springfox is a tool that implements RESTful APIs through Swagger, and RESTful is web-based, which Dubbo cannot use directly. We ultimately chose to implement it ourselves:
+* Provide some simple annotations to describe interface information.
+* Parse annotations and cache the results during the provider startup.
+* Add several interfaces for acquiring interface information used by Dubbo-Api-Docs in the provider.
+* Implement an HTTP gateway to call Dubbo interfaces via Dubbo's generic invocation on the Dubbo Admin side.
+* Implement interface information display and call functionality on the Dubbo Admin side.
+* Display parameters directly as form items in the following situations, others as JSON: 
+  * Method parameters are of basic data types.
+  * Method parameters are a Bean, and the Bean properties are basic data types.
+* Very few third-party dependencies, most of which are already in your project.
+* Can decide whether to load via profile, easily modify profile during packaging to distinguish between production and testing, even if you’re already using the profile.
   
-> 今天,我很高兴的宣布: Dubbo 用户也可以享受类似Swagger的体验了 -- Dubbo-Api-Docs发布了.
+> Today, I am pleased to announce: Dubbo users can also enjoy a Swagger-like experience -- Dubbo-Api-Docs is released.
 > 
-## 简介
-Dubbo-Api-Docs 是一个展示dubbo接口文档,测试接口的工具.
+## Overview
+Dubbo-Api-Docs is a tool for displaying Dubbo interface documentation and testing interfaces.
 
-使用 Dubbo-Api-Docs 分为两个主要步骤:
-1. 在dubbo项目引入Dubbo-Api-Docs 相关jar包,并增加类似Swagger的注解.
-2. 在 Dubbo-Admin 中查看接口描述并测试.
+Using Dubbo-Api-Docs is divided into two main steps:
+1. Introduce Dubbo-Api-Docs related jar packages into the Dubbo project and add annotations similar to Swagger.
+2. View interface descriptions and test them in Dubbo-Admin.
 
-通过以上两个步骤即可享受类似Swagger的体验, 并且可以在生产环境中关闭Dubbo-Api-Docs的扫描.
+With the above two steps, you can enjoy a Swagger-like experience and can turn off the scanning of Dubbo-Api-Docs in the production environment.
 
-Dubbo-Api-Docs 目前通过直连服务节点的方式获取该服务的接口列表. 测试接口时可以直连也可以通过注册中心.未来会增加通过注册中心获取服务列表的方式.并根据Dubbo的升级规划增加新的功能支持.也会根据社区的需求增加功能.
+Dubbo-Api-Docs currently obtains the interface list of the service through direct connection to the service node. When testing interfaces, direct connection or connection via the registry can be used. In the future, there will be an increase in the methods to obtain the service list via the registry and additional support for new functionalities according to Dubbo's upgrade plan. It will also include features based on community needs.
 
-Dubbo-Api-Docs 会在服务提供者启动完毕后扫描docs相关注解并将处理结果缓存.并增加一些Dubbo-Api-Docs相关的Dubbo提供者接口. 缓存的数据在将来可能会放到Dubbo元数据中心中.
+Dubbo-Api-Docs will scan docs-related annotations after the service provider has started and cache the processing results. It will also add some Dubbo provider interfaces related to Dubbo-Api-Docs. The cached data may be placed in the Dubbo metadata center in the future.
 
-## 当前版本: 2.7.8.1
+## Current Version: 2.7.8.1
 
 ```xml
 <dependency>
@@ -71,30 +65,30 @@ Dubbo-Api-Docs 会在服务提供者启动完毕后扫描docs相关注解并将�
 </dependency>
 ```
 
-## 快速入门
-### 1.dubbo提供者项目的方法参数中加上 Dubbo-Api-Docs 注解
-* 如果 dubbo提供者的接口和方法参数在一个单独的jar项目中,则在该项目中引入: dubbo-api-docs-annotations
-* dubbo提供者项目引入 dubbo-api-docs-core
-* 在提供者项目的项目启动类(标注了@SpringBootApplication的类)或者配制类(标注了@Configuration的类)中增加注解 @EnableDubboApiDocs 以启用Dubbo Api Docs功能
-> 为避免增加生产环境中的资源占用, 建议单独创建一个配制类用于启用Dubbo-Api-Docs, 并配合 @Profile("dev") 注解使用
-> 当然, Dubbo-Api-Docs 仅在项目启动时多消耗了点CPU资源, 并使用了一点点内存用于缓存, 将来会考虑将缓存中的内容放到元数据中心.
-
-#### 下面以[dubbo-api-docs-examples](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs/dubbo-api-docs-examples)项目中的部分服务接口为例:
+## Quick Start
+### 1. Add Dubbo-Api-Docs annotations to method parameters in the Dubbo provider project
+* If the Dubbo provider's interfaces and method parameters are in a separate jar project, introduce: dubbo-api-docs-annotations in that project.
+* Introduce dubbo-api-docs-core in the Dubbo provider project.
+* Add the annotation @EnableDubboApiDocs in the project startup class (the class annotated with @SpringBootApplication) or configuration class (the class annotated with @Configuration) to enable the Dubbo Api Docs feature.
+> To avoid increasing resource consumption in the production environment, it is recommended to create a separate configuration class to enable Dubbo-Api-Docs, in conjunction with the @Profile("dev") annotation.
+> Of course, Dubbo-Api-Docs only consumes a bit more CPU resources when the project starts and uses a bit of memory for caching. In the future, consideration will be given to placing the cached content in the metadata center.
+  
+#### Here, we take some service interfaces from the [dubbo-api-docs-examples](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs/dubbo-api-docs-examples) project as an example:
 ```bash
 git clone -b 2.7.x https://github.com/apache/dubbo-spi-extensions.git
 ```
 
-进入 dubbo-spi-extensions/dubbo-api-docs/dubbo-api-docs-examples 目录
+Enter the dubbo-spi-extensions/dubbo-api-docs/dubbo-api-docs-examples directory.
 
-dubbo-api-docs-examples 中有两个子模块:
-* examples-api: 一个jar包项目,其中包含服务的接口和接口参数Bean
-* examples-provider: 提供者服务端,包含spring boot启动器和服务的实现
+The dubbo-api-docs-examples contains two sub-modules:
+* examples-api: A jar project containing service interfaces and parameter Beans.
+* examples-provider: Provider service side with Spring Boot starter and service implementation.
 
-下面我们在这两个子模块中增加Dubbo-Api-Docs
+Below we will add Dubbo-Api-Docs to these two sub-modules. 
 
 > examples-api:
 
-maven引入:
+Maven inclusion:
 ```xml
 <dependency>
     <groupId>org.apache.dubbo</groupId>
@@ -102,8 +96,8 @@ maven引入:
     <version>2.7.8</version>
 </dependency>
 ```
-org.apache.dubbo.apidocs.examples.params 中有两个Bean,我们来为它们添加docs注解
-* QuickStartRequestBean 作为参数Bean, 添加 @RequestParam
+In org.apache.dubbo.apidocs.examples.params, there are two Beans, let's add docs annotations to them:
+* QuickStartRequestBean as parameter Bean, add @RequestParam.
 ```java
 public class QuickStartRequestBean {
 
@@ -116,10 +110,10 @@ public class QuickStartRequestBean {
   @RequestParam("Are you a main?")
   private boolean man;
   
-  // getter/setter略...
+  // getter/setter omitted...
 }
 ```
-* QuickStartRespBean 作为响应Bean,添加 @ResponseProperty
+* QuickStartRespBean as response Bean, add @ResponseProperty.
 ```java
 public class QuickStartRespBean {
 
@@ -129,13 +123,13 @@ public class QuickStartRespBean {
   @ResponseProperty("Response message")
   private String msg;
 
-  // getter/setter略...
+  // getter/setter omitted...
 }
 ```
-由于我们只挑选了部分接口作为演示,到此这些接口涉及的docs注解添加完毕
+Since we only selected some interfaces for demonstration, the docs annotations related to these interfaces have been added.
 > examples-provider:
 
-maven引入:
+Maven inclusion:
 ```xml
 <dependency>
     <groupId>org.apache.dubbo</groupId>
@@ -143,13 +137,13 @@ maven引入:
     <version>2.7.8</version>
 </dependency>
 ```
-我们挑选一个接口作为演示:
+We select one interface as a demonstration:
 
-org.apache.dubbo.apidocs.examples.api.impl.QuickStartDemoImpl 中的 quickStart 方法
+The quickStart method in org.apache.dubbo.apidocs.examples.api.impl.QuickStartDemoImpl.
 
-QuickStartDemoImpl 实现了 api包中的 org.apache.dubbo.apidocs.examples.api.IQuickStartDemo 接口 
+QuickStartDemoImpl implements the interface org.apache.dubbo.apidocs.examples.api.IQuickStartDemo in the api package.
 
-* 在 QuickStartDemoImpl 中:
+* In QuickStartDemoImpl:
 ```java
 @DubboService
 @ApiModule(value = "quick start demo", apiInterface = IQuickStartDemo.class, version = "v0.1")
@@ -162,120 +156,119 @@ public class QuickStartDemoImpl implements IQuickStartDemo {
   }
 }
 ```
-到此docs相关注解已添加完毕,下面我们来开启 Dubbo-Api-Docs. 新增一个配制类,位置任意,只要能被spring boot扫描到就行.
+At this point, the docs-related annotations have been added. Next, let's enable Dubbo-Api-Docs. Add a configuration class, located anywhere as long as it can be scanned by Spring Boot.
 
-我们在 org.apache.dubbo.apidocs.examples.cfg 包中新增一个配制类 DubboDocConfig :
+We add a configuration class DubboDocConfig in the org.apache.dubbo.apidocs.examples.cfg package :
 ```java
 @Configuration
-@Profile("dev")  // 配合 Profile 一起使用, 在 profile 为 dev 时才会加载该配制类
-@EnableDubboApiDocs  // 开启 Dubbo-Api-Docs
+@Profile("dev")  // used with Profile, only loaded when the profile is dev
+@EnableDubboApiDocs  // Enable Dubbo-Api-Docs
 public class DubboDocConfig {
 }
 ```
-到此 Dubbo-Api-Docs 相关的东西已经添加完毕.
-[dubbo-api-docs-examples](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs/dubbo-api-docs-examples)
-中有更多更为详尽的例子.下文中有注解的详细说明.下面我们来看一下增加 Dubbo-Api-Docs 后的效果图.
+At this point, everything related to Dubbo-Api-Docs has been added. There are more detailed examples in the [dubbo-api-docs-examples](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs/dubbo-api-docs-examples) project. Below, we will look at the effect after adding Dubbo-Api-Docs.
 
 ![demoApi2](/imgs/blog/api-docs/quickStart.png)
 
 
-### 2.启动提供者项目
-* 示例使用nacos作为注册中心,[下载并启动nacos](https://nacos.io)
-* 在上面的例子中,我们启动 examples-provider 项目中的 org.apache.dubbo.apidocs.examples.ExampleApplication.
-在examples-provider目录中:
+### 2. Start the provider project
+* The example uses Nacos as the registry, [download and start Nacos](https://nacos.io).
+* In the example above, we start the org.apache.dubbo.apidocs.examples.ExampleApplication in the examples-provider project.
+In the examples-provider directory:
 ```bash
 mvn spring-boot:run
 ```
 
 
 
-### 3.下载 dubbo-admin
-[dubbo-admin仓库](https://github.com/apache/dubbo-admin) 
+### 3. Download Dubbo-Admin
+[Dubbo-Admin Repository](https://github.com/apache/dubbo-admin) 
 
-> dubbo-admin 需要下载 develop 分支源码启动
+> Dubbo-Admin needs to download the develop branch source to start.
 > ```bash
 > git clone -b develop https://github.com/apache/dubbo-admin.git
 > ```
 
-### 4.启动访问 dubbo-admin
-参考 dubbo-admin 里的说明启动:
+### 4. Start and Access Dubbo-Admin
+Refer to the instructions in dubbo-admin to start:
 ```text
-1. 在 dubbo-admin-server/src/main/resources/application.properties 中修改注册中心地址
-2. 编译 mvn clean package
-3. 启动: 
+1. Modify the registry address in dubbo-admin-server/src/main/resources/application.properties
+2. Compile with mvn clean package
+3. Start: 
 mvn --projects dubbo-admin-server spring-boot:run
-或者
+or
 cd dubbo-admin-distribution/target; java -jar dubbo-admin-0.1.jar
-4. 浏览器访问: http://localhost:8080
-5. 默认帐号密码都是: root
+4. Browser access: http://localhost:8080
+5. Default username and password are both: root
 ```
 
-### 5.进入"接口文档"模块
-* 在"dubbo提供者IP"和"dubbo提供者端口"中分别输入提供者所在机器IP和端口, 点击右侧 " 加载接口列表" 按钮
-* 左侧接口列表中加载出接口列表,点击任意接口,右边展示出该接口信息及参数表单.
-* 填入表单内容后,点击最下方测试按钮
-* 响应部分展示了响应示例及实际响应结果
+### 5. Enter the "Interface Documentation" module
+* Enter the provider's machine IP and port in "Dubbo provider IP" and "Dubbo provider port", click the "Load Interface List" button on the right.
+* The left-side interface list loads the interface list, clicking any interface displays its information and parameter form on the right.
+* After filling in the form content, click the test button at the bottom.
+* The response section displays the response examples and actual response result.
 
-## 源码仓库
-Dubbo-Api-Docs 根据功能拆分,分别在两个仓库中:
+## Source Code Repository
+Dubbo-Api-Docs is divided according to functionality, in two repositories:
 
 ### dubbo-spi-extensions 
-> [dubbo-spi-extensions仓库地址](https://github.com/apache/dubbo-spi-extensions)
+> [dubbo-spi-extensions Repository Address](https://github.com/apache/dubbo-spi-extensions)
 
-该仓库存放dubbo的一些非核心功能的扩展, Dubbo-Api-Docs 作为该仓库中的一个子模块,由于该仓库属于Dubbo 3.0中规划的一部分,而Dubbo-Api-Docs是基于Dubbo 2.7.x 开发的,所以在该仓库中增加了[2.7.x分支,Dubbo-Api-Docs就在该分支下](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs).
-该仓库中包含了 Dubbo-Api-Docs 的文档相关注解、注解扫描能力和使用示例:
-* dubbo-api-docs-annotations: 文档生成的相关注解.考虑到实际情况中 dubbo api 的接口类和接口参数会规划为一个单独的jar包, 所以注解也独立为一个jar包.本文后面会对注解做详细说明.
-* dubbo-api-docs-core: 负责解析注解,生成文档信息并缓存. 前面提到的Dubbo-Api-Docs相关接口也在该包中
-* dubbo-api-docs-examples: 使用示例
+This repository contains some non-core functional extensions of Dubbo. Dubbo-Api-Docs is a sub-module of this repository. As this repository is part of Dubbo 3.0 planning, and Dubbo-Api-Docs is developed based on Dubbo 2.7.x, the [2.7.x branch has been added, where Dubbo-Api-Docs resides](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs).
+This repository contains documentation-related annotations, annotation scanning capabilities, and usage examples for Dubbo-Api-Docs:
+* dubbo-api-docs-annotations: Related annotations for document generation. Considering practical situations where Dubbo API interface classes and interface parameters will be planned as a separate jar package, the annotations are also separated into a jar package.
+* dubbo-api-docs-core: Responsible for parsing annotations, generating documentation information and caching. The Dubbo-Api-Docs related interfaces mentioned earlier are also in this package.
+* dubbo-api-docs-examples: Usage examples.
 
 ### Dubbo-Admin
-> [Dubbo-Admin仓库地址](https://github.com/KeRan213539/dubbo-admin)
+> [Dubbo-Admin Repository Address](https://github.com/KeRan213539/dubbo-admin)
 
-文档的展示及测试放在了 dubbo admin 项目中
+The documentation display and testing are placed in the Dubbo Admin project.
 
-## 注解说明
-* @EnableDubboApiDocs: 配制注解, 启用 dubbo api docs 功能
-* @ApiModule: 类注解, dubbo接口模块信息,用于标注一个接口类模块的用途
-    * value: 模块名称
-    * apiInterface: 提供者实现的接口
-    * version: 模块版本
-* @ApiDoc: 方法注解, dubbo 接口信息,用于标注一个接口的用途
-    * value: 接口名称
-    * description: 接口描述(可使用html标签)
-    * version: 接口版本
-    * responseClassDescription: 响应的数据的描述
-* @RequestParam: 类属性/方法参数注解,标注请求参数
-    * value: 参数名
-    * required: 是否必传参数
-    * description: 参数描述
-    * example: 参数示例
-    * defaultValue: 参数默认值
-    * allowableValues: 允许的值,设置该属性后界面上将对参数生成下拉列表
-        * 注:使用该属性后将生成下拉选择框
-        * boolean 类型的参数不用设置该属性,将默认生成 true/false 的下拉列表
-        * 枚举类型的参数会自动生成下拉列表,如果不想开放全部的枚举值,可以单独设置此属性.
-* @ResponseProperty: 类属性注解, 标注响应参数
-    * value: 参数名
-    * example: 示例
+## Annotation Description
+* @EnableDubboApiDocs: Configuration annotation, enables Dubbo API docs functionality.
+* @ApiModule: Class annotation, Dubbo interface module information, used to mark the purpose of an interface class module.
+    * value: Module name.
+    * apiInterface: The interface implemented by the provider.
+    * version: Module version.
+* @ApiDoc: Method annotation, Dubbo interface information, used to mark the purpose of an interface.
+    * value: Interface name.
+    * description: Interface description (HTML tags can be used).
+    * version: Interface version.
+    * responseClassDescription: Description of the response data.
+* @RequestParam: Class property/method parameter annotation, marking request parameters.
+    * value: Parameter name.
+    * required: Whether the parameter is required.
+    * description: Parameter description.
+    * example: Parameter example.
+    * defaultValue: Parameter default value.
+    * allowableValues: Allowed values, setting this property will generate a dropdown list for the parameter on the interface.
+        * Note: Using this property will generate a dropdown selection box.
+        * boolean type parameters do not need to set this property, it will default to generating a true/false dropdown list.
+        * Enum type parameters will automatically generate dropdown lists; if you do not want to expose all enum values, you can set this property individually.
+* @ResponseProperty: Class property annotation, marking response parameters.
+    * value: Parameter name.
+    * example: Example.
 
-## 使用注意
+## Usage Notes
 
-* 响应bean(接口的返回类型)支持自定义泛型, 但只支持一个泛型占位符
-* 关于Map的使用:Map的key只能用基本数据类型.如果Map的key不是基础数据类型,生成的 就不是标准json格式,会出异常
-* 接口的同步/异步取自 org.apache.dubbo.config.annotation.Service#async / org.apache.dubbo.config.annotation.DubboService#async
+* The response bean (return type of the interface) supports custom generics, but only supports one generic placeholder.
+* About the use of Map: The key of the Map can only be of basic data types. If the key of the Map is not of a basic data type, it will not generate a standard JSON format, leading to exceptions.
+* Synchronous/asynchronous of the interface is taken from org.apache.dubbo.config.annotation.Service#async / org.apache.dubbo.config.annotation.DubboService#async.
 
-## 示例说明
-[dubbo-spi-extensions / Dubbo-Api-Docs](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs) 中的 dubbo-api-docs-examples 目录中为示例工程:
-* examples-api: jar包项目,包含服务提供者的接口类及参数Bean
-* examples-provider: 使用 dubbo-spring-boot-starter 的提供者项目, 注册中心使用 nacos
-* examples-provider-sca: 使用 spring-cloud-starter-dubbo 的提供者项目, 注册中心使用 nacos
+## Example Description
+The dubbo-api-docs-examples directory in [dubbo-spi-extensions / Dubbo-Api-Docs](https://github.com/apache/dubbo-spi-extensions/tree/2.7.x/dubbo-api-docs) contains example projects:
+* examples-api: jar project containing service provider interface classes and parameter Beans.
+* examples-provider: Provider project using dubbo-spring-boot-starter, with nacos as the registry.
+* examples-provider-sca: Provider project using spring-cloud-starter-dubbo, with nacos as the registry.
 
-### 示例使用步骤
-1. 示例使用nacos作为注册中心,[下载并启动nacos](https://nacos.io)
-2. 任意启动 examples-provider 和 examples-provider-sca 中的任意一个,当然也可以两个都启动. examples-provider 使用 20881端口 examples-provider-sca 使用20882端口.两个项目都是spring boot项目,启动类在 org.apache.dubbo.apidocs.examples 包下.
-3. 启动 [Dubbo-Admin](https://github.com/KeRan213539/dubbo-admin), 浏览器访问: http://localhost:8080
-4. 进入 dubbo-admin 中的 "接口文档"模块
-5. 在"dubbo提供者IP"和"dubbo提供者端口"中分别输入提供者所在机器IP和端口, 点击右侧 " 加载接口列表" 按钮
-6. 左侧接口列表中加载出接口列表,点击任意接口,右边展示出该接口信息及参数表单.
-7. 填入表单内容后,点击最下方测试按钮
-8. 响应部分展示了响应示例及实际响应结果
+### Example Usage Steps
+1. The example uses nacos as the registry, [download and start nacos](https://nacos.io).
+2. Start any one of the examples-provider and examples-provider-sca. You can also start both. examples-provider uses port 20881 and examples-provider-sca uses port 20882. Both projects are spring boot projects, and the startup class is under org.apache.dubbo.apidocs.examples.
+3. Start [Dubbo-Admin](https://github.com/KeRan213539/dubbo-admin), browser access: http://localhost:8080.
+4. Enter the "Interface Documentation" module in dubbo-admin.
+5. Enter the provider's machine IP and port in "Dubbo provider IP" and "Dubbo provider port", click the "Load Interface List" button on the right.
+6. The left-side interface list loads the interface list, clicking any interface displays its information and parameter form on the right.
+7. After filling in the form content, click the test button at the bottom.
+8. The response section displays response examples and actual response results.
+

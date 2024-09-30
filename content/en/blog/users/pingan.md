@@ -1,228 +1,229 @@
 ---
 date: 2023-01-15
-title: "平安健康的 Dubbo3 迁移历程"
-linkTitle: "平安健康"
-tags: ["用户案例"]
+title: "The Migration Journey of Ping An Health to Dubbo3"
+linkTitle: "Ping An Health"
+tags: ["User Case"]
 weight: 5
 ---
-# 1 背景
+# 1 Background
 
-我们公司从15年开始就使⽤dubbo作为微服务框架，当社区推出dubbo3时，我们也⽴刻跟进并做了深⼊调研，发现dubbo3 的应⽤/实例级服务注册和发现模式能够在一定程度上解决我们当前注册中⼼⾯临的压⼒，解决稳定性和安全性问题。同时dubbo3在服务治理上也做了升级，契合云原⽣架构，⽽且dubbo3能够向下兼容dubbo2，这也将降低升级的成本和⻛险。
+Our company has used Dubbo as a microservice framework since 2015. When the community launched Dubbo3, we immediately followed suit and conducted in-depth research. We found that the application/instance-level service registration and discovery model of Dubbo3 could alleviate some pressure faced by our current registration center, addressing stability and security issues. At the same time, Dubbo3 has upgraded service governance, aligning with cloud-native architecture, and is backward compatible with Dubbo2, which lowers the cost and risk of upgrading.
 
-升级项目有了阶段性的进展，目前仍然在进行中。通过本⽂，我们对公司内部的Dubbo3 升级过程及收益等做了深⼊总结。
+The upgrade project has made significant progress and is still ongoing. Through this article, we deeply summarize the internal Dubbo3 upgrade process and its benefits.
 
-# 2 Dubbo3 核⼼功能介绍
+# 2 Introduction to Core Features of Dubbo3
 
-dubbo社区关于dubbo3的文档和资料越来越完善，以下是我们从社区引用的一些内容。
+The documentation and materials about Dubbo3 in the community are becoming increasingly comprehensive. Below are some contents we referenced from the community.
 
-## 2.1 下一代云原生服务框架
+## 2.1 Next-Generation Cloud-Native Service Framework
 
 ![pingan](/imgs/v3/users/pingan-2.png)
 
-Dubbo3被社区寄予厚望，将其视为下一代云原生服务框架打造，Dubbo3 提供的核心特性列表，主要包括四部分。
+Dubbo3 is regarded by the community as the next-generation cloud-native service framework. The core features provided by Dubbo3 mainly include four parts.
 
-- **全新服务发现模型** 。应用粒度服务发现，面向云原生设计，适配基础设施与异构系统；性能与集群伸缩性大幅提升。
-- **下一代 **** RPC  ****协议**  **Triple** 。基于 HTTP/2 的 Triple 协议，兼容 gRPC；网关穿透性强、多语言友好、支持 Reactive Stream。
-- **统一流量治理模型** 。面向云原生流量治理，SDK、Mesh、VM、Container 等统一治理规则；能够支持更丰富的流量治理场景。
-- **Service Mesh** 。在最新的3.1.0的版本中支持Sidecar Mesh 与 Proxyless Mesh，提供更多架构选择，降低迁移、落地成本。
+- **New Service Discovery Model**. Application-level service discovery designed for cloud-native adaptation to infrastructure and heterogeneous systems; significantly enhances performance and cluster scalability.
+- **Next-Generation RPC Protocol: Triple**. A Triple protocol based on HTTP/2, compatible with gRPC; strong gateway penetration, multi-language friendly, supports Reactive Stream.
+- **Unified Traffic Governance Model**. Cloud-native traffic governance, uniform governance rules for SDK, Mesh, VM, Container, etc.; can support richer traffic governance scenarios.
+- **Service Mesh**. The latest version 3.1.0 supports Sidecar Mesh and Proxyless Mesh, providing more architectural options and reducing migration and implementation costs.
 
 ![pingan](/imgs/v3/users/pingan-3.png)
 
-首先是性能、资源利用率的提升。社区资料显示，升级 Dubbo3 的应用预期能实现单机内存 50% 的下降，对于越大规模的集群效果将越明显，Dubbo3 从架构上支持百万实例级别的集群横向扩展,同时依赖应用级服务发现、Triple协议等可以大大提供应用的服务治理效率和吞吐量。
+First, there’s the improvement in performance and resource utilization. Community data shows that upgrading to Dubbo3 can potentially reduce single machine memory usage by 50%. The larger the cluster scale, the more pronounced these effects will be. Dubbo3 architecture supports horizontal scaling of clusters at the million-instance level, significantly improving application service governance efficiency and throughput.
 
-其次， Dubbo3 让业务架构升级变得更容易、更合理，尤其是RPC协议，在 2.x 版本中，web、移动端与后端的通信都要经过网关代理，完成协议转换、类型映射等工作，dubbo3的Triple 协议让这些变得更容易与自然；并通过流式通信模型满足更多的使用场景。
+Second, Dubbo3 makes upgrading the business architecture easier and more reasonable, especially the RPC protocol. In version 2.x, the communication between web, mobile end, and backend had to go through a gateway proxy, completing protocol conversion and type mapping. Dubbo3's Triple protocol simplifies and naturalizes these processes; it also satisfies more usage scenarios through a streaming communication model.
 
-最后，得益于 Dubbo3 的完善云原生解决方案，Dubbo3的mesh架构可以帮助业务屏蔽底层云原生基础设施细节，让业务更专注于业务，这也是mesh的最根本的优势。
+Lastly, thanks to Dubbo3's comprehensive cloud-native solution, the mesh architecture of Dubbo3 helps businesses shield underlying cloud-native infrastructure details, allowing more focus on business, which is the fundamental advantage of mesh.
 
-## 2.2 应用级服务发现核心原理
+## 2.2 Core Principles of Application-Level Service Discovery
 
 ![pingan](/imgs/v3/users/pingan-4.png)
 
-我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。 在这个过程中
+Starting from the classic operational principle diagram of Dubbo, since its design inception, Dubbo has built-in capabilities for service address discovery. The provider registers its address with the registration center, and the consumer subscribes to real-time updates from the registration center. Upon receiving the address list, the consumer initiates RPC calls to the provider based on specific load balancing strategies. In this process:
 
-  - 每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；
-  - 注册中心通过这个 key 对 provider 实例地址进行聚合；
-  - Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；
+- Each provider registers its accessible address with the registration center using a specific key.
+- The registration center aggregates provider instance addresses through this key.
+- Consumers subscribe using the same key from the registration center to timely receive the aggregated address list.
 
 ![pingan](/imgs/v3/users/pingan-5.png)
 
-再来看一下Provider向注册中心注册的 URL 地址的详细格式，这里把 URL 地址数据划分成了几份：
+Next, let’s look at the detailed format of the URL address registered by the provider to the registration center, which divides the URL address data into several parts:
 
-- 首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体。
-- 其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息。
-- 下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。
-- 最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。
+- First, the accessible address of the instance, mainly containing the IP and port, which the consumer will use to generate a TCP network link as the transmission carrier for subsequent RPC data.
+- Second, RPC metadata, which is used to define and describe an RPC request, indicating that this address data is related to a specific RPC service, including its version number, group, and method-related information.
+- The next part is RPC configuration data, some of which control the behavior of RPC calls, while some synchronize the state of the provider process instance, such as timeout, data encoding serialization methods, etc.
+- The last part is custom metadata, differing from the predefined configuration of the above framework, providing users with greater flexibility, allowing them to extend and add custom metadata to enrich instance status.
 
-结合以上对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，可以得出这么几条结论：
+Combining the above analysis of the Dubbo2 interface-level address model with the basic principle diagram of Dubbo, we can derive a few conclusions:
 
-- 第一，地址发现聚合的 key 就是 RPC 粒度的服务。
-- 第二，注册中心同步的数据不止包含地址，还包含了各种元数据以及配置。
-- 得益于 1 与 2，Dubbo 实现了支持应用、RPC 服务、方法粒度的服务治理能力。
+- First, the key for address discovery aggregation is the service at the RPC level.
+- Second, the data synchronized by the registration center contains not only addresses but also metadata and configurations.
 
-这就是一直以来 Dubbo2 在易用性、服务治理功能性、可扩展性上强于很多服务框架的真正原因。
+Thanks to conclusions 1 and 2, Dubbo has achieved service governance capabilities at the application, RPC service, and method level.
 
-面对这样的地址数量级放大的问题，在 Dubbo3 架构下，社区认真思考了两个问题：
+This is the real reason why Dubbo2 has always been stronger than many service frameworks in usability, functional service governance, and scalability.
 
-- 如何在保留易用性、功能性的同时，重新组织 URL 地址数据，避免冗余数据的出现，让 Dubbo3 能支撑更大规模集群水平扩容？
-- 如何在地址发现层面与其他的微服务体系如 Kubernetes、Spring Cloud 打通？
+In the face of such a scale of addresses, the community seriously considered two questions under the Dubbo3 architecture:
+
+- How to reorganize URL address data while retaining usability and functionality to avoid redundancy, allowing Dubbo3 to support large-scale cluster expansion?
+- How to bridge the address discovery layer with other microservice systems such as Kubernetes and Spring Cloud?
 
 ![pingan](/imgs/v3/users/pingan-6.png)
 
-最终，社区给出的方案也是非常巧妙和经典。Dubbo3 的应用级服务发现方案设计的基本思路是：地址发现链路上的聚合元素也就是之前提到的 Key 由服务调整为应用，这也是其名称叫做应用级服务发现的由来,与kubernetes和spring cloud的服务注册发现处于同一粒度，能够平滑打通；另外，通过注册中心同步的数据内容上做了大幅精简，只保留最核心的 ip、port 地址数据。 经过上述调整，应用级别服务发现在保持接口级地址模型易用性的同时，实现了地址单条数据大小和总数量的下降。
+Ultimately, the community came up with a refined solution. The basic idea of Dubbo3's application-level service discovery scheme is that the aggregation element on the address discovery link, the previously mentioned Key, has shifted from service-oriented to application-oriented. This is the reason behind its name—application-level service discovery, operating at the same granularity as Kubernetes and Spring Cloud service registration discovery, enabling smooth interconnection; additionally, significantly streamlining the content of data synchronized from the registration center to retain only the core IP and port address data. Following the above adjustments, application-level service discovery maintains ease of use of the interface-level address model while reducing the size and total number of address data.
 
-元数据、配置数据以及自定义数据等通过元数据中心或者MetadataService进行同步，且将所有的数据生成一个metadata revision, metadata revision相同则认为元数据等信息相同，通过这种方式来降低元数据中心或MetadataService的访问频次。
+Metadata, configuration data, and custom data are synchronized through the metadata center or MetadataService, which generates a single metadata revision. If the metadata revision is the same, it is deemed that the metadata and other information are the same, thereby reducing the access frequency to the metadata center or MetadataService.
 
-# 3 前期调研
+# 3 Preliminary Research
 
-了解了 Dubbo3 的核心功能以及应用级服务发现的工作原理后，我们开始进入前期工作阶段。
+After understanding the core functions of Dubbo3 and the operational principles of application-level service discovery, we began the preliminary work phase.
 
-## 3.1 性能压测
+## 3.1 Performance Testing
 
-从社区的资料来看，dubbo3各方面都非常不错，但是我们还得自己检验一次，所以我们使用当前在用的dubbo2内部定制版和dubbo3的性能压测，压测的主要场景在于同步调用，异步场景只做了dubbo3的压测， **以下压测数据和结论仅供参考** 。结果表明dubbo3在性能上面确实做了很多的优化，在相同cpu使用率的情况下，dubbo3的tps是要高于dubbo2的；tps相当的情况下，dubbo3的cpu使用率要低于dubbo2。尤其是dubbo2的接口级与dubbo3的实例级，在tps相当的情况下，dubbo3的cpu使用率要较定制版的dubbo2低20%左右。
+From community data, Dubbo3 excels in many aspects, but we needed to validate it ourselves. Therefore, we tested the performance of the current customized version of Dubbo2 and Dubbo3, focusing primarily on synchronous calls. For asynchronous scenarios, we only conducted testing on Dubbo3. **The following testing data and conclusions are for reference only**. The results indicate that Dubbo3 has indeed made significant optimizations; with similar CPU usage, Dubbo3's TPS outperforms Dubbo2, and when TPS is equal, Dubbo3's CPU usage is lower than that of Dubbo2. Specifically, when comparing the interface level of Dubbo2 with the instance level of Dubbo3, Dubbo3’s CPU usage was approximately 20% lower than that of the customized Dubbo2.
 
-压测环境：
+Test environment:
 
-| 类别 | 版本 | 机器配置 |
+| Type | Version | Machine Configuration |
 | --- | --- | --- |
 | Provider | dubbo 3.0.4 | 4C8G |
 | Consumer | dubbo 3.0.4 | 4C8G |
-| Provider | dubbo 2.5.3.22(基于2.5.3版本定制) | 4C8G |
-| Consumer | dubbo 2.5.3.222(基于2.5.3版本定制) | 4C8G |
+| Provider | dubbo 2.5.3.22 (Customized based on 2.5.3) | 4C8G |
+| Consumer | dubbo 2.5.3.222 (Customized based on 2.5.3) | 4C8G |
 
-测试场景：
+Test scenario:
 
-使用的是Dubbo协议，接口没有其它逻辑，直接将输入返回给消费者, 接口数据包大小500B，每个场景压30分钟。
+Using the Dubbo protocol, the interface has no other logic; it directly returns the input to the consumer, with an interface data packet size of 500B, and each scenario lasts for 30 minutes.
 
-测试数据 (仅供参考)：
+Test data (for reference only):
 
 ![pingan](/imgs/v3/users/pingan-7.png)
 
-## 3.2 升级前调研
+## 3.2 Pre-upgrade Research
 
-做了压测得到dubbo2和dubbo3的压测数据后，我们开始计划将 Dubbo3 引入公司进行试点，此时，我们需要考虑dubbo3与dubbo2的兼容和迁移重构问题，升级目标，以及dubbo3提供有哪些能力支持升级和迁移。
+After obtaining the performance data for Dubbo2 and Dubbo3 from the stress tests, we started planning to pilot Dubbo3 in the company. At this point, we needed to consider the compatibility and migration restructuring between Dubbo3 and Dubbo2, the upgrade goals, and what capabilities Dubbo3 provides to support the upgrade and migration.
 
-### 3.2.1 升级的兼容和迁移重构问题
+### 3.2.1 Compatibility and Migration Restructuring Issues
 
-考虑到公司的系统规模，要将dubbo2升级到dubbo3却不是一个简单的过程，尤其是公司的dubbo2版本在原开源版本基础之上做了不少优化和扩展，涵盖了ops服务治理、monitor数据指标监控、服务注册和发现、RPC灰度路由、链路分析、序列化编解码、作为其他基础框架的底层支持等多个方面，同时dubbo3社区也处于活跃的状态，我们也希望能够持续享受dubbo社区的技术红利，在这样的背景下不得不考虑三个问题：
+Given the scale of the company's systems, upgrading from Dubbo2 to Dubbo3 is not a straightforward process, especially since our version of Dubbo2 has undergone numerous optimizations and extensions on top of the original open-source version. These include areas such as OPS service governance, monitoring data metrics, service registration and discovery, RPC gray routing, link analysis, serialization, and providing underlying support for other frameworks. Simultaneously, the Dubbo3 community is actively enhancing, and we hope to continue enjoying the technical benefits of the community. In this context, three issues must be considered:
 
-1. 需要解决公司版本的dubbo2与dubbo3的兼容问题；
-2. 原有功能的迁移重构问题；
-3. 不在dubbo3的源码上做改动，保持和社区版本一致。
+1. The need to solve compatibility issues between the company's version of Dubbo2 and Dubbo3.
+2. The migration and restructuring of existing functionalities.
+3. Avoiding modifications to the source code of Dubbo3 to maintain alignment with the community version.
 
-得益于dubbo 良好的扩展能力，我们可以通过dubbo 的SPI和IoC模块在dubbo3的基础之上优雅的兼容公司版本的dubbo2，不用改动dubbo3源码，只要研发dubbo3扩展包跟随dubbo3版本的API升级即可，这个升级改动的成本和从社区获取红利相比是比较小的。
+Thanks to Dubbo's excellent extensibility, we can elegantly inherit the company's version of Dubbo2 through the SPI and IoC modules on the basis of Dubbo3 without altering Dubbo3’s source code. We only need to develop an extension package for Dubbo3 to follow the API upgrades of Dubbo3. This upgrade change cost is relatively low compared to reaping benefits from the community.
 
-### 3.2.2 升级目标
+### 3.2.2 Upgrade Goals
 
-既然历史包袱的解决方案已经有了，那么就要思考升级的目标了。首先确定的是，最终我们将会采用实例级的服务注册和服务发现，其次我们目前使用的注册中心是zookeeper，而dubbo社区更推荐使用的注册中心是nacos，而且我们在验证阶段时也暴露过几个在zookeeper上出现而在nacos上没有出现的问题，这也使得我们开始考虑将来是否将注册中心最终也迁移到nacos上。
+Having determined the solution to historical burdens, we also need to think about the upgrade objectives. First, we confirm that ultimately, we will adopt instance-level service registration and discovery. Currently, the registration center we are using is Zookeeper, while the registration center more recommended by the Dubbo community is Nacos. We also encountered several issues during the validation phase on Zookeeper that did not occur on Nacos, prompting us to consider whether we would ultimately migrate the registration center to Nacos.
 
-同时，我们也希望整个迁移过程是平滑、可控的，我们整体方案也要将风险把控作为核心要点考虑，尽可能的做到失败降级、实时可控。
+Additionally, we hope the entire migration process will be smooth and controllable. Our overall方案 also considers risk management as a core point, aiming for failure degradation and real-time controllability.
 
-综上，我们将升级的目标归纳为下面几点：
+Thus, we summarize the upgrade objectives as follows:
 
-1）平滑的从dubbo2升级到dubbo3。
+1) Smoothly upgrade from Dubbo2 to Dubbo3.
 
-2）将接口级服务注册和发现模式平滑的迁移到应用级服务注册和发现模式。
+2) Effectively migrate from interface-level service registration and discovery to application-level service registration and discovery.
 
-3）为后面平滑迁移注册中心做好准备。
+3) Prepare for the eventual migration of the registration center.
 
-4）迁移过程可监控、可观测。
+4) Ensure monitoring and observability during the migration process.
 
-5）迁移过程要可灰度、可实时管控。
+5) Enable gray and real-time control during the migration process.
 
-6）统一dubbo3的通用配置规范，尽量适配原dubbo2的export和refer方式。
+6) Unify the common configuration specifications of Dubbo3 to adapt to the original export and refer methods of Dubbo2.
 
-### 3.2.3 dubbo3对于迁移的支撑能力
+### 3.2.3 Support Capabilities of Dubbo3 for Migration
 
-前面介绍的是我们的目标，但是如何把dubbo3的原生设计理念融入到现实情况中呢？以下是我们的相关思考，并在验证过程中。
+The previous sections introduced our goals, but how to integrate Dubbo3’s native design concepts into the real situation? Here are our relevant reflections and validations.
 
-首先dubbo3能够支持在registryUrl上通过参数管理provider和consumer以不同的模式进行服务注册和服务发现，其中核心参数名有: registry-type, registry-protocol-type, register-mode。
+First, Dubbo3 supports managing providers and consumers in different modes of service registration and discovery through parameters on the registryUrl. Key parameters include: registry-type, registry-protocol-type, and register-mode.
 
-其次，dubbo3可以支持使用多个注册中心，不同的注册中心通过上面的registryUrl参数控制注册中心的服务注册模式和服务发现模式。而且还可以通过ProviderConfig和ConsumerConfig这两个这两个Config类分别管理provider侧和consumer侧使用的注册中心。在consumer侧，如果有使用多个注册中心，默认会使用ZoneAwareCluster创建的ZoneAwareClusterInvoker来进行负载均衡，从类名上可以看出，该ClusterInvoker是有提供区域感知的能力，查看源码时发现它还提供了preferred的功能，只在相应的registryUrl中添加了preferred=true，这个registryUrl创建的ClusterInvoker就会被优先调用。
+Secondly, Dubbo3 can support multiple registration centers. Different registration centers are controlled by the aforementioned registryUrl parameters for their service registration and discovery modes. Additionally, ProviderConfig and ConsumerConfig classes can manage the registration centers used on the provider and consumer sides, respectively. On the consumer side, if multiple registration centers are in use, a ZoneAwareCluster created with ZoneAwareClusterInvoker is used for load balancing by default. As the class name suggests, this ClusterInvoker offers area-aware capabilities. Upon reviewing the source code, we found that it also provides a preferred feature; by adding preferred=true to the corresponding registryUrl, the ClusterInvoker created with that registryUrl will be prioritized.
 
-在同一注册中心进行接口级迁移到实例级的场景中，dubbo3的MigrationInvoker也提供了相应的支持，MigrationInvoker可以根据MigrationRule来控制实例级的RPC流量，并且根据MigrationRuleListener能够实时监听到指定应用的MigrationRule的变更。
+In scenarios where migration is occurring from interface-level to instance-level within the same registration center, Dubbo3’s MigrationInvoker also provides the relevant support. MigrationInvoker can control instance-level RPC traffic based on the MigrationRule and listen for changes in the specified application’s MigrationRule using the MigrationRuleListener.
 
-关于RPC 的监控在dubbo中一直由MonitorFilter和DubboMonitor提供RPC监控数据的收集和上报，收集的数据有消费者的ip端口、提供者的ip端口、应用名称、DubboService、Method、以及成功数、失败数、输入字节数、输出字节数、耗时、并发数等，
+RPC monitoring in Dubbo has traditionally been provided by MonitorFilter and DubboMonitor, which collect and report RPC monitoring data. The collected data includes the IP and port of the consumer, the IP and port of the provider, application name, DubboService, Method, and statistics such as success count, failure count, input byte count, output byte count, duration, and concurrency.
 
-这些能力能够满足基本的迁移工作，结合我们的现状来看，相对升级目标要求的平滑迁移，迁移流量可观测、可灰度、可管控还有一些距离，不过在梳理dubbo3这块能力的时候，也找到了相对简单的扩展方案。到此，对于整体的迁移方案也有了一个大致的雏形。
+These capabilities can meet basic migration tasks. However, from our current status concerning the need for a smooth migration, the observability of migration traffic, and gray and controllable procedures, there still seems to be some distance. Yet while sorting out Dubbo3’s capabilities, we found relatively simple extension solutions. Thus, a general outline of the overall migration方案 is established.
 
-# 4 升级&迁移方案设计
+# 4 Design of Upgrade & Migration方案
 
-方案的设计重点放在"平滑、可控"两点，根据dubbo3的新架构，目前正在验证中的迁移方案示意图如下：
+The design of the方案 focuses on "smooth and controllable." Based on the new architecture of Dubbo3, the current migration方案 schematic is being validated as follows:
 
 ![pingan](/imgs/v3/users/pingan-8.png)
 
-从上图可以看出，在整个升级迁移的过程中，应用域中会存在多个dubbo版本，dubbo3是能够兼容社区的dubbo2版本，而我们公司内部的dubbo2版本是基于dubbo2.5.3开源版本深度定制过的，在ops服务治理、monitor数据指标监控、服务注册和发现、RPC灰度路由、序列化编解码等方面都做了扩展定制，我们的思路是由dubbo3基于dubbo的SPI采用扩展的方式或者ExtensionLoader的Wrapper模式去兼容定制版的dubbo2。
+From the diagram above, during the entire upgrade and migration process, there will be multiple versions of Dubbo within the application domain. Dubbo3 is compatible with the community’s version of Dubbo2, while our internally customized version of Dubbo2 is deeply based on the Dubbo2.5.3 open-source version, with extensions made in areas including OPS service governance, monitoring data metrics, service registration and discovery, RPC gray routing, and serialization. Our strategy involves using Dubbo3 as a base and employing the SPI mechanism for compatibility with the customized version of Dubbo2.
 
-除了应用外，在dubbo3的架构基础上划分了3个逻辑域，分别是注册域、配置管控域和监控域。注册域主要服务于服务的注册和发现，例如provider在DubboService暴露时，将服务信息和元数据信息上报到注册域的注册中心和元数据中心，consumer通过注册中心和元数据中心来发现服务。配置管控域主要是管理应用配置和迁移流量管控，dubbo3提供的配置中心支持自身能力的配置，所以流量规则的配置由dubbo3的配置中心进行维护，dubbo3的DynamicConfigration提供了很多关于动态配置的方法可以直接使用。监控域除了原RPC流量的监控外，还细分了迁移流量的监控，在迁移过程中，可以通过监控直观的看到迁移流量的现状，出现问题时，也可以及时报警通知相关人员介入。
+In addition to the application, three logical domains are delineated based on the architecture of Dubbo3: registration domain, configuration control domain, and monitoring domain. The registration domain mainly serves service registration and discovery; for example, when the provider exposes DubboService, it reports service information and metadata to the registration center and metadata center. The consumer discovers services through the registration and metadata centers. The configuration control domain primarily manages application configuration and migration traffic control. Dubbo3’s configuration center supports the maintenance of its own ability configurations, meaning that traffic rule configurations are maintained by the configuration center. Dubbo3 provides many methods for dynamic configuration that can be used directly. The monitoring domain, in addition to monitoring original RPC traffic, further details monitoring of migration traffic, allowing intuitive visualization of migration traffic conditions during the process. In case of problems, timely alerts can notify relevant personnel for intervention.
 
-整个升级过程分为3个阶段：
+The entire upgrade process is divided into three phases:
 
-第一阶段：将dubbo2升级到dubbo3的接口级，验证功能、兼容性、性能和稳定性
+First phase: Upgrade from Dubbo2 to the interface level of Dubbo3 to validate functionality, compatibility, performance, and stability.
 
-第二阶段：接口级和应用级双注册，通过MigrationRule和RegistryMigrationRule管理RPC流量
+Second phase: Dual registration at the interface and application levels, managing RPC traffic through MigrationRule and RegistryMigrationRule.
 
-第三阶段：全面切换到应用级，撤掉MigrationRule和RegistryMigrationRule
+Third phase: Fully switch to application-level, removing MigrationRule and RegistryMigrationRule.
 
-## 4.1 dubbo3扩展兼容dubbo2定制版本
+## 4.1 Extending Dubbo3 Compatibility with Customized Versions of Dubbo2
 
-考虑到dubbo3社区版本的迭代情况，最终决定dubbo3兼容dubbo2定制版本的插件以SDK的方式单独维护，实现兼容的扩展功能主要有如下内容：
+Considering the iteration of the Dubbo3 community version, we ultimately decided to maintain the plugin for compatibility with the customized version of Dubbo2 in the form of an SDK. The main functions of the compatibility extensions are as follows:
 
-1. RPC 正向透递与反向透传
+1. RPC Forward and Reverse Proxy
 
-在consumer侧和provider侧扩展Filter接口实现类，为正向与反向透传数据实现其发送和接收的功能。Dubbo2定制版是在序列化编解码层面对RpcResult进行了修改，要兼容这一逻辑也只能在序列化编解码层面去支持，采用Wrapper模式对Codec2这个SPI进行增强，与其它扩展类一并实现该兼容功能。
+Extend the Filter interface implementation on both the consumer and provider sides to manage the send and receive capabilities of forward and reverse proxy data. The customized version of Dubbo2 modified the RpcResult on the serialization layer, so compatibility must also be supported on this level by enhancing the Codec2 SPI using Wrapper mode in conjunction with other extension classes.
 
-2. RPC 灰度路由
+2. RPC Gray Routing
 
-扩展Dubbo 的Router、 Cluster和ConfiguratorFactory等SPI，与内部的eunomia灰度管控平台集成实现RPC灰度路由，替换并兼容掉原dubbo2定制版在其源码层面修改实现的灰度路由功能。
+Extend the Router, Cluster, and ConfiguratorFactory SPIs of Dubbo, integrating with the internal Eunomia gray control platform to implement RPC gray routing while replacing and maintaining compatibility with the original gray routing functionality modified in the source code of the customized version of Dubbo2.
 
-3. monitor数据指标监控
+3. Monitoring Data Metrics
 
-扩展Protocol、MonitorFilter、Monitor等SPI，与内部的监控中心完成对接，与dubbo2定制版的监控逻辑保持一致。
+Extend Protocol, MonitorFilter, Monitor, etc., SPIs to interface with the internal monitoring center while maintaining consistency with the monitoring logic of the customized version of Dubbo2.
 
-4. ops 支持实例级
+4. OPS Support for Instance-Level
 
-在ops层面，除了要兼容原接口级的服务管控外，还要添加实例级的服务管控。
+On the OPS side, we aim to add instance-level service governance in addition to maintaining compatibility with the original interface-level service governance.
 
-5. 其它中间件兼容
+5. Compatibility with Other Middleware
 
-除了dubbo本身的兼容外，内部还有部分自研的中间件也是有依赖dubbo或者跟dubbo有关联的，还要对这些中间件进行改造升级。
+In addition to maintaining compatibility with Dubbo itself, some internally developed middleware dependencies or connections related to Dubbo also need upgrades and modifications.
 
-## 4.2 迁移扩展
+## 4.2 Migration Extension
 
-在dubbo3原有能力基础上，也要另外进行扩展以提供平滑迁移的能力，我们构想的设计方案如下：
+In addition to the original capabilities of Dubbo3, we also need to extend to provide smooth migration capabilities. Our proposed design方案 is as follows:
 
-1. 扩展支持注册中心的迁移可灰度、可管控
+1. Support for Gradual and Controllable Migration of Registration Centers
 
-在dubbo3中，当consumer侧应用了多个注册中心时，默认会通过ZoneAwareCluster创建ZoneAwareClusterInvoker来进行负载均衡，参考其实现可以扩展一个Cluster实现类和一个ClusterInvoker实现类将ZoneAwareCluster替换掉，注册中心迁移的流量管理、灰度、降级等能力都在扩展的ClusterInvoker中去实现
+In Dubbo3, when the consumer side application employs multiple registration centers, it will default to balancing load through ZoneAwareCluster created ZoneAwareClusterInvoker. Drawing on this implementation, we can expand a Cluster implementation and a ClusterInvoker implementation to replace ZoneAwareCluster, where migration traffic management, gray control, and degradation capabilities can be realized in the extended ClusterInvoker.
 
-2. 扩展支持接口级到实例级迁移规则的全局配置管理
+2. Global Configuration Management for Migration Rules from Interface-Level to Instance-Level
 
-MigrationRule由MigrationRuleListener通过DynamicConfiguration监听指定的应用的迁移规则，如果一个系统拥有成百上千个微服务应用时，由这种方式去管理，维护成本将会变高，我们借鉴这个方法实现了全局级别的MigrationRule管理能力。
+MigrationRules are listened to by the MigrationRuleListener via DynamicConfiguration for specified application migration rules. If a system has hundreds or thousands of microservice applications, managing them this way could lead to higher maintenance costs. We implemented a global-level management capability for MigrationRules based on this approach.
 
-3. 扩展迁移流量可观测、可报警
+3. Observability and Alerting for Migration Traffic
 
-dubbo RPC的流量监控已经有MonitorFilter和DubboMonitor实现了，只是MonitorFilter不能识别本次RPC请求的Invoker对象是通过哪个注册中心进行服务发现的，以及该Invoke对象的服务发现模式是接口级还是实例级的；，我们在consumer侧新增一个ClusterFilter接口和Filter接口去实现这个识别逻辑。
+RPC traffic monitoring has been implemented by MonitorFilter and DubboMonitor, yet MonitorFilter cannot recognize which registration center the current RPC request's Invoker object uses for service discovery, nor can it determine if the service discovery mode of that Invoker object is interface-level or instance-level. To address this, we introduced a ClusterFilter interface and Filter interface on the consumer side to implement this recognition logic.
 
-4. 迁移组件开关
+4. Migration Component Switches
 
-在扩展的最后，要考虑迁移组件下线的问题，即使要下线也不可能再次调整业务工程将迁移组件全部从依赖中删除掉，所以需要通过开关控制迁移组件的功能下线。
+Finally, we need to consider the issue of retiring migration components. Even if we need to take them offline, it is not feasible or practical to re-adjust business projects and remove all dependencies on migration components, hence the need for switch controls.
 
-## 4.3 配置统一管理
+## 4.3 Unified Configuration Management
 
-在升级和迁移过程中，我们可能会随时调整注册中心和迁移规则的配置参数，为减少出错的风险以及业务工程升级改动的工作量，这些公共的配置需要统一管理维护起来，dubbo3的配置中心正常能够把这个任务较好的承接下来。
+During the upgrade and migration process, we may need to adjust configuration parameters for the registration center and migration rules at any time. To reduce the risk of errors and the workload for changes during business project upgrades, these public configurations need to be unified for management and maintenance. Dubbo3's configuration center can effectively handle this task.
 
-最终我们又扩展了一个配置加载的组件，通过我们公司内部的配置中心管理维护迁移组件的开关和配置中心的连接地址与超时等配置参数。有了这个组件后，新的应用可以不用担心dubbo3和迁移的公共配置，老的应用也减少了这部分公共配置的调整工作量。
+Ultimately, we also extended a configuration loading component to centrally manage the switches of migration components and connection parameters for the configuration center, such as connection addresses and timeouts. With this component, new applications do not need to worry about public configurations for Dubbo3 and migration, while existing applications can reduce the workload of adjusting these public configurations.
 
-## 4.4 风险预案
+## 4.4 Risk Prevention Plans
 
-dubbo作为一个提供底层支撑能力的微服务框架，我们始终把稳定性的要求放在首位，升级过程中任何一点意外，都可能导致线上问题，所以我们整个方案都是在面向失败、面向风险设计的。除了在扩展的迁移组件中实现了主动降级外，也着重考虑了一些极端情况，同时为这些极端情况提供风险预案。线上环境可能会出现各种意想不到的情况，在迁移过程中需要预先思考各种风险，准备完善的应对处理预案，保证系统快速恢复。
+As Dubbo provides underlying support capabilities for microservices, we always prioritize stability. Any unexpected issues during the upgrade may lead to online problems; thus, our entire方案 is designed with a focus on failure and risk management. Beyond implementing proactive degradation within the extended migration components, we also consider some extreme scenarios while providing risk prevention plans for these situations. Various unexpected events may occur in the online environment, necessitating pre-thought on risk and establishing comprehensive response handling plans to ensure rapid system recovery.
 
-## 4.5 小结
+## 4.5 Summary
 
-dubbo2是一个优秀的微服务框架，提供的SPI以及Extension机制能够非常方便的让用户去扩展实现想要功能。dubbo3在其基础之上，丰富了不少新的SPI，我们花了很长的时间去设计迁移方案，真正花在迁移组件上的开发时间较短。
+Dubbo2 is an excellent microservice framework, and its SPI and Extension mechanisms allow users to easily extend functions as needed. Dubbo3, built on this foundation, introduces numerous new SPIs. We spent significant time designing the migration方案, but the actual development time for the migration components was relatively short.
 
-dubbo3整体架构升级调整对于过去的服务注册压力也得到了解决。性能上也做了优化，架构升级后的dubbo3也更适应目前云原生的架构，dubbo 3.1.x 版本支持sidecar和proxyless的mesh方案，而且社区也在准备开源java agent 方式的proxyless，这样就能较好的将微服务架框的framework与数据面解耦，降低微服务框架的维护成本和升级成本。
+The overall architectural upgrade of Dubbo3 has resolved past pressures on service registration. Performance optimizations have also been made, and with the upgrade, Dubbo3 is more adaptable to current cloud-native architectures. The Dubbo 3.1.x version supports both sidecar and proxyless mesh solutions. The community is also preparing to open-source a Java agent approach to proxyless, decoupling the microservice framework from the data plane, thus lowering maintenance and upgrade costs for the microservice framework.
 
-# 5 社区协作
+# 5 Community Collaboration
 
-目前该项目仍然在持续升级中，我们跟社区保持着紧密的联系，期间碰到不少问题，都得到了社区开发同学耐⼼解答并最终给予解决。对于要升级 Dubbo3 的⽤户，可以在社区的Github User Issue（https://github.com/apache/dubbo/issues/9436） 进⾏登记，想参与社区的同学们也可以关注 Dubbo 官⽅公众号（搜索 Apache Dubbo）了解更多关于dubbo社区的进展。
+Currently, this project is still under continuous upgrading, and we maintain close contact with the community. During this period, we have encountered many problems, all of which have been patiently resolved by community developers. Users looking to upgrade to Dubbo3 can register on the community's GitHub User Issue ([https://github.com/apache/dubbo/issues/9436](https://github.com/apache/dubbo/issues/9436)), and those interested in participating in the community can follow the official Dubbo public account (search for Apache Dubbo) to learn more about the developments in the Dubbo community.

@@ -1,24 +1,23 @@
 ---
-title: "如何使用Seata保证Dubbo微服务间的一致性"
-linkTitle: "如何使用Seata保证Dubbo微服务间的一致性"
+title: "How to Use Seata to Ensure Consistency Between Dubbo Microservices"
+linkTitle: "How to Use Seata to Ensure Consistency Between Dubbo Microservices"
 date: 2019-01-17
-tags: ["生态", "Java"]
+tags: ["Ecosystem", "Java"]
 description: >
-    本文主要介绍如何使用Seata保证Dubbo微服务间的一致性
+    This article mainly introduces how to use Seata to ensure consistency between Dubbo microservices
 ---
 
-## 案例
+## Case
 
-用户采购商品业务，整个业务包含3个微服务:
+The user purchases product business, which consists of 3 microservices:
 
-- 库存服务: 扣减给定商品的库存数量。
-- 订单服务: 根据采购请求生成订单。
-- 账户服务: 用户账户金额扣减。
+- Inventory Service: Deducts the inventory quantity of the given product.
+- Order Service: Generates an order based on the purchase request.
+- Account Service: Deducts from the user's account balance.
 
-### 业务结构图
+### Business Structure Diagram
 
 ![Architecture](/imgs/blog/fescar/fescar-1.png) 
-
 
 ### StorageService
 
@@ -26,7 +25,7 @@ description: >
 public interface StorageService {
 
     /**
-     * 扣除存储数量
+     * Deduct storage quantity
      */
     void deduct(String commodityCode, int count);
 }
@@ -38,7 +37,7 @@ public interface StorageService {
 public interface OrderService {
 
     /**
-     * 创建订单
+     * Create order
      */
     Order create(String userId, String commodityCode, int orderCount);
 }
@@ -50,13 +49,13 @@ public interface OrderService {
 public interface AccountService {
 
     /**
-     * 从用户账户中借出
+     * Debit from user account
      */
     void debit(String userId, int money);
 }
 ```
 
-### 主要的业务逻辑：
+### Main Business Logic:
 
 ```java
 public class BusinessServiceImpl implements BusinessService {
@@ -66,7 +65,7 @@ public class BusinessServiceImpl implements BusinessService {
     private OrderService orderService;
 
     /**
-     * 采购
+     * Purchase
      */
     public void purchase(String userId, String commodityCode, int orderCount) {
 
@@ -116,11 +115,11 @@ public class OrderServiceImpl implements OrderService {
 }
 ```
 
-## Seata 分布式事务解决方案
+## Seata Distributed Transaction Solution
 
 ![undefined](/imgs/blog/fescar/fescar-2.png) 
 
-此处仅仅需要一行注解 `@GlobalTransactional` 写在业务发起方的方法上: 
+Here, you only need to add a single annotation `@GlobalTransactional` on the method of the business initiator: 
 
 ```java
 
@@ -130,15 +129,15 @@ public class OrderServiceImpl implements OrderService {
     }
 ```
 
-##  Dubbo 与 Seata 结合的例子
+## Example of Combining Dubbo and Seata
 
-### Step 1: 安装数据库
+### Step 1: Install Database
 
-- 要求: MySQL (InnoDB 存储引擎)。
+- Requirement: MySQL (InnoDB storage engine).
 
-**提示:** 事实上例子中3个微服务需要3个独立的数据库，但为了方便我们使用同一物理库并配置3个逻辑连接串。 
+**Tip:** In fact, the 3 microservices in the example require 3 independent databases, but for convenience, we use the same physical database and configure 3 logical connection strings. 
 
-更改以下xml文件中的数据库url、username和password
+Change the database url, username, and password in the following xml files
 
 dubbo-account-service.xml
 dubbo-order-service.xml
@@ -149,12 +148,13 @@ dubbo-storage-service.xml
     <property name="username" value="xxx" />
     <property name="password" value="xxx" />
 ```
-### Step 2: 为 Seata 创建 undo_log 表
 
-`UNDO_LOG` 此表用于 Seata 的AT模式。
+### Step 2: Create undo_log Table for Seata
+
+`UNDO_LOG` This table is used for Seata's AT mode.
 
 ```sql
--- 注意当 Seata 版本升级至 0.3.0+ 将由之前的普通索引变更为唯一索引。
+-- Note that when Seata version is upgraded to 0.3.0+, it will change from a normal index to a unique index.
 CREATE TABLE `undo_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `branch_id` bigint(20) NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE `undo_log` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 ```
 
-### Step 3: 创建相关业务表
+### Step 3: Create Related Business Tables
 
 ```sql
 
@@ -203,9 +203,10 @@ CREATE TABLE `account_tbl` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
-### Step 4: 启动 Seata-Server 服务
 
-- 下载[服务器软件包](https://github.com/seata/seata/releases)，将其解压缩。
+### Step 4: Start Seata-Server Service
+
+- Download [server package](https://github.com/seata/seata/releases) and decompress it.
 
 ```shell
 Usage: sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows) [options]
@@ -217,7 +218,7 @@ Usage: sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows
       The port to listen.
       Default: 8091
     --storeMode, -m
-      log store mode : file、db
+      log store mode : file, db
       Default: file
     --help
 
@@ -226,13 +227,14 @@ e.g.
 sh seata-server.sh -p 8091 -h 127.0.0.1 -m file
 ```
 
-### Step 5: 运行例子
+### Step 5: Run the Example
 
-- 启动账户服务 ([DubboAccountServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java)).
-- 启动库存服务 ([DubboStorageServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java)).
-- 启动订单服务  ([DubboOrderServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java)).
-- 运行BusinessService入口 ([DubboBusinessTester](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java)).
+- Start the Account Service ([DubboAccountServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboAccountServiceStarter.java)).
+- Start the Inventory Service ([DubboStorageServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboStorageServiceStarter.java)).
+- Start the Order Service ([DubboOrderServiceStarter](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboOrderServiceStarter.java)).
+- Run the BusinessService entry ([DubboBusinessTester](https://github.com/apache/dubbo-samples/tree/c6a704900501289973b174670beb788eceee5cc4/99-integration/dubbo-samples-transaction/src/main/java/org/apache/dubbo/samples/starter/DubboBusinessTester.java)).
 
-### 相关项目
+### Related Projects
 * Seata:          https://github.com/seata/seata
 * Seata Samples : https://github.com/seata/seata-samples
+

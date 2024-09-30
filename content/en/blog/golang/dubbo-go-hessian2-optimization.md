@@ -1,32 +1,32 @@
 ---
-title: "记一次对 dubbo-go-hessian2 的性能优化"
-linkTitle: "记一次对 dubbo-go-hessian2 的性能优化"
+title: "A Performance Optimization Experience with dubbo-go-hessian2"
+linkTitle: "A Performance Optimization Experience with dubbo-go-hessian2"
 tags: ["Go"]
 date: 2021-01-12
 description: >
-    本文介绍了在 dubbo-go-hessian2 中的一次性能调优
+    This article introduces a performance tuning in dubbo-go-hessian2
 ---
 
 
-> dubbo-go-hessian2 是一个用 Go 实现的 hessian 协议 v2.0 版本的序列化库。从项目名称里可以看到主要用在 dubbo-go 这个项目里。hessian 协议作为 dubbo 的默认协议，因此对性能有比较高的要求。
+> dubbo-go-hessian2 is a serialization library implementing version 2.0 of the hessian protocol in Go. As indicated by the project name, it is primarily used in the dubbo-go project. The hessian protocol is the default protocol for dubbo, thus, it has higher performance requirements.
 
-## 立项
+## Project Initiation
 
-譬如有网文 基于Go的马蜂窝旅游网分布式IM系统技术实践 把 dubbo-go 与其他 RPC 框架对比如下：
+For example, in an article titled "Technical Practice of a Distributed IM System for Mafengwo based on Go", a comparison of dubbo-go with other RPC frameworks is as follows:
 
-1. Go STDPRC: Go 标准库的 RPC，性能最优，但是没有治理；
-2. RPCX: 性能优势 2*GRPC + 服务治理；
-3. GRPC: 跨语言，但性能没有 RPCX 好；
-4. TarsGo: 跨语言，性能 5*GRPC，缺点是框架较大，整合起来费劲；
-5. Dubbo-Go: 性能稍逊一筹，比较适合 Go 和 Java 间通信场景使用
+1. Go STDPRC: Optimal performance but lacks governance;
+2. RPCX: Performance advantage 2*GRPC + service governance;
+3. GRPC: Cross-language but not as good as RPCX in performance;
+4. TarsGo: Cross-language with 5*GRPC performance, but the framework is large and complex to integrate;
+5. Dubbo-Go: Slightly inferior in performance, more suitable for communication scenarios between Go and Java.
 
-有鉴于此，社区便开始组织部分人力，启动了对 dubbo-go 性能优化【同时也欢迎上文作者到钉钉群 23331795 与我们社区交流】。考察 dubbo-go 的各个组件，大家不约而同地决定首先优化比较独立的 dubbo-go-hessian2。
+In light of this, the community started to organize some manpower to initiate performance optimization for dubbo-go【We also welcome the author of the above article to communicate with our community in the DingTalk group 23331795】. In examining various components of dubbo-go, everyone unanimously decided to first optimize the relatively independent dubbo-go-hessian2.
 
-## 起步
+## Initial Steps
 
-在最开始的时候，并没有太想清楚需要做什么，改哪个地方，要优化到何种程度，所以最简单的办法就是看看现状。
+At the beginning, there was no clear plan on what to do, where to change, and to what extent to optimize, so the simplest way was to observe the current situation.
 
-首先，写了一个简单的例子，把常见的类型到一个结构体里，然后测一下耗时。
+First, I wrote a simple example, putting common types into a struct, and then measured the time taken.
 
 ```go
 type Mix struct {
@@ -41,13 +41,13 @@ type Mix struct {
 
 m := Mix{A: int('a'), B: `hello`}
 m.CD = []float64{1, 2, 3}
-// 再加一层，使得数据显得复杂一些
+// Adding another layer for complexity
 m.D = map[string]interface{}{`floats`: m.CD, `A`: m.A, `m`: m}
 ```
 
-> 看起来这个结构体跟真实环境里可能不太一样，但是用来分析瓶颈应该是足够了。
+> Although this struct may not reflect the real environment, it should suffice for analyzing bottlenecks.
 
-然后直接靠 Go Test 写个测试用例：
+Next, I created a test case using Go Test:
 
 ```go
 func BenchmarkEncode(b *testing.B) {
@@ -65,32 +65,32 @@ func BenchmarkDecode(b *testing.B) {
 
 > go test -benchmem -run=^$ github.com/apache/dubbo-go-hessian2 -bench "^B" -vet=off -v
 
-得到下面结果：
+The results obtained were:
 
 ```
 BenchmarkEncode-8 89461    11485 ns/op    3168 B/op 122 allocs/op
 BenchmarkDecode-8 64914    19595 ns/op    7448 B/op 224 allocs/op
 ```
 
-***注：基于 MacBook Pro 2018【主频 Intel Core i7 2.6 GHz】测试。\***
+***Note: Tested on MacBook Pro 2018【Intel Core i7 2.6 GHz】.\***
 
-不与同类库作横向比较，仅仅从这个测试结果里的数字上无法得出任何结论。对我们来说更重要的是：它到底慢在哪里。首先想到的手段便是：借助 pprof 生成火焰图，定位 CPU 消耗。
+Not making horizontal comparisons with similar libraries, we cannot derive any conclusions just from these numbers. More importantly for us is: where is it slow? The first thought was to generate a flame graph using pprof to locate CPU consumption.
 
-pprof 工具的用法可以参考官网文档。本文测试时直接使用了 Goland 内置 `CPU Profiler` 的测试工具：测试函数左边的 `Run xx with 'CPU Profiler'`。
+For the usage of pprof, refer to the official documentation. During testing, I directly used the built-in `CPU Profiler` testing tool in Goland: select `Run xx with 'CPU Profiler'` next to the test function.
 
 ![img](/imgs/blog/dubbo-go/hessian/p2.png)
 
-测试跑完后， Goland 直接显示火焰图如下：
+After the test, Goland displayed the flame graph as follows:
 
 ![img](/imgs/blog/dubbo-go/hessian/p3.png)
 
-从这个图里可以看到，测试代码大概占用了左边的70%，右边30%是运行时的一些消耗，运行时部分一般包括 gc、schedule 两大块，一般不能直接优化。图上左边可以清晰地看到 `encObject` 里 `RegisterPOJO` 和 `Encode` 各占了小一半。
+From this graph, it can be seen that the test code occupies about 70% on the left, while the runtime consumption occupies 30% on the right, which generally includes gc and scheduling, neither of which can be directly optimized. On the left, it’s clear to see that `encObject` has `RegisterPOJO` and `Encode` each taking about half.
 
-完成序列化功能的 `Encode` 消耗 CPU 如此之多尚可理解，而直觉上，把类对象进行解析和注册 `RegisterPOJO` 是不应该成为消耗大户的。所以猜测这个地方要么注册有问题，要么有重复注册。
+While it is understandable that `Encode`, which is responsible for serialization, consumes a lot of CPU, intuitively, parsing and registering objects using `RegisterPOJO` should not be such a significant cost. Hence, I speculated that there might be an issue with registration or duplicate registrations.
 
-下一步分析，用了一个简单的办法：在这个函数里加日志。然后继续再跑一下 benchmark，可以看到性能瓶颈处：容器读写的地方。
+Next, I analyzed further by adding logs to this function. Then I ran the benchmark again and saw the performance bottleneck was in the container read/write operations.
 
-既然知道这里做了许多重复的无用功，就很容易明确优化方法：加缓存。把已经解析过的结果缓存下来，下次需要的时候直接取出使用。改进后的代码简单如下：
+Now that it is clear that a lot of redundant work is being done here, the optimization method became obvious: caching. Cache the already parsed results for direct retrieval when needed. The improved code is as follows:
 
 ```go
 if goName, ok := pojoRegistry.j2g[o.JavaClassName()]; ok {
@@ -98,41 +98,43 @@ if goName, ok := pojoRegistry.j2g[o.JavaClassName()]; ok {
 }
 ```
 
-这里刚开始有个疑问，为什么要分两步先取 `JavaClassName` 再取 `GoName` 而不直接取后者？看起来好像是多此一举了，但其实 `JavaClassName` 是类直接定义的，而 `GoName` 却依赖一次反射。相较之下两次转换的消耗可以忽略了。改完之后再跑一下 benchmark：
+At first, I had a question about why we take `JavaClassName` first and then `GoName` instead of directly taking the latter? It seems redundant but actually, `JavaClassName` is defined directly in the class, whereas `GoName` requires a reflection call. Comparatively, the overhead of two conversions can be negligible. After making the change, I ran the benchmark again:
 
 ```
 BenchmarkEncode-8 197593   5601 ns/op   1771 B/op   51 allocs/op
 ```
 
-非常惊讶地看到，吞吐量大概是原来的 200%。与上面的火焰图对比，可以粗略的计算，`RegiserPOJO` 大概占了整体的30%，改进后应该也只有原来的 `1 / 0.7 * 100% = 140%` 才对。答案也可以在火焰图里找到：
+I was very surprised to see that the throughput is approximately 200% of the original. Comparing this with the previous flame graph, we can roughly calculate that `RegisterPOJO` occupies about 30% of the total; after the improvement, it should be only `1 / 0.7 * 100% = 140%`. The answer can also be found in the flame graph:
 
 ![img](/imgs/blog/dubbo-go/hessian/p4.png)
 
-除了 `RegisterPOJO` 被干掉以外，与上图对比，还有哪些区别呢？可以看到，原来占用将近 20% 的 `GC` 也几乎看不到了。所以真实的 CPU 利用率也要加上这部分的增长，大约 `1 / 0.5 * 100% = 200%`。
+In addition to `RegisterPOJO` being eliminated, what other differences can be seen compared to the previous graph? Notably, the `GC` that originally occupied nearly 20% is now almost gone. Therefore, the true CPU utilization should also include this growth, roughly `1 / 0.5 * 100% = 200%`.
 
-> 需要提醒的是，benchmark 跑出来的结果并不算稳定，所以你自己压出来的结果跟我的可能不太一致，甚至多跑几次的结果也不完全一样。对于上面的数字你只要理解原因就好，上下浮动10%也都是正常范围。
->
-> 反过来看，这也算是 GC 优化的一个角度。碰到 GC 占用CPU过高，除了去一个个换对象池，也可以重点看看那些被频繁调用的模块。当然更科学的方法是看 `pprof heap` / `memory profiler` 。
+> It should be noted that the benchmark results are not stable, so the results you derive may not match mine, and multiple runs will yield varying results. You just need to understand the reason behind these numbers; a fluctuation of 10% is normal.
 
-针对这个结果，可以看到 `encObject` 以上都被切割成了不同的小格子，不再有像 `RegisterPOJO` 那样的大块占用，一般情况下，优化到这里就可以了。
+> Conversely, this can be viewed as an angle of GC optimization. When GC consumes too much CPU, aside from replacing object pools one by one, it is also essential to take a close look at frequently called modules. More scientifically, using `pprof heap` / `memory profiler` is recommended.
 
-看完了 `Encode` ，再来看看 `Decode` ，方法类似，直接看 Goland 生成的火焰图：
+Regarding these results, it can be observed that everything above `encObject` has been divided into different small segments, no longer having significant allocations like `RegisterPOJO`. Generally, when optimizations reach this point, it is sufficient.
+
+Having reviewed `Encode`, let’s take a look at `Decode`. The method is similar; I generated and viewed the flame graph in Goland:
 
 ![img](/imgs/blog/dubbo-go/hessian/p5.png)
 
-这个图有点迷惑性，好像也被分成差不多的小格子了。可以点开 `decObject` 这一层：
+This graph can be deceptive, as it appears to be similarly divided into small segments. We can open up the `decObject` layer:
 
 ![img](/imgs/blog/dubbo-go/hessian/p6.png)
 
-这个时候原来小的 `...` 会显示具体内容，需要注意的是里面有两个 `findField` ，在复杂的调用里经常会遇到这种情况：一个耗资源的函数被分到了许多函数里，导致在看火焰图时并不能直观地看到它就是瓶颈。比较常见的有序列化、日志、网络请求等每个模块都会干一点却又没有一个全局的函数只干他一件事。这个时候除了肉眼去找以外也可以借助于另外一个工具：
+At this point, the small `...` will display specific contents, and it is important to note that there are two `findField` calls present. In complex calls, it’s common to encounter situations where a resource-intensive function is split across many functions, making it difficult to visually identify it as a bottleneck on the flame graph. Common scenarios include serialization, logging, and network requests, where each module does a small portion of work without having a single global function.
+
+To help identify the bottleneck, we can also rely on another tool:
 
 ![img](/imgs/blog/dubbo-go/hessian/p7.png)
 
-在这个 `Method List` 里可以明显看到 `findField` 已经被合并到一起了，总占用接近 CPU 的一半，看到这里你大概就知道它应该是个优化点了。
+In this `Method List`, it is clear that `findField` has been merged together, accounting for almost half of the CPU usage, indicating it’s a potential optimization point.
 
-## 进一步
+## Further Steps
 
-函数 `func findField(name string, typ reflect.Type) ([]int, error)` 的作用是在一个类型里寻找指定属性的位置（Index，反射包里用它来表示是第几个字段）。很容易想到，对于一个结构体来说，每个字段的位置从一开始就确定了，所以用缓存一样可以解决这个问题。一个简单的优化如下：
+The function `func findField(name string, typ reflect.Type) ([]int, error)` is designed to find the position (index, as denoted by the reflection package) of a specified property within a type. It’s easy to see that for a struct, the position of each field is known from the start, so caching can also effectively solve this problem. A simple optimization is shown below:
 
 ```go
 func findField(name string, typ reflect.Type) (indexes []int, err error) {
@@ -153,11 +155,11 @@ func findField(name string, typ reflect.Type) (indexes []int, err error) {
 + BenchmarkDecode-8 82995    12272 ns/op    7224 B/op    126 allocs/op
 ```
 
-可以看到，结果并不如预期的那样提升一倍效果。这个代码乍看起来，好像除了有一些啰嗦的断言，好像也没别的东西了，为什么只有60%的提升呢，我们还是借助下工具
+The results are not as significant as anticipated, showing only about a 60% improvement. At first glance, this code appears to be just some verbose assertions; why was the improvement only 60%? Using tools again, we can observe the following:
 
 ![img](/imgs/blog/dubbo-go/hessian/p8.png)
 
-可以看到：读缓存耗费了 7% 的资源。其中，`sync.(*Map)` 不便优化，但 `newobejct` 是哪里来的呢？代码里可以看到，唯一定义新对象的地方就是函数第一行的 `&sync.Map` ，我抱着试一试的心态把 `LoadOrStore` 拆成了两步
+It can be seen that reading from the cache consumed 7% of the resources. While `sync.(*Map)` cannot be optimized, where does `newobject` originate? The code reveals that the only definition of a new object occurs in `&sync.Map` at the function’s first line. With a trial mindset, I separated `LoadOrStore` into two steps:
 
 ```go
 typCache, ok := findFieldCache.Load(typ)
@@ -172,7 +174,7 @@ if !ok {
 +BenchmarkDecode-8         103876         12385 ns/op        6568 B/op         112 allocs/op
 ```
 
-看结果，着实出乎意料。想起来以前看 Java 代码时经常碰到这样的代码：
+The result is indeed surprising. It reminds me of seeing similar code while reading Java:
 
 ```go
 if ( logLevel >= `info` ) {
@@ -180,15 +182,15 @@ if ( logLevel >= `info` ) {
 }
 ```
 
-以前一直觉得这个 `if` 真是浪费感情，现在想来，别是一番认知了。如果能提供一个 `LoadOrStore(key, func() interface{})` 的方法， 会不会更好一些？
+I used to think this `if` was such a waste, but reflecting on it now has changed my perspective. If we could provide a `LoadOrStore(key, func() interface{})` method, wouldn't that be better?
 
-到这里的话，我们做了两个比较大的优化，整体性能大约提升了一倍。如果仔细看火焰图，还会发现有很多小的优化点，但是由于没有什么特别质的飞跃，这里不再赘述。有兴趣的小伙伴可以到 PR Imp: cache in reflection 里阅读相关的讨论。
+At this point, we’ve made some significant optimizations, with overall performance improving by about double. If one closely examines the flame graph, many small optimization points can also be found, but due to the lack of particularly qualitative breakthroughs, I won’t elaborate further. Interested parties can read the relevant discussions in PR Imp: cache in reflection.
 
-## 更进一步
+## Beyond
 
-优化到此，依然藏着一个更深层次的问题：找一个可靠的参考基准，以衡量目前的工作结果【毕竟没有对比就没有伤害】。一个很容易想到的比较对象是 Go 语言官方的 `json` 标准库。
+Even with these optimizations, there lies a deeper issue: finding a reliable reference benchmark to measure the current work results【After all, without comparison, there is no harm】. A readily conceivable comparison object is the Go language's official `json` standard library.
 
-把 dubbo-go-hessian2 与 `json` 标准库做比较如下：
+Below is a comparison between dubbo-go-hessian2 and the `json` standard library:
 
 ```bash
 $ go test -benchmem -run=^$ github.com/apache/dubbo-go-hessian2 -bench "^B" -vet=off -v -count=5
@@ -223,23 +225,24 @@ PASS
 ok      github.com/apache/dubbo-go-hessian2    28.680s
 ```
 
-虽然每次的结果不稳定，但就整体而言，目前的序列化和反序列化性能大概都是JSON标准库的85%左右。这个成绩并不能说好，但短期内能花20分的精力得到一个80分的结果，应该也是可以接受的。至于剩下的20%，就不是靠改几行代码就能搞定了。内存分配是否合理、执行流程是否有冗余，都是需要一点一滴地去改进。
+Although the results are unstable, overall, the current serialization and deserialization performance is about 85% of the JSON standard library. This result is not remarkable, but spending 20 minutes to achieve an 80% result in the short term should be acceptable. As for the remaining 20%, it cannot be fixed simply by modifying a few lines of code. Factors like memory allocation efficiency and redundant execution processes need continuous improvements.
 
-## 总结
+## Conclusion
 
-最后，我们来总结一下本文主要的优化步骤：
+Finally, let's summarize the main optimization steps in this article:
 
-- 利用火焰图 快速定位消耗 CPU 较高的模块；
-- 利用缓存机制，快速消除重复的计算；
-- 利用 CallTree、MethodList 等多种工具分析小段代码的精确消耗；
-- 遵循二八定律，以最小的成本做出一个效果显著的收益。
+- Use flame graphs to quickly locate CPU-intensive modules;
+- Utilize caching mechanisms to rapidly eliminate redundant computations;
+- Employ tools like CallTree and MethodList to analyze the precise consumption of small code segments;
+- Follow the Pareto Principle to achieve significant gains with minimal costs.
 
-### 欢迎加入 dubbo-go 社区
+### Welcome to Join the dubbo-go Community
 
-目前 dubbo-go 已经到了一个比较稳定成熟的状态。在接下来的版本里面，我们将集中精力在云原生上。下一个版本，我们将首先实现应用维度的服务注册，这是一个和现有注册模型完全不同的新的注册模型。也是我们朝着云原生努力的一个关键版本。
+Currently, dubbo-go has reached a relatively stable and mature state. In upcoming versions, we will focus on cloud-native aspects. In the next version, we will first implement service registration at the application level, representing a completely new registration model distinct from the existing one. It is a key version as we strive towards cloud-native standards.
 
-dubbo-go 钉钉群 **23331795** 欢迎你的加入。
+The DingTalk group for dubbo-go is **23331795**; you are welcome to join.
 
-#### 作者信息
+#### Author Information
 
-张慧仁，github id: micln，任职 得到APP 后端开发。
+Zhang Huiren, GitHub ID: micln, works as a backend developer at the Get app.
+

@@ -1,134 +1,134 @@
 ---
-title: "Dubbo 在 Service Mesh 下的思考和方案"
-linkTitle: "Dubbo 在 Service Mesh 下的思考和方案"
+title: "Thoughts and Solutions of Dubbo under Service Mesh"
+linkTitle: "Thoughts and Solutions of Dubbo under Service Mesh"
 tags: ["Java"]
 date: 2019-11-30
-description: Dubbo 是实现框架，融入 service mesh 理念就是我们今天分享的
+description: Dubbo is an implementation framework, and integrating the service mesh concept is what we share today.
 ---
 
-## 开头
-Service Mesh这个“热”词是2016年9月被“造”出来，而今年2018年更是被称为service Mesh的关键之年，各家大公司都希望能在这个思潮下领先一步。今天我也分享阿里中间件在这方面的观点，思考和实践。考虑到有些人没了解过Dubbo(集团内以HSF为主)和Servicemesh，先简单介绍下这两个词。Dubbo应该是国内最受欢迎的远程服务框架，在Github上有超过2w的star数，也是阿里分布式架构互联互通的核心所在。跟Dubbo一样，servicemesh也是面向服务互联互通这一问题域，是云原生技术栈的核心之一；大家可以简单理解service mesh就是云原生组织定义的微服务架构解决理念。Dubbo是实现框架，融入service mesh理念就是我们今天分享的。
+## Introduction
+The term Service Mesh was coined in September 2016, and 2018 is recognized as a crucial year for service mesh, with major companies aiming to lead in this trend. Today, I will share Alibaba's middleware perspectives, thoughts, and practices in this regard. For those unfamiliar with Dubbo (primarily HSF in the group) and service mesh, let’s briefly introduce these terms. Dubbo is arguably the most popular remote service framework in China, with over 20,000 stars on GitHub, and is core to Alibaba's distributed architecture. Similar to Dubbo, service mesh addresses the issue of service interconnectivity and is among the core technologies in the cloud-native stack; it can be understood as the microservice architecture solution defined by cloud-native organizations. Dubbo is an implementation framework, and integrating the service mesh concept is what we share today.
 
-## 现状和挑战
+## Current Situation and Challenges
 
 
 ![1.png | center | 826x206](/imgs/blog/dubbomesh/1.png)
 
-当前Dubbo支撑的阿里分布式应用内支撑万级别的应用数，运行在20多万的服务器实例上，每天调用量是万亿级别，这应该是国内最大的分布式应用集群。
+Currently, Dubbo supports over ten thousand applications within Alibaba's distributed environment, running on more than 200,000 server instances, with daily invocation volumes reaching trillions. This is likely the largest distributed application cluster in China.
 
-挑战主要来自三方面
+Challenges mainly come from three aspects
 
-* 首先， 数以万计的应用意味着有以十万级的服务，理顺错综复杂的服务拓扑关系，甚至及时诊断某个异常调用链路，需要考虑海量数据的拉取分析，是非常有挑战的，阿里通过EagleEye鹰眼链路系统提供可观察性和治理能力来解决；
-* 第二个挑战是机房级别容灾，阿里的机房是分布在天南海北，大家可以想象横跨数千公里的网络延迟会造成服务互通很大的影响，所以在保证一定恢复时间和一定数据容错的情况下做异地多活是有巨大挑战，阿里通过支持异地多活的单元化架构解决。
-* 第三个挑战是阿里业务众多，尤其像阿里生态中的高德，UC，优酷等所使用的开发语言跟淘系Java是不一样的，比如PHP，C，Nodejs，Dart等，要维护多个版本并保证各版本具有同样的功能是成本比较高的；这个挑战在云原生的新一代理念下更具挑战，毕竟。今天主题跟第三个挑战是息息相关，能解决一定的问题。
+* First, tens of thousands of applications mean there's a level of services in the hundreds of thousands, organizing the intricate service topology and even diagnosing any abnormal call chain in real-time requires considering massive data retrieval and analysis, which is highly challenging. Alibaba addresses this through the EagleEye system, providing observability and governance capabilities;
+* The second challenge is disaster recovery at the data center level. Alibaba's data centers are spread across vast distances, and one can imagine how network latency across thousands of kilometers significantly impacts service interconnectivity, so ensuring certain recovery times and data fault tolerance while implementing multi-active deployments across different places is a huge challenge. Alibaba resolves this through a unit-based architecture that supports multi-active deployments.
+* The third challenge is that Alibaba has many businesses, particularly those in the Alibaba ecosystem like Gaode, UC, Youku, etc., which use programming languages different from 淘系 Java, such as PHP, C, Node.js, Dart, etc. Maintaining multiple versions while ensuring consistent functionality across them is cost-prohibitive; this challenge is exacerbated under new cloud-native principles. Today’s topic is closely related to this third challenge, which can resolve certain issues.
 
-这里讲个大鱼吃小鱼的故事来简单理解下云原生：软件会吃掉这个世界，也就是信息化不可避免，而开源会吃掉软件，最终云原生会吃掉开源。这正代表了云原生理念的颠覆性，从商业软件到开源到云原生，环环相套，以体系化和层次化的方式推荐各个方面的开源方案和标准，这会极大降低企业级架构服务的技术门槛，是企业信息化之路的一大利好，当然也是进化方向。这个故事跟今天的主题--开发者定义软件未来，是非常契合，也就是说这个趋势至少在企业级软件服务领域正在发生。云原生：Cloud Native is Patterns with A complete and trusted tool kit for modern architectures。
+To illustrate cloud-native, let’s tell a story of big fish eating small fish: software will dominate the world, as informatization is inevitable, and open source will dominate software, ultimately cloud-native will dominate open source. This represents the disruptive nature of cloud-native concepts, moving from commercial software to open source to cloud-native, promoting various open-source solutions and standards in a systematic and hierarchical manner, significantly lowering the technical threshold of enterprise architecture services and being a boon for enterprise informatization, also an evolutionary direction. This story closely aligns with today’s theme—the future of software defined by developers, indicating that this trend is certainly taking place in the enterprise software service sector. Cloud Native is Patterns with A complete and trusted toolkit for modern architectures.
 
-<span data-type="color" style="color:white">Service Mesh的典型方案</span>
-## Service Mesh的典型方案
+<span data-type="color" style="color:white">Typical Solutions for Service Mesh</span>
+## Typical Solutions for Service Mesh
 
 
 ![2.png | center | 826x206](/imgs/blog/dubbomesh/2.png "")
 
-讲完故事，回到servicemesh。
+Having told the story, let's return to service mesh.
 
-传统形态下SDK代表着一个特定语言的库，由应用和微服务框架共处一进程内，在发布升级中共享生命周期。比较典型的代表是Twitter的finagle，Google的stubby/grpc，阿里巴巴的HSF/Dubbo.
+In traditional forms, SDK represents a library in a specific language, coexisting within the same process as applications and microservice frameworks, sharing lifecycle during releases and upgrades. Notable examples include Twitter's Finagle, Google's Stubby/gRPC, and Alibaba's HSF/Dubbo.
 
-Serviemesh下推荐是右边Sidecar方案，Sidecar方案没有引入新的功能，只是改变了原有功能的位置，以独立的应用来存在，大家可以暂时以nginx来理解其网络代理能力也可以。
+Under service mesh, the recommended approach is the Sidecar model on the right, which does not introduce new functionality but merely changes the location of existing functions, existing as independent applications. One can momentarily understand its network proxy capabilities through Nginx.
 
-在这张图中希望大家关注两个信息， 1）所有的sidecar形成逻辑网络被称为数据面，是业务服务的链路中是强依赖节点，承载了业务数据互联互通的基础；传统的ops管控服务被称为控制面，这部分跟传统是大同小异。 2）在sidecar形态下，网络会增加两跳，即应用与sidecar之间，他们之间的数据互通也是基于协议规范。后面会详细讲。
+In this illustration, I hope everyone pays attention to two pieces of information: 1) All sidecars form a logical network known as the data plane, which is a strongly dependent node in the business services’ link, carrying the foundation of cross-business data interconnection; traditional ops control services are known as the control plane, which aligns closely with traditional approaches. 2) In the sidecar configuration, the network incurs two additional hops, i.e., between the application and the sidecar, and the data intercommunication between them is also based on protocol specifications. Further details will follow.
 
-## Sidecar模式的优劣
+## Advantages and Disadvantages of Sidecar Model
 
 
 ![3.png | center | 826x206](/imgs/blog/dubbomesh/3.png "")
 
-接下来从开发和运维两个阶段来分开比较。
+Now let’s separately compare the development and operations phases.
 
-* 多语言支持方面，既然sidecar是独立应用，用最合适的一种语言开发完成即可，就避免了需要针对不同语言的应用场景做不同的版本开发。当前阿里选择基于C语言的Envoy做二次开发来追求最小的footprint和性能，当然也曾经历一些弯路，比如曾经用Java开发过一个sidecar，但最终由于引入JRE体量大和GC带来的抖动等问题证明不可行。有必要强调的是：这里说的是sidecar自身开发现在避免了多语言多版本的问题，而真要支持任意服务自由采用任意语言实现这一理想，是需要站在从业务到数据面再到业务的整个链路上的数据交互做思考。
-* 性能方面，sidecar情形下由于会增加两跳，这两跳是业务应用与sidecar的两个进程之间的调用，这是本机，即便是经过优化，也是会增加进程切换以及数据转换的开销。经过我们的优化测试，在正常的业务访问下，相比SDK形态下最多增加1毫秒的开销，这在大多数业务情形下是基本无感知无影响。
-* 再看运维阶段的比较，一般SDK形态的服务框架都是只关心开发的诉求，对于如何运维都是不关心，而软件生命周期中运维是最长的，如何从中间件角度解决更多的运维问题是非常有意义的。阿里的中间件经常需要升级，以库的形式升级时就需要业务方应用重新打包，这个推动业务方变更的方式是比较被动，而且周期很长。
-* 当以镜像为基本原子单位进行发布部署时，阿里的中间件SDK体量大概是200兆，需要与业务一起打包，这样在业务应用升级时让分发的包就显得笨重，时效性相比sidecar形态就差一截。
+* Regarding multi-language support, as the sidecar is an independent application, it can be developed in the most suitable language, thus avoiding the need for different version developments across various languages. Currently, Alibaba has chosen to base its secondary development on C language Envoy to pursue the smallest footprint and performance; however, it has encountered setbacks, such as when a sidecar was developed in Java but ultimately proved unfeasible due to the large size of the JRE and GC-induced fluctuations. It is essential to emphasize that the sidecar's current development avoids the multi-language, multi-version issues, but to genuinely support any service freely adopting any language is necessary to consider data interactions throughout the entire link from business to data to business.
+* In terms of performance, the sidecar case incurs two additional hops, namely the calls between the business application and the two processes of the sidecar, which are local but still incur overhead for process switching and data conversion. Our optimization tests show that under normal business access, compared to SDK form, the maximum increase is 1 millisecond, which is generally imperceptible and has no impact in most business scenarios.
+* Looking at the comparison during the operations phase, generally, SDK-based service frameworks only care about development needs and do not concern themselves with operational management. However, during the software lifecycle, operations represent the longest phase, making it significant to resolve more operational issues from a middleware perspective. Alibaba's middleware often requires upgrades, and upgrading as a library necessitates the business applications to be repackaged, which tends to be a passive way to drive changes from the business side, and the cycle can be long.
+* When deploying and releasing using images as the basic atomic unit, Alibaba’s middleware SDK weighs around 200MB, needing to be packaged with business; thereby, during business application upgrades, the distributed packages seem cumbersome, and the timeliness is not as good as that of sidecar approaches.
 
-稍微总结下，sidecar具有两个明显优势，一个是多语言开发维护成本低 ，另一个是独立升级，当然代价是需要增加一点点的网络延迟。至此大家是不是觉得Sidecar基本完美？ 别着急，需要大家再思考一个问题：SDK模式下中间件组件会随应用一起发布，拥有完全一致的生命周期；而在sidecar模式下，如何管理sidecar的生命周期？这里可以拿无线耳机来举个例子，无线耳机是独立了，但必须独立电源的驱动，所以充电是要的。是的，在大规模的集群中这个点会带来不小的复杂性。
+To briefly summarize, the sidecar offers two clear advantages: one is lower multi-language development and maintenance costs, and the other is independent upgrades, though at the cost of slightly increased network latency. So does everyone think the sidecar is nearly perfect? Hold on; you need to consider one more question: In the SDK model, middleware components are released with applications and share the same lifecycle; however, in the sidecar model, how to manage the lifecycle of sidecars? A good analogy might be wireless headphones; they are independent but require independent power sources to function, thus necessitating charging. Yes, this point adds substantial complexity in large-scale clusters.
 
-## 关键点
+## Key Points
 
 
 ![4.png | center | 826x206](/imgs/blog/dubbomesh/4.png "")
 
-下面跟大家分享下我们对servicemesh理解的三个关键技术点。分别是sidecar运维，数据面与控制面的集成，协议。
+Next, we will share our understanding of three key technical points of service mesh. They are sidecar operations, data plane and control plane integration, and protocols.
 
-* 先说sidecar的运维，这是个难点，也是为什么sidecar方案以前没有被广泛应用的重要原因。前面说sidecar与应用现在成为两个不同的进程，要考虑多个事宜，一是要考虑如何把sidecar与应用部署在一起，二是考虑业务进程或sidecar进程一方需要升级重启时如何协同来保证请求的正常处理或转发，即优雅上下线的问题。这些事宜考虑清楚并解决后，算是具备servicemesh的前提条件。当然，kubernetes解决了这块的事情，提供了initiator类似插件的机制来对原子性的pod进行注入sidecar，并通过健康检查机制来保证两个进程的协同。简单地也可以这么理解：先把kubernetes容器调度平台的实施是servicemesh的前提条件。
-* 数据面中的sidecar的服务治理能力则是其核心竞争力，包括负载均衡策略，路由，安全，权重等等，这些能力是以规则形式通过控制面来统一下发给数据面。在传统微服务框架下数据面和控制面的集成是紧耦合，也就是数据面和控制面是一体的，举例来说用了Dubbo框架，只能选择Dubbo-Ops。而Envoy作为servicemesh思潮的带领者，提出了一整套的API规范，Istio可以实现其xDS接口，阿里巴巴也可以根据自己的架构设计实现类似的服务平台。
-* 协议 协议 协议， 重要的事说三遍。。。sidecar和Dubbo的内核是网络协议的处理器，而sidecar又是面向多语言场景的，所以自然协议处理能力是要强调的。先说下阿里Dubbo当下向Mesh方向发展时遇到难点。首先我们的服务接口都是通过Java Interface描述，其次涉及的传输模型DTO也是Java POJO定义，最后协议也是私有的。这会导致跨语言比较难，而sidecar形态需要面向多语言，这些问题更是首当其冲。考虑到这里有点稍微偏细节点，希望大家带着如下问题来先思考下：业务应用到sidecar之间的数据交换要考虑什么? Sidecar自身在处理网络字节流时又要考虑什么？是的，首先业务应用最好都不依赖特定协议库，也不依赖特接口定义库；Sidecar自身处理数据时跟nginx很接近，但最好具备协议转换适配的能力，比如把基于HTTP的请求转换为Dubbo请求，就能轻松集成Dubbo遗留系统。
+* First, the sidecar's operations is a challenge, and it explains why the sidecar solution wasn't widely adopted earlier. As previously noted, the sidecar and applications are now two distinct processes, raising multiple concerns: one must consider how to deploy the sidecar alongside the application, and two, when either the business process or sidecar process needs an upgrade or restart, collaboration is required to ensure normal request handling or forwarding, i.e., the issue of graceful shutdowns and startups. Once these concerns are understood and resolved, the foundation for establishing service mesh is set. Of course, Kubernetes addresses these matters by providing a plugin-like mechanism similar to the initiator to inject the sidecar into atomic pods and ensure process cooperation through health checks. To simplify, one can also understand this as: establishing Kubernetes Container Scheduling Platform implementation is a prerequisite for service mesh.
+* The service governance capabilities of sidecars in the data plane are its core competitiveness, including load balancing strategies, routing, security, weights, etc., which are issued as rules from the control plane to the data plane. In traditional microservice frameworks, data plane and control plane integration is tightly coupled; that is, the data plane and control plane are one unit. For example, with the Dubbo framework, only Dubbo-Ops can be selected. Envoy, as a leader in the service mesh movement, has put forward a comprehensive set of API specifications, and Istio can implement its xDS interfaces, while Alibaba can design and implement a similar service platform based on its architecture.
+* Protocol, protocol, protocol—important matters are worth mentioning three times… The sidecar and Dubbo's core is the network protocol handler, and the sidecar is aimed at multi-language scenarios; hence, the ability to handle protocols is emphasized. Let’s discuss the challenges facing Alibaba’s Dubbo as it develops in the Mesh direction. First, our service interfaces are described via Java interfaces; second, the involved transport models DTO are also defined as Java POJO; finally, the protocol is proprietary. This creates difficulties for cross-language implementations, whereas the sidecar model requires multi-language support, making these issues challenging. Considering this delves into a more detailed aspect, I hope everyone reflects on the following questions: What should be considered for data exchange between business applications and sidecars? What must the sidecar consider when processing network byte streams? Yes, ideally, business applications should not depend on specific protocol libraries or interface definition libraries; when the sidecar processes data, it closely resembles Nginx, but it should ideally have the capability for protocol conversion and adaptation, for instance, converting HTTP-based requests to Dubbo requests, thereby easily integrating Dubbo legacy systems.
 
-## 回看协议
+## Reviewing Protocols
 
 
 ![5.png | center | 826x206](/imgs/blog/dubbomesh/5.png "")
 
-既然协议在跨语言场景下如此重要，有必要稍微回归下协议的历史轨迹。看历史一般是轻松有趣的过程，最重要的好处是能使我们头脑清晰而不迷茫。
+Given the importance of protocols in cross-language scenarios, it's worthwhile to reflect on the historical trajectory of protocols. Reviewing history is usually an enjoyable and easy process, providing clarity and preventing confusion.
 
-我们先从2008年说起，很近也就10年，阿里服务框架诞生这一年。当年各大公司还在炒作SOA思想的时候，阿里在不清楚SOA思想的情况下根据自身业务诉求实践拥抱了SOA的架构。阿里服务框架一直是从三个层面来定义，第一RPC通信 第二是提供丰富强大的治理能力 第三就是基于容器隔离的运维能力，使得中间件可以独立升级。这个理念直到今日都是非常先进，非常的赞。就像前面说的，Dubbo主要是面向Java领域的微服务架构解决方案，在以Java为主导的技术架构下是绝对首选，但因为其协议设计是私有特性，要想成为跨语言的协议标准是有一定难度。
+We start from 2008, just ten years ago, the year when Alibaba's service framework was born. While many companies were still discussing SOA concepts at that time, Alibaba embraced SOA architecture based on its own business requirements without fully understanding SOA concepts. The Alibaba service framework has consistently been defined across three levels: first, RPC communication; second, providing rich and potent governance capabilities; and third, operational capabilities based on container isolation for independent middleware upgrades. This concept remains very advanced and commendable today. As mentioned earlier, Dubbo primarily serves as a microservice architecture solution for the Java domain and is the absolute first choice under Java-led technical architecture, but its proprietary protocol design presents challenges to become a standard across languages.
 
-事实上，之前已经出现了很多通用的跨语言的服务集成规范。最早是91年的CORBA，是分布式对象访问协议，2000年的SOAP是当年webservice思想下的协议，无论是CORBA还是SOAP都是支持所有平台和语言的一套规范，但是设计地比较复杂笨重，且性能存在一定问题。
+In fact, many general cross-language service integration specifications have emerged previously. The earliest was CORBA in 1991, a protocol for accessing distributed objects, followed by SOAP in 2000, developed under the web service concept. Both CORBA and SOAP provided a set of specifications supporting all platforms and languages, yet were often criticized for being complex and heavy, in addition to performance issues.
 
-REST是一种架构风格，相比SOAP的设计，有非常优秀的理念和最佳实践指导，并且万维网作为世界上最大型最成功的的分布式应用是REST最好的证明。但跟SOAP一样，REST跑在1上有性能瓶颈，这个也可能是当年阿里服务框架没有选择REST规范的原因。额外提下，REST思想虽然很早就有，但事实上REST的规范在Java领域JAX-RS API 直到最近两年在2.2版本下才算稳定成形，且越来越接近微服务框架。
+REST is an architectural style that, compared to SOAP’s design, offers superior concepts and best practice guidance, with the World Wide Web being the largest and most successful distributed application, serving as the best proof of REST. But like SOAP, running on REST has performance bottlenecks, which could explain why Alibaba did not choose the REST specification for its service framework at the time. It is worth mentioning that although the REST concept has existed for a long time, the REST specification in the Java domain, JAX-RS API, only stabilized in its 2.2 version within the last two years, increasingly aligning with microservice frameworks.
 
-1996年的1在连接通道不支持多工复用，根本无法发挥TCP/UDP的网络能力；而到了2015年HTTP2则解决这些，能够最大限度的利用TCP层的网络宽带，且支持了streaming，push等交互模式，这些跟很多的私有或专有应用协议干得是一个事，但是标准化的大家都容易接受的事。这里必须提一下，伴随HTTP2而来的是grpc，原先Google早早推出了Protocolbuffer，但一直没把自家stubby开源，我猜测最大的原因是不想grpc跑在一个私有协议上，而是在等HTTP2.
+In 1996, the initial version had no support for multiplexing, thus failing to leverage TCP/UDP network capabilities; by 2015, HTTP/2 resolved these issues, maximizing the use of TCP layer bandwidth while supporting streaming, push, and other interaction modes. This aligns with many private or proprietary application protocols, but it standardizes what everyone can easily accept. Notably, HTTP/2 was accompanied by gRPC; Google had initially released Protocol Buffers but had not open-sourced its stubby system; I speculate the key reason was to avoid having gRPC operate on a private protocol and wait for HTTP/2.
 
-总结下来，协议技术一直在向着轻量级和标准规范化的方向发展。像SOAP，CORBA这些重量级的不跨平台的协议必然消失在历史车轮里，私有或专有的协议也会向标准协议靠拢。在面向跨语言的场景下，有两种的协议规范是大概率胜出，一种是REST，一种是grpc，两者都是以HTTP为交换通道。
+In conclusion, protocol technology has consistently evolved toward lightweight and standardized approaches. Heavyweight, non-cross-platform protocols such as SOAP and CORBA will inevitably disappear, while private or proprietary protocols will converge towards standardized protocols. In cross-language scenarios, two types of protocol specifications are highly likely to succeed, namely REST and gRPC, both utilizing HTTP as the communication channel.
 
-## 面向多语言协议的三层面
+## Three Levels for Multi-Language Protocols
 
 
 ![6.png | center | 826x206](/imgs/blog/dubbomesh/6.png "")
 
-展开来讲，在面向多语言的协议需要考虑三个层面。
+Expanding on this, three levels must be considered in the context of multi-language protocols.
 
-* 先从最右边的会话层，干得事是在tcp字节流的基础上形成交互模式，比如 一对一的标准请求响应模式， 以及onway， 一对多的streaming模式。Dubbo在这一层是有扩展能力的，目前除了支持自定义的Dubbo-Remoting，也支持基于HTTP通道能力，我们觉得未来的趋势是HTTP2,所以也会支持这块.这里在分享一句话跟大家一起思考，HTTP不是RPC，HTTP被翻译成超文本传输协议，但不是传输层。另外提一下，这一层是对于MQ，Streaming Compute，Cache等等都是通用的。
-* 再说展示层，干得事是在真正的服务调用过程中，业务对象以何种形式被格式化，比如HTTP头中的content-type就用于这个展示协议的描述，最常用的JSON,TXT,XML等。这一层对于sidecar来说，可以做透明处理，也就是说sidecar只需要解析出头部信息，前提是要求业务应用把需要在治理时用到的一些字段信息以字符串形式放到头部中。Dubbo当前是默认HEssion，跨语言能力比较弱，所以未来JSON是我们首选。
-* 最后，首先一个服务是干什么的，它的名字，方法，参数都是怎样的，等等基本元信息是需要统一描述的，即便像是REST这样基于URI，也是需要一种协议来定义，以前Dubbo是基于java interface来定义，现在我们在多语言的mesh环境下是考虑向OpenAPI specification方向考虑，支持swagger。
-    我们相信在这几个层面，尤其是会话层和应用层，用不多几年一定会是标准化的，尤其是在云原生的趋势下。
+* Starting from the far-right session layer, its role is to create interaction modes based on TCP byte streams, such as one-to-one standard request-response modes and one-to-many streaming modes. Dubbo currently has extensibility at this layer, as it supports custom Dubbo-Remoting alongside HTTP channel capabilities, forecasting that the future trend is HTTP/2, which is a focal area for support. Here’s a thought: HTTP is not RPC. HTTP translates to Hypertext Transfer Protocol, but it is not a transport layer protocol. Also, this layer is applicable to MQ, Streaming Compute, Cache, etc.
+* Moving onto the presentation layer, this is concerned with how business objects are formatted during actual service calls; for instance, the content-type in HTTP headers describes this presentation protocol, commonly using JSON, TXT, XML, etc. For the sidecar, transparent processing can be performed, meaning it only needs to extract header information, provided business applications pass needed governance fields as strings in their headers. Currently, Dubbo defaults to Hession, which is weaker in cross-language capabilities; hence, looking to the future, JSON is our first option.
+* Finally, fundamental service metadata needs to be uniformly described, including what a service does, its name, methods, parameters, etc. Even REST, based on URI, requires a protocol for definition. Dubbo previously defined itself via Java interfaces; now, in multi-language mesh environments, we consider approaching OpenAPI Specifications to support Swagger.
+    We believe that within these levels, especially the session and application layers, standardization will definitely emerge within a few years, particularly under the cloud-native trend.
 
-### 方案之Kubernetes集成<span data-type="color" style="color:white">Du</span>
+### Kubernetes Integration Plan<span data-type="color" style="color:white">Du</span>
 
 
 ![7.png | center | 826x206](/imgs/blog/dubbomesh/7.png "")
-<span data-type="color" style="color:white">bbo Mesh方案之Kubernetes集成</span>
-其实，servicemesh在最近两年流行最大的原因是云原生理念的逐渐深入人心，从广义角度看，能够融入云原生的微服务框架都能称得上servicemesh。谈云原生，肯定绕不开kubernetes，所以我们在Dubbo Mesh的方案的第一个分享是 在kubernetes下的集成，目标是复用Kubernetes的基础服务，从而使得Dubbo能解决kubernetes环境下的微服务集成问题，同时能最大限度的利用dubbo已有的功能。核心思路是两点，
+<span data-type="color" style="color:white">Kubernetes Integration Under the Dubbo Mesh Scheme</span>
+Actually, the primary reason for the recent popularity of service mesh over the past two years lies in the growing acceptance of cloud-native concepts. Broadly speaking, any microservice framework that integrates into cloud-native can be deemed a service mesh. When discussing cloud-native, Kubernetes cannot be overlooked; thus, our first sharing of the Dubbo Mesh scheme is its integration under Kubernetes, aiming to reuse Kubernetes’ foundational services, enabling Dubbo to resolve microservice integration issues in Kubernetes environments, while maximizing the utilization of existing Dubbo functionalities. The core thoughts are twofold,
 
-* Dubbo应用在构建阶段自动生成其deployment和service的声明文件。这个主要是解决Dubbo与kubernetes的服务映射。
-* Dubbo地址注册针对kubernetes的扩展实现，通过Kubernetes的APIServer来拉取并监听某个服务的podIP。这样，在kubernetes集群内，Dubbo服务就能在其podID的虚拟网络内实现服务发现。
+* Dubbo applications automatically generate their deployment and service declaration files during the build phase. This mainly resolves the service mapping issue between Dubbo and Kubernetes.
+* The address registration for Dubbo is implemented as an extension targeting Kubernetes, utilizing Kubernetes' APIServer to pull and listen for a specific service's pod IP. Therefore, within the Kubernetes cluster, Dubbo services can achieve service discovery within their pod ID’s virtual network.
     
-## 方案之跨语言协议支持
+## Cross-Language Protocol Support Plan
 
 
 ![8.png | center | 826x206](/imgs/blog/dubbomesh/8.png "")
 
-前面讲了很多关于协议方面的东西，也为我们在Dubbo Mesh的方案的第二点分享是做了铺垫， 第二点的目标是Dubbo 协议的多语言支持。核心思路是
-* 积极兼容开源社区Envoy，这个使得Envoy上兼容支持Dubbo的私有协议。
-* Dubbo支持HTTP/2作为传输通道，这个是为了Dubbo的协议通道能力向更加开放更加标准规范的方向做努力。
+Having discussed numerous aspects regarding protocols, we lay the groundwork for our second point in the Dubbo Mesh scheme, which focuses on multi-language support for the Dubbo protocol. The core thought is:
+* Actively ensuring compatibility with the open-source community Envoy, enabling Envoy to support Dubbo’s private protocol seamlessly.
+* Dubbo supports HTTP/2 as a transport channel, aiming to move the Dubbo protocol capabilities toward a more open and standardized direction.
 
-## ServiceMesh之云原生的指导
+## Cloud Native Guidance for Service Mesh
 
 
 ![9.png | center | 826x206](/imgs/blog/dubbomesh/9.png "")
 
-孤立地看待servicemesh其实和传统服务框架，价值还不算大，甚至成本相对更高。这时候，当我们把servicemesh设定到云原生的上下文中，就会发现不一样的意义。
+Viewing service mesh in isolation from traditional service frameworks doesn't represent significant value and may even incur higher costs. However, when we set service mesh within the context of cloud-native, it reveals a distinct significance.
 
-servicemesh是云原生理念的路径地图的第五步，如果没有前面的容器化，CICD等四部，真正拥抱servicemesh也只是空中楼阁。阿里在这方面的实践经验是，servicemesh的实施是需要结合软件开发的整个生命周期进行统筹，从软件在本地开发测试，到通过持续集成服务的自动化构建，再到以镜像方式分发到仓库并依托调度云平台的持续部署，最后持续监控。
+Service mesh serves as the fifth step in the roadmap for cloud-native concepts; without the preceding four steps of containerization, CI/CD, and so on, truly embracing service mesh would merely be castles in the air. Alibaba's practical experience suggests that implementing service mesh requires integrating with the entire lifecycle of software development, from local development and testing to automated builds via CI services, then distributing as images to repositories while relying on scheduling cloud platforms for continual deployment, culminating in ongoing monitoring.
 
-dubbo已经开源好多年，是非常符合云原生这个原则，正向servicemesh方向和云原生理念上努力，为企业信息化做出一点贡献。
+Dubbo, having been open-sourced for many years, aligns well with cloud-native principles, striving towards the direction of service mesh and contributing to enterprise informatization efforts.
 
-## 总结
+## Summary
 
 
-总结一下Dubbo Mesh是Dubbo在cloud native下的一种演进，这个演进是为了更加开放更加靠近标准协议规范的方向做的探索。通过分享希望大家能带走三点思考。
+In summary, Dubbo Mesh represents an evolution of Dubbo under cloud-native, exploring pathways toward being more open and aligned with standardized protocol specifications. Through this share, I hope everyone takes away three key considerations.
 
-1. servicemesh的多语言方案其实是走规范化标准化的协议之路，这样才能覆盖多语言的诉求。
-2. 建议大家根据实际业务场景来慎重权衡sidecar模式下运维复杂性和收益回报。
-3. 一定把servicemesh设定在云原生的上下文中才具意义，离开了Kubernetes谈servicemesh的实践是不建议的大跃进。
-    最后希望大家一起共建共享的Dubbo开源社区，谢谢。
+1. The multi-language solution for service mesh essentially follows the pathway of standardized protocol practices to meet multi-language demands.
+2. It is advisable to carefully weigh the operational complexities and return on investment in sidecar models based on actual business scenarios.
+3. Setting service mesh within the context of cloud-native is essential—disregarding Kubernetes discussions about service mesh practices would be a leap forward one should avoid.
+    Finally, I hope everyone can collaboratively build and share the Dubbo open-source community. Thank you.
 

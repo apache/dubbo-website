@@ -1,68 +1,66 @@
 ---
-title: "在 Dubbo 中使用 Zipkin"
-linkTitle: "在 Dubbo 中使用 Zipkin"
+title: "Using Zipkin in Dubbo"
+linkTitle: "Using Zipkin in Dubbo"
 date: 2018-06-17
-tags: ["生态", "Java"]
+tags: ["Ecosystem", "Java"]
 description: >
-   本文介绍如何在 Dubbo 中使用 Zipkin 进行全链路追踪
+   This article introduces how to use Zipkin for end-to-end tracing in Dubbo
 ---
 
-随着业务的发展，应用的规模不断的扩大，传统的应用架构无法满足诉求，服务化架构改造势在必行，以 Dubbo 为代表的分布式服务框架成为了服务化改造架构中的基石。随着微服务理念逐渐被大众接受，应用进一步向更细粒度拆分，并且，不同的应用由不同的开发团队独立负责，整个分布式系统变得十分复杂。没有人能够清晰及时的知道当前系统整体的依赖关系。当出现问题时，也无法及时知道具体是链路上的哪个环节出了问题。
+As business grows, the scale of applications continues to expand, and traditional application architectures cannot meet demands. The transformation to a service-oriented architecture is imperative, with distributed service frameworks like Dubbo becoming essential. As the microservices concept becomes widely accepted, applications are further segmented into finer granularity, and different applications are independently managed by various development teams, resulting in a very complex distributed system. No one can clearly and timely know the overall dependency relationships within the system. When problems occur, it's also not possible to quickly identify which link in the chain fails.
 
-在这个背景下，Google 发表了 [Dapper](https://ai.google/research/pubs/pub36356) 的论文，描述了如何通过一个分布式追踪系统解决上述问题。基于该论文，各大互联网公司实现并部署了自己的分布式追踪系统，其中比较出名的有阿里巴巴的 EagleEye。本文中提到的 Zipkin 是 Twitter 公司开源的分布式追踪系统。下面会详细介绍如何在 Dubbo 中使用 Zipkin 来实现分布式追踪。
+Against this backdrop, Google published the paper on [Dapper](https://ai.google/research/pubs/pub36356), detailing how a distributed tracing system can address the above issues. Based on this paper, major internet companies have implemented and deployed their distributed tracing systems, notable among them being Alibaba's EagleEye. The Zipkin mentioned in this article is an open-source distributed tracing system by Twitter. The following sections will explain how to use Zipkin in Dubbo for distributed tracing.
 
-## Zipkin 简介
+## Introduction to Zipkin
 
-Zipkin 是基于 [Dapper](https://ai.google/research/pubs/pub36356) 论文实现，由 Twitter 开源的分布式追踪系统，通过收集分布式服务执行时间的信息来达到追踪服务调用链路、以及分析服务执行延迟等目的。
+Zipkin is based on the implementation described in the [Dapper](https://ai.google/research/pubs/pub36356) paper and is an open-source distributed tracing system developed by Twitter. It achieves tracing of service call chains and analysis of service execution delays by collecting information about the execution times of distributed services.
 
-### Zipkin 架构
+### Zipkin Architecture
 
 ![Zipkin architecture](/imgs/blog/zipkin-architecture.png)
 
-Collector 收集器、Storage 存储、API、UI 用户界面等几部分构成了 Zipkin Server 部分，对应于 GitHub 上 [openzipkin/zipkin](https://github.com/openzipkin/zipkin) 这个项目。而收集应用中调用的耗时信息并将其上报的组件与应用共生，并拥有各个语言的实现版本，其中 Java 的实现是 GitHub 上 [openzipkin/brave](https://github.com/openzipkin/brave)。除了 Java 客户端实现之外，openzipkin 还提供了许多其他语言的实现，其中包括了 go、php、JavaScript、.net、ruby 等，具体列表可以参阅 Zipkin 的 [Exiting instrumentations](https://zipkin.io/pages/tracers_instrumentation.html)。
+The Zipkin Server section consists of several parts, including Collector, Storage, API, and UI, corresponding to the [openzipkin/zipkin](https://github.com/openzipkin/zipkin) project on GitHub. The components for collecting execution time information of calls in applications and reporting them reside with the applications and have implementations in various languages, among which the Java implementation is available in [openzipkin/brave](https://github.com/openzipkin/brave). In addition to the Java client implementation, OpenZipkin also provides many implementations in other languages, including Go, PHP, JavaScript, .NET, Ruby, etc., and a specific list can be referred to in Zipkin's [Existing instrumentations](https://zipkin.io/pages/tracers_instrumentation.html).
 
-### Zipkin 的工作过程
+### The Working Process of Zipkin
 
-当用户发起一次调用时，Zipkin 的客户端会在入口处为整条调用链路生成一个全局唯一的 trace id，并为这条链路中的每一次分布式调用生成一个 span id。span 与 span 之间可以有父子嵌套关系，代表分布式调用中的上下游关系。span 和 span 之间可以是兄弟关系，代表当前调用下的两次子调用。一个 trace 由一组 span 组成，可以看成是由 trace 为根节点，span 为若干个子节点的一棵树。
+When a user initiates a call, Zipkin's client generates a globally unique trace ID for the entire call chain at the entry point and generates a span ID for each distributed call in this chain. Spans can have parent-child nested relationships, representing the upstream and downstream relationships in distributed calls. Spans can also be siblings, indicating two sub-calls under the current call. One trace is composed of a group of spans, resembling a tree with the trace as the root node and several spans as child nodes.
 
 ![Related image](/imgs/blog/trace-sample.png)
 
-Span 由调用边界来分隔，在 Zipkin 中，调用边界由以下四个 annotation 来表示：
+Span boundaries are separated by invocation edges, which are represented in Zipkin using the following four annotations:
 
-* cs - Clent Sent 客户端发送了请求
-* sr - Server Receive 服务端接受到请求
-* ss - Server Send 服务端处理完毕，向客户端发送回应
-* cr - Client Receive 客户端收到结果
+* cs - Client Sent
+* sr - Server Receive
+* ss - Server Send
+* cr - Client Receive
 
-显然，通过这四个 annotation 上的时间戳，可以轻易的知道一次完整的调用在不同阶段的耗时，比如：
+Clearly, by examining the timestamps of these four annotations, it's easy to identify the time taken in different phases of a complete invocation, such as:
 
-* sr - cs 代表了请求在网络上的耗时
-* ss - sr 代表了服务端处理请求的耗时
-* cr - ss 代表了回应在网络上的耗时
-* cr - cs 代表了一次调用的整体耗时
+* sr - cs represents the time taken in the network for the request
+* ss - sr represents the time taken by the server to process the request
+* cr - ss represents the time taken in the network for the response
+* cr - cs represents the overall time taken for an invocation
 
-Zipkin 会将 trace 相关的信息在调用链路上传递，并在每个调用边界结束时异步的把当前调用的耗时信息上报给 Zipkin Server。Zipkin Server 在收到 trace 信息后，将其存储起来，Zipkin 支持的存储类型有 inMemory、MySql、Cassandra、以及 ElasticsSearch 几种方式。随后 Zipkin 的 Web UI 会通过 API 访问的方式从存储中将 trace 信息提取出来分析并展示，如下图所示：
+Zipkin passes trace-related information along the call chain and asynchronously reports the current call's execution time information to the Zipkin Server at the end of each invocation boundary. Upon receiving the trace information, Zipkin Server stores it. Zipkin supports storage options such as inMemory, MySQL, Cassandra, and Elasticsearch. Subsequently, Zipkin's Web UI extracts, analyzes, and displays the trace information from the storage via API access, as shown below:
 
 ![Web interface screenshot](/imgs/blog/zipkin-web-screenshot.png)
 
+## Using Zipkin in Dubbo
 
+Since [Brave](https://github.com/openzipkin/brave) has actively provided support for Dubbo, integrating Zipkin-based tracing in Dubbo becomes quite simple. Below, I will demonstrate how to use Zipkin in Dubbo according to the guidance on [Dubbo RPC support in Brave](https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/README.md).
 
-## 在 Dubbo 中使用
+### Install Zipkin Server
 
-由于 [Brave](https://github.com/openzipkin/brave) 对 Dubbo 已经主动做了支持，在 Dubbo 中集成基于 Zipkin 的链路追踪变的十分简单。下面会按照 Brave 中关于 [Dubbo RPC 支持的指引](https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/README.md)来说明如何在 Dubbo 中使用 Zipkin。
-
-### 安装 Zipkin Server
-
-按照 [Zipkin 官方文档中的快速开始](https://github.com/openzipkin/zipkin/tree/master/zipkin-server#quick-start) 来安装 Zipkin，如下所示：
+Follow the quick start in [Zipkin's official documentation](https://github.com/openzipkin/zipkin/tree/master/zipkin-server#quick-start) to install Zipkin, as follows:
 
 ```bash
 $ curl -sSL https://zipkin.io/quickstart.sh | bash -s
 $ java -jar zipkin.jar
 ```
 
-按照这种方式安装的 Zipkin Server 使用的存储类型是 inMemory 的。当服务器停机之后，所有收集到的 trace 信息会丢失，不适用于生产系统。如果在生产系统中使用，需要配置另外的存储类型。Zipkin 支持 MySql、Cassandra、和 ElasticSearch。推荐使用 Cassandra 和 ElasticSearch，相关的配置请自行查阅[官方文档](https://github.com/openzipkin/zipkin/tree/master/zipkin-server)。
+The Zipkin Server installed this way uses inMemory as the storage type. When the server goes down, all collected trace information will be lost, making it unsuitable for production systems. If you intend to use it in a production environment, additional storage types need to be configured. Zipkin supports MySQL, Cassandra, and Elasticsearch. It is recommended to use Cassandra and Elasticsearch; please refer to the [official documentation](https://github.com/openzipkin/zipkin/tree/master/zipkin-server) for relevant configurations.
 
-本文为了演示方便，使用的存储是 inMemory 类型。成功启动之后，可以在终端看到如下的提示：
+For demonstration purposes, this article uses inMemory storage type. After a successful startup, you should see the following message in the terminal:
 
 ```bash
 $ java -jar zipkin.jar
@@ -99,13 +97,13 @@ o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 9411 (htt
 2018-10-10 18:40:31.605  INFO 21072 --- [           main] z.s.ZipkinServer                         : Started ZipkinServer in 6.835 seconds (JVM running for 8.35)
 ```
 
-然后在浏览器中访问 http://localhost:9411 验证 WEB 界面。
+Then visit http://localhost:9411 in your browser to verify the WEB interface.
 
-### 配置 Maven 依赖
+### Configure Maven Dependencies
 
-#### 引入 Brave 依赖
+#### Import Brave Dependencies
 
-新建一个新的 Java 工程，并在 pom.xml 中引入 Brave 相关的依赖如下：
+Create a new Java project and add the Brave dependencies in your pom.xml as follows:
 
 ```xml
     <properties>
@@ -115,7 +113,7 @@ o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 9411 (htt
 
     <dependencyManagement>
         <dependencies>
-            <!-- 引入 zipkin brave 的 BOM 文件 -->
+            <!-- Import zipkin brave BOM file -->
             <dependency>
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-bom</artifactId>
@@ -123,8 +121,8 @@ o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 9411 (htt
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-			
-            <!-- 引入 zipkin repoter 的 BOM 文件 -->
+            
+            <!-- Import zipkin reporter BOM file -->
             <dependency>
                 <groupId>io.zipkin.reporter2</groupId>
                 <artifactId>zipkin-reporter-bom</artifactId>
@@ -136,25 +134,25 @@ o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 9411 (htt
     </dependencyManagement>
 
     <dependencies>
-        <!-- 1. brave 对 dubbo 的集成 -->
+        <!-- 1. brave integration for dubbo -->
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-instrumentation-dubbo-rpc</artifactId>
         </dependency>
 
-        <!-- 2. brave 的 spring bean 支持 -->
+        <!-- 2. brave spring bean support -->
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-spring-beans</artifactId>
         </dependency>
 
-        <!-- 3. 在 SLF4J 的 MDC (Mapped Diagnostic Context) 中支持 traceId 和 spanId -->
+        <!-- 3. support for traceId and spanId in SLF4J's MDC (Mapped Diagnostic Context) -->
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-context-slf4j</artifactId>
         </dependency>
 
-        <!-- 4. 使用 okhttp3 作为 reporter -->
+        <!-- 4. use okhttp3 as reporter -->
         <dependency>
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-sender-okhttp3</artifactId>
@@ -162,20 +160,20 @@ o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 9411 (htt
     </dependencies>
 ```
 
-其中：
+Among them:
 
-1. 引入 brave-instrumentation-dubbo-rpc，brave 对 dubbo 的支持：https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/README.md
-2. 引入 brave-spring-beans，brave 对 spring bean 的支持：https://github.com/openzipkin/brave/blob/master/spring-beans/README.md
-3. 引入 brave-context-slf4j，brave 对 SLF4J 的支持，可以在 MDC 中使用 traceId 和 spanId：https://github.com/openzipkin/brave/blob/master/context/slf4j/README.md
-4. 引入 zipkin-sender-okhttp3，使用 okhttp3 上报数据：https://github.com/openzipkin/zipkin-reporter-java
+1. Import brave-instrumentation-dubbo-rpc, Brave’s support for Dubbo: https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/README.md
+2. Import brave-spring-beans, Brave’s support for Spring beans: https://github.com/openzipkin/brave/blob/master/spring-beans/README.md
+3. Import brave-context-slf4j, Brave’s support for SLF4J, allowing traceId and spanId to be used in MDC: https://github.com/openzipkin/brave/blob/master/context/slf4j/README.md
+4. Import zipkin-sender-okhttp3, using okhttp3 to report data: https://github.com/openzipkin/zipkin-reporter-java
 
-#### 引入 Dubbo 相关依赖
+#### Import Dubbo Related Dependencies
 
-Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的例子中，我们将会使用独立的 Zookeeper Server 作为服务发现。
+The relevant dependencies for Dubbo include Dubbo itself and the Zookeeper client. In the example below, we will use an independent Zookeeper Server for service discovery.
 
 ```xml
     <dependencies>
-        <!-- 1. Zookeeper 客户端依赖 -->
+        <!-- 1. Zookeeper client dependency -->
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
@@ -187,7 +185,7 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- 2. Dubbo 依赖 -->
+        <!-- 2. Dubbo dependency -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
@@ -196,18 +194,18 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
     </dependencies>
 ```
 
-其中：
+Where:
 
-1. Dubbo 这里依赖独立的 Zookeeper Server 做服务发现，这里使用的客户端是 Curator
-2. 引入 Dubbo 框架的依赖，原则上 2.6 的任何版本都是工作的，这里使用的是 2.6.2 版本
+1. Dubbo here depends on an independent Zookeeper Server for service discovery, with Curator as the client used.
+2. Introduces the dependency for the Dubbo framework, which should generally work with any version of 2.6; we are using version 2.6.2 here.
 
-### 实现
+### Implementation
 
-我们这里构造的场景是一个有两个节点的服务依赖链，也就是，当一个 Dubbo 客户端调用服务 A 时，服务 A 将会继续调用服务 B。在这个例子中，服务 A 是 greeting service，它所依赖的下游服务服务 B 是 hello service。
+The scenario we are constructing is a service dependency chain with two nodes: when a Dubbo client calls Service A, Service A will continue to call Service B. In this example, Service A is the greeting service, and its downstream service, Service B, is the hello service.
 
-#### 定义服务接口
+#### Define Service Interfaces
 
-为此需要事先定义两个服务接口 GreetingService 以及 HelloService
+First, two service interfaces, GreetingService and HelloService, need to be defined.
 
 1. com.alibaba.dubbo.samples.api.GreetingService
 
@@ -229,11 +227,11 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
    }
    ```
 
-#### 实现服务接口
+#### Implement Service Interfaces
 
-为了区分对待，所有和 HelloService 相关的实现代码都放在 hello 子包下，同理 GreetingService 相关的放在 greeting 子包下。
+To differentiate, all implementation code related to HelloService is placed under the hello subpackage, and similarly for GreetingService, it is placed under the greeting subpackage.
 
-1. 实现 com.alibaba.dubbo.samples.api.HelloService
+1. Implement com.alibaba.dubbo.samples.api.HelloService
 
     ```java
     package com.alibaba.dubbo.samples.service.hello;
@@ -246,7 +244,7 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
         @Override
         public String hello(String message) {
             try {
-                // 通过 sleep 模拟业务逻辑处理时间
+                // Simulate business logic processing time with sleep
                 Thread.sleep(new Random(System.currentTimeMillis()).nextInt(1000));
             } catch (InterruptedException e) {
                 // no op
@@ -256,7 +254,7 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
     }
     ```
 
-2. 实现 com.alibaba.dubbo.samples.api.GreetingService
+2. Implement com.alibaba.dubbo.samples.api.GreetingService
 
    ```java
    package com.alibaba.dubbo.samples.service.greeting;
@@ -267,7 +265,7 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
    import java.util.Random;
    
    public class GreetingServiceImpl implements GreetingService {
-   	// 下游依赖服务，运行时靠 spring 容器注入 HelloService 的服务代理
+   	// Downstream dependency service, which gets the HelloService proxy from spring container at runtime
        private HelloService helloService;
    
        public void setHelloService(HelloService helloService) {
@@ -277,7 +275,7 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
        @Override
        public String greeting(String message) {
            try {
-               // 通过 sleep 模拟业务逻辑处理时间
+               // Simulate business logic processing time with sleep
                Thread.sleep(new Random(System.currentTimeMillis()).nextInt(1000));
            } catch (InterruptedException e) {
                // no op
@@ -287,53 +285,53 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
    }
    ```
 
-   这里需要注意的是，GreetingServiceImpl 的实现中声明了一个类型是 HelloService 的成员变量，并在 greeting 方法中，执行完自己逻辑之后又调用了 HelloService 上的 hello 方法。这里的 helloService 的实现将会在运行态由外部注入，注入的不是 HelloServiceImpl 的实现，而是 HelloService 的远程调用代理。通过这样的方式，完成了在一个 Dubbo 服务中继续调用另一个远程 Dubbo 服务的目的。从链路追踪的角度来说，客户端调用 GreetingService 是一个 span，GreetingService 调用 HelloService 是另一个 span，并且两者有父子关系，同属于一个 trace，也就是属于同一条调用链路。
+   It is important to note that the implementation of GreetingServiceImpl declares a member variable of type HelloService, and in the greeting method, after executing its own logic, it calls the hello method of HelloService. The implementation of helloService will be injected by an external source at runtime; the injected instance is not HelloServiceImpl but a remote call proxy of HelloService. This way, it achieves invoking another remote Dubbo service within a Dubbo service. From a tracing perspective, the client call to GreetingService is one span, the call from GreetingService to HelloService is another span, and the two have a parent-child relationship, belonging to the same trace and the same call chain.
 
-   另外，在 GreetingServiceImpl 和 HelloServiceImpl 的实现中，通过 Thread.sleep 来模拟了处理业务逻辑的耗时，以便在 Zipkin UI 上更好的展示。
+   Additionally, in the implementations of GreetingServiceImpl and HelloServiceImpl, we use Thread.sleep to simulate processing time to better display in the Zipkin UI.
 
-#### 配置
+#### Configuration
 
-为了专注在展示如何使用 Zipkin 这一点上，本文在配置和编程模型上没有采用更多的高级技术，而是使用了最传统的 Spring XML 的配置方式，帮助读者理解。更高级的通过 annotation 甚至 spring boot 的方式，读者可以自行查阅 Dubbo 和 Zipkin 相关的文档。
+To focus on demonstrating how to use Zipkin, this article does not adopt more advanced technologies in configuration and programming models but instead uses the most traditional Spring XML configuration method to help readers understand. Readers can refer to the relevant documentation for Dubbo and Zipkin for more advanced annotations or Spring Boot configurations.
 
-1. 暴露 HelloService 服务
+1. Expose the HelloService
 
-   在 resouces/spring/hello-service.xml 中增加以下的配置来将 HelloServiceImpl 暴露成一个 Dubbo 服务：
+   Add the following configuration in resources/spring/hello-service.xml to expose HelloServiceImpl as a Dubbo service:
 
-   * 使用了本地启动的 Zookeeper Server 作为注册中心，地址为默认值 zookeeper://127.0.0.1:2181
-   * 用 Dubbo 原生服务在端口 20880 上暴露服务
-   * 将 HelloServiceImpl 注册成 id 是 `helloService` 的 Spring Bean，这样就可以在后续的 `<dubbo:service>` 中引用到这个实现类
-   * 通过 `<dubbo:service>` 将 HelloServiceImpl 暴露成 Dubbo 服务
+   * Uses the locally launched Zookeeper Server as the registration center, with the address as the default zookeeper://127.0.0.1:2181.
+   * Exposes the service using Dubbo's native service on port 20880.
+   * Registers HelloServiceImpl as a Spring Bean with id `helloService`, allowing it to be referenced later in `<dubbo:service>`.
+   * Exposes HelloServiceImpl as a Dubbo service through `<dubbo:service>`.
 
    ```xml
-       <!-- 定义 HelloService 的应用名 -->
+       <!-- Define the application name for HelloService -->
        <dubbo:application name="hello-service-provider"/>
    
-       <!-- 指定注册中心地址 -->
+       <!-- Specify the registry address -->
        <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
    
-       <!-- 使用 Dubbo 原生协议在 20880 端口上暴露服务 -->
+       <!-- Use Dubbo's native protocol to expose service on port 20880 -->
        <dubbo:protocol name="dubbo" port="20880"/>
    
-       <!-- 将 HelloServiceImpl 的实现声明成一个 spring bean -->
+       <!-- Declare the implementation of HelloServiceImpl as a spring bean -->
        <bean id="helloService" class="com.alibaba.dubbo.samples.service.hello.HelloServiceImpl"/>
    
-       <!-- 将 HelloServiceImpl 声明成一个 Dubbo 服务 -->
+       <!-- Declare HelloServiceImpl as a Dubbo service -->
        <dubbo:service interface="com.alibaba.dubbo.samples.api.HelloService" ref="helloService"/>
    ```
 
-2. 增加 Zipkin 相关的配置
+2. Add Zipkin related configuration
 
-   在 resources/spring/hello-service.xml 中增加 Zipkin 相关的配置：
+   Add Zipkin related configurations in resources/spring/hello-service.xml:
 
-   * 修改 dubbo 服务暴露的配置，添加 Zipkin 的 tracing filter 到 Dubbo 的 filter chain 中
-   * 按照 https://github.com/openzipkin/brave/blob/master/spring-beans/README.md 来配置 Zipkin 的 sender 和 tracing 的 spring bean
+   * Modify the configuration for service exposure to add Zipkin's tracing filter to Dubbo's filter chain.
+   * Configure Zipkin's sender and tracing Spring beans according to the documentation at https://github.com/openzipkin/brave/blob/master/spring-beans/README.md.
 
    ```xml
-       <!-- 1. 修改 dubbo 服务暴露配置，在 filter chain 中增加 zipkin 的 tracing 过滤器 -->
+       <!-- 1. Modify Dubbo service exposure configuration to add the zipkin tracing filter in the filter chain -->
        <dubbo:service interface="com.alibaba.dubbo.samples.api.HelloService" ref="helloService" filter="tracing"/>
    
-       <!-- 2. zipkin 相关的配置 -->
-       <!-- 使用 OKHttp 来发送 trace 信息到 Zipkin Server。这里的 Zipkin Server 启动在本地 -->
+       <!-- 2. Zipkin related configurations -->
+       <!-- Use OKHttp to send trace information to Zipkin Server. Here, the Zipkin Server runs locally -->
        <bean id="sender" class="zipkin2.reporter.beans.OkHttpSenderFactoryBean">
            <property name="endpoint" value="http://localhost:9411/api/v2/spans"/>
        </bean>
@@ -357,9 +355,9 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
        </bean>
    ```
 
-3. 增加 HelloService 的启动类
+3. Add the startup class for HelloService
 
-   在 com.alibaba.dubbo.samples.service.hello.Application 中通过 ClassPathXmlApplicationContext 读取 刚才配置的 spring/hello-service.xml 来初始化一个 spring context 并启动
+   In com.alibaba.dubbo.samples.service.hello.Application, use ClassPathXmlApplicationContext to read spring/hello-service.xml configuration to initialize a Spring context and start it.
 
    ```java
    package com.alibaba.dubbo.samples.service.hello;
@@ -380,9 +378,9 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
    }
    ```
 
-4. 暴露 GreetingService 服务，并使用 Zipkin
+4. Expose the GreetingService and use Zipkin
 
-   在 resources/spring/greeting-service.xml 中配置 GreetingService。相关步骤与 HelloService 类似，不再赘述，重点关注如何在 GreetingService 中配置下游服务的依赖。完整的 XML 配置如下：
+   Configure GreetingService in resources/spring/greeting-service.xml. The relevant steps are similar to HelloService and will not be repeated, focusing on how to configure the dependency for the downstream service in GreetingService. The complete XML configuration is as follows:
 
    ```xml
    <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -391,27 +389,27 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
           http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
    
-       <!-- 1. 定义 GreetingService 的应用名 -->
+       <!-- 1. Define the application name for GreetingService -->
        <dubbo:application name="greeting-service-provider"/>
    
-       <!-- 2. 指定注册中心地址 -->
+       <!-- 2. Specify the registry address -->
        <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
    
-        <!-- 3. 使用 Dubbo 原生协议在 20881 端口上暴露服务 -->
+        <!-- 3. Use Dubbo's native protocol to expose service on port 20881 -->
        <dubbo:protocol name="dubbo" port="20881"/>
        
-       <!-- 4. 声明 HelloService 的远程代理，并在 Dubbo 的 filter chain 中增加 tracing filter -->
+       <!-- 4. Declare the remote proxy for HelloService and add the tracing filter in Dubbo's filter chain -->
        <dubbo:reference id="helloService" check="false" interface="com.alibaba.dubbo.samples.api.HelloService" filter="tracing"/>
        
-       <!-- 5. 将 GreetingServiceImpl 的实现声明成一个 spring bean，并将 HelloService 的远程代理装配进去 -->
+       <!-- 5. Declare GreetingServiceImpl as a Spring bean and wire the HelloService remote proxy into it -->
        <bean id="greetingService" class="com.alibaba.dubbo.samples.service.greeting.GreetingServiceImpl">
            <property name="helloService" ref="helloService"/>
        </bean>
    
-       <!-- 6. 将 GreetingServiceImpl 声明成一个 Dubbo 服务，并在 Dubbo 的 filter chain 中增加 tracing filter -->
+       <!-- 6. Declare GreetingServiceImpl as a Dubbo service and add the tracing filter in Dubbo's filter chain -->
        <dubbo:service interface="com.alibaba.dubbo.samples.api.GreetingService" ref="greetingService" filter="tracing"/>
    
-       <!-- 7. zipkin 相关的配置 -->
+       <!-- 7. Zipkin related configuration -->
        <bean id="sender" class="zipkin2.reporter.beans.OkHttpSenderFactoryBean">
            <property name="endpoint" value="http://localhost:9411/api/v2/spans"/>
        </bean>
@@ -436,14 +434,13 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
    </beans>
    ```
 
-   这里的配置与上面的 HelloService 类似，需要重点关注的有两点：
+   This configuration is similar to the above HelloService. Notable points to pay attention to include:
 
-   * 第 3 步中注意服务需要暴露在不同的端口上，否则会和 HelloService 冲突，本例中选择的是 20881 这个端口
+   * In step 3, the service needs to be exposed on a different port to avoid conflicts with HelloService; in this example, port 20881 is chosen.
 
-   * 通过第 4 步先声明 HelloService 的远程代理，然后在第 5 步中将其组装给 GreetingService 来完成服务上下游依赖的声明
+   * In step 4, first declare the remote proxy for HelloService, then in step 5, wire it into GreetingService to complete the declaration of the upstream and downstream service dependencies.
 
-
-   增加 GreeeingService 的启动类，与 HelloService 类似，通过 spring/greeting-service.xml 的配置来初始化一个新的 spring context 来完成。
+   Add the startup class for GreetingService, similar to HelloService, initializing a new Spring context based on spring/greeting-service.xml configuration.
 
    ```java
    package com.alibaba.dubbo.samples.service.greeting;
@@ -464,9 +461,9 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
    }
    ```
 
-5. 实现客户端
+5. Implement the Client
 
-   通过 resources/spring/client.xml 初始化一个 spring context，从其中获取 GreetingService 的远程代理，发起远程调用。
+   Initialize a Spring context through resources/spring/client.xml, from which to get the remote proxy of GreetingService and initiate a remote call.
 
    ```java
    package com.alibaba.dubbo.samples.client;
@@ -479,32 +476,32 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
        public static void main(String[] args) {
            ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/client.xml");
            context.start();
-           // 获取远程代理并发起调用
+           // Obtain the remote proxy and initiate the call
            GreetingService greetingService = (GreetingService) context.getBean("greetingService");
            System.out.println(greetingService.greeting("world"));
        }
    }
    ```
 
-   resource/spring/client.xml 中的配置与 Dubbo 服务的配置类似，主要是配置远程代理，以及配置 Zipkin
+   The configuration in resource/spring/client.xml is similar to the Dubbo service configuration, primarily focusing on the configuration of the remote proxy and Zipkin.
 
-   ```xml
+```xml
    <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
           xmlns="http://www.springframework.org/schema/beans"
           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
           http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
    
-      <!-- 1. 定义 dubbo 客户端的应用名 -->
+      <!-- 1. Define the application name for Dubbo client -->
        <dubbo:application name="dubbo-client"/>
    
-       <!-- 2. 指定注册中心地址 -->
+       <!-- 2. Specify the registry address -->
        <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
    
-       <!-- 3. 声明 GreetingService 的远程代理，并在 Dubbo 的 filter chain 中增加 tracing filter -->
+       <!-- 3. Declare the remote proxy for GreetingService and add the tracing filter in Dubbo's filter chain -->
        <dubbo:reference id="greetingService" check="false" interface="com.alibaba.dubbo.samples.api.GreetingService" filter="tracing"/>
    
-       <!-- 4. zipkin 相关的配置 -->
+       <!-- 4. Zipkin related configuration -->
        <bean id="sender" class="zipkin2.reporter.beans.OkHttpSenderFactoryBean">
            <property name="endpoint" value="http://localhost:9411/api/v2/spans"/>
        </bean>
@@ -527,79 +524,78 @@ Dubbo 相关的依赖是 Dubbo 本身以及 Zookeeper 客户端，在下面的�
            </property>
        </bean>
    </beans>
-   ```
+```
 
-完成之后的工程的目录结构如下：
+The final project directory structure is as follows:
 
 ![zipkin dubbo project structure](/imgs/blog/zipkin-dubbo-project.png)
 
-### 运行
+### Running
 
-现在让我们把整个链路运行起来，看看 Zipkin 链路追踪的效果。
+Now let’s run the entire chain and see the effect of Zipkin's tracing.
 
-#### 启动 Zookeeper Server
+#### Start Zookeeper Server
 
-执行以下命令在本地启动一个 Zookeeper Server，如果没有安装，请自行从 [ZooKeeper 官网](https://zookeeper.apache.org) 下载：
+Execute the following command to start a Zookeeper Server locally. If you haven't installed it, please download from the [ZooKeeper website](https://zookeeper.apache.org):
 
 ```bash
 $ zkServer start
 ```
 
-#### 启动 Zipkin Server
+#### Start Zipkin Server
 
-执行以下命令在本地启动一个 Zipkin Server：
+Execute the following command to start a Zipkin Server locally:
 
 ```bash
 $ curl -sSL https://zipkin.io/quickstart.sh | bash -s
 $ java -jar zipkin.jar
 ```
 
-#### 启动 HelloService
+#### Start HelloService
 
-使用下面的命令启动 HelloService，当然也可以直接在 IDE 中启动：
+Use the following command to start HelloService, or you can also start it directly in the IDE:
 
 ```bash
 $ mvn exec:java -Dexec.mainClass=com.alibaba.dubbo.samples.service.hello.Application
 ```
 
-启动成功后应该可以在终端上看到 “Hello service started” 的字样。
+After a successful startup, you should be able to see "Hello service started" in the terminal.
 
-#### 启动 GreetingService
+#### Start GreetingService
 
-使用下面的命令启动 GreetingService，当然也可以直接在 IDE 中启动：
+Use the following command to start GreetingService, or run it directly in the IDE:
 
 ```bash
 $ mvn exec:java -Dexec.mainClass=com.alibaba.dubbo.samples.service.greeting.Application
 ```
 
-启动成功后应该可以在终端上看到 “Greeting service started” 的字样。
+You should see "Greeting service started" in the terminal after successful startup.
 
-#### 运行 Dubbo 客户端
+#### Run the Dubbo Client
 
-使用下面的命令运行 Dubbo 客户端向 GreetingService 发起远程调用，当然也可以直接在 IDE 中运行：
+Use the following command to run the Dubbo client, which will make a remote call to GreetingService, or run it directly in the IDE:
 
 ```bash
 $ mvn exec:java -Dexec.mainClass=com.alibaba.dubbo.samples.client.Application
 ```
 
-执行成功后，客户端会在终端上输出 “greeting, hello, world”。
+Upon successful execution, the client will output "greeting, hello, world" in the terminal.
 
-#### 链路追踪
+#### Trace the chain
 
-打开浏览器访问 "http://localhost:9411" 并通过 "Find Traces" 按钮来搜索，可以找到刚刚调用的链路追踪，效果如下图所示：
+Open the browser and visit "http://localhost:9411" and click the "Find Traces" button to search; you can find the trace of the call just initiated, shown as below:
 
 ![zipkin trace](/imgs/blog/zipkin-trace.png)
 
-还可以进一步的选择每一个 span 来查看本次调用边界内的详情，比如，hello-service 这个 span 的详情如下：
+You can further select each span to view the details within the invocation boundaries. For example, the details of the hello-service span are as follows:
 
 ![zipkin span](/imgs/blog/zipkin-span.png)
 
+## Conclusion
 
+This article introduced the basic concept of tracing and the fundamental usage of Zipkin, then built the simplest call chain using Dubbo and incorporated Zipkin for end-to-end tracing. Since Zipkin has good support for Dubbo, the entire integration process is quite simple and clear.
 
-## 总结
+Zipkin's support for Dubbo is built on Dubbo's filter extension mechanism. Interested readers can learn about its implementation details through https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/src/main/java/brave/dubbo/TracingFilter.java.
 
-本文介绍了链路追踪的基本概念以及 Zipkin 的基本用法，然后用 Dubbo 构建了一条最简单的调用链路，并引入了 Zipkin 做全链路追踪。由于 Zipkin 对 Dubbo 做了很好的支持，整个集成的过程还是十分简单明了的。
+The examples mentioned in this article can be found in the "dubbo-samples-zipkin" submodule from https://github.com/dubbo/dubbo-samples. Additionally, starting from version 2.0 of spring-cloud-sleuth, Dubbo is officially supported, and related articles and examples are planned to be provided later.
 
-Zipkin 对 Dubbo 的支持是构建在 Dubbo 的 filter 扩展机制上的，有兴趣的读者可以通过 https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/src/main/java/brave/dubbo/TracingFilter.java 了解其实现细节。
-
-本文中涉及的例子可以从 https://github.com/dubbo/dubbo-samples 中的 "dubbo-samples-zipkin" 子模块中获取。另外，spring-cloud-sleth 2.0 中开始正式支持 Dubbo，相关的文章和例子后续计划提供。

@@ -1,46 +1,46 @@
 ---
-title: "Dubbo可扩展机制源码解析"
-linkTitle: "Dubbo可扩展机制源码解析"
+title: "Source Code Analysis of Dubbo's Extensible Mechanism"
+linkTitle: "Source Code Analysis of Dubbo's Extensible Mechanism"
 tags: ["Java"]
 date: 2019-05-02
 description: >
-    本文介绍了SPI扩展机制的实现原理与细节。
+    This article introduces the implementation principles and details of the SPI extension mechanism.
 ---
 
 
-在[Dubbo可扩展机制实战]({{<ref "/blog/java/demos/introduction-to-dubbo-spi.md" >}} "")中，我们了解了Dubbo扩展机制的一些概念，初探了Dubbo中LoadBalance的实现，并自己实现了一个LoadBalance。是不是觉得Dubbo的扩展机制很不错呀，接下来，我们就深入Dubbo的源码，一睹庐山真面目。
+In [Practical Application of Dubbo's Extensible Mechanism]({{<ref "/blog/java/demos/introduction-to-dubbo-spi.md" >}} ""), we learned some concepts of Dubbo's extension mechanism, explored the implementation of LoadBalance in Dubbo, and implemented a LoadBalance ourselves. Think Dubbo's extension mechanism is pretty good? Next, we'll dive into the source code of Dubbo and see its true form.
 
 ## ExtensionLoader
-ExtensionLoader 是最核心的类，负责扩展点的加载和生命周期管理。我们就以这个类开始吧。
-ExtensionLoader 的方法比较多，比较常用的方法有:
+ExtensionLoader is the core class responsible for loading extension points and managing their lifecycle. Let's start with this class.
+There are quite a few methods in ExtensionLoader, the commonly used ones are:
 * `public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type)`
 * `public T getExtension(String name)`
 * `public T getAdaptiveExtension()`
 
-比较常见的用法有:
+Common usages include:
 * `LoadBalance lb = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(loadbalanceName)`
 * `RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getAdaptiveExtension()`
 
-说明：在接下来展示的源码中，我会将无关的代码(比如日志，异常捕获等)去掉，方便大家阅读和理解。
+Note: In the source code displayed below, I will omit unrelated code (such as logging, exception handling, etc.) for easier reading and understanding.
 
-1. getExtensionLoader方法
-    这是一个静态工厂方法，入参是一个可扩展的接口，返回一个该接口的ExtensionLoader实体类。通过这个实体类，可以根据name获得具体的扩展，也可以获得一个自适应扩展。
+1. getExtensionLoader method
+    This is a static factory method that takes an extensible interface as a parameter and returns an instance of the ExtensionLoader for that interface. Using this instance, specific extensions can be obtained by name, and adaptive extensions can also be retrieved.
 
 ```java
 public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
-        // 扩展点必须是接口
+        // Extension points must be interfaces
         if (!type.isInterface()) {
-            throw new IllegalArgumentException("Extension type(" + type + ") is not interface!");
+            throw new IllegalArgumentException("Extension type(" + type + ") is not an interface!");
         }
-        // 必须要有@SPI注解
+        // Must have @SPI annotation
         if (!withExtensionAnnotation(type)) {
             throw new IllegalArgumentException("Extension type without @SPI Annotation!");
         }
-        // 从缓存中根据接口获取对应的ExtensionLoader
-        // 每个扩展只会被加载一次
+        // Get the corresponding ExtensionLoader from the cache based on the interface
+        // Each extension will only be loaded once
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         if (loader == null) {
-            // 初始化扩展
+            // Initialize extension
             EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
             loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         }
@@ -53,7 +53,7 @@ private ExtensionLoader(Class<?> type) {
 }
 ```
 
-2. getExtension方法
+2. getExtension method
 
 ```java
 public T getExtension(String name) {
@@ -63,7 +63,7 @@ public T getExtension(String name) {
             holder = cachedInstances.get(name);
         }
         Object instance = holder.get();
-        // 从缓存中获取，如果不存在就创建
+        // Get from cache, create if not exists
         if (instance == null) {
             synchronized (holder) {
                 instance = holder.get();
@@ -76,22 +76,22 @@ public T getExtension(String name) {
         return (T) instance;
 }
 ```
-getExtension 方法中做了一些判断和缓存，主要的逻辑在 createExtension 方法中。我们继续看 createExtension 方法。
+The getExtension method does some checks and caching, the main logic is in the createExtension method. Let's continue with the createExtension method.
 
 ```java
 private T createExtension(String name) {
-        // 根据扩展点名称得到扩展类，比如对于LoadBalance，根据random得到RandomLoadBalance类
+        // Get the extension class based on the extension point name, e.g., get RandomLoadBalance class for random
         Class<?> clazz = getExtensionClasses().get(name);
         
         T instance = (T) EXTENSION_INSTANCES.get(clazz);
         if (instance == null) {
-              // 使用反射调用nesInstance来创建扩展类的一个示例
+              // Use reflection to call newInstance to create an instance of the extension class
             EXTENSION_INSTANCES.putIfAbsent(clazz, (T) clazz.newInstance());
             instance = (T) EXTENSION_INSTANCES.get(clazz);
         }
-        // 对扩展类示例进行依赖注入
+        // Perform dependency injection on the extension class instance
         injectExtension(instance);
-        // 如果有wrapper，添加wrapper
+        // If there's a wrapper, add the wrapper
         Set<Class<?>> wrapperClasses = cachedWrapperClasses;
         if (wrapperClasses != null && !wrapperClasses.isEmpty()) {
             for (Class<?> wrapperClass : wrapperClasses) {
@@ -101,15 +101,15 @@ private T createExtension(String name) {
         return instance;
 }
 ```
-createExtension方法做了以下事情:
-1. 先根据name来得到对应的扩展类。从ClassPath下`META-INF`文件夹下读取扩展点配置文件。
-2. 使用反射创建一个扩展类的实例
-3. 对扩展类实例的属性进行依赖注入，即IOC。
-4. 如果有wrapper，添加wrapper。即AOP。
+The createExtension method does the following:
+1. First, get the corresponding extension class by name. Read extension point configuration files from the `META-INF` folder under ClassPath.
+2. Create an instance of the extension class using reflection.
+3. Perform dependency injection on the properties of the extension class instance, i.e., IOC.
+4. If there's a wrapper, add the wrapper, i.e., AOP.
 
-下面我们来重点看下这4个过程
-1. 根据name获取对应的扩展类
-    先看代码:
+Next, let's focus on these 4 processes:
+1. Get the corresponding extension class by name.
+   Looking at the code:
 
 ```java
 private Map<String, Class<?>> getExtensionClasses() {
@@ -147,22 +147,22 @@ private Map<String, Class<?>> loadExtensionClasses() {
         return extensionClasses;
 }
 ```
-过程很简单，先从缓存中获取，如果没有，就从配置文件中加载。配置文件的路径就是之前提到的:
+The process is quite simple, first retrieve from the cache, and if not found, load from the configuration files located at:
 * `META-INF/dubbo/internal`
 * `META-INF/dubbo`
 * `META-INF/services`
 
-2. 使用反射创建扩展实例
-    这个过程很简单，使用`clazz.newInstance()`来完成。创建的扩展实例的属性都是空值。
-3. 扩展实例自动装配
-    在实际的场景中，类之间都是有依赖的。扩展实例中也会引用一些依赖，比如简单的Java类，另一个Dubbo的扩展或一个Spring Bean等。依赖的情况很复杂，Dubbo的处理也相对复杂些。我们稍后会有专门的章节对其进行说明，现在，我们只需要知道，Dubbo可以正确的注入扩展点中的普通依赖，Dubbo扩展依赖或Spring依赖等。
-4. 扩展实例自动包装
-    自动包装就是要实现类似于Spring的AOP功能。Dubbo利用它在内部实现一些通用的功能，比如日志，监控等。关于扩展实例自动包装的内容，也会在后面单独讲解。
+2. Using reflection to create an extension instance
+    This is straightforward, achieved using `clazz.newInstance()`. The properties of the created extension instance are all null.
+3. Automatic wiring of the extension instance
+    In practical scenarios, there are dependencies among classes. The extension instance will reference some dependencies. The dependency injection in Dubbo is relatively complex, and we'll cover this in detail later. For now, we need to understand that Dubbo can correctly inject ordinary dependencies in extension points, or Dubbo extension dependencies, or Spring dependencies, etc.
+4. Automatic wrapping of extension instances
+    Automatic wrapping implements functions similar to Spring's AOP. Dubbo uses it internally to implement common functionalities such as logging and monitoring. This will also be explained later in detail.
 
-经过上面的4步，Dubbo就创建并初始化了一个扩展实例。这个实例的依赖被注入了，也根据需要被包装了。到此为止，这个扩展实例就可以被使用了。
+After the above 4 steps, Dubbo creates and initializes an extension instance. This instance's dependencies are injected and wrapped as necessary. At this point, this extension instance can be used.
 
-## Dubbo SPI高级用法之自动装配
-自动装配的相关代码在injectExtension方法中:
+## Advanced Use of Dubbo SPI: Automatic Wiring
+The relevant code for automatic wiring is in the injectExtension method:
 
 ```java
 private T injectExtension(T instance) {
@@ -182,8 +182,8 @@ private T injectExtension(T instance) {
     return instance;
 }
 ```
-要实现对扩展实例的依赖的自动装配，首先需要知道有哪些依赖，这些依赖的类型是什么。Dubbo的方案是查找Java标准的setter方法。即方法名以set开始，只有一个参数。如果扩展类中有这样的set方法，Dubbo会对其进行依赖注入，类似于Spring的set方法注入。
-但是Dubbo中的依赖注入比Spring要复杂，因为Spring注入的都是Spring bean，都是由Spring容器来管理的。而Dubbo的依赖注入中，需要注入的可能是另一个Dubbo的扩展，也可能是一个Spring Bean，或是Google guice的组件，或其他任何一个框架中的组件。Dubbo需要能够从任何一个场景中加载扩展。在injectExtension方法中，是用`Object object = objectFactory.getExtension(pt, property)`来实现的。objectFactory是ExtensionFactory类型的，在创建ExtensionLoader时被初始化:
+To implement automatic wiring for extension instance dependencies, it's first necessary to identify what dependencies exist and their types. Dubbo's solution is to look for Java standard setter methods, i.e., methods whose names begin with "set" that take a single parameter. If the extension class has such a set method, Dubbo performs dependency injection akin to Spring's set method injection.
+However, Dubbo's dependency injection is more complex than Spring's since dependencies may come from various sources such as another Dubbo extension, a Spring Bean, a Google Guice component, or any component from other frameworks. Dubbo needs to load extensions from any scenario. In the injectExtension method, this is accomplished via `Object object = objectFactory.getExtension(pt, property)`. The objectFactory is of ExtensionFactory type, initialized when creating ExtensionLoader:
 
 ```java
 private ExtensionLoader(Class<?> type) {
@@ -191,17 +191,17 @@ private ExtensionLoader(Class<?> type) {
         objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
 ```
-objectFacory本身也是一个扩展，通过`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension()`来获取。
+The objectFactory itself is also an extension, obtained via `ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension()`.
 
 
 ![Dubbo-ExtensionFactory](/imgs/blog/dubbo-extensionfactory.png "")
 
-ExtensionFactory 有三个实现：
-1. SpiExtensionFactory：Dubbo自己的Spi去加载Extension
-2. SpringExtensionFactory：从Spring容器中去加载Extension
-3. AdaptiveExtensionFactory: 自适应的AdaptiveExtensionLoader
+ExtensionFactory has three implementations:
+1. SpiExtensionFactory: Dubbo's own Spi to load Extensions
+2. SpringExtensionFactory: Loads Extensions from the Spring container
+3. AdaptiveExtensionFactory: Adaptive AdaptiveExtensionLoader
 
-这里要注意 AdaptiveExtensionFactory，源码如下:
+Note the AdaptiveExtensionFactory; the source code is as follows:
 
 ```java
 @Adaptive
@@ -229,15 +229,15 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
     }
 }
 ```
-AdaptiveExtensionLoader类有@Adaptive注解。前面提到了，Dubbo会为每一个扩展创建一个自适应实例。如果扩展类上有@Adaptive，会使用该类作为自适应类。如果没有，Dubbo会为我们创建一个。所以`ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension()`会返回一个AdaptiveExtensionLoader实例，作为自适应扩展实例。
-AdaptiveExtensionLoader会遍历所有的ExtensionFactory实现，尝试着去加载扩展。如果找到了，返回。如果没有，在下一个ExtensionFactory中继续找。Dubbo内置了两个ExtensionFactory，分别从Dubbo自身的扩展机制和Spring容器中去寻找。由于ExtensionFactory本身也是一个扩展点，我们可以实现自己的ExtensionFactory，让Dubbo的自动装配支持我们自定义的组件。比如，我们在项目中使用了Google的guice这个 IOC 容器。我们可以实现自己的GuiceExtensionFactory，让Dubbo支持从guice容器中加载扩展。
+The AdaptiveExtensionLoader class has the @Adaptive annotation. As mentioned earlier, Dubbo creates an adaptive instance for every extension. If the extension class has @Adaptive, that class will be used as the adaptive class. If not, Dubbo will create one for us. Thus, `ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension()` returns an instance of AdaptiveExtensionLoader as the adaptive extension instance.
+AdaptiveExtensionLoader traverses all ExtensionFactory implementations to attempt to load extensions. If found, it returns it. If not, it continues looking in the next ExtensionFactory. Dubbo has two built-in ExtensionFactory instances that find from both Dubbo's own extension mechanism and the Spring container. Since ExtensionFactory is also an extension point, we can implement our own ExtensionFactory to allow Dubbo's automatic wiring to support our custom components. For instance, if we used Google Guice as the IoC container in our project, we could create our own GuiceExtensionFactory to make Dubbo support loading extensions from the Guice container.
 
-## Dubbo SPI高级用法之 AOP
-在用Spring的时候，我们经常会用到AOP功能。在目标类的方法前后插入其他逻辑。比如通常使用Spring AOP来实现日志，监控和鉴权等功能。
-Dubbo的扩展机制，是否也支持类似的功能呢？答案是yes。在Dubbo中，有一种特殊的类，被称为Wrapper类。通过装饰者模式，使用包装类包装原始的扩展点实例。在原始扩展点实现前后插入其他逻辑，实现AOP功能。
+## Advanced Use of Dubbo SPI: AOP
+While using Spring, we often utilize AOP functionality. Logic is inserted before and after the target class's methods, commonly used for logging, monitoring, and authorization.
+Does Dubbo's extension mechanism support similar functionality? The answer is yes. In Dubbo, there is a special type of class known as a Wrapper class. By using the decorator pattern, Wrapper classes wrap the original extension point instances and insert logic before and after the original extension implementations, achieving AOP functionality.
 
-### 什么是Wrapper类
-那什么样类的才是Dubbo扩展机制中的Wrapper类呢？Wrapper类是一个有复制构造函数的类，也是典型的装饰者模式。下面就是一个Wrapper类:
+### What is a Wrapper class?
+What types of classes qualify as Wrapper classes in Dubbo's extension mechanism? A Wrapper class is a class that has a copy constructor, displaying the typical decorator pattern. Here is an example of a Wrapper class:
 
 ```java
 class A{
@@ -247,17 +247,17 @@ class A{
     }
 }
 ```
-类A有一个构造函数`public A(A a)`，构造函数的参数是A本身。这样的类就可以成为Dubbo扩展机制中的一个Wrapper类。Dubbo中这样的Wrapper类有ProtocolFilterWrapper, ProtocolListenerWrapper等, 大家可以查看源码加深理解。
+Class A has a constructor `public A(A a)` where the parameter is an instance of A itself. Such a class can be a Wrapper class in Dubbo's extension mechanism. Some examples of Wrapper classes in Dubbo include ProtocolFilterWrapper and ProtocolListenerWrapper; the source code can be reviewed for deeper understanding.
 
-### 怎么配置Wrapper类
+### How to configure Wrapper classes
 
-在Dubbo中Wrapper类也是一个扩展点，和其他的扩展点一样，也是在`META-INF`文件夹中配置的。比如前面举例的ProtocolFilterWrapper和ProtocolListenerWrapper就是在路径`dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol`中配置的:
+In Dubbo, Wrapper classes are also extension points, and like other extension points, they are configured in the `META-INF` directory. For instance, the ProtocolFilterWrapper and ProtocolListenerWrapper examples mentioned earlier are configured at the path `dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol`:
 ```text
 filter=org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper
 listener=org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper
 mock=org.apache.dubbo.rpc.support.MockProtocol
 ```
-在Dubbo加载扩展配置文件时，有一段如下的代码:
+When Dubbo loads the extension configuration files, the following code snippet executes:
 
 ```java
 try {  
@@ -270,16 +270,16 @@ try {
   wrappers.add(clazz);
 } catch (NoSuchMethodException e) {}
 ```
-这段代码的意思是，如果扩展类有复制构造函数，就把该类存起来，供以后使用。有复制构造函数的类就是Wrapper类。通过`clazz.getConstructor(type)`来获取参数是扩展点接口的构造函数。注意构造函数的参数类型是扩展点接口，而不是扩展类。
-以Protocol为例。配置文件`dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol`中定义了`filter=org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper`。
-ProtocolFilterWrapper代码如下：
+This means if the extension class has a copy constructor, it's stored for future use. Classes with a copy constructor qualify as Wrapper classes. The constructor is obtained through `clazz.getConstructor(type)`, where the parameter is the extension point interface, not the extension class itself.
+Taking Protocol as an example, the configuration file at `dubbo-rpc/dubbo-rpc-api/src/main/resources/META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol` defines `filter=org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper`.
+Here’s the code for ProtocolFilterWrapper:
 
 ```java
 public class ProtocolFilterWrapper implements Protocol {
 
     private final Protocol protocol;
 
-    // 有一个参数是Protocol的复制构造函数
+    // Copy constructor parameter is Protocol
     public ProtocolFilterWrapper(Protocol protocol) {
         if (protocol == null) {
             throw new IllegalArgumentException("protocol == null");
@@ -288,12 +288,12 @@ public class ProtocolFilterWrapper implements Protocol {
     }
 }
 ```
-ProtocolFilterWrapper有一个构造函数`public ProtocolFilterWrapper(Protocol protocol)`，参数是扩展点Protocol，所以它是一个Dubbo扩展机制中的Wrapper类。ExtensionLoader会把它缓存起来，供以后创建Extension实例的时候，使用这些包装类依次包装原始扩展点。
+ProtocolFilterWrapper has a constructor `public ProtocolFilterWrapper(Protocol protocol)`, the parameter is the extension point Protocol, making it a Wrapper class in Dubbo's extension mechanism. ExtensionLoader caches it for use later when creating Extension instances, applying these wrapper classes in sequence to wrap the original extension point.
 
-## 扩展点自适应
+## Adaptive extension points
 
-前面讲到过，Dubbo需要在运行时根据方法参数来决定该使用哪个扩展，所以有了扩展点自适应实例。其实是一个扩展点的代理，将扩展的选择从Dubbo启动时，延迟到RPC调用时。Dubbo中每一个扩展点都有一个自适应类，如果没有显式提供，Dubbo会自动为我们创建一个，默认使用Javaassist。
-先来看下创建自适应扩展类的代码:
+As mentioned before, Dubbo needs to decide at runtime which extension to use based on method parameters, leading to the need for adaptive instances of extension points. Essentially, these are proxies that defer the choice of extensions from Dubbo startup to RPC invocation time. Each extension point in Dubbo has an adaptive class created automatically by Dubbo if not explicitly provided, using Javaassist by default.
+Let’s take a look at the code that creates adaptive extension classes:
 
 ```java
 public T getAdaptiveExtension() {
@@ -311,14 +311,14 @@ public T getAdaptiveExtension() {
     return (T) instance;
 }
 ```
-继续看createAdaptiveExtension方法
+Continuing on to the createAdaptiveExtension method:
 
 ```java
 private T createAdaptiveExtension() {        
     return injectExtension((T) getAdaptiveExtensionClass().newInstance());
 }
 ```
-继续看getAdaptiveExtensionClass方法
+Next, let's see the getAdaptiveExtensionClass method:
 
 ```java
 private Class<?> getAdaptiveExtensionClass() {
@@ -329,7 +329,7 @@ private Class<?> getAdaptiveExtensionClass() {
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 ```
-继续看createAdaptiveExtensionClass方法，绕了一大圈，终于来到了具体的实现了。看这个createAdaptiveExtensionClass方法，它首先会生成自适应类的Java源码，然后再将源码编译成Java的字节码，加载到JVM中。
+Continuing to the createAdaptiveExtensionClass method, we finally arrive at the specific implementation. This method generates the Java source code for the adaptive class, compiles it into Java bytecode, and loads it into the JVM.
 
 ```java
 private Class<?> createAdaptiveExtensionClass() {
@@ -339,7 +339,7 @@ private Class<?> createAdaptiveExtensionClass() {
         return compiler.compile(code, classLoader);
     }
 ```
-Compiler的代码，默认实现是javassist。
+The default implementation of the Compiler is javassist.
 
 ```java
 @SPI("javassist")
@@ -347,8 +347,8 @@ public interface Compiler {
     Class<?> compile(String code, ClassLoader classLoader);
 }
 ```
-createAdaptiveExtensionClassCode()方法中使用一个StringBuilder来构建自适应类的Java源码。方法实现比较长，这里就不贴代码了。这种生成字节码的方式也挺有意思的，先生成Java源代码，然后编译，加载到jvm中。通过这种方式，可以更好的控制生成的Java类。而且这样也不用care各个字节码生成框架的api等。因为xxx.java文件是Java通用的，也是我们最熟悉的。只是代码的可读性不强，需要一点一点构建xx.java的内容。
-下面是使用createAdaptiveExtensionClassCode方法为Protocol创建的自适应类的Java代码范例:
+In the createAdaptiveExtensionClassCode() method, a StringBuilder is used to build the Java source code for the adaptive class. The implementation is relatively long, which won't be pasted here. This approach of generating bytecode is interesting, initially generating Java source code, then compiling and loading it into the JVM. This allows for better control over generated Java classes without having to care about various bytecode generation framework APIs. As the .java file format is universal in Java and familiar, the content must be constructed incrementally for readability.
+Here is an example of the Java code for an adaptive class created for Protocol using the createAdaptiveExtensionClassCode method:
 
 ```java
 package org.apache.dubbo.rpc;
@@ -387,8 +387,8 @@ public class Protocol$Adaptive implements org.apache.dubbo.rpc.Protocol {
     }
 }
 ```
-大致的逻辑和开始说的一样，通过url解析出参数，解析的逻辑由@Adaptive的value参数控制，然后再根据得到的扩展点名获取扩展点实现，然后进行调用。如果大家想知道具体的构建.java代码的逻辑，可以看`createAdaptiveExtensionClassCode`的完整实现。
-在生成的 Protocol$Adaptive 中，发现getDefaultPort和destroy方法都是直接抛出异常的，这是为什么呢？来看看Protocol的源码
+The overall logic is consistent with what was previously stated, where parameters are resolved through URL, and the resolution logic is controlled by the value parameter of the @Adaptive annotation, after which the corresponding extension point implementation is fetched for invocation. For those interested in the specifics of constructing the .java code, the complete implementation of createAdaptiveExtensionClassCode can be referred to.
+In the generated Protocol$Adaptive, we observe that the getDefaultPort and destroy methods directly throw exceptions. Why is that? Let's look at the Protocol source code.
 
 ```java
 @SPI("dubbo")
@@ -405,4 +405,5 @@ public interface Protocol {
     void destroy();
 }
 ```
-可以看到Protocol接口中有4个方法，但只有export和refer两个方法使用了@Adaptive注解。Dubbo自动生成的自适应实例，只有@Adaptive修饰的方法才有具体的实现。所以，Protocol$Adaptive 类中，也只有export和refer这两个方法有具体的实现，其余方法都是抛出异常。
+It can be seen that the Protocol interface has 4 methods, but only the export and refer methods use the @Adaptive annotation. Therefore, only the methods marked with @Adaptive in the automatically generated adaptive instances have concrete implementations, which is why Protocol$Adaptive contains implementations for only the export and refer methods, while the others throw exceptions.
+

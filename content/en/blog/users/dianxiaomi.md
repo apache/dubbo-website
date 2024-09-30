@@ -1,119 +1,122 @@
 ---
-title: "店小蜜升级 Triple 协议"
-linkTitle: "达摩院云小蜜"
-tags: ["用户案例"]
+title: "Dingxiaomi Upgrades to Triple Protocol"
+linkTitle: "DAMO Academy Cloud Xiaomi"
+tags: ["User Case"]
 date: 2023-01-15
 weight: 4
 ---
 
-# 前言
-阿里云-达摩院-云小蜜对话机器人产品基于深度机器学习技术、自然语言理解技术和对话管理技术，为企业提供多引擎、多渠道、多模态的对话机器人服务。17年云小蜜对话机器人在公共云开始公测，同期在混合云场景也不断拓展。为了同时保证公共云、混合云发版效率和稳定性，权衡再三我们采用了1-2个月一个大版本迭代。
-经过几年发展，为了更好支撑业务发展，架构升级、重构总是一个绕不过去的坎，为了保证稳定性每次公共云发版研发同学都要做两件事：
+# Introduction
+Alibaba Cloud - DAMO Academy - Cloud Xiaomi conversational robot product is based on deep machine learning technology, natural language understanding technology, and dialogue management technology, providing enterprises with multi-engine, multi-channel, and multi-modal conversational robot services. In 2017, Cloud Xiaomi's conversational robot started public testing on the public cloud, and continuously expanded in hybrid cloud scenarios. To ensure efficiency and stability in public and hybrid cloud releases, we adopted a major version iteration every 1-2 months after much consideration. 
 
- 	1. 梳理各个模块相较线上版本接口依赖变化情况，决定十几个应用的上线顺序、每批次发布比例；
- 	2. 模拟演练上述1产出的发布顺序，保证后端服务平滑升级，客户无感知；
+After years of development, to better support business growth, architectural upgrades and refactoring are unavoidable. For stability, every public cloud release requires developers to do two things:
 
-上述 1、2 动作每次都需要 2-3 周左右的时间梳理、集中演练，但是也只能保证开放的PaaS API平滑更新；
+ 	1. Review the changes in interface dependencies compared to online versions and determine the release order and proportion of applications.
+ 	2. Simulate the release order output from the first step to ensure a smooth upgrade for backend services without customer perception.
 
-控制台服务因为需要前端、API、后端保持版本一致才能做到体验无损（如果每次迭代统一升级API版本开发、协同成本又会非常大），权衡之下之前都是流量低谷期上线，尽量缩短发布时间，避免部分控制台模块偶发报错带来业务问题。针对上面问题，很早之前就考虑过用蓝绿发布、灰度等手段解决，但是无奈之前对话机器人在阿里云内部业务区域，该不再允许普通云产品扩容，没有冗余的机器，流量治理完全没法做。
+These actions take about 2-3 weeks each time to sort out and practice focused, but only ensure that the exposed PaaS API updates smoothly.
 
-# 迁移阿里云云上
+The console service requires the frontend, API, and backend to maintain version consistency for a seamless experience, leading to previous releases during traffic valleys to minimize publication time and avoid occasional errors in certain console modules. We considered using blue-green and gray releases to address these issues early on, but such expansion of ordinary cloud products within Alibaba was no longer allowed, resulting in no redundant machines and complete lack of traffic governance.
 
-带着上面的问题，终于迎来的 2021 年 9 月份，云小蜜将业务迁移至阿里云云上。
+# Migration to Alibaba Cloud
 
-## Dubbo3 的实践
+Bearing the above issues, in September 2021, Cloud Xiaomi migrated its business to Alibaba Cloud.
 
-“当时印象最深的就是这张图，虽然当时不知道中间件团队具体要做什么事情，但是记住了两个关键词：三位一体、红利。没想到在2021年底，真真切切享受到了这个红利。”
+## Practice of Dubbo3
+
+"The most impressive thing at the time was this image; although I didn't know exactly what the middleware team was doing, I remembered two keywords: Trinity and Dividend. I didn't expect to actually enjoy this dividend at the end of 2021."
 
 ![image1](/imgs/v3/users/yunxiaomi-1.png)
 
-云小蜜使用的是集团内部的HSF服务框架，需要迁移至阿里云云上，并且存在阿里云云上与阿里内部业务域的互通、互相治理的诉求。云小蜜的公共服务部署在公有云VPC，部分依赖的数据服务部署在内部，内部与云上服务存在RPC互调的诉求，其实属于混合云的典型场景。
-简单整理了下他们的核心诉求，概括起来有以下三点吧：希望尽可能采用开源方案，方便后续业务推广；在网络通信层面需要保障安全性；对于业务升级改造来说需要做到低成本。
+Cloud Xiaomi uses the group's internal HSF service framework, which needs to be migrated to Alibaba Cloud, while also requiring intercommunication and mutual governance with Alibaba's internal business domain. Cloud Xiaomi's public services are deployed in the public cloud VPC, while some dependent data services are deployed internally, necessitating the RPC interoperability between internal and cloud services, a typical hybrid cloud scenario. 
+
+In summary, their core demands include: a preference for open-source solutions for easier future business promotion; ensuring safety during network communication; and needing low-cost solutions for business upgrades and transformations.
 
 ![image2](/imgs/v3/users/yunxiaomi-2.png)
 
-在此场景下，经过许多讨论与探索，方案也敲定了下来
+After many discussions and explorations, the solution was finalized.
 
-- 全链路升级至开源 Dubbo3.0，云原生网关默认支持Dubbo3.0，实现透明转发，网关转发RT小于1ms
-- 利用 Dubbo3.0 支持HTTP2特性，云原生网关之间采用 mTLS 保障安全
-- 利用云原生网关默认支持多种注册中心的能力，实现跨域服务发现对用户透明，业务侧无需做任何额外改动
-- 业务侧升级SDK到支持 Dubbo3.0，配置发布 Triple 服务即可，无需额外改动
+- Fully upgrade to open-source Dubbo 3.0, with the cloud-native gateway supporting Dubbo 3.0 by default for transparent forwarding, with gateway forwarding RT less than 1ms.
+- Utilize Dubbo 3.0's support for HTTP2 features, and ensure security between cloud-native gateways through mTLS.
+- Use the multi-registration center capability supported by the cloud-native gateway to achieve cross-domain service discovery transparently for users, requiring no extra modifications on the business side.
+- Upgrade the SDK on the business side to support Dubbo 3.0 and simply publish Triple services, requiring no further changes.
 
-**解决了互通、服务注册发现的问题之后，就是开始看如何进行服务治理方案了**
+**After resolving interoperability and service registration and discovery issues, the focus shifted to service governance solutions.**
 
-# 阿里云云上流量治理
+# Traffic Governance on Alibaba Cloud
 
-迁移至阿里云云上之后，流量控制方案有非常多，比如集团内部的全链路方案、集团内单元化方案等等。
+After migrating to Alibaba Cloud, there are many traffic control solutions such as the group's full-link solution and the unitization scheme within the group.
 
-## 设计目标和原则
+## Design Objectives and Principles
 
-1. 要引入一套流量隔离方案，上线过程中，新、旧两个版本服务同时存在时，流量能保证在同一个版本的“集群”里流转，这样就能解决重构带来的内部接口不兼容问题。
-2. 要解决上线过程中控制台的平滑性问题，避免前端、后端、API更新不一致带来的问题。
-3. 无上线需求的应用，可以不参与上线。
-4. 资源消耗要尽量少，毕竟做产品最终还是要考虑成本和利润。
+1. Introduce a traffic isolation scheme to ensure that during the online process, both new and old service versions coexist, and traffic flows remain within the same version "cluster," solving internal interface incompatibility issues brought about by refactoring.
+2. Address the smoothness issue of the console during the go-live process, avoiding problems caused by inconsistent updates among the frontend, backend, and API.
+3. Applications without go-live requirements can remain exempt from the go-live process.
+4. Minimize resource consumption, as product development ultimately requires consideration of cost and profit.
 
-## 方案选型
+## Solution Selection
 
-1. 集团内部的全链路方案：目前不支持阿里云云上
-2. 集团内单元化方案：主要解决业务规模、容灾等问题，和我们碰到的问题不一样
-3. 搭建独立集群，版本迭代时切集群：成本太大
-4. 自建：在同一个集群隔离新、老服务，保证同一个用户的流量只在同版本服务内流转
+1. Group's full-link solution: Currently not supported on Alibaba Cloud.
+2. Group's unitization scheme: Mainly addresses business scalability and disaster recovery, differing from our encountered issues.
+3. Establish an independent cluster, changing clusters during version iteration: Too costly.
+4. Self-built: Isolate new and old services within the same cluster to ensure a user's traffic only circulates within services of the same version.
 
-以RPC为例：
+Take RPC as an example:
 
-* 方案一：通过开发保证，当接口不兼容升级时，强制要求升级HSF version，并行提供两个版本的服务； 缺点是一个服务变更，关联使用方都要变更，协同成本特别大，并且为了保持平滑，新老接口要同时提供服务，维护成本也比较高
-* 方案二：给服务（机器）按版本打标，通过RPC框架的路由规则，保证流量优先在同版本内流转
+* Solution one: Ensure through development that when interface upgrades are incompatible, it is mandatory to upgrade HSF versions and provide two versions of services in parallel; the downside is that if one service changes, all associated users must also change, leading to exceptionally high coordination costs. Maintaining old and new interfaces concurrently generates significant maintenance costs.
+* Solution two: Tag services (machines) by version, using the RPC framework's routing rules to ensure that traffic flows primarily within the same version.
 
-## 全链路灰度方案
+## Full-Link Gray Release Solution
 
-就当1、2、3、4都觉得不完美，一边调研一边准备自建方案5的时候，兜兜绕绕拿到了阿里云 MSE 微服务治理团队[《20分钟获得同款企业级全链路灰度能力》](https://yuque.antfin.com/docs/share/a8df43ac-3a3b-4af4-a443-472828884a5d?#)，方案中思路和准备自建的思路完全一致，也是利用了RPC框架的路由策略实现的流量治理，并且实现了产品化（微服务引擎-微服务治理中心），同时，聊了两次后得到几个“支持”，以及几个“后续可以支持”后，好像很多事情变得简单了...
+While considering options 1, 2, 3, and 4 as imperfect, while researching and preparing self-built solution 5, we eventually got access to Alibaba Cloud MSE Microservices Governance Team's [“20-Minute Enterprise-Level Full-Link Gray Release Capability”](https://yuque.antfin.com/docs/share/a8df43ac-3a3b-4af4-a443-472828884a5d?#), which aligned perfectly with our self-built idea, utilizing the RPC framework's routing strategy for traffic governance, realizing productization (Microservice Engine - Microservice Governance Center). 
 
 ![image3](/imgs/v3/users/yunxiaomi-3.png)
 
-从上图可以看到，各个应用均需要搭建基线(base)环境和灰度(gray)环境，除了流量入口-业务网关以外，下游各个业务模块按需部署灰度（gray）环境，如果某次上线某模块没有变更则无需部署。
+As seen in the image above, each application is required to set up baseline (base) environments and gray (gray) environments. Apart from the traffic entrance - business gateway, the downstream business modules should deploy gray (gray) environments as needed. If a module does not change during a release, it does not need to be deployed.
 
-### 各个中间件的治理方案
+### Governance Solutions for Various Middlewares
 
-1. Mysql、ElasticSearch：持久化或半持久化数据，由业务模块自身保证数据结构兼容升级；
-2. Redis：由于对话产品会有多轮问答场景，问答上下文是在Redis里，如果不兼容则上线会导致会话过程中的C端用户受影响，因此目前Redis由业务模块自身保证数据结构兼容升级；
-3. 配置中心：基线(base)环境、灰度(gray)环境维护两套全量配置会带来较大工作量，为了避免人工保证数据一致性成本，基线(base)环境监听dataId，灰度(gray)环境监听gray.dataId如果未配置gray.dataId则自动监听dataId；（云小蜜因为在18年做混合云项目为了保证混合云、公共云使用一套业务代码，建立了中间件适配层，本能力是在适配层实现）
-4. RPC服务：使用阿里云 one agent 基于Java Agent技术利用Dubbo框架的路由规则实现，无需修改业务代码；
+1. Mysql, ElasticSearch: Persisted or semi-persistent data, ensuring data structure compatibility upgrades by the business module itself.
+2. Redis: As conversational products involve multi-turn Q&A scenarios, the Q&A context is in Redis. Incompatibility during go-live could impact end users during sessions; thus currently, Redis relies on the business module to assure data structure compatibility upgrades.
+3. Configuration Center: Maintaining two complete configuration sets for baseline (base) and gray (gray) environments incurs significant workload. To avoid personnel effort in ensuring data consistency, the baseline (base) environment listens to dataId, and the gray (gray) environment listens to gray.dataId. If gray.dataId is not configured, it automatically listens to dataId; (Cloud Xiaomi established a middleware adaptation layer in 2018 to ensure both hybrid and public clouds use a set of business codes—this capability is realized in the adaptation layer).
+4. RPC Services: Utilize Alibaba Cloud one agent based on Java Agent technology, using the routing rules of the Dubbo framework without needing to modify business code.
 
-应用只需要加一点配置：
+Applications only require slight configurations:
 
-* 1）linux环境变量
-alicloud.service.tag=gray标识灰度，基线无需打标
-profiler.micro.service.tag.trace.enable=true标识经过该机器的流量，如果没有标签则自动染上和机器相同的标签，并向后透传
-* 2）JVM参数，标识开启MSE微服务流量治理能力**       SERVICE_OPTS=**"$**{SERVICE_OPTS}** -Dmse.enable=true"**
+* 1) Linux environment variable
+alicloud.service.tag=gray for gray identification; baseline does not require tagging.
+profiler.micro.service.tag.trace.enable=true identifies traffic passing through this machine. If no tag is present, it automatically adopts the same tag as the machine and transmits it backward.
+* 2) JVM parameters, indicating enabling MSE microservices traffic governance capability:
+**       SERVICE_OPTS=**"$**{SERVICE_OPTS}** -Dmse.enable=true"**
 
-### 流量管理方案
+### Traffic Management Scheme
 
-流量的分发模块决定流量治理的粒度和管理的灵活程度。
+The traffic distribution module determines the granularity of traffic governance and the flexibility of management.
 
-对话机器人产品需要灰度发布、蓝绿发布目前分别用下面两种方案实现：
+The conversational robot product requires gray releases and blue-green releases currently implemented through the following two schemes:
 
-1. 灰度发布：
-部分应用单独更新，使用POP的灰度引流机制，该机制支持按百分比、UID的策略引流到灰度环境
-2. 蓝绿发布：
-    * 1）部署灰度(gray)集群并测试：测试账号流量在灰度(gray)集群，其他账号流量在基线(base)集群
-    * 2）线上版本更新：所有账号流量在灰度(gray)集群
-    * 3）部署基线(base)集群并测试：测试账号流量在基线(base)集群，其他账号流量在灰度(gray)集群
-    * 4）流量回切到基线(base)集群并缩容灰度(gray)环境：所有账号流量在基线(base)集群
+1. Gray Release:
+Certain applications update independently, using POP's gray traffic diversion mechanism which supports diversion to the gray environment by percentage or UID strategies.
+2. Blue-Green Release:
+    * 1) Deploy gray (gray) cluster and test: Testing account traffic in the gray (gray) cluster; other account traffic in the baseline (base) cluster.
+    * 2) Online version update: All account traffic in the gray (gray) cluster.
+    * 3) Deploy baseline (base) cluster and test: Testing account traffic in the baseline (base) cluster; other account traffic in the gray (gray) cluster.
+    * 4) Redirect traffic back to the baseline (base) cluster and downsize the gray (gray) environment: All account traffic in the baseline (base) cluster.
 
-## 全链路落地效果
+## Full-Link Implementation Effects
 
-上线后第一次发布的效果：“目前各个模块新版本的代码已经完成上线，含发布、功能回归一共大约花费2.5小时，相较之前每次上线到凌晨有很大提升。”
-MSE 微服务治理全链路灰度方案满足了云小蜜业务在高速发展情况下快速迭代和小心验证的诉求，通过JavaAgent技术帮助云小蜜快速落地了企业级全链路灰度能力。
-流量治理随着业务发展会有更多的需求，下一步，我们也会不断和微服务治理产品团队，扩充此解决方案的能力和使用场景，比如：rocketmq、schedulerx的灰度治理能力。
+The effect of the first release after going live: "The new version codes of each module are already launched, covering publishing and functional regression, taking about 2.5 hours, which is a significant improvement compared to previous releases that extended to the early hours."
+MSE Microservices Governance full-link gray release solution met Cloud Xiaomi's needs for rapid iteration and cautious validation in the context of accelerating business growth, helping Cloud Xiaomi quickly realize enterprise-level full-link gray capabilities through JavaAgent technology. 
 
-## 更多的微服务治理能力
+As traffic governance develops with business growth, further needs will arise—next steps will include ongoing collaboration with the microservices governance product team to expand the capabilities and use cases of this solution, for example with the gray governance capabilities of RocketMQ and SchedulerX.
 
-使用 MSE 服务治理后，发现还有更多开箱即用的治理能力，能够大大提升研发的效率。包含服务查询、服务契约、服务测试等等。这里要特别提一下就是云上的服务测试，服务测试即为用户提供一个云上私网 Postman ，让我们这边能够轻松调用自己的服务。我们可以忽略感知云上复杂的网络拓扑结构，无需关系服务的协议，无需自建测试工具，只需要通过控制台即可实现服务调用。支持 Dubbo 3.0 框架，以及 Dubbo 3.0 主流的 Triple 协议。
+## More Microservices Governance Capabilities
+
+After using MSE service governance, we discovered additional out-of-the-box governance capabilities greatly enhancing development efficiency, including service querying, service contracts, and service testing, among others. Notably, the cloud service testing provides users with a private network Postman on the cloud, enabling us to easily call our services. We can overlook the complexity of the cloud’s network topology without concern for service protocols, and without needing to create testing tools, everything can be accomplished through the console. It supports the Dubbo 3.0 framework and the mainstream Triple protocol of Dubbo 3.0.
 
 ![image4](/imgs/v3/users/yunxiaomi-4.png)
 
-# 结束语
+# Conclusion
 
-最终云小蜜对话机器人团队成功落地了全链路灰度功能，解决了困扰团队许久的发布效率问题。在这个过程中我们做了将部分业务迁移至阿里云云上、服务框架升级至Dubbo3.0、选择MSE微服务治理能力等等一次次新的选择与尝试。“世上本没有路，走的人多了便成了路”。经过我们工程师一次又一次的探索与实践，能够为更多的同学沉淀出一个个最佳实践。我相信这些最佳实践将会如大海中璀璨的明珠般，经过生产实践与时间的打磨将会变得更加熠熠生辉。
-
+Ultimately, the Cloud Xiaomi conversational robot team successfully implemented full-link gray release functionality, resolving the long-standing publishing efficiency issue. During this process, we migrated parts of the business to Alibaba Cloud, upgraded the service framework to Dubbo 3.0, and chose MSE microservices governance capabilities, making numerous new choices and attempts. "There was originally no road in the world; as more people walked, it became a road." Through repeated exploration and practice by our engineers, we can distill many best practices for more colleagues. I believe these best practices will shine like pearls in the sea, becoming even more brilliant through practical application and the passage of time.
 

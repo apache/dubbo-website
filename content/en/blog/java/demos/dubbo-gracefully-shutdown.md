@@ -1,73 +1,74 @@
 ---
-title: "Dubbo 优雅停机"
-linkTitle: "Dubbo 优雅停机"
+title: "Dubbo Graceful Shutdown"
+linkTitle: "Dubbo Graceful Shutdown"
 tags: ["Java"]
 date: 2018-08-14
 description: > 
-    本文介绍了Dubbo优雅停机的原理和使用方式
+    This article introduces the principles and usage of Dubbo graceful shutdown.
 ---
 
-## 背景
+## Background
 
-对于任何一个线上应用，如何在服务更新部署过程中保证客户端无感知是开发者必须要解决的问题，即从应用停止到重启恢复服务这个阶段不能影响正常的业务请求。理想条件下，在没有请求的时候再进行更新是最安全可靠的，然而互联网应用必须要保证可用性，因此在技术层面上优化应用更新流程来保证服务在更新时无损是必要的。
+For any online application, ensuring that clients are unaware during service update deployments is a problem that developers must solve. That is, the stage from application stop to restart must not impact normal business requests. Ideally, performing updates when there are no requests is the safest and most reliable. However, internet applications must ensure availability, making it necessary to optimize the application update process to ensure service integrity during updates.
 
-传统的解决方式是通过将应用更新流程划分为手工摘流量、停应用、更新重启三个步骤，由人工操作实现客户端无对更新感知。这种方式简单而有效，但是限制较多：不仅需要使用借助网关的支持来摘流量，还需要在停应用前人工判断来保证在途请求已经处理完毕。这种需要人工介入的方式运维复杂度较高，只能适用规模较小的应用，无法在大规模系统上使用。
+The traditional solution is to manually divide the application update process into three steps: remove traffic, stop the application, and restart after updating. This approach is simple and effective but has many limitations: it requires gateway support to remove traffic and requires manual judgment before stopping the application to ensure in-flight requests are handled. This need for manual intervention leads to high operational complexity and is only suitable for smaller applications, making it impractical for large-scale systems.
 
-因此，如果在容器/框架级别提供某种自动化机制，来自动进行摘流量并确保处理完以到达的请求，不仅能保证业务不受更新影响，还可以极大地提升更新应用时的运维效率。
+Thus, providing some automatic mechanism at the container/framework level to remove traffic and ensure that incoming requests are handled would greatly enhance operational efficiency during application updates while ensuring business continuity.
 
-这个机制也就是优雅停机，目前Tomcat/Undertow/Dubbo等容器/框架都有提供相关实现。下面给出正式一些的定义：优雅停机是指在停止应用时，执行的一系列保证应用正常关闭的操作。这些操作往往包括等待已有请求执行完成、关闭线程、关闭连接和释放资源等，优雅停机可以避免非正常关闭程序可能造成数据异常或丢失，应用异常等问题。优雅停机本质上是JVM即将关闭前执行的一些额外的处理代码。
+This mechanism is called graceful shutdown, currently provided by containers/frameworks such as Tomcat/Undertow/Dubbo. Here is a more formal definition: graceful shutdown refers to a series of operations performed to ensure the application closes normally. These operations often include waiting for existing requests to complete, closing threads, shutting down connections, and releasing resources. Graceful shutdown can avoid data anomalies or losses caused by abnormal program closures, as well as application exceptions. Essentially, graceful shutdown is some additional processing code executed before the JVM is about to close.
 
-## 适用场景
+## Applicable Scenarios
 
-- JVM主动关闭(`System.exit(int)`；
-- JVM由于资源问题退出(`OOM`)；
-- 应用程序接受到`SIGTERM`或`SIGINT`信号。
+- JVM actively shutting down (`System.exit(int)`);
+- JVM exiting due to resource issues (`OOM`);
+- Application receiving `SIGTERM` or `SIGINT` signals.
 
-## 配置方式
-### 服务的优雅停机
-在Dubbo中，优雅停机是默认开启的，停机等待时间为10000毫秒。可以通过配置`dubbo.service.shutdown.wait`来修改等待时间。
+## Configuration
 
-例如将等待时间设置为20秒可通过增加以下配置实现：
+### Graceful Shutdown for Services
+In Dubbo, graceful shutdown is enabled by default, with a wait time of 10,000 milliseconds. The wait time can be modified by configuring `dubbo.service.shutdown.wait`.
+
+For example, to set the wait time to 20 seconds, you can achieve this by adding the following configuration:
 
 ```shell
 dubbo.service.shutdown.wait=20000
 ```
 
-### 容器的优雅停机
-当使用`org.apache.dubbo.container.Main`这种容器方式来使用 Dubbo 时，也可以通过配置`dubbo.shutdown.hook`为`true`来开启优雅停机。
+### Graceful Shutdown for Containers
+When using container methods like `org.apache.dubbo.container.Main` to use Dubbo, graceful shutdown can also be enabled by setting `dubbo.shutdown.hook` to `true`.
 
-### 通过QOS优雅上下线
+### Graceful Online and Offline via QOS
 
-基于`ShutdownHook`方式的优雅停机无法确保所有关闭流程一定执行完，所以 Dubbo 推出了多段关闭的方式来保证服务完全无损。
+The graceful shutdown based on the `ShutdownHook` method cannot ensure that all shutdown processes are executed completely, so Dubbo has introduced a multi-step shutdown method to ensure complete service integrity.
 
-多段关闭即将停止应用分为多个步骤，通过运维自动化脚本或手工操作的方式来保证脚本每一阶段都能执行完毕。
+Multi-step shutdown divides the stopping application into multiple steps, ensuring that every phase of the script can be executed either through operational automation scripts or manual operations.
 
-在关闭应用前，首先通过 QOS 的`offline`指令下线所有服务，然后等待一定时间确保已经到达请求全部处理完毕，由于服务已经在注册中心下线，当前应用不会有新的请求。这时再执行真正的关闭(`SIGTERM` 或` SIGINT`)流程，就能保证服务无损。
+Before shutting down the application, first, use the QOS `offline` command to take all services offline, then wait for a period to ensure that all incoming requests are processed. Since the service is offline in the registry, the current application will not receive new requests. At this point, executing the actual shutdown (`SIGTERM` or `SIGINT`) process can ensure service integrity.
 
-QOS可通过 telnet 或 HTTP 方式使用，具体方式请见[Dubbo-QOS命令使用说明](/en/docsv2.7/user/references/qos/)。
+QOS can be used via telnet or HTTP, for specific methods see [Dubbo-QOS command usage instructions](/en/docsv2.7/user/references/qos/).
 
-## 流程
+## Process
 
-Provider在接收到停机指令后
+After the Provider receives the shutdown command,
 
-- 从注册中心上注销所有服务；
-- 从配置中心取消监听动态配置；
-- 向所有连接的客户端发送只读事件，停止接收新请求；
-- 等待一段时间以处理已到达的请求，然后关闭请求处理线程池；
-- 断开所有客户端连接。
+- Unregister all services from the registry;
+- Cancel monitoring of dynamic configurations from the configuration center;
+- Send read-only events to all connected clients, stopping the acceptance of new requests;
+- Wait for a period to process incoming requests, then close the request processing thread pool;
+- Disconnect all client connections.
 
-Consumer在接收到停机指令后
+After the Consumer receives the shutdown command,
 
-- 拒绝新到请求，直接返回调用异常；
-- 等待当前已发送请求执行完毕，如果响应超时则强制关闭连接。
+- Reject new incoming requests and directly return call exceptions;
+- Wait for currently sent requests to complete; if the response times out, forcibly close the connection.
 
-当使用容器方式运行 Dubbo 时，在容器准备退出前，可进行一系列的资源释放和清理工。
+When running Dubbo in container mode, a series of resource release and cleanup operations can be performed before the container is prepared to exit.
 
-例如使用 SpringContainer时，Dubbo 的ShutdownHook线程会执行`ApplicationContext`的`stop`和`close`方法，保证 Bean的生命周期完整。
+For instance, when using SpringContainer, Dubbo's ShutdownHook thread executes the `stop` and `close` methods of `ApplicationContext`, ensuring the complete lifecycle of beans.
 
-## 实现原理
+## Implementation Principles
 
-1. 在加载类`org.apache.dubbo.config.AbstractConfig`时，通过`org.apache.dubbo.config.DubboShutdownHook`向JVM注册 ShutdownHook。
+1. When loading the class `org.apache.dubbo.config.AbstractConfig`, the `org.apache.dubbo.config.DubboShutdownHook` registers a ShutdownHook with the JVM.
 
    ```java
    /**
@@ -80,7 +81,7 @@ Consumer在接收到停机指令后
    }
    ```
 
-2. 每个ShutdownHook都是一个单独的线程，由JVM在退出时触发执行`org.apache.dubbo.config.DubboShutdownHook`。
+2. Each ShutdownHook is a separate thread triggered by the JVM upon exit to execute `org.apache.dubbo.config.DubboShutdownHook`.
 
    ```java
    /**
@@ -97,19 +98,20 @@ Consumer在接收到停机指令后
    }
    ```
 
-3. 首先关闭所有注册中心，这一步包括：
-   - 从注册中心注销所有已经发布的服务；
-   - 取消订阅当前应用所有依赖的服务；
-   - 断开与注册中心的连接。
-4. 执行所有`Protocol`的`destroy()`，主要包括：
-   - 销毁所有`Invoker`和`Exporter`；
-   - 关闭Server，向所有已连接Client发送当前Server只读事件；
-   - 关闭独享/共享Client，断开连接，取消超时和重试任务；
-   - 释放所有相关资源。
-5. 执行完毕，关闭JVM。
+3. First, close all registries, which includes:
+   - Unregister all published services from the registry;
+   - Cancel subscriptions for all services depended on by the current application;
+   - Disconnect from the registry.
+4. Execute `destroy()` for all `Protocols`, mainly including:
+   - Destroy all `Invokers` and `Exporters`;
+   - Shutdown the server, sending read-only events to all connected clients;
+   - Close exclusive/shared clients, disconnect, and cancel timeout and retry tasks;
+   - Release all related resources.
+5. After finishing, shutdown the JVM.
 
-## 注意事项
+## Precautions
 
-- 使用`SIGKILL`关闭应用不会执行优雅停机；
-- 优雅停机不保证会等待所有已发送/到达请求结束；
-- 配置的优雅停机等待时间`timeout`不是所有步骤等待时间的总和，而是每一个`destroy`执行的最大时间。例如配置等待时间为5秒，则关闭Server、关闭Client等步骤会分别等待5秒。
+- Using `SIGKILL` to close an application will not execute graceful shutdown;
+- Graceful shutdown does not guarantee that all sent/incoming requests will be waited on to complete;
+- The configured graceful shutdown wait time `timeout` is not the sum of wait times for all steps but is the maximum time for each `destroy` execution. For example, if the wait time is configured to 5 seconds, then steps like closing the server and stopping clients will each wait for 5 seconds.
+

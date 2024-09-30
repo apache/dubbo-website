@@ -1,103 +1,101 @@
 ---
-title: "Dubbo与Kubernetes集成"
-linkTitle: "Dubbo与Kubernetes集成"
+title: "Integration of Dubbo with Kubernetes"
+linkTitle: "Integration of Dubbo with Kubernetes"
 tags: ["Java"]
 date: 2018-09-30
 description: >
-    本文主要尝试将Dubbo服务注册到Kubernetes，同时无缝融入Kubernetes的多租户安全体系。
+    This article mainly attempts to register Dubbo services into Kubernetes while seamlessly integrating with Kubernetes' multi-tenant security system.
 ---
 
-## 大体目标
+## Overall Goal
 
-Dubbo的provider不再关心服务注册的事宜，只需要把其Dubbo服务端口打开，由Kubernetes来进行服务的声明和发布；Dubbo的consumer在服务发现时直接发现kubernetes的对应服务endpoints，从而复用Dubbo已有的微服务通道能力。好处是无需依赖三方的软负载注册中心；同时无缝融入Kubernetes的多租户安全体系。Demo的代码参照： https://github.com/dubbo/dubbo-kubernetes
+Dubbo providers no longer need to worry about service registration; they just need to open the Dubbo service port, with Kubernetes handling the declaration and publishing of services. Dubbo consumers directly discover the corresponding service endpoints in Kubernetes during service discovery, thus reusing the existing microservice channel capabilities of Dubbo. The benefit is that there is no need to rely on third-party soft load registration centers, while seamlessly integrating into Kubernetes' multi-tenant security system. Code for the demo reference: https://github.com/dubbo/dubbo-kubernetes
 
-## 闲谈
+## Chatting
 
-Kubernates是建立在扩展性的具备二次开发的功能层次丰富的体系化系统
+Kubernetes is built on a scalable, extensible, and richly functional systematic system.
 
-- 首先其最核心的功能是管理容器集群，能管理容器化的集群（包括存储，计算），当然这个是建立在对容器运行时(CRI)，网络接口(CNI),存储服务接口（CSI/FV）的基础上；
-- 其次是面向应用(包括无状态/有状态,批处理/服务型应用)的部署和路由能力，特别是基于微服务架构的应用管理，具备了其服务定义和服务发现，以及基于configmap的统一配置能力；
-- 在基础资源（主要是抽象底层IaaS的资源）和应用层的抽象模型之上是治理层，包含弹性扩容，命名空间/租户，等。当然，基于其原子内核的基础能力，在Kubernetes的核心之上搭建统一的日志中心和全方位监控等服务是水到渠成的，CNCF更是有其认定推荐。
+- Its core function is to manage container clusters, capable of managing containerized clusters (including storage and computation), based on container runtime (CRI), network interface (CNI), and storage service interface (CSI/FV);
+- It offers deployment and routing capabilities for applications (including stateless/stateful, batch/service applications), especially for microservice architecture application management, providing service definition, service discovery, and unified configuration based on configmap;
+- Above the basic resource (mainly abstracting underlying IaaS resources) and application layer abstract model is the governance layer, which includes elastic scaling, namespaces/tenants, etc. Building a unified logging center and comprehensive monitoring services on top of Kubernetes' core capabilities is a natural progression, and the CNCF recognizes and recommends this.
 
-来张Kubernetes Architecture的一张图解释下上述描述。在2018年Kubernetes往事实的paas底座的标配迈出质的一步，有人说原因在于基于扩展的二次开发能力，有人说在于其声明式编程和背靠Google和Redhat的强大社区运作，我觉得回归本质是在于下图中的**Layered架构和其问题域的领域建模抽象**。
+Here’s a diagram of Kubernetes Architecture to explain the above description. In 2018, Kubernetes made a qualitative leap towards being a standard PaaS base, with reasons attributed to its extensible development capabilities, its declarative programming approach, and robust community support from Google and Redhat. However, I believe the essence lies in the **Layered architecture and domain modeling abstraction** shown in the diagram below.
 
 ![img](/imgs/blog/k8s/1.png)
 
-以微服务架构视角，Kubernetes在一定意义上是微服务框架（这时较叫微服务平台或toolkit集更合适），支持微服务的服务发现/注册的基本能力。借用如下图做一个简单描述。
+From a microservices architecture perspective, Kubernetes is, in a sense, a microservices framework (it's more appropriate to call it a microservices platform or toolkit), supporting the basic capabilities of service discovery/registration for microservices. A simple description is given in the diagram below.
 
 ![img](/imgs/blog/k8s/2.jpeg)
 
-话题再展开一下，微服务领域涉及众多问题，大概可以用下图说明。
+Expanding the topic, the microservices domain involves numerous issues, as illustrated in the diagram below.
 
 ![img](/imgs/blog/k8s/3.jpeg)
 
-Kubernetes解决得只是少部分，而像动态路由，稳定性控制（断路器，隔水舱等），分布式服务追踪等是个空白，这也就是servicemesh要解决的，是在CNCF的Trail Map占有重要一席；当然Dubbo是基本具备完备的微服务，也就是使得其集成到k8s体系下具有相当的意义。Dubbo在serviemesh中基于sidecar的方案是解决跨语言诉求的通用servicemesh方案，需要新开一个话题来展开说；而引用serviemsh的原始定义：
+Kubernetes only addresses a small part of these issues, while dynamic routing, stability control (circuit breakers, water-tight compartments, etc.), distributed service tracking remain gaps that the service mesh aims to fill, holding a significant place in the CNCF Trail Map. Certainly, Dubbo is basically equipped with comprehensive microservice capabilities, making its integration into the Kubernetes system quite meaningful. The sidecar-based solution of Dubbo in the service mesh is a general service mesh solution addressing cross-language demands, which requires a new topic for discussion; referencing the original definition of a service mesh:
 
-> A service mesh is a dedicated infrastructure layer for handling service-to-service communication. It’s responsible for the reliable delivery of requests through the complex topology of services that comprise a modern, cloud native application. 
+> A service mesh is a dedicated infrastructure layer for handling service-to-service communication. It’s responsible for the reliable delivery of requests through the complex topology of services that comprise a modern, cloud-native application. 
 
-> 首先服务网格是一个云原生环境下基础设施层，功能在于处理服务间通信，职责是负责实现请求的可靠传递，被使得被监控跟踪，被治理，最终使得微服务架构被赋予高可控的稳定性和快速的问题定位排查能力。
+The existing Dubbo integration with cloud-native infrastructure Kubernetes and its ability to address core microservice-related issues can be regarded as a narrow service mesh solution, albeit limited to the Java domain; humorously understood as such, haha.
 
-可以得出现有Dubbo集成云原生基础设施Kubernetes的基础能力而并解决微服务相关核心问题也算是一种狭义上的servicemesh方案，只是是Java领域的罢了；当玩笑理解也行，哈哈。
+## Approach/Solution
 
-## 思路/方案
+Kubernetes can naturally serve as an address registration center for microservices, similar to Zookeeper, Alibaba's internal VIPserver, and Configserver. Specifically, in Kubernetes, a Pod represents a running instance of an application, with scheduling and deployment/stop controlling through API-Server services to maintain its status in ETCD; the service in Kubernetes corresponds to the concept of microservices and is defined as follows:
 
-Kubernetes是天然可作为微服务的地址注册中心，类似于Zookeeper， 阿里巴巴内部用到的VIPserver，Configserver。 具体来说，Kubernetes中的Pod是对于应用的运行实例，Pod的被调度部署/启停都会调用API-Server的服务来保持其状态到ETCD；Kubernetes中的service是对应微服务的概念，定义如下
+> A Kubernetes Service is an abstraction layer that defines a logical set of Pods and enables external traffic exposure, load balancing, and service discovery for those Pods.
 
-> A Kubernetes Service is an abstraction layer which defines a logical set of Pods and enables external traffic exposure, load balancing and service discovery for those Pods.
+In summary, Kubernetes services have the following characteristics:
 
-概括来说Kubernetes service具有如下特点
+- Each Service has a unique name and corresponding IP. The IP is automatically assigned by Kubernetes, while the name is defined by the developer.
+- Service IPs have several representations: ClusterIP, NodePort, LoadBalance, and Ingress. ClusterIP is mainly used for intra-cluster communication; NodePort, Ingress, and LoadBalance are used for exposing services to external access.
 
-- 每个Service都有一个唯一的名字，及对应IP。IP是kubernetes自动分配的，名字是开发者自己定义的。
-- Service的IP有几种表现形式，分别是ClusterIP，NodePort,LoadBalance,Ingress。 ClusterIP主要用于集群内通信；NodePort，Ingress，LoadBalance用于暴露服务给集群外的访问入口。
+At first glance, Kubernetes services all have unique IPs. Under the conventional thinking of Dubbo/HSF, it's apparent that Dubbo/HSF services are formed by aggregating the IPs of the whole service cluster, implying a fundamental difference. However, upon further reflection, the distinction is not significant, as the unique IP in Kubernetes is simply a VIP that mounts multiple endpoints behind it, which are the actual processing nodes. This discussion only addresses the access of Dubbo services within the same Kubernetes cluster; the external consumer accessing the provider within Kubernetes involves network address space issues, usually requiring Gateway/Loadbalance for mapping and conversion, which is not elaborated here. There are two options for Kubernetes:
 
-乍一看，Kubernetes的service都是唯一的IP，在原有的Dubbo/HSF固定思维下：Dubbo/HSF的service是由整个服务集群的IP聚合而成，貌似是有本质区别的，细想下来差别不大，因为Kubernetes下的唯一IP只是一个VIP，背后挂载了多个endpoint，那才是事实上的处理节点。此处只讨论集群内的Dubbo服务在同一个kubernetes集群内访问；至于kubernetes外的consumer访问kubernetes内的provider，涉及到网络地址空间的问题，一般需要GateWay/Loadbalance来做映射转换，不展开讨论。针对Kubernetes内有两种方案可选： ：
-
-1. DNS： 默认Kubernetes的service是靠DNS插件(最新版推荐是coreDNS)， Dubbo上有个proposal是关于这个的。我的理解是static resolution的机制是最简单最需要支持的一种service discovery机制，具体也可以参考Envoy在此的观点，由于HSF/Dubbo一直突出其软负载的地址发现能力，反而忽略Static的策略。同时蚂蚁的SOFA一直是支持此种策略，那一个SOFA工程的工程片段做一个解释。这样做有两个好处，1）当软负载中心crash不可用造成无法获取地址列表时，有一定的机制Failover到此策略来处理一定的请求。 2）在LDC/单元化下，蚂蚁的负载中心集群是机房/区域内收敛部署的，首先保证软负载中心的LDC化了进而稳定可控，当单元需要请求中心时，此VIP的地址发现就排上用场了。
+1. **DNS**: By default, Kubernetes services rely on the DNS plugin (the latest recommendation is coreDNS), and there is a proposal in Dubbo regarding this. My understanding is that static resolution is the simplest and most necessary service discovery mechanism that needs support; Envoy’s perspective on this can be referenced. Dubbo's continuous emphasis on its softload address discovery capability often overlooks the Static strategy. Meanwhile, Ant Financial's SOFA has long supported this strategy; an engineering fragment of a SOFA project serves as an explanation here. This approach has two advantages: 1) When a soft load center crashes and cannot provide an address list, there is a fallback mechanism to handle certain requests. 2) Under LDC/unitization, Ant's load center cluster is convergently deployed within a datacenter/region, ensuring that the soft load center is LDC-compliant and stability-controlled. When a unit requires a request center, the VIP address discovery comes into play.
 
 ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1Kj1ktpkoBKNjSZFEXXbrEVXa-985-213.png)
 
-2. API：DNS是依靠DNS插件进行的，相当于额外的运维开销，所以考虑直接通过kubernetes的client来获取endpoint。事实上，通过访问Kubernetes的API server接口是可以直接获取某个servie背后的endpoint列表，同时可以监听其地址列表的变化。从而实现Dubbo/HSF所推荐的软负载发现策略。具体可以参考代码：
+2. **API**: DNS relies on a DNS plugin, which incurs additional operational overhead, thus considering direct access to Kubernetes' client to obtain endpoints. In fact, by accessing Kubernetes' API server interface, one can directly retrieve the list of endpoints behind a service while listening for changes in its address list. This achieves the soft load discovery strategy recommended by Dubbo/HSF. Referencing specific code:
 
-以上两种思路都需要考虑以下两点:
+Both approaches need to consider the following points:
 
-1. Kubernetes和Dubbo对于service的名字是映射一致的。Dubbo的服务是由serviename，group，version三个来确定其唯一性，而且servicename一般其服务接口的包名称，比较长。需要映射Kubernetes的servie名与dubbo的服务名。要么是像SOFA那样增加一个属性来进行定义，这是个大的改动，但最合理；要么是通过固定规则来引用部署的环境变量，可用于快速验证。
-2. 端口问题：默认Pod与Pod的网络互通算是解决了，需要验证。
+1. **Service name mapping**: The names of services in Kubernetes and Dubbo must match. Dubbo services are uniquely determined by service name, group, and version, with the service name generally being the package name of the service interface, which tends to be lengthy. This requires mapping Kubernetes service names to Dubbo service names. One option could be to add a property as in SOFA, which is a significant change but most reasonable; alternatively, use fixed rules to reference deployed environment variables for quick validation.
+2. **Port issue**: By default, the network communication between Pods is seen as resolved; verification is needed.
 
-## Demo验证
+## Demo Verification
 
-下面通过阿里云的容器镜像服务和EDAS中的Kubernetes服务来做一次Demo部署。访问阿里云 -> 容器镜像服务。
+Below, we will make a demo deployment using Alibaba Cloud's container image service and Kubernetes services in EDAS. Access Alibaba Cloud -> Container Image Service.
 
-1. 创建镜像仓库并绑定github代码库。如下图
+1. Create an image repository and bind it to the GitHub code repository, as shown below.
 
 ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1m.tEtrorBKNjSZFjXXc_SpXa-1892-870.png)
 
-2. 点击管理 **进行创建好的仓库**，通过镜像服务下的构建功能，把demo构建成image，并发布到指定仓库。如下图。
+2. Click on management **to create the repository**, use the building function under the image service to build the demo into an image and publish it to the specified repository, as shown below.
 
 ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1oYqvtcIrBKNjSZK9XXagoVXa-1872-888.png)
 
-3. 切换到企业级分布式应用服务（EDAS）产品，在资源管理 -> 集群 下创建Kubernetes集群并绑定ECS，如下图.
+3. Switch to the Enterprise Distributed Application Service (EDAS) product, and create a Kubernetes cluster under Resource Management -> Cluster, binding it with ECS, as shown below.
 
 ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
 
-4. 应用管理 -》创建应用，**类型为kubernetes应用** 并且指定在容器镜像服务中的镜像。如下图。
+4. Application Management -> Create Application, **with type as Kubernetes application** and specify the image from the container image service. As shown below.
 
 ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1b1p2trZnBKNjSZFKXXcGOVXa-1858-833.png)
 
 ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB18uzTtdcnBKNjSZR0XXcFqFXa-1820-861.png)
 
-5. 创建完成后，进行应用部署。如下图
+5. Once created, proceed to deploy the application. As shown below.
 
 ![img](/imgs/blog/2018/09/30/integrate-dubbo-with-kubernetes/TB1fEpEtrorBKNjSZFjXXc_SpXa-1846-783.png)
 
-- 补充应用名不能有大写字母，全部小写，否则有部署失败的问题。
+- Note that the application name cannot contain uppercase letters; it must be all lowercase, or deployment may fail.
 
-- 在创建应用时，选中镜像后，下一步的按钮无法点击，需要点击选择来继续。
+- When creating the application, if the image is selected, the next step button may be unclickable, requiring a re-selection to proceed.
 
-- EDAS有两套独立的Kubernetes服务，一套是基于阿里云的容器服务，一套是Lark自己搞的。本人体验的是后者。
+- EDAS has two independent sets of Kubernetes services; one is based on Alibaba Cloud's container service, while the other is managed by Lark. I have experienced the latter.
 
-- Docker与IDE集成的开发联调，需要考虑集成IDEA的相关插件。
+- Development integration with Docker and IDE needs to consider relevant plugins for integration with IDEA.
 
-- 部署时总是出错，感觉Kubernetes服务上哪里有问题。需要进一步排查。
+- Deployment is frequently failing, suggesting issues with the Kubernetes service, requiring further investigation.
 
 ```json
 {
@@ -109,3 +107,4 @@ Kubernetes是天然可作为微服务的地址注册中心，类似于Zookeeper�
   "resourceVersion": "850282769"
 }, "reason": "FailedSync", "message": "Error syncing pod", "
 ```
+

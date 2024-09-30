@@ -1,23 +1,23 @@
 ---
-title: "Sentinel 为 Dubbo 服务保驾护航"
-linkTitle: "Sentinel 为 Dubbo 服务保驾护航"
+title: "Sentinel Safeguarding Dubbo Services"
+linkTitle: "Sentinel Safeguarding Dubbo Services"
 date: 2018-07-27
-tags: ["生态", "Java"]
+tags: ["Ecosystem", "Java"]
 description: >
-    本文主要介绍了面向分布式服务架构的轻量级流量控制组件 Sentinel 以及在 Dubbo 中整合使用 Sentinel 的最佳实践。
+    This article mainly introduces Sentinel, a lightweight traffic control component aimed at distributed service architecture, as well as best practices for integrating Sentinel with Dubbo.
 ---
 
-在复杂的生产环境下可能部署着成千上万的 Dubbo 服务实例，流量持续不断地进入，服务之间进行相互调用。但是分布式系统中可能会因流量激增、系统负载过高、网络延迟等一系列问题，导致某些服务不可用，如果不进行相应的控制可能导致级联故障，影响服务的可用性，因此如何对流量进行合理的控制，成为保障服务稳定性的关键。
+In complex production environments, thousands of Dubbo service instances may be deployed, with continuous traffic flowing in and services calling each other. However, distributed systems may encounter issues like traffic surges, system overload, and network delays, leading to service unavailability. If not controlled, this may cause cascading failures, impacting service availability. Hence, the rational control of traffic becomes key to ensuring service stability.
 
-[Sentinel](https://github.com/alibaba/Sentinel) 是阿里中间件团队开源的，面向分布式服务架构的轻量级流量控制产品，主要以流量为切入点，从**流量控制**、**熔断降级**、**系统负载保护**等多个维度来帮助用户保护服务的稳定性。本文将基于 Dubbo，看看 Sentinel 是如何进行流量控制的，并且提供 Dubbo 整合 Sentinel 的最佳实践。
+[Sentinel](https://github.com/alibaba/Sentinel) is an open-source lightweight traffic control product developed by Alibaba's middleware team, focusing on traffic dynamics and helping users protect service stability through **traffic control**, **circuit breaking**, and **system load protection**. This article will explore how Sentinel performs traffic control based on Dubbo, providing best practices for Dubbo integration with Sentinel.
 
-## 快速接入 Sentinel
+## Quick Access to Sentinel
 
-Sentinel 意为**哨兵**，这个命名形象的诠释了 Sentinel 在分布式系统中的工作角色和重要性。以 Sentinel 在 Dubbo 生态系统中的作用为例，Dubbo 的核心模块包括注册中心、服务提供方、服务消费方（服务调用方）和监控四个模块。Sentinel 通过对服务提供方和服务消费方的限流来进一步提升服务的可用性。接下来我们看看 Sentinel 对服务提供方和服务消费方限流的技术实现方式。
+Sentinel means **sentinel**, symbolically illustrating its role and importance in distributed systems. In Dubbo's ecosystem, core modules include the registry, service providers, service consumers, and monitoring. Sentinel enhances service availability by rate limiting service providers and consumers. Let’s explore the technical approach of Sentinel's rate limiting for service providers and consumers.
 
 ![Dubbo Arch](/imgs/architecture.png)
 
-Sentinel 提供了与 Dubbo 适配的模块 – [Sentinel Dubbo Adapter](https://github.com/dubbo/dubbo-sentinel-support)，包括针对服务提供方的过滤器和服务消费方的过滤器（Filter）。使用时我们只需引入以下模块（以 Maven 为例）：
+Sentinel provides a Dubbo-adapted module – [Sentinel Dubbo Adapter](https://github.com/dubbo/dubbo-sentinel-support), which includes filters for service providers and consumers. To use it, simply add the following module (using Maven as an example):
 
 ```xml
 <dependency>
@@ -27,80 +27,79 @@ Sentinel 提供了与 Dubbo 适配的模块 – [Sentinel Dubbo Adapter](https:/
 </dependency>
 ```
 
-引入此依赖后，Dubbo 的服务接口和方法（包括调用端和服务端）就会成为 Sentinel 中的资源，在配置了规则后就可以自动享受到 Sentinel 的防护能力。同时提供了灵活的配置选项，例如若不希望开启 Sentinel Dubbo Adapter 中的某个 Filter，可以手动关闭对应的 Filter。
+After introducing this dependency, the service interfaces and methods (both calling and serving sides) become resources in Sentinel. After configuring rules, services can automatically benefit from Sentinel’s protections. Flexible configuration options are provided; for example, one can manually disable a specific filter in the Sentinel Dubbo Adapter if desired.
 
-接入 Sentinel Dubbo Adapter 后，即使未配置规则，Sentinel 也会对相应的 Dubbo 服务的调用信息进行统计。那么我们怎么知道 Sentinel 接入成功了呢？这时候就要请出一大利器 —— Sentinel 控制台了。
+After connecting to the Sentinel Dubbo Adapter, even without configured rules, Sentinel will statistically aggregate the invocation information of the corresponding Dubbo service. So how can we verify a successful connection? This is where a powerful tool – the Sentinel dashboard – comes into play.
 
-## 限流必备 - 监控管理
+## Essential for Rate Limiting - Monitoring and Management
 
-流量具有很强的实时性，之所以需要限流，是因为我们无法对流量的到来作出精确的预判，不然的话我们完全可以通过弹性的计算资源来处理，所以这时候为了保证限流的准确性，限流框架的监控功能就非常重要了。
+Traffic is highly real-time, and rate limiting is necessary because we cannot precisely predict traffic bursts. Otherwise, we could simply handle it with elastic computing resources. Therefore, to ensure accuracy in rate limiting, the monitoring capabilities of the rate limiting framework are vital.
 
-Sentinel 的控制台（Dashboard）是流量控制、熔断降级规则统一配置和管理的入口，同时它为用户提供了多个维度的监控功能。在 Sentinel 控制台上，我们可以配置规则并实时查看流量控制效果。
+The Sentinel dashboard is the entrance for unified configuration and management of traffic control, circuit breaking, and degradation rules, while offering multiple monitoring dimensions. On the Sentinel dashboard, users can configure rules and view traffic control effects in real time.
 
-接入 Sentinel 控制台的步骤如下（**缺一不可**）：
+Steps to access the Sentinel dashboard are as follows (all are necessary):
 
-1. 按照 [Sentinel 控制台文档](https://github.com/alibaba/Sentinel/wiki/%E6%8E%A7%E5%88%B6%E5%8F%B0) 启动控制台
-2. 应用引入 `sentinel-transport-simple-http` 依赖，以便控制台可以拉取对应应用的相关信息
-3. 给应用添加相关的启动参数，启动应用。需要配置的参数有：
-   - `-Dcsp.sentinel.api.port`：客户端的 port，用于上报相关信息（默认为 8719）
-   - `-Dcsp.sentinel.dashboard.server`：控制台的地址
-   - `-Dproject.name`：应用名称，会在控制台中显示
+1. Start the dashboard according to the [Sentinel Dashboard Documentation](https://github.com/alibaba/Sentinel/wiki/%E6%8E%A7%E5%88%B6%E5%8F%B0).
+2. Include the `sentinel-transport-simple-http` dependency in the application, so the dashboard can pull relevant application information.
+3. Add relevant startup parameters to the application. Required parameters include:
+   - `-Dcsp.sentinel.api.port`: Client port to report relevant information (default is 8719).
+   - `-Dcsp.sentinel.dashboard.server`: Address of the dashboard.
+   - `-Dproject.name`: Application name, displayed on the dashboard.
 
-注意某些环境下本地运行 Dubbo 服务还需要加上 `-Djava.net.preferIPv4Stack=true` 参数。比如中 Service Provider 的启动参数可以配成：
+Note that in some environments, running Dubbo services locally also requires adding the `-Djava.net.preferIPv4Stack=true` parameter. For example, the startup parameters for the Service Provider can be:
 
 ```bash
 -Djava.net.preferIPv4Stack=true -Dcsp.sentinel.api.port=8720 -Dcsp.sentinel.dashboard.server=localhost:8080 -Dproject.name=dubbo-provider-demo
 ```
 
-这样在启动应用后就能在控制台找到对应的应用了。以下是常用功能：
+This way, after starting the application, you will find the corresponding application on the dashboard. Here are common features:
 
-- **单台设备监控**：当在机器列表中看到您的机器，就代表着已经成功接入控制台，可以查看单台设备的设备名称、IP地址、端口号、健康状态和心跳时间等信息。
+- **Device Monitoring**: When your machine appears in the machine list, it indicates successful connection to the dashboard, allowing you to view device name, IP address, port number, health status, and heartbeat time.
 
 ![Discovery](/imgs/blog/2018/07/27/sentinel/machinediscover.png)
 
-- **链路监控**：簇点链路实时的去拉取指定客户端资源的运行情况，它提供了两种展示模式，一种用书状结构展示资源的调用链路；另外一种则不区分调用链路展示资源的运行情况。通过链路监控，可以查看到每个资源的流控和降级的历史状态。
+- **Link Monitoring**: This feature pulls the operating conditions of designated client resources in real-time, offering two display modes: one shows the resource call chain in a tree structure; the other displays resource performance without distinguishing the call chain. Through link monitoring, you can check the historical status of flow control and downgrading for each resource.
 
-| 树状链路| 平铺链路 
+| Tree Link | Flat Link 
 | :----: | :----
 |![resourceTree](/imgs/blog/2018/07/27/sentinel/resourceTree.png)|![cluster](/imgs/blog/2018/07/27/sentinel/sentine_dashboard.gif)
 
-- **聚合监控**：同一个服务下的所有机器的簇点信息会被汇总，实现实时监控，精确度达秒级。
+- **Aggregate Monitoring**: Information from all devices under the same service is aggregated for real-time monitoring, achieving accuracy to the second level.
 
-![秒级实时监控](/imgs/blog/sentinel-dashboard-metrics.png)
+![Second-level Real-time Monitoring](/imgs/blog/sentinel-dashboard-metrics.png)
 
-- **规则配置**：可以查看已有的限流、降级和系统保护规则，并实时地进行配置。
+- **Rule Configuration**: You can view existing flow, degradation, and system protection rules and configure them in real time.
 
-![规则配置](/imgs/blog/sentinel-dashboard-view-rules.png)
+![Rule Configuration](/imgs/blog/sentinel-dashboard-view-rules.png)
 
-## Sentinel 基于 Dubbo 的最佳实践
+## Best Practices of Sentinel Based on Dubbo
 
-> 具体 Demo 代码请见 [sentinel-demo-dubbo](https://github.com/alibaba/Sentinel/tree/master/sentinel-demo/sentinel-demo-dubbo)。
+> For specific demo code, please refer to [sentinel-demo-dubbo](https://github.com/alibaba/Sentinel/tree/master/sentinel-demo/sentinel-demo-dubbo).
 
 ### Service Provider
 
-> 对服务提供方的流量控制可分为**服务提供方的自我保护能力**和**服务提供方对服务消费方的请求分配能力**两个维度。
-> 
+> Traffic control for service providers can be divided into two dimensions: **self-protection capabilities of service providers** and **request allocation capabilities to service consumers**.
 
-Service Provider 用于向外界提供服务，处理各个消费者的调用请求。为了保护 Provider 不被激增的流量拖垮影响稳定性，可以给 Provider 配置 **QPS 模式**的限流，这样当每秒的请求量超过设定的阈值时会自动拒绝多的请求。限流粒度可以是 *服务接口* 和 *服务方法* 两种粒度。若希望整个服务接口的 QPS 不超过一定数值，则可以为对应服务接口资源（resourceName 为**接口全限定名**）配置 QPS 阈值；若希望服务的某个方法的 QPS 不超过一定数值，则可以为对应服务方法资源（resourceName 为**接口全限定名:方法签名**）配置 QPS 阈值。有关配置详情请参考 [流量控制 | Sentinel](https://github.com/alibaba/Sentinel/wiki/%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6)。
+Service Providers offer services externally, handling various consumer requests. To protect the Provider from being overwhelmed by surge traffic, you can configure a **QPS mode** rate limit. This way, when the request volume exceeds the set threshold per second, excessive requests are automatically rejected. The rate limit granularity can be either at the *service interface* level or *service method* level. If you want the overall QPS of a service interface not to exceed a certain value, you can configure the QPS threshold for the corresponding service interface resource (resourceName is the **fully qualified name of the interface**); if you want the QPS of a specific method to remain below a certain number, you can set the QPS threshold for the corresponding method resource (resourceName is the **fully qualified name of the interface: method signature**). For details, refer to [Traffic Control | Sentinel](https://github.com/alibaba/Sentinel/wiki/%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6).
 
-我们看一下这种模式的限流产生的效果。假设我们已经定义了某个服务接口 `com.alibaba.csp.sentinel.demo.dubbo.FooService`，其中有一个方法 `sayHello(java.lang.String)`，Provider 端该方法设定 QPS 阈值为 10。在 Consumer 端在 1s 之内连续发起 15 次调用，可以通过日志文件看到 Provider 端被限流。拦截日志统一记录在 `~/logs/csp/sentinel-block.log` 中：
+Let's look at the effect of rate limiting in this mode. Suppose we defined a service interface `com.alibaba.csp.sentinel.demo.dubbo.FooService`, with a method `sayHello(java.lang.String)`, and set the QPS threshold for this method to 10 on the Provider side. If the Consumer side issues 15 calls within 1 second, you can see through the log file that the Provider has been rate limited. Intercept logs are recorded uniformly at `~/logs/csp/sentinel-block.log`:
 
 ```
 2018-07-24 17:13:43|1|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String),FlowException,default,|5,0
 ```
 
-在 Provider 对应的 metrics 日志中也有记录：
+The corresponding metrics logs on the Provider side also contain records:
 
 ```
 1532423623000|2018-07-24 17:13:43|com.alibaba.csp.sentinel.demo.dubbo.FooService|15|0|15|0|3
 1532423623000|2018-07-24 17:13:43|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String)|10|5|10|0|0
 ```
 
-根据**调用方**的需求来分配服务提供方的处理能力也是常见的限流方式。比如有两个服务 A 和 B 都向 Service Provider 发起调用请求，我们希望只对来自服务 B 的请求进行限流，则可以设置限流规则的 `limitApp` 为服务 B 的名称。Sentinel Dubbo Adapter 会自动解析 Dubbo 消费者（调用方）的 application name 作为调用方名称（`origin`），在进行资源保护的时候都会带上调用方名称。若限流规则未配置调用方（`default`），则该限流规则对所有调用方生效。若限流规则配置了调用方则限流规则将仅对指定调用方生效。
+Allocating processing capabilities of service providers based on **caller** demands is also a common rate limiting method. For example, if services A and B both call the Service Provider and we want to rate limit only requests from service B, we can set the rate limiting rule's `limitApp` to the name of service B. The Sentinel Dubbo Adapter automatically parses the Dubbo consumer's (caller) application name as the caller's name (`origin`), and when protecting resources, the caller's name will also be included. If rate limiting rules do not specify the caller (`default`), then the rules apply to all callers. If defined for a specific caller, the rules will apply solely to that designated caller.
 
-> 注：Dubbo 默认通信不携带对端 application name 信息，因此需要开发者在调用端手动将 application name 置入 attachment 中，provider 端进行相应的解析。Sentinel Dubbo Adapter 实现了一个 Filter 用于自动从 consumer 端向 provider 端透传 application name。若调用端未引入 Sentinel Dubbo Adapter，又希望根据调用端限流，可以在调用端手动将 application name 置入 attachment 中，key 为 `dubboApplication`。
+> Note: Dubbo's default communication does not carry the remote application name information, so developers need to manually place the application name into the attachment on the calling side, and the provider side will parse it accordingly. The Sentinel Dubbo Adapter implements a filter to automatically pass the application name from the consumer side to the provider side. If the calling side does not introduce the Sentinel Dubbo Adapter and still wishes to rate limit based on the caller, the application name can be manually placed into the attachment, with the key being `dubboApplication`.
 
-在限流日志中会也会记录调用方的名称，如下面的日志中的 `demo-consumer` 即为调用方名称：
+The caller's name will also be recorded in the rate limiting logs, such as in the following log where `demo-consumer` is the caller's name:
 
 ```
 2018-07-25 16:26:48|1|com.alibaba.csp.sentinel.demo.dubbo.FooService:sayHello(java.lang.String),FlowException,default,demo-consumer|5,0
@@ -108,34 +107,35 @@ Service Provider 用于向外界提供服务，处理各个消费者的调用请
 
 ### Service Consumer
 
-> 对服务提供方的流量控制可分为**控制并发线程数**和**服务降级**两个维度。
+> Traffic control for service providers can differ as **controlling concurrency thread count** and **service degradation**.
 
-#### 并发线程数限流
+#### Concurrency Thread Count Rate Limiting
 
-Service Consumer 作为客户端去调用远程服务。每一个服务都可能会依赖几个下游服务，若某个服务 A 依赖的下游服务 B 出现了不稳定的情况，服务 A 请求 服务 B 的响应时间变长，从而服务 A 调用服务 B 的线程就会产生堆积，最终可能耗尽服务 A 的线程数。我们通过用并发线程数来控制对下游服务 B 的访问，来保证下游服务不可靠的时候，不会拖垮服务自身。基于这种场景，推荐给 Consumer 配置**线程数模式**的限流，来保证自身不被不稳定服务所影响。采用基于线程数的限流模式后，我们不需要再显式地去进行线程池隔离，Sentinel 会控制资源的线程数，超出的请求直接拒绝，直到堆积的线程处理完成，可以达到**信号量隔离**的效果。
+Service Consumers call remote services as clients. Each service may depend on several downstream services; if a downstream service B that service A depends on becomes unstable, the response time of service B lengthens, causing a backlog of service A's calls to it. By controlling the concurrency thread count for accessing downstream service B, we ensure that service A is not overwhelmed during the instability of service B. In such scenarios, it is recommended that the Consumer configure **thread count mode** for rate limiting to shield itself from unreliable services. Once thread count-based rate limiting is enabled, there's no need for explicit thread pool isolation; Sentinel will manage the thread count for the resource, rejecting requests that exceed it until the accumulated threads are processed efficiently.
 
-我们看一下这种模式的效果。假设当前服务 A 依赖两个远程服务方法 `sayHello(java.lang.String)` 和 `doAnother()`。前者远程调用的响应时间 为 1s-1.5s 之间，后者 RT 非常小（30 ms 左右）。服务 A 端设两个远程方法 thread count 为 5。然后每隔 50 ms 左右向线程池投入两个任务，作为消费者分别远程调用对应方法，持续 10 次。可以看到 `sayHello` 方法被限流 5 次，因为后面调用的时候前面的远程调用还未返回（RT 高）；而 `doAnother()` 调用则不受影响。线程数目超出时快速失败能够有效地防止自己被慢调用所影响。
+Let’s observe the effect of this mode. Suppose service A relies on two remote service methods `sayHello(java.lang.String)` and `doAnother()`. The former has a response time of 1s-1.5s, while the latter's RT is minimal (around 30 ms). Service A sets the thread count for both remote methods to 5. Every 50 ms, two tasks are submitted to the thread pool, both consumers invoking the respective methods continuously 10 times. You will see that the `sayHello` method is rate limited 5 times, as previous invocations haven’t returned due to the higher RT; meanwhile, the `doAnother()` calls are unaffected. Quick failure when exceeding thread count effectively prevents self-impacts from slow calls.
 
-#### 服务降级
+#### Service Degradation
 
-当服务依赖于多个下游服务，而某个下游服务调用非常慢时，会严重影响当前服务的调用。这里我们可以利用 Sentinel 熔断降级的功能，为调用端配置基于平均 RT 的[降级规则](https://github.com/alibaba/Sentinel/wiki/%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7)。这样当调用链路中某个服务调用的平均 RT 升高，在一定的次数内超过配置的 RT 阈值，Sentinel 就会对此调用资源进行降级操作，接下来的调用都会立刻拒绝，直到过了一段设定的时间后才恢复，从而保护服务不被调用端短板所影响。同时可以配合 fallback 功能使用，在被降级的时候提供相应的处理逻辑。
+When a service depends on multiple downstream services, a sluggish downstream call can severely affect the current service's operations. Here, we can utilize Sentinel's circuit breaking and degradation feature, configuring degradation rules based on average RT for the calling side. If any service in the calling chain has an elevated average RT above the configured threshold a certain number of times, Sentinel will downgrade that calling resource, immediately rejecting subsequent calls until a preset time elapses, thus protecting the service from the downstream bottleneck. The fallback feature can also be utilized for providing appropriate handling logic during downgrades.
 
 ### Fallback
 
-从 0.1.1 版本开始，Sentinel Dubbo Adapter 还支持配置全局的 fallback 函数，可以在 Dubbo 服务被限流/降级/负载保护的时候进行相应的 fallback 处理。用户只需要实现自定义的 [`DubboFallback`](https://github.com/alibaba/Sentinel/blob/master/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/fallback/DubboFallback.java) 接口，并通过 `DubboFallbackRegistry` 注册即可。默认情况会直接将 `BlockException` 包装后抛出。同时，我们还可以配合 [Dubbo 的 fallback 机制](/en/docsv2.7/user/examples/local-mock/) 来为降级的服务提供替代的实现。
+Starting from version 0.1.1, the Sentinel Dubbo Adapter also supports configuring a global fallback function to handle fallback operations when Dubbo services are rate limited/degraded/load protected. Users simply need to implement a custom [`DubboFallback`](https://github.com/alibaba/Sentinel/blob/master/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/fallback/DubboFallback.java) interface and register it through `DubboFallbackRegistry`. By default, the `BlockException` will be wrapped and thrown. At the same time, this can be combined with [Dubbo's fallback mechanism](/en/docsv2.7/user/examples/local-mock/) to provide alternative implementations for downgraded services.
 
-## Sentinel 与 Hystrix 的比较
+## Comparison Between Sentinel and Hystrix
 
-目前业界常用的熔断降级/隔离的库是 Netflix 的 [Hystrix](https://github.com/Netflix/Hystrix)，那么 Sentinel 与 Hystrix 有什么异同呢？Hystrix 的关注点在于以 *隔离* 和 *熔断* 为主的容错机制，而 Sentinel 的侧重点在于多样化的流量控制、熔断降级、系统负载保护、实时监控和控制台，可以看到解决的问题还是有比较大的不同的。
+The commonly used circuit breaker/degradation/isolation library in the industry is Netflix's [Hystrix](https://github.com/Netflix/Hystrix). So what are the similarities and differences between Sentinel and Hystrix? Hystrix primarily focuses on a fault tolerance mechanism based on *isolation* and *circuit breaking*, whereas Sentinel emphasizes diverse traffic control, circuit breaking, degradation, system load protection, real-time monitoring, and dashboard capabilities, addressing distinctly different problems.
 
-Hystrix 采用命令模式封装资源调用逻辑，并且资源的定义与隔离规则是强依赖的，即在创建 HystrixCommand 的时候就要指定隔离规则（因其执行模型依赖于隔离模式）。Sentinel 的设计更为简单，不关注资源是如何执行的，资源的定义与规则的配置相分离。用户可以先定义好资源，然后在需要的时候配置规则即可。Sentinel 的原则非常简单：根据对应资源配置的规则来为资源执行相应的限流/降级/负载保护策略，若规则未配置则仅进行统计。从 0.1.1 版本开始，Sentinel 还引入了[注解支持](https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81)，可以更方便地定义资源。
+Hystrix employs the command pattern to encapsulate resource calling logic, strongly tying resource definitions and isolation rules together, meaning one must specify an isolation rule when creating a HystrixCommand (as its execution model relies on isolation patterns). Sentinel's design is simpler; it doesn't concern how resources are executed, separating resource definitions from rule configurations. Users can define resources first and configure rules when needed. Sentinel's principle is straightforward: execute respective rate limiting/degradation/load protection strategies based on configured rules for corresponding resources; if rules are not configured, only statistics are gathered. Starting from version 0.1.1, Sentinel also introduced [annotation support](https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81), making resource definition more convenient.
 
-隔离是 Hystrix 的核心功能。Hystrix 通过线程池或信号量的方式来对依赖（即 Sentinel 中对应的资源）进行隔离，其中最常用的是资源隔离。Hystrix 线程池隔离的好处是比较彻底，但是不足之处在于要开很多线程池，在应用本身线程数目比较多的时候上下文切换的 overhead 会非常大；Hystrix 的信号量隔离模式可以限制调用的并发数而不显式创建线程，这样的方式比较轻量级，但缺点是无法对慢调用自动进行降级，只能等待客户端自己超时，因此仍然可能会出现级联阻塞的情况。Sentinel 可以通过并发线程数模式的流量控制来提供信号量隔离的功能。并且结合基于响应时间的熔断降级模式，可以在不稳定资源的平均响应时间比较高的时候自动降级，防止过多的慢调用占满并发数，影响整个系统。
+Isolation is a core feature of Hystrix. Hystrix achieves isolation of dependencies (corresponding resources in Sentinel) via thread pools or signals, with resource isolation being the most commonly used. The advantage of Hystrix thread pool isolation is thoroughness, yet the drawback is the need to create many thread pools, leading to substantial context switch overhead when the application itself has a high thread count; Hystrix's signal-based isolation limits concurrent calls without explicitly creating threads, making it lightweight but incapable of automatically degrading slow calls, thus potentially causing cascading blocking. Sentinel offers signal isolation features through concurrency thread count rate control and combines it with response time-based circuit breaking/degradation modes to automatically degrade when the average response time of unstable resources is high, preventing excessive slow calls from saturating the concurrency count and affecting the entire system.
 
-Hystrix 熔断降级功能采用熔断器模式，在某个服务失败比率高时自动进行熔断。Sentinel 的熔断降级功能更为通用，支持平均响应时间与失败比率两个指标。Sentinel 还提供各种调用链路关系和流量控制效果支持，同时还可以根据系统负载去实时地调整流量来保护系统，应用场景更为丰富。同时，Sentinel 还提供了实时的监控 API 和控制台，可以方便用户快速了解目前系统的状态，对服务的稳定性了如指掌。
+Hystrix's circuit breaking functionality adopts a circuit breaker pattern, automatically tripping when failure rates for a service are high. Sentinel's circuit breaking and degradation capabilities are more generic, supporting both average response time and failure rates as metrics. Sentinel also provides support for various call chain relationships and effects of traffic control, while dynamically adjusting traffic based on system load to protect the system, offering more abundant application scenarios. Furthermore, Sentinel offers real-time monitoring APIs and a dashboard for users to quickly understand the system's status, grasping service stability.
 
-更详细的对比请参见 [Sentinel 与 Hystrix 的对比](https://github.com/alibaba/Sentinel/wiki/Sentinel-%E4%B8%8E-Hystrix-%E7%9A%84%E5%AF%B9%E6%AF%94)。
+For a more detailed comparison, please refer to [Comparison Between Sentinel and Hystrix](https://github.com/alibaba/Sentinel/wiki/Sentinel-%E4%B8%8E-Hystrix-%E7%9A%84%E5%AF%B9%E6%AF%94).
 
-## 总结
+## Summary
 
-以上介绍的只是 Sentinel 的一个最简单的场景 —— 限流。Sentinel 还可以处理更复杂的各种情况，比如超时熔断、冷启动、请求匀速等。可以参考 [Sentinel 文档](https://github.com/alibaba/Sentinel/wiki/%E4%B8%BB%E9%A1%B5)，更多的场景等待你去挖掘！
+The above introduction only covers one of Sentinel's simplest scenarios – rate limiting. Sentinel can handle more complex situations, such as timeout circuit breaking, cold starts, and request smoothing. Please consult the [Sentinel Documentation](https://github.com/alibaba/Sentinel/wiki/%E4%B8%BB%E9%A1%B5) for more scenarios waiting for you to explore!
+

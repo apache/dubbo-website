@@ -1,30 +1,30 @@
 ---
-title: "Dubbo Go 踩坑记"
-linkTitle: "Dubbo Go 踩坑记"
+title: "Dubbo Go Pitfalls"
+linkTitle: "Dubbo Go Pitfalls"
 tags: ["Go"]
 date: 2021-01-11
-description: 本文记录了一个用户第一次接入 Dubbo Go 的体验
+description: This article records a user's experience of integrating Dubbo Go for the first time.
 ---
 
-## 扯淡
+## Nonsense
 
-### 前尘
+### Past
 
-由于我的一个项目需要做公司用户鉴权，而组内其他小伙伴刚好有一个 *dubbo* 的鉴权 *rpc* ，一开始我是打算直接的读 *redis* 数据然后自己做解密。工作进行到一半，由于考虑到如果以后这个服务有任何变动，我这边要有联动行为，所以改用 *go* 来调用 *dubbo* 的 *rpc* ，于是我在 *github* 上找到了 [雨神](https://github.com/AlexStocks) 的 `https://github.com/apache/dubbo-go-samples/tree/master` (PS: 这个是 *dubbo-go* 前身)。不得不说，雨神是热心的人儿啊，当时还帮着我调试代码。最后也是接入了一个阉割版的吧，主要是当时 *hessian2* 对泛型支持的不怎么好。
+Due to a project requiring user authentication for the company, and since some colleagues in the group had a *dubbo* authentication *rpc*, I initially planned to directly read *redis* data and decrypt it myself. Halfway through the work, considering potential future changes to this service that would require some reactive behavior, I decided to call *dubbo*'s *rpc* using *go*, and thus I found [Yushen](https://github.com/AlexStocks)'s `https://github.com/apache/dubbo-go-samples/tree/master` (PS: this is the predecessor of *dubbo-go*). I have to say, Yushen is a warm-hearted person; he helped me debug the code at that time. Ultimately, I integrated a trimmed version primarily because *hessian2* had poor support for generics at that time.
 
-### 现在
+### Now
 
-目前 [dubbo-go](https://github.com/apache/dubbo-go)隶属于 *apache* 社区，相比以前做了部分重构，并且维护也很活跃了。
+Currently, [dubbo-go](https://github.com/apache/dubbo-go) belongs to the *apache* community, which has undergone some refactoring compared to before and is now maintained much more actively.
 
-## 接入
+## Integration
 
-### 问题
+### Issues
 
-目前整个项目在快速的迭代中，很多功能还没有完善，维护人员还没有时间来完善文档，所以在接入的时候要自己看源码或调试。
+The entire project is currently undergoing rapid iteration, and many features are not fully developed; maintenance personnel haven't had time to improve the documentation, so you'll need to refer to the source code or debug during integration.
 
-### 说明
+### Description
 
-目前我司在使用 *dubbo* 的过程使用的 *zookeeper* 作为注册中心，序列化是 *hessian2* ，所以我们要做如下初始化：
+Currently, our company uses *zookeeper* as the registry when using *dubbo*, and serialization is *hessian2*, so we need to initialize as follows:
 
 ```golang
   import (
@@ -39,9 +39,9 @@ description: 本文记录了一个用户第一次接入 Dubbo Go 的体验
   )
 ```
 
-### 配置
+### Configuration
 
-由于我是接入客户端，所以我这边只配置了 *ConsumerConfig* 。
+Since I am integrating the client, I have only configured *ConsumerConfig*.
 
 ```yaml
 dubbo:
@@ -74,9 +74,9 @@ dubbo:
             retries: "3"
 ```
 
-我这里是把 *dubbo-go* 作为第三方库来用，所以我没使用官方 [dubbo-samples](https://github.com/apache/dubbo-go-samples/) 那样在 *init* 函数中读入配置。
+I am using *dubbo-go* as a third-party library, so I did not read the configuration in the *init* function like in the official [dubbo-samples](https://github.com/apache/dubbo-go-samples/).
 
-配置代码如下：
+The configuration code is as follows:
 
 ```golang
   import (
@@ -98,13 +98,13 @@ dubbo:
   }
 ```
 
-### 接入
+### Integration
 
-好了，配置加载完就说明我们的准备工作已经做好了，接下来就要接入 *rpc* 接口了。
+Alright, with the configuration loaded, it indicates our preparatory work is ready, and we can now integrate the *rpc* interface.
 
-#### 返回值
+#### Return Value
 
-一般 *rpc* 调用的返回值都是自定义的，所以我们也要告诉 *dubbo-go* 长什么样子。这个结构体要跟 *java* 的类对应起来，这里我们是要实现 *hessian2* 的 *interface* :
+Generally, the return value of an *rpc* call is custom, so we also need to specify how it should look to *dubbo-go*. This struct should correspond to the *java* class; here we need to implement the *hessian2* *interface*:
 
 ```golang
 // POJO interface
@@ -115,7 +115,7 @@ type POJO interface {
 }
 ```
 
-我的实现如下：
+My implementation is as follows:
 
 ```golang
 type Result struct {
@@ -132,11 +132,11 @@ func (r Result) JavaClassName() string {
 }
 ```
 
-这里的 *JavaClassName* 接口的意义就如函数签名一样，返回的就是 *java* 的类名。
+The purpose of the *JavaClassName* interface is similar to a function signature, returning the name of the *java* class.
 
-#### 接口
+#### Interface
 
-要想调用 *dubbo* 的接口就必须实现下面这个 *interface*
+To call a *dubbo* interface, the following *interface* must be implemented:
 
 ```golang
 // rpc service interface
@@ -145,7 +145,7 @@ type RPCService interface {
 }
 ```
 
-所以我需要构造一个 *struct* 来做这个事情，比如：
+So I need to construct a *struct* for this purpose, for example:
 
 ```golang
 type ITokenService struct {
@@ -157,13 +157,13 @@ func (i *ITokenService) Reference() string {
 }
 ```
 
-这个结构体一般是不会有什么数据成员。
+This struct generally won't have any data members.
 
-这里我们注意到 *Validate* 函数声明后面跟的 *dubbo tag* ，这个是为如果 *rpc* 名称的首字母是小写（比如我要调用的 *dubbo* 接口就是 *validate* )准备的 *MethodMapper* ，类似于 *json* 的映射 *tag* 功效。一开始我就是遇到这个坑，我按官方的例子实现，日志一直说找不到接口，后来我也在官方群里询问大佬才知道有这个功能。
+Here we note that the *Validate* function declaration is followed by the *dubbo tag*, which is for when the *rpc* name's first letter is lowercase (for example, the *dubbo* interface I want to call is *validate*), serving as a *MethodMapper*, similar to the mapping effect of a *json* tag. Initially, I encountered this pit; I implemented according to the official example, and the logs kept saying the interface could not be found. Later, I inquired in the official group and was informed of this feature.
 
-#### 注册
+#### Registration
 
-好了，上面的准备全部完成后，我们要做最后一步，那就是告诉 *dubbo-go* 我们想要的是什么。代码如下：
+Alright, after completing the preparations above, we need to do the last step, which is to inform *dubbo-go* what we want. The code is as follows:
 
 ```golang
   import (
@@ -179,9 +179,9 @@ func (i *ITokenService) Reference() string {
   }
 ```
 
-#### 调用
+#### Call
 
-接下来我们就可以完成我们的 *DubboCli* 接口了，代码如下：
+Next, we can complete our *DubboCli* interface. The code is as follows:
 
 ```golang
 func (d *DubboCli) CheckUser(token, app string) (bool, error) {
@@ -198,8 +198,8 @@ func (d *DubboCli) CheckUser(token, app string) (bool, error) {
 }
 ```
 
-好了，至此我们就完成了 *dubbo-go* 的全部接入工作。 Happy Coding...
+That’s it; we have completed the entire integration work of *dubbo-go*. Happy Coding...
 
-## 写在最后
+## Final Words
 
-其实代码格式这个问题，我在接入的时候跟官方群里的维护者大佬提过，使用 *go* 官方的代码格式工具 [goimports](https://github.com/golang/tools/tree/master/cmd/goimports) 来统一代码格式，这 样对于维护者以外的人提 *PR* 也是有利。我在接入的过程中遇到一个 *bug* ，我反馈给雨神，他就让我提了个 *PR* ，在整个过程就是这个 代码格式的问题，导致我反复的修改代码。
+Actually, regarding the code formatting issue, I had previously mentioned it to a maintainer in the official group. Using the official *go* code formatting tool [goimports](https://github.com/golang/tools/tree/master/cmd/goimports) to unify the code format is beneficial for people other than maintainers submitting *PR* as well. I encountered a *bug* during integration, and when I reported it to Yushen, he asked me to submit a *PR*. The entire process highlighted the code formatting issue, which caused me to repeatedly modify the code.

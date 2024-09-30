@@ -1,29 +1,29 @@
 ---
-title: "Dubbo 2.7.x repackage 后的兼容实现方案"
-linkTitle: "Dubbo 2.7.x repackage 后的兼容实现方案"
+title: "Compatibility Implementation Plan After Repackaging Dubbo 2.7.x"
+linkTitle: "Compatibility Implementation Plan After Repackaging Dubbo 2.7.x"
 tags: ["Java"]
 date: 2018-07-22
 description: >
-    本文简单描述了2.7.x repackage后对老版本的兼容性实现方案。
+    This article briefly describes the compatibility implementation plan for older versions after repackaging 2.7.x.
 ---
 
-Dubbo至加入Apache孵化器以来，一个很强的诉求就是需要rename groupId和package name，这两项工作在项目毕业前需要完成。其中rename package相对来说复杂一些，除了要修改所有类的包名为`org.apache.dubbo`外，更多的是需要考虑如何老版本的兼容性。
+Since Dubbo joined the Apache Incubator, a strong requirement has been to rename the groupId and package name, which needs to be completed before the project graduates. Renaming the package is relatively complex, as it involves not only changing all class package names to `org.apache.dubbo`, but also considering compatibility with older versions.
 
-常见的兼容性包括但不限于以下几种情况：
+Common compatibility issues include but are not limited to the following situations:
 
-* 用户API
-  * 编程API
-  * Spring注解
-* 扩展SPI
-  * 扩展Filter
+* User API
+  * Programming API
+  * Spring Annotations
+* Extension SPI
+  * Extension Filter
 
-2.7.x里就是通过增加了一个新的模块`dubbo-compatible`来解决以上兼容性问题。
+In 2.7.x, the above compatibility issues are resolved by adding a new module `dubbo-compatible`.
 
-## 编程使用API
+## Programming API
 
-编程使用API是最直接最原始的使用方式，其他方式诸如Spring schema、注解等方式都是基于原始API的；因此非常有必要对API编程形式进行兼容。
+The programming API is the most direct and original way of using Dubbo, and other methods like Spring schema and annotations are based on the original API. Therefore, it is essential to maintain compatibility with the API programming form.
 
-所有编程相关API的兼容代码均在`com.alibaba.dubbo.config`包下，下面我们看看几个常见API的兼容实现。
+All compatibility code related to the programming-related API is under the `com.alibaba.dubbo.config` package. 
 
 ### ApplicationConfig
 
@@ -64,56 +64,56 @@ public class ProtocolConfig extends org.apache.dubbo.config.ProtocolConfig {
 }
 ```
 
-可以看到：
+As we can see:
 
-1. 兼容类是直接通过继续repacakge后的类，达到最大程度的代码复用；
-2. 构造函数也需要保持兼容；
+1. The compatibility class directly extends the repackaged class, maximizing code reuse.
+2. Constructors also need to maintain compatibility.
 
-整个兼容包中，除了上述API以外，包括一些常用的类比如`Constants`、`URL`以及绝大部分的兼容类都是通过简单的继承，让用户基于老的API实现的类能正确运行。
+In the entire compatibility package, in addition to the APIs mentioned above, some common classes like `Constants`, `URL`, and most compatibility classes are implemented through simple inheritance, allowing user-implemented classes based on the old API to run correctly.
 
-## Spring注解
+## Spring Annotations
 
-Spring注解诸如`@EnableDubbo`、`@Service`以及`@Reference`，由于不能使用继承，故这些注解类是通过代码拷贝来实现的；用于处理这些注解的Spring BeanPostProcessor以及Parser等相关的类，也是通过拷贝来实现；
+Spring annotations like `@EnableDubbo`, `@Service`, and `@Reference`, cannot use inheritance, so these annotation classes are implemented through code duplication. The Spring BeanPostProcessor and related classes for processing these annotations are also implemented through duplication.
 
-这类兼容代码分别位于兼容包的以下几个package中：
+This type of compatibility code exists in the following packages of the compatibility module:
 
 * com.alibaba.dubbo.config.annotation
 * com.alibaba.dubbo.config.spring.context.annotation
 * org.apache.dubbo.config.spring
 
-所以这里要特别强调的是，这类代码在2.7.x里存在2份，因此有修改的同时需要同步修改。
+Thus, it is important to emphasize that this type of code exists in two copies in 2.7.x, so modifications need to be synchronized.
 
-## 扩展SPI
+## Extension SPI
 
-Dubbo的SPI扩展机制，可以通过[Dubbo可扩展机制实战](/en/blog/2019/04/25/dubbo可扩展机制实战/)这篇博客详细了解。
+Dubbo's SPI extension mechanism can be detailed in the blog post [Dubbo Extensibility Mechanism Practical Guide](/en/blog/2019/04/25/dubbo可扩展机制实战/).
 
-以Filter扩展为例，简单来说就是：
+Taking the Filter extension as an example, it can be summarized as:
 
-1. MyFilter需要实现Filter接口
-2. 在META-INF/dubbo下，增加META-INF/dubbo/com.alibaba.dubbo.rpc.Filter，内容为：
+1. MyFilter needs to implement the Filter interface.
+2. Under META-INF/dubbo, add META-INF/dubbo/com.alibaba.dubbo.rpc.Filter with the content:
 
 	```
 	myFilter=com.test.MyFilter
 	```
 
-看似简单的两点，对Dubbo框架来说，需要：
+These seemingly simple two points require the Dubbo framework to:
 
-1. 正确加载配置文件META-INF/dubbo/com.alibaba.dubbo.rpc.Filter
-2. 正确加载MyFilter类并执行invoke方法
+1. Correctly load the configuration file META-INF/dubbo/com.alibaba.dubbo.rpc.Filter.
+2. Correctly load the MyFilter class and execute the invoke method.
 
-下面分别介绍Dubbo框架怎么实现以上几点。
+Let's introduce how the Dubbo framework achieves these points.
 
-### 正确加载META-INF/dubbo/com.alibaba.dubbo.rpc.Filter
+### Correctly Load META-INF/dubbo/com.alibaba.dubbo.rpc.Filter
 
-Dubbo SPI机制在查找配置文件时，是根据扩展点的类名来查找的，以Filter为例，在包名变为org.apache.dubbo后，查询的目录变成：
+The Dubbo SPI mechanism looks for configuration files based on the extension point's class name. For the Filter example, after the package name changes to org.apache.dubbo, the directories searched become:
 
 * META-INF/dubbo/internal/org.apache.dubbo.rpc.Filter
 * META-INF/dubbo/org.apache.dubbo.rpc.Filter
 * META-INF/services/org.apache.dubbo.rpc.Filter
 
-但是用户之前按老的包实现的Filter，其配置是放在类似`META-INF/dubbo/com.alibaba.dubbo.rpc.Filter`的，如果框架不做特殊处理，是不会加载老配置的。
+However, filters implemented by users according to the old package have their configurations placed in directories like `META-INF/dubbo/com.alibaba.dubbo.rpc.Filter`. If the framework does not handle this specially, it will not load the old configuration.
 
-因此在`ExtensionLoader`这个类里，做了特殊的处理：
+Therefore, special handling is made in the `ExtensionLoader` class:
 
 ```java
     // synchronized in getExtensionClasses
@@ -142,20 +142,20 @@ Dubbo SPI机制在查找配置文件时，是根据扩展点的类名来查找�
     }
 ```
 
-可以看到，除了加载新配置外，老配置文件也会进行扫描。
+As seen, in addition to loading new configurations, old configuration files are also scanned.
 
-### 正确加载MyFilter类
+### Correctly Load MyFilter Class
 
-`com.alibaba.dubbo.rpc.Filter`接口除了要继承自`org.apache.dubbo.rpc.Filter`以外，其唯一的方法invoke也需要做特殊处理。我们看看它的方法签名：
+The `com.alibaba.dubbo.rpc.Filter` interface must extend `org.apache.dubbo.rpc.Filter`, and its only method, invoke, requires special handling. Let's look at its method signature:
 
 `Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException;`
 
-这里参数、返回值、异常都会被实现类`MyFilter`用到，因此这些类也需要有兼容类；而参数、返回值不同，对于接口来说是不同的方法，因此：
+Here, the parameters, return values, and exceptions will all be utilized by the implementing class `MyFilter`, so these classes also need compatibility classes. Since different parameters and return values mean different methods for interfaces:
 
-* 需要在com.alibaba.dubbo.rpc.Filter里，定义老的invoke方法，MyFilter会覆盖这个方法；
-* org.apache.dubbo.rpc.Filter里的invoke方法，需要找一个地方来实现桥接，框架调用Filter链执行到新的invoke方法时，新的参数如何转换成老参数，老返回值如何转换成新的返回值；
+* In `com.alibaba.dubbo.rpc.Filter`, the old invoke method needs to be defined, which MyFilter will override.
+* The invoke method in `org.apache.dubbo.rpc.Filter` needs to find a place to implement a bridge so that when the framework calls the Filter chain and executes the new invoke method, the parameters can be converted and the return values can also be translated.
 
-这里就用到了JDK8的新特性：接口default方法。
+This utilizes the new feature of JDK8: interface default methods.
 
 ```java
 @Deprecated
@@ -173,17 +173,17 @@ public interface Filter extends org.apache.dubbo.rpc.Filter {
 }
 ```
 
-可以看到，default方法里，对参数进行了包装，然后调用老的invoke方法，并将返回值进行解包后返回给Dubbo框架。这里Result.CompatibleResult、Invocation.CompatibleInvocation以及Invoker.CompatibleInvoker都用到了代理模式。
+It can be seen that in the default method, parameters are wrapped and then the old invoke method is called, unpacking the return value and returning it to the Dubbo framework. Here, Result.CompatibleResult, Invocation.CompatibleInvocation, and Invoker.CompatibleInvoker all use the proxy pattern.
 
-感兴趣的同学可以详细看一下以下几个类：
+Interested parties can take a look at the following classes:
 
 * com.alibaba.dubbo.rpc.Invocation
 * com.alibaba.dubbo.rpc.Invoker
 * com.alibaba.dubbo.rpc.Result
 
-## 后续todo list
+## Future Todo List
 
-目前兼容包仅仅是对常见的API及SPI做了支持，列表如下：
+Currently, the compatibility package only supports common APIs and SPIs, including:
 
 * com.alibaba.dubbo.rpc.Filter / Invocation / Invoker / Result / RpcContext / RpcException
 * com.alibaba.dubbo.config.*Config
@@ -195,4 +195,5 @@ public interface Filter extends org.apache.dubbo.rpc.Filter {
 * com.alibaba.dubbo.cache.CacheFactory / Cache
 * com.alibaba.dubbo.rpc.service.EchoService / GenericService
 
-大家如果在试用的过程中发现有任何问题请及时提出；同时如果对其他扩展点有兼容需求，也请大家提出来，也非常欢迎大家自己解决并贡献出来。
+If you encounter any issues during testing, please report them promptly. Also, if there are compatibility needs for other extension points, please bring them up, and contributions are more than welcome.
+

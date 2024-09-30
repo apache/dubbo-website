@@ -1,41 +1,39 @@
 ---
-title: "使用 Apache APISIX 代理 Dubbo 服务 (dubbo 协议)"
-linkTitle: "从原理到操作，让你在 Apache APISIX 中代理 Dubbo 服务更便捷"
+title: "Using Apache APISIX to Proxy Dubbo Services (Dubbo Protocol)"
+linkTitle: "From Principles to Operations, Making It Easier to Proxy Dubbo Services in Apache APISIX"
 date: 2024-04-25
-tags: ["网关", "生态", "Java"]
+tags: ["Gateway", "Ecosystem", "Java"]
 description: >
-    本文为大家介绍了如何借助 Apache APISIX 实现 Dubbo Service 的代理，通过引入 dubbo-proxy 插件便可为 Dubbo 框架的后端系统构建更简单更高效的流量链路
+    This article introduces how to use Apache APISIX to proxy Dubbo services. By introducing the dubbo-proxy plugin, it can build simpler and more efficient traffic links for the backend system of the Dubbo framework.
 aliases:
     - /en/overview/what/gateway/apisix/
     - /en/overview/what/gateway/higress/
 ---
 
-{{% alert title="注意" color="warning" %}}
-本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 [使用 Apache APISIX 代理 Dubbo 服务（triple协议）](/en/blog/2024/04/22/使用-apache-apisix-代理-dubbo-服务triple协议/) 学习具体示例。
+{{% alert title="Note" color="warning" %}}
+This article is only applicable to the Dubbo protocol communication scenario. If you are a Dubbo3 user, it is recommended to use the triple protocol. Please refer to [Using Apache APISIX to Proxy Dubbo Services (Triple Protocol)](/en/blog/2024/04/22/using-apache-apisix-to-proxy-dubbo-services-triple-protocol/) for specific examples.
 {{% /alert %}}
 
+[Apache APISIX](https://apisix.apache.org/) is a top-level open-source project of the Apache Software Foundation and the most active open-source gateway project currently. As a dynamic, real-time, high-performance open-source API gateway, Apache APISIX provides rich traffic management features such as load balancing, dynamic upstream, gray release, service circuit breaking, authentication, and observability.
 
-[Apache APISIX](https://apisix.apache.org/) 是 Apache 软件基金会的顶级开源项目，也是当前最活跃的开源网关项目。作为一个动态、实时、高性能的开源 API 网关，Apache APISIX 提供了负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等丰富的流量管理功能。
+Apache APISIX equips Apache Dubbo services with HTTP gateway capabilities based on the open-source project tengine/mod_dubbo module. With the dubbo-proxy plugin, you can easily publish Dubbo services as HTTP services.
 
-Apache APISIX 基于开源项目 tengine/mod_dubbo 模块为 Apache Dubbo 服务配备了HTTP 网关能力。通过 dubbo-proxy 插件，可以轻松地将 Dubbo Service 发布为 HTTP 服务。
+![Architecture Diagram](/imgs/blog/apisix-plugin/1.png)
 
-![架构图](/imgs/blog/apisix-plugin/1.png)
+## Getting Started
 
+### Installing APISIX
 
-## 入门篇
+This document uses Docker to install APISIX. Make sure to install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) locally first.
 
-### 安装 APISIX
-
-本文档使用 Docker 安装 APISIX。确保本地先安装 [Docker](https://www.docker.com/) 和 [Docker Compose](https://docs.docker.com/compose/)。
-
-首先，下载 [apisix-docker](https://github.com/apache/apisix-docker) 仓库。
+First, download the [apisix-docker](https://github.com/apache/apisix-docker) repository.
 
 ```shell
 $ git clone https://github.com/apache/apisix-docker.git
 $ cd apisix-docker/example
 ```
 
-由于本示例要接入到 Nacos 注册中心，因此 `apisix-docker/example` 目录下安装用的 `docker-compose.yaml`，添加如下内容：
+Since this example will connect to the Nacos registry, add the following content in the `docker-compose.yaml` file located in the `apisix-docker/example` directory:
 
 ```yaml
   nacos:
@@ -51,7 +49,7 @@ $ cd apisix-docker/example
       apisix:
 ```
 
-在 config.yaml 文件中增加 nacos 注册中心配置：
+Add Nacos registry configuration in the `config.yaml` file:
 
 ```yaml
 discovery:
@@ -60,7 +58,7 @@ discovery:
       - "http://192.168.33.1:8848"
 ```
 
-在 config.yaml 文件中进行 dubbo-proxy 插件启用：
+Enable the dubbo-proxy plugin in the `config.yaml` file:
 
 ```yaml
 # Add this in config.yaml
@@ -69,33 +67,33 @@ plugins:
   - dubbo-proxy
 ```
 
-> 如果你使用了 Apache APISIX 2.11 版本镜像，则可以省去 `dubbo-proxy` 配置环节，该版本的 APISIX-Base 中已默认编译了 Dubbo 模块，可直接使用。
+> If you use the Apache APISIX version 2.11 image, you can skip the `dubbo-proxy` configuration step since the Dubbo module is already compiled in the APISIX-Base version and can be used directly.
 
-最后，使用 `docker-compose` 启用 APISIX：`docker-compose -p docker-apisix up -d`
+Finally, use `docker-compose` to start APISIX: `docker-compose -p docker-apisix up -d`
 
-### 示例说明
+### Example Description
 
-在接下来的操作中，我们将使用 [dubbo-samples-gateway-triple-apisix](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-dubbo) 项目进行部分展示。
+In the following operations, we will demonstrate using the [dubbo-samples-gateway-triple-apisix](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-dubbo) project.
 
-在进入正式操作前，我们先简单看下 Dubbo 接口的定义、配置以及相关实现。
+Before diving into the main operations, let’s briefly look at the definition, configuration, and relevant implementation of the Dubbo interface.
 
-#### 接口实现一览
+#### Interface Implementation Overview
 
 ```java
 public interface ApisixService {
 
     /**
-     * standard samples dubbo infterace demo
-     * @param context pass http infos
-     * @return Map<String, Object></> pass to response http
+     * standard samples dubbo interface demo
+     * @param context pass HTTP info
+     * @return Map<String, Object> to pass to HTTP response
      **/
     Map<String, Object> apisixDubbo(Map<String, Object> httpRequestContext);
 }
 ```
 
-如上所示，Dubbo 接口的定义是固定的。即方法参数中 `Map` 表示 APISIX 传递给 Dubbo Provider 关于 HTTP request 的一些信息（如：header、body...)。而方法返回值的 `Map` 表示 Dubbo Provider 传递给 APISIX 要如何返回 HTTP response 的一些信息。
+As shown above, the definition of the Dubbo interface is fixed. The `Map` in the method parameter represents some information regarding the HTTP request (such as header, body...) passed from APISIX to the Dubbo Provider. The return value `Map` represents some information about how the Dubbo Provider conveys the HTTP response to APISIX.
 
-通过上述配置后，Consumer 可通过 `org.apache.dubbo.samples.gateway.apisix.dubbo.api.ApisixService` 访问其中的`apisixDubbo` 方法。具体接口实现如下：
+After the above configuration, the Consumer can access the `apisixDubbo` method through `org.apache.dubbo.samples.gateway.apisix.dubbo.api.ApisixService`. The specific implementation of the interface is as follows:
 
 ```java
 public class ApisixServiceImpl implements ApisixService {
@@ -106,18 +104,18 @@ public class ApisixServiceImpl implements ApisixService {
         }
 
         Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("body", "dubbo success\n"); // http response body
-        ret.put("status", "200"); // http response status
-        ret.put("test", "123"); // http response header
+        ret.put("body", "dubbo success\n"); // HTTP response body
+        ret.put("status", "200"); // HTTP response status
+        ret.put("test", "123"); // HTTP response header
 
         return ret;
     }
 }
 ```
 
-上述代码中，`ApisixServiceImpl` 会打印接收到的 `httpRequestContext`，并通过返回包含有指定 Key 的 Map 对象去描述该 Dubbo 请求的 HTTP 响应。
+In the above code, `ApisixServiceImpl` will print the received `httpRequestContext`, and return a Map object containing the specified Key to describe the HTTP response of the Dubbo request.
 
-在 `dubbo-samples-gateway-apisix-dubbo` 目录，运行以下命令启动应用（或者选择使用 IDE 启动应用）：
+In the `dubbo-samples-gateway-apisix-dubbo` directory, run the following command to start the application (or choose to start the application using an IDE):
 
 ```shell
 $ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
@@ -126,15 +124,15 @@ $ cd dubbo-samples/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix
 $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.gateway.apisix.dubbo.provider.ProviderApplication"
 ```
 
-启动 consumer 进程，验证服务正常启动，可以被调用：
+Start the consumer process to verify that the service has started normally and can be called:
 
 ```shell
 $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.gateway.apisix.dubbo.consumer.ConsumerApplication"
 ```
 
-### 接入APISIX
+### Connecting to APISIX
 
-1. 创建指向 Dubbo 服务的 Upstream。
+1. Create an upstream pointing to the Dubbo service.
 
 ```shell
 curl http://127.0.0.1:9180/apisix/admin/upstreams/1  -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
@@ -145,7 +143,7 @@ curl http://127.0.0.1:9180/apisix/admin/upstreams/1  -H 'X-API-KEY: edd1c9f03433
 }'
 ```
 
-4. 为 DemoService 暴露一个 HTTP 路由。
+2. Expose an HTTP route for the DemoService.
 
 ```shell
 curl http://127.0.0.1:9180/apisix/admin/routes/1  -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
@@ -163,7 +161,7 @@ curl http://127.0.0.1:9180/apisix/admin/routes/1  -H 'X-API-KEY: edd1c9f034335f1
 }'
 ```
 
-5. 使用 curl 命令请求 Apache APISIX，并查看返回结果。
+3. Use the curl command to request Apache APISIX and check the returned result.
 
 ```shell
 curl http://127.0.0.1:9080/demo  -H "Host: example.org"  -X POST --data '{"name": "hello"}'
@@ -179,11 +177,11 @@ curl http://127.0.0.1:9080/demo  -H "Host: example.org"  -X POST --data '{"name"
 dubbo success
 ```
 
-:::note 说明
-上述代码返回中包含了 `test: 123` Header，以及 `dubbo success` 字符串作为 Body 体。这与我们在 `DemoServiceImpl` 编码的预期效果一致。
+:::note Explanation
+The above response contains the `test: 123` Header, and the string `dubbo success` as the Body. This is consistent with the expected effect we coded in `DemoServiceImpl`.
 :::
 
-6. 查看 Dubbo Provider 的日志。
+4. Check the logs of the Dubbo Provider.
 
 ```
 Key = content-length, Value = 17
@@ -194,23 +192,23 @@ Key = accept, Value = */*
 Key = user-agent, Value = curl/7.80.0
 ```
 
-:::note 说明
-通过 `httpRequestContext` 可以拿到 HTTP 请求的 Header 和 Body。其中 Header 会作为 Map 元素，而 Body 中 Key 值是固定的字符串"body"，Value 则代表 Byte 数组。
+:::note Explanation
+You can obtain the HTTP request's Header and Body through `httpRequestContext`. The Header will be a Map element, while the Key in the Body is a fixed string "body", and the Value represents the Byte array.
 :::
 
-### 进阶篇：复杂场景示例
+### Advanced Section: Complex Scenario Example
 
-在上述的简单用例中可以看出，我们确实通过 Apache APISIX 将 Dubbo Service 发布为一个 HTTP 服务，但是在使用过程中的限制也非常明显。比如：接口的参数和返回值都必须要是 `Map<String, Object>`。
+In the above simple use case, we indeed published the Dubbo Service as an HTTP service through Apache APISIX, but the limitations during use are also very obvious. For example, the parameters and return values of the interface must both be `Map<String, Object>`.
 
-那么，如果项目中出现已经定义好、但又不符合上述限制的接口，该如何通过 Apache APISIX 来暴露 HTTP 服务呢？
+So, what if there is an already defined interface in the project that does not conform to the above constraints? How can we expose an HTTP service through Apache APISIX?
 
-#### 操作步骤
+#### Steps
 
-针对上述场景，我们可以通过 HTTP Request Body 描述要调用的 Service 和 Method 以及对应参数，再利用 Java 的反射机制实现目标方法的调用。最后将返回值序列化为 JSON，并写入到 HTTP Response Body 中。
+For the above scenario, we can describe the Service and Method to be called and corresponding parameters in the HTTP Request Body, and then utilize Java's reflection mechanism to invoke the target method. Finally, the return value can be serialized as JSON and written into the HTTP Response Body.
 
-这样就可以将 Apache APISIX 的 「HTTP to Dubbo」 能力进一步加强，并应用到所有已存在的 Dubbo Service 中。具体操作可参考下方：
+This way, we can further enhance Apache APISIX's "HTTP to Dubbo" capability and apply it to all existing Dubbo Services. The specific operations can reference the following:
 
-1. 为已有项目增加一个 Dubbo Service 用来统一处理 HTTP to Dubbo 的转化。方法定义如下：
+1. Add a Dubbo Service to the existing project to uniformly handle the transformation from HTTP to Dubbo. The method definitions are as follows:
 
 ```java
 public class DubboInvocationParameter {
@@ -229,7 +227,7 @@ public interface HTTP2DubboService {
 }
 ```
 
-2. 提供服务实现并将其发布为标准的 Dubbo 服务。网关将所有流量都转发到这个服务，由这个服务在后端进程内完成调用转发。
+2. Provide a service implementation and publish it as a standard Dubbo service. The gateway will forward all traffic to this service, which will complete the invocation forwarding within the backend process.
 
 ```java
 @DubboService
@@ -258,7 +256,7 @@ public class HTTP2DubboServiceImpl implements HTTP2DubboService {
 }
 ```
 
-3. 在 APISIX 中为 `HTTP2DubboService` 服务配置路由规则（此处省略）。接下来，就可以通过类似如下方式发起对后端 Dubbo 服务的调用了：
+3. In APISIX, configure routing rules for the `HTTP2DubboService` service (this step is omitted). Next, you can initiate a call to the backend Dubbo service in a manner similar to the following:
 
 ```shell
 curl http://127.0.0.1:9080/demo  -H "Host: example.org"  -X POST --data '
@@ -274,10 +272,11 @@ curl http://127.0.0.1:9080/demo  -H "Host: example.org"  -X POST --data '
 }'
 ```
 
-## 总结
+## Conclusion
 
-本文为大家介绍了如何借助 Apache APISIX 实现 Dubbo Service 的代理，通过引入 `dubbo-proxy` 插件便可为 Dubbo 框架的后端系统构建更简单更高效的流量链路。
+This article introduced how to proxy Dubbo services using Apache APISIX, allowing for the construction of simpler and more efficient traffic links for the backend system of the Dubbo framework by introducing the `dubbo-proxy` plugin.
 
-希望通过上述操作步骤和用例场景分享，能为大家在相关场景的使用提供借鉴思路。更多关于 `dubbo-proxy` 插件的介绍与使用可参考[官方文档](https://apisix.apache.org/docs/apisix/plugins/dubbo-proxy/)。
+We hope that through the above operation steps and use case sharing, you can gain insights for relevant scenarios. For more information about the `dubbo-proxy` plugin, please refer to the [official documentation](https://apisix.apache.org/docs/apisix/plugins/dubbo-proxy/).
 
-关于这部分的更多示例，还可以参考 https://github.com/chickenlj/APISIX-Dubbo-Nacos
+For more examples related to this section, you can also refer to https://github.com/chickenlj/APISIX-Dubbo-Nacos
+

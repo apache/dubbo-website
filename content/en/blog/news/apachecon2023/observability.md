@@ -1,164 +1,165 @@
 ---
-title: "Apache Dubbo 云原生可观测性的探索与实践"
-linkTitle: "Apache Dubbo 云原生可观测性的探索与实践"
+title: "Exploration and Practice of Cloud Native Observability in Apache Dubbo"
+linkTitle: "Exploration and Practice of Cloud Native Observability in Apache Dubbo"
 tags: ["apachecon2023", "observability", "metrics", "tracing"]
 date: 2023-10-07
-authors: ["宋小生"]
-description: Apache Dubbo 云原生可观测性的探索与实践
+authors: ["Song Xiaosheng"]
+description: Exploration and Practice of Cloud Native Observability in Apache Dubbo
 ---
 
-摘要：本文整理自平安壹钱包中间件资深工程师、Apache Dubbo committer宋小生在 Community Over Code 2023 大会上的分享。本篇内容主要分为五个部分：
+Abstract: This article is organized from the sharing of Song Xiaosheng, a senior engineer at Ping An Yiqian Wallet and an Apache Dubbo committer, at the Community Over Code 2023 conference. The content is mainly divided into five parts:
 
-- 一、可观测性建设
-- 二、多维指标体系
-- 三、链路追踪门面
-- 四、日志管理分析
-- 五、稳定性的实践
+- I. Building Observability
+- II. Multidimensional Metrics System
+- III. Link Tracing Interface
+- IV. Log Management and Analysis
+- V. Stability Practices
 
-## 一、可观测性建设
+## I. Building Observability
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img.png)
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img.png)
 
-首先介绍一下云原生升级的挑战。目前大部分公司里基本上都有CICD、OPS来帮助开发、测试、运维提升开发的效率与质量，也会有容器化来帮助提升产线运维的效率与质量。但在云原生时代，大规模容器的频繁变更会带来很多稳定性的问题。这些稳定性问题，包含了很多我们可以提前规避掉的已知的异常，也包含了很多我们无法避免的异常，比如网络故障、机器宕机等系统无法提前测出来的问题。
+First, let's talk about the challenges of cloud-native upgrades. Most companies currently have CICD and OPS to help improve development efficiency and quality, along with containerization for operational efficiency. However, the frequent changes in large-scale containers during the cloud-native era can lead to numerous stability issues. These issues may include known exceptions that we can avoid in advance as well as unavoidable ones like network failures and machine crashes.
 
-如果我们能提前发现这些问题，其实是可以规避掉很多风险的。所以我们通过可观测系统及时的感知到了这些问题，高效的分析异常，快速的恢复系统。因此可以判定，在云原生时代，可观测系统的建设是非常重要的。
+If we can detect these issues early, we can mitigate many risks. Thus, having an observability system that timely senses these problems, analyzes anomalies effectively, and quickly recovers the system is of paramount importance in the cloud-native era.
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_1.png)
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_1.png)
 
-Dubbo作为微服务RPG的框架，直接建设一个大而全的可观测性系统或者平台是不现实的，而且它的定位也不是很符合。可观测性系统更强调关联性，通过单维度或者多维度进行系统的观测与问题的诊断。
+As a microservices RPG framework, it is unrealistic for Dubbo to build a comprehensive observability system or platform, and its functionality does not fit that either. The observability system emphasizes correlation through single or multidimensional observation for diagnosing system issues.
 
-首先看一下可度量系统的健康状态的指标。Dubbo通过采集系统内部的Dubbo指标的同时，把指标内部的数据暴露给外部的监控系统。这些监控指标中间包含了很多的应用信息、主机信息、Dubbo服务标签信息等等。当我们发现问题的时候，可以通过这些标签信息关联到全链路系统。之后全链路系统可以做到请求级或者应用级的系统性能分析或者系统异常诊断。
+First, let's look at the metrics that measure the health status of the system. Dubbo exposes internal metrics data to external monitoring systems while also collecting internal Dubbo metrics. These monitoring metrics include a lot of application information, host details, Dubbo service tags, and so on. When issues arise, we can use these tags to trace back to the full link system. Then, the entire link system can perform request-level or application-level performance analysis and abnormal diagnostics.
 
-Dubbo侧通过适配各大厂商门面的形式，只需进行非常简易的依赖就引入或者配置就可以直接把数据导出到各大全链路平台。无论企业使用哪个流行平台，在后期升级Dubbo后都可以直接把链路导出去。
+Dubbo supports exporting data to major link platforms with minimal dependency through adaptations to various vendor interfaces. Regardless of the popular platform enterprises choose, after upgrading Dubbo, they can export the links directly.
 
-另外，链路系统还包含全链路的Traceid或者局部的磁盘ID。通过全链路的ID，我们可以在链路系统直接跳转到日志平台。在日志平台里包含非常详细的日志上下文，这些日志上下文可以提供非常精确的异常问题诊断。
+Additionally, the link system includes full link Trace IDs or local disk IDs. Through these IDs, we can directly navigate from the link system to the logging platform, which contains detailed log contexts that can provide precise anomaly diagnostics.
 
-Dubbo也提供了非常详细的错误码机制和专家建议的形式，在官网上通过日志的形式可以直接通过错误码的形式直接导航到官网上的帮助文档。
+Dubbo also provides a detailed error code mechanism and expert advice in the form of logs, allowing users to navigate to help documentation on the official website using error codes. 
 
-## 二、多维指标体系
+## II. Multidimensional Metrics System
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_2.png)
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_2.png)
 
-Dubbo在多维度指标体系实践的时候，我们主要从两个维度来看它。
+In the practice of the multidimensional metrics system in Dubbo, we mainly look at it from two dimensions.
 
-第一个是纵向的维度。Dubbo指标在采集的时候有一个接入导出的流程。Dubbo为用户和开发者提供了简单易用的接入门面。接入后服务在运行过程中通过指标器进行指标的采集。Dubbo中提供了非常多的指标采集器，包括聚合和非聚合的指标采集等等。
+The first is the vertical dimension. There is an access and export process when collecting Dubbo metrics. Dubbo provides an easy-to-use access interface for users and developers. Once accessed, the service collects metrics during its operation through the metrics collectors. Dubbo offers many metrics collectors, including aggregate and non-aggregate metrics.
 
-然后采集的指标会通过变量值临时存储在内存里，之后会有部分指标（QPS等带有滑动窗口的最小值、最大值的聚合指标）进行聚合计算，最后这些指标会导出到外部系统。我们支持在Dubbo QPS服务质量中进行指标导出，或者把指标导出到Prometheus，或者http直接访问也可以进行指标的查询。
+The collected metrics are temporarily stored in memory. Some metrics (like QPS with sliding window min/max aggregation metrics) will be aggregated for calculation before export to external systems. We support metrics export in the Dubbo QPS service quality or direct queries via HTTP.
 
-第二个是横向的维度。Dubbo指标采集覆盖了非常容易出现异常的地方。比如Dubbo 3提供了三大中心，包括注册中心、元数据中心、配置中心，存在外部网络交互的地方是非常容易出现问题的。
+The second is the horizontal dimension. Dubbo metrics collection covers areas where anomalies are likely to occur. For example, Dubbo 3 provides three primary centers: the registry, metadata, and configuration centers, where external network interactions are prone to issues.
 
-另外一个比较关键的是RPC电路上的采集，比如请求相应的时间、异常、nity网络、IO的指标等等。此外还有一些关于Dubbo线程池的指标采集。
+Another key aspect is RPC circuit sampling, such as request response time, exceptions, unit network, IO metrics, and other related metrics from Dubbo thread pools.
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_3.png)
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_3.png)
 
-前面说的是比较大面上的指标采集，具体Dubbo的采集需要哪些指标我们也调研了很多比较流行的方法论。
+Earlier, we discussed a broad overview of metrics collection; we also researched various popular methodologies to identify which metrics should be collected in Dubbo.
 
-- 图中第一张图是谷歌SRE书的四大黄金指标。它是谷歌总结大规模的分布式服务监控总结出来的，它可以进行请求级别的服务质量的衡量，主要包含延迟、流量、错误以及饱和度。
-- 图中第二张图是RED 方法。它更侧重于请求，从外部视角来查看服务的健康状态，主要包含速率、错误与持续时间。
-- 图中第三张图是USE 方法。它更侧重于系统内部的资源使用情况，包含利用率、饱和度与错误。
+- The first image represents the four golden metrics summarized in Google's SRE book. These metrics help measure service quality at the request level, mainly including latency, traffic, errors, and saturation.
+- The second image shows the RED method, emphasizing requests and viewing service health from an external perspective, including rate, errors, and duration.
+- The third image depicts the USE method, focusing on internal resource usage, including utilization, saturation, and errors.
 
-可以看到，以上三个指标的方法论中都包含的指标是错误，错误也是每个开发者比较关注的。
+It can be seen that all three methodologies include error metrics, which are a significant concern for developers.
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_4.png)
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_4.png)
 
-然后我们进行了指标的系统完善。在Dubbo 3.2版本中，多维度指标体系已经完成，而且也在快速持续的版本迭代中。在这个版本中我们只需要引入一个快速集成的Spring Boot中的Starter包就可以实现指标的自动采集。之后我们通过Dubbo的QPS服务质量端口可以直接访问到。如果是本机可以通过浏览器，如果是服务器可以通过科尔命令访问52端口，后面加一个Metric路径，这样就可以看到非常详细的默认指标的导出。
+We have completed the system refinement of the metrics. In Dubbo 3.2, the multidimensional metrics system is now finished and is undergoing rapid continuous iteration. In this version, a quick integration Spring Boot starter package allows automatic metrics collection. Accessing it can be done via Dubbo's QPS service quality port. If local, it can be accessed through the browser; on the server, it can be accessed using cURL on port 52 with a Metric path, providing detailed default metrics export.
 
-可以看到这些指标有Dubbo前缀，类型是Dubbo的不同模块，比如消费者提供的请求级别，三大注册中心一起线程。
+These metrics are prefixed with "Dubbo," with different types reflecting various Dubbo modules, such as consumer-provided request levels across the three registration centers.
 
-下面是Dubbo当前指标的行为，比如响应时间最后会加一些单位，这个格式参考的是Prometheus的官方格式。
+The following shows the behavior of current Dubbo metrics; for example, the response time will include some units, referencing the official Prometheus format.
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_5.png)
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_5.png)
 
-多维度指标体系有些人可能会直接复用Spring Boot默认的manager管理端口，Dubbo也适配了一下Spring Boot Actuator的扩展。
+Some may directly reuse the default manager port in Spring Boot; Dubbo has adapted the Spring Boot Actuator extensions. The operation is the same—simply introduce the Spring Boot starter package. There's no need for any additional configuration to view detailed metrics in the Spring port, including built-in JVM metrics and Dubbo metrics.
 
-操作和刚刚一样，只是引入Spring Boot Starter包。后面也无需做任何其他的配置，就可以在Spring端口里看到详细的指标了。包括Spring Boot内置的jvm指标、Dubbo指标等等。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_6.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_6.png)
+After integrating the metrics system, if accessed through the command line, one can only see instantaneous data. However, in the monitoring metrics system, we are more concerned with multidimensional vector data. If we treat these data as points, it may be difficult to identify issues, so we need to store this data and view it as applicable vector data.
 
-指标体系接入之后，我们如果直接通过命令行访问只能看到一些瞬时的数据，但在监控指标体系我们其实更关注的是多维度的向量数据。如果我们把这些数据看作是一个点其实是比较难看出问题的，所以我们需要把这些数据存储起来，看作是一个实际化的向量数据。
+Dubbo provides default integration for Prometheus metrics collection. Prometheus, as a monitoring system integrating metric storage and monitoring, offers numerous service discovery models. For example, if services are deployed on K8s, metrics can be collected based on K8s label service discovery mechanisms. If a company has a self-built CMDB system, it can extend HTTP interfaces for metrics collection. Besides, files or static service discovery mechanisms can also collect metrics as long as they can discover Dubbo service IPs and service interfaces. Collected metrics will be automatically stored in Prometheus's actual database.
 
-Dubbo默认提供对Prometheus采集的介入。Prometheus作为指标存储与监控一体的监控系统，提供了很多的服务发现模型。比如我们直接把服务部署在K8s上，可以直接基于K8s标签的服务发现机制进行指标采集。如果公司有自建的cmdb系统，可以自己扩展http接口进行指标采集。此外,文件或者静态的服务发现机制只要能发现Dubbo服务的IP和服务接口，也可以进行指标采集。采集到的指标会自动存储在Prometheus的实际数据库里。
+The above image shows the latest response time metrics collected through Prometheus's query interface.
 
-上图是我们通过Prometheus的查询框查询出来的响应时间的最新指标。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_7.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_7.png)
+Prometheus metrics emphasize storage and alerts, but for more visual representations, we need to incorporate Grafana. Grafana aims to provide easy-to-access monitoring dashboards for enterprises, as shown in the simple global dashboard image above.
 
-Prometheus的指标更侧重于存储与报警，如果我们想更直观的体现还需要接入Grafana。Grafana的目标是为企业提供简易接入的监控面板，上图是一个简易的全局大盘。
+By filtering at the application level / querying by machine IP / and examining service interface dimensions, we can check the service health status. The metrics are generally based on previous methodologies, including QPS, request count, success rate, failure rate, and request delay, among others.
 
-我们通过应用级别的筛选/机器IP维度的查询/服务接口的维度，查询服务的健康状态。可以看到，这些指标基本上都是基于前面总结的方法论实现的。比如QPS、请求数量、成功率、失败率、请求的时延等等。
+Additionally, some application information metrics are available, such as when upgrading to Dubbo 3, allowing users to see which applications have been updated to the new version, the new application version numbers, instance IP distributions, and resource availability.
 
-此外，还有一些应用信息的指标，比如升级Dubbo 3时，想看到哪些应用已经升级到新的版本，就可以看到新的应用的版本号，也会有应用信息的实例IP分布，还有一些现成资源。
+## III. Link Tracing Interface
 
-## 三、链路追踪门面
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_8.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_8.png)
+The metrics previously mentioned are relatively abstract, aiding in problem discovery; next, we will conduct simple problem diagnostics. Microservice systems often have interdependencies, so diagnostics between services rely heavily on a full link system.
 
-刚才说的指标比较抽象，它更利于帮助我们发现问题，接下来进行一些简单问题的诊断。微服务系统往往是多个系统之间有关联关系，所以服务之间的诊断更依赖于全链路系统。
+For full link systems like Dubbo, the Agent approach was considered, making it convenient for users to integrate, as some metric collection methods could be injected directly at the proxy layer. This makes full link coverage in enterprises quite simple; however, if Dubbo only collects its own metrics, associated risks could arise. After agent integration, issues like bytecode modification incompatibilities could occur, which might be challenging to identify early.
 
-全链路系统Dubbo，当时考虑使用Agent的方式，这种方式对于用户接入是非常方便的，在代理层直接注入一些指标采集的方式即可。如果用这种方式在企业里做全链路的覆盖是非常方便的，但如果Dubbo只做Dubbo的指标采集，风险会比较大。因为Agent接入后会进行字节码修改等不兼容的问题，有些时候很难在前期发现。
+Moreover, Dubbo has researched some open-source link tracing interfaces. Dubbo chose to use a native built-in interface, allowing professionals to handle specialized matters. By adopting various vendor-based full link tracing systems, Dubbo enables rapid adaptation for users with minimal configuration changes for exporting link data.
 
-另外，Dubbo也调研了一些开源的链路追踪门面。Dubbo选择通过原生内置门面的形式，让专业的事情交给专业人做。Dubbo通过适配各大厂商的全链路追踪系统，快速适配接入的用户，只需增加少量的配置就可以实现链路数据的导出。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_9.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_9.png)
+In the selection of link tracing interfaces, we referred to several popular industry options and selected two for further evaluation: OpenTelemetry and Micrometer.
 
-在链路追踪门面的选型方面，我们参考了业界比较流行的几个链路，从中挑选了两个进行选型，分别是OpenTelemetry和Micrometer。
+OpenTelemetry is well-known; it supports multiple languages with a unified API and integrates with most popular third-party full link tracing systems. It is one of the CNCF incubated projects, with many middleware applications already adopting this standard.
 
-OpenTelemetry，大家应该非常熟悉，它支持多语言，规范标准统一的API，支持大部分流行的第三方厂商的全链路追踪系统，是CNCF孵化的项目之一，很多中间件应用都已经接入了这种规范。
+Micrometer, on the other hand, is often associated with metrics collection integration. Its major limitation is Java-only support; however, it provides the default metrics collection and link collection support via micrometer-tracing in Spring Boot 3. Additionally, Micrometer can convert to open protocols through bridging packages, indirectly supporting various third-party data collection frameworks. Micrometer itself also adjusts many full link vendor mechanisms through its tuning mechanism.
 
-Micrometer，大家可能对的印象是指标采集的接入。它的缺点是只能支持Java，但它在语言方面，它是Spring Boot 3默认的指标采集，链路采集默认支持micrometer-tracing的功能。此外，Micrometer它还可以通过桥接包直接转化为open的协议，间接也支持各种第三方的采集。并且Micrometer自身也通过调节机制调节了很多的全链路厂商。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_10.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_10.png)
+To unify with the previously used metrics collection, utilizing Micrometer eliminates the need to introduce additional third-party dependencies; simply using the Micrometer Tracing bridge package allows for rapid integration.
 
-我们为了和前面使用到的指标采集进行统一，使用Micrometer后无需额外引入第三方的依赖，只需使用Micrometer Tracing的桥接包，就可以快速的接入。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_11.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_11.png)
+The above image illustrates the simple structure of the link tracing system. Dubbo's edge collection primarily gathers RPC request traces. When a consumer triggers a request, if a link ID exists, it will be reused; if not, a new link ID will be generated and reported to the collector. Similarly, consumers will relay link data through RPC context to the provider. The provider will then associate this link data with a parent-child relationship before reporting it to the collector.
 
-上图是链路追踪系统的简单结构。Dubbo的边路采集主要采集rpc请求的链路。在消费者发起请求的时候，如果存在链路ID就直接复用，没有的话会产生链路ID，然后把她们上报给采集器。同样消费者也会通过rpc的上下文把链路数据透传给提供端。提供端拿到这个链路数据后，会对它进行父子关系的关联。最后把这些链路数据上报采集器。
+The collector initially operates at the memory level, minimizing system performance impact. Asynchronous exports will follow, similar to the aforementioned metrics system, with synchronous collection in memory exporting data asynchronously to third-party link systems.
 
-采集器在前面的时候主要是内存级别的操作，对系统的损耗比较小。后面将进行异步的导出，和前面指标体系是一样的。内存级的同步采集，异步的把数据导出到第三方的链路系统。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_12.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_12.png)
+Integrating link systems is straightforward and primarily involves introducing the Spring Boot Starter dependency package and simple configuration, including details like different vendor export addresses.
 
-链路系统接入也比较简单，主要是引入Spring Boot Starter的依赖包，进行一些比较简单的配置，包括不同厂商的导出地址等等。
+Link systems can assist in analyzing performance and anomalies; however, some issues in system diagnostics may require more detailed log contexts. In such cases, the link system appends data to the MDC log system context, extracting link content from the log context to present it in log files.
 
-链路系统可以帮助大家分析性能与异常，但一些系统问题原因的排查可能需要更详细的日志上下文来进行关联。这个时候这个链路系统会把数据放到mdc日志系统的上下文里面，然后在日志上下文里把链路系统编入的内容取出来，展示到日志的文件里。
+Log files may also interface with third-party log platforms; if you possess secondary development capabilities, you can embed links allowing the Trace ID to automatically redirect—enabling seamless navigation between the full link system and the logging platform, making issue queries far more efficient.
 
-日志文件可能也会接触到第三方的日志平台，如果你有二次开发能力，可以在这种系统平台里加上链接，让这些Traceid自动跳转，即全链路系统自动跳转到日志平台，日志平台也可以自动跳转到全链路系统，查询问题会非常高效。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_13.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_13.png)
+The above image presents the integration page for Zipkin. It illustrates application-level performance analysis and interface-level performance evaluations. Additionally, we can see some Dubbo metadata; its tags can be associated with metric dashboard metrics.
 
-上图是接入Zipkin的展示页面。可以看到它可以进行应用级的性能分析和接口级的性能分析。还可以看到一些Dubbo元数据，它的标签可以和指标大盘指标体系进行关联关系。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_14.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_14.png)
+This depicts Skywalking's format, featuring both list and tabular forms. It utilizes Trace IDs to uncover full link request paths, along with performance and anomaly diagnostics.
 
-这是Skywalking的格式，包括列表形式、表格形式等等。它通过Traceid搜到全链路的请求链路，也可以进行性能和异常的诊断。
+## IV. Log Management Analysis
 
-## 四、日志管理分析
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_15.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_15.png)
+Dubbo adapts to major logging components through logs. Due to the many systems stemming from our log components' historical development, Dubbo has adapted various logging components via its interfaces.
 
-Dubbo通过日志里面的形式适配了各大日志组件。因为我们的日志组件在后期发展的体系是非常多的，可能是历史原因，Dubbo已经通过门面的形式适配了各大日志组件。
+Areas prone to issues during system operation include service registration and discovery, the registration model for services, service provider registrations, service consumer subscriptions and notifications, and RPC request links.
 
-系统运行过程中，非常容易出现问题的地方包括，服务的注册与发现，注册服务发现模型，服务提供端的注册，服务消费端的订阅与通知，服务rpc请求链路。
+When these issues arise, the system may experience exceptions. Directly checking exceptions, searching online, or analyzing through source code can be both difficult and time-consuming.
 
-当出现这些问题的时候，系统会出现异常。如果我们直接查看异常/网上检索/通过源码形式分析的话，不仅比较困难而且非常耗时。
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_16.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_16.png)
+In light of this, Dubbo has created an expert advice document. After upgrading to Dubbo 3, users will find a help document in log entries' SQ links, providing potential reasons for issues and problem-solving approaches.
 
-基于此，Dubbo做了一个专家建议帮助的文档手册。升级到Dubbo 3版本后，可以看到日志里有一个帮助文档的sq链接的形式。这个帮助手册套里提供了一些问题可能出现的原因和排查问题的解决思路。
+For those interested in diagnostics, please refer to the official website, which contains numerous problem diagnosis methodologies from seasoned experts, aiming to collaboratively build with community users and developers.
 
-对排查问题比较感兴趣的同学，可以直接打开官网看一下。里面包含了非常多资深专家提供的问题诊断的思路，希望社区里的用户和开发者和我们一起共同建设。
+## V. Stability Practices
 
-## 五、稳定性的实践
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_17.png)
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_17.png)
+Finally, we will introduce stability practices combining metrics, links, and logs—primarily divided into two sections: observing system anomalies and rapid recovery.
 
-最后我们结合指标、链路、日志进行稳定性实践的介绍。主要分为两个部分：观测系统的异常和快速的恢复。
+Observing system anomalies involves having operations personnel monitoring dashboards, actively discovering alerts, alongside passive notifications via email, SMS, or WeChat. Regardless of the alert format, upon receiving an alert, observable thinking can be applied to investigate common indicators associated with the anomaly.
 
-观测系统的异常，在整体全链路系统建设之后，我们有运营人员主动的盯监控大盘发现告警，也有通过邮件、短信、钉钉的形式被动的收到告警。无论通过哪种形式，收到告警之后可以尝试使用可观测的思维，通过一些常见的、和异常相关的指标进行排查。
+Through this approach, you might discover certain issues, though these may not necessarily be root causes. In such cases, identify the section of the full link system where the metrics have shown issues, subsequently analyzing the specific problem.
 
-通过这个方法，你可能会发现一些问题，但不一定是病因。这个时候你可以通过指标发生问题的地方找到全链路系统，之后分析哪个系统的哪一段有问题。如果排查不到问题，再通过链路系统的全链路ID关联到日志，通过日志里排查详细原因。如果日志也排查不到问题，可能就需要你在系统流量摘掉之后，通过工具进行详细的根因分析。
+If the issue remains elusive, you can link the full link ID from the link system to the logs to examine detailed reasons. If logs fail to illuminate the issue, root cause analyses using tools may be necessary after isolating the system traffic.
 
-![dubbo-可观测性-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_18.png)
+![dubbo-observability-metrics-and-tracing](/imgs/blog/2023/8/apachecon-scripts/observability/img_18.png)
 
-快速的恢复，有了前面的原因定位后，基本上就可以知道哪里有问题了。这个时候可以根据你的原因进行流量的治理。比如切换机房流量，对流量进行限流，或者你的系统有异常的时候进行系统的回滚。
+With the earlier cause identification, locating the problem becomes straightforward. Based on these findings, traffic governance can be implemented—such as switching room traffic, limiting traffic, or rolling back the system if anomalies arise.
+

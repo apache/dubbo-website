@@ -1,131 +1,132 @@
 ---
-title: "无缝衔接 gRPC 与 dubbo-go"
-linkTitle: "无缝衔接 gRPC 与 dubbo-go"
+title: "Seamless Integration of gRPC and dubbo-go"
+linkTitle: "Seamless Integration of gRPC and dubbo-go"
 tags: ["Go"]
 date: 2021-01-11
-description: 本文介绍了如何在 dubbo go 中如何支持 gRPC
+description: This article introduces how to support gRPC in dubbo-go
 ---
 
-最近我们 dubbo-go 社区里面，呼声很大的一个 feature 就是对 gRPC 的支持。在某位大佬的不懈努力之下，终于弄出来了。
+Recently, a highly anticipated feature in our dubbo-go community has been support for gRPC. After the relentless efforts of a certain expert, it has finally been achieved.
 
-今天我就给大家分析一下大佬是怎么连接 dubbo-go 和 gRPC 。
+Today, I will analyze how this expert connected dubbo-go with gRPC.
 
 ## gRPC
 
-先来简单介绍一下 gRPC 。它是 Google 推出来的一个 RPC 框架。gRPC是通过 IDL ( Interface Definition Language )——接口定义语言——编译成不同语言的客户端来实现的。可以说是RPC理论的一个非常非常标准的实现。
+First, let’s briefly introduce gRPC. It is an RPC framework introduced by Google. gRPC is implemented through IDL (Interface Definition Language) compiled into clients of different languages. It can be said to be a very standard implementation of RPC theory.
 
-因而 gRPC 天然就支持多语言。这几年，它几乎成为了跨语言 RPC 框架的标准实现方式了，很多优秀的rpc框架，如 Spring Cloud 和 dubbo ，都支持 gRPC 。
+Thus, gRPC natively supports multiple languages. In recent years, it has almost become the standard implementation method for cross-language RPC frameworks, with many excellent RPC frameworks, such as Spring Cloud and Dubbo, supporting gRPC.
 
-server 端
+Server Side
 
-在 Go 里面，server 端的用法是：
+In Go, the usage on the server side is:
 
 ![img](/imgs/blog/dubbo-go/grpc/p1.webp)
 
-它的关键部分是：s := grpc.NewServer()和pb.RegisterGreeterServer(s, &server{})两个步骤。第一个步骤很容易，唯独第二个步骤RegisterGreeterServer有点麻烦。为什么呢？
+The key parts are: s := grpc.NewServer() and pb.RegisterGreeterServer(s, &server{}), with the first step being straightforward, while the second step, RegisterGreeterServer, can be a bit tricky. Why?
 
-因为pb.RegisterGreeterServer(s, &server{})这个方法是通过用户定义的protobuf编译出来的。
+Because the method pb.RegisterGreeterServer(s, &server{}) is generated from user-defined protobuf.
 
-好在，这个编译出来的方法，本质上是：
+Fortunately, the generated method essentially is:
 
 ![img](/imgs/blog/dubbo-go/grpc/p2.webp)
 
-也就是说，如果我们在 dubbo-go 里面拿到这个 _Greeter_serviceDesc ，就可以实现这个 server 的注册。因此，可以看到，在 dubbo-go 里面，要解决的一个关键问题就是如何拿到这个 serviceDesc 。
+In other words, if we can obtain this _Greeter_serviceDesc in dubbo-go, we can register this server. Therefore, it can be seen that a critical issue to resolve in dubbo-go is how to obtain this serviceDesc.
 
-## Client 端
+### Client Side
 
-Client 端的用法是：
+The usage on the client side is:
 
 ![img](/imgs/blog/dubbo-go/grpc/p3.webp)
 
-这个东西要复杂一点：1、创建连接：conn, err := grpc.Dial(address)2、创建client：c := pb.NewGreeterClient(conn)3、调用方法：r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
+This part is a bit more complex: 1. Create a connection: conn, err := grpc.Dial(address) 2. Create a client: c := pb.NewGreeterClient(conn) 3. Call a method: r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
 
-第一个问题其实挺好解决的，毕竟我们可以从用户的配置里面读出 address ；
+The first issue is quite easy to solve, as we can read the address from user configuration;
 
-第二个问题就是最难的地方了。如同 RegisterGreeterServer 是被编译出来的那样，这个 NewGreeterClient 也是被编译出来的。
+The second issue is the most challenging. Just as RegisterGreeterServer was generated, NewGreeterClient is also generated.
 
-而第三个问题，乍一看是用反射就能解决，但是我们打开 SayHello 就能看到：
+The third issue might seem solvable with reflection at first glance, but if we look at SayHello, we can see:
 
 ![img](/imgs/blog/dubbo-go/grpc/p4.webp)
 
-结合 greetClient 的定义，很容易看到，我们的关键就在于 err := c.cc.Invoke ( ctx, "/helloworld.Greeter/SayHello", in, out, opts... )。换言之，我们只需要创建出来连接，并且拿到方法、参数就能通过类似的调用来模拟出 c.SayHello 。
+Combining with the definition of greetClient, we can easily see that our key is err := c.cc.Invoke(ctx, "/helloworld.Greeter/SayHello", in, out, opts...). In other words, we only need to establish a connection and get the method and parameters to simulate c.SayHello through a similar call.
 
-通过对 gRPC 的简单分析，我们大概知道要怎么弄了。还剩下一个问题，就是我们的解决方案怎么和 dubbo-go 结合起来呢？
+Through a simple analysis of gRPC, we generally know how to proceed. One remaining question is how our solution can be integrated with dubbo-go.
 
-## 设计
+## Design
 
-我们先来看一下 dubbo-go 的整体设计，思考一下，如果我们要做 gRPC 的适配，应该是在哪个层次上做适配。
+Let’s first take a look at the overall design of dubbo-go and think about which layer we should adapt to do gRPC.
 
 ![img](/imgs/blog/dubbo-go/grpc/p5.webp)
 
-我们根据前面介绍的 gRPC 的相关特性可以看出来，gRPC 已经解决了 codec 和 transport 两层的问题。
+Based on the earlier introduction of gRPC's related features, we can see that gRPC has already resolved the issues of codec and transport.
 
-而从 cluster 往上，显然 gRPC 没有涉及。于是，从这个图里面我们就可以看出来，要做这种适配，那么 protocol 这一层是最合适的。即，我们可以如同 dubbo protocol 那般，扩展出来一个 grpc protocol 。
+From the cluster up, it is clear that gRPC does not address this. Thus, from this diagram, we can see that to achieve this adaptation, the protocol layer is the most suitable. That is, we can extend a gRPC protocol similar to the dubbo protocol.
 
-这个 gRPC protocol 大体上相当于一个适配器，将底层的 gRPC 的实现和我们自身的 dubbo-go 连接在一起。
+This gRPC protocol essentially acts as an adapter that connects the underlying gRPC implementation with our own dubbo-go.
 
 ![img](/imgs/blog/dubbo-go/grpc/p6.webp)
 
-## 实现
+## Implementation
 
-在 dubbo-go 里面，和 gRPC 相关的主要是：
+In dubbo-go, the main components related to gRPC are:
 
 ![img](/imgs/blog/dubbo-go/grpc/p7.webp)
 
-我们直接进去看看在 gRPC 小节里面提到的要点是如何实现的。
+Let’s directly see how the key points mentioned in the gRPC section are implemented.
 
-### server端
+### Server Side
 
 ![img](/imgs/blog/dubbo-go/grpc/p8.webp)
 
-这样看起来，还是很清晰的。如同 dubbo- go 其它的 protocol 一样，先拿到 service ，而后通过 service 来拿到 serviceDesc ，完成服务的注册。
+This looks quite clear. As with other protocols in dubbo-go, we first obtain the service and then get the serviceDesc to complete the service registration.
 
-注意一下上图我红线标准的 ds, ok := service.(DubboGrpcService) 这一句。
+Note the red line highlighting ds, ok := service.(DubboGrpcService) in the image above.
 
-为什么我说这个地方有点奇怪呢？是因为理论上来说，我们这里注册的这个 service 实际上就是 protobuf 编译之后生成的 gRPC 服务端的那个 service ——很显然，单纯的编译一个 protobuf 接口，它肯定不会实现 DubboGrpcService 接口：
+Why do I say this part is a bit strange? It is because, theoretically, the registered service here is actually the protobuf-generated gRPC server service—obviously, simply compiling a protobuf interface will not implement the DubboGrpcService interface:
 
 ![img](/imgs/blog/dubbo-go/grpc/p9.webp)
 
-那么 ds, ok := service.(DubboGrpcService) 这一句，究竟怎么才能让它能够执行成功呢？
+So, how can ds, ok := service.(DubboGrpcService) execute successfully?
 
-我会在后面给大家揭晓这个谜底。
+I will reveal the answer later.
 
-## Client端
+### Client Side
 
-dubbo-go 设计了自身的 Client ，作为对 gRPC 里面 Client 的一种模拟与封装：
+dubbo-go has designed its own Client as a kind of simulation and encapsulation of the Client in gRPC:
 
 ![img](/imgs/blog/dubbo-go/grpc/p10.webp)
 
-注意看，这个 Client 的定义与前面 greetClient 的定义及其相似。再看下面的 NewClient 方法，里面也无非就是创建了连接 conn ，而后利用 conn 里创建了一个 Client 实例。
+Notice that the definition of this Client is quite similar to the earlier definition of greetClient. Looking at the NewClient method below, it simply creates a connection conn and then utilizes conn to create a Client instance.
 
-注意的是，这里面维护的 invoker 实际上是一个 stub 。
+It’s important to note that the invoker maintained here is essentially a stub.
 
-当真正发起调用的时候：
+When the actual call is initiated:
 
 ![img](/imgs/blog/dubbo-go/grpc/p11.webp)
 
-红色框框框住的就是关键步骤。利用反射从 invoker ——也就是 stub ——里面拿到调用的方法，而后通过反射调用。
+The key steps are highlighted in the red box. It uses reflection to retrieve the method from the invoker, which is the stub, and then calls it via reflection.
 
-### 代码生成
+### Code Generation
 
-前面提到过 ds, ok := service.(DubboGrpcService) 这一句，面临的问题是如何让 protobuf 编译生成的代码能够实现 DubboGrpcService 接口呢？
+Earlier, I mentioned the line ds, ok := service.(DubboGrpcService), which faces the issue of how to make the code generated by protobuf compilations implement the DubboGrpcService interface.
 
-有些小伙伴可能也注意到，在我贴出来的一些代码里面，反射操作会根据名字来获取method实例，比如NewClient方法里面的method := reflect.ValueOf(impl).MethodByName("GetDubboStub")这一句。这一句的impl，即指服务的实现，也是 protobuf 里面编译出来的，怎么让 protobuf 编译出来的代码里面含有这个 GetDubboStub 方法呢？
+Some of you may have noticed that in some of the provided code, reflection operations retrieve method instances by name, as in the line method := reflect.ValueOf(impl).MethodByName("GetDubboStub") in the NewClient method. This impl refers to the service implementation, which is also compiled from protobuf. How can we make the code compiled from protobuf include this GetDubboStub method?
 
-到这里，答案已经呼之欲出了：修改 protobuf 编译生成代码的逻辑！
+At this point, the answer is emerging: modify the logic of the protobuf compilation generated code!
 
-庆幸的是，在 protobuf 里面允许我们通过插件的形式扩展我们自己的代码生成的逻辑。
+Fortunately, protobuf allows us to extend our code generation logic through plugins.
 
-所以我们只需要注册一个我们自己的插件：
+So, we just need to register our own plugin:
 
 ![img](/imgs/blog/dubbo-go/grpc/p12.webp)
 
-然后这个插件会把我们所需要的代码给嵌入进去。比如说嵌入GetDubboStub方法：
+Then this plugin will embed the necessary code. For example, embedding the GetDubboStub method:
 
 ![img](/imgs/blog/dubbo-go/grpc/p13.webp)
 
-还有DubboGrpcService接口：
+And the DubboGrpcService interface:
 
 ![img](/imgs/blog/dubbo-go/grpc/p14.webp)
 
-这个东西，属于难者不会会者不难。就是如果你不知道可以通过plugin的形式来修改生成的代码，那就是真难；但是如果知道了，这个东西就很简单了——无非就是水磨工夫罢了。
+This is a task where the challenge is only in knowing how to change the generated code through the plugin; once known, it becomes quite simple—it just requires some diligence.
+

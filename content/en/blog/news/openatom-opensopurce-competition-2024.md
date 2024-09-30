@@ -1,120 +1,119 @@
 ---
-title: "Apache Dubbo 下一代云原生微服务挑战赛启动报名！五大赛题50万奖金池等你来战"
-linkTitle: "Apache Dubbo 下一代云原生微服务挑战赛启动报名！五大赛题50万奖金池等你来战"
+title: "Apache Dubbo Next Generation Cloud Native Microservices Challenge Registration Open! Five Major Topics with a 500,000 RMB Prize Pool Await You"
+linkTitle: "Apache Dubbo Next Generation Cloud Native Microservices Challenge Registration Open! Five Major Topics with a 500,000 RMB Prize Pool Await You"
 date: 2024-01-18
-tags: ["新闻动态"]
+tags: ["News Updates"]
 description: >
-    中国开源开放原子基金会主办，Apache Dubbo 下一代云原生微服务挑战赛启动报名！五大赛题50万奖金池等你来战
+    Organized by the OpenAtom Foundation, registration for the Apache Dubbo Next Generation Cloud Native Microservices Challenge is now open! Five major topics with a 500,000 RMB prize pool await your participation.
 ---
 
-本文带来本赛题详细解读，<a href="https://competition.atomgit.com/competitionInfo?id=be48a38bb1daf499bd5c98ac8a3108fd" target="_blank">开放原子开源基金会官方报名渠道</a> 及更多详情请查看文章最后链接与二维码。
+This article provides a detailed interpretation of the competition topics. For the official registration channel of the OpenAtom Open Source Foundation, please refer to the link and QR code at the end of the article.
 
-## 赛题解读
-我们期待参赛团队在高性能 Triple(HTTP/3) 协议设计、完善的 Benchmark 验收体系、零信任解决方案、Service Mesh架构 等方向持续探索，共同定义下一代云原生微服务体系，为开源社区和企业用户在性能、安全等方面带来收益。
+## Topic Interpretation
+We look forward to participating teams to continuously explore high-performance Triple (HTTP/3) protocol design, a robust Benchmark acceptance system, zero-trust solutions, and Service Mesh architecture, jointly defining the next generation cloud-native microservice system, bringing benefits in performance and security to the open-source community and enterprise users.
 
-本赛事一共包含五道赛题：
-* 基于 HTTP/3 的高性能传输协议(Java)
-* 自动化的 Dubbo 框架与协议性能基准 Benchmark 机制与平台(语言不限)
-* 设计并实现一套零信任安全机制（含 Java/Golang SDK 适配与证书管理）
-* 面向云原生的下一代微服务集群监测机制，涵盖Kubernetes、Nacos 等(Golang)
-* 一种跨集群Kubernetes、传统VM微服务集群的互通方案与实现(Golang)
+The competition consists of five topics:
+* High-performance transmission protocol based on HTTP/3 (Java)
+* Automated Dubbo framework and protocol performance Benchmark mechanism and platform (language不限)
+* Design and implement a zero-trust security mechanism (including Java/Golang SDK adaptation and certificate management)
+* Next generation microservice cluster monitoring mechanism for cloud-native, covering Kubernetes, Nacos, etc. (Golang)
+* A cross-cluster communication solution and implementation between Kubernetes and traditional VM microservice clusters (Golang)
 
-### 1 基于HTTP/3 的高性能传输协议(Java)
+### 1 High-performance transmission protocol based on HTTP/3 (Java)
 
-#### 1.1 赛题背景与目标
-本赛题的主要目标是将 Dubbo 中的 triple 协议适配到 HTTP/3 之上，兑现 triple 协议规范中的所有核心能力。
+#### 1.1 Topic Background and Goals
+The main goal of this topic is to adapt the triple protocol in Dubbo to HTTP/3 and fulfill all core capabilities in the triple protocol specification.
 
-关于 Dubbo3 triple 协议使用的相关示例请参考（请注意阅读 README 中链接指向的其他相关示例）：[https://github.com/apache/dubbo-samples/tree/master/1-basic](https://github.com/apache/dubbo-samples/tree/master/1-basic)，通过运行示例，可以了解当前 triple 协议的功能。
+For related examples using the Dubbo3 triple protocol, please refer to (be sure to read the other related examples linked in the README): [https://github.com/apache/dubbo-samples/tree/master/1-basic](https://github.com/apache/dubbo-samples/tree/master/1-basic). By running the example, you can understand the current functionality of the triple protocol.
 
-以下是 Triple 协议规范：[https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/](https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/)
+The following is the Triple protocol specification: [https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/](https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/)
 
-#### 1.2 赛题说明
+#### 1.2 Topic Explanation
 
-请基于 Apache Dubbo Java 实现的 3.3 分支进行开发，代码仓库链接如下：
+Please develop based on the Apache Dubbo Java implementation from the 3.3 branch, and the code repository link is as follows:
 [https://github.com/apache/dubbo/tree/3.3](https://github.com/apache/dubbo/tree/3.3)
 
-triple 协议相关实现源码：
+Source code for triple protocol related implementations:
 
 - [https://github.com/apache/dubbo/tree/3.2/dubbo-rpc/dubbo-rpc-triple](https://github.com/apache/dubbo/tree/3.2/dubbo-rpc/dubbo-rpc-triple)
 - [https://github.com/apache/dubbo/tree/3.3/dubbo-remoting/dubbo-remoting-http12](https://github.com/apache/dubbo/tree/3.3/dubbo-remoting/dubbo-remoting-http12)
 
-开发者可根据自己的理解修改 Dubbo源码实现，比如在 remoting 层做 http3 适配，赛题实现不受限制，可以依赖如 Netty 等任意网络库或框架。
+Developers can modify the Dubbo source code implementation based on their understanding, such as adapting HTTP/3 at the remoting layer. There are no restrictions on the topic implementation and any network library or framework such as Netty can be used.
 
-#### 1.3 参考链接
+#### 1.3 Reference Links
 
 - [https://github.com/grpc/proposal/blob/master/G2-http3-protocol.md](https://github.com/grpc/proposal/blob/master/G2-http3-protocol.md)
 - [https://devblogs.microsoft.com/dotnet/http-3-support-in-dotnet-6/](https://devblogs.microsoft.com/dotnet/http-3-support-in-dotnet-6/)
 - [https://github.com/netty/netty-incubator-codec-http3](https://github.com/netty/netty-incubator-codec-http3)
 - [https://webtide.com/jetty-http-3-support/](https://webtide.com/jetty-http-3-support/)
 
-### 2 自动化的 Dubbo 框架与协议性能基准 Benchmark 机制与平台(语言不限)
+### 2 Automated Dubbo framework and protocol performance Benchmark mechanism and platform (language不限)
 
-#### 2.1 赛题背景与目标
-作为一款 RPC 框架，Apache Dubbo 内置了两款高性能通信协议：
+#### 2.1 Topic Background and Goals
+As an RPC framework, Apache Dubbo comes with two high-performance communication protocols:
 
-- triple 协议，基于 TCP 的高性能通信协议。
-- dubbo 协议，基于 HTTP 的高性能通信协议，支持 Streaming 通信模型。
+- The triple protocol, a high-performance communication protocol based on TCP.
+- The dubbo protocol, a high-performance communication protocol based on HTTP that supports Streaming communication models.
 
-本赛题计划建设的 benchmark 平台理论需具备持任意协议测试的能力，实际产出可以 dubbo、triple 协议为主。
+The planned benchmark platform must theoretically have the capacity to test any protocol, with the actual output focusing on the dubbo and triple protocols.
 
-#### 2.2 赛题说明
+#### 2.2 Topic Explanation
 
-- 建设一套支持 dubbo benchmark 验收的机制与流程，如当前有支持 java 语言的 [https://github.com/apache/dubbo-](https://github.com/apache/dubbo-samples)benchmark 可供参考
-- 给出 dubbo、triple 协议的性能指标，以直观可视化的方式展示
-- 找出性能瓶颈点、给出优化建议或实现
+- Build a mechanism and process that supports dubbo benchmark acceptance, for reference the current one supporting Java language is [https://github.com/apache/dubbo-samples](https://github.com/apache/dubbo-samples)
+- Provide performance metrics for dubbo and triple protocols, and display them visually in an intuitive manner
+- Identify performance bottlenecks and suggest or implement optimizations
 
-#### 2.3 参考资料
+#### 2.3 Reference Materials
 
 - [https://github.com/benchmark-action/github-action-benchmark](https://github.com/benchmark-action/github-action-benchmark)
 - [https://grpc.io/docs/guides/benchmarking/](https://grpc.io/docs/guides/benchmarking/)
-- triple协议规范 [https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/](https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/)
-- dubbo协议规范 [https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/](https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/)
-- 了解 dubbo 的基本使用方式 [https://github.com/apache/dubbo-samples](https://github.com/apache/dubbo-samples)
+- Triple Protocol Specification [https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/](https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/triple-spec/)
+- Dubbo Protocol Specification [https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/](https://cn.dubbo.apache.org/zh-cn/overview/reference/protocols/tcp/)
+- Understand the basic usage of dubbo [https://github.com/apache/dubbo-samples](https://github.com/apache/dubbo-samples)
 
-
-### 3 设计并实现一套零信任安全机制（含Java/Golang SDK 适配与证书管理）
-#### 3.1 赛题背景与目标
-本赛题的直接目标是为 Dubbo RPC 数据通信提供 TLS/mTLS 支持，但仅有相应的 API 与底层 tcp 链路是不够的，为了打造一套微服务整体解决方案，我们期望建立如下的一套零信任安全体系：
+### 3 Design and Implementation of a Zero Trust Security Mechanism (including Java/Golang SDK Adaptation and Certificate Management)
+#### 3.1 Topic Background and Goals
+The direct goal of this topic is to provide TLS/mTLS support for Dubbo RPC data communication. However, having merely the corresponding APIs and underlying TCP links is insufficient. To create a comprehensive microservice solution, we aim to establish a zero-trust security system as follows:
 
 ![openatom-2024](/imgs/blog/2024/01/openatom/security.png)
 
-赛题涉及到控制面到数据面（Dubbo SDK）的数据推送，如证书更新、认证规则、鉴权规则等，我们计划在这个推送链路使用 xDS 协议。
+The topic involves data push from the control plane to the data plane (Dubbo SDK) such as certificate updates, authentication rules, authorization rules, etc. We plan to use the xDS protocol for this push link.
 
-针对架构设计中的几个核心组件，其主要职责是：
+The main responsibilities of several core components in the architectural design are:
 
-1. 控制面组件
-   1. 作为 CA 机构负责证书签发与轮转，负责认证/鉴权规则的转换，提供 xDS Server 将证书与规则下发到数据面
-   2. 接收认证/鉴权规则，一套定义良好的认证与鉴权规则，支持控制 TLS/mTLS 行为，如什么场景下启用mTLS等；支持配置符合匹配条件下的认证/鉴权，可通过下文参考链接了解更多内容
-   3. xDS 协议，提供 xDS Server 负责证书与规则的推送。
+1. Control Plane Component
+   1. Acts as CA to manage certificate issuance and rotation, handle authentication/authorization rule conversions, and provide xDS Server to push certificates and rules to the data plane
+   2. Receives authentication/authorization rules with a well-defined rule set, supporting control over TLS/mTLS behavior, such as when to enable mTLS; also supports configuration matching conditions for authentication/authorization, further details can be found in the reference links below
+   3. xDS Protocol, provides xDS Server responsible for pushing certificates and rules.
 
-2. 数据面组件（Dubbo SDK）
-   1. Dubbo 框架适配 xDS 通道，接收证书与规则
+2. Data Plane Component (Dubbo SDK)
+   1. The Dubbo framework adapts to the xDS channel, receiving certificates and rules
 
-#### 3.2 赛题说明
-本赛题是取自 Dubbo 体系的微服务零信任总体方案，以上架构图描述的内容为该总体方案核心目标。
+#### 3.2 Topic Explanation
+This topic stems from the overall zero-trust solution of the Dubbo system, where the content described in the above architectural diagram represents the core objectives of the overall solution.
 
-本赛题选手可以参与开发的内容分为两部分：
+Participants can contribute in two sections:
 
-1. 数据面（Dubbo SDK），此部分为必做内容，即为 Dubbo SDK（Java/Go） 提供 xDS 的安全机制适配支持。如果选手决定不做控制面部分开发，则可以使用任意控制面 xDS Server 如 Istio 等辅助开发，流程与规则亦可直接使用 Istio 等，最终跑通 SDK 整体流程即可。
-2. 控制面，此部分为选做内容，即通过定制 Dubbo 社区提供的控制面实现，实现一整套定制化零信任解决方案。
+1. Data Plane (Dubbo SDK), a mandatory section wherein participants provide xDS security mechanism adaptation support for the Dubbo SDK (Java/Go). If participants choose not to develop the control plane section, they may use any control plane xDS Server, such as Istio, to assist in development; processes and rules may also directly use Istio, with the goal of completing the SDK overall flow.
+2. Control Plane, an optional section, involves customizing the control plane provided by the Dubbo community to realize a comprehensive zero-trust solution.
 
-##### 3.2.1 数据面（Dubbo SDK）开发指南：
+##### 3.2.1 Data Plane (Dubbo SDK) Development Guide:
 
-- 社区 Dubbo SDK 适配 xDS 的基本代码已经由官方提供，选手可直接在此之上关注安全相关 xDS 内容的进一步解析，并将接收到的证书、规则等适配到 Dubbo 框架内不
-- 选手可以考虑 Dubbo 框架认证鉴权能力的可扩展性。比如为 Dubbo 提供一套通用的认证、鉴权 API，本赛题来自 xDS 控制面的安全源成为其中的一个扩展实现；未来可以扩展其他的如非 xDS 通道的证书来源等。
+- The community has provided basic code for adapting xDS in the Dubbo SDK; participants can directly focus on the security-related xDS content and adapt the received certificates, rules, etc., into the Dubbo framework.
+- Participants should consider the extensibility of Dubbo's authentication and authorization capabilities. For example, provide a set of generic authentication and authorization APIs where this topic can be one of the extension implementations sourced from the xDS control plane; in the future, it can be expanded to include other certificate sources beyond xDS channels.
 
-相关源码仓库：
+Relevant source code repositories:
 
-- Dubbo Java 源码：[https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds)
-- Dubbo Go 源码：[https://github.com/apache/dubbo-go/tree/main/xds](https://github.com/apache/dubbo-go/tree/main/xds)
+- Dubbo Java source code: [https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds)
+- Dubbo Go source code: [https://github.com/apache/dubbo-go/tree/main/xds](https://github.com/apache/dubbo-go/tree/main/xds)
 
-##### 3.2.2 控制面开发指南：
-控制面的 xDS Server 将由官方社区提供基础实现，选手们可关注安全相关部分的设计与实现。
+##### 3.2.2 Control Plane Development Guide:
+The xDS Server of the control plane will be implemented by the official community, and participants should focus on the design and implementation of security-related components.
 
-控制面源码仓库：[https://github.com/apache/dubbo-kubernetes](https://github.com/apache/dubbo-kubernetes)
+Control plane source code repository: [https://github.com/apache/dubbo-kubernetes](https://github.com/apache/dubbo-kubernetes)
 
-#### 3.3 参考资料
-总的来说，本赛题要建设的是一套通用的零信任体系，提供以下业界实现作为参考：
+#### 3.3 Reference Materials
+Overall, this topic aims to construct a universal zero-trust system, offering the following industry implementations as references:
 
 - [https://istio.io/latest/docs/concepts/security/](https://istio.io/latest/docs/concepts/security/)
 - [https://github.com/grpc/proposal/blob/master/A29-xds-tls-security.md](https://github.com/grpc/proposal/blob/master/A29-xds-tls-security.md)
@@ -122,117 +121,117 @@ triple 协议相关实现源码：
 - [https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol#xds-protocol-delta](https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol#xds-protocol-delta)
 
 
-### 4 面向云原生的下一代微服务集群监测机制，涵盖Kubernetes、Nacos (Golang)
+### 4 Next Generation Microservice Cluster Monitoring Mechanism for Cloud Native, Covering Kubernetes, Nacos (Golang)
 
-#### 4.1 赛题背景与目标
-微服务的整体可视化管控一直依赖都是一个非常重要的议题，本赛题的大背景是 Apache Dubbo 社区正在推进的 Dubbo 整体可视化项目，我们计划实现一个可以同时兼容 Zookeeper/Nacos 等传统注册中心、Kubernetes Service、Service Mesh 架构的统一的可视化控制台：
+#### 4.1 Topic Background and Goals
+Overall visualization and control of microservices is an important issue. The broader context of this topic is the overall visualization project being advanced by the Apache Dubbo community. We plan to implement a unified visualization console that can be compatible with traditional registries like Zookeeper/Nacos, Kubernetes Services, and Service Mesh architectures:
 
-- 微服务集群数据可视化。包括集群内的应用、服务、示例等基本信息展示。
-- 监控相关。借助 Dubbo SDK 上报到 Prometheus 的 Metrics 数据，控制台通过查询 Prometheus 展示相关监控指标，绘制调用链路图与依赖关系图等。
-- 流量管控。支持流量管控规则，支持规则可视化编辑、预览、下发。
+- Microservice cluster data visualization, including basic information displays of applications, services, instances, etc., within the cluster.
+- Monitoring-related. Using Metrics data reported to Prometheus via the Dubbo SDK, the console displays relevant monitoring metrics by querying Prometheus and drawing call chain diagrams and dependency diagrams, etc.
+- Traffic control. Supports traffic control rules with visual editing, previewing, and issuing.
 
-##### 4.1.1 总体目标
-相比之前老版本的 Dubbo Admin 实现，我们期望新版本的控制台在部署架构、功能丰富度上都实现全面升级。
+##### 4.1.1 Overall Goal
+Compared to the earlier version of Dubbo Admin, we expect a comprehensive upgrade in deployment architecture and feature richness for the new version of the console.
 
-因此参赛选手可重点关注以下几个方向：
+Participants should focus on the following directions:
 
-- 提供一个通用的微服务适配层抽象（如包含 Application、Servcice、Instance 等概念），作为新版控制台的统一数据源，屏蔽底层 Nacos、Kubernetes、Service Mesh 架构的差异。目前官方仓库提供了一个基本参考设计与实现。
-- 设计控制台功能并提供完整实现。目前官方提供了参考交互效果图。
+- Provide a generic microservice adaptation layer abstraction (including ideas like Application, Service, Instance, etc.), as a unified data source for the new version of the console, shielding differences in underlying Nacos, Kubernetes, and Service Mesh architectures. The official repository currently provides a basic reference design and implementation.
+- Design console functions and provide complete implementation. The official reference interactive effect diagrams are provided.
 
-从用户 GUI 视角看，如可做菜单设计如下：
+From a user GUI perspective, the menu design can be as follows:
 
-- 首页大盘
-- 资源详情
-   - 应用
-   - 服务
-   - 实例
-- 流量管控
+- Home Dashboard
+- Resource Details
+   - Application
+   - Service
+   - Instance
+- Traffic Control
 
-#### 4.2 赛题说明
-本赛题官方已经提供了后端适配层的参考实现，同时给出了部分前端交互设计初稿。选手完全可以此为基础进行开发设计，具体评分标准参见官方报名渠道说明。
+#### 4.2 Topic Explanation
+The official has provided reference implementations for the back-end adaptation layer and part of the front-end interaction design drafts. Participants can base their development design on these. Specific scoring standards can be referred to in the official registration channel.
 
-1. 后端： [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
+1. Back-end: [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
 
-2. 前端代码框架：https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
+2. Front-end code framework: https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
 
-#### 4.3 参考资料
+#### 4.3 Reference Materials
 
 - [https://github.com/kiali/kiali](https://github.com/kiali/kiali)
 - [https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin)
 - [https://github.com/apache/dubbo-admin](https://github.com/apache/dubbo-admin)
 - [https://github.com/istio/istio](https://github.com/istio/istio)
 
-### 5 一种跨集群Kubernetes、传统VM微服务集群的互通方案与实现(Golang)
+### 5 A Cross-Cluster Communication Solution and Implementation Between Kubernetes and Traditional VM Microservice Clusters (Golang)
 
-#### 5.1 赛题背景与目标
+#### 5.1 Topic Background and Goals
 
-在 Apache Dubbo 最新规划中，我们计划完整的支持以下部署架构：
+In Apache Dubbo's latest plan, we aim to fully support the following deployment architectures:
 
-##### 5.1.1 传统注册中心模式
+##### 5.1.1 Traditional Registry Center Mode
 
 ![5-1-vm](/imgs/blog/2024/01/openatom/5-1-vm.png)
 
-##### 5.1.2 基于 Kubernetes 调度的注册中心模式
+##### 5.1.2 Registry Center Mode Based on Kubernetes Scheduling
 
 ![5-2-kubernetes](/imgs/blog/2024/01/openatom/5-2-kubernetes.png)
 
-##### 5.1.3 基于 Kubernetes Service 的 Proxyless Service Mesh 模式
+##### 5.1.3 Proxyless Service Mesh Mode Based on Kubernetes Service
 
 ![5-3-kubernetes-service](/imgs/blog/2024/01/openatom/5-3-kubernetes-service.png)
 
-其中，控制面由 Dubbo 社区建设，仓库地址位于：[https://github.com/apache/dubbo-kubernetes](https://github.com/apache/dubbo-kubernetes)
+The control plane is built by the Dubbo community, and the repository is located at: [https://github.com/apache/dubbo-kubernetes](https://github.com/apache/dubbo-kubernetes)
 
-#### 5.2 赛题解读
-由于网络模型、注册中心等多个层面的原因，以上三种部署架构在很多情况下是相互隔离的，要实现这几个架构间的通信变的非常困难。
+#### 5.2 Topic Interpretation
+Due to various reasons such as network models, registries, etc., the above three deployment architectures are often isolated from each other, making communication between these architectures very difficult.
 
-为了实现多集群地址、路由规则等互通，我们提供了一个跨集群部署的示例架构图，如下所示
+To achieve communication among multiple cluster addresses, routing rules, etc., we provide a cross-cluster deployment example architecture diagram as follows
 
 ![5-4-kubernetes-service](/imgs/blog/2024/01/openatom/5-4-multiple-cluster.png)
 
-其中，红色部分即为跨集群的数据流向，其中红色实现部分为控制面数据流，红色虚线部分为数据面数据流。
+The red parts indicate the data flow across clusters, where the solid red part represents control plane data flow, and the dashed red part represents data plane data flow.
 
-##### 5.2.1 为什么要跨集群通信那？
+##### 5.2.1 Why Cross-Cluster Communication?
 
-有以下场景可能会用到：
+The following scenarios may utilize this:
 
-1. Kubernetes 迁移，之前用的是 Zookeeper 传统注册中心架构，期望迁移到 Kubernetes 集群部署，或者期望使用 kubernetes Service 服务模型
-2. Kubernetes 多集群部署，跨多个 Kubernetes 集群 Dubbo 微服务通信
-3. 混合部署，传统注册中心集群、Kubernetes 集群、Kubernetes Service（Service Mesh）架构混合部署
+1. Kubernetes migration, wishing to migrate from traditional Zookeeper registry center architecture to a Kubernetes cluster deployment or expecting to use the Kubernetes Service service model
+2. Multi-cluster deployment on Kubernetes, Dubbo microservices communication across multiple Kubernetes clusters
+3. Hybrid deployment, mixed deployment of traditional registry clusters, Kubernetes clusters, and Kubernetes Service (Service Mesh) architectures
 
-##### 5.2.2 期待交付用户的使用体验
+##### 5.2.2 Expected User Experience Delivery
 
-1. Kubernetes Service：`dubboctl install --mode=kubernetes --ingress-enabled`
-2. Kubernetes：`dubboctl instaqll --mode=universal --ingress-enabled`
-3. 传统 VM：
+1. Kubernetes Service: `dubboctl install --mode=kubernetes --ingress-enabled`
+2. Kubernetes: `dubboctl install --mode=universal --ingress-enabled`
+3. Traditional VM:
 	* `dubbo-cp run --registry-address=nacos://xxx``
 	* `dubbo-dp run --control-plane=xxx`
-4. 跨集群则需要额外部署 global 集群，使用方式与以上类似
+4. For cross-cluster, an additional global cluster needs to be deployed, with usage similar to the above.
 
-##### 5.2.1 主要交付内容
-以上图示例架构为例，参赛选手应主要关注：
+##### 5.2.1 Main Deliverables
+Using the above diagram as an example, participants should primarily focus on:
 
-1. 控制面、Ingress 的开发与建设（Dubbo SDK 侧无须关注，包括 SDK 与控制面的 xDS 通信，此部分可假设整体已经就绪），包括提供新方案中对于跨集群通信必要的组件支持等。
-2. 跨集群的 global 控制面能力建设
+1. Development and construction of the control plane and Ingress (no need to focus on Dubbo SDK side, including xDS communication between the SDK and control plane; this can be assumed to be ready), including providing support for necessary components for cross-cluster communication in the new solution.
+2. Building cross-cluster global control capabilities.
 
-Dubbo 官方目前提供了基础控制面实现，包括基于 xds server 的服务发现等内容，可在此基础上继续扩展跨集群方案实现。项目源码：[https://github.com/apache/dubbo-kubernetes](https://github.com/apache/dubbo-kubernetes)
+Dubbo currently offers a basic implementation of the control plane including service discovery based on the xDS server, which can continue to be expanded to implement cross-cluster solutions. Project source code: [https://github.com/apache/dubbo-kubernetes](https://github.com/apache/dubbo-kubernetes)
 
-#### 5.3 参考资料
+#### 5.3 Reference Materials
 
 1. [https://istio.io/](https://istio.io/)
 2. [https://kuma.io/docs/2.5.x/production/deployment/multi-zone/](https://kuma.io/docs/2.5.x/production/deployment/multi-zone/)
 
-## 报名方式
+## Registration Method
 
-### 报名链接
+### Registration Link
 
-[开放原子开源基金会官方报名渠道](https://competition.atomgit.com/competitionInfo?id=be48a38bb1daf499bd5c98ac8a3108fd)
+[OpenAtom Foundation Official Registration Channel](https://competition.atomgit.com/competitionInfo?id=be48a38bb1daf499bd5c98ac8a3108fd)
 
-### 答疑群
+### Q&A Group
 
-有任何赛题疑问扫码加入以下钉钉群：
+For any questions about the competition topics, please scan to join the following DingTalk group:
 
 ![5-4-kubernetes-service](/imgs/blog/2024/01/openatom/dingding-group.png)
 
-### 赛题详情海报
+### Competition Details Poster
 
 ![openatom-2024](/imgs/blog/2024/01/openatom/openatom-2024.png)

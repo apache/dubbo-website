@@ -11,7 +11,7 @@ description: >
 
 ## Verification  
 
-you can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://downloads.apache.org/dubbo/KEYS) file to verify the download files
+You can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://downloads.apache.org/dubbo/KEYS) file to verify the download files.
 
 ## Apache Dubbo
 
@@ -210,7 +210,6 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
   [asc](https://archive.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.asc) |
   [sha512](https://archive.apache.org/dist/dubbo/2.7.12/apache-dubbo-2.7.12-src.zip.sha512)
 
-
 ### 2.7.11 (2021-05-12)
 
 * [source](https://archive.apache.org/dist/dubbo/2.7.11/apache-dubbo-2.7.11-src.zip) |
@@ -223,13 +222,11 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
   [asc](https://archive.apache.org/dist/dubbo/2.7.10/apache-dubbo-2.7.10-src.zip.asc) |
   [sha512](https://archive.apache.org/dist/dubbo/2.7.10/apache-dubbo-2.7.10-src.zip.sha512)
 
-
 ### 2.7.9 (2020-02-23)
 
 * [source](https://archive.apache.org/dist/dubbo/2.7.9/apache-dubbo-2.7.9-src.zip) |
   [asc](https://archive.apache.org/dist/dubbo/2.7.9/apache-dubbo-2.7.9-src.zip.asc) |
   [sha512](https://archive.apache.org/dist/dubbo/2.7.9/apache-dubbo-2.7.9-src.zip.sha512)
-
 
 ### 2.7.8 (2020-07-28)
 
@@ -348,7 +345,7 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 ## Dubbo Spring Boot Starter
 
 > GitHub: https://github.com/apache/incubator-dubbo-spring-boot-project \
-> 发布说明：https://github.com/apache/incubator-dubbo-spring-boot-project/releases
+> Release Notes: https://github.com/apache/incubator-dubbo-spring-boot-project/releases
 
 ### 2.7.1 (2019-04-09)
 
@@ -396,3 +393,4 @@ you can follow these [procedures](https://www.apache.org/info/verification) and 
 * [source](https://archive.apache.org/dist/incubator/dubbo/dubbo-ops/0.1/apache-dubbo-ops-incubating-0.1-source-release.zip) |
 [asc](https://archive.apache.org/dist/incubator/dubbo/dubbo-ops/0.1/apache-dubbo-ops-incubating-0.1-source-release.zip.asc) |
 [sha512](https://archive.apache.org/dist/incubator/dubbo/dubbo-ops/0.1/apache-dubbo-ops-incubating-0.1-source-release.zip.sha512)
+

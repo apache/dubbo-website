@@ -1,24 +1,24 @@
 ---
-title: "Web 浏览器页面也能访问dubbo、grpc微服务？Dubbo-js alpha版本正式发布"
-linkTitle: "Web 浏览器页面也能访问dubbo、grpc微服务？Dubbo-js alpha版本正式发布"
+title: "Can web browser pages access Dubbo and gRPC microservices? Dubbo-js alpha version officially released"
+linkTitle: "Can web browser pages access Dubbo and gRPC microservices? Dubbo-js alpha version officially released"
 tags: ["web", "dubbo-js", "browser"]
-authors: ["蔡建怿"]
+authors: ["Cai Jianyi"]
 date: 2023-10-07
-description: "Dubbo-js 已于 9 月份发布支持 Dubbo3 协议的首个 alpha 版本，它的发布将有机会彻底改变微服务前后端的架构与通信模式，让你能直接在浏览器页面或web服务器中访问后端 Dubbo RPC 服务。"
+description: "Dubbo-js has officially released its first alpha version supporting the Dubbo3 protocol in September, which has the potential to fundamentally change the architecture and communication patterns between microservices' front-end and back-end, allowing you to access back-end Dubbo RPC services directly from browser pages or web servers."
 ---
 
-基于 Dubbo3 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。[Dubbo TypeScript SDK](https://github.com/apache/dubbo-js/) 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 APl 来发布或调用这些服务。
+Based on the Triple protocol defined by Dubbo3, you can easily write browser and gRPC-compatible RPC services, allowing these services to run simultaneously on HTTP/1 and HTTP/2. The [Dubbo TypeScript SDK](https://github.com/apache/dubbo-js/) supports defining services using IDL or language-specific approaches and provides a lightweight API to publish or invoke these services.
 
-Dubbo-js 已于 9 月份发布支持 Dubbo3 协议的首个 alpha 版本，它的发布将有机会彻底改变微服务前后端的架构与通信模式，让你能直接在浏览器页面或web服务器中访问后端 Dubbo RPC 服务。目前项目快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎搜索钉钉群：**29775027779** 加入开发者群组。
+Dubbo-js has officially released its first alpha version supporting the Dubbo3 protocol in September, which promises to transform the architecture and communication models between front-end and back-end of microservices, enabling direct access to back-end Dubbo RPC services from browser pages or web servers. The project is rapidly evolving, and developers interested in participating in the apache/dubbo-js project are welcome to search for the DingTalk group: **29775027779** to join the developer group.
 
-![Web 浏览器页面也能访问dubbo、grpc微服务](/imgs/blog/2023/9/web/img.png)
-# 浏览器 Web 应用示例
-本示例演示了如何使用 dubbo-js 开发运行在浏览器上的 web 应用程序，web 页面将调用 dubbo node.js 开发的后端服务并生成页面内容。本示例演示基于 IDL 和非 IDL 两种编码模式。
+![Can web browser pages access Dubbo and gRPC microservices](/imgs/blog/2023/9/web/img.png)
+# Browser Web Application Example
+This example demonstrates how to develop a web application running in the browser using dubbo-js, where the web page calls back-end services developed in dubbo node.js to generate page content. This example showcases both IDL and non-IDL coding modes.
 
-![Web 浏览器页面也能访问dubbo、grpc微服务](/imgs/blog/2023/9/web/img_1.png)
-## IDL 模式
-### 前置条件
-首先，我们将使用 Vite 来生成我们的前端项目模板，它内置了我们稍后需要的所有功能支持。
+![Can web browser pages access Dubbo and gRPC microservices](/imgs/blog/2023/9/web/img_1.png)
+## IDL Mode
+### Prerequisites
+First, we will use Vite to generate our front-end project template, which includes all the necessary feature support we'll need later.
 
 ```shell
 npm create vite@latest -- dubbo-web-example --template react-ts
@@ -26,23 +26,23 @@ cd dubbo-web-example
 npm install
 ```
 
-因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `@bufbuild/protoc-gen-es`、`@bufbuild/protobuf`、`@apachedubbo/protoc-gen-apache-dubbo-es`、`@apachedubbo/dubbo`。
+Due to using Protocol Buffer, we first need to install the relevant code generation tools, including `@bufbuild/protoc-gen-es`, `@bufbuild/protobuf`, `@apachedubbo/protoc-gen-apache-dubbo-es`, and `@apachedubbo/dubbo`.
 
 ```shell
 npm install @bufbuild/protoc-gen-es @bufbuild/protobuf @apachedubbo/protoc-gen-apache-dubbo-es @apachedubbo/dubbo
 ```
 
-### 使用 Proto 定义服务
+### Define Services Using Proto
 
-现在，使用 Protocol Buffer (IDL) 来定义一个 Dubbo 服务。
+Now, define a Dubbo service using Protocol Buffer (IDL).
 
-src 下创建 util/proto 目录，并生成文件
+Create the util/proto directory under src and generate the file
 
 ```shell
 mkdir -p src/util/proto && touch src/util/proto/example.proto
 ```
 
-写入内容
+Write the content
 
 ```protobuf
 syntax = "proto3";
@@ -62,17 +62,17 @@ service ExampleService {
 }
 ```
 
-这个文件声明了一个叫做 `ExampleService` 的服务，为这个服务定义了 `Say` 方法以及它的请求参数 `SayRequest` 和返回值 `SayResponse`。
+This file declares a service called `ExampleService`, defining the `Say` method along with its request parameter `SayRequest` and return value `SayResponse`.
 
-### 生成代码
+### Generate Code
 
-创建 gen 目录，作为生成文件放置的目标目录
+Create a gen directory as the target directory for generated files
 
 ```shell
 mkdir -p src/util/gen
 ```
 
-运行以下命令，利用 `protoc-gen-es`、`protoc-gen-apache-dubbo-es` 等插件在 gen 目录下生成代码文件
+Run the following command to generate the code files in the gen directory using plugins like `protoc-gen-es`, `protoc-gen-apache-dubbo-es`
 
 ```shell
 PATH=$PATH:$(pwd)/node_modules/.bin \
@@ -84,7 +84,7 @@ PATH=$PATH:$(pwd)/node_modules/.bin \
   example.proto
 ```
 
-运行命令后，应该可以在目标目录中看到以下生成的文件:
+After running the command, you should see the following generated files in the target directory:
 
 ```
 ├── src
@@ -96,15 +96,15 @@ PATH=$PATH:$(pwd)/node_modules/.bin \
 │   │       └── example.proto
 ```
 
-### 创建 App
+### Create App
 
-需要先下载 `@apachedubbo/dubbo-web`
+First, install `@apachedubbo/dubbo-web`
 
 ```shell
 npm install @apachedubbo/dubbo-web
 ```
 
-现在我们可以从包中导入服务并设置一个客户端。在 App.tsx 中添加以下内容：
+Now we can import the service from the package and set up a client. Add the following content in App.tsx:
 
 ```typescript
 import { useState } from "react";
@@ -177,23 +177,23 @@ function App() {
 export default App;
 ```
 
-执行以下命令，即可得到样例页面
+Run the following command to obtain the sample page
 
 ```shell
 npm run dev
 ```
 
-### 启动 Server
+### Start Server
 
-接下来我们需要启动 Server，可以使用 Java、Go、Node.js 等 Dubbo 支持的任一语言开发 Server。这里我们采用 Dubbo 服务嵌入的 Node.js 服务器，具体可参考 [Node.js 开发 Dubbo 后端服务](https://github.com/apache/dubbo-js/tree/dubbo3/example/dubbo-node-example) 中的操作步骤。
+Next, we need to start the server. You can develop the server in any language supported by Dubbo, such as Java, Go, or Node.js. Here we will use a Node.js server embedded with Dubbo services, detailed in the [Node.js Development of Dubbo Backend Services](https://github.com/apache/dubbo-js/tree/dubbo3/example/dubbo-node-example) guide.
 
-不过需要注意，我们额外需要修改 Node.js 示例：引入 @fastify/cors 来解决前端请求的跨域问题
+However, we need to make an additional modification to the Node.js example: import @fastify/cors to solve the CORS issue for front-end requests.
 
 ```shell
 npm install @fastify/cors
 ```
 
-需要在 server.ts 文件下修改
+The modification in the server.ts file should include
 
 ```typescript
 ...
@@ -214,22 +214,22 @@ async function main() {
 void main();
 ```
 
-最后，运行代码启动服务
+Finally, run the code to start the service
 
 ```shell
 npx tsx server.ts
 ```
 
-## 无 IDL 模式
-在接下来的版本中，我们将继续提供无 IDL 模式的通信支持，这样就可以更方便的访问无 IDL 的后端服务。在这里，我们先快速的看一下无 IDL 模式的使用方式。
+## Non-IDL Mode
+In upcoming versions, we will continue to provide non-IDL mode communication support for easier access to non-IDL back-end services. Here, we will quickly look at the use of non-IDL mode.
 
-同样需要先安装 `@apachedubbo/dubbo`、`@apachedubbo/dubbo-web`
+Again, first install `@apachedubbo/dubbo`, `@apachedubbo/dubbo-web`
 
 ```shell
 npm install @apachedubbo/dubbo @apachedubbo/dubbo-web
 ```
 
-现在就可以一个启动一个客户端，并发起调用了。App.tsx 中的代码与 IDL 模式基本一致，区别点在于以下内容：
+Now you can start a client and initiate a call. The code in App.tsx is mostly identical to the IDL mode, with the following differences:
 
 ```typescript
 // ...
@@ -252,15 +252,16 @@ function App() {
 }
 ```
 
-执行以下命令，即可得到样例页面
+Run the following command to get the sample page
 
 ```shell
 npm run dev
 ```
-# 总结
-直接在浏览器页面或web服务器中访问后端 Dubbo RPC 服务！Dubbo Triple 协议升级以及 Dubbo javascript sdk 的发布，对整个微服务体系是一个非常有力的补充，期待看到它能改变未来整个微服务架构以及前后端通信模式。
+# Summary
+Access back-end Dubbo RPC services directly from browser pages or web servers! The upgrade of the Dubbo Triple protocol and the release of the Dubbo JavaScript SDK provide a significant enhancement to the entire microservices ecosystem, expecting to see it change the entire microservices architecture and front-end and back-end communication patterns in the future.
 
-Dubbo-js 刚刚在 9 月份发布了支持 Dubbo3 Triple 协议的首个 alpha 版本，目前项目正处于快速发展中，对参与 apache/dubbo-js 项目感兴趣的开发者，欢迎通过以下方式加入组织：
+Dubbo-js has just released the first alpha version supporting the Dubbo3 Triple protocol in September, and the project is rapidly evolving. Developers interested in participating in the apache/dubbo-js project are welcome to join the organization through the following methods:
 
-- 搜索钉钉群：**29775027779** 加入开发者群组。
-- 关注该公众号 `apachedubbo`，回复 "dubbojs" 接受邀请加入开发组
+- Search for DingTalk group: **29775027779** to join the developer group.
+- Follow the public account `apachedubbo`, reply "dubbojs" to accept the invitation to join the development team.
+

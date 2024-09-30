@@ -1,23 +1,23 @@
 ---
-title: 谈谈Pixiu的Filter
-keywords: Pixiu 介绍
-description: Filter通常是网关最重要的一部分，那Pixiu的过滤器链是如何运行的呢
+title: Talk About Pixiu's Filter
+keywords: Introduction to Pixiu
+description: The Filter is usually the most important part of the gateway. So how does Pixiu's filter chain work?
 tags: ["Go", "Pixiu"]
 author: mark4z
 date: 2022-02-19
 ---
 
-## **Filter的生命周期**
+## **Lifecycle of the Filter**
 
-Pixiu作为一个面向云原生的gateway，通过简单的配置即可代理Http to Dubbo 2、Tripe甚至是Spring Cloud的请求。那Filter是怎样运行的呢？
+As a cloud-native gateway, Pixiu can proxy Http to Dubbo 2, Tripe, or even Spring Cloud requests through simple configuration. So how does the Filter operate?
 
-首先**Filter Plugin**向**Filter Manager**注册自己**，**然后**Filter Manager**根据配置创建好**Filter Factory**并持有它们，等待请求来临时，**Manager**创建一个一次性的用于此次请求的Filter Chain，然后利用**Factory**创建好**Decode/Encode Filter**并把它们加入链中，然后按照顺序去运行Decode Filter，然后去请求**Upstream**，拿到Response再反向运行Encode Filter，让Filter可以访问到Response。
+First, the **Filter Plugin** registers itself with the **Filter Manager**. Then, the **Filter Manager** creates **Filter Factory** based on configuration and holds them. When a request comes in, the **Manager** creates a one-time Filter Chain for this request, then uses the **Factory** to create **Decode/Encode Filters** and adds them to the chain. Then it runs the Decode Filters in order, goes to the **Upstream** to get the Response, and runs the Encode Filters in reverse order, allowing the Filter to access the Response.
 
-几个关键的概念：
+Key concepts:
 
 **Filter Manager**
 
-> Filter的Manger。。。
+> Filter Manger...
 
 ```go
 // FilterManager manage filters
@@ -27,9 +27,9 @@ type FilterManager struct {
 }
 ```
 
-**Filter Plugin**：定义了Filter的（唯一的）名字和描述如何去创建一个Filter Factory。
+**Filter Plugin**: Defines the (unique) name of the Filter and describes how to create a Filter Factory.
 
-> 其实结合Filter Factory的定义，可以认为Plugin是Filter Factory的Factory
+> The Plugin can be considered a Factory for Filter Factory in conjunction with the definition of Filter Factory.
 
 ```go
 // HttpFilterPlugin describe plugin
@@ -42,38 +42,33 @@ HttpFilterPlugin interface {
 }
 ```
 
-**Filter Factory**：定义了Filter自身的配置，并且在请求来临时创建真实的Filter并把它添加到FilterChain中
+**Filter Factory**: Defines the configurations of the Filter itself, creates the real Filter when a request comes in, and adds it to the FilterChain.
 
-> - Config() 的目的是能让Filter Manager能够有机会把配置交给Factory（此时golang泛型还没有落地）
-> - Apply() 在配置被注入到Factory后，有机会对config做一些检查和提前做一些初始化的工作
-> - PrepareFilterChain() 创建Filter并加入Filter Chain
+> - The purpose of Config() is to give the Filter Manager a chance to pass configurations to the Factory (at this point, Golang generics have not landed yet).
+> - Apply() allows for some checks and initializes work after the config is injected into the Factory.
+> - PrepareFilterChain() creates the Filter and appends it to the Filter Chain.
 
 ```go
 // HttpFilterFactory describe http filter
 HttpFilterFactory interface {
-   // Config Expose the config so that Filter Manger can inject it, so it must be a pointer
+   // Config Expose the config so that Filter Manager can inject it, so it must be a pointer
    Config() interface{}
 
-   // Apply After the config is injected, check it or make it to default
+   // Apply After the config is injected, check it or make it default
    Apply() error
 
    // PrepareFilterChain create filter and append it to FilterChain
-   //
-   // Be Careful !!! Do not pass the Factory's config pointer to the Filter instance,
-   // Factory's config may be updated by FilterManager
    PrepareFilterChain(ctx *http.HttpContext, chain FilterChain) error
 }
 ```
 
-**Decode/Encode Filter：**Filter分为两个部分，**Decode**在实际请求**Upstream**之前，所以可以做一些鉴权、限流，把请求在gateway层拦截掉。**Eecode**则运行在获得**Upstream**的Response之后，所以可以对返回Log甚至修改Response。
+**Decode/Encode Filter**: The Filter is divided into two parts; **Decode** occurs before actual requests to **Upstream**, allowing for authorization, rate limiting, and intercepting requests at the gateway level. **Encode** runs after receiving the **Upstream** response, allowing for logging and even modifying the Response.
 
-> 一个Filter可以即是Decode Filter，又是Encode Filter，没有限制！
+> A Filter can be both a Decode Filter and an Encode Filter without restrictions!
 >
-> 假设有A、B、C三个Filter，都是Decode/Encode Filter，如果配置的顺序是A、B、C，那么运行将会是下面这样
+> Assume there are three Filters A, B, C, all Decode/Encode Filters; if the configured order is A, B, C, the execution will proceed as follows:
 >
-> 在Decode阶段 A->B->C，而在Encode阶段，顺序将会反过来！C->B->A
-
-
+> In the Decode phase A->B->C, while in the Encode phase the order will be reversed! C->B->A.
 
 ```go
 // decode filters will be invoked in the config order: A、B、C, and decode filters will be
@@ -89,15 +84,13 @@ HttpEncodeFilter interface {
 }
 ```
 
-更详细的，每个Decode/Encode Filter可以返回一个FilterStatus来决定继续还是就在这里停下！比如JWT鉴权，token无效时就要及时把401返回给Downstream。当然Decode Filter发出的停止命令只会终止Decode阶段，至于为什么？想想如何做一个Access Log Filter，能在请求失败时也把失败的结果记录下吧来！
+In more detail, each Decode/Encode Filter can return a FilterStatus to decide whether to continue or stop here! For example, for JWT authorization, return 401 to Downstream if the token is invalid. Note that the stop command issued by Decode Filter will only terminate the Decode phase. Why? Consider how to implement an Access Log Filter to record failure results even when requests fail!
 
+## **How to Write a Custom Filter**
 
+Let’s try to create a simple Filter. This Filter will have basic configurations, logging the request body in the Decode phase and returning it as a mock response after reversing it. Finally, it will log the return value based on the configurations in the Encode phase.
 
-## **怎样编写一个自定义Filter**
-
-我们来尝试写一个简单的Filter，这个Filter将会有简单的配置，在Decode阶段把请求的Body Log出来，并翻转后作为Mock的返回值。最后在Encode阶段根据配置把返回值Log出来。
-
-1.首先创建一个Filter
+1. First, create a Filter.
 
 ```go
 type DemoFilter struct {
@@ -108,14 +101,14 @@ func (f *DemoFilter) Decode(ctx *contexthttp.HttpContext) filter.FilterStatus {
    body, _ := ioutil.ReadAll(ctx.Request.Body)
    logger.Infof("request body: %s", body)
 
-   //reverse res str
+   // Reverse res str
    runes := []rune(string(body))
    for i := 0; i < len(runes)/2; i += 1 {
       runes[i], runes[len(runes)-1-i] = runes[len(runes)-1-i], runes[i]
    }
    reverse := string(runes)
 
-   //mock response
+   // Mock response
    ctx.SendLocalReply(200, []byte(reverse))
    return filter.Stop
 }
@@ -127,7 +120,7 @@ func (f *DemoFilter) Encode(ctx *contexthttp.HttpContext) filter.FilterStatus {
 }
 ```
 
-2.创建Filter Factory
+2. Create Filter Factory.
 
 ```go
 type (
@@ -157,10 +150,10 @@ func (f *DemoFilterFactory) Apply() error {
 }
 ```
 
-3.创建Filter Plugin，并注册自己
+3. Create Filter Plugin and register it.
 
 ```go
-//important
+// Important
 func init() {
    filter.RegisterHttpFilter(&Plugin{})
 }
@@ -177,7 +170,7 @@ func (p *Plugin) CreateFilterFactory() (filter.HttpFilterFactory, error) {
 }
 ```
 
-4.配置文件中配置此Filter，并启动Pixiu
+4. Configure this Filter in the configuration file and start Pixiu.
 
 ```yaml
 static_resources:
@@ -201,15 +194,15 @@ static_resources:
                     config:
 ```
 
-5.访问并查看日志与结果
+5. Access and check the logs and results.
 
 ```shell
 curl localhost:8888/demo -d "eiv al tse’c"
 
-c’est la vie% 
+c’est la vie%
 ```
 
-日志
+Logs
 
 ```
 2022-02-19T20:20:11.900+0800    INFO    demo/demo.go:62 request body: eiv al tse’c

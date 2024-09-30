@@ -1,8 +1,5 @@
-
 ---
-title: "社区动态"
-linkTitle: "社区动态"
+title: "Community Updates"
+linkTitle: "Community Updates"
 weight: 10
----
-
-
+---  

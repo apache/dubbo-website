@@ -1,13 +1,13 @@
 ---
-title: "回声测试"
-linkTitle: "回声测试"
+title: "Echo Test"
+linkTitle: "Echo Test"
 tags: ["Java"]
 date: 2018-06-26
 description: >
-    回声测试用于检测服务是否可用
+    The echo test is used to detect whether the service is available.
 ---
 
-回声测试用于检测服务是否可用。客户端通过 EchoService 来使用回声测试。EchoService 申明如下：
+The echo test is used to detect whether the service is available. The client uses EchoService to perform the echo test. The EchoService is declared as follows:
 
 ```Java
 public interface EchoService {
@@ -22,31 +22,29 @@ public interface EchoService {
 
 }
 ```
-用户通过 $echo 方法发起的请求，会按照正常请求的流程执行，能够测试整个调用是否通畅，监控系统可以使用回声测试来检测服务可用性。
+Requests initiated by the user through the $echo method are executed according to the normal request process, allowing testing of the entire call flow. The monitoring system can use the echo test to check service availability.
 
-## 使用范例
+## Usage Example
 
-所有服务引用自动实现 EchoService 接口，用户只需将服务引用强制转型为 EchoService，即可使用。配置和代码范例如下所示。
-Spring 配置：
+All service references automatically implement the EchoService interface. Users just need to cast the service reference to EchoService to use it. The configuration and code example are as follows. Spring configuration:
 
 ```
 <dubbo:reference id="demoService" interface="org.apache.dubbo.samples.echo.DemoService" />
 ```
-代码：
+Code:
 
 ```Java
-// 远程服务引用
+// Remote service reference
 DemoService demoService= ctx.getBean("demoService");
-// 强制转型为EchoService
+// Cast to EchoService
 EchoService echoService = (EchoService) demoService;
-// 回声测试可用性
+// Echo test availability
 String status = echoService.$echo("OK");
 assert(status.equals("OK"));
 ```
-## 实现原理
+## Implementation Principle
 
-我们在配置服务引用时，并没有配置 EchoService 这个接口，为什么可以直接把服务引用转型为 EchoService 呢？
-用户拿到的服务引用其实是一个 Proxy，Dubbo 在生成 Proxy 的时候，已经默认将 EchoService 这个接口加入到 Proxy 的接口列表中，所以用户拿到的 Proxy 都已经实现了 EchoService。生成代理相关代码如下：
+When configuring the service reference, we did not configure the EchoService interface. Why can we directly cast the service reference to EchoService? The service reference the user obtains is actually a Proxy. When Dubbo generates the Proxy, it has already added the EchoService interface to the Proxy's interface list by default, so the Proxy obtained by the user has already implemented EchoService. The code related to generating the proxy is as follows:
 
 ```Java
  public <T> T getProxy(Invoker<T> invoker, boolean generic) throws RpcException {
@@ -79,8 +77,7 @@ assert(status.equals("OK"));
         return getProxy(invoker, interfaces);
     }
 ```
-通过这种方式，任何服务引用都可以被转型成 EchoService 来使用。
-上面解释了客户端的实现，另外一边，用户在服务端也并没有实现 EchoService，那么客户端 EchoService 发出的调用在服务端是如何处理的呢？框架使用 Filter 机制来处理 EchoService 请求。Filter 实现代码如下：
+In this way, any service reference can be cast to EchoService for use. The above explains the client implementation. On the service side, the user has not implemented EchoService; how is the call from the client EchoService processed on the server? The framework uses a Filter mechanism to handle EchoService requests. The implementation code for the Filter is as follows:
 
 ```Java
 @Activate(group = Constants.PROVIDER, order = -110000)
@@ -96,6 +93,7 @@ public class EchoFilter implements Filter {
 
 }
 ```
-请求经过 EchoFilter.invoke 方法时，如果判定为 $echo 调用，则直接返回请求参数，否则继续执行 Filter 链。EchoFilter 默认加入到每一个服务提供者的 Filter 链里 EchoFilter.invoke 方法时，如果判定为 $echo 调用，则直接返回请求参数，否则继续执行 Filter 链。EchoFilter 默认加入到每一个服务提供者的 Filter 链里。这样每一个服务提供者自动具备了响应 EchoService 的能力。
+When a request passes through the EchoFilter.invoke method, if it is determined to be a $echo call, it directly returns the request parameter; otherwise, it continues to execute the Filter chain. EchoFilter is automatically included in the Filter chain of every service provider, enabling each service provider to automatically respond to EchoService requests.
 
-通过上述分析，我们了解了框架是如何通过动态代理和 Filter 机制，使得用户可以透明地使用 EchoService 功能。
+Through the above analysis, we understand how the framework uses dynamic proxy and Filter mechanisms to allow users to transparently utilize EchoService functionality.
+

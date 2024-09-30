@@ -1,31 +1,31 @@
 ---
-title: "研究 Dubbo 网卡地址注册时的一点思考"
-linkTitle: "研究 Dubbo 网卡地址注册时的一点思考"
+title: "A Study on Address Registration of Dubbo Network Interfaces"
+linkTitle: "A Study on Address Registration of Dubbo Network Interfaces"
 tags: ["Java"]
 date: 2019-10-01
-description: 研究 Dubbo 网卡地址注册时的一点思考
+description: A Study on Address Registration of Dubbo Network Interfaces
 ---
 
 
-## 1 如何选择合适的网卡地址
+## 1 How to Choose the Right Network Interface Address
 
-可能相当一部分人还不知道我这篇文章到底要讲什么，我说个场景，大家应该就明晰了。在分布式服务调用过程中，以 Dubbo 为例，服务提供者往往需要将自身的 IP 地址上报给注册中心，供消费者去发现。在大多数情况下 Dubbo 都可以正常工作，但如果你留意过 Dubbo 的 github issue，其实有不少人反馈：Dubbo Provider 注册了错误的 IP。如果你能立刻联想到：多网卡、内外网地址共存、VPN、虚拟网卡等关键词，那我建议你一定要继续将本文看下去，因为我也想到了这些，它们都是本文所要探讨的东西！那么“如何选择合适的网卡地址”呢，Dubbo 现有的逻辑到底算不算完备？我们不急着回答它，而是带着这些问题一起进行研究，相信到文末，其中答案，各位看官自有评说。
+Many people may not know what this article is about. Let me give you a scenario to clarify. In distributed service calls, taking Dubbo as an example, service providers often need to report their IP addresses to the registry for consumers to discover. In most cases, Dubbo works normally, but if you have noticed Dubbo's GitHub issues, you'll see many people reporting: Dubbo Provider registered the wrong IP. If you can immediately think of keywords such as multiple network interfaces, coexistence of internal and external addresses, VPNs, and virtual network interfaces, then I suggest you keep reading this article, as I am interested in these topics as well! So, "how to choose the appropriate network interface address"? Is Dubbo's existing logic sufficient? Let's not rush to answer; instead, let's explore these questions together and by the end, you can form your own opinion.
 
-## 2 Dubbo 是怎么做的
+## 2 How Dubbo Works
 
-Dubbo 获取网卡地址的逻辑在各个版本中也是千回百转，走过弯路，也做过优化，我们用最新的 2.7.2-SNAPSHOT 版本来介绍，在看以下源码时，大家可以怀着质疑的心态去阅读，在 dubbo github 的 master 分支可以获取源码。获取 localhost 的逻辑位于 `org.apache.dubbo.common.utils.NetUtils#getLocalAddress0()` 之中
+Dubbo's logic for obtaining network interface addresses has evolved through various versions, having encountered setbacks and optimizations. We will use the latest version 2.7.2-SNAPSHOT for introduction. While reading the following source code, I encourage you to adopt a questioning mindset. You can obtain the source code from the master branch of Dubbo's GitHub. The logic for obtaining localhost is located in `org.apache.dubbo.common.utils.NetUtils#getLocalAddress0()`
 
 ```java
 private static InetAddress getLocalAddress0() {
     InetAddress localAddress = null;
-    // 首先尝试获取 /etc/hosts 中 hostname 对应的 IP
+    // First attempt to get the IP corresponding to the hostname in /etc/hosts
     localAddress = InetAddress.getLocalHost();
     Optional<InetAddress> addressOp = toValidAddress(localAddress);
     if (addressOp.isPresent()) {
         return addressOp.get();
     }
 
-    // 没有找到适合注册的 IP，则开始轮询网卡
+    // If no suitable IP is found for registration, start polling network interfaces
     Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
     if (null == interfaces) {
         return localAddress;
@@ -34,7 +34,7 @@ private static InetAddress getLocalAddress0() {
         NetworkInterface network = interfaces.nextElement();
         Enumeration<InetAddress> addresses = network.getInetAddresses();
         while (addresses.hasMoreElements()) {
-            // 返回第一个匹配的适合注册的 IP
+            // Return the first suitable IP for registration
             Optional<InetAddress> addressOp = toValidAddress(addresses.nextElement());
             if (addressOp.isPresent()) {
                 return addressOp.get();
@@ -45,38 +45,38 @@ private static InetAddress getLocalAddress0() {
 }
 ```
 
-Dubbo 这段选取本地地址的逻辑大致分成了两步
+Dubbo's logic for selecting the local address roughly consists of two steps:
 
-1. 先去 /etc/hosts 文件中找 hostname 对应的 IP 地址，找到则返回；找不到则转 2
-2. 轮询网卡，寻找合适的 IP 地址，找到则返回；找不到返回 null，在 getLocalAddress0 外侧还有一段逻辑，如果返回 null，则注册 127.0.0.1 这个本地回环地址
+1. First, it looks for the IP address corresponding to the hostname in the /etc/hosts file; if found, it returns; if not, it moves to step 2.
+2. It polls network interfaces to find a suitable IP address; if found, it returns; if not, it returns null. Outside of `getLocalAddress0`, there is an additional logic that registers 127.0.0.1 as the local loopback address if null is returned.
 
-首先强调下，这段逻辑并没有太大的问题，先别急着挑刺，让我们来分析下其中的一些细节，并进行验证。
+First, let’s emphasize that there isn't a major problem with this logic. Let's analyze some of its details and validate it.
 
-### 2.1 尝试获取 hostname 映射 IP
+### 2.1 Attempt to Obtain Hostname-Mapped IP
 
-Dubbo 首先选取的是 hostname 对应的 IP，在源码中对应的 `InetAddress.getLocalHost();`  在 `*nix` 系统实际部署 Dubbo 应用时，可以首先使用 `hostname` 命令获取主机名
+Dubbo first selects the IP corresponding to the hostname. In the source code, this corresponds to `InetAddress.getLocalHost();` When deploying Dubbo applications on *nix systems, you can first use the `hostname` command to obtain the hostname.
 
 ```shell
 xujingfengdeMacBook-Pro:~ xujingfeng$ hostname
 xujingfengdeMacBook-Pro.local
 ```
 
-紧接着在 `/etc/hosts` 配置 IP 映射，为了验证 Dubbo 的机制，我们随意为 hostname 配置一个 IP 地址
+Next, configure the IP mapping in the `/etc/hosts` file to verify Dubbo's mechanism; we can freely set an IP address for the hostname.
 
 ```
 127.0.0.1	localhost
 1.2.3.4 xujingfengdeMacBook-Pro.local
 ```
 
-接着调用 `NetUtils.getLocalAddress0()` 进行验证，控制台打印如下：
+Next, call `NetUtils.getLocalAddress0()` for verification, the console prints as follows:
 
 ```
 xujingfengdeMacBook-Pro.local/1.2.3.4
 ```
 
-### 2.2 判定有效的 IP 地址
+### 2.2 Determine Valid IP Addresses
 
-在 toValidAddress 逻辑中，Dubbo 存在以下逻辑判定一个 IP 地址是否有效
+In the logic of `toValidAddress`, Dubbo has the following criteria for determining whether an IP address is valid:
 
 ```java
 private static Optional<InetAddress> toValidAddress(InetAddress address) {
@@ -93,7 +93,7 @@ private static Optional<InetAddress> toValidAddress(InetAddress address) {
 }
 ```
 
-依次校验其符合 Ipv6 或者 Ipv4 的 IP 规范，对于 Ipv6 的地址，见如下代码：
+It checks compliance with IPv6 or IPv4 address standards. For IPv6 addresses, see the following code:
 
 ```java
 static boolean isValidV6Address(Inet6Address address) {
@@ -110,9 +110,9 @@ static boolean isValidV6Address(Inet6Address address) {
 }
 ```
 
-首先获取 `java.net.preferIPv6Addresses` 参数，其默认值为 false，鉴于大多数应用并没有使用 Ipv6 地址作为理想的注册 IP，这问题不大，紧接着通过 isReachable 判断网卡的连通性。例如一些网卡可能是 VPN/虚拟网卡的地址，如果没有配置路由表，往往无法连通，可以将之过滤。
+It first retrieves the `java.net.preferIPv6Addresses` parameter, which defaults to false. Given that most applications do not use IPv6 addresses as the preferred registration IP, this issue isn’t major. Next, it determines connectivity through `isReachable`. For example, some network interface addresses might be VPN/virtual network interfaces, which often cannot connect without a configured routing table and can be filtered out.
 
-对于 Ipv4 的地址，见如下代码：
+For IPv4 addresses, see the following code:
 
 ```java
 static boolean isValidV4Address(InetAddress address) {
@@ -128,50 +128,50 @@ static boolean isValidV4Address(InetAddress address) {
 }
 ```
 
-对比 Ipv6 的判断，这里我们已经发现前后不对称的情况了
+Comparing the IPv6 determination, we can see an inconsistent situation:
 
-- Ipv4 相比 Ipv6 的逻辑多了 Ipv4 格式的正则校验、本地回环地址校验、ANYHOST 校验
-- Ipv4 相比 Ipv6 的逻辑少了网卡连通性的校验
+- The logic for IPv4 adds regex validation for IPv4 format, local loopback address checks, and ANYHOST checks.
+- The logic for IPv4 lacks connectivity checks present in the IPv6 validation.
 
-大家都知道，Ipv4 将 127.0.0.1 定为本地回环地址， Ipv6 也存在回环地址：0:0:0:0:0:0:0:1 或者表示为 ::1。改进建议也很明显，我们放到文末统一总结。
+As we know, IPv4 defines 127.0.0.1 as the local loopback address, and IPv6 also has a loopback address: 0:0:0:0:0:0:0:1 or represented as ::1. Suggested improvements will be summarized at the end.
 
-### 2.3 轮询网卡
+### 2.3 Polling Network Interfaces
 
-如果上述地址获取为 null 则进入轮询网卡的逻辑（例如 hosts 未指定 hostname 的映射或者 hostname 配置成了 127.0.0.1 之类的地址便会导致获取到空的网卡地址），轮询网卡对应的源码是 `NetworkInterface.getNetworkInterfaces()` ，这里面涉及的知识点就比较多了，支撑起了我写这篇文章的素材，Dubbo 的逻辑并不复杂，进行简单的校验，返回第一个可用的 IP 即可。
+If the above address retrieval returns null, it enters the logic for polling network interfaces (for example, if hosts do not specify the hostname mapping, or the hostname is configured as 127.0.0.1, it may lead to empty network interface addresses). The code for polling network interfaces is `NetworkInterface.getNetworkInterfaces()`, which involves numerous knowledge points and supports the material for this article. The Dubbo logic is not complex; it performs simple checks and returns the first available IP.
 
-性子急的读者可能忍不住了，多网卡！合适的网卡可能不止一个，Dubbo 怎么应对呢？按道理说，我们也替 Dubbo 说句公道话，客官要不你自己指定下？我们首先得对多网卡的场景达成一致看法，才能继续把这篇文章完成下去：我们只能**尽可能**过滤那些“**不对**”的网卡。Dubbo 看样子对所有网卡是一视同仁了，那么是不是可以尝试优化一下其中的逻辑呢？
+Impatient readers may find it hard to resist the urge to inquire about multiple network interfaces! There may be more than one suitable interface; how does Dubbo handle this? To give Dubbo some credit, why not let the user specify one? First, we must reach a consensus on the scenario of multiple network interfaces to continue this article: we can only **filter out** those “**incorrect**” network interfaces **as much as possible**. It appears that Dubbo treats all network interfaces equally; is there a way to optimize its logic?
 
-许多开源的服务治理框架在 stackoverflow 或者其 issue 中，注册错 IP 相关的问题都十分高频，大多数都是轮询网卡出了问题。既然事情发展到这儿，势必需要了解一些网络、网卡的知识，我们才能过滤掉那些明显不适合 RPC 服务注册的 IP 地址了。
+Many open-source service governance frameworks frequently encounter issues related to incorrect IP registration on Stack Overflow or their issues. Most problems occur due to polling network interfaces. Since things have come to this point, it's necessary to understand some networking and network interface knowledge to filter out those obviously unsuitable IP addresses for RPC service registration.
 
-## 3 Ifconfig 介绍
+## 3 Introduction to Ifconfig
 
-我并没有想要让大家对后续的内容望而却步，特地选择了这个大家最熟悉的 Linux 命令！对于那些吐槽：“天呐，都 2019 年了，你怎么还在用 net-tools/ifconfig，iproute2/ip 了解一下”的言论，请大家视而不见。无论你使用的是 mac，还是 linux，都可以使用它去 CRUD 你的网卡配置。
+I don’t mean to discourage anyone from the upcoming content, so I deliberately chose this familiar Linux command! For those who complain, “My gosh, it’s 2019 and you’re still using net-tools/ifconfig, try iproute2/ip,” please ignore. Whether you are using Mac or Linux, you can use it to CRUD your network interface configuration.
 
-### 3.1 常用指令
+### 3.1 Common Commands
 
-**启动关闭指定网卡：**
+**Start or shut down a specified network interface:**
 
 ```
 ifconfig eth0 up
 ifconfig eth0 down
 ```
 
-`ifconfig eth0 up` 为启动网卡 eth0，`ifconfig eth0 down` 为关闭网卡 eth0。ssh 登陆 linux 服务器操作的用户要小心执行这个操作了，千万不要蠢哭自己。不然你下一步就需要去 google：“禁用 eth0 网卡后如何远程连接 Linux 服务器” 了。
+`ifconfig eth0 up` starts the eth0 network interface; `ifconfig eth0 down` shuts it down. Users logging into Linux servers via SSH should be careful executing these commands to avoid locking themselves out. Otherwise, your next step will involve searching on Google: “How to connect to a Linux server after disabling the eth0 interface.”
 
-**为网卡配置和删除IPv6地址：**
+**Configure and delete IPv6 addresses for a network interface:**
 
 ```
-ifconfig eth0 add 33ffe:3240:800:1005::2/64    #为网卡eth0配置IPv6地址
-ifconfig eth0 del 33ffe:3240:800:1005::2/64    #为网卡eth0删除IPv6地址
+ifconfig eth0 add 33ffe:3240:800:1005::2/64    # Configure IPv6 address for eth0
+ifconfig eth0 del 33ffe:3240:800:1005::2/64    # Delete IPv6 address for eth0
 ```
 
-**用 ifconfig 修改 MAC 地址：**
+**Modify MAC address using ifconfig:**
 
 ```
 ifconfig eth0 hw ether 00:AA:BB:CC:dd:EE
 ```
 
-**配置 IP 地址：**
+**Configure IP address:**
 
 ```
 [root@localhost ~]# ifconfig eth0 192.168.2.10
@@ -179,22 +179,22 @@ ifconfig eth0 hw ether 00:AA:BB:CC:dd:EE
 [root@localhost ~]# ifconfig eth0 192.168.2.10 netmask 255.255.255.0 broadcast 192.168.2.255
 ```
 
-**启用和关闭arp协议：**
+**Enable and disable ARP protocol:**
 
 ```
-ifconfig eth0 arp    #开启网卡eth0 的arp协议
-ifconfig eth0 -arp   #关闭网卡eth0 的arp协议
+ifconfig eth0 arp    # Enable ARP on eth0
+ifconfig eth0 -arp   # Disable ARP on eth0
 ```
 
-**设置最大传输单元：**
+**Set maximum transmission unit:**
 
 ```
-ifconfig eth0 mtu 1500    #设置能通过的最大数据包大小为 1500 bytes
+ifconfig eth0 mtu 1500    # Set the maximum packet size to 1500 bytes
 ```
 
-### 3.2 查看网卡信息
+### 3.2 View Network Interface Information
 
-在一台 ubuntu 上执行 `ifconfig -a` 
+In an Ubuntu system, run `ifconfig -a` 
 
 ```shell
 ubuntu@VM-30-130-ubuntu:~$ ifconfig -a
@@ -230,35 +230,35 @@ tun0      Link encap:UNSPEC  HWaddr 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 ```
 
-为了防止黑客对我的 Linux 发起攻击，我还是偷偷对 IP 做了一点“改造”，请不要为难一个趁着打折+组团购买廉价云服务器的小伙子。对于部分网卡的详细解读:
+To prevent hackers from attacking my Linux system, I modified the IP a bit. Please don’t judge someone trying to capitalize on discounts + group purchases of cheap cloud servers. For the detailed interpretation of some network interfaces:
 
-eth0 表示第一块网卡， 其中 HWaddr 表示网卡的物理地址，可以看到目前这个网卡的物理地址(MAC 地址）是 02:42:38:52:70:54
+eth0 represents the first network interface, where HWaddr indicates the physical address of the network interface. Currently, the physical address (MAC address) for this interface is 02:42:38:52:70:54.
 
-inet addr 用来表示网卡的 IP 地址，此网卡的 IP 地址是 10.154.30.130，广播地址， Bcast: 172.18.255.255，掩码地址 Mask:255.255.0.0 
+inet addr represents the IP address of the network interface, which in this case is 10.154.30.130. The broadcast address is Bcast: 172.18.255.255, and the mask address is Mask: 255.255.0.0.
 
-lo 是表示主机的回环地址，这个一般是用来测试一个网络程序，但又不想让局域网或外网的用户能够查看，只能在此台主机上运行和查看所用的网络接口。比如把 HTTPD 服务器的指定到回坏地址，在浏览器输入 127.0.0.1 就能看到你所架构的 WEB 网站了。但只有你能看得到，局域网的其它主机或用户则无从知晓。
+lo represents the loopback address of the host. This is generally used to test a network program without allowing users on the local or external network to view it, running and viewing through the network interface of this host alone. For example, if you specify the HTTPD server to the loopback address, you can access the web site you set up by entering 127.0.0.1 in your browser. However, only you can see it; other hosts or users on the local network cannot.
 
-第一行：连接类型：Ethernet（以太网）HWaddr（硬件mac地址）
+The first line shows the connection type: Ethernet (for the physical MAC address).
 
-第二行：网卡的IP地址、子网、掩码
+The second line shows the IP address, subnet, and mask of the network interface.
 
-第三行：UP（代表网卡开启状态）RUNNING（代表网卡的网线被接上）MULTICAST（支持组播）MTU:1500（最大传输单元）：1500字节（ifconfig 不加 -a 则无法看到 DOWN 的网卡）
+The third line indicates the status: UP (the network interface is on), RUNNING (the cable is plugged in), MULTICAST (supports multicast), MTU:1500 (maximum transmission unit): 1500 bytes (ifconfig does not show DOWN interfaces without -a).
 
-第四、五行：接收、发送数据包情况统计
+The fourth and fifth lines provide statistics for received and sent data packets.
 
-第七行：接收、发送数据字节数统计信息。
+The seventh line provides statistics for received and sent data in bytes.
 
-紧接着的两个网卡 docker0，tun0 是怎么出来的呢？我在我的 ubuntu 上装了 docker 和 openvpn。这两个东西应该是日常干扰我们做服务注册时的罪魁祸首了，当然，也有可能存在 eth1 这样的第二块网卡。ifconfig -a 看到的东西就对应了 JDK 的 api ：`NetworkInterface.getNetworkInterfaces()` 。我们简单做个总结，大致有三个干扰因素
+What about the two network interfaces, docker0 and tun0? I installed Docker and OpenVPN on my Ubuntu setup. These two could be the main culprits interfering with service registration. Of course, there could also be a second network interface like eth1. What you see in ifconfig -a corresponds to the JDK API: `NetworkInterface.getNetworkInterfaces()`. In summary, there are roughly three interfering factors:
 
-- 以 docker 网桥为首的虚拟网卡地址，毕竟这东西这么火，怎么也得单独列出来吧？
-- 以 TUN/TAP 为代表的虚拟网卡地址，多为 VPN 场景
-- 以 eth1 为代表的多网卡场景，有钱就可以装多网卡了！
+- Virtual network interface addresses led by the Docker bridge, which are quite popular and need to be separately mentioned.
+- Virtual network interface addresses represented by TUN/TAP, mainly from VPN scenarios.
+- Multi-network interface scenarios represented by eth1; one can install multiple network interfaces if they have the money!
 
-我们后续的篇幅将针对这些场景做分别的介绍，力求让大家没吃过猪肉，起码看下猪怎么跑的。
+In the following sections, we will separately introduce these scenarios, aiming to give those who have never encountered these issues at least some insight into how they function.
 
-## 4 干扰因素一：Docker 网桥
+## 4 Interference Factor One: Docker Bridge
 
-熟悉 docker 的朋友应该知道 docker 会默认创建一个 docker0 的网桥，供容器实例连接。如果嫌默认的网桥不够直观，我们可以使用 bridge 模式自定义创建一个新的网桥：
+Those familiar with Docker should know that it creates a docker0 bridge by default for container instances to connect. If the default bridge is not sufficiently intuitive, we can customize and create a new bridge in bridge mode:
 
 ```shell
 ubuntu@VM-30-130-ubuntu:~$ docker network create kirito-bridge
@@ -273,9 +273,9 @@ br-a38696dbbe58 Link encap:Ethernet  HWaddr 02:42:6e:aa:fd:0c
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 ```
 
-使用 docker network 指令创建网桥之后，自动创建了对应的网卡，我只给出了 `ifconfig -a` 的增量返回部分，可以看出多了一个 br-a38696dbbe58 的网卡。
+By using the docker network command to create a bridge, a corresponding network interface is automatically created. I have only presented the incremental return portion of `ifconfig -a`; we can see an additional network interface, br-a38696dbbe58.
 
-我有意区分了“网桥”和“网卡”，可以使用 bridge-utils/brctl 来查看网桥信息：
+I intentionally differentiated between “bridges” and “network interfaces” and we can use bridge-utils/brctl to view bridge information:
 
 ```shell
 ubuntu@VM-30-130-ubuntu:~$ sudo brctl show
@@ -284,58 +284,58 @@ br-a38696dbbe58		8000.02426eaafd0c	no
 docker0		8000.02425845c215	no
 ```
 
-网桥是一个虚拟设备，这个设备只有 brctl show 能看到，网桥创建之后，会自动创建一个同名的网卡，并将这个网卡加入网桥。
+A bridge is a virtual device only visible through `brctl show`. Once a bridge is created, a corresponding network interface with the same name is automatically created and added to the bridge.
 
-## 5 干扰因素二：TUN/TAP 虚拟网络设备
+## 5 Interference Factor Two: TUN/TAP Virtual Network Devices
 
-平时我们所说的虚拟网卡、虚拟机，大致都跟 TUN/TAP 有关。我的读者大多数是 Java 从业者，相信我下面的内容并没有太超纲，不要被陌生的名词唬住。对于被唬住的读者，也可以直接跳过 5.1~5.3，直接看 5.4 的实战。
+Generally, when we talk about virtual network interfaces or virtual machines, they are mostly associated with TUN/TAP. Most of my readers are Java practitioners; I trust that the content below won't be too advanced. Don’t let unfamiliar terms intimidate you. For those who feel overwhelmed, you can skip sections 5.1 to 5.3 and directly look at practical application in section 5.4.
 
-### 5.1 真实网卡工作原理
+### 5.1 How Real Network Interfaces Work
 
 ![1918847-496d0e96c237f25a](/imgs/blog/network/01.png)
 
-上图中的 **eth0** 表示我们主机已有的真实的网卡接口 (**interface**)。
+In the above image, **eth0** represents the real network interface present on our host.
 
-网卡接口 **eth0** 所代表的真实网卡通过网线(**wire**)和外部网络相连，该物理网卡收到的数据包会经由接口 **eth0** 传递给内核的网络协议栈(**Network Stack**)。然后协议栈对这些数据包进行进一步的处理。
+The physical network interface represented by **eth0** connects to the external network via a wire. Data packets received by this physical interface are passed to the kernel’s network protocol stack through the **eth0** interface, where the protocol stack further processes these packets.
 
-对于一些错误的数据包,协议栈可以选择丢弃；对于不属于本机的数据包，协议栈可以选择转发；而对于确实是传递给本机的数据包,而且该数据包确实被上层的应用所需要，协议栈会通过 **Socket API** 告知上层正在等待的应用程序。
+For erroneous packets, the protocol stack may choose to discard them; for packets not belonging to the host, the protocol stack may choose to forward them. For packets meant for the host that are needed by higher-level applications, the protocol stack informs waiting applications via the **Socket API**.
 
-### 5.2 TUN 工作原理
+### 5.2 How TUN Works
 
 ![1918847-85ea08bc89d9427e](/imgs/blog/network/02.png)
 
-我们知道，普通的网卡是通过网线来收发数据包的话，而 **TUN** 设备比较特殊，它通过一个文件收发数据包。
+While ordinary network interfaces transmit and receive packets over wires, **TUN** devices are more specialized because they send and receive packets through a file.
 
-如上图所示，**tunX** 和上面的 **eth0** 在逻辑上面是等价的， **tunX** 也代表了一个网络接口,虽然这个接口是系统通过软件所模拟出来的.
+As shown in the image, **tunX** and **eth0** are logically equivalent—**tunX** also represents a network interface, although this interface is simulated by the system through software.
 
-网卡接口 **tunX 所代表的虚拟网卡通过文件 /dev/tunX 与我们的应用程序(App)相连**，应用程序每次使用 **write** 之类的系统调用将数据写入该文件，这些数据会以网络层数据包的形式，通过该虚拟网卡，经由网络接口 **tunX** 传递给网络协议栈，同时该应用程序也可以通过 **read** 之类的系统调用，经由文件 **/dev/tunX** 读取到协议栈向 **tunX** 传递的**所有**数据包。
+The virtual network interface represented by **tunX** connects to our application via the file /dev/tunX. Each time the application uses a system call like **write** to input data into this file, the data is delivered to the network stack as network layer packets via this virtual interface. The application can also read packets delivered to **tunX** through the file **/dev/tunX** via system calls like **read**.
 
-此外，协议栈可以像操纵普通网卡一样来操纵 **tunX** 所代表的虚拟网卡。比如说，给 **tunX** 设定 **IP** 地址，设置路由，总之，在协议栈看来，**tunX** 所代表的网卡和其他普通的网卡区别不大，当然，硬要说区别，那还是有的,那就是 **tunX** 设备不存在 **MAC** 地址，这个很好理解，**tunX** 只模拟到了网络层，要 **MAC**地址没有任何意义。当然，如果是 **tapX** 的话，在协议栈的眼中，**tapX** 和真实网卡没有任何区别。
+Additionally, the protocol stack can manipulate the **tunX** virtual network interface like a normal network interface. For instance, you can assign an **IP** address to **tunX**, set up routing, etc. Overall, from the perspective of the protocol stack, **tunX** does not significantly differ from other standard network interfaces. Of course, if you delve into detail, one distinction would be that **tunX** does not possess a **MAC** address—this is understandable since **tunX** only simulates up to the network layer; thus, a **MAC** address holds no meaning. However, for **tapX**, in the eyes of the protocol stack, there is no notable difference from a real network interface.
 
-是不是有些懵了？我是谁，为什么我要在这篇文章里面学习 TUN！因为我们常用的 VPN 基本就是基于 TUN/TAP 搭建的，如果我们使用 **TUN** 设备搭建一个基于 **UDP** 的 **VPN** ，那么整个处理过程可能是这幅样子：
+Feeling dazed? Why must we learn about TUN in this article? Because the VPNs we commonly use are built on TUN/TAP; if we create a VPN based on **TUN** devices using **UDP**, the entire process may look a little like this:
 
 ![1918847-ac4155ec7e9489b2](/imgs/blog/network/03.png)
 
-### 5.3 TAP 工作原理
+### 5.3 How TAP Works
 
-**TAP** 设备与 **TUN** 设备工作方式完全相同，区别在于：
+The **TAP** device operates in the same way as the **TUN** device; the difference lies in the layers they operate on:
 
-1.  **TUN** 设备是一个三层设备，它只模拟到了 **IP** 层，即网络层 我们可以通过 **/dev/tunX** 文件收发 **IP** 层数据包，它无法与物理网卡做 **bridge**，但是可以通过三层交换（如  **ip_forward**）与物理网卡连通。可以使用`ifconfig`之类的命令给该设备设定 **IP** 地址。
-2.  **TAP** 设备是一个二层设备，它比 **TUN** 更加深入，通过 **/dev/tapX** 文件可以收发 **MAC** 层数据包，即数据链路层，拥有 **MAC** 层功能，可以与物理网卡做 **bridge**，支持 **MAC** 层广播。同样的，我们也可以通过`ifconfig`之类的命令给该设备设定 **IP** 地址，你如果愿意，我们可以给它设定 **MAC** 地址。
+1. The **TUN** device functions at the third layer; it only simulates the **IP** layer of the network stack. Through the file **/dev/tunX**, it can sending and receiving **IP** layer packets, but cannot create a bridge with physical network interfaces. Nevertheless, it can still connect to physical network interfaces through layer 3 switching (like **ip_forward**). The address can be set using commands such as `ifconfig`.
+2. The **TAP** device functions at the second layer; it delves more deeply than **TUN** and can send and receive **MAC** layer packets through the file **/dev/tapX**, which means it possesses MAC layer functions, can establish a bridge with physical network interfaces, and supports MAC layer broadcasting. Similarly, you can set an **IP** address using `ifconfig`, and if you wish, you can also set a **MAC** address.
 
-关于文章中出现的二层，三层，我这里说明一下，第一层是物理层，第二层是数据链路层，第三层是网络层，第四层是传输层。
+Regarding the distinction between the second and third layers mentioned in the article, I'll clarify: the first layer is the physical layer, the second is the data link layer, the third is the network layer, and the fourth is the transport layer.
 
-### 5.4 openvpn 实战
+### 5.4 Practical Application with OpenVPN
 
-openvpn 是 Linux 上一款开源的 vpn 工具，我们通过它来复现出影响我们做网卡选择的场景。
+OpenVPN is an open-source VPN tool for Linux, through which we can replicate scenarios that affect our choice of network interfaces.
 
-安装 openvpn
+Install OpenVPN:
 
 ```shell
 sudo apt-get install openvpn
 ```
 
-安装一个 TUN 设备：
+Install a TUN device:
 
 ```shell
 ubuntu@VM-30-130-ubuntu:~$ sudo openvpn --mktun --dev tun0
@@ -343,7 +343,7 @@ Mon Apr 29 22:23:31 2019 TUN/TAP device tun0 opened
 Mon Apr 29 22:23:31 2019 Persist state set to: ON
 ```
 
-安装一个 TAP 设备：
+Install a TAP device:
 
 ```shell
 ubuntu@VM-30-130-ubuntu:~$ sudo openvpn --mktun --dev tap0
@@ -351,7 +351,7 @@ Mon Apr 29 22:24:36 2019 TUN/TAP device tap0 opened
 Mon Apr 29 22:24:36 2019 Persist state set to: ON
 ```
 
-执行 `ifconfig -a` 查看网卡，只给出增量的部分：
+Run `ifconfig -a` to check the network interfaces, showing only the incremental part:
 
 ```shell
 tap0      Link encap:Ethernet  HWaddr 7a:a2:a8:f1:6b:df
@@ -370,17 +370,17 @@ tun0      Link encap:UNSPEC  HWaddr 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 ```
 
-这样就解释了文章一开始为什么会有 tun0 这样的网卡了。这里读者可能会有疑惑，使用 ifconfig 不是也可以创建 tap 和 tun 网卡吗？当然啦，openvpn 是一个 vpn 工具，只能创建名为 tunX/tapX 的网卡，其遵守着一定的规范，ifconfig 可以随意创建，但没人认那些随意创建的网卡。
+This explains why there is a tun0 network interface at the beginning of this article. Here, readers may question whether using ifconfig can also create tap and tun interfaces. Certainly! OpenVPN is a VPN tool that can only create interfaces named tunX/tapX and follows certain regulations, while ifconfig can create arbitrary interfaces that no one recognizes.
 
-## 6 干扰因素三：多网卡
+## 6 Interference Factor Three: Multiple Network Interfaces
 
 ![image-20190429223515625](/imgs/blog/network/04.png)
 
-这个没有太多好说的，有多张真实的网卡，从普哥那儿搞到如上的 IP 信息。
+There's not much to say here; having multiple real network interfaces gives rise to the IP information as shown above.
 
-## 7 MAC 下的差异
+## 7 Differences on Mac
 
-虽然 ifconfig 等指令是 `*nux` 通用的，但是其展示信息，网卡相关的属性和命名都有较大的差异。例如这是我 MAC 下执行 `ifconfig -a` 的返回：
+Although commands like ifconfig are universal across *nux, the displayed information, attributes related to interfaces, and naming conventions vary significantly. For instance, here’s the output of running `ifconfig -a` on my Mac:
 
 ```shell
 xujingfengdeMacBook-Pro:dubbo-in-action xujingfeng$ ifconfig -a
@@ -444,16 +444,15 @@ utun1: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1380
 	nd6 options=201<PERFORMNUD,DAD>  
 ```
 
-内容很多，我挑几点差异简述下：
+There’s plenty of information, but I’ll briefly summarize a few key differences:
 
-- 内容展示形式不一样，没有 Linux 下的接收、发送数据字节数等统计信息
+- The way information is displayed differs, with no statistics on received or sent bytes visible as in Linux.
+- The naming of real network interfaces differs: eth0 -> en0
+- The naming format for virtual network interfaces differs: tun/tap -> utun
 
-- 真实网卡的命名不一样：eth0 -> en0
-- 虚拟网卡的命名格式不一样：tun/tap -> utun
+For interpreting these common network interface names, I’ll quote a portion from a Stack Overflow response:
 
-对于这些常见网卡命名的解读，我摘抄一部分来自 stackoverflow 的回答：
-
-> In arbitrary order of my familarity / widespread relevance:
+> In arbitrary order of my familiarity / widespread relevance:
 >
 > `lo0` is loopback.
 >
@@ -469,23 +468,23 @@ utun1: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1380
 >
 > `p2p0` is related to AWDL features. Either as an old version, or virtual interface with different semantics than `awdl`.
 >
-> the "Network" panel in System Preferences to see what network devices "exist" or "can exist" with current configuration.
+> Use the "Network" panel in System Preferences to view what network devices "exist" or "can exist" based on the current configuration.
 >
-> many VPNs will add additional devices, often "utun#" or "utap#" following [TUN/TAP (L3/L2)](https://en.wikipedia.org/wiki/TUN/TAP)virtual networking devices.
+> Many VPNs will add additional devices, often "utun#" or "utap#" following [TUN/TAP (L3/L2)](https://en.wikipedia.org/wiki/TUN/TAP) virtual networking devices.
 >
-> use `netstat -nr` to see how traffic is currently routed via network devices according to destination.
+> Use `netstat -nr` to see how traffic is currently routed over network devices based on destination.
 >
-> interface naming conventions started in BSD were retained in OS X / macOS, and now there also additions.
+> Interface naming conventions began in BSD and were retained in OS X/macos, with added specifications.
 
-## 8 Dubbo 改进建议
+## 8 Improvements for Dubbo
 
-我们进行了以上探索，算是对网卡有一点了解了。回过头来看看 Dubbo 获取网卡的逻辑，是否可以做出改进呢？
+After the exploration, we should have a slightly better understanding of network interfaces. Looking back at Dubbo’s logic for obtaining network interfaces, are there improvements that can be made?
 
-**Dubbo Action 1:** 
+**Dubbo Action 1:**
 
-保持 Ipv4 和 Ipv6 的一致性校验。为 Ipv4 增加连通性校验；为 Ipv6 增加 LoopBack 和 ANYHOST 等校验。
+Maintain consistency in checks between Ipv4 and Ipv6; add connectivity checks for Ipv4, and check for LoopBack and ANYHOST for Ipv6.
 
-**Dubbo Action 2:** 
+**Dubbo Action 2:**
 
 ```java
 NetworkInterface network = interfaces.nextElement();
@@ -494,34 +493,34 @@ if (network.isLoopback() || network.isVirtual() || !network.isUp()) {
 }
 ```
 
-JDK 提供了以上的 API，我们可以利用起来，过滤一部分一定不正确的网卡。
+The JDK provides the aforementioned API, which we can utilize to filter out certain incorrect network interfaces.
 
-**Dubbo Action 3:** 
+**Dubbo Action 3:**
 
-我们本文花了较多的篇幅介绍了 docker 和 TUN/TAP 两种场景导致的虚拟网卡的问题，算是较为常见的一个影响因素，虽然他们的命名具有固定性，如 docker0、tunX、tapX，但我觉得通过网卡名称的判断方式去过滤注册 IP 有一些 hack，所以不建议 dubbo contributor 提出相应的 pr 去增加这些 hack 判断，尽管可能会对判断有所帮助。
+This article invested considerable space discussing the issues caused by virtual networks represented by Docker and TUN/TAP, which are common influencing factors. Although their names follow a fixed pattern, such as docker0, tunX, tapX, I believe using interface names to filter registration IP is somewhat hacky, so it is not advisable for Dubbo contributors to submit corresponding PRs for these hacky checks, even though it may assist in filtering.
 
-对于真实多网卡、内外网 IP 共存的场景，不能仅仅是框架侧在做努力，用户也需要做一些事，就像爱情一样，我可以主动一点，但你也得反馈，才能发展出故事。
+In the case of real multi-network interfaces and the coexistence of internal and external IPs, efforts shouldn’t solely lie on the framework's side; users need to act as well, much like in a relationship—while I can try a bit harder, you must reciprocate so that the story can develop.
 
 **Dubbo User Action 1:**
 
-可以配置 `/etc/hosts` 文件，将 hostname 对应的 IP 显式配置进去。
+Users can configure the `/etc/hosts` file to explicitly map the hostname to the IP.
 
 **Dubbo User Action 2:**
 
-可以使用启动参数去显式指定注册的 IP：
+Specify the registered IP using startup parameters:
 
 ```java
 -DDUBBO_IP_TO_REGISTRY=1.2.3.4
 ```
 
-也可以指定 Dubbo 服务绑定在哪块网卡上：
+Users can also specify which network interface the Dubbo service should bind to:
 
 ```java
 -DDUBBO_IP_TO_BIND=1.2.3.4
 ```
 
-## 9 参考文章
+## 9 References
 
-[TUN/TAP 设备浅析](https://www.jianshu.com/p/09f9375b7fa7)
+[TUN/TAP Device Analysis](https://www.jianshu.com/p/09f9375b7fa7)
 
 [what-are-en0-en1-p2p-and-so-on-that-are-displayed-after-executing-ifconfig](https://stackoverflow.com/questions/29958143/what-are-en0-en1-p2p-and-so-on-that-are-displayed-after-executing-ifconfig)

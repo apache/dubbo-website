@@ -1,57 +1,58 @@
 ---
-title: "CoC Asia 2023 大会精彩回顾"
+title: "CoC Asia 2023 Conference Highlights"
 linkTitle: ""
 date: 2023-08-25
 description: >
-    Community over Code Asia 首次下线大会在北京召开，Dubbo 微服务专题论坛带来了 8 大精彩主题演讲，让我们一起回顾一些大会的一些精彩瞬间吧。
+    The Community over Code Asia's first offline conference was held in Beijing, featuring a microservices-themed forum with 8 fantastic keynote speeches. Let's review some of the highlights from the conference.
 ---
 
-以下包含本期演讲的完成文字稿内容与现场精彩瞬间，更多 ppt、视频录像可关注 "apachedubbo" 微信公众号获取。
-* [基于 Triple 协议实现 Web、移动端、后端微服务全面打通](/en/blog/2023/10/07/基于-triple-实现-web-移动端后端全面打通/)
-* [手把手教你部署 Dubbo 应用到 Kubernetes - Apache Dubbo & Kubernetes最佳实践](/en/blog/2023/10/07/手把手教你部署dubbo应用到kubernetes-apache-dubbo-kubernetes-最佳实践/)
-* [Apache Dubbo 云原生可观测性的探索与实践](/en/blog/2023/10/07/apache-dubbo-云原生可观测性的探索与实践/)
-* [Opensergo & Dubbo 微服务治理最佳实践](/en/blog/2023/10/07/opensergo-dubbo-微服务治理最佳实践/)
-* [Seata 微服务架构下的一站式分布式事务解决方案](/en/blog/2023/10/07/seata-微服务架构下的一站式分布式事务解决方案/)
-* [启动速度提升 10 倍：Apache Dubbo-静态化 GraalVM Native Image 深度解析](/en/blog/2023/10/07/启动速度提升10倍apache-dubbo-静态化-graalvm-native-image-深度解析/)
-* [政采云基于 Dubbo 的混合云数据跨网实践](/en/blog/2023/10/07/政采云基于dubbo的混合云数据跨网实践/)
-* 工商银行分布式建设及转型实践
+This includes the complete transcripts of the speeches and highlights from the event. For more PPTs and video recordings, please follow the "apachedubbo" WeChat official account.
+* [Realizing Full Connectivity of Web, Mobile, and Backend Microservices Based on Triple Protocol](/en/blog/2023/10/07/基于-triple-实现-web-移动端后端全面打通/)
+* [Step-by-Step Guide to Deploying Dubbo Applications on Kubernetes - Best Practices for Apache Dubbo & Kubernetes](/en/blog/2023/10/07/手把手教你部署dubbo应用到kubernetes-apache-dubbo-kubernetes-最佳实践/)
+* [Exploration and Practice of Cloud-Native Observability in Apache Dubbo](/en/blog/2023/10/07/apache-dubbo-云原生可观测性的探索与实践/)
+* [Best Practices for Opensergo & Dubbo Microservices Governance](/en/blog/2023/10/07/opensergo-dubbo-微服务治理最佳实践/)
+* [One-Stop Distributed Transaction Solution under Seata Microservices Architecture](/en/blog/2023/10/07/seata-微服务架构下的一站式分布式事务解决方案/)
+* [10x Startup Speed Improvement: Deep Dive into Apache Dubbo - Static GraalVM Native Image](/en/blog/2023/10/07/启动速度提升10倍apache-dubbo-静态化-graalvm-native-image-深度解析/)
+* [Hybrid Cloud Data Cross-Network Practice Based on Dubbo by Government Procurement Cloud](/en/blog/2023/10/07/政采云基于dubbo的混合云数据跨网实践/)
+* Distributed Construction and Transformation Practice of Industrial and Commercial Bank of China
 
 ![dubbo-members-justin](/imgs/blog/2023/8/apachecon-summary/dubbo-members-justin.jpg)
 
-Apache Dubbo 社区骨干成员及 Apache Board Member, Justin Mclean 合影
+Photo with Justin Mclean, core member of the Apache Dubbo community and Apache Board Member
 
 ![dubbo-members-apache-members](/imgs/blog/2023/8/apachecon-summary/dubbo-members-apache-members.jpg)
 
-Apache Dubbo 社区骨干与 Apache Member 交流合影
+Group photo of Apache Dubbo community core members and Apache Members 
 
 ![huazhongming](/imgs/blog/2023/8/apachecon-summary/huazhongming.jpg)
 
-华钟明，Apache Dubbo PMC Member，杭州有赞科技有限公司中间件技术专家，《Apache Dubbo 静态化 GraalVM Native Image 解决方案与实践》
+Hua Zhongming, Apache Dubbo PMC Member, Middleware Technology Expert at Youzan Technology Co., Ltd., "Apache Dubbo Static GraalVM Native Image Solutions and Practices"
 
 ![songxiaosheng](/imgs/blog/2023/8/apachecon-summary/songxiaosheng.jpg)
 
-宋小生，Apache Dubbo Committer，平安壹钱包中间件资深工程师，《Apache Dubbo 云原生可观测性探索与实践》
+Song Xiaosheng, Apache Dubbo Committer, Senior Engineer at Ping An Yi Qian Middleware, "Exploration and Practice of Cloud-Native Observability in Apache Dubbo"
 
 ![chenyouwei](/imgs/blog/2023/8/apachecon-summary/chenyouwei.jpg)
 
-陈有为，Apache Dubbo PMC Member，陌陌研发工程师，《基于 Triple 协议实现WEB、移动端、后端服务全面打通》
+Chen Youwei, Apache Dubbo PMC Member, Engineer at Momo, "Realizing Full Connectivity of WEB, Mobile, and Backend Services Based on Triple Protocol"
 
 ![jiangheqing](/imgs/blog/2023/8/apachecon-summary/jiangheqing.jpg)
 
-江河清，Apache Dubbo PMC Member，阿里云研发工程师，《精进云原生 - Dubbo Kubernetes 最佳实践》
+Jiang Heqing, Apache Dubbo PMC Member, R&D Engineer at Alibaba Cloud, "Enhancing Cloud-Native - Best Practices for Dubbo Kubernetes"
 
 ![wangxiaobin](/imgs/blog/2023/8/apachecon-summary/wangxiaobin.jpg)
 
-王晓彬，Apache Dubbo Committer，政采云资深开发工程师，《政采云基于 Dubbo 的混合云跨网方案实践》
+Wang Xiaobin, Apache Dubbo Committer, Senior Developer at Government Procurement Cloud, "Practice of Hybrid Cloud Cross-Network Solutions Based on Dubbo"
 
 ![hejiahuan](/imgs/blog/2023/8/apachecon-summary/hejiahuan.jpg)
 
-何家欢，Sentinel Maintainer，阿里云研发工程师，《OPENSERGO & DUBBO 微服务治理最佳实践》
+He Jiahui, Sentinel Maintainer, R&D Engineer at Alibaba Cloud, "Best Practices for OPENSERGO & DUBBO Microservices Governance"
 
 ![dingxingzhong](/imgs/blog/2023/8/apachecon-summary/dingxingzhong.jpg)
 
-丁兴中，中国工商银行软件研发中心云计算实验室架构师，《工商银行分布式建设及转型实践》
+Ding Xingzhong, Architect at China Industrial and Commercial Bank Software R&D Center Cloud Computing Lab, "Distributed Construction and Transformation Practice of Industrial and Commercial Bank of China"
 
 ![jimin](/imgs/blog/2023/8/apachecon-summary/jimin.jpg)
 
-季敏，Seata 开源项目创始人，阿里云分布式事务产品负责人，《SEATA：微服务架构下的一站式分布式事务解决方案》
+Ji Min, Founder of Seata Open Source Project, Head of Distributed Transaction Products at Alibaba Cloud, "SEATA: One-Stop Distributed Transaction Solution under Microservices Architecture"
+

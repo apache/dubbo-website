@@ -1,28 +1,28 @@
 ---
 date: 2023-01-15
-title: "工商银行 Dubbo3 应用级服务发现实践"
-linkTitle: "工商银行"
-tags: ["用户案例"]
+title: "Industrial and Commercial Bank of China Dubbo3 Application-Level Service Discovery Practice"
+linkTitle: "Industrial and Commercial Bank of China"
+tags: ["User Cases"]
 weight: 2
 ---
 
-### 问题分析
-以下是经典的 Dubbo 的工作原理图，服务提供者和消费者通过注册中心协调实现地址的自动发现。
+### Problem Analysis
+The following is a classic diagram of Dubbo's operating principle, where service providers and consumers coordinate to achieve automatic address discovery through the registration center.
 
 ![icbc-analyze](/imgs/user/icbc/icbc-analyze.png)
 
-工商银行面临的主要瓶颈是在注册中心与服务消费端，接口级别地址的数量已经是亿级规模，一方面存储容量达到瓶颈、另一方面推送效率明显下降；而在消费端这一侧，Dubbo2 框架常驻内存已超 40%，每次地址推送带来的 cpu 等资源消耗率也非常高，影响正常的业务调用。
+The main bottleneck faced by the Industrial and Commercial Bank of China is at the registration center and service consumer end; the number of interface-level addresses has reached a scale of hundreds of millions. On one hand, storage capacity has reached its limits, and on the other hand, push efficiency has significantly declined. At the consumer end, the resident memory of the Dubbo2 framework has exceeded 40%, and each address push brings high resource consumption rates such as CPU, affecting normal business calls.
 
-这是 Dubbo2 接口级服务发现架构在大规模集群场景下的固有问题（具体原因请查看应用级服务发现原理解析），通过常规的性能优化无法从根本上解决问题。因此工商银行采用了 Dubbo3 中提出的应用级服务发现模型，经过实测，新的服务发现模型能实现节点到注册中心间数据传输量 90% 的下降，这就使得注册中心的压力极大降低，同时消费端的框架常驻内存也实现超 50% 下降。
+This is an inherent problem of Dubbo2 interface-level service discovery architecture in large-scale cluster scenarios (for specific reasons, see the Application-Level Service Discovery Principle Analysis). Conventional performance optimization cannot fundamentally solve the problem. Therefore, the Industrial and Commercial Bank of China adopted the application-level service discovery model proposed in Dubbo3, which was tested and resulted in a 90% reduction in data transmission volume between nodes and the registration center, significantly reducing pressure on the registration center and achieving over 50% reduction in resident memory at the consumer end.
 
-### 压测数据
-下面是工商银行联合 Dubbo 社区给出的一组基于真实服务特点给出的模拟压测数据。
+### Load Testing Data
+Below is a set of simulated load testing data provided by the Industrial and Commercial Bank of China in collaboration with the Dubbo community, based on real service characteristics.
 
 ![icbc-data1](/imgs/user/icbc/icbc-data1.png)
 
-上图是对使用了应用级服务发现的消费端进程采样的内存对比数据。其中横轴是不同的 Dubbo 版本，纵轴是实际采样到的内存表现，可以看到 Dubbo 2.6、2.7 版本表现几乎一致，而升级到 3.0 版本后，即使不升级应用级服务发现，内存也降低接近 40%，而当切换到应用级服务发现之后，内存占用下降到只有原来的 30%。
+The above image shows memory comparison data sampled from the consumer end process using application-level service discovery. The horizontal axis represents different versions of Dubbo, while the vertical axis shows the actual sampled memory performance. It can be seen that versions 2.6 and 2.7 performed almost identically, whereas after upgrading to version 3.0, even without upgrading application-level service discovery, memory usage reduced by nearly 40%. When switching to application-level service discovery, memory usage dropped to only 30% of the original.
 
 ![icbc-data2](/imgs/user/icbc/icbc-data2.png)
 
-上图是消费端的 GC 情况统计，同样的，横轴是不同的 Dubbo 版本，纵轴是实际采样到的 GC 表现。这里的压测数据，是通过模拟注册中心不停的往消费端进程推送地址列表的场景得到的。可以看到 Dubbo 2.6、2.7 版本表现几乎一致，而在 3.0 版本中切换到应用级服务发现之后，GC 已经趋近于零次。
+The above image depicts the GC statistics of the consumer end. Again, the horizontal axis represents different versions of Dubbo, while the vertical axis shows the actual sampled GC performance. The load testing data was obtained by simulating a scenario where the registration center continuously pushed the address list to the consumer process. It can be observed that versions 2.6 and 2.7 performed almost identically, while in version 3.0, after switching to application-level service discovery, GC has nearly approached zero occurrences.
 

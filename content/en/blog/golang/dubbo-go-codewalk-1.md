@@ -1,149 +1,149 @@
 ---
-title: "Dubbo-go 源码笔记（一）Server 端开启服务过程"
-linkTitle: "Dubbo-go 源码笔记（一）Server 端开启服务过程"
-tags: ["Go", "源码解析"]
+title: "Dubbo-go Source Code Notes (1) Server Side Service Startup Process"
+linkTitle: "Dubbo-go Source Code Notes (1) Server Side Service Startup Process"
+tags: ["Go", "Source Code Analysis"]
 date: 2021-01-14
-description: 本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。
+description: This article will introduce the basic usage of the dubbo-go framework, and provide a server-side source code reading guide from the perspective of the export call chain, hoping to guide readers to further understand this framework.
 ---
 
-随着微服务架构的流行，许多高性能 rpc 框架应运而生，由阿里开源的 dubbo 框架 go 语言版本的 dubbo-go 也成为了众多开发者不错的选择。本文将介绍 dubbo-go 框架的基本使用方法，以及从 export 调用链的角度进行 server 端源码导读，希望能引导读者进一步认识这款框架。
+With the rise of microservices architecture, many high-performance RPC frameworks have emerged. The Go language version of the Dubbo framework, dubbo-go, open-sourced by Alibaba, has also become a popular choice among developers. This article will introduce the basic usage of the dubbo-go framework, and provide a server-side source code reading guide from the export call chain perspective, hoping to guide readers to further understand this framework.
 
-当拿到一款框架之后，一种不错的源码阅读方式大致如下：从运行最基础的 helloworld demo 源码开始 —> 再查看配置文件 —> 开启各种依赖服务（比如zk、consul） —> 开启服务端 —> 再到通过 client 调用服务端 —> 打印完整请求日志和回包。调用成功之后，再根据框架的设计模型，从配置文件解析开始，自顶向下递阅读整个框架的调用栈。
+When starting with a framework, a good way to read the source code is as follows: start with the basic helloworld demo source code —> check configuration files —> start various dependency services (such as zk, consul) —> start the server —> then call the server through the client —> print complete request logs and responses. After a successful call, analyze the entire call stack of the framework from top to bottom starting from the configuration file parsing.
 
-对于 C/S 模式的 rpc 请求来说，整个调用栈被拆成了 client 和 server 两部分，所以可以分别从 server 端的配置文件解析阅读到 server 端的监听启动，从 client 端的配置文件解析阅读到一次 invoker Call 调用。这样一次完整请求就明晰了起来。
+For C/S mode RPC requests, the entire call stack is divided into client and server parts, so you can read from the server-side configuration file parsing to the server listening startup and from the client-side configuration file parsing to a single invoker Call. This makes the complete request clear.
 
-## 运行官网提供的 helloworld-demo
+## Run the helloworld-demo provided by the official website
 
-**官方 demo 相关链接**：https://github.com/dubbogo/dubbo-samples/tree/master/golang/helloworld/dubbo
+**Official demo related link**: https://github.com/dubbogo/dubbo-samples/tree/master/golang/helloworld/dubbo
 
-### 1. dubbo-go 2.7 版本 QuickStart
+### 1. dubbo-go 2.7 QuickStart
 
-#### 1）开启一个 go-server 服务
+#### 1) Start a go-server service
 
-- 将仓库 clone 到本地
+- Clone the repository to your local machine
 
 ```bash
 $ git clone https://github.com/dubbogo/dubbo-samples.git
 ```
 
-- 进入 dubbo 目录
+- Go to the dubbo directory
 
 ```bash
 $ cd dubbo-samples/golang/helloworld/dubbo
 ```
 
-进入目录后可看到四个文件夹，分别支持 go 和 java 的 client 以及 server，我们尝试运行一个 go 的 server。进入 app 子文件夹内，可以看到里面保存了 go 文件。
+After entering the directory, you will see four folders, supporting both go and java clients and servers. We'll try to run a go server. Enter the app subfolder, where the go files are stored.
 
 ```bash
 $ cd go-server/app
 ```
 
-- sample 文件结构
+- Sample file structure
 
-可以在 go-server 里面看到三个文件夹：app、assembly、profiles。
+You can see three folders in go-server: app, assembly, profiles.
 
-其中 app 文件夹下保存 go 源码，assembly 文件夹下保存可选的针对特定环境的 build 脚本，profiles 下保存配置文件。对于 dubbo-go 框架，配置文件非常重要，没有文件将导致服务无法启动。
+The app folder contains the go source code, the assembly folder contains optional build scripts for specific environments, and the profiles folder stores configuration files. For the dubbo-go framework, configuration files are very important; missing files will prevent the service from starting.
 
-- 设置指向配置文件的环境变量
+- Set environment variables pointing to configuration files
 
-由于 dubbo-go 框架依赖配置文件启动，让框架定位到配置文件的方式就是通过环境变量来找。对于 server 端需要两个必须配置的环境变量：CONF_PROVIDER_FILE_PATH、APP_LOG_CONF_FILE，分别应该指向服务端配置文件、日志配置文件。
+Since the dubbo-go framework relies on configuration files for startup, it locates the configuration files through environment variables. For the server side, two necessary environment variables are required: CONF_PROVIDER_FILE_PATH and APP_LOG_CONF_FILE, which should point to the server configuration file and log configuration file, respectively.
 
-在 sample 里面，我们可以使用 dev 环境，即 profiles/dev/log.yml 和 profiles/dev/server.yml 两个文件。在 app/ 下，通过命令行中指定好这两个文件：
+In the sample, we can use the dev environment, specifically the files profiles/dev/log.yml and profiles/dev/server.yml. Under app/, specify these two files in the command line:
 
 ```bash
 $ export CONF_PROVIDER_FILE_PATH="../profiles/dev/server.yml"
 $ export APP_LOG_CONF_FILE="../profiles/dev/log.yml"
 ```
 
-- 设置 go 代理并运行服务
+- Set go proxy and run the service
 
 ```bash
 $ go run .
 ```
 
-如果提示 timeout，则需要设置 goproxy 代理。
+If a timeout prompt appears, set the goproxy proxy.
 
 ```bash
 $ export GOPROXY="http://goproxy.io"
 ```
 
-再运行 go run 即可开启服务。
+Then run go run to start the service.
 
-#### 2）运行 zookeeper
+#### 2) Run Zookeeper
 
-安装 zookeeper，并运行 zkServer, 默认为 2181 端口。
+Install Zookeeper and run zkServer, default on port 2181.
 
-#### 3）运行 go-client 调用 server 服务
+#### 3) Run go-client to call server service
 
-- 进入 go-client 的源码目录
+- Enter the source code directory of go-client
 
 ```bash
 $ cd go-client/app
 ```
 
-- 同理，在 /app 下配置环境变量
+- Similarly, configure environment variables in /app
 
 ```bash
 $ export CONF_CONSUMER_FILE_PATH="../profiles/dev/client.yml"
 $ export APP_LOG_CONF_FILE="../profiles/dev/log.yml"
 ```
 
-配置 go 代理：
+Configure go proxy:
 
 ```bash
 $ export GOPROXY="http://goproxy.io"
-````
+```
 
-- 运行程序
+- Run the program
 
 ```bash
 $ go run .
 ```
 
-即可在日志中找到打印出的请求结果：
+You can find the printed request result in the logs:
 
 ```bash
 response result: &{A001 Alex Stocks 18 2020-10-28 14:52:49.131 +0800 CST}
 ```
 
-同样，在运行的 server 中，也可以在日志中找到打印出的请求：
+Also, in the running server, you can find the printed request in the logs:
 
 ```bash
 req:[]interface {}{"A001"}
 rsp:main.User{Id:"A001", Name:"Alex Stocks", Age:18, Time:time.Time{...}
 ```
 
-恭喜！一次基于 dubbo-go 的 rpc 调用成功。
+Congratulations! A successful RPC call based on dubbo-go.
 
-#### 4）常见问题
+#### 4) Common Issues
 
-- 当日志开始部分出现 profiderInit 和 ConsumerInit 均失败的日志，检查环境变量中配置路径是否正确，配置文件是否正确。
-- 当日志中出现 register 失败的情况，一般为向注册中心注册失败，检查注册中心是否开启，检查配置文件中关于 register 的端口是否正确。
-- sample 的默认开启端口为 20000，确保启动前无占用。
+- When the log starts with providerInit and ConsumerInit both failing, check whether the configuration paths in the environment variables are correct and whether the configuration files are correct.
+- If the log shows a register failure, it is generally due to a failure to register with the registry center. Check if the registry center is running and whether the port in the configuration file related to register is correct.
+- The default starting port for the sample is 20000, ensuring no occupation before starting.
 
-### 2. 配置环境变量
+### 2. Configure Environment Variables
 
 ```bash
 export APP_LOG_CONF_FILE="../profiles/dev/log.yml"
 export CONF_CONSUMER_FILE_PATH="../profiles/dev/client.yml"
 ```
 
-### 3. 服务端源码
+### 3. Server-Side Source Code
 
-#### 1）目录结构
+#### 1) Directory Structure
 
-dubbo-go 框架的 example 提供的目录如下：
+The example structure provided by the dubbo-go framework is as follows:
 
 ![img](/imgs/blog/dubbo-go/code1/p1.png)
 
-- app/ 文件夹下存放源码，可以自己编写环境变量配置脚本 buliddev.sh
-- assembly/ 文件夹下存放不同平台的构建脚本
-- profiles/ 文件夹下存放不同环境的配置文件
-- target/ 文件夹下存放可执行文件
+- The app/ folder contains the source code, and you can create your own environment variable configuration script buliddev.sh
+- The assembly/ folder contains build scripts for different platforms
+- The profiles/ folder contains configuration files for different environments
+- The target/ folder contains the executable files
 
-### 2）关键源码
+### 2) Key Source Code
 
-源码放置在 app/ 文件夹下，主要包含 server.go 和 user.go 两个文件，顾名思义，server.go 用于使用框架开启服务以及注册传输协议；user.go 则定义了 rpc-service 结构体，以及传输协议的结构。
+The source code is placed in the app/ folder, mainly including server.go and user.go. As the name suggests, server.go is used to start the service using the framework and register the transmission protocol; user.go defines the rpc-service structure and the structure of the transmission protocol.
 
 - **user.go**
 
@@ -164,19 +164,19 @@ type UserProvider struct {
 func (u *UserProvider) GetUser(ctx context.Context, req []interface{}) (*User, error) {
 ```
 
-可以看到，user.go 中存在 init 函数，是服务端代码中最先被执行的部分。User 为用户自定义的传输结构体，UserProvider 为用户自定义的 rpc_service；包含一个 rpc 函数，GetUser。当然，用户可以自定义其他的 rpc 功能函数。
+In user.go, you can see the init function, which is the first part executed in the server code. User is the user-defined transmission struct, and UserProvider is the user-defined rpc_service; it contains an rpc function, GetUser. Of course, users can define other rpc function methods.
 
-在 init 函数中，调用 config 的 SetProviderService 函数，将当前 rpc_service 注册在框架 config 上。
+In the init function, the config.SetProviderService function is called to register the current rpc_service in the framework's config.
 
-**可以查看 dubbo 官方文档提供的设计图：**
+**You can check the design diagram provided in the official dubbo documentation:**
 
 ![img](/imgs/blog/dubbo-go/code1/p2.png)
 
-service 层下面就是 config 层，用户服务会逐层向下注册，最终实现服务端的暴露。
+The service layer is below the config layer, and the user service will be registered layer by layer, ultimately achieving the exposure of the server.
 
-rpc-service 注册完毕之后，调用 hessian 接口注册传输结构体 User。
+Once the rpc-service is registered, the hessian interface is called to register the transmission struct User.
 
-至此，init 函数执行完毕。
+Thus, the init function completes its execution.
 
 - **server.go**
 
@@ -194,17 +194,17 @@ func initSignal() {
     ...
 ```
 
-之后执行 main 函数。
+Then the main function executes.
 
-main 函数中只进行了两个操作，首先使用 hessian 注册组件将 User 结构体注册（与之前略有重复），从而可以在接下来使用 getty 打解包。
+The main function performs only two operations: first, it registers the User structure using the hessian register component (which is slightly redundant from before), enabling the use of getty unpacking afterwards.
 
-之后调用 config.Load 函数，该函数位于框架 config/config_loader.go 内，这个函数是整个框架服务的启动点，**下面会详细讲这个函数内重要的配置处理过程**。执行完 Load() 函数之后，配置文件会读入框架，之后根据配置文件的内容，将注册的 service 实现到配置结构里，再调用 Export 暴露给特定的 registry，进而开启特定的 service 进行对应端口的 tcp 监听，成功启动并且暴露服务。
+Then it calls the config.Load function, which is located in the framework config/config_loader.go. This function is the starting point for the entire framework service's launch, **the important configuration processing of this function will be detailed below**. After executing the Load() function, the configuration file will be imported into the framework, then based on the contents of the configuration file, registered services will be implemented to the configuration structure, and then Export will be called to expose to the specified registry, thus starting the specific service for the corresponding port's TCP listening, successfully starting and exposing the service.
 
-最终开启信号监听 initSignal() 优雅地结束一个服务的启动过程。
+Finally, signal listening initSignal() gracefully ends the startup process of a service.
 
-### 4. 客户端源码
+### 4. Client-Side Source Code
 
-客户端包含 client.go 和 user.go 两个文件，其中 user.go 与服务端完全一致，不再赘述。
+The client contains client.go and user.go files, where user.go is identical to the server side, thus no further explanation is provided.
 
 - **client.go**
 
@@ -220,30 +220,30 @@ func main() {
     user := &User{}
     err := userProvider.GetUser(context.TODO(), []interface{}{"A001"}, user)
     if err != nil {
-  panic(err)
+        panic(err)
     }
     println("response result: %v\n", user)
     initSignal()
 }
 ```
 
-main 函数和服务端也类似，首先将传输结构注册到 hessian 上，再调用 config.Load() 函数。在下文会介绍，客户端和服务端会根据配置类型执行 config.Load() 中特定的函数 loadConsumerConfig() 和 loadProviderConfig()，从而达到“开启服务”、“调用服务”的目的。
+The main function is similar to the server side; first, the transmission structure is registered with hessian, and then it calls config.Load(). In the following section, we will explain that the client and server will execute specific functions loadConsumerConfig() and loadProviderConfig() from config.Load() based on the configuration type, achieving the goal of "starting service" and "calling service".
 
-加载完配置之后，还是通过实现服务、增加函数 proxy、申请 registry 和 reloadInvoker 指向服务端 ip 等操作，重写了客户端实例 userProvider 的对应函数，这时再通过调用 GetUser 函数，可以直接通过 invoker，调用到已经开启的服务端，实现 rpc 过程。
+After loading the configuration, it also rewrites the corresponding functions of the client instance userProvider through service implementation, adding function proxy, applying registry and redirecting invoker to the server IP, etc. Then by calling the GetUser function, you can directly invoke the already started server and achieve the RPC process.
 
-下面会从 server 端和 client 端两个角度，详细讲解服务启动、registry 注册和调用过程。
+Next, we will explain the service startup, registry registration, and call process from both the server and client perspectives.
 
-### 5. 自定义配置文件（非环境变量）方法
+### 5. Custom Configuration File (Non-Environment Variable) Method
 
-#### 1）服务端自定义配置文件
+#### 1) Custom Configuration File for Server
 
-- var providerConfigStr = `xxxxx`// 配置文件内容，可以参考 log 和 client。在这里你可以定义配置文件的获取方式，比如配置中心，本地文件读取。
+- var providerConfigStr = `xxxxx` // configuration file content, can refer to log and client. Here you can define the way to obtain the configuration file, such as from a configuration center or local file reading.
 
-> **log 地址**：https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/log.yml
+> **Log Address**: https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/log.yml
 >
-> **client 地址**：https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/client.yml
+> **Client Address**: https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/client.yml
 
-- 在 `config.Load()` 之前设置配置，例如：
+- Set configurations before `config.Load()`, for example:
 
 ```go
 func main() {
@@ -260,10 +260,10 @@ func main() {
 }
 ```
 
-#### 2）客户端自定义配置文件
+#### 2) Custom Configuration File for Client
 
-- var consumerConfigStr = `xxxxx`// 配置文件内容，可以参考 log 和 clien。在这里你可以定义配置文件的获取方式，比如配置中心，本地文件读取。
-- 在 `config.Load()` 之前设置配置，例如：
+- var consumerConfigStr = `xxxxx` // configuration file content, can refer to log and client. Here you can define the way to obtain the configuration file, such as configuration center or local file reading.
+- Set configurations before `config.Load()`, for example:
 
 ```go
 func main() {
@@ -285,21 +285,21 @@ func main() {
 }
 ```
 
-## Server 端
+## Server Side
 
-服务暴露过程涉及到多次原始 rpcService 的封装、暴露，网上其他文章的图感觉太过笼统，在此，简要地绘制了一个用户定义服务的数据流图：
+The service exposure process involves multiple encapsulations and exposures of the original rpcService. Other articles online seem too vague, so here is a simple flow chart of a user-defined service data flow:
 
 ![img](/imgs/blog/dubbo-go/code1/p3.png)
 
-### 1. 加载配置
+### 1. Load Configuration
 
-#### 1）框架初始化
+#### 1) Framework Initialization
 
-在加载配置之前，框架提供了很多已定义好的协议、工厂等组件，都会在对应模块 init 函数内注册到 extension 模块上，以供接下来配置文件中进行选用。
+Before loading the configuration, the framework provides many predefined protocols, factories, and other components that will be registered in the corresponding module init functions for selection in the configuration files.
 
-其中重要的有：
+Among them, the important ones are:
 
-- **默认函数代理工厂**：common/proxy/proxy_factory/default.go
+- **Default Function Proxy Factory**: common/proxy/proxy_factory/default.go
 
 ```go
 func init() {
@@ -307,9 +307,9 @@ func init() {
 }
 ```
 
-它的作用是将原始 rpc-service 进行封装，形成 proxy_invoker，更易于实现远程 call 调用，详情可见其 invoke 函数。
+Its role is to encapsulate the original rpc-service into proxy_invoker for easier realization of remote call invocation. For more details, see its invoke function.
 
-- **注册中心注册协议**：
+- **Registry Registration Protocol**:
   registry/protocol/protocol.go
 
 ```go
@@ -318,9 +318,9 @@ func init() {
 }
 ```
 
-它负责将 invoker 暴露给对应注册中心，比如 zk 注册中心。
+It is responsible for exposing the invoker to the corresponding registry, such as the zk registry.
 
-- **zookeeper 注册协议**：registry/zookeeper/zookeeper.go
+- **Zookeeper Registration Protocol**: registry/zookeeper/zookeeper.go
 
 ```go
 func init() {
@@ -328,9 +328,9 @@ func init() {
 }
 ```
 
-它合并了 base_resiger，负责在服务暴露过程中，将服务注册在 zookeeper 注册器上，从而为调用者提供调用方法。
+It combines the base_resiger, responsible for registering the service in the zookeeper registry during the exposure process, thus providing a calling method for the caller.
 
-- **dubbo 传输协议**：protocol/dubbo/dubbo.go
+- **Dubbo Transport Protocol**: protocol/dubbo/dubbo.go
 
 ```go
 func init() {
@@ -338,9 +338,9 @@ func init() {
 }
 ```
 
-它负责监听对应端口，将具体的服务暴露，并启动对应的事件 handler，将远程调用的 event 事件传递到 invoker 内部，调用本地 invoker 并获得执行结果返回。
+It is responsible for listening to the corresponding port, exposing specific services, and starting corresponding event handlers to pass remote call events to the invoker, invoke local invoker, and obtain execution results.
 
-- **filter 包装调用链协议**：protocol/protocolwrapper/protocol_filter_wrapper.go
+- **Filter Wrapped Invocation Chain Protocol**: protocol/protocolwrapper/protocol_filter_wrapper.go
 
 ```go
 func init() {
@@ -348,13 +348,13 @@ func init() {
 }
 ```
 
-它负责在服务暴露过程中，将代理 invoker 打包，通过配置好的 filter 形成调用链，并交付给 dubbo 协议进行暴露。
+It is responsible for packaging the proxy invoker during service exposure, forming an invocation chain through the configured filters, delivered to the dubbo protocol for exposure.
 
-上述提前注册好的框架已实现的组件，在整个服务暴露调用链中都会用到，会根据配置取其所需。
+The components implemented by the framework registered in advance will be used throughout the entire service exposure invocation chain based on configuration.
 
-#### 2）配置文件
+#### 2) Configuration File
 
-服务端需要的重要配置有三个字段：services、protocols、registries。
+The important configurations required for the server include three fields: services, protocols, registries.
 
 profiles/dev/server.yml:
 
@@ -366,10 +366,8 @@ registries :
     address: "127.0.0.1:2181"
 services:
   "UserProvider":
-    # 可以指定多个registry，使用逗号隔开;不指定默认向所有注册中心注册
     registry: "demoZk"
     protocol : "dubbo"
-    # 相当于dubbo.xml中的interface
     interface : "com.ikurento.user.UserProvider"
     loadbalance: "random"
     warmup: "100"
@@ -384,17 +382,17 @@ protocols:
     port: 20000
 ```
 
-其中 service 指定了要暴露的 rpc-service 名（"UserProvider）、暴露的协议名（"dubbo"）、注册的协议名("demoZk")、暴露的服务所处的 interface、负载均衡策略、集群失败策略及调用的方法等等。
+The services specify the name of the rpc-service to be exposed ("UserProvider"), the name of the exposure protocol ("dubbo"), the protocol name for registration ("demoZk"), the service's interface, load balancing strategy, cluster failure strategy, and called methods.
 
-其中，中间服务的协议名需要和 registries 下的 mapkey 对应，暴露的协议名需要和 protocols 下的 mapkey 对应。
+The protocol name of the middle service needs to correspond to the mapkey under registries, and the exposed protocol name needs to correspond to the mapkey under protocols.
 
-可以看到上述例子中，使用了 dubbo 作为暴露协议，使用了 zookeeper 作为中间注册协议，并且给定了端口。如果 zk 需要设置用户名和密码，也可以在配置中写好。
+As observed in the above example, dubbo is used as the exposure protocol, and zookeeper is used as the intermediate registration protocol, with a designated port. If zk needs to set a username and password, it can also be specified in the configuration.
 
-#### 3）配置文件的读入和检查
+#### 3) Read and Check Configuration File
 
 > config/config_loader.go:: Load()
 
-在上述 example 的 main 函数中，有 config.Load() 函数的直接调用，该函数执行细节如下：
+In the main function of the above example, there is a direct call to the config.Load() function, the detailed execution of this function is as follows:
 
 ```go
 // Load Dubbo Init
@@ -417,146 +415,138 @@ func Load() {
 }
 ```
 
-在本文中，我们重点关心 loadConsumerConfig() 和 loadProviderConfig() 两个函数。
+In this article, we focus on the functions loadConsumerConfig() and loadProviderConfig().
 
-对于 provider 端，可以看到 loadProviderConfig() 函数代码如下：
+For the provider side, the loadProviderConfig() function code is as follows:
 
 ![img](/imgs/blog/dubbo-go/code1/p4.png)
 
-前半部分是配置的读入和检查，进入 for 循环后，是单个 service 的暴露起始点。
+The first half deals with reading and checking the configuration; after entering the for loop, it begins to expose each service in turn.
 
-前面提到，在配置文件中已经写好了要暴露的 service 的种种信息，比如服务名、interface 名、method 名等等。在图中 for 循环内，会将所有 service 的服务依次实现。
-
-for 循环的第一行，根据 key 调用 GetProviderService 函数，拿到注册的 rpcService 实例，这里对应上述提到的 init 函数中，用户手动注册的自己实现的 rpc-service 实例：
+As previously mentioned, various information about the service to be exposed, such as service name, interface name, and method name, has already been written in the configuration file. Inside the for loop, the registered rpcService instance is retrieved using the key through the GetProviderService function:
 
 ![img](/imgs/blog/dubbo-go/code1/p5.png)
 
-这个对象也就成为了 for 循环中的 rpcService 变量，将这个对象注册通过 Implement 函数写到 sys（ServiceConfig 类型）上，设置好 sys 的 key 和协议组，最终调用了 sys 的 Export 方法。
+This object becomes the rpcService variable in the for loop, registering it using the Implement function to write into sys (of type ServiceConfig), setting up sys's key and protocol group, and finally calling the Export method on sys.
 
-此处对应流程图的部分：
+This corresponds to the corresponding part of the flowchart:
 
 ![img](/imgs/blog/dubbo-go/code1/p6.png)
 
-至此，框架配置结构体已经拿到了所有 service 有关的配置，以及用户定义好的 rpc-service 实例，它触发了 Export 方法，旨在将自己的实例暴露出去。这是 Export 调用链的起始点。
+Thus, the framework's configuration structure obtains all configurations related to the service and the user-defined rpc-service instance, triggering the Export method aiming to expose its instance. This marks the starting point of the Export call chain.
 
-### 2. 原始 service 封装入 proxy_invoker
+### 2. Original Service Encapsulated into Proxy Invoker
 
 > config/service_config.go :: Export()
 
-接下来进入 ServiceConfig.Export() 函数.
+Next, we enter the ServiceConfig.Export() function.
 
-这个函数进行了一些细碎的操作，比如为不同的协议分配随机端口，如果指定了多个中心注册协议，则会将服务通过多个中心注册协议的 registryProtocol 暴露出去，我们只关心对于一个注册协议是如何操作的。还有一些操作比如生成调用 url 和注册 url，用于为暴露做准备。
+This function does some granular operations, such as allocating random ports for different protocols; if multiple central registration protocols are specified, it will expose the service through multiple registryProtocol; we only care about how to operate for a single registration protocol. Other operations include generating call URLs and registration URLs to prepare for exposure.
 
-#### 1）首先通过配置生成对应 registryUrl 和 serviceUrl
+#### 1) First, generate the corresponding registryUrl and serviceUrl through configuration
 
 ![img](/imgs/blog/dubbo-go/code1/p7.png)
 
-registryUrl 是用来向中心注册组件发起注册请求的，对于 zookeeper 的话，会传入其 ip 和端口号，以及附加的用户名密码等信息。
+registryUrl is used to initiate registration requests to the central registry. For zookeeper, this involves passing its IP and port number plus any additional username and password.
 
-这个 regUrl 目前只存有注册（zk）相关信息，后续会补写入 ServiceIvk，即服务调用相关信息，里面包含了方法名，参数等...
+This regUrl currently only contains registration (zk) related information; later will be supplemented with ServiceIvk, containing call-related parameters such as method name and arguments...
 
-#### 2）对于一个注册协议，将传入的 rpc-service 实例注册在 common.ServiceMap
+#### 2) For one registration protocol, register the input rpc-service instance in common.ServiceMap
 
 ![img](/imgs/blog/dubbo-go/code1/p8.png)
 
-这个 Register 函数将服务实例注册了两次，一次是以 Interface 为 key 写入接口服务组内，一次是以 interface 和 proto 为 key 写入特定的一个唯一的服务。
+This Register function registers the service instance twice, once using the Interface as key in the interface service group, and once using interface and proto as key in a specific unique service.
 
-后续会从 common.Map 里面取出来这个实例。
+Later, this instance will be fetched from common.Map.
 
-#### 3）获取默认代理工厂，将实例封装入代理 invoker
+#### 3) Get the default proxy factory and encapsulate the instance into the proxy invoker
 
 ```go
-// 拿到一个proxyInvoker，这个invoker的url是传入的regUrl，这个地方将上面注册的service实例封装成了invoker
-// 这个GetProxyFactory返回的默认是common/proxy/proxy_factory/default.go
-// 这个默认工厂调用GetInvoker获得默认的proxyInvoker，保存了当前注册url
+// Getting a proxyInvoker, the invoker's URL is the passed regUrl, which encapsulates the registered service instance into an invoker
 invoker := extension.GetProxyFactory(providerConfig.ProxyFactory).GetInvoker(*regUrl)
-// 暴露出来 生成exporter,开启tcp监听
-// 这里就该跳到registry/protocol/protocol.go registryProtocol 调用的Export，将当前proxyInvoker导出
+// Expose by generating exporter and starting TCP listening
 exporter = c.cacheProtocol.Export(invoker)
 ```
 
-这一步的 GetProxyFactory("default") 方法获取默认代理工厂，通过传入上述构造的 regUrl，将 url 封装入代理 invoker。
+This step of the GetProxyFactory("default") method retrieves the default proxy factory and encapsulates the regUrl into the proxy invoker.
 
-可以进入 common/proxy/proxy_factory/default.go::ProxyInvoker.Invoke() 函数里，看到对于 common.Map 取用为 svc 的部分，以及关于 svc 对应 Method 的实际调用 Call 的函数如下：
+You can investigate common/proxy/proxy_factory/default.go::ProxyInvoker.Invoke() function for the svc section from common.Map and the actual invocation of svc corresponding Method.
 
-![img](/imgs/blog/dubbo-go/code1/p9.png)
+At this point, the invoker returned from GetInvoker(*regUrl) is the proxy_invoker, which has encapsulated the user-defined rpc_service, embedding specific invocation logic within the Invoke function.
 
-到这里，上面 GetInvoker(*regUrl) 返回的 invoker 即为 proxy_invoker，它封装好了用户定义的 rpc_service，并将具体的调用逻辑封装入了 Invoke 函数内。
-
-> 为什么使用 Proxy_invoker 来调用？
+> Why use Proxy_invoker for invocation?
 >
-> 通过这个 proxy_invoke 调用用户的功能函数，调用方式将更加抽象化，可以在代码中看到，通过 ins 和 outs 来定义入参和出参，将整个调用逻辑抽象化为 invocation 结构体，而将具体的函数名的选择、参数向下传递和 reflect 反射过程封装在 invoke 函数内，这样的设计更有利于之后远程调用。个人认为这是 dubbo Invoke 调用链的设计思想。
+> This proxy_invoke allows the user’s function to be called in a more abstract manner; one can observe in the code the use of ins and outs to define input and output parameters, abstracting the entire invocation process into an invocation structure while encapsulating the selection of actual function names, parameter passing, and reflection process within the invoke function, making this design beneficial for future remote calls. Personally, this represents the design philosophy of the dubbo Invoke call chain.
 >
-> 至此，实现了图中对应的部分：
+> Thus, we have realized the corresponding parts in the flowchart:
 
 ![img](/imgs/blog/dubbo-go/code1/p10.png)
 
-### 3. registry 协议在 zkRegistry 上暴露上面的 proxy_invoker
+### 3. Registry Protocol Exposing the Above Proxy Invoker on zkRegistry
 
-上面，我们执行到了 exporter = c.cacheProtocol.Export(invoker)。
+Here, we execute exporter = c.cacheProtocol.Export(invoker).
 
-这里的 cacheProtocol 为一层缓存设计，对应到原始的 demo 上，这里是默认实现好的 registryProtocol。
+CacheProtocol serves as a caching design; corresponding to the original demo, this is the default implemented registryProtocol.
 
 > registry/protocol/protocol.go:: Export()
 
-这个函数内构造了多个 EventListener，非常有 java 的设计感。
+This function constructs multiple EventListeners and exhibits a strong sense of Java design.
 
-我们只关心服务暴露的过程，先忽略这些监听器。
+We only focus on the service exposure process, ignoring these listeners for now.
 
-#### 1）获取注册 url 和服务 url
+#### 1) Retrieve registration URL and service URL
 
 ![img](/imgs/blog/dubbo-go/code1/p11.png)
 
-#### 2）获取注册中心实例 zkRegistry
+#### 2) Retrieve the registry instance zkRegistry
 
 ![img](/imgs/blog/dubbo-go/code1/p12.png)
 
-一层缓存操作，如果 cache 没有需要从 common 里面重新拿 zkRegistry。
+There's a layer of cache operation; if the cache does not exist, it retrieves from common zkRegistry again.
 
-#### 3）zkRegistry 调用 Registry 方法，在 zookeeper 上注册 dubboPath
+#### 3) zkRegistry calls the Registry method to register dubboPath on Zookeeper
 
-上述拿到了具体的 zkRegistry 实例，该实例的定义在：registry/zookeeper/registry.go。
+With the concrete instance of zkRegistry obtained, its definition can be found in: registry/zookeeper/registry.go.
 
 ![img](/imgs/blog/dubbo-go/code1/p13.png)
 
-该结构体组合了 registry.BaseRegistry 结构，base 结构定义了注册器基础的功能函数，比如 Registry、Subscribe 等，但在这些默认定义的函数内部，还是会调用 facade 层（zkRegistry 层）的具体实现函数，这一设计模型能在保证已有功能函数不需要重复定义的同时，引入外层函数的实现，类似于结构体继承却又复用了代码。这一设计模式值得学习。
+This structure combines with registry.BaseRegistry, defining the basic functional functions of the registrar, such as Registry, Subscribe, etc., yet these default-defined functions will still invoke facade-level (zkRegistry layer) specific implementation functions. This design model enables the existing functional definitions not to be redundantly redefined while allowing the introduction of outer function implementations, akin to struct inheritance but reusing code. This design model is worth learning.
 
-我们查看上述 registry/protocol/protocol.go:: Export() 函数，直接调用了:
+We observe that the registry/protocol/protocol.go:: Export() function directly calls:
 
 ```go
-// 1. 通过zk注册器，调用Register()函数，将已有@root@rawurl注册到zk上
-    err := reg.Register(*registeredProviderUrl)
+// Register the existing @root@rawurl to zk via the zk registrar
+err := reg.Register(*registeredProviderUrl)
 ```
 
-将已有 RegistryUrl 注册到了 zkRegistry 上。
+This registers the existing RegistryUrl with the zkRegistry.
 
-这一步调用了 baseRegistry 的 Register 函数，进而调用 zkRegister 的 DoRegister 函数，进而调用：
+This call invokes the baseRegistry's Register function, leading to the zkRegister's DoRegister function.
 
 ![img](/imgs/blog/dubbo-go/code1/p14.png)
 
-在这个函数里，将对应 root 创造一个新的节点。
+In this function, it creates a new node for the corresponding root.
 
 ![img](/imgs/blog/dubbo-go/code1/p15.png)
 
-并且写入具体 node 信息，node 为 url 经过 encode 的结果，**包含了服务端的调用方式。**
+And writes specific node information, which includes the encoded service call method on the URL. 
 
-这部分的代码较为复杂，具体可以看 baseRegistry 的 processURL() 函数：http://t.tb.cn/6Xje4bijnsIDNaSmyPc4Ot。
+This section of code is rather complex; for specific implementations, refer to the baseRegistry's processURL() function: http://t.tb.cn/6Xje4bijnsIDNaSmyPc4Ot.
 
-至此，将服务端调用 url 注册到了 zookeeper 上，而客户端如果想获取到这个 url，只需要传入特定的 dubboPath，向 zk 请求即可。目前 client 是可以获取到访问方式了，但服务端的特定服务还没有启动，还没有开启特定协议端口的监听，这也是 registry/protocol/protocol.go:: Export() 函数接下来要做的事情。
+Thus, the service calling URL has been registered in Zookeeper, and for clients to access this URL, they only need to pass the specific dubboPath to request from zk. Currently, the client can access the calling method, but the specific server-side service has not started, and the specific protocol port listening has also not commenced; this will also be handled in the registry/protocol/protocol.go:: Export() function.
 
-#### 4）proxy_invoker 封装入 wrapped_invoker，得到 filter 调用链
+#### 4) Proxy_invoker is Encapsulated into a Wrapped_invoker, Forming a Filter Invocation Chain
 
 ```go
-    // invoker封装入warppedInvoker
+    // enveloped invoker into wrappedInvoker
     wrappedInvoker := newWrappedInvoker(invoker, providerUrl)
-    // 经过为invoker增加filter调用链，再使用dubbo协议Export，开启service并且返回了Exporter 。
-    // export_1
+    // By adding filter invocation chains to the invoker, use the dubbo protocol to Export, starting the service and returning the Exporter.
     cachedExporter = extension.GetProtocol(protocolwrapper.FILTER).Export(wrappedInvoker)
 ```
 
-新建一个 WrappedInvoker，用于之后链式调用。
+A newly created WrappedInvoker prepares for subsequent chained calls.
 
-拿到提前实现并注册好的 ProtocolFilterWrapper，调用 Export 方法，进一步暴露。
+Retrieving the previously established ProtocolFilterWrapper, invoking the Export method further exposes it.
 
 > protocol/protocolwrapped/protocol_filter_wrapper.go:Export()
 
@@ -566,107 +556,106 @@ exporter = c.cacheProtocol.Export(invoker)
 
 ![img](/imgs/blog/dubbo-go/code1/p17.png)
 
-可见，根据配置的内容，通过链式调用的构造，将 proxy_invoker 层层包裹在调用链的最底部，最终返回一个调用链 invoker。
+As inferred from the configurations, the proxy_invoker is layered within the call chain, resulting in a returned invocation chain invoker.
 
-对应图中部分：
+Corresponding to the parts in the diagram:
 
 ![img](/imgs/blog/dubbo-go/code1/p18.png)
 
-至此，我们已经拿到 filter 调用链，期待将这个 chain 暴露到特定端口，用于相应请求事件。
+At this point, we have obtained the filter invocation chain and are set to expose this chain to a particular port to respond to request events.
 
-#### 5）通过 dubbo 协议暴露 wrapped_invoker
+#### 5) Expose wrapped_invoker via Dubbo Protocol
 
 > protocol/protocolwrapped/protocol_filter_wrapper.go:Export()
 
 ```go
-// 通过dubbo协议Export  dubbo_protocol调用的 export_2
-    return pfw.protocol.Export(invoker)
+// Export the wrapped invoker using the dubbo protocol
+return pfw.protocol.Export(invoker)
 ```
 
-回到上述 Export 函数的最后一行，调用了 dubboProtocol 的 Export 方法，将上述 chain 真正暴露。
+Returning to the last line of the previous Export function, it calls the Export method of dubboProtocol to actually expose the aforementioned chain.
 
-该 Export 方法的具体实现在：protocol/dubbo/dubbo_protocol.go: Export()。
+The specific implementation of this Export method can be found in: protocol/dubbo/dubbo_protocol.go: Export().
 
 ![img](/imgs/blog/dubbo-go/code1/p19.png)
 
-这一函数做了两个事情：构造触发器、启动服务。
+This function accomplishes two tasks: constructing a trigger and starting the service.
 
-- 将传入的 Invoker 调用 chain 进一步封装，封装成一个 exporter，再将这个 export 放入 map 保存。**注意！这里把 exporter 放入了 SetExporterMap中，在下面服务启动的时候，会以注册事件监听器的形式将这个 exporter 取出！**
-- 调用 dubboProtocol 的 openServer 方法，开启一个针对特定端口的监听。
+- It encapsulates the incoming Invoker calling chain further, creating an exporter and saving the export in a map. **Note! Here the exporter is placed in SetExporterMap; during service startup, this exporter will be retrieved as part of the registration event listener!**
+- It calls the openServer method of dubboProtocol, initiating a listener for the designated port.
 
 ![img](/imgs/blog/dubbo-go/code1/p20.png)
 
-如上图所示，一个 Session 被传入，开启对应端口的事件监听。
+As illustrated, a Session is passed in to commence event listening on the corresponding port.
 
-至此构造出了 exporter，完成图中部分：
+At this point, the exporter has been constructed, completing that part of the diagram:
 
 ![img](/imgs/blog/dubbo-go/code1/p21.png)
 
-### 4. 注册触发动作
+### 4. Registration Triggered Actions
 
-上述只是启动了服务，但还没有看到触发事件的细节，点进上面的 s.newSession 可以看到，dubbo 协议为一个 getty 的 session 默认使用了如下配置：
+The above merely initiated the service without viewing the trigger event details. Delving into the aforementioned s.newSession, it reveals that the dubbo protocol for a getty session, utilizes the default configuration:
 
 ![img](/imgs/blog/dubbo-go/code1/p22.png)
 
-其中很重要的一个配置是 EventListener，传入的是 dubboServer 的默认 rpcHandler。
+One crucial configuration is the EventListener, which defaults to the rpcHandler of dubboServer.
 
 > protocol/dubbo/listener.go:OnMessage()
 
-rpcHandler 有一个实现好的 OnMessage 函数，根据 getty 的 API，当 client 调用该端口时，会触发 OnMessage。
+The rpcHandler contains an implemented OnMessage function, which processes upon receiving a message in the connection according to the getty API as the client calls the designated port.
 
 ```go
 // OnMessage notified when RPC server session got any message in connection
 func (h *RpcServerHandler) OnMessage(session getty.Session, pkg interface{}) {
 ```
 
-这一函数实现了在 getty session 接收到 rpc 调用后的一系列处理：
+This function implements a series of processes upon receiving an RPC call in the getty session:
 
-- 传入包的解析
+- Parsing the incoming package
 
 ![img](/imgs/blog/dubbo-go/code1/p23.png)
 
-- 根据请求包构造请求 url
+- Constructing the request URL based on the package
 
 ![img](/imgs/blog/dubbo-go/code1/p24.png)
 
-- 拿到对应请求 key，找到要被调用的 exporter
+- Retrieving the request key and locating the exporter to be called
 
 ![img](/imgs/blog/dubbo-go/code1/p25.png)
 
-- 拿到对应的 Invoker
+- Accessing the corresponding Invoker
 
 ![img](/imgs/blog/dubbo-go/code1/p26.png)
 
-- 构造 invocation
+- Constructing the invocation
 
 ![img](/imgs/blog/dubbo-go/code1/p27.png)
 
-- 调用
+- Calling
 
 ![img](/imgs/blog/dubbo-go/code1/p28.png)
 
-- 返回
+- Returning
 
 ![img](/imgs/blog/dubbo-go/code1/p29.png)
 
-整个被调过程一气呵成。实现了从 getty.Session 的调用事件，到经过层层封装的 invoker 的调用。
+The entire invocation process proceeds smoothly. A successful RPC call returns correctly.
 
-至此，一次 rpc 调用得以正确返回。
+## Summary
 
-## 小结
+- **About Layered Encapsulation of Invoker**
 
-- **关于 Invoker 的层层封装**
+Ability to abstract a call into an invoke; abstraction of a protocol as an encapsulation for invoke; encapsulating specific alterations made for an invoke within the invoke function reduces module coupling. The layered encapsulation logic is clearer.
 
-能把一次调用抽象成一次 invoke；能把一个协议抽象成针对 invoke 的封装；能把针对一次 invoke 所做出的特定改变封装到 invoke 函数内部，可以降低模块之间的耦合性。层层封装逻辑更加清晰。
+- **About URL Abstraction**
 
-- **关于 URL 的抽象**
+The extreme abstraction of the unified request object URL of dubbo is something I have not encountered before... I believe such encapsulation guarantees simplification and consistency of the request parameter list. However, during development, excessive misuse of abstract interfaces might cause difficulties in debugging, alongside uncertainty about which fields are pre-packaged and which are superfluous.
 
-关于 dubbo 的统一化请求对象 URL 的极度抽象是之前没有见过的... 个人认为这样封装能保证请求参数列表的简化和一致。但在开发的过程中，滥用极度抽象的接口可能造成... debug 的困难？以及不知道哪些字段是当前已经封装好的，哪些字段是无用的。
+- **About Protocol Understanding**
 
-- **关于协议的理解**
+My previous understanding of protocols was too specific; however, about the dubbo-go dubboProtocol, I consider it a deeper encapsulation based on getty, defining particular operations regarding sessions that the client and server should undertake. This guarantees consistency between the invoker and the invoked protocol, which is also a manifestation of the protocol — regulated by the dubbo protocol.
 
-之前理解的协议还是太过具体化了，而关于 dubbo-go 对于 dubboProtocol 的协议，我认为是基于 getty 的进一步封装，它定义了客户端和服务端，对于 getty 的 session 应该有哪些特定的操作，从而保证主调和被调的协议一致性，而这种保证也是一种协议的体现，是由 dubbo 协议来规范的。
+If you have any questions, feel free to scan the DingTalk QR code to join the discussion group: DingTalk Group Number 23331795!
 
-如果你有任何疑问，欢迎钉钉扫码加入交流群：钉钉群号 23331795！
+> Author Profile: **Li Zhixin** (GitHub ID LaurenceLiZhixin), a student majoring in Software Engineering at Sun Yat-sen University, proficient in Java/Go, focused on cloud-native and microservices technology directions.
 
-> 作者简介 **李志信** (GitHubID LaurenceLiZhixin)，中山大学软件工程专业在校学生，擅长使用 Java/Go 语言，专注于云原生和微服务等技术方向

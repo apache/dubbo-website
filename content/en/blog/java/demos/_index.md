@@ -1,8 +1,6 @@
-
 ---
-title: "功能演示"
-linkTitle: "功能演示"
+title: "Feature Demonstration"
+linkTitle: "Feature Demonstration"
 weight: 10
 ---
-
 

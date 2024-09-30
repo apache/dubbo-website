@@ -1,11 +1,12 @@
 ---
-title: "Dubbo路线图在QCon Beijing 2018上公布"
-linkTitle: "Dubbo路线图在QCon Beijing 2018上公布"
+title: "Dubbo Roadmap Revealed at QCon Beijing 2018"
+linkTitle: "Dubbo Roadmap Revealed at QCon Beijing 2018"
 date: 2018-04-22
-tags: ["新闻动态"]
+tags: ["News"]
 description: >
-    本文将向你介绍在QCon Beijing 2018上公布Dubbo路线图。
+    This article will introduce you to the Dubbo roadmap announced at QCon Beijing 2018.
 ---
 
 
-罗毅在Qcon Beijing 2018上进行了Dubbo开源现状及未来规划的主题演讲。详细内容请查看[幻灯片](https://github.com/dubbo/awesome-dubbo/raw/master/slides/qcon2018/dubbo-present-and-future.pdf)。
+Ro Yi delivered a keynote speech on the current status and future plans of Dubbo at QCon Beijing 2018. For more details, please check the [slides](https://github.com/dubbo/awesome-dubbo/raw/master/slides/qcon2018/dubbo-present-and-future.pdf).
+

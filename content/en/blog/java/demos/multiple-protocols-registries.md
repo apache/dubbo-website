@@ -1,21 +1,21 @@
 ---
-title: "Dubbo 连接异构微服务体系 - 多协议&多注册中心"
-linkTitle: "Dubbo 连接异构微服务体系 - 多协议&多注册中心"
+title: "Dubbo Connecting Heterogeneous Microservice Architecture - Multi-Protocol & Multi-Registry"
+linkTitle: "Dubbo Connecting Heterogeneous Microservice Architecture - Multi-Protocol & Multi-Registry"
 tags: ["Java"]
 date: 2023-01-05
 description: >
-    本文介绍了 Dubbo 的多协议、多注册中心支持方案，以及如何用它们实现多协议共存、多协议互通、多协议迁移等能力。
+    This article introduces Dubbo's multi-protocol and multi-registry support solutions, and how to achieve capabilities such as multi-protocol coexistence, intercommunication, and migration.
 ---
 
-从编程开发的角度来说，Dubbo 首先是一款 RPC 服务框架，它最大的优势在于提供了面向接口代理的服务编程模型，对开发者屏蔽了底层的远程通信细节。同时 Dubbo 也是一款服务治理框架，它为分布式部署的微服务提供了服务发现、流量调度等服务治理解决方案。
+From a programming development perspective, Dubbo is primarily an RPC service framework. Its greatest advantage lies in providing an interface-based service programming model that shields developers from the underlying remote communication details. At the same time, Dubbo is also a service governance framework, offering solutions for service discovery, traffic scheduling, and other service governance aspects for microservices deployed in a distributed manner.
 
-在这篇文章中，我们将以以上基础能力为背景，尝试突破 Dubbo 体系自身，探索如何利用 Dubbo 对多协议、多服务发现模型的支持，来实现异构微服务体系间的互联互通。在实际业务场景中，这可以用来解决异构技术体系共存场景下的通信问题，帮助公司实现在异构技术体系间作平滑迁移，解决大规模跨区域、多集群部署场景的地址发现及流量调度等问题。
+In this article, we will explore how to leverage Dubbo's support for multiple protocols and service discovery models to achieve interconnectivity between heterogeneous microservice architectures. In practical business scenarios, this can address communication issues under heterogeneous technology stacks, facilitate smooth migrations, and solve challenges like address discovery and traffic scheduling in large-scale, cross-regional, and multi-cluster deployments.
 
-## 面向接口代理的透明服务开发框架
+## Interface-Based Transparent Service Development Framework
 
-我们还是从 **Dubbo 是一个微服务开发框架** 这个大家熟知的概念开始。就像 Spring 是开发 Java 应用的基础框架一样，我们经常会选用 Dubbo 作为开发微服务业的基础框架。 Dubbo 框架的最大优势我认为就在其面向接口的编程模型，使得开发远程服务调用就像开发本地服务一样（以 Java 语言为例）：
+We start with the well-known concept that **Dubbo is a microservice development framework**. Just as Spring serves as a foundation for developing Java applications, Dubbo is often chosen as the basic framework for microservices development. I believe Dubbo's biggest advantage is its interface-oriented programming model, allowing developers to invoke remote services as if they were local services (using Java as an example):
 
-1. 服务定义
+1. Service Definition
 
 ```java
 public interface GreetingsService {
@@ -23,10 +23,10 @@ public interface GreetingsService {
 }
 ```
 
-2. 消费方调用服务
+2. Consumer Calls Service
 
 ```java
-// 和调用本地服务一样，完全透明。
+// Completely transparent, just like calling a local service.
 @Reference
 private GreetingService greetingService;
 
@@ -35,57 +35,55 @@ public void doSayHello(String name) {
 }
 ```
 
-下图是 Dubbo 的基本工作原理图，服务提供者与服务消费者之间通过注册中心协调地址，通过约定的协议实现数据交换。
+The diagram below illustrates the basic working principle of Dubbo, where service providers and consumers coordinate addresses via a registry and exchange data using a predefined protocol.
 
 ![Dubbo basic work flow](/imgs/blog/2023/01/protocols/img.png)
 
+## Problems Faced by Homogeneous/Heterogeneous Microservice Systems
 
-## 同构/异构微服务体系面临的问题
+The specifics of the Dubbo protocol itself and related service governance functionalities are not the focus of this article. Instead, we'll examine the challenges faced by organizations in building internal microservice architectures and discuss how Dubbo can offer solutions for architectural selection and migration.
 
-关于 Dubbo 协议本身及其服务治理相关功能细节并不是本文的重点，我们今天将从一个更高的层次，来看看公司内部构建微服务体系所面的挑战，以及 Dubbo 能为架构选型和迁移等提供哪些解决思路。
+An organization's microservices may be developed using the same service framework, such as Dubbo, which we refer to as a **homogeneous microservice system**. On the other hand, some organizations may construct their microservices using multiple different frameworks, which we call a **heterogeneous microservice system**. The co-existence of various technology stack microservice systems within large organizations is quite common, and there can be many reasons for this scenario—ranging from legacy systems to ongoing technology stack migrations, or independent selections made by different business departments to meet specific needs.
 
-一个公司内部的微服务可能都是基于某一个相同的服务框架开发的，比如说 Dubbo，对于这样的架构，我们称之为是**同构的微服务体系**；而有些公司的微服务可能是使用多个不同的服务框架所建设，我们称之为**异构的微服务体系**，多个不同技术栈微服务体系的共存在大型组织内还是非常普遍的，造成这种局面可能有很多原因。比如，可能是遗留系统带来的，也可能是公司正在做技术栈迁移，或者就是不同业务部门为了满足各自特殊需求而做的独立选型（这也意味着异构微服务体系的长期共存）。
+**1. Coexistence of Heterogeneous Microservice Systems**
 
-**1. 异构微服务体系共存**
-
-我们很容易想到的一个挑战是：**不同的体系间通常是使用不同的 RPC 通信协议、部署独立的注册中心集群，面对这种多协议、多注册中心集群的场景，要如何实现相互之间透明的地址发现和透明的 RPC 调用？**如果我们什么都不做，那么每个微服务体系就只能感知到自己体系内的服务状态，流量也在各自的体系内封闭。而要做到从体系 A 平滑的迁移到体系 B，或者想长期的保持公司内部多个体系的共存，则解决不同体系间的互联互通，实现流量的透明调度将是非常重要的环节。
+One immediate challenge is: **Different systems usually utilize different RPC communication protocols and deploy independent registry clusters. How do we achieve transparent address discovery and transparent RPC calls in such a multi-protocol, multi-registry cluster environment?** If we do nothing, each microservice system can only recognize the service status within its own environment, resulting in isolated traffic. For a smooth migration from system A to system B, or to maintain the coexistence of multiple systems internal to the company, achieving interconnectivity and transparent traffic scheduling will be critical.
 
 ![2](/imgs/blog/2023/01/protocols/img_1.png)
 
+**2. Within the Dubbo System**
 
-**2. Dubbo 体系内部**
+**The issues of multi-protocol and multi-registry clusters can also exist in homogeneous microservice systems, especially when the scale of microservices within an organization grows significantly.**
 
-**多协议、多注册中心集群的问题在同构的微服务体系中也可能存在，尤其是当一个组织内部的微服务规模增长到一定量级的时候。**
+* We may need to use different communication protocols between different services, as they face various business scenarios, leading to distinct data transmission characteristics. We need to adopt protocols that better fit the specific business characteristics. For example, in typical scenarios, we might use the Dubbo protocol for standard business services, HTTP protocol for services interacting with the FrontEnd, and gRPC protocol for services requiring streaming data transmission.
 
-* 我们可能要在不同的服务之间采用不同的通信协议，因为不同的服务面临不同的业务场景，而这也进一步导致了数据传输特点的不同，我们需要分别采用更适合各类业务特点的协议。比如典型的场景：我们可能对于普通的业务服务采用 Dubbo 协议，对于和 FrontEnd 交互的服务需要 HTTP 协议，而对于需要流式数据传输的业务则采用 gRPC 协议等等。
+* Another common issue within the Dubbo system arises in large-scale distributed deployments, where microservices may be deployed across regions and registries, thereby encountering problems with address synchronization and traffic scheduling between multiple clusters.
 
-* Dubbo 体系内部另一个常出现的问题是，在大规模分布式部署的场景下，微服务系统会做跨区域、跨注册中心的部署，这个时候就会出现多集群间地址同步和流量调度的问题。
+In summary, **both homogeneous and heterogeneous systems face challenges with multi-protocol communication and multi-registry address discovery.** Dubbo currently supports multiple protocols and registries, which is essentially designed to address the scenarios analyzed within homogeneous Dubbo systems. Therefore, we will start by discussing the basic multi-protocol and multi-registry support provided by Dubbo in homogeneous systems, before further exploring how to extend this capability to support interconnectivity in heterogeneous microservice systems.
 
-总结起来，**不论是同构体系还是异构体系，都面临对多协议通信、多注册中心集群地址发现的问题。** Dubbo 目前是支持多协议、多注册中心的，可以说就是为解决我们上面分析的 Dubbo 同构体系内的场景而设计的，因此下面我们从同构体系的多协议、多注册中心场景讲起，先了解 Dubbo 多协议、多注册中心的基本支持情况以及它们是如何工作的。而在后面的一章再进一步探索怎么扩展这个能力来支持异构微服务体系的互联互通。
+## Multi-Protocol and Multi-Registry Mechanism in the Dubbo System
 
-## Dubbo 体系内的多协议、多注册中心机制
+We will illustrate the use and working principles of Dubbo's multi-protocol and multi-registry mechanisms through two scenarios.
 
-我们将通过两个场景示例，来分别具体的讲一下 Dubbo 的多协议、多注册中心机制的使用方式和工作原理。
-
-### 多协议
+### Multi-Protocol
 
 ![undefined](/imgs/blog/2023/01/protocols/img_2.png)
 
-以上是使用 Dubbo 开发的一套微服务，服务间通信使用到了不同的协议，根据我们的调研发现，公司内部启用多协议其实是非常普遍需求，具体场景在此我们暂不做解释。
+The above illustrates a set of microservices developed using Dubbo, with different protocols utilized for communication between services. According to our research, the adoption of multiple protocols within organizations is a common requirement, though we won’t explain specific scenarios here.
 
-应用 B 作为服务提供者，发布了 5 个服务，其中：
+Application B serves as the provider, publishing five services, including:
 
-* `DemoService1` `DemoService2` 通过 `dubbo` 协议发布
-* `DemoService3` `DemoService4` 通过 `gRPC` 协议发布
-* `DemoService0`  通过 `dubbo` 、`gRPC` 双协议发布
+* `DemoService1` and `DemoService2` published using the `dubbo` protocol
+* `DemoService3` and `DemoService4` published using the `gRPC` protocol
+* `DemoService0` published with both `dubbo` and `gRPC` protocols
 
-应用 A 作为消费者，使用 dubbo 协议消费 `DemoService1` `DemoService2`，使用 gRPC 协议消费 `DemoService0`。
+Application A acts as a consumer, consuming `DemoService1` and `DemoService2` using the dubbo protocol, and `DemoService0` using the gRPC protocol.
 
-应用 B 作为消费者，使用 gRPC 协议消费 `DemoService2` `DemoService4`，使用 dubbo 协议消费 `DemoService0`。
+Application B, as a consumer, consumes `DemoService2` and `DemoService4` using the gRPC protocol, and `DemoService0` using the dubbo protocol.
 
-以下是具体的代码配置：
+Here are the specific code configurations:
 
-1. 提供端应用 B
+1. Provider Application B
 
 ```xml
 <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService1" protocol="dubbo"/>
@@ -97,7 +95,7 @@ public void doSayHello(String name) {
 <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService0" protocol="dubbo, grpc"/>
 ```
 
-2. 消费端应用 A
+2. Consumer Application A
 
 ```xml
 <dubbo:reference protocol="dubbo" interface="org.apache.dubbo.samples.basic.api.DemoService1"/>
@@ -106,7 +104,7 @@ public void doSayHello(String name) {
 <dubbo:reference protocol="grpc" interface="org.apache.dubbo.samples.basic.api.DemoService0"/>
 ```
 
-3. 消费端应用 C
+3. Consumer Application C
 
 ```xml
 <dubbo:reference protocol="grpc" interface="org.apache.dubbo.samples.basic.api.DemoService3"/>                                                                                     <dubbo:reference protocol="grpc" interface="org.apache.dubbo.samples.basic.api.DemoService4"/>
@@ -115,56 +113,54 @@ public void doSayHello(String name) {
 
 ```
 
-#### Dubbo 多协议支持现状
+#### Current Support Status of Dubbo Multi-Protocol
 
-Dubbo 目前所支持的协议包括 Dubbo、REST、Thrift、gRPC、JsonRPC、Hessian 等，基本涵盖了业界大多数主流的 RPC 通信协议。需要注意的是，这些协议的支持都是以直接集成官方 Release 实现的形式来做的，我认为这是一个很好的选择，既保证了协议解析自身的稳定性，又能使 Dubbo 社区更专注的将更多的精力放在 Dubbo 外围服务治理能力的改善上。试想如果 Dubbo 社区自己为每个协议提供实现，那是要花费多少精力和时间才能使每种协议达到稳定的生产可用。
+The protocols currently supported by Dubbo include Dubbo, REST, Thrift, gRPC, JsonRPC, Hessian, etc., covering most mainstream RPC communication protocols in the industry. It’s worth noting that these protocol supports are implemented through direct integration with official releases, which I believe is a good choice as it ensures protocol parsing stability while allowing the Dubbo community to focus more on improving service governance capabilities around Dubbo. Imagine the amount of energy and time the community would have to spend if they had to provide implementations for every protocol themselves.
 
-除了以上官方提供支持的协议之外，得益于 Dubbo 灵活的扩展机制，想要为 Dubbo 扩展协议非常容易，开发者可以随时为 Dubbo 增加更多的协议支持，包括自有协议扩展。
+In addition to the officially supported protocols, thanks to Dubbo's flexible extension mechanism, it is very easy for developers to extend Dubbo with additional protocol supports, including proprietary protocol extensions.
 
-关于对 gRPC (HTTP/2) 协议的支持，请参阅上期文档
+For support regarding gRPC (HTTP/2) protocol, please refer to the previous document.
 
 ![3](/imgs/blog/2023/01/protocols/img_3.png)
 
-#### 多协议能解决的问题
+#### Problems Solvable by Multi-Protocol
 
-* 将 RPC 框架无缝地接入 Dubbo 的服务治理体系。
+* Seamlessly integrating the RPC framework into Dubbo's service governance system.
 
-  通过协议扩展将 RPC 协议纳入 Dubbo 服务开发体系，从而复用 Dubbo 的编程模型和服务发现、流量管控等能力。比如 gRPC，其服务治理体系相对比较弱、编程 API 不够友好，很难直接用于微服务开发。
+  By integrating RPC protocols through protocol extensions, we can reuse Dubbo's programming model and capabilities like service discovery and traffic control. For instance, gRPC's service governance system is relatively weak, and its programming API is not very user-friendly, making it difficult to use in microservice development.
 
-* 满足不同场景的调用需求。
+* Meeting diverse calling needs in various scenarios.
 
-  各个服务可能是为了满足不同业务需求而开发，同时外围消费端应用的技术栈也可能多种多样，通过启用不同的通信协议，可以最优化不同场景的通信需求。
+  Different services may be developed to meet specific business needs, while the technology stacks of external consumer applications may vary, enabling the optimization of communication needs in different scenarios through the use of various communication protocols.
 
-* 实现协议间的迁移。
+* Realizing protocol migration.
 
-  通过支持多种协议，借助注册中心的协调，可以快速满足公司内协议迁移的需求。如从自有协议升级到 Dubbo 协议，Dubbo 协议自身升级，从 Dubbo 协议迁移到 gRPC，从 REST 迁移到 Dubbo 协议等。
+  By supporting multiple protocols, and with the coordination of the registry, we can quickly fulfill the need for protocol migration within the company. This could involve upgrading from a proprietary protocol to Dubbo, upgrading Dubbo itself, migrating from Dubbo to gRPC, or migrating from REST to Dubbo.
 
+### Multi-Registry
 
-### 多注册中心
+When the service cluster is small, a centralized cluster deployment solution can effectively address our business problems. However, as application scale increases and user traffic grows, we must consider introducing cross-regional, multi-cluster deployment solutions for the business system. This brings forth deployment solution options for the registries closely related to the business systems:
 
-当服务集群规模小的时候，一个中心化的集群部署方案能很好的解决我们的业务问题。但是随着应用规模的增长、用户流量的增加，我们就不得不考虑要为业务系统引入跨区域、多集群的部署方案，而此时同业务系统密切相关的注册中心集群也面临部署方案的选型：
+1. Continue maintaining a globally shared registry cluster. The advantage of this architecture scheme is its simplicity; its drawback is that the registry cluster must keep complete address data, which might impose significant storage and pushing pressures. Additionally, for certain registry products (like Zookeeper), stability and performance may be challenged in cross-cluster network deployments.
 
-1. 继续维持全局共享的注册中心集群。这种架构方案的优点是简单；缺点是注册中心集群由于要保存全量的地址数据，存储和推送压力会变得很大，另外对于一些注册中心产品（如 Zookeeper 等）在跨集群网络部署的场景下稳定性和性能可能都会面临挑战。
+2. Deploy independent registry clusters for each business cluster. The advantages of multi-registry clusters include solving cross-cluster network availability issues and alleviating storage and pushing pressures on the registry. The drawback is that the service framework (like Dubbo) must support publishing/listening to multiple registry clusters simultaneously.
 
-2. 每个业务集群部署独立的注册中心集群。多注册中心集群的优点是能解决跨集群网络可用性的问题，同时也能够减轻注册中心的存储和推送压力；缺点则是要求服务框架（如 Dubbo 等）能有同时发布/监听多个注册中心集群的能力。
-
-下面我们具体看一下，Dubbo 为多注册中心集群场景提供的解决方案。
+Let’s look closely at the solutions Dubbo provides for multi-registry cluster scenarios.
 
 ![4](/imgs/blog/2023/01/protocols/img_4.png)
 
-上图有两个业务集群，分别部署在北京和上海，每个业务集群有自己独立的注册中心集群，要解决两个业务集群间服务的透明 RPC 通信问题。
+The diagram above shows two business clusters located in Beijing and Shanghai, each having its own independent registry cluster, solving the issue of transparent RPC communication between the two business clusters.
 
-1. 服务提供端，双注册中心发布
+1. Service Provider, Dual Registry Publishing
 
 ```xml
 <dubbo:registry id="beijingRegistry" address="zookeeper://${zookeeper.address1}" default="false"/>                                                                           <dubbo:registry id="shanghaiRegistry" address="zookeeper://${zookeeper.address2}" />
 
 <dubbo:service interface="org.apache.dubbo.samples.multi.registry.api.HelloService" ref="helloService" registry="shanghaiRegistry,beijingRegistry"/>
 <dubbo:service interface="org.apache.dubbo.samples.multi.registry.api.DemoService" ref="demoService" registry="shanghaiRegistry,beijingRegistry"/>
-
 ```
 
-2. 服务消费端，根据消费需求做单/双注册中心订阅
+2. Service Consumer, Subscription to Single/Dual Registries Based on Needs
 
 ```xml
 <dubbo:registry id="beijingRegistry" address="zookeeper://${zookeeper.address1}" default="false" preferred="true" weight="100"/>                                                                                         <dubbo:registry id="shanghaiRegistry" address="zookeeper://${zookeeper.address2}" default="true" weight="20"/>
@@ -176,120 +172,120 @@ Dubbo 目前所支持的协议包括 Dubbo、REST、Thrift、gRPC、JsonRPC、He
 <dubbo:reference interface="org.apache.dubbo.samples.multi.registry.api.HelloService" registry="beijingRegistry"/>
 
 <dubbo:reference interface="org.apache.dubbo.samples.multi.registry.api.HelloService" registry="shanghaiRegistry,shanghaiRegistry"/>
-
 ```
 
-#### Dubbo 对异构注册中心集群的支持
+#### Dubbo's Support for Heterogeneous Registry Clusters
 
-虽然我们会做多注册中心集群部署，但通常情况下，我们部署的都是相同的注册中心产品，如都是 Zookeeper、Nacos；而对于注册中心迁移的场景，则要求 Dubbo 能提供对更多的注册中心产品的支持，或者最重要的要有很好的扩展能力。Dubbo 官方目前支持的注册中心实现有：
+Although we may deploy multi-registry clusters, we typically use the same registry products, such as all Zookeeper or Nacos. In the context of migrating registries, Dubbo must provide support for a broader range of registry products or, most importantly, offer strong extensibility. Currently, the registry implementations supported officially by Dubbo are:
 
 ![5](/imgs/blog/2023/01/protocols/img_5.png)
 
-这里需要特别提到的一点是，当前 Dubbo 的服务注册/发现模型是以接口为粒度的，而从 2.7.5 版本开始，Dubbo 新引入了应用粒度的服务注册/发现模型。这一方面有助于优化 Dubbo 当前服务发现机制、提升服务容量，另一方面对于联通以 SpringCloud 为代表的微服务体系也非常重要（关于这点在下一章中有进一步提及）。更多关于《应用粒度服务发现：服务自省》的介绍，我们将在接下来的文章或文档中予以补充，请持续关注。
+It is particularly important to mention that Dubbo's service registration/discovery model currently operates at the interface granularity, while starting from version 2.7.5, Dubbo has introduced a service registration/discovery model at the application granularity. This not only helps optimize Dubbo's current service discovery mechanism and enhance service capacity but is also crucial for connecting microservice architectures represented by SpringCloud (this point will be elaborated in the next chapter). More information on "Application Granularity Service Discovery: Service Self-Inspection" will be provided in upcoming articles or documents, so please stay tuned.
 
-#### 多订阅带来的流量调度问题
+#### Traffic Scheduling Issues Arising from Multi-Subscription
 
-在引入多注册中心集群后，Dubbo 在流量选址时的多了一层注册中心集群间的负载均衡：
+With the introduction of multi-registry clusters, Dubbo introduces an additional layer of load balancing among registry clusters when determining traffic allocation:
 
 ![6](/imgs/blog/2023/01/protocols/img_6.png)
 
-在 Cluster Invoker 这一级，我们支持的选址策略有（2.7.5+ 版本，具体使用请参见文档）：
+At the Cluster Invoker level, the selection strategies we support are (for version 2.7.5+; specific usage can be found in the documentation):
 
-* 指定优先级
+* Specify Priority
 
   ```xml
-  <!-- 来自 preferred=“true” 注册中心的地址将被优先选择，只有该中心无可用地址时才 Fallback 到其他注册中心 -->
+  <!-- Addresses from the preferred="true" registry will be prioritized; fallback to other registries only if no available addresses are present in this registry -->
   <dubbo:registry address="zookeeper://${zookeeper.address1}" preferred="true" />
   ```
 
-* 同 zone 优先
+* Same Zone Priority
 
   ```xml
-  <!-- 选址时会和流量中的 zone key 做匹配，流量会优先派发到相同 zone 的地址 -->
+  <!-- During selection, it will match the zone key in the traffic; traffic will be preferentially dispatched to addresses in the same zone -->
   <dubbo:registry address="zookeeper://${zookeeper.address1}" zone="beijing" />
   ```
 
-* 权重轮询
+* Weight Polling
 
   ```xml
-  <!-- 来自北京和上海集群的地址，将以 10:1 的比例来分配流量 -->
-  <dubbo:registry id="beijing" address="zookeeper://${zookeeper.address1}" weight=”100“ />
-  <dubbo:registry id="shanghai" address="zookeeper://${zookeeper.address2}" weight=”10“ />
+  <!-- Addresses from Beijing and Shanghai clusters will be allocated traffic in a 10:1 ratio -->
+  <dubbo:registry id="beijing" address="zookeeper://${zookeeper.address1}" weight="100" />
+  <dubbo:registry id="shanghai" address="zookeeper://${zookeeper.address2}" weight="10" />
   ```
 
-* 默认，stick to 任意可用
+* Default, stick to any available one
 
-#### 多注册中心适用的场景
+#### Scenarios Suitable for Multi-Registry
 
-* 同区域流量优先调度
+* Same Regional Traffic Priority Scheduling
 
-  出于容灾或者服务伸缩性需求，服务/应用往往需要部署在多个独立的机房/区域，在每个区域有独立注册中心集群的场景下，实现同区域的流量优先调度就能很好的解决延迟和可用性问题。
+  For disaster recovery or service scalability needs, services/applications often require deployment across multiple independent data centers/regions. In scenarios where each region has its own independent registry cluster, implementing same-region traffic priority scheduling can effectively resolve latency and availability issues.
 
-* 注册中心迁移
+* Registry Migration
 
-  公司的服务一直以来可能是存储在某一个注册中心，如 Zookeeper，但到了某个时间节点，因为各种各样的原因，当我们要迁移到另外的注册中心时，多注册中心模型能够保证平滑的迁移。
+  A company’s services may have historically been stored in a single registry, such as Zookeeper. However, at certain points, for various reasons, when we need to migrate to another registry, a multi-registry model ensures a smooth transition.
 
-* 异构系统互通
+* Interconnectivity of Heterogeneous Systems
 
-  不同微服务体系开发的服务，都封闭在各自的服务发现体系中，而通过统一的多注册中心模型，可以实现不同体系的服务互相发现。
+  Services developed within different microservice architectures are isolated within their own service discovery systems; however, through a unified multi-registry model, services across different systems can discover one another.
 
-## 借助 Dubbo 联通异构的微服务体系
+## Leveraging Dubbo to Connect Heterogeneous Microservice Systems
 
-上文我们提到了在组织内存在异构微服务体系的各种合理可能性，现在我们来具体看一下异构微服务体系的实际场景，以及使用 Dubbo 实现互联互通的解决方法。首先我们先通过一张图来看一下，联通异构的微服务体系具体是一个什么样的场景。
+As mentioned earlier, there are various valid possibilities for the existence of heterogeneous microservice systems within organizations. Now, let's look specifically at real scenarios involving heterogeneous microservice systems and methods utilizing Dubbo for interconnectivity. First, let's visualize what interconnecting heterogeneous microservice systems looks like.
 
 ![7](/imgs/blog/2023/01/protocols/img_7.png)
 
-如上图所示，我们有部分微服务可以是基于 SpringCloud、gRPC、K8S 或者是自建体系构建的，他们各自之间默认是相互隔离无法联通的。当我们再构建一套基于 Dubbo 的微服务体系时，则利用 Dubbo 的多协议、多服务发现模型，我们就可以做到和各个微服务体系间的两两之间的互联互通。进一步的，如图中橙色箭头所示，依赖 Dubbo 体系作为桥接层，我们还可以实现两个异构微服务体系间的打通。
+As shown in the diagram, some microservices are built on SpringCloud, gRPC, K8S, or self-constructed architectures, and they are typically isolated and unable to communicate with each other. When we construct a set of microservices based on Dubbo, utilizing Dubbo's multi-protocol and multi-service discovery models allows for bi-directional connectivity between heterogeneous microservice systems. Further, as indicated by the orange arrows in the illustration, relying on the Dubbo system as a bridge, we can facilitate connections between two heterogeneous microservice systems.
 
-对于以下几个示例场景，由于在地址发现层面目前没有统一的标准，我们暂且假设地址发现层面不同的体系建是没有障碍的，我们将重点关注迁移的基本流程以及通信协议环节。（关于地址发现部分，我们将在后续《服务自省：基于应用粒度的服务发现》之后再深入探讨）
+For several example scenarios, since there is currently no unified standard for address discovery, we will assume for now that there are no obstacles at the address discovery layer, focusing on the basic migration processes and communication protocols. (We will delve deeper into address discovery in an upcoming article titled "Service Self-Inspection: Application Granularity Service Discovery".)
 
-### Dubbo 体系内的协议迁移（共存）
+### Protocol Migration within the Dubbo System (Coexistence)
 
-绝大多数开发者对 Dubbo 有这么一个固有认知：使用 Dubbo 开发微服务系统，则就要用 Dubbo 协议来作为服务间的通信协议才是最优方案。实际上，我们完全没有必要只束缚在 Dubbo RPC 协议上。Dubbo 作为微服务开发框架和 Dubbo 作为 RPC 协议这是两个概念，其实是完全可以分开来看待的，比如我们用 Dubbo 框架开发的业务系统，选用 rest、gRPC 通信是完全没有问题的（参加 Dubbo 支持的协议列表），具体用什么协议根据业务特点和技术规划才是最适合的。
+Most developers hold a conventional understanding that using Dubbo to develop microservice systems necessitates employing the Dubbo protocol as the optimal inter-service communication protocol. In reality, we are not limited to only the Dubbo RPC protocol. Dubbo as a microservice development framework and Dubbo as an RPC protocol are distinct concepts and can be considered separately. For instance, it is entirely acceptable for business systems developed using the Dubbo framework to utilize REST or gRPC for communication (as shown in the list of protocols supported by Dubbo); the choice of protocol should be based on business characteristics and technical planning.
 
 ![8](/imgs/blog/2023/01/protocols/img_8.png)
 
-当前在云原生、Mesh 的大背景下， HTTP1/2、gRPC 协议开始受到越来越多的关注，一方面原因自然是因为它们在标准化方面做的更好，得到的更多的网络设备和基础设施的支持，具备更好的通用性和穿透性。对于很多有云原生迁移意愿的企业来说，往此类协议迁移无疑将对之后的架构升级有更多的帮助。
+In the current cloud-native and mesh background, HTTP/1.2 and gRPC protocols are gaining increasing attention; one reason for this is their superior standardization, garnering support from more networking devices and infrastructure and exhibiting better universality and penetration. For many enterprises willing to migrate to cloud-native architectures, transitioning to such protocols undoubtedly aids future architectural upgrades.
 
-下图演示了在 Dubbo 体系内，从 Dubbo 协议向 gRPC 协议迁移的一个中间状态。
+The diagram below illustrates an intermediate state during the migration from the Dubbo protocol to the gRPC protocol within the Dubbo system.
 
 ![9](/imgs/blog/2023/01/protocols/img_9.png)
 
-* 最左边的代表尚未迁移的老应用，这类应用在迁移过程中仍然要消费和提供 Dubbo 协议的服务。
-* 中间的代表处于迁移中的应用，他们中间可能有些是服务提供者，既要为左边的老系统提供提供 Dubbo 协议服务；又要为右边的新系统提供 gRPC 服务；因此他们都是双协议暴露服务。
-* 最右边则代表是新开发的或者已经迁移完成的应用，这个体系内已能完全用 gRPC 协议通信。
-* 最终度过中间态后，我们期望所有的应用都达到最左边应用的状态，实现完全的 gRPC 协议通信。
+* The far-left represents legacy applications that have not yet migrated; these applications must still consume and provide services using the Dubbo protocol during the migration period.
+* The middle section signifies applications in the process of migration, potentially acting as service providers by offering Dubbo protocol services to the legacy systems on the left while simultaneously providing gRPC services to the new systems on the right; thus, they expose services using both protocols.
+* The far-right represents newly developed or fully migrated applications, where communication can entirely occur over the gRPC protocol.
+* After traversing the intermediate state, we expect to achieve a situation where all applications can communicate entirely using the gRPC protocol.
 
-### Spring Cloud 体系迁移到 Dubbo 体系（共存）
+### Migration from Spring Cloud System to Dubbo System (Coexistence)
 
-如前文所述，由于 SpringCloud 和 Dubbo 间服务发现模型的问题，要两个体系间的地址互通需要 Dubbo 侧作相应的适配，关于这部分内容将在接下来的 2.7.5 版本《服务自省》部分发布，在此我们暂且认为已经打通。
+As previously mentioned, due to issues with service discovery models between SpringCloud and Dubbo, enabling address intercommunication necessitates corresponding adaptations on the Dubbo side. During the release of version 2.7.5, we will address this content in the "Service Self-Inspection" section. For now, we will assume the connection has been established. 
 
 ![10](/imgs/blog/2023/01/protocols/img_10.png)
 
-Dubbo 体系内的部分应用作为透明的联通两个体系的关键节点，部分服务提供者应用要双协议发布、部分消费者应用要做到选定协议消费。由于老的 Spring Cloud 体系不允许做任何改动，因此联通两套体系的关键是 REST 协议，对 Dubbo 侧的应用来说：
+Certain applications within the Dubbo system serve as transparent key nodes for connecting the two systems; some service provider applications must publish dual protocols, and some consumer applications must select protocols for consumption. Since modifications to the legacy Spring Cloud system are not permitted, the key for interconnecting the two architectures lies in the REST protocol. For applications on the Dubbo side:
 
-* 部分应用可能要以 REST 协议消费 SpringCloud 的服务；
-* 部分应用可能要暴露 REST 协议共 SpringCloud 消费；
-* Dubbo 自有体系内则通过自己选定的协议通信，这里就比较灵活了，可以是 Dubbo、REST、gRPC 等其中的任一种。而如果选定 REST 协议则对于与 SpringCloud 体系的联通就变得更加自然了，因为两端的协议都是统一的。
+* Some applications may consume services from SpringCloud via REST protocol;
+* Some applications may expose services for SpringCloud consumers using the REST protocol;
+* Internally within Dubbo's own system, communication can occur through a selected protocol, providing flexibility to choose between Dubbo, REST, or gRPC. If REST is chosen, the connection to SpringCloud becomes more natural as both sides utilize the same protocol.
 
-对于消费 Spring Cloud 服务的应用，要配置服务 ：
+For applications consuming Spring Cloud services, the service configuration would be:
 
 ```xml
 <dubbo:reference interface ="xxx.SpringService" protocol="rest"/>
 ```
 
-对于提供服务给 Spring Cloud 侧消费的应用，则指定服务暴露为 rest 协议，或者双协议暴露（因如果这个服务还要被新体系内的应用调用到）：
+For applications exposing services for consumption by Spring Cloud, it can specify the service exposure as a REST protocol or dual-protocol exposure (if that service is intended for calls by applications in the new system):
 
 ```xml
 <dubbo:service interface="xxx.NewService" protocol="rest,dubbo"/>
 ```
 
-作为 Dubbo 的维护者，虽然我们这里有明显的偏向性，讲的是从如何从 SpringCloud 体系迁移到 Dubbo 体系。但是反过来考虑，如果你已经或者即将选型 Dubbo 来开发微服务，则未来从 Dubbo 迁移到 SpringCloud 也是同样的思路，Dubbo 的多协议、多注册模型为双向迁移都提供了同样的灵活性。
+As maintainers of Dubbo, while we clearly lean towards discussing migration from SpringCloud to Dubbo, it is equally valid to consider the reverse; if you are currently using or planning to use Dubbo for microservice development, migrating from Dubbo to SpringCloud will follow the same line of reasoning. Dubbo's multi-protocol and multi-registry model provides the same flexibility for bi-directional migration.
 
-### 自建体系迁移到 Dubbo 体系（共存）
+### Migration from Self-Built Systems to Dubbo Systems (Coexistence)
 
-这个场景和上一节中讲到的的 SpringCloud 迁移有些类似，最大的区别在于 rest 协议是 Dubbo 官方默认提供支持的，而对于已有的微服务体系内的私有通信协议，则需要先要自己去扩展 Dubbo Protocol 来提供协议层面的支持。
+This scenario is somewhat similar to the previous section on migration from SpringCloud. The key difference lies in the fact that the REST protocol is officially supported by Dubbo, whereas for private communication protocols within an existing microservice system, one must first extend the Dubbo Protocol to provide protocol-level support.
 
-## 总结与展望
+## Summary and Outlook
 
-要实现异构微服务体系间的共存或迁移，关键点在打通异构体系间的`协议`与`服务发现`，得益于 Dubbo 自身对多协议、多注册模型的支持，我们可以很容易的使 Dubbo 成为桥接异构微服务体系的中间层。熟悉 Dubbo 多协议实现细节的同学，可能会担心在服务数量较多的场景下，多协议注册会导致地址数量翻倍从而影响地址推送性能；另外在文中《借助 Dubbo 联通异构的微服务体系》一节，关于如何实现异构体系间的透明服务发现部分我们没有做详细的说明。关于涉及服务发现的这部分，我们将在接下来的文章中做具体阐述，看看 Dubbo 2.7.5 版本引入新的服务发现机制是如何解决这个问题的，请持续关注后续文章及 Dubbo 官方文档。
+To achieve coexistence or migration between heterogeneous microservice architectures, the key is to bridge the `protocol` and `service discovery` across heterogeneous systems. Thanks to Dubbo's support for multiple protocols and registries, we can easily make Dubbo a bridge connecting heterogeneous microservice systems. Familiarity with Dubbo's multi-protocol implementation details might prompt concerns about performance impact due to the doubling of address numbers in scenarios with numerous services, as outlined in the "Leveraging Dubbo to Connect Heterogeneous Microservice Systems" section where we didn’t detail how to achieve transparent service discovery between heterogeneous systems. We will specifically elucidate this aspect involving service discovery in future articles, detailing how the new service discovery mechanism introduced in version 2.7.5 addresses these challenges. Please stay tuned for upcoming articles and the official Dubbo documentation.
+

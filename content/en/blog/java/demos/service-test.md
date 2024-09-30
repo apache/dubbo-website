@@ -1,27 +1,28 @@
 ---
-title: "Dubbo Admin服务测试功能"
-linkTitle: "Dubbo Admin服务测试功能"
+title: "Dubbo Admin Service Testing Features"
+linkTitle: "Dubbo Admin Service Testing Features"
 tags: ["Java"]
 date: 2019-08-26
 slug: service-test
 description: >
-   可以通过泛化调用，在控制台上调用真实的服务提供者 
+   You can call the real service provider on the console through generic invocation 
 ---
 
-基于Dubbo2.7的元数据，Dubbo Admin实现了服务测试功能，可以通过泛化调用，在控制台上调用真实的服务提供者
+Based on the metadata of Dubbo 2.7, Dubbo Admin implements service testing functions, allowing real service providers to be called on the console through generic invocation.
 
-## 使用方式
-* 部署服务提供者： 可以在[这里](https://github.com/nzomkxia/dubbo-demo)下载demo，此工程基于spring boot，方便在IDE或者命令行启动，对于服务测试来说，只需要启动`dubbo-basic-provider`即可。
-* 服务查询： 完成服务端部署后，可以到Dubbo Admin的`服务测试`页面上查询对应的服务: 
+## Usage
+* Deploy Service Provider: You can download the demo [here](https://github.com/nzomkxia/dubbo-demo). This project is based on Spring Boot, making it easy to start from an IDE or command line. For service testing, simply start `dubbo-basic-provider`.
+* Service Query: After completing the server deployment, you can query the corresponding service on the Dubbo Admin `Service Testing` page:  
 ![testSearch](/imgs/blog/admin/testSearch.jpg)  
-这里的信息和元数据类似，包含方法名，参数类型和返回值信息，点击右边的标签就可以进入服务测试页面  
-* 服务测试：
+The information here is similar to the metadata and contains method names, parameter types, and return value information. Click the tab on the right to enter the service testing page.  
+* Service Testing:  
 ![testSuccess](/imgs/blog/admin/testSuccess.jpg)  
-服务测试页面包含了两个json编辑器，参数类型的信息都是以json格式保存，这里需要填入对应的参数值(本例中数类型时`String`)，填写完成后点击`执行`即可对服务端发起调用，调用结果展示在右边的编辑器中，如果调用失败，会显示详细的失败原因，下面来看一下调用失败的例子：  
-![testFail](/imgs/blog/admin/testFail.jpg)
-本例中，先关掉Dubbo服务提供者的进程，再执行服务测试，可以看到返回的结果是`找不到服务提供者`的异常。和普通调用一样，业务和框架的异常都会返回在结果中，方便业务排查。
-* 复合类型参数   
-考虑`UserService`中的以下方法和类型： 
+The service testing page includes two JSON editors. Parameter type information is stored in JSON format. Here, you need to fill in the corresponding parameter values (in this case, the data type is `String`), and after filling in, click `Execute` to invoke the backend service. The call result is displayed in the editor on the right. If the call fails, detailed failure reasons will be shown. Let's look at an example of a failed call:  
+![testFail](/imgs/blog/admin/testFail.jpg)  
+In this example, the Dubbo service provider's process is first shut down, and then the service test is executed. The returned result indicates an exception of `Service provider not found`. Similar to normal calls, business and framework exceptions will be returned in the result, facilitating business troubleshooting.
+
+* Complex Type Parameters  
+Consider the following methods and types in `UserService`:  
 ```java
 //org.apache.dubbo.demo.api.UserService
 Result getUser(String name, UserInfoDO userInfoDO);
@@ -73,14 +74,14 @@ public class LocationDO {
     }
 }
 ```
-参数是比较复杂的符合类型参数，服务测试的时候，会逐层展开填写每一个field的值，如下图所示：  
-![complex](/imgs/blog/admin/complex.jpg)
-同样可以调用成功并且返回结果
+The parameters are relatively complex compound type parameters. During service testing, each field's value needs to be filled in layer by layer, as shown in the figure below:  
+![complex](/imgs/blog/admin/complex.jpg)  
+It can also be invoked successfully and return results.
 
-## 原理：数据来源 
-服务测试中，最重要的就是完整的方法签名信息，和参数的类型信息，有了这些信息才能够一步步填入每个参数的值，拼装出完整的服务消费者。在Dubbo2.7中，新增了元数据中心，Dubbo Admin的方法签名和参数类型信息就是从这里来的：  
-![medatada](/imgs/blog/admin/metadata.png)
-如图所示，服务端在运行的时候会将服务的元数据信息注册到元数据中心，格式如下： 
+## Principle: Data Source  
+In service testing, the most important aspect is the complete method signature information and parameter type information. With this information, each parameter's value can be filled in step by step to assemble a complete service consumer. In Dubbo 2.7, a metadata center has been added, and the method signature and parameter type information of Dubbo Admin come from here:  
+![medatada](/imgs/blog/admin/metadata.png)  
+As shown in the figure, the server will register the service's metadata information to the metadata center when running, in the format:  
 ```json
 {
     ...
@@ -156,11 +157,10 @@ public class LocationDO {
     ]
 }
 ```
-与服务测试相关的就是`methods`和`types`所包含的方法和类型信息，Dubbo Admin根据这些信息，将参数渲染到服务测试页面的Json Editor中，由用户来输入每个参数，每个成员变量的值。
+The information related to service testing is contained in the `methods` and `types` sections. Dubbo Admin uses this information to render parameters in the JSON Editor on the service testing page, allowing users to input each parameter and each member variable's value.
 
+## Principle: Generic Calling  
+With parameter types identified, the next question is how to invoke the service on the server side. In traditional Dubbo RPC calls, the client needs to rely on the server-side API jar package (refer to the earlier demo for [dubbo-basic-consumer](https://github.com/nzomkxia/dubbo-demo/tree/master/dubbo-basic-consumer)). This is not feasible for Dubbo Admin because services go online and offline dynamically, and Dubbo Admin cannot dynamically add jar package dependencies. Therefore, Dubbo's **generic call** is utilized, which allows the client to initiate a service call directly through the `GenericService` interface without the server API interfaces, using Map to represent data objects in the return value. Generic calls do not require special handling on the server side; they only need to be initiated by the client.
 
-## 原理： 泛化调用  
-有了参数类型，下一个问题就是怎么能够调用到服务端，在传统的Dubbo RPC调用中，客户端需要依赖服务端的API jar包(参考前文demo中的[dubbo-basic-consumer](https://github.com/nzomkxia/dubbo-demo/tree/master/dubbo-basic-consumer))，这对于Dubbo Admin来说不太可能，因为服务的上下线是动态的，Dubbo Admin无法动态增加jar包依赖，因此需要用到Dubbo中的**泛化调用**，指的是在没有服务端API接口的情况下，客户端直接通过 `GenericService` 接口来发起服务调用，返回值中的数据对象都用Map来表示。泛化调用在服务端不需要做特殊处理，只需要客户端发起即可。
-
-## 总结和展望  
-本文简单介绍了服务测试的用法和原理，后续会进一步针对该功能进行增强，比如处理抽象类的参数类型，支持从json文件导入参数值，支持对参数值的保存等等，方便对服务接口进行回归测试。
+## Summary and Outlook  
+This article briefly introduces the usage and principles of service testing. In the future, there will be enhancements for this feature, such as handling abstract class parameter types, supporting importing parameter values from JSON files, and saving parameter values, making it easier for regression testing of service interfaces.  

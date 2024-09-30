@@ -1,90 +1,89 @@
 ---
-title: "新版 Dubbo Admin 介绍"
-linkTitle: "新版 Dubbo Admin 介绍"
+title: "Introduction to the New Dubbo Admin"
+linkTitle: "Introduction to the New Dubbo Admin"
 date: 2019-01-07
-tags: ["生态", "Java"]
+tags: ["Ecosystem", "Java"]
 description: >
-    当前版本的Dubbo Admin包含了之前版本中的绝大部分功能，包括服务治理，服务查询等，同时支持了Dubbo2.7中服务治理的新特性
+    The current version of Dubbo Admin includes most of the functions from previous versions, including service governance, service query, and supports new service governance features in Dubbo 2.7.
 ---
 
 ```
 github: https://github.com/apache/dubbo-ops
 ```
-Dubbo Admin之前的版本过于老旧，也长期疏于维护，因此在去年年中的时候，对该项目进行了一次重构，项目结构上的变化如下：  
-* 将后端框架从webx替换成spring boot
-* 前端采用Vue和Vuetify.js作为开发框架
-* 移除velocity模板
-* 集成swagger，提供api管理功能
+The previous versions of Dubbo Admin were outdated and lacked maintenance for a long time. Therefore, a major refactoring of the project was carried out mid last year, with the following structural changes:  
+* The backend framework was replaced from webx to spring boot.
+* The frontend uses Vue and Vuetify.js as the development framework.
+* Removed velocity templates.
+* Integrated swagger for API management features.
 
-当前版本的Dubbo Admin包含了之前版本中的绝大部分功能，包括服务治理，服务查询等，同时支持了Dubbo2.7中服务治理的新特性。
+The current version of Dubbo Admin includes most of the functions from previous versions, including service governance and service query, while supporting the new service governance features introduced in Dubbo 2.7.
 
-
-## 配置规范  
-由于在Dubbo2.7中，配置中心和注册中心做了分离，并且增加了元数据中心，因此Dubbo Admin的配置方式也做了更新，`application.properties`中的配置如下:   
+## Configuration Specifications  
+In Dubbo 2.7, the configuration center and registration center have been separated, and a metadata center has been added, leading to updates in the configuration methods for Dubbo Admin. The configuration in `application.properties` is as follows:   
 ```properties
 admin.registry.address=zookeeper://127.0.0.1:2181
 admin.config-center=zookeeper://127.0.0.1:2181
 admin.metadata-report.address=zookeeper://127.0.0.1:2181
 ```
-也可以和Dubbo2.7一样，在配置中心指定元数据和注册中心的地址，以zookeeper为例，配置的路径和内容如下: 
+It is also possible to specify the addresses for metadata and registration centers in the configuration center, just as in Dubbo 2.7. For example, the configuration path and content are as follows: 
 ```properties
 # /dubbo/config/dubbo/dubbo.properties
 dubbo.registry.address=zookeeper://127.0.0.1:2181
 dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 ```
-配置中心里的地址会覆盖掉本地`application.properties`的配置
+The addresses in the configuration center will override the local `application.properties` settings.
 
-## 功能介绍  
-功能上，主要延续了之前版本的功能，包括服务查询和服务治理，2.7版本在服务治理的功能上有了很大的改进，这些改进也大部分都会以Dubbo Admin作为入口来体现。
+## Feature Introduction  
+The features mainly continue from previous versions, including service query and governance. Version 2.7 brings significant improvements to service governance, most of which will be reflected in Dubbo Admin.
 
-### 标签路由  
-标签路由是Dubbo2.7引入的新功能，配置以应用作为维度，给不同的服务器打上不同名字的标签，配置如下图所示：
+### Tag Routing  
+Tag routing is a new feature introduced in Dubbo 2.7, configured per application, allowing different labels to be assigned to various servers, as shown in the configuration below:
 
 ![tag](/imgs/blog/admin/route.jpg)
 
-调用的时候，客户端可以通过`setAttachment`的方式，来设置不同的标签名称，比如本例中，`setAttachment(tag1)`，客户端的选址范围就在如图所示的三台机器中，可以通过这种方式来实现流量隔离，灰度发布等功能。
+During invocation, the client can set different tag names using `setAttachment`, for example, `setAttachment(tag1)`. The client can then select among the three machines shown in the image, enabling traffic isolation and gray releases.
 
-### 应用级别的服务治理
-在Dubbo2.6及更早版本中，所有的服务治理规则都只针对服务粒度，如果要把某条规则作用到应用粒度上，需要为应用下的所有服务配合相同的规则，变更，删除的时候也需要对应的操作，这样的操作很不友好，因此Dubbo2.7版本中增加了应用粒度的服务治理操作，对于条件路由(包括黑白名单)，动态配置(包括权重，负载均衡)都可以做应用级别的配置：  
+### Application-Level Service Governance  
+In Dubbo 2.6 and earlier, all service governance rules were at the service granularity. To apply a rule to the application level, all services under the application needed to be matched with the same rules, which was cumbersome. Therefore, in Dubbo 2.7, application-level service governance operations have been added, allowing conditions (including black/white lists) and dynamic configuration (including weight and load balancing) to be configured at the application level:  
 
 ![condition](/imgs/blog/admin/conditionRoute.jpg) 
   
-上图是条件路由的配置，可以按照应用名，服务名两个维度来填写，也可以按照这两个维度来查询。  
-
+The above image shows the condition routing configuration, which can be filled in according to application name and service name, and can also be queried by these dimensions.  
 
 ![weight](/imgs/blog/admin/weight.jpg)  
 
-条件路由，标签路由和动态配置都采用了`yaml`格式的文本编写，其他的规则配置还是采用了表单的形式。
+Condition routing, tag routing, and dynamic configurations are written in `yaml` format, while other rule configurations still use a form format.
 
-#### 关于兼容性  
-Dubbo2.6到Dubbo2.7，服务治理发生了比较大的变化，Dubbo Admin兼容两个版本的用法：  
-* 对于服务级别的配置，会按照Dubbo2.6(URL)和Dubbo2.7(配置文件)两种格式进行写入，保证Dubbo2.6的客户端能够正确读取，解析规则 
-* 对于应用级别的配置，包括标签路由，只会按照Dubbo2.7的格式进行写入，因为Dubbo2.6无此功能，不需要做向前兼容。
-* Dubbo Admin只会按照Dubbo2.7的格式进行配置读取，因此，所有在Dubbo Admin上做的配置都可以被读到，但是之前遗留的，Dubbo2.6格式的URL无法被读取。
-* 对于同一个应用或者服务，每种规则只能够配置一条，否则新的会覆盖旧的。
+#### About Compatibility  
+From Dubbo 2.6 to Dubbo 2.7, significant changes occurred in service governance. Dubbo Admin is compatible with both versions:  
+* For service-level configurations, entries will be written in both Dubbo 2.6 (URL) and Dubbo 2.7 (configuration files) formats to ensure that Dubbo 2.6 clients can correctly read and parse the rules. 
+* Application-level configurations, including tag routing, will only be written in the Dubbo 2.7 format, as Dubbo 2.6 doesn't have this feature, so there is no need for backward compatibility.
+* Dubbo Admin will only read configurations in the Dubbo 2.7 format, meaning that all configurations made on Dubbo Admin can be read, but legacy URLs in the Dubbo 2.6 format cannot be read.
+* For the same application or service, each rule can only be configured once; otherwise, the new one will overwrite the old.
 
-### 配置管理
-配置管理也是配合Dubbo2.7新增的功能，在Dubbo2.7中，增加了全局和应用维度的配置，
-* 全局配置： 
+### Configuration Management  
+Configuration management is also a newly added feature in Dubbo 2.7, with both global and application-level configurations:  
+* Global Configuration: 
 
 ![config](/imgs/blog/admin/config.jpg)  
 
-全局配置里可以指定注册中心，元数据中心的地址，服务端和客户端的超时时间等，这些配置在全局内生效。除了配置写入，也可以用来查看。如果使用zookeeper作为注册中心和元数据中心，还可以看到配置文件所在位置的目录结构。  
-* 应用， 服务配置  
+Global configurations can specify the registration center and metadata center addresses, as well as the timeout settings for both server and client, and these settings take effect globally. In addition to writing configurations, this section can also be used for viewing them. If using zookeeper as the registration and metadata center, the directory structure of the configuration files can also be viewed.  
+* Application, Service Configuration  
 
 ![appConfig](/imgs/blog/admin/appConfig.jpg)  
 
-应用级别的配置可以为应用或者应用内的服务指定配置，在服务维度上，需要区分提供者和消费者。`dubbo.reference.{serviceName}`表示作为该服务消费者的配置，`dubbo.provider.{servcieName}`表示作为该服务提供者的配置。优先级服务 > 应用 > 全局。其中注册中心和元数据中心的地址，只能在全局配置中指定，这也是Dubbo2.7中推荐的使用方式。  
+Application-level configurations can specify settings for applications or services within applications, requiring a distinction between providers and consumers. `dubbo.reference.{serviceName}` represents the configuration for the service consumer, and `dubbo.provider.{servcieName}` represents the configuration for the service provider. The priority is service > application > global. The addresses for the registration and metadata centers can only be specified in the global configuration, which is the recommended method in Dubbo 2.7.  
 
-### 元数据和服务测试  
-元数据是Dubbo2.7中新引入的元素，主要的使用场景就在Dubbo Admin中，主要体现在两个地方：  
-* 服务详情展示：
+### Metadata and Service Testing  
+Metadata is a newly introduced element in Dubbo 2.7, mainly utilized within Dubbo Admin and appears in two primary areas:  
+* Service Detail Display:
   
 ![metadata](/imgs/blog/admin/metadata.jpg)  
 
-跟之前版本相比，Dubbo2.7中增加了对服务方法完整签名的记录，因此服务详情中也增加了方法信息的详情，可以看到方法名，方法参数列表以及返回值信息。
-* 服务测试： 
+Compared to previous versions, Dubbo 2.7 adds complete signature records for service methods, therefore the service detail has also been enhanced with method details, including method name, parameter list, and return value information.  
+* Service Testing: 
   
 ![test](/imgs/blog/admin/test.jpg)
 
-更重要的，元数据为服务测试提供了数据基础，可以在页面上调用真实的服务提供者，方便测试，也不需要为了调用服务去搭建一套Dubbo环境以及编写消费端代码。
+More importantly, metadata provides a data foundation for service testing, enabling real service providers to be called directly on the page for convenience, eliminating the need to set up a Dubbo environment or write consumer code just for service invocation.
+

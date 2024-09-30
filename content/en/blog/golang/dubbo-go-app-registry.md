@@ -1,18 +1,18 @@
 ---
-title: "Dubbo-go应用维度注册模型"
-linkTitle: "Dubbo-go应用维度注册模型"
+title: "Dubbo-go Application Dimension Registration Model"
+linkTitle: "Dubbo-go Application Dimension Registration Model"
 tags: ["Go"]
 date: 2021-01-14
-description: Dubbo-go 中的应用维度注册模型
+description: Application dimension registration model in Dubbo-go
 ---
 
-Dubbo 3.0 将至。其最重要的一点就是服务自省，其基础即是应用维度的注册模型，作为目前与 Dubbo 在功能上完全对齐的 Dubbo-go，已于 本年【2020 年】7 月份发布了其 v1.5.0 版本，实现了该模型，为年底实现与 Dubbo 3.0 对齐的新版本奠定了基础。
+Dubbo 3.0 is approaching. The most important aspect is service introspection, which is based on the application dimension registration model. As Dubbo-go, which is fully aligned with Dubbo in functionality, released its v1.5.0 version in July of this year [2020], it established a foundation for aligning with Dubbo 3.0 by the end of the year.
 
-Dubbo-go 作为 Dubbo 的 Go 语言版本，因跨语言之故，二者针对同一模型的实现必然有较大差异，故本文注重讨论 Dubbo-go 社区自身对该模型的理解和实现，以及其与 Dubbo 之间的差异。
+As the Go language version of Dubbo, Dubbo-go has significant differences in implementation due to cross-language issues. This article focuses on discussing the Dubbo-go community's understanding and implementation of this model, as well as the differences between it and Dubbo.
 
-## 1 引语
+## 1 Quote
 
-在 v1.5 以前，Dubbo-go 注册模型都是以服务为维度的，直观的理解可认为其是接口维度。譬如注册信息，按照服务维度模型其示例如下：
+Before v1.5, the registration model of Dubbo-go was service-oriented, which could be intuitively understood as interface-oriented. For instance, the registration information, according to the service-oriented model, is as follows:
 
 ```json
 "com.xxx.User":[
@@ -22,16 +22,16 @@ Dubbo-go 作为 Dubbo 的 Go 语言版本，因跨语言之故，二者针对同
 ]
 ```
 
-这种模式的好处是不言而喻的，简单直观，提供了细粒度的服务控制手段。
+The advantage of this model is obvious, as it is simple and intuitive, providing fine-grained service control.
 
-而近两年，随着云时代的到来，这种模式就暴露了不足：
+However, in recent years, with the advent of the cloud era, this model has revealed its shortcomings:
 
-1. 主流的注册模型都是应用维度的；
-2. 以服务维度来注册，那么规模与服务数量成正比，大规模集群之下【工行软件中心的接口注册规模达到万级】，注册中心压力非常大；
+1. Mainstream registration models are application-oriented;
+2. Registering by service dimension leads to a scale proportional to the number of services, putting great pressure on the registration center under large-scale clusters [e.g., the ICBC software center's service registration scale reaches tens of thousands];
 
-## 2 Dubbo-go v1.5.0 的新注册模型
+## 2 New Registration Model in Dubbo-go v1.5.0
 
-这次 Dubbo-go 支持了新的注册模型，也就是应用维度的注册模型。简单而言，在应用维度注册下，其注册信息类似：
+This time, Dubbo-go supports a new registration model, which is the application dimension registration model. In simple terms, under the application dimension registration, the registration information looks like:
 
 ```json
 "application1": [
@@ -41,76 +41,77 @@ Dubbo-go 作为 Dubbo 的 Go 语言版本，因跨语言之故，二者针对同
 ]
 ```
 
-在此模式之下，可以看到注册信息将会大幅度减少，集群规模只与实例数量相关。
+Under this model, the registration information can be significantly reduced, and the scale of the cluster is only related to the number of instances.
 
-与此同时，在实现这一个功能的时候，Dubbo-go 还希望保持两个目标：
+Meanwhile, in implementing this feature, Dubbo-go aims to achieve two goals:
 
-1. 对用户完全兼容，用户迁移无感知；
-2. 保持住原本服务粒度上精细控制的能力——即保留现有的服务维度的元数据；
+1. Complete compatibility for users, with seamless migration;
+2. Retain the ability to finely control service granularity—i.e., maintain existing service dimension metadata;
 
-因此 Dubbo-go 要着力解决以下几点：
+Thus, Dubbo-go focuses on addressing the following points:
 
-1. 目前 Consumer 的配置是以接口为准的，如何根据接口找到该接口对应的应用？例如，用户配置了 `com.xxx.User` 服务，那么，Dubbo-go 怎么知道这个服务是由哪个应用来提供的呢？
-2. 在知道了是哪个应用之后，可以从注册中心拿到应用的注册信息，如实例信息等；那怎么知道 `com.xxx.User` 服务自身的元数据呢？
+1. How to find out which application provides the service based on the interface since the current consumer configuration is interface-based? For example, if the user configured the `com.xxx.User` service, how would Dubbo-go know which application is providing this service?
+2. Once it is known which application it is, how to access the registration information of the application, such as instance information, and how to know the metadata of the `com.xxx.User` service itself?
 
-为了解决这两个问题，在已有的注册模型的基础上，Dubbo-go 引入两个额外的组件：ServiceNameMapping 和 MetadataService。
+To solve these two issues, Dubbo-go introduces two additional components based on the existing registration model: ServiceNameMapping and MetadataService.
 
-前者用于解决服务-应用之间的映射，后者用于获取服务的元数据。
+The former is used to solve the mapping between service and application, while the latter is used to obtain the service metadata.
 
-由此，Dubbo-go 的应用维度注册模型就变为：
+Thus, Dubbo-go's application dimension registration model becomes:
 
 ![img](/imgs/blog/dubbo-go/app-registry/app-registry-model.png)
 
 ### 2.1 ServiceNameMapping
 
-ServiceNameMapping 并不复杂。考虑到一般人在 Consumer 侧想要调用一个服务，其十有八九是知道这个服务是哪个应用提供的，于是 Dubbo-go 引入了新的配置项 `provideBy`
+ServiceNameMapping is not complicated. Considering that a typical consumer wants to call a service, they mostly know which application provides the service, so Dubbo-go introduces a new configuration item `provideBy`.
 
 ![img](/imgs/blog/dubbo-go/app-registry/provideby.png)
 
-当然，所谓 “十有八九”就是说有些时候确实不知道是服务是谁提供的，所以 Dubbo-go 还支持了基于配置中心的 ServiceNameMapping 实现。Dubbo-go 会用服务名作为 Key 从配置中心里面读出对应的应用名。这意味着, Provider 启动的时候，也会在配置中心将自身的 服务-应用名映射 写入配置中心。
+Of course, the term "mostly" acknowledges that sometimes it's indeed unknown who provides the service, so Dubbo-go also supports a configuration center-based ServiceNameMapping implementation. Dubbo-go will read the corresponding application name from the configuration center using the service name as the key. This means that when the provider starts, it will also write its service-application mapping into the configuration center.
 
 ### 2.2 MetadataService
 
-MetadataService 稍微要复杂一点，有 `remote` 和 `local` 两种模式。
+MetadataService is slightly more complex, with both `remote` and `local` modes.
 
-类似于前面的 ServiceNameMapping，Dubbo-go 提供了基于配置中心的 MetadataService 的实现，即 `remote` 模式。Provider 启动的时候，就会将服务的元数据写进去。
+Similar to the earlier ServiceNameMapping, Dubbo-go provides a configuration center-based implementation of MetadataService, known as `remote` mode. When the provider starts, it will write the service metadata in.
 
-另外一种模式是 `local` 模式。Dubbo-go 可以直接将 MetadataService 看做是一个普通的微服务，而后由 `Provider` 所提供。类似于：
+The other mode is `local`. Dubbo-go can treat MetadataService as a regular microservice, provided by the Provider. Similar to:
 
 ![img](/imgs/blog/dubbo-go/app-registry/local-metadata-service.png)
 
-由此带来一个问题：
+This brings up a question:
 
-既然 Dubbo-go 将 MetadataService 看做是一个普通的服务，那么 MetadataService 的元数据，Consumer 该怎么获得呢？这是一个典型的鸡生蛋蛋生鸡的问题。
+Since Dubbo-go regards MetadataService as an ordinary service, how can the consumer obtain the metadata from MetadataService? This is a classic chicken-or-egg problem.
 
-Dubbo-go 的方案非常简单粗暴，Provider 启动的时候，不仅仅往注册中心里面写入应用本身的信息，还要把它的 MetadataService 信息写入。
+Dubbo-go's solution is rather straightforward: when the provider starts, it not only writes its own information to the registration center but also writes its MetadataService information.
 
-这是一个应用的注册信息：
+This is the registration information for an application:
 
 ![img](/imgs/blog/dubbo-go/app-registry/registry-info.png)
 
-本质上来说，应用维度注册信息 + 服务元数据 = 服务维度注册信息。或者说，应用维度注册，只是一种重新组织这些信息的方式。
+Essentially, application dimension registration information + service metadata = service dimension registration information. In other words, application dimension registration is merely a way to restructure this information.
 
-## 3 差异与改进
+## 3 Differences and Improvements
 
-Dubbo-go v1.5.x 对标 Dubbo 2.7.5，可以认为是参照 Dubbo 2.7.5 直接实现其 Go 源码，但是考虑到 Java 和 Go 之间的语言差异，导致二者之间的实现不可能完全对等。
+Dubbo-go v1.5.x is aligned with Dubbo 2.7.5 and can be seen as a direct implementation of its Go source code, but considering the language differences between Java and Go, the implementations cannot be completely equivalent.
 
-### 3.1 修订版本号revision比对
+### 3.1 Revision Number Comparison
 
-Dubbo v2.7.x 在 MetadataService 注册时，会对其 provider 应用的所有服务接口的 hash 值做为修订版本号写入元数据中心，此 revision 是对所有接口的方法以及其参数总体的计算结果。其目的是减少 consumer 端到注册中心的拉取次数。
+When registering MetadataService, Dubbo v2.7.x writes the hash value of all service interfaces of its provider application as a revision number into the metadata center. This revision is a comprehensive calculation result of all interfaces' methods and their parameters. The purpose is to reduce the number of pulls from consumer to the registration center.
 
-在Go中用的计算 revision 的 hash 算法与 Java 是不一致的，而且 Go 与 Java 的方法签名信息是不相同的，所以计算出来的 hash 值一定是不一样的。
+The hash algorithm used to calculate revision in Go is inconsistent with that in Java, and the method signature information in Go differs from that in Java, resulting in differing hash values.
 
-此不一致会导致如果Go应用和Java应用同时发布同一个服务的时候，Go服务和Java服务的修订版本号必定是不相同的，Consumer需要分别缓存这两个修订版本的元数据。
+This inconsistency leads to the situation where if Go applications and Java applications simultaneously publish the same service, the revision numbers of Go services and Java services will inevitably differ, requiring the consumer to cache the metadata of these two revision numbers separately.
 
-### 3.2 应用注册时机
+### 3.2 Application Registration Timing
 
-Dubbo-go v1.5.0 实现时，其中一个考量是全面向后兼容 v1.4.x。Dubbo-go v1.5.x 应用 consumer 既可以调用 Dubbo-go v1.4.x 应用的服务，也可以调用 Dubbo v2.6.x 应用的服务，当然也可以调用其对标的 v2.7.x 应用的服务。
+One consideration in implementing Dubbo-go v1.5.0 was to maintain full backward compatibility with v1.4.x. Dubbo-go v1.5.x consumers can call services from Dubbo-go v1.4.x applications, Dubbo v2.6.x applications, and of course, services from the corresponding v2.7.x applications.
 
-为了达到兼容性，Dubbo-go v1.5.x 实现时面临一个问题：Dubbo-go provider 应用启动时有一个服务启动成功，把应用信息注册到元数据中心之后，就会把实例注册到注册中心，而 Dubbo 2.7.x 的 provider 应用则是在其所有服务接口的信息注册到元数据中心后才会注册实例！
+To achieve compatibility, Dubbo-go v1.5.x faced an issue: when the Dubbo-go provider application starts, it registers its application information to the metadata center only after a service has successfully started, whereas in Dubbo 2.7.x, the provider application registers instances only after all service interface information has been registered to the metadata center!
 
-这个问题的后果就是：Dubbo-go v1.5.0 的 provider 每次发布接口到元数据中心的同时，都会触发Dubbo-go v1.5.0 / Dubbo v2.7.x 的 consumer 应用拉取 Dubbo-go v1.5.0 应用信息，当provider 发布的服务过多时 consumer 侧性能损耗非常明显！
+The consequence of this issue is that every time a provider publishes an interface to the metadata center, it triggers both Dubbo-go v1.5.0 and Dubbo v2.7.x consumer applications to pull information from Dubbo-go v1.5.0, which results in significant performance degradation on the consumer side when the provider has published many services.
 
-Dubbo-go 在 v1.5.1 中已经修复了这个问题，provider 在启动时先将其全部服务接口发布到元数据中心，然后注册实例到注册中心，减少了 consumer 拉取元数据的次数。
+Dubbo-go has fixed this in v1.5.1, where the provider first publishes all its service interfaces to the metadata center before registering instances to the registration center, reducing the number of metadata pulls by consumers.
 
-> 本文作者： 白泽（蒋超），Github ID [@Patrick0308](https://github.com/Patrick0308)，开源爱好者。
+> Author of this article: Baize (Jiang Chao), GitHub ID [@Patrick0308](https://github.com/Patrick0308), open-source enthusiast.
+

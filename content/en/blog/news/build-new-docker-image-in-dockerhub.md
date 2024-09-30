@@ -1,59 +1,50 @@
 ---
-title: "在DockerHub发布Dubbo Admin镜像"
-linkTitle: "在DockerHub发布Dubbo Admin镜像"
+title: "Publishing Dubbo Admin Images on DockerHub"
+linkTitle: "Publishing Dubbo Admin Images on DockerHub"
 date: 2018-04-23
-tags: ["新闻动态"]
+tags: ["News"]
 description: >
-  本文将介绍如何在Dockerhub上发布Dubbo Admin镜像。
+  This article will introduce how to publish Dubbo Admin images on Dockerhub.
 ---
 
-Dubbo Admin是Dubbo的服务治理中心，提供了大量日常运维所需的服务治理、配置管理等功能。
+Dubbo Admin is the service governance center for Dubbo, providing many features such as service governance and configuration management needed for daily operations.
 
-Dubbo Admin同时包含了前端代码和后端代码，如果用户需要自己下载源码并编译打包，需要花费一定时间。
-特别是对于一些希望快速调研和试用Dubbo Admin的用户，这种流程的体验并不是很好。
+Dubbo Admin includes both front-end and back-end code. If users need to download the source code and compile it themselves, it will take some time. This experience is not ideal, especially for users who wish to quickly research and try Dubbo Admin.
 
-Docker是一个开源的应用容器引擎，让开发者可以打包应用以及依赖包到一个可移植的镜像中，社区对于提供Dubbo Admin镜像的呼声较高。
-Docker官方维护了一个公共仓库DockerHub，该仓库还有很多国内镜像，访问速度快，将Dubbo Admin镜像发布到DockerHub是一个较好的选择。
+Docker is an open-source application container engine that allows developers to package applications and their dependencies into a portable image. There is a strong demand in the community for a Dubbo Admin image. Docker maintains a public repository, DockerHub, which also has many domestic mirrors, allowing for faster access. Publishing the Dubbo Admin image to DockerHub is a good choice.
 
+## Applying for a DockerHub Account
+To publish images on DockerHub, you naturally need an account. DockerHub has two common account types: personal accounts and organizational accounts. Apache has an organizational account on DockerHub[^apache-repo]. Our first choice is to publish under the organizational account.
 
-## DockerHub账号申请
-要在DockerHub上发布镜像，自然需要对应的账号。
-而DockerHub有两种常见账号，一种是面向个人的，一种是面向组织的。Apache在DockerHub上有一个组织账号[^apache-repo]。
-自然我们首选是发布在组织账号下。
+DockerHub manages organizational accounts based on groups, meaning there are multiple groups under an organizational account, each with different members, and a group can manage one or more images.
 
-DockerHub对于组织账号的管理是基于组的，也就是一个组织账号下有多个组，每个组有不同的成员，而一个组可以管理一个或者多个镜像。
+So the first step is to apply for permission, which requires submitting an issue to the Apache Infrastructure team to request DockerHub image repository and group permissions. Currently, the image and group have been applied for; you just need to apply for group permissions, following up on previous requests[^request-ticket].
 
-所以要做的第一步就是申请权限，这个需要提一个issue给Apache Infrastructure团队，申请DockerHub的镜像仓库和组权限。
-目前镜像和组已经申请好了，只需要申请组的权限就行了，可以参考之前的申请[^request-ticket]。
+After applying for the permissions, logging in with the Apache account should show the corresponding images and configuration options.
 
-申请完权限以后使用Apache账号登陆应该就可以看到对应的镜像和配置选项了。
+## Adding New Build Rules
+There are two ways to publish images to DockerHub: one is to build the image locally and then push it to DockerHub, and the other is to provide a Dockerfile and use the build functionality on DockerHub directly. The latter is obviously more operationally convenient, and the Dubbo Admin image is currently published this way.
 
-## 添加新的构建规则
-发布镜像到DockerHub有两种办法，一种是本地构建好镜像以后远程push到DockerHub，另外一种是提供Dockerfile并借助DockerHub提供的构建功能直接在DockerHub构建。
-后者明显操作性和便捷性要好很多，目前Dubbo Admin的镜像也是这样构建发布的。
+When a new version of Dubbo Admin is released, a new Dockerfile file needs to be added to the project's docker directory. You can refer to the current Dockerfile for version 0.1.0[^docker-file]. The configuration may vary slightly depending on the specific version, but is generally consistent.
 
-当Dubbo Admin有新版本发布以后，需要在项目的docker目录新增一个Dockerfile文件，可以参考目前0.1.0版本的Dockerfile[^docker-file]，其中的配置根据具体的版本可能有细微差别，但是大致上是一致的。
-
-在添加了Dockerfile之后，进入DockerHub对应的管理界面新增Build Rules
+After adding the Dockerfile, go to the DockerHub management interface to add Build Rules.
 
 ![dockerhub-build-rules.png](/imgs/blog/dockerhub-build-rules.png)
 
+Fill it out according to the actual situation. There are two points to note:
++ The latest version must match the latest version configuration.
++ Do not check Autobuild.
 
-根据实际情况填写即可。这里需要注意两点：
-+ latest 版本要和最新的版本配置一致
-+ 不要勾选Autobuild
+Checking Autobuild will trigger an automatic build for every git commit. However, since Dubbo Admin does not provide snapshot Docker images, it only needs to build and publish when releasing a new version.
 
-勾选Autobuild会导致每次git提交都会触发自动构建，但是由于Dubbo Admin不提供snapshot的Docker镜像，所以只有发布新版本的时候才需要构建发布。
+After making changes, click Save, then trigger the build manually.
 
-修改以后点Save，然后手动触发构建即可。
+## Conclusion
+In summary, the steps to publish an image on DockerHub are not complicated. If permissions have already been applied for, the process is very smooth.
 
-## 总结
-总的来说DockerHub上发布镜像的步骤并不复杂，如果已经申请过权限的话，操作起来是很流畅的。
-
-另外DockerHub的构建是需要排队的，有时候会遇到长时间没有开始构建的情况，需要耐心等待。
-
-
+Additionally, building on DockerHub requires queuing, and sometimes you may encounter long wait times before the build starts, so patience is required.
 
 [^apache-repo]: https://hub.docker.com/r/apache
 [^request-ticket]: https://issues.apache.org/jira/browse/INFRA-18167
 [^docker-file]: https://github.com/apache/dubbo-admin/blob/develop/docker/0.1.0/Dockerfile
+

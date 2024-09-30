@@ -1,7 +1,5 @@
 ---
-title: "方案设计"
-linkTitle: "方案设计"
+title: "Scheme Design"
+linkTitle: "Scheme Design"
 weight: 30
----
-
-
+---  

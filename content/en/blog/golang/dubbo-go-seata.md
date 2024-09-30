@@ -1,31 +1,31 @@
 ---
-title: "分布式事务框架 seata-golang 通信模型详解"
-linkTitle: "分布式事务框架 seata-golang 通信模型详解"
-tags: ["Go", "生态"]
+title: "Detailed Explanation of the Communication Model of the Distributed Transaction Framework seata-golang"
+linkTitle: "Detailed Explanation of the Communication Model of the Distributed Transaction Framework seata-golang"
+tags: ["Go", "Ecosystem"]
 date: 2021-01-15
 description: >
-    本文介绍了 seata 的 go 语言客户端通信模型的实现
+    This article introduces the implementation of the communication model of the seata Go language client.
 ---
 
-## 简介
+## Introduction
 
-Java 的世界里，大家广泛使用一个高性能网络通信框架 —— netty，很多 RPC 框架都是基于 netty 来实现的。在 golang 的世界里，getty 也是一个类似 netty 的高性能网络通信库。getty 最初由 dubbo-go 项目负责人于雨开发，作为底层通信库在 dubbo-go 中使用。随着 dubbo-go 捐献给 apache 基金会，在社区小伙伴的共同努力下，getty 也最终进入到 apache 这个大家庭，并改名 dubbo-getty。
+In the Java world, a high-performance network communication framework called Netty is widely used, with many RPC frameworks built on it. In the Go world, Getty is a similar high-performance network communication library. Getty was originally developed by Yu Yu, the project lead of dubbo-go, and is used as a lower-level communication library in dubbo-go. When dubbo-go was donated to the Apache Foundation, Getty eventually became part of the Apache family and was renamed dubbo-getty.
 
-18 年的时候，我在公司里实践微服务，当时遇到最大的问题就是分布式事务问题。同年，阿里在社区开源他们的分布式事务解决方案，我也很快关注到这个项目，起初还叫 fescar，后来更名 seata。由于我对开源技术很感兴趣，加了很多社区群，当时也很关注 dubbo-go 这个项目，在里面默默潜水。随着对 seata 的了解，逐渐萌生了做一个 go 版本的分布式事务框架的想法。
+In 2018, I practiced microservices at my company and faced significant issues with distributed transactions. The same year, Alibaba open-sourced their distributed transaction solution, which I quickly took note of, initially called Fescar and later renamed Seata. As I was interested in open-source technologies, I joined many community groups and closely followed the dubbo-go project, quietly absorbing knowledge. As my understanding of Seata grew, I gradually developed the idea of creating a Go version of a distributed transaction framework.
 
-要做一个 golang 版的分布式事务框架，首先需要解决的一个问题就是如何实现 RPC 通信。dubbo-go 就是摆在眼前很好的一个例子，遂开始研究 dubbo-go 的底层 getty。
+To create a Go version of a distributed transaction framework, one of the first challenges to address is how to implement RPC communication. Dubbo-go presents a good example, prompting a study of the underlying Getty.
 
-## 如何基于 getty 实现 RPC 通信
+## How to Implement RPC Communication Based on Getty
 
-getty 框架的整体模型图如下：
+The overall model diagram of the Getty framework is as follows:
 
 ![img](/imgs/blog/dubbo-go/seata/p1.webp)
 
-下面结合相关代码，详述 seata-golang 的 RPC 通信过程。
+Next, let's detail the RPC communication process of Seata-golang with related code.
 
-### 1. 建立连接
+### 1. Establishing a Connection
 
-实现 RPC 通信，首先要建立网络连接，这里先从 client.go 开始看起。
+To implement RPC communication, a network connection must first be established, beginning with client.go.
 
 ```go
 func (c *client) connect() {
@@ -35,28 +35,28 @@ func (c *client) connect() {
   )
 
   for {
-        // 建立一个 session 连接
+        // Establishing a session connection
     ss = c.dial()
     if ss == nil {
-      // client has been closed
+      // Client has been closed
       break
     }
     err = c.newSession(ss)
     if err == nil {
-            // 收发报文
+            // Sending and receiving messages
       ss.(*session).run()
-      // 此处省略部分代码
+      // Omitted parts of the code
 
       break
     }
-    // don't distinguish between tcp connection and websocket connection. Because
-    // gorilla/websocket/conn.go:(Conn)Close also invoke net.Conn.Close()
+    // Don't distinguish between TCP and WebSocket connections. Because
+    // gorilla/websocket/conn.go:(Conn)Close also invokes net.Conn.Close()
     ss.Conn().Close()
   }
 }
 ```
 
-`connect()` 方法通过 `dial()` 方法得到了一个 session 连接，进入 `dial()` 方法：
+The `connect()` method obtains a session connection via the `dial()` method. Now, let's look into `dial()`:
 
 ```go
 func (c *client) dial() Session {
@@ -75,7 +75,7 @@ func (c *client) dial() Session {
 }
 ```
 
-我们关注的是 TCP 连接，所以继续进入 `c.dialTCP()` 方法：
+Focusing on TCP connections, we continue with the `c.dialTCP()` method:
 
 ```go
 func (c *client) dialTCP() Session {
@@ -91,11 +91,11 @@ func (c *client) dialTCP() Session {
     if c.sslEnabled {
       if sslConfig, err := c.tlsConfigBuilder.BuildTlsConfig(); err == nil && sslConfig != nil {
         d := &net.Dialer{Timeout: connectTimeout}
-        // 建立加密连接
+        // Establish a secure connection
         conn, err = tls.DialWithDialer(d, "tcp", c.addr, sslConfig)
       }
     } else {
-            // 建立 tcp 连接
+            // Establish a TCP connection
       conn, err = net.DialTimeout("tcp", c.addr, connectTimeout)
     }
     if err == nil && gxnet.IsSameAddr(conn.RemoteAddr(), conn.LocalAddr()) {
@@ -103,7 +103,7 @@ func (c *client) dialTCP() Session {
       err = errSelfConnect
     }
     if err == nil {
-            // 返回一个 TCPSession
+            // Return a TCPSession
       return newTCPSession(conn, c)
     }
 
@@ -113,47 +113,45 @@ func (c *client) dialTCP() Session {
 }
 ```
 
-至此，我们知道了 getty 如何建立 TCP 连接，并返回 TCPSession。
+At this point, we understand how Getty establishes a TCP connection and returns a TCPSession.
 
-### 2. 收发报文
+### 2. Sending and Receiving Messages
 
-那它是怎么收发报文的呢，我们回到 connection 方法接着往下看，有这样一行 `ss.(*session).run()`，在这行代码之后，代码都是很简单的操作，我们猜测这行代码运行的逻辑里面一定包含收发报文的逻辑，接着进入 `run()` 方法：
+So how does it send and receive messages? Returning to the connection method, we see `ss.(*session).run()`. After this line of code, the subsequent operations are simple; we suspect this line's logic includes the messaging logic. We then enter the `run()` method:
 
 ```go
 func (s *session) run() {
-  // 省略部分代码
+  // Omitted parts of the code
 
   go s.handleLoop()
   go s.handlePackage()
 }
 ```
 
-这里起了两个 goroutine：`handleLoop` 和 `handlePackage`，看字面意思符合我们的猜想，进入 `handleLoop()` 方法：
+Two goroutines are launched: `handleLoop` and `handlePackage`, matching our assumptions. Entering `handleLoop()`:
 
 ```go
 func (s *session) handleLoop() {
-    // 省略部分代码
+    // Omitted parts of the code
 
   for {
-    // A select blocks until one of its cases is ready to run.
-    // It choose one at random if multiple are ready. Otherwise it choose default branch if none is ready.
     select {
-    // 省略部分代码
+    // Omitted parts of the code
 
     case outPkg, ok = <-s.wQ:
-      // 省略部分代码
+      // Omitted parts of the code
 
       iovec = iovec[:0]
       for idx := 0; idx < maxIovecNum; idx++ {
-        // 通过 s.writer 将 interface{} 类型的 outPkg 编码成二进制的比特
+        // encode the interface{} type outPkg into binary bytes via s.writer
         pkgBytes, err = s.writer.Write(s, outPkg)
-        // 省略部分代码
+        // Omitted parts of the code
 
         iovec = append(iovec, pkgBytes)
 
-                //省略部分代码
+                // Omitted parts of the code
       }
-            // 将这些二进制比特发送出去
+            // Send these binary bytes out
       err = s.WriteBytesArray(iovec[:]...)
       if err != nil {
         log.Errorf("%s, [session.handleLoop]s.WriteBytesArray(iovec len:%d) = error:%+v",
@@ -171,7 +169,7 @@ func (s *session) handleLoop() {
             log.Warnf("wsConn.writePing() = error:%+v", perrors.WithStack(err))
           }
         }
-                // 定时执行的逻辑，心跳等
+                // Regular logic, such as heartbeat
         s.listener.OnCron(s)
       }
     }
@@ -179,13 +177,13 @@ func (s *session) handleLoop() {
 }
 ```
 
-通过上面的代码，我们不难发现，`handleLoop()` 方法处理的是发送报文的逻辑，RPC 需要发送的消息首先由 `s.writer` 编码成二进制比特，然后通过建立的 TCP 连接发送出去。这个 `s.writer` 对应的 Writer 接口是 RPC 框架必须要实现的一个接口。
+From the above code, we find that the `handleLoop()` method handles the logic for sending messages; the messages that need to be sent by RPC are first encoded into binary bytes by `s.writer` and then sent via the established TCP connection. This `s.writer` corresponds to a Writer interface that must be implemented in the RPC framework.
 
-继续看 `handlePackage()` 方法：
+Continuing to the `handlePackage()` method:
 
 ```go
 func (s *session) handlePackage() {
-    // 省略部分代码
+    // Omitted parts of the code
 
   if _, ok := s.Connection.(*gettyTCPConn); ok {
     if s.reader == nil {
@@ -205,40 +203,40 @@ func (s *session) handlePackage() {
 }
 ```
 
-进入 `handleTCPPackage()` 方法：
+Entering the `handleTCPPackage()` method:
 
 ```go
 func (s *session) handleTCPPackage() error {
-    // 省略部分代码
+    // Omitted parts of the code
 
   conn = s.Connection.(*gettyTCPConn)
   for {
-    // 省略部分代码
+    // Omitted parts of the code
 
     bufLen = 0
     for {
-      // for clause for the network timeout condition check
+      // Check for network timeout condition
       // s.conn.SetReadTimeout(time.Now().Add(s.rTimeout))
-            // 从 TCP 连接中收到报文
+            // Receive the package from TCP connection
       bufLen, err = conn.recv(buf)
-      // 省略部分代码
+      // Omitted parts of the code
 
       break
     }
-    // 省略部分代码
+    // Omitted parts of the code
 
-        // 将收到的报文二进制比特写入 pkgBuf
+        // Write the received binary bytes into pkgBuf
     pktBuf.Write(buf[:bufLen])
     for {
       if pktBuf.Len() <= 0 {
         break
       }
-            // 通过 s.reader 将收到的报文解码成 RPC 消息
+            // Decode the received binary package into an RPC message via s.reader
       pkg, pkgLen, err = s.reader.Read(s, pktBuf.Bytes())
-      // 省略部分代码
+      // Omitted parts of the code
 
       s.UpdateActive()
-            // 将收到的消息放入 TaskQueue 供 RPC 消费端消费
+            // Add the received message to TaskQueue for RPC consumer
       s.addTask(pkg)
       pktBuf.Next(pkgLen)
       // continue to handle case 5
@@ -252,13 +250,13 @@ func (s *session) handleTCPPackage() error {
 }
 ```
 
-从上面的代码逻辑我们分析出，RPC 消费端需要将从 TCP 连接收到的二进制比特报文解码成 RPC 能消费的消息，这个工作由 s.reader 实现，所以，我们要构建 RPC 通信层也需要实现 s.reader 对应的 Reader 接口。
+From the logic above, we analyze that the RPC consumer needs to decode the binary package received from the TCP connection into an RPC consumable message, which is achieved by `s.reader`. Therefore, to build the RPC communication layer, we also need to implement the Reader interface corresponding to `s.reader`.
 
-### 3. 底层处理网络报文的逻辑如何与业务逻辑解耦
+### 3. How to Decouple Network Message Processing Logic from Business Logic
 
-我们都知道，netty 通过 boss 线程和 worker 线程实现了底层网络逻辑和业务逻辑的解耦。那么，getty 是如何实现的呢？
+We know that Netty achieved decoupling of underlying network logic and business logic through boss and worker threads. So how does Getty achieve this?
 
-在 `handlePackage()` 方法最后，我们看到，收到的消息被放入了 `s.addTask(pkg)` 这个方法，接着往下分析：
+At the end of the `handlePackage()` method, we see that the received message is placed into the method `s.addTask(pkg)`. Let's analyze this further:
 
 ```go
 func (s *session) addTask(pkg interface{}) {
@@ -274,9 +272,9 @@ func (s *session) addTask(pkg interface{}) {
 }
 ```
 
-`pkg` 参数传递到了一个匿名方法，这个方法最终放入了 `taskPool`。这个方法很关键，在我后来写 seata-golang 代码的时候，就遇到了一个坑，这个坑后面分析。
+The `pkg` parameter is passed to an anonymous method, which eventually places the task into the `taskPool`. This method is crucial; when I later wrote the seata-golang code, I encountered a snag related to this—this pitfall will be analyzed later.
 
-接着我们看一下 taskPool 的定义：
+Next, we look at the definition of `taskPool`:
 
 ```go
 // NewTaskPoolSimple build a simple task pool
@@ -292,7 +290,7 @@ func NewTaskPoolSimple(size int) GenericTaskPool {
 }
 ```
 
-构建了一个缓冲大小为 size （默认为  `runtime.NumCPU() * 100`） 的 channel `sem`。再看方法 `AddTaskAlways(t task)`：
+A buffered channel `sem` of size (default is `runtime.NumCPU() * 100`) is created. Looking at the method `AddTaskAlways(t task)`:
 
 ```go
 func (p *taskPoolSimple) AddTaskAlways(t task) {
@@ -307,6 +305,7 @@ func (p *taskPoolSimple) AddTaskAlways(t task) {
     return
   default:
   }
+  
   select {
   case p.work <- t:
   case p.sem <- struct{}{}:
@@ -318,11 +317,11 @@ func (p *taskPoolSimple) AddTaskAlways(t task) {
 }
 ```
 
-加入的任务，会先由 len(p.sem) 个 goroutine 去消费，如果没有 goroutine 空闲，则会启动一个临时的 goroutine 去运行 t()。相当于有  len(p.sem) 个 goroutine 组成了 goroutine pool，pool 中的 goroutine 去处理业务逻辑，而不是由处理网络报文的 goroutine 去运行业务逻辑，从而实现了解耦。写 seata-golang 时遇到的一个坑，就是忘记设置 taskPool 造成了处理业务逻辑和处理底层网络报文逻辑的 goroutine 是同一个，我在业务逻辑中阻塞等待一个任务完成时，阻塞了整个 goroutine，使得阻塞期间收不到任何报文。
+The tasks added are first consumed by `len(p.sem)` goroutines; if none are free, a temporary goroutine starts to run `t()`. This forms a goroutine pool with `len(p.sem)` goroutines for handling business logic, instead of processing network messages directly, thus achieving decoupling. A pitfall I encountered while writing seata-golang was forgetting to set the taskPool, causing the same goroutine to handle both business and networking logic, leading to blockages.
 
-### 4. 具体实现
+### 4. Specific Implementation
 
-下面的代码见getty.go ：
+The code below can be found in getty.go:
 
 ```go
 // Reader is used to unmarshal a complete pkg from buffer
@@ -374,18 +373,18 @@ type EventListener interface {
 }
 ```
 
-通过对整个 getty 代码的分析，我们只要实现  `ReadWriter` 来对 RPC  消息编解码，再实现 `EventListener` 来处理 RPC 消息的对应的具体逻辑，将 `ReadWriter` 实现和 `EventLister` 实现注入到 RPC 的 Client 和 Server 端，则可实现 RPC 通信。
+Through the analysis of the entire Getty code, we can achieve RPC communication by implementing `ReadWriter` to handle RPC message encoding and decoding, and implementing `EventListener` to handle the corresponding logic. Injecting the implementations of `ReadWriter` and `EventListener` into the RPC Client and Server achieves RPC communication.
 
-### 1）编解码协议实现
+### 1) Codec Protocol Implementation
 
-下面是 seata 协议的定义：
+The definition of the Seata protocol is shown below:
 
 ![img](/imgs/blog/dubbo-go/seata/p2.webp)
 
-在 ReadWriter 接口的实现 `RpcPackageHandler` 中，调用 Codec 方法对消息体按照上面的格式编解码：
+In the implementation of the ReadWriter interface `RpcPackageHandler`, the Codec method is called to encode and decode the message body according to the above format:
 
-```
-// 消息编码为二进制比特
+```go
+// Encode the message into binary bytes
 func MessageEncoder(codecType byte, in interface{}) []byte {
   switch codecType {
   case SEATA:
@@ -396,7 +395,7 @@ func MessageEncoder(codecType byte, in interface{}) []byte {
   }
 }
 
-// 二进制比特解码为消息体
+// Decode binary bytes into message body
 func MessageDecoder(codecType byte, in []byte) (interface{}, int) {
   switch codecType {
   case SEATA:
@@ -408,21 +407,21 @@ func MessageDecoder(codecType byte, in []byte) (interface{}, int) {
 }
 ```
 
-### 2）Client 端实现
+### 2) Client-side Implementation
 
-再来看 client 端 `EventListener` 的实现 `RpcRemotingClient`：
+Now, let's look at the client-side implementation of `EventListener` in `RpcRemotingClient`:
 
 ```go
 func (client *RpcRemoteClient) OnOpen(session getty.Session) error {
-  go func() 
+  go func() {
     request := protocal.RegisterTMRequest{AbstractIdentifyRequest: protocal.AbstractIdentifyRequest{
       ApplicationId:           client.conf.ApplicationId,
       TransactionServiceGroup: client.conf.TransactionServiceGroup,
     }}
-    // 建立连接后向 Transaction Coordinator 发起注册 TransactionManager 的请求
+    // After establishing the connection, initiate a request to register TransactionManager with Transaction Coordinator
     _, err := client.sendAsyncRequestWithResponse(session, request, RPC_REQUEST_TIMEOUT)
     if err == nil {
-      // 将与 Transaction Coordinator 建立的连接保存在连接池供后续使用
+      // Save the connection established with Transaction Coordinator in the connection pool for future use
       clientSessionManager.RegisterGettySession(session)
       client.GettySessionOnOpenChannel <- session.RemoteAddr()
     }
@@ -456,7 +455,7 @@ func (client *RpcRemoteClient) OnMessage(session getty.Session, pkg interface{})
     rpcMessage.MessageType == protocal.MSGTYPE_RESQUEST_ONEWAY {
     log.Debugf("msgId:%s, body:%v", rpcMessage.Id, rpcMessage.Body)
 
-    // 处理事务消息，提交 or 回滚
+    // Handle transaction messages, commit or rollback
     client.onMessage(rpcMessage, session.RemoteAddr())
   } else {
     resp, loaded := client.futures.Load(rpcMessage.Id)
@@ -471,16 +470,16 @@ func (client *RpcRemoteClient) OnMessage(session getty.Session, pkg interface{})
 
 // OnCron ...
 func (client *RpcRemoteClient) OnCron(session getty.Session) {
-  // 发送心跳
+  // Send heartbeat
   client.defaultSendRequest(session, protocal.HeartBeatMessagePing)
 }
 ```
 
-`clientSessionManager.RegisterGettySession(session)` 的逻辑将在下文中分析。
+The logic `clientSessionManager.RegisterGettySession(session)` will be analyzed later.
 
-### 3）Server 端 Transaction Coordinator 实现
+### 3) Server-side Transaction Coordinator Implementation
 
-代码见 `DefaultCoordinator`：
+The code can be found in `DefaultCoordinator`:
 
 ```go
 func (coordinator *DefaultCoordinator) OnOpen(session getty.Session) error {
@@ -489,7 +488,7 @@ func (coordinator *DefaultCoordinator) OnOpen(session getty.Session) error {
 }
 
 func (coordinator *DefaultCoordinator) OnError(session getty.Session, err error) {
-  // 释放 TCP 连接
+  // Release TCP connection
   SessionManager.ReleaseGettySession(session)
   session.Close()
   log.Errorf("getty_session{%s} got error{%v}, will be closed.", session.Stat(), err)
@@ -505,7 +504,7 @@ func (coordinator *DefaultCoordinator) OnMessage(session getty.Session, pkg inte
   if ok {
     _, isRegTM := rpcMessage.Body.(protocal.RegisterTMRequest)
     if isRegTM {
-      // 将 TransactionManager 信息和 TCP 连接建立映射关系
+      // Map TransactionManager information to TCP connection
       coordinator.OnRegTmMessage(rpcMessage, session)
       return
     }
@@ -521,7 +520,7 @@ func (coordinator *DefaultCoordinator) OnMessage(session getty.Session, pkg inte
       log.Debugf("msgId:%s, body:%v", rpcMessage.Id, rpcMessage.Body)
       _, isRegRM := rpcMessage.Body.(protocal.RegisterRMRequest)
       if isRegRM {
-        // 将 ResourceManager 信息和 TCP 连接建立映射关系
+        // Map ResourceManager information to TCP connection
         coordinator.OnRegRmMessage(rpcMessage, session)
       } else {
         if SessionManager.IsRegistered(session) {
@@ -530,7 +529,7 @@ func (coordinator *DefaultCoordinator) OnMessage(session getty.Session, pkg inte
               log.Errorf("Catch Exception while do RPC, request: %v,err: %w", rpcMessage, err)
             }
           }()
-          // 处理事务消息，全局事务注册、分支事务注册、分支事务提交、全局事务回滚等
+          // Handle transaction messages: global transaction registration, branch transaction registration, branch transaction commit, global transaction rollback, etc.
           coordinator.OnTrxMessage(rpcMessage, session)
         } else {
           session.Close()
@@ -554,9 +553,9 @@ func (coordinator *DefaultCoordinator) OnCron(session getty.Session) {
 }
 ```
 
-`coordinator.OnRegTmMessage(rpcMessage, session)` 注册 Transaction Manager，`coordinator.OnRegRmMessage(rpcMessage, session)` 注册 Resource Manager。具体逻辑分析见下文。
+`coordinator.OnRegTmMessage(rpcMessage, session)` registers the Transaction Manager, while `coordinator.OnRegRmMessage(rpcMessage, session)` registers the Resource Manager. A detailed analysis will follow.
 
-消息进入 `coordinator.OnTrxMessage(rpcMessage, session)` 方法，将按照消息的类型码路由到具体的逻辑当中：
+Messages enter the method `coordinator.OnTrxMessage(rpcMessage, session)`, routed according to the message type code:
 
 ```go
 switch msg.GetTypeCode() {
@@ -591,13 +590,14 @@ switch msg.GetTypeCode() {
   default:
     return nil
   }
+}
 ```
 
-### 4）session manager 分析
+### 4) Session Manager Analysis
 
-Client 端同 Transaction Coordinator 建立连接起连接后，通过 `clientSessionManager.RegisterGettySession(session)` 将连接保存在 `serverSessions = sync.Map{}` 这个 map 中。map 的 key 为从 session 中获取的 RemoteAddress 即 Transaction Coordinator 的地址，value 为 session。这样，Client 端就可以通过 map 中的一个 session 来向 Transaction Coordinator 注册 Transaction Manager 和 Resource Manager 了。具体代码见 `getty_client_session_manager.go`。
+Upon establishing a connection with the Transaction Coordinator, the client saves the connection through `clientSessionManager.RegisterGettySession(session)` into `serverSessions = sync.Map{}`. The map's key is the RemoteAddress obtained from the session, which corresponds to the Transaction Coordinator's address. The value is the session. This way, the client can use the session stored in the map to register the Transaction Manager and Resource Manager with the Transaction Coordinator. The specific code can be found in `getty_client_session_manager.go`.
 
-Transaction Manager 和 Resource Manager 注册到 Transaction Coordinator 后，一个连接既有可能用来发送 TM 消息也有可能用来发送 RM 消息。我们通过 RpcContext 来标识一个连接信息：
+Once the Transaction Manager and Resource Manager register with the Transaction Coordinator, a connection might be used to send TM messages or RM messages. We identify a connection using the `RpcContext`:
 
 ```go
 type RpcContext struct {
@@ -611,7 +611,7 @@ type RpcContext struct {
 }
 ```
 
-当收到事务消息时，我们需要构造这样一个 RpcContext 供后续事务处理逻辑使用。所以，我们会构造下列 map 来缓存映射关系：
+When transaction messages are received, we need to construct such an RpcContext for subsequent transaction processing logic. Hence, we create the following maps to cache the relationships:
 
 ```go
 var (
@@ -631,30 +631,28 @@ var (
 )
 ```
 
-这样，Transaction Manager 和 Resource Manager 分别通过 `coordinator.OnRegTmMessage(rpcMessage, session)` 和 `coordinator.OnRegRmMessage(rpcMessage, session)` 注册到 Transaction Coordinator 时，会在上述 client_sessions map 中缓存 applicationId、ip、port 与 session 的关系，在 client_resources map 中缓存 applicationId 与 resourceIds（一个应用可能存在多个 Resource Manager） 的关系。
+In this way, both the Transaction Manager and Resource Manager map their relationship with the applicationId, IP, and port to the session in the `client_sessions` map during their registrations to the Transaction Coordinator, caching this mapping for later use of the RpcContext. The implementation of this part differs significantly from the Java version of Seata, and those interested can explore further. The detailed code can be found in `getty_session_manager.go`.
 
-在需要时，我们就可以通过上述映射关系构造一个 RpcContext。这部分的实现和 java 版 seata 有很大的不同，感兴趣的可以深入了解一下。具体代码见 `getty_session_manager.go`。
+Thus, we have analyzed the entire RPC communication model mechanism of seata-golang.
 
-至此，我们就分析完了 seata-golang 整个 RPC 通信模型的机制。
+### Future of seata-golang
 
-### seata-golang 的未来
-
-seata-golang 从今年 4 月份开始开发，到 8 月份基本实现和 java 版 seata 1.2 协议的互通，对 mysql 数据库实现了 AT 模式（自动协调分布式事务的提交回滚），实现了 TCC 模式，TC 端使用 mysql 存储数据，使 TC 变成一个无状态应用支持高可用部署。下图展示了 AT 模式的原理：
+Development of seata-golang started in April this year and by August, it had achieved interoperability with Seata Java version 1.2 and implemented AT mode for MySQL databases (automatic coordination for distributed transaction commits and rollbacks). TCC mode has also been realized, with the TC side using MySQL to store data, transforming TC into a stateless application supporting high availability deployment. The following diagram demonstrates the principles of AT mode:
 
 ![img](/imgs/blog/dubbo-go/seata/p3.webp)
 
-后续，还有许多工作可以做，比如：对注册中心的支持、对配置中心的支持、和 java 版 seata 1.4 的协议互通、其他数据库的支持、raft transaction coordinator 的实现等，希望对分布式事务问题感兴趣的开发者可以加入进来一起来打造一个完善的 golang 的分布式事务框架。如果你有任何疑问，欢迎钉钉扫码加入交流群【钉钉群号 33069364】：
+There is still much work to be done, such as support for the registration center, configuration center integration, protocol interoperability with Seata Java version 1.4, support for other databases, implementation of a Raft Transaction Coordinator, etc. We hope that developers interested in distributed transaction issues can join us in building a comprehensive Go distributed transaction framework. If you have any questions, feel free to scan the QR code to join the group chat【DingTalk Group Number 33069364】:
 
-另外，欢迎对 dubbogo 感兴趣的朋友到 dubbogo 社区钉钉群（钉钉群号 31363295）沟通 dubbogo 技术问题。
+Additionally, friends interested in dubbo-go are welcome to join the Dubbo-go community DingTalk group (DingTalk Group Number 31363295) to discuss technical issues related to dubbo-go.
 
-### 参考资料
+### References
 
-- seata 官方: https://seata.io
-- java 版 seata: https://github.com/seata/seata
-- seata-golang 项目地址: https://github.com/opentrx/seata-golang
-- seata-golang go 夜读 b 站分享: https://www.bilibili.com/video/BV1oz411e72T
+- Seata Official: https://seata.io
+- Seata Java Version: https://github.com/seata/seata
+- Seata-golang Project Address: https://github.com/opentrx/seata-golang
+- Seata-golang Go Night Reading Bilibili Share: https://www.bilibili.com/video/BV1oz411e72T
 
-> 作者简介
+> Author Biography
 > 
-> **刘晓敏** (GitHubID dk-lockdown)，目前就职于 h3c 成都分公司，擅长使用 Java/Go 语言，在云原生和微服务相关技术方向均有涉猎，目前专攻分布式事务。
-> **于雨**(（github @AlexStocks），dubbo-go 项目和社区负责人，一个有十多年服务端基础架构研发一线工作经验的程序员，陆续参与改进过 Muduo/Pika/Dubbo/Sentinel-go 等知名项目，目前在蚂蚁金服可信原生部从事容器编排和 service mesh 工作。
+> **Liu Xiaomin** (GitHub ID dk-lockdown), currently employed at H3C Chengdu branch, proficient in Java/Go, with experience in cloud-native and microservices-related technologies, currently focusing on distributed transactions.
+> **Yu Yu** (GitHub @AlexStocks), project lead and community manager of dubbo-go, a programmer with over ten years of experience in server-side infrastructure research and development, has participated in improvements for several well-known projects, including Muduo/Pika/Dubbo/Sentinel-go, and is currently engaged in container orchestration and service mesh work at Ant Financial.

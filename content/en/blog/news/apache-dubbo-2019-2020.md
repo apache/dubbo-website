@@ -1,74 +1,72 @@
 ---
-title: "从 2019 到 2020，Apache Dubbo 年度回顾与总结"
-linkTitle: "从 2019 到 2020，Apache Dubbo 年度回顾与总结"
+title: "Annual Review and Summary of Apache Dubbo from 2019 to 2020"
+linkTitle: "Annual Review and Summary of Apache Dubbo from 2019 to 2020"
 date: 2020-05-11
-tags: ["新闻动态"]
+tags: ["News"]
 description: >
-    通过这篇文章我们将：总结过去一年 Dubbo 社区取得的成绩
+    In this article, we will summarize the achievements made by the Dubbo community in the past year.
 ---
 
-非常感谢大家对 Dubbo 社区的关注，通过这篇文章我们将：总结过去一年 Dubbo 社区取得的成绩，包括社区和框架演进两个方面；展望未来 Dubbo 社区和框架的新的规划（roadmap）。社区建设是推动 Dubbo 健康持续发展的一个非常重要的环节，我们需要与社区保持良性的互动、有活跃的贡献者、有积极的富有建设性的讨论，而整个 Dubbo 社区过去一年在这方面都做的不错；在框架演进上，我们主要发布了 2.7.0 - 2.7.5 共 6 个特性版本，功能层面涵盖编程模型、协议、服务治理、性能优化等多个方面；除了已经发布的功能外，我们在 Dubbo 3.0 协议、服务自省和云原生等方向上也做了深入的探索，对这些方向的支持将是 Dubbo 接下来的重要工作方向，希望能通过这篇文章将其中更详细的思考和计划同步给大家。
+Thank you all for your attention to the Dubbo community. In this article, we will summarize the achievements made by the Dubbo community over the past year, covering both community and framework evolution, and look forward to future plans (roadmap) for the Dubbo community and framework. Community building is a very important aspect of promoting Dubbo's healthy and sustainable development. We need to maintain positive interactions within the community, have active contributors, and engage in constructive discussions. Over the past year, the entire Dubbo community has made significant progress in this regard. In terms of framework evolution, we primarily released 6 feature versions from 2.7.0 to 2.7.5, covering various aspects including programming models, protocols, service governance, and performance optimization. In addition to released features, we also explored deeply into areas such as Dubbo 3.0 protocol, service introspection, and cloud-native directions. Support for these areas will be crucial for Dubbo's future work, and we hope to share more detailed thoughts and plans through this article.
 
+## Community Review
 
-## 社区回顾
+Looking back on the development of the Dubbo community over the past year, one important milestone was graduating from Apache incubation in May 2019. Dubbo became the second project donated by Alibaba to graduate from Apache. I had the privilege of participating in the entire process from restarting the open-source project, entering Apache incubation to graduation, during which the community did a lot of work, including email list building, code standard checks, documentation and code internationalization, and handling issues/pull requests. These efforts were required by the Apache community and also played a positive role in promoting Dubbo's development.
 
-回顾 Dubbo 社区过去一年的发展，其中一个重要的节点就是 2019 年 5 月从 Apache 孵化毕业。成为第二个由 Alibaba 捐献后从 Apache 毕业的项目，我有幸参与到了从重启开源、进入 Apache 孵化到毕业的整个过程，社区在此过程中做了大量的工作，包括邮件列表建设、代码规范检查、文档和代码国际化、issue/pr 处理等，这些一方面是 Apache 社区要求的工作，同时也为推动 Dubbo 的发展起到了正面的作用。
+After graduating from Apache, related Dubbo projects were also migrated, all moved under the [Apache](https://github.com/apache?utf8=✓&q=dubbo&type=&language=) organization:
 
-在从 Apache 毕业之后，Dubbo 相关的项目也进行了迁移，都迁移到了 [Apache](https://github.com/apache?utf8=✓&q=dubbo&type=&language=) 组织之下：
-
-Dubbo 社区的项目总共有 24 个之多，维护如此多的项目，并不是单纯靠几个活跃的开发者就能做到的，而是靠整个社区努力的结果。我总结了过去一年提名的所有 Committer/PMC，总过有 27 人获得提名（23 名 committer、4 名 PMC），通过下方的饼状图可以看出，只有不到 20% 的贡献者是来自于 Alibaba，而 80% 以上是来自各个不同组织的开发者或爱好者。这样的 Committer 分布，是加入 Apache 带给 Dubbo 社区的一个最重要的变化之一：Dubbo 项目是属于整个社区的，反映的是不同组织不同开发者的共同诉求，它的发展不是由一个公司控制或决定的，而是由社区共同讨论后决定的。如果你对参与到 Dubbo 社区感兴趣，都可以参与到 Dubbo 发展的讨论、决策和 coding 中来，也非常期待各位能成为下一个 Committer。
+The Dubbo community has a total of 24 projects. Maintaining so many projects is not something that can be done solely by a few active developers, but is the result of the entire community's efforts. I summarized all the Committers/PMCs nominated over the past year, with a total of 27 people nominated (23 Committers and 4 PMCs). As shown in the pie chart below, less than 20% of the contributors come from Alibaba, while over 80% come from various organizations of developers or enthusiasts. This distribution of Committers represents one of the most important changes brought about by joining Apache: the Dubbo project belongs to the entire community, reflecting the common aspirations of different organizations and developers. Its development is not controlled or decided by one company but decided after community discussions. If you are interested in participating in the Dubbo community, you can engage in discussions, decision-making, and coding related to Dubbo's development, and we look forward to everyone becoming the next Committer.
 
 ![community distribution](/imgs/blog/community-distribution.png) 
 
-
-过去一年 Dubbo 社区组织了超过 10 场的线下 meetup 活动，覆盖了国内基本所有的开发者聚集的城市，与广大 Dubbo 开发者和使用者保持了密切交流。通过这些线下或线上的直播活动，分享了超过 100 个 topic 的演讲，深度讲解了 Dubbo 社区最新动态、功能模块开发和近期规划等。并且在所有的这些主题演讲中，绝大多数都是通过社区采集的方式，最终由 Dubbo 的深度企业分享的实践主题，其中典型的代表包括携程、工商银行、考拉、信用算力等。
+Over the past year, the Dubbo community organized more than 10 offline meetup events, covering almost all cities in China where developers gather, maintaining close communication with many Dubbo developers and users. Through these offline or online live events, over 100 topics were shared, deeply explaining the latest developments, functionality module development, and recent plans of the Dubbo community. The vast majority of these topics were gathered through community efforts, ultimately presented by enterprises deeply involved with Dubbo, such as Ctrip, Industrial and Commercial Bank of China, Koala, and Trust Capacity.
 
 ![community meetup](/imgs/blog/community-meetup.png) 
 
-从 Github 上来看，Dubbo 在过去一年也受到了非常高的关注度，一个重要的里程碑是 Star 数突破 3w，相比重启开源时增长了近 5 倍；贡献者由最初的几十个增长到现在的 282 个，而这其中有六七十个已经被提名为 committer，不论是贡献者数量还是 committer 比例都得到很大的提升；另一个数据是发布的版本，总共发布了 64 个版本，大家如果要了解每个版本的具体信息，也可以从这里点进去查看。
+From GitHub, Dubbo also received a very high level of attention over the past year, with a significant milestone being the Star count surpassing 30,000, which increased nearly five times since the restart of the open-source project. The number of contributors rose from initially a few dozen to currently 282, of which approximately 60 to 70 have been nominated as Committers. Both the number of contributors and the proportion of Committers has seen significant improvement. Another metric is the number of released versions, totaling 64. If you want to understand the specific information of each version, you can click through here.
 
 ![community github](/imgs/blog/community-github.png) 
 
-当前社区维护的大版本主要有 3 个，分别是 2.5.x 2.6.x 和 2.7.x。
+Currently, the community maintains three major versions: 2.5.x, 2.6.x, and 2.7.x.
 
-其中，2.7.x 是我们的主要开发版本，在过去的一年共发布了 6 个版本（2.7.0 - 2.7.5），每个版本都带来了一些值得关注的特性或功能升级，涵盖从编程模型、服务治理、性能到协议的多个方面的增强。
+Among them, 2.7.x is our primary development version, with 6 versions released in the past year (2.7.0 - 2.7.5). Each version introduces noteworthy features or functional upgrades, enhancing various aspects from programming models, service governance, performance to protocols.
 
-2.6.x 版本则定位为 bugfix 版本，过去一年共发布了 3 个版本，主要以修复问题和安全漏洞为主，并没有增加什么新 feature，因此这一系列的版本在稳定性上是得到保证的。
+The 2.6.x version is positioned as a bugfix version, with 3 versions released in the past year, mainly focusing on fixing issues and security vulnerabilities, without introducing new features, ensuring stability across this series of versions.
 
-2.5.x 版本当前从去年初开始已宣布 EOF，只做安全修复；而到了下半年已经完全停止了维护。还在使用这个版本的用户建议尽快升级到 2.6 或 2.7 版本。
+The 2.5.x version was declared EOF from early last year, only receiving security fixes; by the second half of the year, maintenance had completely ceased. Users still on this version are advised to upgrade to versions 2.6 or 2.7 as soon as possible.
 
-关于 2.6 和 2.7 版本的用户分布情况，目前并没有官方的统计数据，但是根据我们从 issue 分布及一些深度用户的跟踪情况来看，这两个版本的使用分布大概是 40% - 60% 的状态。同时我们还观察到一个趋势，即很大一部分 2.6 的用户都已经开始调研升级到 2.7 版本或在升级的过程中，毕竟一个框架是否能很好的满足业务开发诉求，一个重要的因素是其是否不断的有功能的加入，是否能跟进新的技术趋势，2.6 版本已很难满足这些诉求。
+Regarding the distribution of users for versions 2.6 and 2.7, there are currently no official statistics, but based on our tracking of issue distributions and some in-depth users, the usage distribution of these two versions appears to be approximately 40%-60%. Additionally, we have observed a trend where a significant portion of 2.6 users have begun researching and upgrading to version 2.7. After all, whether a framework can meet business development demands is largely dependent on its capability to continuously incorporate new features and keep pace with emerging technology trends, which version 2.6 struggles to satisfy.
 
-对于很多开发者来说，要升级到 2.7 版本，当前最大的顾虑即是其稳定性。因为 2.7 每个版本都会增加很多新内容且迭代速度较快，要保证每个发布版本的稳定性对社区来说也是一个充满挑战的事情。为了方便用户更好的完成升级评估，我们近期在 github 上列出了单独列了一个 issue 来统计现在包括未来版本的稳定性：[Dubbo 各版本总结与升级建议 #5669](https://github.com/apache/dubbo/issues/5669)
+For many developers, the primary concern when upgrading to version 2.7 is its stability. Each version of 2.7 introduces many new contents and has a rapid iteration speed, making it a challenge for the community to ensure the stability of each release version. To help users better assess upgrades, we have recently listed a separate issue on GitHub to summarize the stability of current and future versions: [Summary and Upgrade Suggestions for Dubbo Versions #5669](https://github.com/apache/dubbo/issues/5669).
 
-|          | **版本** | **重要功能** | **升级建议**                                                 |
+|          | **Version** | **Key Features** | **Upgrade Recommendations**                                                 |
 | -------- | ------------ | ------------------------------------------------------------ | ------------------------------- |
-| 1        | 2.7.5        | 服务自省 HTTP/2（gRPC） Protobuf TLS 性能优化   https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5 | 不建议大规模生产使用            |
-| 2        | 2.7.4.1      | [bugfixes and enhancements of 2.7.3](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.4.1) | **推荐生产使用**                |
-| 3        | 2.7.3        | [bigfixes of and enhancements of 2.7.2](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.3) | **推荐生产使用**                |
-| 4        | 2.7.2        | [bigfixes of and enhancements of 2.7.1](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.2) | 不建议大规模生产使用            |
-| 5        | 2.7.1        | [bigfixes of and enhancements of 2.7.0](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.1) | 不建议大规模生产使用            |
-| 6        | 2.7.0        | 异步编程模型 - 消费端/提供端异步 服务治理规则增强 简化的注册模型 配置中心、元数据中心 package 重构   https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0 | beta 版本，2.6.x 重构后首个版本 |
+| 1        | 2.7.5        | Service introspection, HTTP/2 (gRPC), Protobuf, TLS performance optimization https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5 | Not recommended for large-scale production use            |
+| 2        | 2.7.4.1      | [bugfixes and enhancements of 2.7.3](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.4.1) | **Recommended for production use**                |
+| 3        | 2.7.3        | [bugfixes and enhancements of 2.7.2](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.3) | **Recommended for production use**                |
+| 4        | 2.7.2        | [bugfixes and enhancements of 2.7.1](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.2) | Not recommended for large-scale production use            |
+| 5        | 2.7.1        | [bugfixes and enhancements of 2.7.0](https://github.com/apache/dubbo/releases/tag/dubbo-2.7.1) | Not recommended for large-scale production use            |
+| 6        | 2.7.0        | Asynchronous programming model - asynchronous consumer/provider, enhanced service governance rules, simplified registration model, Configuration Center, Metadata Center, package restructuring   https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0 | beta version, first version after reconstruction of 2.6.x |
 
-其中 2.7.5 版本预计将在接下来的 1-2 个版本之后逐步达到稳定状态。
+The 2.7.5 version is expected to gradually reach stability in the next 1-2 versions.
 
-对于后续的版本是否通过标识性的后缀如 -beta、RC 等来区分不同阶段的发布版本，社区也有过类似的讨论，后续我们将视未来发展情况而定。
+Regarding whether subsequent versions will have identifiable suffixes like -beta, RC, etc., to distinguish different stages of release versions, the community has had similar discussions, and future decisions will depend on the development situation.
 
-## 重点功能回顾
+## Key Features Review
 
-接下来针对 2.7 版本中发布的新功能，从编程模型、性能优化、服务治理、传输协议、生态发展等几个角度来做具体的讲解。
+Next, let’s specifically discuss the new features released in version 2.7 from several perspectives, including programming models, performance optimization, service governance, transport protocols, and ecosystem development.
 
-### 编程模型
+### Programming Model
 
-Dubbo 中涉及编程模型相关的改动主要是以下几点：
+The key changes related to the programming model in Dubbo include the following:
 
-* CompletableFuture 异步方法签名的服务
-* 服务端异步支持 API
-* IDL 跨语言服务定义
-* Reactive-style 方法签名的服务
+* CompletableFuture asynchronous service method signatures
+* Asynchronous support API for the server
+* IDL cross-language service definitions
+* Reactive-style method signatures for services
 
-首先，我们先来看一下异步化相关的增强。
-Dubbo Java 版本的典型服务定义如下：
+Firstly, let’s look at the enhancements related to asynchronous programming.
+A typical service definition in the Java version of Dubbo is as follows:
 
 ```java
 public interface HelloService {
@@ -77,14 +75,14 @@ public interface HelloService {
 }
 ```
 
-如果要实现消费端的异步服务调用，则需要单独配置异步标识，并通过 RpcContext API 配合使用
+To implement asynchronous service calls on the consumer side, a separate asynchronous identifier needs to be configured and used in conjunction with the RpcContext API.
 
 ```java
 String result = helloService.sayHello("world"); // result is always null
 Future future = RpcContext.getContext().getFuture();
 ```
 
-在 2.7 版本之后，我们可以直接定义如下方法接口，以更直观的实现消费端/提供端异步：
+After version 2.7, we can directly define the method interface as follows to achieve asynchronous on both consumer/provider sides more intuitively:
 
 ```java
 public interface HelloService {
@@ -95,226 +93,215 @@ public interface HelloService {
 CompletableFuture<String> future = helloService.sayHello("world"); 
 ```
 
-以上示例都是基于 Java Interface 来描述 Dubbo 服务的，如果要和多语言异构的微服务实现互调，则服务又需要用相应语言的方式重新定义一遍，无法实现跨语言的服务复用；另外跨语言的序列化也是需要注意的一个问题。
+The above examples describe Dubbo services based on Java Interfaces. If calls are to be made among heterogeneous microservices in multiple languages, the service would need to be redefined in the respective languages, thus failing to achieve cross-language service reuse. Cross-language serialization also requires special attention.
 
-为此 2.7.5 版本引入了对 IDL + Protobuf 的支持，以解决跨语言的服务定义问题，具体可参见示例：
+To address this, version 2.7.5 introduces support for IDL + Protobuf to solve cross-language service definition issues. For details, please refer to the example:
 
 [dubbo-samples-protobuf](https://github.com/apache/dubbo-samples/tree/master/3-extensions/serialization/dubbo-samples-protobuf)
 
 ![service idl](/imgs/blog/service-idl.png) 
 
-对 Reactive-style API 的支持则和上面 CompletableFuture 有些类似，允许用户定义 RxJava、Reactor API 的服务接口
+The support for Reactive-style APIs is somewhat similar to CompletableFuture, allowing users to define service interfaces using RxJava or Reactor APIs.
 
 ![idl dubbo compiler](/imgs/blog/idl-dubbo-compiler.png) 
 
-但是需要注意的一定是，由于外围的 Reactive API 需要有底层传输协议的支持才有意义，因此，目前 Reactive API 只能在使用 gRPC 协议时才有意义，具体请参见示例以及下面关于 ”[Dubbo 对 gRPC 的支持](https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava)” 一节的讲解。
+However, it is important to note that the external Reactive API requires underlying transport protocol support to be meaningful. Therefore, currently, Reactive APIs only make sense when using the gRPC protocol. For specific details, refer to the examples and the following section on "[Dubbo's support for gRPC](https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc/dubbo-samples-rxjava)".
 
-### 性能优化
+### Performance Optimization
 
-2.7 版本在性能优化方面也做了很多的工作，对 Dubbo 业务系统的吞吐量、调用链路响应速度、服务治理链路性能等都有明显提升。
+Version 2.7 has also made significant strides in performance optimization, with obvious improvements in throughput, call chain response time, and service governance chain performance of Dubbo's business system.
 
-1. 系统吞吐量
+1. System Throughput
 
-   和提升系统吞吐量相关的增强主要有框架的全异步化改造、消费端线程模型优化、引入 Stream 语义协议等。
+   The major enhancements related to increasing system throughput include a full asynchronous transformation of the framework, optimization of the consumer thread model, and the introduction of Stream semantic protocols.
 
-   全异步化改造，很关键的一点是 Filter 链路的异步化，之前的 Filter 只有一个同步的 invoke 方法，现在为了支持异步回调，增加了 Listener 回调监听器，从而可以实现对异步调用结果的监听与拦截。
+   The full asynchronous transformation involves a critical point: the asynchronousization of the Filter chain. Previously, Filters only had a synchronous invoke method. Now, to support asynchronous callbacks, a Listener callback listener has been added to listen and intercept the results of asynchronous calls.
 
 ![filter](/imgs/blog/filter.png) 
-   
-   关于消费端线程模型的优化，对于网关类应用，需要消费大量服务的应用，都会在系统稳定性和性能表现上有很大提升，其优化后的总体工作原理图所下所示，具体解析可以参见之前发布的文章：[《消费端线程池模型》](/en/docsv2.7/user/examples/consumer-threadpool/)
-   
-   
-   老线程模型工作原理：
+
+   In terms of optimizing the consumer thread model, applications that consume a large number of services, like gateway applications, see a significant improvement in system stability and performance. The overall working principle diagram after optimization is shown below; specific analyses can be referenced in the previously published article: [“Consumer Thread Pool Model”](/en/docsv2.7/user/examples/consumer-threadpool/)
+
+   Old thread model working principle:
 
   ![consumer threadpool](/imgs/blog/consumer-threadpool0.png) 
 
-   新线程模型工作原理：
+   New thread model working principle:
 
    ![consumer threadpool new](/imgs/blog/consumer-threadpool1.png) 
-   
 
-2. RPC 调用链路
+2. RPC Call Chain
 
-   从 2.7.0 到 2.7.5，从我们的测试数据来看，通过一系列的优化调用链路性能提升在 30% 以上。总体来说，优化的目标是减少调用过程中的内存分配和 cpu 计算，主要有两个方面的改造：
+   From 2.7.0 to 2.7.5, our testing data indicates that the performance of the call chain has improved by over 30% through a series of optimizations. Overall, the optimization aims to reduce memory allocation and CPU computation during the calling process, comprising two main modifications:
 
-   * 服务元数据静态化，在启动阶段尽可能多的计算并缓存，以减少调用过程中的计算成本，加快响应速度
-   * 减少调用过程中的 URL 操作产生的内存分配
+   * Service metadata statification, computing and caching as much as possible during the startup phase to minimize computational costs during calls and accelerate response speed.
+   * Reducing memory allocation caused by URL operations during the calling process.
 
-3. 服务治理链路
+3. Service Governance Chain
 
-   服务治理链路上主要有以下几点值得关注：地址推送、服务治理规则推送、服务治理规则计算、路由选址等，尤其是在大规模服务集群的场景下，以上每个点都可能成为性能或稳定性瓶颈。在 2.7 版本中，目前着重对 “地址推送” 相关计算路径做了优化，简单概括起来主要是以下几点：
+   Key concerns in the service governance chain include address pushing, service governance rules pushing, service governance rules computation, routing location, and so on. Especially in large-scale service cluster scenarios, each of these points may become a performance or stability bottleneck. In version 2.7, we have primarily optimized the computation paths related to "address pushing", summarized as follows:
 
-   * 地址推送事件合并，避免短时间重复计算
-   * 全量地址推送时，避免 URL 重新分配
-   * 在 URL 合并链路上，引入 URL 可变状态，避免 URL 拷贝造成的开销
+   * Address push event consolidation to avoid redundant calculations in a short time frame.
+   * Avoiding URL reallocation during full address pushes.
+   * Introducing variable URL states in the URL merging chain to avoid costs caused by URL copying.
 
-### 服务治理
+### Service Governance
 
-服务治理也是 2.7 版本中着重增强的一个模块。总体上可以分为三部分
+Service governance is also a module that has been significantly enhanced in version 2.7. Overall, it can be divided into three parts:
 
-* 普通路由规则相关的优化和增强
-* 增强对跨区域、跨机房部署的路由支持
-* 元数据中心、配置中心
+* Optimization and enhancement related to ordinary routing rules.
+* Enhanced routing support for cross-regional and cross-datacenter deployments.
+* Metadata center and configuration center.
 
-我们针对这三部分逐步展开讲解。以下是 2.7 版本路由规则的几个例子。
+We will gradually elaborate on these three parts. Below are examples of routing rules in version 2.7.
 
 ![route app](/imgs/blog/route-app.png) 
 
 ![route service](/imgs/blog/route-service.png) 
 
-其中，最明显的一个变化是路由规则都以 YAML 进行了重写，并且后续所有的路由规则都计划以 YAML 为基本描述语言；相比于之前路由规则直接存储于注册中心，在 2.7 版本中增加了配置中心后，新版本的路由规则默认将存储在于独立的配置中心，配置格式推送机制都得到了优化；另外，2.7 版本中还增加了应用粒度的路由规则，方便从整个应用的角度去设置流量规则。
+Among the notable changes, the routing rules have been rewritten in YAML format, and all future routing rules are expected to use YAML as their basic descriptive language; compared to previously storing routing rules directly in the registry, in version 2.7, with the addition of the configuration center, routing rules are now stored in an independent configuration center by default, with optimized configuration format pushing mechanisms. Additionally, version 2.7 also introduced application-level routing rules for setting traffic rules from the perspective of the entire application.
 
-新增加的跨注册中心的路由机制，可以实现调用流量在多个注册中心间的负载均衡，对于需要做异地容灾、同机房优先或者注册中心迁移的场景比较有用处。
+The newly added cross-registry routing mechanism can achieve load balancing of call traffic across multiple registries, which is quite useful for scenarios requiring cross-region disaster recovery, priority for the same datacenter, or migration of registries.
 
 ![cluster load balance](/imgs/blog/cluster-lb.png) 
 
-当前支持的注册中心集群负载均衡策略有：
+The supported load balancing strategies for registry clusters currently include:
 
-- 同区域优先
-- 权重轮询
-- 指定优先级
-- 任意可用
+- Same region priority
+- Weighted round-robin
+- Specified priority
+- Any usable
 
-元数据中心存储了 Dubbo 服务方法定义的描述，目前主要的用途是服务测试，将来也可用作服务 API 管理、网关参数映射等。
+The metadata center stores descriptions of Dubbo service method definitions, currently mainly utilized for service testing, and may later be used for service API management, gateway parameter mapping, etc.
 
-新增的配置中心主要有两个用途：存储/推送配置规则、应用配置托管，接下来着重讲解应用配置托管相关功能，看其对 Dubbo 的开发与运维配置的影响。Dubbo 当前支持 JVM 动态参数、配置中心、API、本地配置文件等几种配置源，他们之间按照优先级从高到低的顺序实现配置覆盖，如下图所示：
+The new configuration center mainly serves two purposes: storing/pushing configuration rules and application configuration hosting. Next, we will focus on explaining the application configuration hosting-related functions and their impact on Dubbo's development and operational configurations. Dubbo currently supports several configuration sources such as JVM dynamic parameters, configuration centers, API, and local configuration files. These sources implement configuration overrides in a hierarchy from high to low as shown in the diagram:
 
 ![config](/imgs/blog/config.png) 
 
-配置中心相当于是共享版本的 `dubbo.properties` 的远程托管，其中，key 值有特定的命名规范：
+The configuration center acts as a shared version of remote hosting for `dubbo.properties`, with keys having specific naming conventions:
 
 ```properties
-# 应⽤用级别
+# Application-level
 dubbo.{config-type}[.{config-id}].{config-item} {config-item-value}
-# 服务级别
+# Service-level
 dubbo.service.{interface-name}[.{method-name}].{config-item} {config-item-value}
 dubbo.reference.{interface-name}[.{method-name}].{config-item} {config-item-value}
-# 多配置项
+# Multiple configuration items
 dubbo.{config-type}s.{config-id}.{config-item} {config-item-value}
 ```
 
-### 传输协议
+### Transport Protocol
 
-2.7 版本在 RPC 协议层和序列化层进行了扩展，RPC 协议层增加了对 gRPC 协议的支持，序列化层增加了对 Protobuf 协议的支持。
+Version 2.7 expanded upon the RPC protocol layer and serialization layer, introducing support for the gRPC protocol in the RPC layer and Protobuf protocol in the serialization layer.
 
-支持 gRPC 其中一个重要原因是其基于 HTTP/2 协议构建，HTTP/2 协议作为 HTTP 标准协议，在各个层次的网络设备及网关代理上都得到了很好的支持，因此具有更好的穿透性和通用性。通过支持 gRPC 协议，对于期望使用 HTTP/2 的 Dubbo 用户提供了一种传输协议选择。
+One of the important reasons for supporting gRPC is its construction based on the HTTP/2 protocol, which, as a standard HTTP protocol, has received excellent support across various levels of network devices and gateway proxies, providing greater penetration and versatility. By supporting the gRPC protocol, Dubbo offers a transport protocol option for users wishing to utilize HTTP/2.
 
-gRPC 在 HTTP/2 上构建了 Stream 的 RPC 语义，支持 Request - Response、Stream - Response、Request - Stream、Bi-Stream 等多种语义，能满足不同的业务调用场景。
+gRPC builds RPC semantics on top of HTTP/2 streams, supporting various semantics such as Request - Response, Stream - Response, Request - Stream, and Bi-Stream, accommodating differing business call scenarios.
 
 ![service idl2](/imgs/blog/service-idl2.png) 
 
-在 Dubbo 的设计中，所有的 RPC 协议都处于一个平等的地位，无论是自有的 Dubbo 协议，还是扩展的其他三方协议如 Thrift、Hessian、gRPC 等，得益于这样的设计，我们可以扩展任何新协议支持。关于如何扩展 RPC 协议及其应用场景，请参见之前发布的[《使用 Dubbo 连接异构微服务体系》](https://mp.weixin.qq.com/s/-fvDeGlCLjz0n60naZJnQg)文章。
+In Dubbo's design, all RPC protocols are treated equally, whether it is the proprietary Dubbo protocol or extended third-party protocols like Thrift, Hessian, or gRPC. Thanks to this design, we can extend support for any new protocol. For details on how to extend RPC protocols and their application scenarios, please refer to the previously published article “[Using Dubbo to Connect Heterogeneous Microservice Systems](https://mp.weixin.qq.com/s/-fvDeGlCLjz0n60naZJnQg)”.
 
-Protobuf 序列化协议支持更多的是考虑其在跨语言、安全性和性能方面。
+Protobuf serialization protocol support is considered more for its advantages in cross-language, security, and performance.
 
 ## Roadmap 
 
-未来社区将会持续推动 Dubbo 的发展，重点来说有以下几个方向：
+The community will continue to promote the development of Dubbo in the future, focusing on several key directions:
 
-* 继续增强服务治理相关能力，以更好的满足微服务开发和运维的需求；
-* 协议层面，着手研发下一代的 RPC 协议，新协议将提供更丰富的如 Stream、Flow Control 等内置语义，同时将具有更好的扩展性、网关的友好性等；
-* 基于应用粒度的服务发现机制，
-* 云原生带来了底层基础设施的变化，同时在此基础上衍生出了如 ServiceMesh 的微服务解决方案，我们需要继续探索 Dubbo ；
+* Continuing to enhance service governance capabilities to better meet the needs of microservice development and operations;
+* At the protocol level, starting to develop the next generation RPC protocol, which will provide richer built-in semantics like Stream, Flow Control, etc., while ensuring better extensibility and friendliness towards gateways;
+* Service discovery mechanisms based on application granularity.
+* Cloud-native transformations bring changes to the underlying infrastructure and give rise to microservice solutions like ServiceMesh. We need to keep exploring Dubbo;
 
-### 微服务功能
+### Microservice Features
 
-目前正在开发或规划中的微服务功能有服务鉴权、熔断、路由规则增强等，预计将在接下来的 2.7.6 等版本中陆续发布。后续也将会根据社区中的诉求，陆续增加其他的微服务功能支持。
+Currently in development or planning are microservice features such as service authentication, circuit breaking, and routing rule enhancements, with expected releases in upcoming versions like 2.7.6. Additionally, based on community demands, further microservice feature support will be added over time.
 
-以当前正在开发的服务鉴权功能为例，这是社区中很多 Dubbo 使用者在实际使用中遇到的需求：虽然 Dubbo 服务主要是在内部运转，但有些服务仍期望只对部分场景或用户开放，比如某些涉及到敏感数据操作的服务，这就需要有鉴权能力的支持。
+Taking the service authentication feature currently in development as an example, it addresses a demand encountered by many Dubbo users in practice: although Dubbo services primarily operate internally, some services are expected to be open only for certain scenarios or users, such as services involved in sensitive data operations. This requires support for authentication capability.
 
-[Dubbo调用鉴权认证方案 #5461](https://github.com/apache/dubbo/issues/5461) 中有关于 Dubbo 当前正在开发中的鉴权功能的详细讨论，总体来说 Dubbo 提供的鉴权功能约束了 Dubbo 侧鉴权的基本流程，这是一套通用鉴权的方案，在 token 计算、校验等环节都被设计为可扩展的，因此可以方便的对接到各种认证及权限管理系统。
+Detailed discussions regarding the service authentication feature that Dubbo is developing can be found in [Dubbo Call Authentication Scheme #5461](https://github.com/apache/dubbo/issues/5461). Overall, the authentication features provided by Dubbo constrain the basic process of authentication on the Dubbo side. It is a universal authentication scheme designed to be extensible in elements like token computation and verification, making integration with various authentication and permission management systems easy.
 
-非常感谢社区的活跃开发者，现就职于爱奇艺的 [CodingSinger](https://github.com/CodingSinger)，其是鉴权模块的发起者和主要开发贡献者。
+Thanks to the active developers in the community, notably [CodingSinger](https://github.com/CodingSinger), currently employed at iQIYI, who is the initiator and main contributor to the authentication module.
 
+### Protocol - 3.0
 
-### 协议 - 3.0
-
-以下是 Dubbo 2.0 协议，我们之前已经在多个场合做过详细的讲解
+Here is the Dubbo 2.0 protocol, which we have previously discussed in detail on several occasions.
 
 ![Dubbo Protocol 2.0](/imgs/blog/grpc/dubbo-ptotocol.png) 
 
-Dubbo 2.0 协议在云原生、mesh 等场景下暴露出一些问题，如：
+The Dubbo 2.0 protocol has revealed some issues in cloud-native and mesh scenarios, such as:
 
-* 协议缺少扩展性
-* RPC 协议层和 payload 耦合在一起
-* 基于 TCP 构建的二进制私有协议
-* 缺少 Stream 语义的支持
+* Lack of extensibility in the protocol
+* RPC protocol layer and payload being tightly coupled
+* Binary proprietary protocol built on TCP
+* Lack of support for Stream semantics
 
-所以，针对以上问题，新一代的 Dubbo 协议将突出以下特点：
+Hence, in response to these issues, the next generation Dubbo protocol will highlight the following features:
 
 **Reactive Stream**
-Reactive Stream 引入 RPC，带来更丰富的通信语义和 API 编程模型支持，如 Request-Stream、Bi-Stream 等
+Reactive Streams introduce RPC, bringing richer communication semantics and API programming model support, such as Request-Stream and Bi-Stream.
 
-**协议升级**
-协议内置应⽤层协议协商机制，包括自建协议升级机制、ALPN 等，以方面将来协议升级或兼容老版本协议的迁移
+**Protocol Upgrade**
+The protocol includes a built-in application layer protocol negotiation mechanism, featuring a self-built protocol upgrade mechanism and ALPN to facilitate future upgrades of the protocol or compatibility with legacy protocol migrations.
 
 **HTTP/2**
-微服务云原⽣生场景下，基于 HTTP/2 构建的通信协议具有更更好的通⽤用性和穿透性
+In cloud-native microservice scenarios, protocols built on HTTP/2 offer better generality and penetration.
 
-**可扩展**
-协议可扩展，区分协议头 Metadata 与 RPC 方法的参数
+**Extensibility**
+The protocol is extendable, distinguishing protocol header Metadata from RPC method parameters.
 
-**多语⾔支持**
-如通过支持 Protobuf 提供了更完善的 跨语言服务定义 与 序列化传输 的支持
+**Multi-language Support**
+Support for Protobuf provides comprehensive support for cross-language service definitions and serialization transfers.
 
 **Mesh**
-协议对 Mesh 更友好，方便完成与 Mesh 的协作，包括流量控制机制、应用层配置协商等
+The protocol is more friendly towards Mesh, facilitating collaboration with Mesh, including traffic control mechanisms and application-layer configuration negotiations.
 
-**流量控制**
-协议内置流控机制，支持类似 Reqctive Stream 的 Request (n)  流控机制
+**Traffic Control**
+The protocol has a built-in flow control mechanism, supporting mechanisms similar to Reactive Stream's Request (n) flow control.
 
-**协议通用性**
-兼顾通用性与性能，支持协议能在各种设备上运行
+**Protocol Generality**
+Maintaining a balance between generality and performance, the protocol supports running on various devices.
 
-### 服务自省 - 应用粒度的服务注册
+### Service Introspection - Application-Level Service Registration
 
-Dubbo 最大的优势之一在于其易用性，其面向接口（RPC 方法）的编程模型。同时，面向接口的治理也带来了一些问题：
+One of Dubbo's greatest advantages is its ease of use, particularly its interface-oriented (RPC method) programming model. However, governance focusing on interfaces has also posed some challenges:
 
-* 地址数量成倍增长，给地址推送带来很大压力
-* 和主流微服务体系模型不匹配，如 SpringCloud、Kubernetes 等
+* The number of addresses has increased exponentially, placing considerable pressure on address pushing.
+* It does not align well with mainstream microservice model systems like Spring Cloud and Kubernetes.
 
-为此，我们计划引入应用粒度的服务注册机制，主要有以下几个重点：
+To this end, we plan to introduce an application-level service registration mechanism with the following key highlights:
 
-* 注册中心按 “应用 - 实例IP” 组织，不再关心 RPC 接口同步
-* 引入独立的元数据服务完成 RPC 接口同步工作
+* The registry organizes by “Application - Instance IP,” without needing to synchronize RPC interfaces.
+* Introducing an independent metadata service to handle RPC interface synchronization.
 
-以下是应用粒度服务注册（服务自省）的基本工作原理，请持续关注后续对这部分的具体解析和开发进展。
+Below is the basic working principle of application-level service registration (service introspection). Please stay tuned for further analysis and development progress on this aspect.
 
 ![service discovery new](/imgs/blog/servicediscovery-new.png) 
 
-### 云原生
+### Cloud Native
 
-云原生带来了底层基础设施，应用开发、部署和运维等全方位的变化：
+Cloud-native brings changes to the underlying infrastructure and comprehensive changes in application development, deployment, and operations:
 
-**基础设施**
+**Infrastructure**
 
-* 基础设施调度机制变化，带来运维（生命周期）、服务治理等方面的变化。
-* 服务发现能力下沉， Kubernetes 抽象了 Native Service Discovery。
+* Changes in infrastructure scheduling mechanisms lead to variations in maintenance (lifecycle) and service governance.
+* Service discovery capabilities are descending, with Kubernetes abstracting native service discovery.
 
-**Service Mesh - 云原生微服务解决方案**
+**Service Mesh - Cloud-Native Microservice Solutions**
 
-* Mesh 为跨语言、sdk 升级等提供了解决方案，Dubbo sdk 要与 Mesh 协作，做到功能、协议、服务治理等多方便的适配。
-* Mesh 尚未大规模铺开，且其更适合对流量管控更关注的应用，传统 SDK 的性能优势仍旧存在，两者混部迁移场景可能会长期存在。
+* Mesh offers solutions for cross-language and SDK upgrades, requiring Dubbo SDK to collaborate with Mesh, adapting functionality, protocols, and service governance.
+* While Mesh has yet to be extensively deployed, it suits applications more focused on traffic control. Traditional SDK performance advantages are still extant, and transitional scenarios between the two may persist for some time.
 
-从应用场景上，Dubbo 可能的部署环境包括：
+From an application scenario perspective, the possible deployment environments for Dubbo include:
 
-1. 不使用 Kubernetes Native Service，Kubernetes 只作为容器编排调度设施，继续使用 Dubbo  自建的服务注册、发现机制。
-2. 复用 Kubernetes Native Service，Dubbo 不再关心服务注册，Dubbo Client 负责服务发现与流量分配。
-3. Dubbo sdk 往 Mesh 迁移，一方面要做到适应 Mesh 架构，成为 Mesh 体系下的 RPC 编程和通信方案；另一方面要做到 Dubbo 与 Mesh 架构长期共存，互相打通服务发现和治理体系。
-4. Kubernetes 上与云下混合部署的平滑迁移支持，包括服务发现的统一与网络通信方案的打通。
+1. Not using Kubernetes Native Service, with Kubernetes serving only as a container orchestration and scheduling facility, continuing with Dubbo's self-built service registration and discovery mechanism.
+2. Reusing Kubernetes Native Service, wherein Dubbo no longer concerns itself with service registration, with Dubbo Client handling service discovery and traffic allocation.
+3. Transitioning Dubbo SDK to Mesh, aiming to adapt to the Mesh architecture for RPC programming and communication solutions while ensuring long-term coexistence and integration between Dubbo and the Mesh governance systems.
+4. Providing smooth migration support for mixed deployments across Kubernetes and off-cloud environments, including unified service discovery and network communication solutions.
 
-从 Dubbo 功能划分上，将着重从以下方面提供对云原生基础设施的支持：
+From Dubbo's perspective, we will focus on the following aspects to provide support for cloud-native infrastructure:
 
-**生命周期：** Dubbo 与 Kubernetes 调度机制绑定，保持服务生命周期与 Pod 容器等生命周期的自动对齐
-**治理规则：** 服务治理规则在规则体、规则格式方面进行优化，如规则体以 YAML 描述、取消过滤规则对 IP 的直接依赖，定义规则特有的 CRD 资源等。
-**服务发现：** 支持 K8S Native Service 的服务发现，包括 DNS、API-Server，支持 xDS 的服务发现
-**Mesh 架构协作：** 构建下一代的基于 HTTP/2 的通信协议，支持 xDS 的标准化的数据下发
-
-
-
-
-
-
-
-
+**Lifecycle:** Binding Dubbo to Kubernetes scheduling mechanisms, ensuring automatic alignment of service lifecycles with Pod containers, etc.
+**Governance Rules:** Optimizing service governance rules in terms of rule body and format, such as describing rule bodies in YAML and removing direct dependencies of filtering rules on IPs, defining rule-specific CRD resources, etc.
+**Service Discovery:** Supporting service discovery for K8S Native Services, including DNS and API-Server, supporting xDS for service discovery.
+**Mesh Architecture Collaboration:** Building the next generation of HTTP/2-based communication protocols, supporting standardized data transmission based on xDS.
 

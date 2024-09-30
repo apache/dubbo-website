@@ -1,27 +1,27 @@
 ---
-title: "第四届Dubbo开发者沙龙于8月26日在成都举行"
-linkTitle: "第四届Dubbo开发者沙龙于8月26日在成都举行"
+title: "The 4th Dubbo Developer Salon Held in Chengdu on August 26"
+linkTitle: "The 4th Dubbo Developer Salon Held in Chengdu on August 26"
 date: 2018-08-26
-tags: ["新闻动态"]
-description: 第四届Dubbo开发者沙龙于8月26日在成都举行。
+tags: ["News"]
+description: The 4th Dubbo Developer Salon was held in Chengdu on August 26.
 ---
 
 
 ![img](/imgs/blog/meetup-chengdu/all-hands.webp)
 
-## 用户深度沟通交流
+## In-depth Communication with Users
 
-8.26上午10:00-12:00，邀请到货车帮，云图金控，前BBD，飞鱼星四家公司开源爱好者及重度用户参与面对面交流；据参与者反馈，解答了对Dubbo的诸多疑惑，特别是如何参与贡献社区，以及捐献代码所带来的价值点。希望后面可以更加深入参与Dubbo社区及活动中。
+On August 26, from 10:00 to 12:00, we invited four companies: Truck Alliance, Yuntu Jin控, former BBD, and Feiyu Star, to participate in face-to-face discussions with open-source enthusiasts and heavy users. According to participant feedback, many questions about Dubbo were answered, especially about how to contribute to the community and the value points brought by donating code. We hope to engage more deeply in the Dubbo community and activities in the future.
 
-## meetup活动信息
+## Meetup Event Information
 
-本次活动依旧爆满，总报名人数976，现场用户350+，直播PV 13207。
+This event was once again fully booked, with a total of 976 registered participants, over 350 onsite users, and 13,207 live stream views.
 
 
-## 报名信息
+## Registration Information
 
-Aliware Open Source•成都站-Apache Dubbo开发者沙龙于8月26日(周日)在成都高新区天府五街200号菁蓉国际广场8号楼2楼会议厅举办，技术GG们的思想盛宴，干货与福利一个都不会少。
+Aliware Open Source•Chengdu Station - Apache Dubbo Developer Salon was held on August 26 (Sunday) at 200 Tianfu 5th Street, Chengdu High-tech Zone, in the conference hall on the 2nd floor of Jingrong International Plaza Building 8. A feast of ideas for tech enthusiasts, there will be plenty of dry goods and benefits. 
 
-报名链接：http://www.huodongxing.com/event/7453091088400
+Registration link: http://www.huodongxing.com/event/7453091088400
  
 ![img](/imgs/blog/dubbo-chengdu-meetup-img.jpg)

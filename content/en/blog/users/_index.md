@@ -1,6 +1,5 @@
 ---
-title: "用户案例"
-linkTitle: "用户案例"
+title: "User Cases"
+linkTitle: "User Cases"
 weight: 10
----
-
+---  

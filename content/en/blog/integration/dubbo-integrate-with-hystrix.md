@@ -1,35 +1,35 @@
 ---
-title: "Spring应用快速集成Dubbo + Hystrix"
-linkTitle: "Spring应用快速集成Dubbo + Hystrix"
+title: "Quick Integration of Dubbo + Hystrix in Spring Applications"
+linkTitle: "Quick Integration of Dubbo + Hystrix in Spring Applications"
 date: 2018-08-22
-tags: ["生态", "Java"]
+tags: ["Ecosystem", "Java"]
 description: >
-    本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。
+    This article describes how to combine Dubbo and Hystrix in a Spring application.
 ---
 
 
-## 背景
+## Background
 
-Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。
+Hystrix is designed to provide more robust fault tolerance by controlling the nodes that access remote systems, services, and third-party libraries, thus providing stronger resilience against latency and failures. Hystrix includes thread and signal isolation, fallback mechanisms, circuit breaker functionality, request caching, request bundling, as well as monitoring and configuration.
 
-Dubbo是Alibaba开源的，目前国内最流行的java rpc框架。
+Dubbo is an open-source Java RPC framework from Alibaba and is currently the most popular in China.
 
-本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。
+This article describes how to combine Dubbo and Hystrix in a Spring application.
 
 - <https://github.com/Netflix/Hystrix>
 - <https://github.com/apache/dubbo>
 
-## Spring Boot应用
+## Spring Boot Application
 
-Demo地址： <https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix>
+Demo address: <https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix>
 
-### 生成dubbo集成spring boot的应用
+### Generate a Dubbo integrated Spring Boot application
 
-对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： <http://start.dubbo.io/>
+For those unfamiliar with integrating Dubbo into Spring Boot applications, you can directly generate a Dubbo + Spring Boot project here: <http://start.dubbo.io/>
 
-### 配置spring-cloud-starter-netflix-hystrix
+### Configure spring-cloud-starter-netflix-hystrix
 
-spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：
+Spring Boot provides official integration with Hystrix. Simply add the dependency in your pom.xml:
 
 ```xml
         <dependency>
@@ -39,7 +39,7 @@ spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖�
         </dependency>
 ```
 
-然后在Application类上增加`@EnableHystrix`来启用hystrix starter：
+Then add `@EnableHystrix` on the Application class to enable the Hystrix starter:
 
 ```java
 @SpringBootApplication
@@ -47,9 +47,9 @@ spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖�
 public class ProviderApplication {
 ```
 
-### 配置Provider端
+### Configure the Provider side
 
-在Dubbo的Provider上增加`@HystrixCommand`配置，这样子调用就会经过Hystrix代理。
+Add `@HystrixCommand` configuration on the Dubbo Provider, so the calls will go through the Hystrix proxy.
 
 ```java
 @Service(version = "1.0.0")
@@ -66,9 +66,9 @@ public class HelloServiceImpl implements HelloService {
 }
 ```
 
-### 配置Consumer端
+### Configure the Consumer side
 
-对于Consumer端，则可以增加一层method调用，并在method上配置`@HystrixCommand`。当调用出错时，会走到`fallbackMethod = "reliable"`的调用里。
+For the Consumer side, an additional method call can be added, with `@HystrixCommand` configured on the method. When a call fails, it will fall back to the `fallbackMethod = "reliable"`.
 
 ```java
     @Reference(version = "1.0.0")
@@ -83,16 +83,16 @@ public class HelloServiceImpl implements HelloService {
     }
 ```
 
-通过上面的配置，很简单地就完成了Spring Boot里Dubbo + Hystrix的集成。
+With the above configuration, the integration of Dubbo + Hystrix in Spring Boot is easily completed.
 
-## 传统Spring Annotation应用
+## Traditional Spring Annotation Application
 
-Demo地址： <https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-hystrix>
+Demo address: <https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-hystrix>
 
-传统spring annotation应用的配置其实也很简单，和spring boot应用不同的是：
+The configuration of a traditional Spring annotation application is also straightforward, differing from Spring Boot applications in that:
 
-1. 显式配置Spring AOP支持：`@EnableAspectJAutoProxy`
-2. 显式通过`@Configuration`配置`HystrixCommandAspect` Bean。
+1. Explicitly configure Spring AOP support: `@EnableAspectJAutoProxy`
+2. Explicitly configure the `HystrixCommandAspect` Bean via `@Configuration`.
 
 ```java
     @Configuration
@@ -109,9 +109,9 @@ Demo地址： <https://github.com/dubbo/dubbo-samples/tree/master/4-governance/d
     }
 ```
 
-## Hystrix集成Spring AOP原理
+## Hystrix Integration with Spring AOP Principle
 
-在上面的例子里可以看到，Hystrix对Spring的集成是通过Spring AOP来实现的。下面简单分析下实现。
+In the example above, it can be seen that Hystrix integrates with Spring through Spring AOP. Let's briefly analyze the implementation.
 
 ```java
 @Aspect
@@ -153,12 +153,12 @@ public class HystrixCommandAspect {
     }
 ```
 
-1. `HystrixCommandAspect`里定义了两个注解的AspectJ Pointcut：`@HystrixCommand`, `@HystrixCollapser`。所有带这两个注解的spring bean都会经过AOP处理
-2. 在`@Around` AOP处理函数里，可以看到Hystrix会创建出`HystrixInvokable`，再通过`CommandExecutor`来执行
+1. The `HystrixCommandAspect` defines two AspectJ Pointcuts for the annotations: `@HystrixCommand`, `@HystrixCollapser`. All Spring beans with these annotations will undergo AOP processing.
+2. In the `@Around` AOP processing function, it can be seen that Hystrix will create a `HystrixInvokable`, which is then executed through `CommandExecutor`.
 
-## spring-cloud-starter-netflix-hystrix的代码分析
+## Code Analysis of spring-cloud-starter-netflix-hystrix
 
-1. `@EnableHystrix` 引入了`@EnableCircuitBreaker`，`@EnableCircuitBreaker`引入了`EnableCircuitBreakerImportSelector`
+1. `@EnableHystrix` introduces `@EnableCircuitBreaker`, and `@EnableCircuitBreaker` introduces `EnableCircuitBreakerImportSelector`.
 
    ```java
    @EnableCircuitBreaker
@@ -170,16 +170,16 @@ public class HystrixCommandAspect {
    }
    ```
 
-2. `EnableCircuitBreakerImportSelector`继承了`SpringFactoryImportSelector<EnableCircuitBreaker>`，使spring加载`META-INF/spring.factories`里的`EnableCircuitBreaker`声明的配置
+2. `EnableCircuitBreakerImportSelector` extends `SpringFactoryImportSelector<EnableCircuitBreaker>`, allowing Spring to load the configuration declared by `EnableCircuitBreaker` in `META-INF/spring.factories`.
 
-   在`META-INF/spring.factories`里可以找到下面的配置，也就是引入了`HystrixCircuitBreakerConfiguration`。
+   In `META-INF/spring.factories`, the following configuration can be found, which introduces `HystrixCircuitBreakerConfiguration`.
 
    ```properties
    org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker=\
    org.springframework.cloud.netflix.hystrix.HystrixCircuitBreakerConfiguration
    ```
 
-3. 在`HystrixCircuitBreakerConfiguration`里可以发现创建了`HystrixCommandAspect`
+3. In `HystrixCircuitBreakerConfiguration`, the creation of `HystrixCommandAspect` can be found.
 
    ```java
    @Configuration
@@ -191,19 +191,20 @@ public class HystrixCommandAspect {
        }
    ```
 
-可见`spring-cloud-starter-netflix-hystrix`实际上也是创建了`HystrixCommandAspect`来集成Hystrix。
+It can be seen that `spring-cloud-starter-netflix-hystrix` effectively creates `HystrixCommandAspect` to integrate Hystrix.
 
-另外`spring-cloud-starter-netflix-hystrix`里还有metrics, health, dashboard等集成。
+Additionally, `spring-cloud-starter-netflix-hystrix` also includes metrics, health, dashboard, and other integrations.
 
-## 总结
+## Summary
 
-- 对于dubbo provider的`@Service`是一个spring bean，直接在上面配置`@HystrixCommand`即可
-- 对于dubbo consumer的`@Reference`，可以通过加一层简单的spring method包装，配置`@HystrixCommand`即可
-- Hystrix本身提供`HystrixCommandAspect`来集成Spring AOP，配置了`@HystrixCommand`和`@HystrixCollapser`的spring method都会被Hystrix处理
+- For the Dubbo provider, `@Service` is a Spring bean, and `@HystrixCommand` can be configured directly on it.
+- For the Dubbo consumer's `@Reference`, a simple Spring method wrapper can be added and `@HystrixCommand` configured.
+- Hystrix provides `HystrixCommandAspect` to integrate with Spring AOP, and Spring methods configured with `@HystrixCommand` and `@HystrixCollapser` will be processed by Hystrix.
 
-## 链接
+## Links
 
 - <https://github.com/Netflix/Hystrix>
 - <https://github.com/apache/dubbo>
 - <http://start.dubbo.io/>
 - <https://cloud.spring.io/spring-cloud-netflix/single/spring-cloud-netflix.html#_circuit_breaker_hystrix_clients>
+

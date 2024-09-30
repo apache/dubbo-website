@@ -7,23 +7,23 @@ description: >
     What's new in Dubbo-go-hessian2 v1.7.0
 ---
 
-Dubbo-go-hessian2 v1.7.0已发布，详见 https://github.com/apache/dubbo-go-hessian2/releases/tag/v1.7.0， 以下对这次更新内容进行详细整理。
+Dubbo-go-hessian2 v1.7.0 has been released. See https://github.com/apache/dubbo-go-hessian2/releases/tag/v1.7.0 for detailed information. Below is a detailed summary of this update.
 
-另外v1.6.3 将 attachment 类型由 map[string]stiring 改为map[string]interface{} 导致版本不兼容问题，这部分已还原，后续的计划是将dubbo协议的request/response对象整体迁移到dubbogo项目中进行迭代修改， hessian2中将不再改动到request/response对象。
+Additionally, version 1.6.3 changed the attachment type from map[string]string to map[string]interface{}, causing compatibility issues. This part has been reverted. The plan moving forward is to migrate the request/response objects of the Dubbo protocol entirely to the dubbo-go project for iterative modifications. No further changes will be made to the request/response objects in hessian2.
 
 ## 1. New Features
 
 ### 1.1 add GetStackTrace method into Throwabler and its implements. [#207](https://github.com/apache/dubbo-go-hessian2/pull/207)
 
-go语言client请求java语言服务时，如果java语言抛出了异常，异常对应的堆栈信息是被保存在StackTraceElement中。
+When a Go client requests a Java service and an exception is thrown in Java, the corresponding stack trace information is stored in StackTraceElement.
 
-这个异常信息在日志中最好能被打印出来，以方便客户端排查问题，所以在Throwabler和对应子类中增加了StackTraceElement的获取。
+This exception information should ideally be printed in logs for easy troubleshooting from the client side, so the retrieval of StackTraceElement has been added to Throwabler and its subclasses.
 
-注：其实还有一种更好的方法，所有的具体的异常类型都包含java_exception/exception.go的Throwable struct。这样只需要在Throwable中增加GetStackTrace方法就可以了。但是这种方式需要更多的测试验证，改动的逻辑相对会复杂一些。但是代码会更整洁。 这里先不用这种方法。
+Note: There is actually a better way, where all specific exception types include the Throwable struct in java_exception/exception.go. This would simply require adding the GetStackTrace method in Throwable. However, this method requires more testing validation, and the logic change is relatively more complex, though the code would be cleaner. We won't use this method for now.
 
 ### 1.2 catch user defined exceptions. [#208](https://github.com/apache/dubbo-go-hessian2/pull/208)
 
-golang中增加一个java中Exception对象的序列化输出方法：
+A serialization output method for the Java Exception object has been added in Go:
 
 ```go
 func JavaException() []byte {
@@ -34,7 +34,7 @@ func JavaException() []byte {
 }
 ```
 
-在output/output.go 提供调用入口:添加如下函数初始化声明
+An entry point is provided in output/output.go: Add the following function initialization declaration
 
 ```go
 func init() {
@@ -42,9 +42,9 @@ func init() {
 }
 ```
 
-java代码中增加调用go方法序列化结果:
+In the Java code, an invocation has been added to serialize the result of the Go method:
 
-**说明**: Assert.assertEquals 不能直接比较Exception对象是否相等
+**Note**: Assert.assertEquals cannot directly compare if Exception objects are equal
 
 ```java
     /**
@@ -62,7 +62,7 @@ java代码中增加调用go方法序列化结果:
 
 ### 1.3 support java8 time object. [#212](https://github.com/apache/dubbo-go-hessian2/pull/212), [#221](https://github.com/apache/dubbo-go-hessian2/pull/221)
 
-golang中增加一个java8对象的序列化输出方法：
+An output method for Java 8 objects has been added in Go:
 
 ```go
 // test java8 java.time.Year
@@ -81,7 +81,7 @@ func Java8LocalDate() []byte {
 }
 ```
 
-在output/output.go 提供调用入口:添加函数初始化声明
+An entry point is provided in output/output.go: Add function initialization declarations
 
 ```go
 func init() {
@@ -90,7 +90,7 @@ func init() {
 }
 ```
 
-java代码中增加调用go方法序列化结果:
+The Java code includes calls to serialize the results of the Go methods:
 
 ```java
 /**
@@ -108,9 +108,9 @@ public void testJava8Year() {
 
 ### 1.4 support test golang encoding data in java. [#213](https://github.com/apache/dubbo-go-hessian2/pull/213)
 
-为了更好的测试验证hessian库，原来已经支持在golang中测试java的序列化数据，现在增加在java中测试golang的序列化数据，实现双向测试验证。
+In order to better test and validate the hessian library, it was previously supported to test Java serialization data in Golang; now, it adds the capability to test Golang serialization data in Java, achieving bidirectional testing validation.
 
-golang中增加序列化输出方法:
+An output method has been added in Go:
 
 ```go
 func HelloWorldString() []byte {
@@ -120,7 +120,7 @@ func HelloWorldString() []byte {
 }
 ```
 
-将该方法注册到output/output.go中
+Register this method in output/output.go
 
 ```go
  // add all output func here
@@ -129,7 +129,7 @@ func HelloWorldString() []byte {
 }
 ```
 
-output/output.go 提供调用入口:
+The entry point in output/output.go:
 
 ```go
 func main() {
@@ -157,7 +157,7 @@ func main() {
 }
 ```
 
-java代码中增加调用go方法序列化结果:
+The Java code includes calls to serialize the results of the Go methods:
 
 ```java
 public class GoTestUtil {
@@ -194,7 +194,7 @@ public class GoTestUtil {
 }
 ```
 
-增加java测试代码:
+Adding Java test code:
 
 ```java
 @Test
@@ -206,23 +206,23 @@ public void testHelloWordString() {
 
 ### 1.5 support java.sql.Time & java.sql.Date. [#219](https://github.com/apache/dubbo-go-hessian2/pull/219)
 
-增加了 java 类 java.sql.Time, java.sql.Date 支持，分别对应到hessian.Time 和 hessian.Date， 详见 https://github.com/apache/dubbo-go-hessian2/pull/219/files。
+Support for the Java classes java.sql.Time and java.sql.Date has been added, corresponding to hessian.Time and hessian.Date, see https://github.com/apache/dubbo-go-hessian2/pull/219/files for details.
 
 ## 2. Enhancement
 
 ### 2.1 Export function EncNull. [#225](https://github.com/apache/dubbo-go-hessian2/pull/225)
 
-开放 hessian.EncNull 方法，以便用户特定情况下使用。
+The hessian.EncNull method has been opened for use in specific user cases.
 
 ## 3. Bugfixes
 
 ### 3.1 fix enum encode error in request. [#203](https://github.com/apache/dubbo-go-hessian2/pull/203)
 
-原来在 dubbo request 对象中没有判断 enum 类型的情况，此pr增加了判断是不是POJOEnum类型。详见 https://github.com/apache/dubbo-go-hessian2/pull/203/files
+Previously, the Dubbo request object did not consider the enum type situation; this PR added a check for the POJOEnum type. See https://github.com/apache/dubbo-go-hessian2/pull/203/files for details.
 
 ### 3.2 fix []byte field decoding issue. [#216](https://github.com/apache/dubbo-go-hessian2/pull/216)
 
-v1.7.0 之前如果 struct中包含[]byte字段时无法反序列化, 报错“error list tag: 0x29”，主要原因是被当做list进行处理，对于这种情况应该按照binary数据进行处理即可。
+Before v1.7.0, if a struct contained a []byte field, it would fail to deserialize and throw the error "error list tag: 0x29". The primary reason for this was treating it as a list; for such situations, it should be handled as binary data.
 
 ```go
 type Circular struct {
@@ -238,10 +238,10 @@ func (Circular) JavaClassName() string {
 
 ### 3.3 fix decoding error for map in map. [#229](https://github.com/apache/dubbo-go-hessian2/pull/229)
 
-v1.7.0 之前嵌套map无法正确解析，主要原因是对应的map对象被当做一个数据类型却未被自动加到类引用列表中，而嵌套map类信息是同一类型的引用，去类引用列表找，找不到就报错了。 解决这个问题的方法就是遇到map类对象，也将其加入到类引用列表中即可。 问题详细参考 [#119](https://github.com/apache/dubbo-go-hessian2/issues/119).
+Before v1.7.0, nested maps could not be parsed correctly due to the corresponding map object being treated as a data type but not automatically included in the class reference list. The solution to this issue is to include the map class object into the class reference list. For more details, refer to [#119](https://github.com/apache/dubbo-go-hessian2/issues/119).
 
 ### 3.4 fix fields name mismatch in Duration class. [#234](https://github.com/apache/dubbo-go-hessian2/pull/234)
 
-这个 PR 解决了Duration对象中字段错误定义，原来是"second/nano"， 应该是"seconds/nanos"。
+This PR resolves the incorrect field definitions in the Duration object, where it was originally "second/nano" but should be "seconds/nanos".
 
-同时改善了测试验证数据。之前使用0作为int字段的测试数据，这是不准确的，因为int类型默认值就是0.
+It also improves the test validation data. Previously, using 0 as test data for int fields was inaccurate since the default value for int types is already 0.

@@ -1,23 +1,23 @@
 ---
-title: "Dubbo Go 快速开始"
-linkTitle: "Dubbo Go 快速开始"
+title: "Dubbo Go Quick Start"
+linkTitle: "Dubbo Go Quick Start"
 tags: ["Go"]
 date: 2021-01-11
-description: 本文介绍了如何通过一个 `hellowworld` 例子带领大家快速上手 Dubbo Go 框架
+description: This article introduces how to quickly get started with the Dubbo Go framework through a `helloworld` example.
 ---
 
-## 环境
+## Environment
 
-- Go编程环境
-- 启动zookeeper服务，也可以使用远程实例
+- Go programming environment
+- Start the zookeeper service, or you can use a remote instance.
 
-## 从服务端开始
+## Start from the Server Side
 
-### 第一步：编写 `Provider` 结构体和提供服务的方法
+### Step 1: Write the `Provider` struct and the method to provide the service
 
 > https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/user.go
 
-1. 编写需要被编码的结构体，由于使用 `Hessian2` 作为编码协议，`User` 需要实现 `JavaClassName` 方法，它的返回值在dubbo中对应User类的类名。
+1. Write the struct that needs to be encoded. Since `Hessian2` is used as the encoding protocol, `User` needs to implement the `JavaClassName` method, and its return value corresponds to the class name of User in dubbo.
 
 ```go
 type User struct {
@@ -32,7 +32,7 @@ func (u User) JavaClassName() string {
 }
 ```
 
-1. 编写业务逻辑，`UserProvider` 相当于dubbo中的一个服务实现。需要实现 `Reference` 方法，返回值是这个服务的唯一标识，对应dubbo的 `beans` 和 `path` 字段。
+1. Write the business logic. `UserProvider` acts as a service implementation in dubbo. The `Reference` method must be implemented, and the return value is the unique identifier for this service, corresponding to the `beans` and `path` fields in dubbo.
 
 ```go
 type UserProvider struct {
@@ -40,7 +40,7 @@ type UserProvider struct {
 
 func (u *UserProvider) GetUser(ctx context.Context, req []interface{}) (*User, error) {
 	println("req:%#v", req)
-	rsp := User{"A001", "hellowworld", 18, time.Now()}
+	rsp := User{"A001", "helloworld", 18, time.Now()}
 	println("rsp:%#v", rsp)
 	return &rsp, nil
 }
@@ -50,7 +50,7 @@ func (u *UserProvider) Reference() string {
 }
 ```
 
-1. 注册服务和对象
+1. Register the service and object
 
 ```go
 func init() {
@@ -60,11 +60,11 @@ func init() {
 }
 ```
 
-### 第二步：编写主程序
+### Step 2: Write the main program
 
 > https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/app/server.go
 
-1. 引入必需的dubbo-go包
+1. Import the necessary dubbo-go packages
 
 ```go
 import (
@@ -81,7 +81,7 @@ import (
 )
 ```
 
-1. main 函数
+1. The main function
 
 ```go
 func main() {
@@ -89,30 +89,30 @@ func main() {
 }
 ```
 
-### 第三步：编写配置文件并配置环境变量
+### Step 3: Write the configuration file and configure environment variables
 
-1. 参考 [log](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/log.yml) 和 [server](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/server.yml) 编辑配置文件。
+1. Edit the configuration files by referring to [log](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/log.yml) and [server](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-server/profiles/release/server.yml).
 
-主要编辑以下部分：
+Mainly edit the following sections:
 
-- `registries` 结点下需要配置zk的数量和地址
-- `services` 结点下配置服务的具体信息，需要配置 `interface` 配置，修改为对应服务的接口名，服务的key对应第一步中 `Provider` 的 `Reference` 返回值
+- Configure the number and address of zookeeper under the `registries` node
+- Configure the specific information of the service under the `services` node, modify the `interface` configuration to correspond to the service's interface name, and the service key corresponds to the `Reference` return value of `Provider` from Step 1.
 
-1. 把上面的两个配置文件分别配置为环境变量
+1. Set the two above configuration files as environment variables
 
 ```shell
 export CONF_PROVIDER_FILE_PATH="xxx"
 export APP_LOG_CONF_FILE="xxx"
 ```
 
-## 接着是客户端
+## Next is the Client
 
-### 第一步：编写客户端 `Provider`
+### Step 1: Write the client `Provider`
 
 > https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/user.go
 
-1. 参考服务端第一步的第一点。
-2. 与服务端不同的是，提供服务的方法作为结构体的参数，不需要编写具体业务逻辑。另外，`Provider` 不对应dubbo中的接口，而是对应一个实现。
+1. Refer to the first point in Step 1 of the server.
+2. Unlike the server, the method providing the service is a parameter of the struct, and specific business logic does not need to be written. Also, the `Provider` does not correspond to an interface in dubbo, but corresponds to an implementation.
 
 ```go
 type UserProvider struct {
@@ -124,7 +124,7 @@ func (u *UserProvider) Reference() string {
 }
 ```
 
-1. 注册服务和对象
+1. Register the service and object
 
 ```go
 func init() {
@@ -133,11 +133,11 @@ func init() {
 }
 ```
 
-### 第二步：编写客户端主程序
+### Step 2: Write the client main program
 
 > https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/app/client.go
 
-1. 引入必需的dubbo-go包
+1. Import the necessary dubbo-go packages
 
 ```go
 import (
@@ -154,7 +154,7 @@ import (
 )
 ```
 
-1. main 函数
+1. The main function
 
 ```go
 func main() {
@@ -174,16 +174,16 @@ func println(format string, args ...interface{}) {
 }
 ```
 
-### 第三步：编写配置文件并配置环境变量
+### Step 3: Write the configuration file and configure environment variables
 
-1. 参考 [log](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/log.yml) 和 [client](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/client.yml) 编辑配置文件。
+1. Edit the configuration files by referring to [log](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/log.yml) and [client](https://github.com/dubbogo/dubbo-samples/blob/master/golang/helloworld/dubbo/go-client/profiles/release/client.yml).
 
-主要编辑以下部分：
+Mainly edit the following sections:
 
-- `registries` 结点下需要配置zk的数量和地址
-- `references` 结点下配置服务的具体信息，需要配置 `interface` 配置，修改为对应服务的接口名，服务的key对应第一步中 `Provider` 的 `Reference` 返回值
+- Configure the number and address of zookeeper under the `registries` node
+- Configure the specific information of the service under the `references` node, modify the `interface` configuration to correspond to the service's interface name, and the service key corresponds to the `Reference` return value of `Provider` from Step 1.
 
-1. 把上面的两个配置文件费别配置为环境变量，为防止log的环境变量和服务端的log环境变量冲突，建议所有的环境变量不要做全局配置，在当前起效即可。
+1. Set the two above configuration files as environment variables. To prevent conflicts between the log environment variables and the server's log environment variables, it is recommended that all environment variables not be globally configured, and only take effect in the current context.
 
 ```shell
 export CONF_CONSUMER_FILE_PATH="xxx"

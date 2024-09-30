@@ -1,114 +1,118 @@
 ---
-title: "如何参与贡献Dubbo社区"
-linkTitle: "如何参与贡献Dubbo社区"
+title: "How to Contribute to the Dubbo Community"
+linkTitle: "How to Contribute to the Dubbo Community"
 date: 2018-03-11
-tags: ["新闻动态"]
+tags: ["News"]
 description: >
-  本文介绍了如何以Apache Way的方式参与Dubbo社区并做贡献
+  This article explains how to participate in the Dubbo community and contribute in an Apache Way.
 ---
 
 
 ![img](/imgs/blog/involve-dubbo/head.jpg)
 
-## 前言
+## Introduction
 
-本文首次分享是在Apache Dubbo成都meetup上，这个话题是第一次在meetup上讲，不是我们没有更好的话题，相反，我们认为这个话题非常重要，甚至建议这个话题以后每次meetup都要讲。
+This article was first shared at the Apache Dubbo meetup in Chengdu, where the topic was discussed for the first time. It's not that we lack better topics; rather, we believe this topic is crucial and even suggest it should be covered in every meetup.
 
-Dubbo的发展历史大家应该并不陌生了，这里我还是简单回顾一下。Dubbo于2011年在github开源，后面几年由于一些原因停止了维护，直接去年7月份阿里重启维护，并于2018年2月16日捐献给Apache。
+Most of you are familiar with the development history of Dubbo. Dubbo was open-sourced on GitHub in 2011 and, for several years, was not maintained due to various reasons. It was restarted by Alibaba in July last year and donated to Apache on February 16, 2018.
 
-为什么会选择捐献给Apache，主要是为了打消社区对Dubbo未来发展的顾虑，给Dubbo用户足够的信心；Apache认为`社区大于代码`，非常注重多样性，强调一个项目需要有多个公司和个人贡献者参与，现在Dubbo的发展完全是按`The Apache Way`社区化的方式来运作的。
+The donation to Apache aims to dispel community concerns regarding Dubbo's future and to build confidence among Dubbo users; Apache believes that `community is greater than code` and emphasizes diversity, stating that a project requires contributions from multiple companies and individuals. Currently, Dubbo operates entirely under `The Apache Way`.
 
+## The Birth of Apache
 
-## Apache的诞生
+Apache is the world's largest software foundation, and many projects, like Maven, Log4j, and Tomcat, are used globally. Among these, the Apache HTTP Server stands out as Apache's first project.
 
-说到Apache，大家都非常熟悉了，它是全球目前最大的软件基金；Apache的很多项目我们都用过，比如Maven、Log4j、Tomcat等，但有一个项目要特别强调的，那就是 Apache httpd server，这是Apache的第一个项目。
+The Apache Software Foundation was officially established in 1999 to provide useful free software to the public and to support the software developer community. Its founders were a group self-identified as the `Apache group`.
 
-Apache软件基金会正式创建于1999年，主要是为公众提供有用的免费软件，并为软件开发者社区提供支持和服务；它的创建者是一个自称为`Apache组织`的群体；
+As early as 1995, this organization formed around the NCSA HTTPd server developed at the University of Illinois' National Center for Supercomputing Applications.
 
-早在1995年，这个组织就存在了，他们聚集在一起，在美国伊利诺伊大学超级计算机应用程序国家中心开发的NCSA HTTPd服务器的基础上开发与维护了一个叫Apache的HTTP服务器。
+Originally, the NCSA HTTPd server was developed by Rob McCool, who eventually lost interest, leading to a lack of maintenance for the powerful and user-friendly server. Enthusiasts and users then took it upon themselves to maintain and improve it. To facilitate better communication, one individual created a mailing list, efficiently organized the maintenance work, and self-identified as the `Apache group`, dubbing the software `Apache Server`.
 
-最早NCSA HTTPd服务器是一个叫Rob McCool的人开发的，但是后来慢慢失去了兴趣，导致这个功能强大又好用的服务器没人维护；于是一些爱好者和用户就自发开始维护起来，并不断改善功能、发布版本；为了更好进行沟通，一哥们就创建了一个邮件组，并把维护工作高效组织起来，且自称是`Apache组织`，并把这个软件叫`Apache 服务器`。
+This is why all Apache projects still primarily use mailing lists for communication today.
 
-这也是为什么Apache的所有的项目到今天为止依然以邮件列表作为沟通的主要方式。
-
-关于Apache的命名来源，从北美当地的一支叫`Apache`的印第安部落名称而来，这支部落以高超的军事素养和超人的忍耐力著称，19世纪后半期对侵占他们领土的入侵者进行了反抗；为了对这支部落表示敬仰，就取了这个名字；但这里还流传着一个小故事，说是在NCSA HTTPd基础上，大家都通过打补丁不断在修改这个软件，被戏称为`A Patchy Server`，和`Apache Server`读音很像。
+Regarding the name Apache, it originates from a North American Indian tribe known for its superior military skill and remarkable endurance, which resisted invaders in the latter half of the 19th century. The name was chosen to honor this tribe. There’s also a lighthearted story that while patching the NCSA HTTPd, it was humorously referred to as `A Patchy Server`, sounding similar to `Apache Server`.
 
 ![img](/imgs/blog/involve-dubbo/apache-history.png)
 
-随着后来商业需求扩大，围绕Apache HTTP服务器的项目越来越多，后来越来越多的项目启动，也有很多外部组织捐献项目；为了让这些外部项目能顺利进入到Apache基金会，2002年创建了Incubator（孵化）项目。可以看到，经过10多年的发展，到2010年，75个顶级项目，30个孵化项目，每天2697封讨论邮件；2018年这个数据进一步增长，194个顶级项目，54个孵化项目，3255个committers；其中中国人主导的项目，有RocketMQ，WeeX，ECharts，Skywalking等。
+With the expansion of commercial demand, more projects emerged around the Apache HTTP Server, leading to the establishment of the Incubator project in 2002 to facilitate the smooth entry of external projects into the Apache Foundation. By 2010, after more than a decade of development, there were 75 top-level projects and 30 incubator projects, with 2,697 discussion emails per day. By 2018, this number further increased to 194 top-level projects, 54 incubator projects, and 3,255 committers. Projects led by Chinese developers include RocketMQ, WeeX, ECharts, and Skywalking.
 
-Dubbo正在成为Apache顶级项目的路上——Apache孵化项目中。
+Dubbo is on the path to becoming an Apache top-level project—currently an Apache incubator project.
 
-回顾一下Apache这些历史和数据，我们不难发现几个关键词：兴趣、参与、邮件；这些就是我们后面要重点介绍的`The Apache Way`。
+Reflecting on Apache's history and data, we can identify several key terms: interest, participation, and mailing lists; these will be the focus of our later discussion on `The Apache Way`.
 
-## ASF组织架构
+## ASF Organizational Structure
 
 ![img](/imgs/blog/involve-dubbo/apache-org.png)
 
-我们知道每个组织都有它自己的架构，ASF同样也不例外；那Apache的组织架构是什么样的呢？它有什么独特的地方吗？这里特别要强调的是Project Management Committees，即 PMC，每个项目从孵化阶段开始就会有PMC，主要负责保证开源项目的社区活动都能运转良好，这里运转的机制就是`The Apache Way`。
+Every organization has its own structure, and the ASF is no exception. So what does Apache's organizational structure look like? Is there anything unique? Notably, we have Project Management Committees, or PMC. Each project has a PMC from the incubation stage, primarily responsible for ensuring that the community activities of the open-source project operate smoothly under `The Apache Way`.
 
-图中，Board就是负责整个基金会符合章程的运作。Board我们一般很少能接触到，接触更多的是PMC以及下面的这几层。
+In the diagram, the Board oversees the foundation's operations according to its charter. We rarely interact with the Board but engage more with the PMC and the several layers below.
 
-参与Apache项目社区活动的人，一般分为以下几类：
+Participants in Apache project community activities can be categorized as follows:
 
-* 直接用户：在座的都是Dubbo的用户，可能部分现在还不是，但将来肯定会是
+* Direct Users: Many present are users of Dubbo, some may not be now, but will definitely be in the future.
 
-* 贡献者：部分用户在使用Dubbo过程中，遇到问题，自己通过分析调试找到解决方案，并提交给Dubbo官方，最终被接受，这些用户就是Dubbo的贡献者
+* Contributors: Some users, encountering issues while using Dubbo, identify solutions through analysis and debugging, submitting them to the Dubbo team, eventually becoming contributors.
 
-* 提交者：贡献多了，经过PMC的提议和投票，就会成为Committer；Committer即意味着正式加入Apache，拥有个人Apache帐号以及相应项目的写权限
+* Committers: After making significant contributions, a Committer position can be achieved through PMC nomination and voting. Being a Committer means officially joining Apache, gaining a personal Apache account, and write permissions on relevant projects.
 
-* PMC：Committer再往上走就是PMC，这个必须由现有PMC成员提名
+* PMC: Advancing from a Committer to a PMC requires nomination by existing PMC members.
 
-个人在社区的成长，就像我们在公司晋升一样，一步一步往上走。
+Individual growth in the community resembles promotions within a company, progressing step by step.
 
-本文的目的就是告诉大家，从User到Contributor没有大家想像的那么难，从Contributor到Committer也不是不可能；只要大家拥有一颗开源的心，找到自己感兴趣的项目，并持续投入，付出肯定会有回报。
+The goal of this article is to demonstrate that moving from User to Contributor is not as difficult as imagined, and transitioning from Contributor to Committer is also achievable. With a spirit of open source, finding projects of interest, and sustained effort, contributions will surely be rewarded.
 
 ## The Apache Way
 
-就像你加入一家公司需要了解这家公司的文化一样，参与Apache开源项目之前，同样我们需要需要了解ASF的文化，这个文化就称为`The Apache Way`。
+Just as you need to understand a company's culture before joining, participating in Apache open-source projects also requires understanding the culture of the ASF, known as `The Apache Way`.
 
 ![img](/imgs/blog/involve-dubbo/apache-way.png)
 
-这里想特别强调以下几点：
+Here are some key points to emphasize:
 
-* 社区胜于代码：把项目构建出来这不是开源，去构建社区才是真正的开源；对社区而言，一切都是围绕代码而生，无代码则社区不复存在；在代码之上，则是如何做事、如何待人、如何决策的理念体现；一个健康的社区远比优秀的代码重要——如果代码奇烂无比，社区可以重写，但社区有了毛病，代码最终也会付之东流；
-* 公开透明与共识决策：`If it doesn't happen on email, it doesn't happen.` 所有的决定，不管是技术feature、发展方向，还是版本发布等，都应该被公开讨论，而形式就是邮件列表，这些讨论过程和结论都会被永久存档；而讨论的过程，就是大家自由发表意见的过程，但最终大家要投票，比较民主的做法；
-* 任人唯贤：`Those that have proven they can do, get to do more.` 特别强调一点，贡献绝不仅仅是代码，贡献可以是很多方面，接下来我们结合Dubbo来讲，大家如何参与并贡献；
+* Community over Code: Building a project is not true open source; creating a community is. Everything revolves around code; without code, there is no community. Above code is the philosophy of how to work, treat people, and make decisions. A healthy community is far more important than great code—if the code is awful, the community can rewrite it, but if the community has issues, the code will ultimately perish.
 
-## 参与Dubbo社区
+* Open and Transparent Consensus Decision-Making: `If it doesn't happen on email, it doesn't happen.` All decisions, whether about technical features, development direction, or version releases, should be publicly discussed, primarily through mailing lists, and all discussions and conclusions should be archived permanently. The discussion process allows everyone to freely express opinions, but a vote is necessary at the end—a rather democratic approach.
+
+* Meritocracy: `Those that have proven they can do, get to do more.` It's crucial to emphasize that contributions are not limited to code; many aspects can contribute. 
+
+## Participating in the Dubbo Community
 
 ![img](/imgs/blog/involve-dubbo/dubbo-community.png)
 
-要参与Dubbo社区，就要先大概了解一下目前社区的工作方式。总结一句话就是4个角色、3个途径以及2个代码组；
+To participate in the Dubbo community, it's essential to understand how the community currently operates. In short, it revolves around four roles, three pathways, and two code bases:
 
-1. 4个角色前面也提到过了，分别是User、Contributor、Committer、PMC；这里特别要强调用的是，角色之间不是孤立的，比如提功能建议的也可以是Committer或Contributor等；PMC有投票权，但其他人一样也可以投票，这本身就是一种参与、一种贡献；
-2. 3个途径，分别是Dubbo官网、github、dev邮件列表；目前比较活跃的是github issue/PR；我们鼓励按`The Apache Way`的方式，使用邮件列表交流，让导师看到我们的贡献；
-3. 2个代码组，一个是 `github.com/apache/dubbo*` ，这里是dubbo孵化的项目，目前主要包含dubbo-rpc、dubbo-spring-boot-start、dubbo-ops三个部分；另外一个就是 `github.com/dubbo`，这个是dubbo作为微服务解决方案的所有相关的生态部分，包括dubbo-rpc的扩展、dubbo与其他产品集成、dubbo多语言客户端实现以及一些工具和套件等；
+1. The four roles mentioned earlier are User, Contributor, Committer, and PMC. It's important to note that these roles are not isolated—for instance, someone suggesting features can also be a Committer or Contributor. PMC has voting rights, but others can also vote; this itself is a form of participation and contribution.
+
+2. The three pathways are the Dubbo official website, GitHub, and the developer mailing list. Currently, GitHub issues/PRs are the most active. We encourage everyone to engage via mailing lists in the spirit of `The Apache Way`, enabling mentors to see our contributions.
+
+3. The two code bases are `github.com/apache/dubbo*`, which is the Dubbo incubator project focusing on dubbo-rpc, dubbo-spring-boot-start, and dubbo-ops; and `github.com/dubbo`, which encompasses all related ecosystem aspects for Dubbo as a microservices solution, including extensions of dubbo-rpc, integration with other products, multilingual client implementations, tools, and packages.
 
 ![img](/imgs/blog/involve-dubbo/dubbo-project.png)
 
-所以，对于想参与Dubbo社区、想为Dubbo这个微服务解决方案自己一份力量的人来说，以下就是你们现在就可以开始做的：
+For those looking to participate in the Dubbo community and contribute to this microservices solution, here are some immediate actions you can take:
 
-1. 开发邮件组可以订阅起来，可以参考这里：https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide
-2. github.com/apache/dubbo star起来，fork起来
-3. 学习中英文文档，进行修正或优化，提PR；有疑问的地方，可以email到邮件组或提issue；官方开发者的回复总比google或stackoverflow里找到的答案要强的多吧？
-4. 如果你正在使用dubbo，可以将经验总结出来，写篇blog，分享给社区；真实的案例总是最具有说服力；
-5. 如果你有时间，可以参与issue和PR的解决，回条用户的问题、PR的review；`Good first issue`以及`Help wanted`的issue，总有一个是适合你的；
-6. 如果你想深入学习dubbo-rpc框架，UT是一个非常好的开始，完善和补充现有的UT，一边学习一边贡献，何乐而不为？
-7. 发现了bug，报issue；通过自己的努力最终解决了，提一个issue，`first-contributor`并不是那么难；哦，对了，拼写错误也算哦；
-8. 如果你发现一个可以帮助用户更方便地使用dubbo，开发、测试、调试、mock、工具等；都可以贡献到Dubbo生态中来；
-9. 最后我们非常欢迎大家通过邮件提想法，也欢迎大家多讨论；你会发现，技术变牛的同时，英文也变的66的了；
+1. Subscribe to the developer mailing group; guidance is available here: https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide
+2. Star and fork github.com/apache/dubbo.
+3. Review and optimize the English and Chinese documentation, submitting PRs; for any questions, email the mailing group or raise an issue; responses from official developers are usually much better than what you find on Google or StackOverflow.
+4. If you're using Dubbo, summarize your experiences and write a blog to share with the community; real cases are always the most persuasive.
+5. If you have time, participate in resolving issues and PRs by responding to user inquiries and reviewing PRs; there will always be suitable `Good first issue` or `Help wanted` issues for you.
+6. If you want to delve into the dubbo-rpc framework, UT is an excellent starting point; improving and supplementing existing UTs allows you to learn while contributing—what's not to love?
+7. If you discover bugs, report issues; solving them through your efforts qualifies you as a `first-contributor`, which isn't that challenging. Oh, and spelling errors count too.
+8. If you identify opportunities to help users conveniently use Dubbo, whether through development, testing, debugging, mocking, or tools, you can contribute to the Dubbo ecosystem.
+9. Finally, we welcome everyone to share ideas via email and engage in discussions; you’ll find that as your technical skills improve, your English will too.
 
-## 加入Apache孵化
+## Joining the Apache Incubator
 
-如果大家有好的项目希望捐献给Apache，这个流程可以参考一下；
+If you have promising projects you hope to donate to Apache, you can refer to the following process:
 
 ![img](/imgs/blog/involve-dubbo/get-into-apache.png)
 
-进入 Apache 分为三个阶段，准备阶段、孵化阶段和毕业阶段。准备阶段需要做的事情要找到愿意帮助孵化的导师，向Apache 提交进入孵化的申请，经过导师们讨论并投票，如果通过的话就可以进入孵化。孵化阶段分为两大环节，第一个环节是公司和个人签署协议向Apache 移交代码和知识产权，之后就是在导师的指导下按照Apache的规范做版本迭代、社区运营、发展更多的Committer；如果最终通过了成熟度评估，就可以顺利毕业成为Apache的顶级项目。
+Joining Apache involves three stages: the preparation stage, incubation stage, and graduation stage. During the preparation phase, you'll need to find a mentor willing to help with incubation and submit an application to enter the incubation. After discussions and votes among the mentors, if approved, you'll enter incubation. The incubation stage comprises two major steps: signing agreements with the company and individuals to transfer code and intellectual property to Apache, followed by version iterations and community management under Apache guidelines to develop more Committers. If you pass the maturity assessment at the end, you can successfully graduate to become a top-level Apache project.
 
-## 结语
+## Conclusion
 
-希望越来越多的公司团队和个人能够贡献到国际化的开源社区里去，一起打造我们中国的开源品牌！也希望大家都能愉快去贡献，罗马非一日建成，但付出一定会有回报。
+We hope more teams and individuals can contribute to the international open-source community and work together to build our Chinese open-source brands! We also hope everyone can contribute happily—Rome wasn't built in a day, but contributions will definitely pay off.
 
-这里透露一个小福利，所有Apache Committer可以免费使用IntelliJ的全套付费产品，包括全宇宙最好用的IDEA。
+Here’s a little perk: all Apache Committers can use the entire suite of paid IntelliJ products for free, including the best IDE, IDEA.
+

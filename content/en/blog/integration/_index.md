@@ -1,9 +1,6 @@
-
 ---
-title: "生态集成"
-linkTitle: "生态集成"
+title: "Ecosystem Integration"
+linkTitle: "Ecosystem Integration"
 weight: 11
-description: "Dubbo 生态集成相关博客"
----
-
-
+description: "Blogs related to Dubbo ecosystem integration"
+---  

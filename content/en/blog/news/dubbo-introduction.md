@@ -1,116 +1,112 @@
 ---
-title: "一文帮你快速了解 Dubbo 核心能力"
-linkTitle: "一文帮你快速了解 Dubbo 核心能力"
+title: "A Quick Guide to Understanding the Core Capabilities of Dubbo"
+linkTitle: "A Quick Guide to Understanding the Core Capabilities of Dubbo"
 date: 2023-02-23
 description: >
-    Apache Dubbo 是一款微服务开发框架，它帮助解决微服务开发中的通信问题，同时为构建企业级微服务的提供服务治理能力，Dubbo 不绑定编程语言，我们的目标是为所有主流语言提供对等的微服务开发体验 。
+    Apache Dubbo is a microservices development framework that helps solve communication issues in microservices development while providing service governance capabilities for building enterprise-level microservices. Dubbo is not tied to a specific programming language; our goal is to provide a peer-to-peer microservices development experience for all mainstream languages.
 ---
 
-## Dubbo 简介
+## Introduction to Dubbo
 
-### 一句话定义
-Apache Dubbo 是一款微服务开发框架，它帮助解决微服务开发中的通信问题，同时为构建企业级微服务的提供服务治理能力，Dubbo 不绑定编程语言，我们的目标是为所有主流语言提供对等的微服务开发体验。
+### One-Sentence Definition
+Apache Dubbo is a microservices development framework that helps solve communication problems in microservices development while providing service governance capabilities for building enterprise-level microservices. Dubbo is not tied to a specific programming language; our goal is to provide a peer-to-peer microservices development experience for all mainstream languages.
 ![overview](/imgs/blog/2023/2/introduction/1-overview.jpg)
 
-### 基本架构
+### Basic Architecture
 
 ![overview](/imgs/blog/2023/2/introduction/2-arc.jpg)
 
-Dubbo 从架构图上分为数据面和控制面。在数据面，使用 Dubbo 开发的微服务进程间基于 RPC 协议通信。DubboAdmin 控制面作为服务治理的抽象入口，由一系列可选的服务治理组件构成，负责 Dubbo集群的服务发现、流量管控策略、可视化监测。
+Dubbo's architecture is divided into the data plane and control plane. In the data plane, microservices developed with Dubbo communicate via the RPC protocol. The DubboAdmin control plane serves as an abstract entry point for service governance, composed of a series of optional service governance components responsible for service discovery, traffic control policies, and visual monitoring of Dubbo clusters.
 
-### 行业应用
+### Industry Applications
 
 ![overview](/imgs/blog/2023/2/introduction/3-usecase.jpg)
 
-Dubbo 设计用于解决阿里巴巴内部大规模 微服务集群实践难题，当前已被广泛应用于几乎所有行业的微服务实践中。
+Dubbo was designed to address the challenges of large-scale microservices cluster practices within Alibaba and is currently widely used in microservices practices across almost all industries.
 
 ![overview](/imgs/blog/2023/2/introduction/4-usecase-alibaba.jpg)
 
-以阿里巴巴为例，在 2021 年，阿里巴巴基于内部多年 HSF 框架实践积累，面向云原生架构设计了下一代微服务框架 Dubbo3，用于解决性能、治理升级、服务网格等一系列问题；截止目前，阿里巴巴已全面完成从 HSF到 Dubbo3 的迁移，核心业务都跑在开源 Dubbo3 之上。
+For instance, in 2021, Alibaba built the next-generation microservices framework Dubbo3, based on years of internal HSF framework practice, targeting cloud-native architecture to solve issues related to performance, governance upgrades, service mesh, and more. As of now, Alibaba has fully completed the migration from HSF to Dubbo3, with core businesses running on open-source Dubbo3.
 
-## Dubbo 到底提供了哪些核心能力？
+## What Core Capabilities Does Dubbo Provide?
 
-### 提供微服务抽象与框架
+### Provides Microservices Abstraction and Framework
 
 ![overview](/imgs/blog/2023/2/introduction/5-framework.jpg)
 
-首先，Dubbo 作为服务开发框架解决了业务应用中微服务定义、暴露、通信与治理的问题，为业务应用开发定义了一套微服务编程范式。
-具体来说，Dubbo 为业务应用提供了微服务开发API、RPC 协议、服务治理三大核心能力，让开发者真正的专注业务逻辑开发。
+Firstly, Dubbo solves the issues of microservice definition, exposure, communication, and governance in business applications as a service development framework, defining a set of microservices programming paradigms for business application development.
+Specifically, Dubbo provides three core capabilities for business applications: microservices development API, RPC protocol, and service governance, allowing developers to truly focus on business logic development.
 
 ![overview](/imgs/blog/2023/2/introduction/6-extensibility.jpg)
 
-Dubbo 不是应用框架的替代者，它可以很好的工作在每种语言的主流编程框架之上，以 Java 为例，Dubbo 可以很好的与 Spring 协作，并在此基础上提供服务定义、微服务编程、服务发现、负载均衡、流量管控等能力。
+Dubbo is not a replacement for application frameworks; it works well on top of mainstream programming frameworks in every language. For example, Dubbo can integrate well with Spring in Java, providing capabilities like service definition, microservices programming, service discovery, load balancing, and traffic control.
 
-### 提供灵活的通信协议切换能力
+### Provides Flexible Communication Protocol Switching Capability
 
+In terms of communication, Dubbo differs from other RPC frameworks in that it is not tied to a specific protocol; you can choose any communication protocol at the bottom level, such as HTTP/2, TCP, gRPC, REST, Hessian, etc., while enjoying a unified API and equal service governance capabilities.
 
-在通信方面，Dubbo 区别于其他 RPC 框架的是它不绑定特定协议，你可以在底层选用 HTTP./2、TCP、gRPC、REST、Hessian 等任意通信协议，同时享受统一的 API、以及对等的服务治理能力。
-
-### 一切皆可扩展
+### Everything is Expandable
 ![overview](/imgs/blog/2023/2/introduction/8-extensibility.jpg)
 
-Dubbo 的另一个优势在于其可扩展性设计，从流量管控、协议编码、诊断调优、再到服务治理，你都可以去扩展，满足企业级微服务开发与运维的所有诉求。
+Another advantage of Dubbo lies in its extensibility design. You can expand in areas such as traffic control, protocol encoding, diagnostic tuning, and service governance to meet all demands for enterprise-level microservices development and operations.
 
-### 丰富的生态
+### Rich Ecosystem
 ![overview](/imgs/blog/2023/2/introduction/9-ecosystem.jpg)
 
-基于扩展能力 Dubbo 官方提供了丰富的生态适配，涵盖了所有主流的开源微服务组件。
+Based on extensibility, Dubbo officially provides a rich ecosystem integration covering all mainstream open-source microservices components.
 
-### 服务网格
+### Service Mesh
 ![overview](/imgs/blog/2023/2/introduction/10-mesh.jpg)
 
-对于服务网格架构，Dubbo也可以轻松接入原生 Istio 体系；
-在数据面支持与 Envoy 部署的 Proxy 模式，也支持无 Envoy 的 Proxyless 模式，提供更灵活的数据面选择。
+For service mesh architectures, Dubbo can also easily integrate with native Istio systems; it supports data planes with both Envoy-deployed Proxy modes and Proxyless modes without Envoy, providing more flexible data plane options.
 
-## 构建企业级Dubbo 微服务有多简单？你只需要 4 步
-我们以 Java 微服务开发为例。
+## How Simple is it to Build Enterprise-Level Dubbo Microservices? You Just Need 4 Steps
+We take Java microservices development as an example.
 
-### 第一步
+### Step 1
 ![overview](/imgs/blog/2023/2/introduction/11-initializer.png)
 
-使用 [官方脚手架](https://start.dubbo.apache.org/bootstrap.html) 快速创建项目模板，只需要选择依赖的版本、组件，点击 “获取代码” 即可
+Use the [official scaffolding](https://start.dubbo.apache.org/bootstrap.html) to quickly create project templates by simply choosing the dependency versions and components, and clicking "Get Code".
 
-### 第二步
-将模板项目导入 IDE 开发环境。
-定义 Java 接口作为 Dubbo 服务。
+### Step 2
+Import the template project into your IDE development environment.
+Define a Java interface as a Dubbo service.
 ![overview](/imgs/blog/2023/2/introduction/12-interface.jpg)
 
-开发 Dubbo 服务端，实现接口并完成业务逻辑编码，通过一条简单的注解配置完成服务发布。
+Develop the Dubbo server, implement the interface, and complete business logic coding. Publish the service through a simple annotation configuration.
 ![overview](/imgs/blog/2023/2/introduction/13-impl.jpg)
 
-开发Dubbo 客户端，通过注解声明 Dubbo 服务，然后就可以发起远程方法调用了。至此，开发工作完成。
+Develop the Dubbo client, declare the Dubbo service with annotations, and initiate remote method calls. At this point, the development work is complete.
 ![overview](/imgs/blog/2023/2/introduction/14-reference.jpg)
 
+### Step 3
+Enter the deployment phase; we choose Kubernetes as the deployment environment.
 
-### 第三步
-进入部署环节，我们选择 Kubernetes 作为部署环境。
-
-首先，通过一条命令安装 dubbo-admin 等服务治理组件，安装成功之后，我们查看部署状态。接下来，开始部署业务应用，随后查看确认直到应用已经正常启动
+First, install Dubbo Admin and other service governance components with a single command. After successful installation, check the deployment status. Next, start deploying the business applications and confirm until the application starts normally.
 ![overview](/imgs/blog/2023/2/introduction/15-deploy.jpg)
 
-然后，我们就可以打开 Admin 控制台查看服务部署与调用情况了。这里是 Dubbo Admin 控制台的页面显示效果，可以看到刚才启动的 Dubbo 服务部署状态；除此之外，Admin 还提供了更详细的流量监控监测，点击服务统计，可进入监控页面
+Then, we can open the Admin console to check the service deployment and invocation statistics. Here is the display effect of the Dubbo Admin console page, showing the deployment status of the just-started Dubbo service; in addition, Admin provides more detailed traffic monitoring. Clicking on Service Statistics leads to the monitoring page.
 
 ![overview](/imgs/blog/2023/2/introduction/16-admin.jpg)
 
-你可以在此了解Dubbo 集群的详细运行状态，包括每个应用对外服务和调用服务的情况，QpS、成功率等，还可以查看每个实例的资源健康状况。
+You can learn about the detailed operational status of the Dubbo cluster, including each application's external services and invocation services, QpS, success rates, and check the resource health status of each instance.
 
 ![overview](/imgs/blog/2023/2/introduction/17-grafana1.png)
 
-### 第四步
-进行流量管控。当应用已经平稳运行后，进一步控制流量的访问行为，包括实现金丝雀发布、全链路灰度、动态调整超时时间、调整权重、按比例流量分发、参数路由等。控制台提供了可视化的流量治理规则操作入口，在这里可以直接下发流量规则。
+### Step 4
+Perform traffic control. Once the application is running smoothly, further control the traffic access behavior, including implementing canary releases, full-link gray release, dynamically adjusting timeout settings, adjusting weights, proportionate traffic distribution, and parameter routing. The console provides a visual entry point for traffic governance rule operations, where traffic rules can be directly issued.
 
 ![overview](/imgs/blog/2023/2/introduction/19-gray.jpg)
 
-以一个线上环境的灰度隔离示例，通过 Dubbo 流量管控机制，我们可以给每个应用的一部分机器打上 gray 标签，接下来，对于入口为 gray 的流量，就可以控制确保它只在有 gray 标记的 Dubbo 实例内流转，实现了全链路的逻辑隔离效果，
-对于隔离多套开发环境、线上灰度测试等场景都非常有用。
+For example, in a gray isolation scenario in an online environment, through Dubbo's traffic control mechanism, we can label a portion of machines for each application with a gray tag. For incoming traffic labeled as gray, we can control it to ensure it only circulates within Dubbo instances marked as gray, achieving full-link logical isolation, which is very useful for isolating multiple development environments and online gray testing.
 
 ![overview](/imgs/blog/2023/2/introduction/20-region.jpg)
 
-对于同区域优先调用的场景，这里有两个应用做了多区域部署，紫色是杭州区域、蓝色是北京区域，部署在橙色区域的应用会优先访问同区域的应用，以此降低访问延迟，蓝色区域部署的服务亦是如此。
+In scenarios where priority calls are made to the same region, there are two applications deployed in multiple regions. The purple represents the Hangzhou region, and the blue represents the Beijing region; applications deployed in the orange area will prefer to access applications in the same region to reduce access latency, and the services deployed in the blue region will operate similarly.
 
 ![overview](/imgs/blog/2023/2/introduction/21-region.jpg)
 
-当应用在同区域区域部署的实例不可用时，调用会自动跨区域切换到其他可用区，确保整体可用性。
+When instances deployed in the same region are unavailable, calls will automatically switch to other available regions, ensuring overall availability.
 
-## 总结
-接下来，请开始你的Dubbo 之旅吧。
+## Conclusion
+Now, please start your Dubbo journey.  

@@ -1,42 +1,42 @@
 ---
-title: "在dubbo-go中使用sentinel"
-linkTitle: "在dubbo-go中使用sentinel"
+title: "Using Sentinel in dubbo-go"
+linkTitle: "Using Sentinel in dubbo-go"
 tags: ["Go"]
 date: 2021-01-11
-description: 本文介绍了如何在 dubbo-go 中使用限流组件 sentinel
+description: This article introduces how to use the rate limiting component Sentinel in dubbo-go
 ---
 
 
-时至今日，Apache/dubbo-go（以下简称 dubbo-go ）项目在功能上已经逐步对齐java版本，稳定性也在不同的生产环境得到了验证。社区便开始再服务治理、监控等方向发力。随着 1.2和1.3 版本发布， dubbo-go 新增了大量此类新feature。
+As of today, the Apache/dubbo-go (hereinafter referred to as dubbo-go) project has gradually aligned functionally with the Java version, and its stability has been verified in various production environments. The community has begun to focus on service governance, monitoring, and other areas. With the releases of versions 1.2 and 1.3, dubbo-go has added a large number of these new features.
 
-今天我们聊一聊限流相关话题，此前dubbo-go已经支持了[tps limit](https://github.com/apache/dubbo-go/pull/237)、[execute limit ](https://github.com/apache/dubbo-go/pull/246)、[hystrix](https://github.com/apache/dubbo-go/pull/133) 的内置filter，用户只要简单配置就能马上用上。但我们知道，在 java 的 dubbo 生态中，有一项限流工具被广泛使用，那就是sentinel。sentinel因为强大的动态规划配置、优秀的dashboard以及对dubbo的良好适配，成为众多使用dubbo的企业选用限流工具的不二之选。
+Today, we will discuss rate limiting. Previously, dubbo-go already supported built-in filters for [tps limit](https://github.com/apache/dubbo-go/pull/237), [execute limit](https://github.com/apache/dubbo-go/pull/246), and [hystrix](https://github.com/apache/dubbo-go/pull/133), which users can easily configure and use immediately. However, we know that within the Java Dubbo ecosystem, one tool has been widely used for rate limiting: Sentinel. Due to its powerful dynamic configuration, excellent dashboard, and good adaptation to Dubbo, Sentinel has become the preferred choice for many enterprises using Dubbo.
 
-就在前些日子，社区非常高兴得知 Sentinel Golang 首个版本 0.1.0 正式发布，这使得 dubbo-go也可以使用 sentinel 作为工具进行一些服务治理、监控的工作了。随着sentinel golang的健壮，我们相信用户马上可以像sentinel管理java dubbo服务那样管理dubbo-go的服务了。
+Recently, the community was very pleased to learn that the first version of Sentinel Golang, 0.1.0, was officially released, enabling dubbo-go to use Sentinel for service governance and monitoring tasks. As the Sentinel Golang matures, we believe users will soon be able to manage dubbo-go services just like managing Java Dubbo services with Sentinel.
 
-完成sentinel golang的dubbo-adapter其实非常简单，这得益于dubbo-go早就完成了filter链的构造，用户可以自定义filter，并且灵活的安排其执行顺序。在1.3发布后，增加了filter中的context传递，构建sentinel/adapter/dubbo更为方便。
+Implementing the Sentinel Golang dubbo-adapter is actually quite simple, thanks to the fact that dubbo-go has already completed the construction of the filter chain, allowing users to customize filters and flexibly arrange their execution order. After the release of 1.3, context passing in the filter was added, making the construction of sentinel/adapter/dubbo even more convenient.
 
-我们以其中的provider filter适配为例:
+Taking the provider filter adaptation as an example:
 
 ![img](/imgs/blog/dubbo-go/sentinel/dubbo-go-sentinel-provider-filter.png)
 
-此 filter 实现了 dubbo-go的filter接口，只要用户在服务启动时将此filter加载到dubbo-go中，即可使用此filter。 
+This filter implements the dubbo-go filter interface. As long as users load this filter into dubbo-go when starting the service, they can use it. 
 
 ![img](/imgs/blog/dubbo-go/sentinel/sentinel-golang.png)
 
-sentinel实现原理与其他限流、熔断库大同小异，底层是用的滑动窗口算法。与hystrix等框架相比不同点是设计理念，Sentinel 的设计理念是让您自由选择控制的角度，并进行灵活组合，从而达到想要的效果。
+The implementation principle of Sentinel is similar to other rate limiting and circuit breaking libraries, using a sliding window algorithm at its core. The difference from frameworks such as Hystrix lies in the design philosophy; Sentinel's design concept allows you the freedom to choose the angle of control and to combine it flexibly to achieve the desired effect.
 
-下面我整理了完整的使用流程：(注意：dubbo-go版本请使用1.3.0-rc3及其以上版本)
+Below, I have整理了完整的使用流程： (Note: please use dubbo-go version 1.3.0-rc3 and above)
 
-在dubbo-go中使用sentinel主要分为以下几步：
+Using Sentinel in dubbo-go mainly consists of the following steps:
 
-1. 初始化sentinel
-2. 将sentinel注入dubbo-go的filter
-3. 初始化dubbo-go
-4. 配置规划
+1. Initialize Sentinel
+2. Inject Sentinel into dubbo-go's filter
+3. Initialize dubbo-go
+4. Configure planning
 
-## 初始化sentinel
+## Initialize Sentinel
 
-示例代码：
+Example code:
 
 ```go
 import (
@@ -46,14 +46,14 @@ import (
 func initSentinel() {
 	err := sentinel.InitWithLogDir(confPath, logDir)
 	if err != nil {
-		// 初始化 Sentinel 失败
+		// Failed to initialize Sentinel
 	}
 }
 ```
 
-## 将sentinel注入dubbo-go的filter
+## Inject Sentinel into dubbo-go's filter
 
-你可以通过import包的形式执行，执行其中的init()来注入filter
+You can execute this using the import package form and call init() to inject the filter
 
 ```go
 import (
@@ -61,7 +61,7 @@ import (
 )
 ```
 
-也可以手动执行，给你的filter取上自己想要的名字
+Alternatively, you can execute it manually and give your filter a name of your choice
 
 ```go
 import (
@@ -75,7 +75,7 @@ func main(){
 }
 ```
 
-完成以上步骤，你就可以在需要的dubbo接口配置里写入sentinel的filterName,构建起接口的filter链条。比如以下以consumer.yml配置文件为例
+After completing the above steps, you can specify the sentinel filterName in the configuration of the necessary dubbo interfaces, thereby constructing the filter chain for the interface. For example, here is a consumer.yml configuration file:
 
 ```yml
 references:
@@ -90,9 +90,9 @@ references:
       retries: 3
 ```
 
-## 初始化dubbo-go
+## Initialize dubbo-go
 
-到这一步，你只需要正常启动dubbo-go程序就完成了服务启动。用以下代码做一个较为完整举例
+At this point, you only need to start the dubbo-go program normally to complete the service startup. Here’s a more complete example code:
 
 ```go
 import (
@@ -126,17 +126,17 @@ func main() {
 }
 ```
 
-## 规划配置
+## Configure Planning
 
-sentinel以强大的规划配置吸引了很多使用者，其提供动态数据源接口进行扩展，用户可以通过动态文件或 etcd 等配置中心来动态地配置规则。但目前sentinel-golang作为破蛋版本，动态配置还在开发中
+Sentinel attracts many users with its powerful planning configuration, which provides dynamic data source interfaces for expansion. Users can dynamically configure rules through dynamic files or configuration centers like etcd. However, currently, Sentinel Golang as a beta version is still developing dynamic configuration.
 
-### 动态数据源
+### Dynamic Data Source
 
-（开发中）Sentinel 提供动态数据源接口进行扩展，用户可以通过动态文件或 etcd 等配置中心来动态地配置规则。
+(Under development) Sentinel provides dynamic data source interfaces for expansion, allowing users to configure rules dynamically through files or configuration centers like etcd.
 
-### 硬编码方式
+### Hard Coding Method
 
-Sentinel 也支持原始的硬编码方式加载规则，可以通过各个模块的 `LoadRules(rules)` 方法加载规则。以下是硬编码方式对某个method在consumer端的QPS流控：
+Sentinel also supports loading rules in the primitive hard coding way and can load rules using the `LoadRules(rules)` method of various modules. Below is an example of hard coding a QPS rate limit for a specific method on the consumer side:
 
 ```go
 _, err := flow.LoadRules([]*flow.FlowRule{
@@ -149,14 +149,15 @@ _, err := flow.LoadRules([]*flow.FlowRule{
 	},
 })
 if err != nil {
-	// 加载规则失败，进行相关处理
+	// Failed to load rules, handle accordingly
 }
 ```
 
-# 总结
+# Summary
 
-更加具体的实现，我就不详细论述，大家可以去看源码进一步了解。
+For a more detailed implementation, I will not elaborate further. You can refer to the source code for more understanding.
 
-最后，欢迎大家持续关注，或者贡献代码，期待dubbo-go在2020年在云原生领域继续突破。
+Finally, everyone is welcome to continue following us or contribute code. We look forward to dubbo-go making further breakthroughs in the cloud-native field in 2020.
 
-dubbo-go仓库地址：https://github.com/apache/dubbo-go
+dubbo-go repository address: https://github.com/apache/dubbo-go
+

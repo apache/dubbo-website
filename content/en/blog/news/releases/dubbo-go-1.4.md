@@ -4,108 +4,106 @@ linkTitle: "dubbo-go 1.4.0"
 date: 2021-01-12
 tags: ["Release Notes"]
 description: >
-    dubbo-go 1.4.0 版本发布，支持 K8s 注册中心、rest 协议
+    The dubbo-go 1.4.0 version has been released, supporting K8s registration center and REST protocol.
 ---
 
-得益于社区活跃的支持，2020 年 3 月 25 日 我们发布了一个让人兴奋的版本——dubbo-go v1.4.0。除了继续支持已有的 Dubbo 的一些特性外， dubbo-go 开始了一些自己的创新尝试。
+Thanks to the active support of the community, we released an exciting version on March 25, 2020—dubbo-go v1.4.0. In addition to continuing to support some existing Dubbo features, dubbo-go has begun some of its own innovative attempts.
 
-这个版本，最大的意义在于，做了一些支持云原生的准备工作。比如说，社区在探讨了很久的 k8s 落地之后，终于拿出来了使用 k8s 作为注册中心的解决方案。
+The most significant aspect of this version is the groundwork laid for cloud-native support. For instance, after long discussions within the community, we finally introduced a solution that uses K8s as the registration center.
 
-其次一个比较大的改进是--我们在可观测性上也迈出了重要的一步。在这之前，dubbo-go只提供了日志这么一个单一手段，内部的信息比较不透明，这个版本将有很大的改善。
+Another substantial improvement is that we have made significant strides in observability. Previously, dubbo-go only offered logging as the sole method, making internal information quite opaque, but this version will bring major improvements.
 
-最后一个令人心动的改进是，我们支持了 REST 协议。
+Finally, a thrilling enhancement is our support for the REST protocol.
 
-## 1. K8s 注册中心
+## 1. K8s Registration Center
 
-dubbo-go 注册中心的本质为K/V型的数据存储。当前版本实现了以 Endpoint 为维度在 k8s API Server 进行服务注册和发现的方案【下文简称 Endpoint 方案】，架构图如下。
+The registration center of dubbo-go is essentially a K/V type data storage. The current version implements service registration and discovery in k8s API Server based on Endpoint, as shown in the architecture diagram below.
 
 ![img](/imgs/blog/dubbo-go/1.4/k8s.png)
 
-Endpoint 方案，首先将每个 dubbo-go 进程自身服务信息序列化后，通过 Kubernetes 提供的 Patch 的接口写入在自身 Pod 对象的 Annotation 中。其次，通过 Kubernetes 的 Watch 接口观察集群中本 Namespace 内带有某些固定lable [见上图] Pod 的Annotation 信息的更新，处理服务健康检查、服务上下线等情况并实时更新本地缓存。整体流程仅使用 Kubernetes 原生 API 完成将 Kubernetes 作为注册中心的功能特性。
+The Endpoint approach first serializes the service information of each dubbo-go process and writes it into the Annotation of its Pod object via the Patch interface provided by Kubernetes. It then uses Kubernetes' Watch interface to monitor updates to the Annotation information of Pods with specific labels in the current Namespace, handling service health checks, service online/offline situations, and updating the local cache in real-time. The entire process completes the functionality of using Kubernetes as a registration center solely using the native Kubernetes API.
 
-这个方案非常简洁，不需要实现额外的第三方模块，也不需要对 Dubbo 业务作出改动，仅仅把 k8s 当做部署平台，依赖其容器管理能力，没有使用其 label selector 和 service 等服务治理特性。如果站在 k8s Operator 的角度来看，Operator 方案的优点即 Endpoint 方案的缺点，Endpoint 方案无法使用 k8s 的健康检查能力，亦没有使用 k8s service 的事件监听能力，每个 consumer 冗余监听一些不必要监听的事件，当 Endpoint 过多时会加大 API Server 的网络压力。
+This approach is very simple, requiring no additional third-party modules or modifications to Dubbo business logic, merely treating k8s as a deployment platform while relying on its container management capabilities, without utilizing its label selector and service governance features. From the perspective of a k8s Operator, the advantage of the Operator scheme is the downside of the Endpoint scheme; the Endpoint scheme cannot utilize k8s's health check capabilities and lacks event listening for k8s services, resulting in each consumer redundantly listening to unnecessary events, potentially increasing the network load on the API Server as the number of Endpoints grows.
 
-目前 dubbo-go 社区其实已经有了 operator 版本注册中心的技术方案， 后续版本【计划版本是 v1.6】的 dubbo-go 会给出其实现。相比当前实现，operator 方案开发和线上维护成本当然上升很多。二者如同硬币的两面，社区会让两种方式会共存，以满足不同 level 的使用者。
+Currently, the dubbo-go community already has a technical solution for an operator version registration center, and future versions (with planned release v1.6) of dubbo-go will provide its implementation. Compared to the current implementation, the operator scheme incurs significantly higher development and online maintenance costs. The two are like two sides of a coin, and the community will facilitate the coexistence of both methods to meet the needs of different levels of users.
 
-注意: 因 Pod 被调度而 IP 发生变化时，当前版本的 configuration 以及 router config 模块暂时无法动态更新。这有待于我们进一步解决。
+Note: Due to Pod scheduling, changes in IP cannot be dynamically updated in the current version's configuration and router config modules. This is something we need to address further.
 
-参考范例[^1].
+Reference example[^1].
 
-## 2. tracing 和 metric
+## 2. Tracing and Metric
 
-可观测性是微服务重要的一环，也是我们1.4版本着力支持的部分。在1.4版本中，我们主要在 tracing 和 metric 两个方向提供了支持。
+Observability is an essential component of microservices, and it is a focus of the 1.4 version. In version 1.4, we mainly provided support in tracing and metric directions.
 
-为了支持 tracing 和 metric，关键的一点是支持context在整个调用过程中传递。为此我们解决了context跨端传递的问题。目前用户可以在接口中声明 context 并且设置值，dubbo-go 在底层完成 context 内容从 client 传递到 server 的任务。
+To support tracing and metrics, a key point is supporting context passing throughout the entire call process. We addressed the issue of context passing across endpoints. Users can now declare context in the interface and set values, with dubbo-go completing the task of transmitting context from the client to the server.
 
 ![img](/imgs/blog/dubbo-go/1.4/context.png)
 
-在 metric 方面，dubbo-go 开始支持 Prometheus 采集数据了。目前支持 Prometheus中 的 Histogram 和 Summary。用户也可以通过扩展 Reporter 接口来自定义数据采集。
+In terms of metrics, dubbo-go has begun supporting Prometheus data collection. Currently, it supports Histogram and Summary in Prometheus. Users can also extend the Reporter interface to customize data collection.
 
-在 tracing 方面，目前 dubbo-go 的设计是采用 opentracing 作为统一的 API，在该 API 的基础上，通过在 client 和 server 之中传递 context，从而将整个链路串起来。用户可以采用任何支持 opentracing API 的监控框架来作为实现，例如 zipkin，jaeger 等。
+In terms of tracing, dubbo-go's design uses OpenTracing as a unified API, linking the entire chain by passing context between the client and server. Users can use any monitoring framework that supports the OpenTracing API, such as Zipkin, Jaeger, etc.
 
-## 3. rest协议支持
+## 3. REST Protocol Support
 
-Dubbo 生态的应用与其他生态的应用互联互通，一直是 dubbo-go 社区追求的目标。dubbo-go v1.3 版本已经实现了 dubbo-go 与 grpc 生态应用的互联互通，若想与其他生态如 Spring 生态互联互通，借助 rest 协议无疑是一个很好的技术手段。
+Interoperability between Dubbo ecosystem applications and applications from other ecosystems has always been a goal of the dubbo-go community. The dubbo-go v1.3 version has already achieved interoperability between dubbo-go and grpc ecosystem applications. If you want to connect to other ecosystems like Spring, using the REST protocol is undoubtedly a great technical means.
 
-Rest 协议是一个很强大并且社区呼声很高的特性，它能够有效解决 open API，前端通信，异构系统通信等问题。比如，如果你的公司里面有一些陈年代码是通过 http 接口来提供服务的，那么使用我们的 rest 协议就可以无缝集成了。
+The REST protocol is a powerful feature that has received high community demand, effectively addressing problems like open APIs, front-end communication, and communication between heterogeneous systems. For example, if your company has some legacy code providing services via HTTP interfaces, using our REST protocol can seamlessly integrate it.
 
-通过在 dubbo-go 中发布 RESTful 的接口的应用可以调用任意的 RESTful 的接口，也可以被任何客户端以 http 的形式调用，框架图如下：
+By publishing RESTful interfaces in dubbo-go, applications can call any RESTful interface and be called by any client in HTTP format, as shown in the framework diagram below:
 
 ![img](/imgs/blog/dubbo-go/1.4/rest.png)
 
-在设计过程中，考虑到不同的公司内部使用的 web 框架并不相同，所以我们允许用户扩展自己 rest server （ web 框架在 dubbo-go的封装）的实现，当然，与 rest server 相关的，诸如 filter 等，都可以在自己的 rest server 实现内部扩展。
+During the design process, considering that different companies use different web frameworks, we allow users to extend their implementation of the REST server (the web framework encapsulation in dubbo-go). Naturally, anything associated with the REST server, such as filters, can be extended within the user's REST server implementation.
 
-## 4. 路由功能增强
+## 4. Enhanced Routing Functionality
 
-路由规则在发起一次 RPC 调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起 RPC 调用的备选地址。v1.4 版本的 dubbo-go 实现了 Condition Router 和 Health Instance First Router，将在后面版本中陆续给出诸如 Tag Router 等剩余 Router 的实现。
+Routing rules serve to filter target server addresses before initiating an RPC call, with the filtered address list used as candidate addresses for the consumer to finally initiate the RPC call. The v1.4 version of dubbo-go implements Condition Router and Health Instance First Router, which will gradually be followed by the implementation of remaining routers like Tag Router in forthcoming versions.
 
-### 4.1 条件路由
+### 4.1 Conditional Routing
 
-条件路由，是 dubbo-go 中第一个支持的路由规则，允许用户通过配置文件及远端配置中心管理路由规则。
+Conditional routing is the first routing rule supported in dubbo-go, allowing users to manage routing rules through configuration files and remote configuration centers.
 
-与之相似的一个概念是 dubbo-go 里面的 group 概念，但是条件路由提供了更加细粒度的控制手段和更加丰富的表达语义。比较典型的使用场景是黑白名单设置，灰度以及测试等。
+A similar concept is the group concept in dubbo-go, but conditional routing provides a more granular control mechanism and richer expression semantics. Typical use cases include black and white listing, gray releases, and testing, etc.
 
-参考范例[^2]。
+Reference example[^2].
 
-### 4.2 健康实例优先路由
+### 4.2 Health Instance First Routing
 
-在 RPC 调用中，我们希望尽可能地将请求命中到那些处理能力快、处于健康状态的实例，该路由的功能就是通过某种策略断定某个实例不健康，并将其排除在候选调用列表，优先调用那些健康的实例。这里的"健康"可以是我们自己定义的状态，默认实现即当错误比例到达某一个阈值时或者请求活跃数大于上限则认为其不健康，允许用户扩展健康检测策略。
+In RPC calls, we hope to direct requests to instances that are fast in handling and in a healthy state. This routing feature determines whether an instance is healthy based on some strategy, excluding unhealthy candidates from the list and prioritizing healthy instances. Here, "healthy" can be a state we define; the default implementation considers an instance unhealthy when the error ratio reaches a certain threshold or when the request activity exceeds a limit, allowing users to extend health detection strategies.
 
-在我们服务治理里面，核心的问题其实就在于如何判断一个实例是否可用。无论是负载均衡、
+The core issue in our service governance actually lies in how to determine whether an instance is available. Whether it’s load balancing, circuit breaking, or rate limiting, they all answer this question. Therefore, this feature is an excellent attempt since the features we plan to provide next, like rule-based rate limiting and dynamic rate limiting, all aim to address the question of "how to determine the availability of an instance."
 
-熔断还是限流，都是对这个问题的解答。所以，这个 feature 是一个很好的尝试。因为我们接下来计划提供的特性，基于规则的限流以及动态限流，都是要解决“如何断定一个实例是否可用”这么一个问题。
+So, we welcome everyone to use this feature and provide feedback on the health metrics they set. This will greatly assist our upcoming work.
 
-所以欢迎大家使用这个特性，并向社区反馈各自设定的健康指标。这对我们接下来的工作会有很大的帮助。
+## 5. Hessian Protocol Enhancements
 
-## 5. hessian 协议增强
+Compared to Dubbo's Java implementation and other multi-language versions, one of the proud aspects of the dubbo-go community is that both the underlying network engine and the native Hessian2 protocol, as well as the entire service governance framework, have been developed and maintained from scratch by the dubbo-go community. The v1.4 version of dubbo-go brings many new features to the Hessian2 protocol.
 
-相较于 dubbo 的 Java 语言以及其他多语言版本，dubbo-go 社区比较自豪的地方之一就是：无论底层网络引擎还是原生使用的 hessian2 协议，以及整体服务治理框架，都由 dubbo-go 社区从零开发并维护。v1.4 版本的 dubbo-go 对 hessian2 协议又带来了诸多新 feature。
+### 5.1 Support for Dubbo Protocol Attachments
 
-### 5.1 支持 dubbo 协议的 attachments
+In dubbo-go, the attachments mechanism is used to pass additional information outside of the business parameters, serving as an important way to transmit non-business parameter information between the client and server.
 
-在 dubbo-go中，attachments 机制用于传递业务参数之外的附加信息，是在客户端和服务端之间传递非业务参数信息的重要方式。
+The hessian encoding protocol transmits this by encoding it at the end of the body content. Previously, dubbo-go-hessian2 did not support reading/writing attachments. At the request of multiple users (such as Ant Financial), dubbo-go-hessian2 now supports reading/writing attachments based on compatibility with the existing use.
 
-hessian 编码协议将之编码在 body 内容的后面进行传输，dubbo-go-hessian2 之前并不支持读/写 attachments，在多个使用方【如蚂蚁金服】的要求下，dubbo-go-hessian2 以兼容已有的使用方式为前提，支持了 attachments 的读/写。
+The struct for Request and Response defines a map for attachments. When attachments are needed, the user must construct these two types of parameters or return objects. Otherwise, it will not be possible to retrieve and write attachments in the hessian transmission stream.
 
-Request 和 Response 的 struct 中定义了 attachments 的 map，当需要使用 attachments，需要由使用方构造这两种类型的参数或者返回对象。否则，将无法在hessian的传输流中获取和写入attachments。
+Additionally, by leveraging the context transmission function in the dubbo-go call chain, users can now add attachments via context in service methods.
 
-另外，利用 dubbo-go 调用链中传输 context 的功能，用户已经可以在服务方法中通过 context 添加 attachments了。
+### 5.2 Support for Ignoring Non-Registered POJO Resolution
 
-### 5.2 支持忽略非注册 pojo 的解析方式
+Due to the high coupling of the hessian encoding protocol with Java types, implementing this in Go can be relatively troublesome since specific types need to be indicated. The dubbo-go-hessian2 implementation defines a POJO interface, requiring an implementation of the JavaClassName method for the program to obtain the corresponding class name in Java. This meant that requests containing unregistered classes would result in parsing errors, a problem that was previously unsolvable.
 
-由于 hessian 编码协议与 Java 的类型高度耦合，在 golang 的实现中会相对比较麻烦，需要有指明的对应类型。dubbo-go-hessian2 的实现方式是：定义 POJO 接口，要求实现 JavaClassName 方法来供程序获取 Java 对应的类名。这导致了接收到包含未注册类的请求时，将会无法解析而报错，这个问题以前是无法解决的。
+However, certain use cases like gateways or service mesh sidecars require simply reading additional information from the Dubbo requests as one would read HTTP header information, without caring about the specific definitions of Java classes. This feature allows gateways/sidecars to bypass reading unparseable specific types while directly reading the content of attachments when parsing request data flows.
 
-但是，有一些使用场景如网关或者 service mesh 的 sidecar，需要在不关心 Java 类的具体定义的情况下，像 http读取 header 信息一样仅仅读取 dubbo 请求的附加信息，将 dubbo/dubbo-go 请求转发。通过该 feature，网关/sidecar 并不关注请求的具体内容，可以在解析请求的数据流时跳过无法解析的具体类型，直接读取 attachments 的内容。
+This implementation is achieved by adding a skip field in the Decoder, applying special handling to each object.
 
-该实现通过在 Decoder 中添加的 skip 字段，对每一个 object 做出特殊处理。
+### 5.3 Support for java.math.BigInteger and java.math.BigDecimal
 
-### 5.3 支持 java.math.BigInteger 和 java.math.BigDecimal
+In Java services, java.math.BigInteger and java.math.BigDecimal are frequently used numerical types, which the Hessian library maps to the corresponding types under github.com/dubbogo/gost/math/big.
 
-在 Java 服务中，java.math.BigInteger 和 java.math.BigDecimal 是被频繁使用的数字类型，hessian 库将它们映射为 github.com/dubbogo/gost/math/big 下的对应类型。
+### 5.4 Support for 'Inheritance' and Ignoring Redundant Fields
 
-### 5.4 支持 ‘继承’ 和忽略冗余字段
-
-由于 go 没有继承的概念，所以在之前的版本，Java 父类的字段不被 dubbo-go-hessian2 所支持。新版本中，dubbo-go-hessian2 将Java来自父类的字段用匿名结构体对应，如：
+Since Go does not have the concept of inheritance, earlier versions did not support fields from Java parent classes in dubbo-go-hessian2. In the new version, dubbo-go-hessian2 corresponds to fields from Java's parent class using anonymous structs, such as:
 
 ```go
 type Dog struct {
@@ -115,39 +113,40 @@ type Dog struct {
 }
 ```
 
-同时，就像 json 编码中通过 `immediately` 可以在序列化中忽略该字段，同理，通过 `hessian:"-"` 用户也可以让冗余字段不参与 hessian 序列化。
+Furthermore, just as the `immediately` directive can be used in JSON encoding to skip serialization of a field, users can use `hessian:"-"` to exclude redundant fields from Hessian serialization.
 
-目前，上述四个特性已被某 Go 版本的 sidecar 集成到其商业版本中提供商业服务。
+Currently, the above four features have been integrated into a commercial version of a certain Go version's sidecar for commercial services.
 
-## 6. Nacos 配置中心
+## 6. Nacos Configuration Center
 
-配置中心是现代微服务架构里面的核心组件，现在 dubbo-go 提供了对配置中心的支持。
+The configuration center is a core component in modern microservice architecture, and now dubbo-go provides support for configuration centers.
 
 ![img](/imgs/blog/dubbo-go/1.4/config-center.png)
 
-Nacos 作为一个易于构建云原生应用的动态服务发现、配置管理和服务管理平台，在该版本终于作为配置中心而得到了支持。
+Nacos, as a platform for dynamic service discovery, configuration management, and service management that is easy to build for cloud-native applications, finally received support as a configuration center in this version.
 
-参考范例[^3].
+Reference example[^3].
 
-## 7. 接口级签名认证
+## 7. Interface-Level Signature Authentication
 
-Dubbo 鉴权认证是为了避免敏感接口被匿名用户调用而在 SDK 层面提供的额外保障。用户可以在接口级别进行定义是否允许匿名调用，并对调用方进行验签操作，对于验签不通过的消费端，禁止调用。
+Dubbo authentication is an additional safeguard provided at the SDK level to prevent sensitive interfaces from being invoked by anonymous users. Users can define whether anonymous calls are allowed at the interface level and perform signature verification on the caller, prohibiting consumption from those who fail the signature verification.
 
 ![img](/imgs/blog/dubbo-go/1.4/acl.png)
 
-如上图，总体实现基于 AK/SK 机制，应用通过 HTTPS 通信，启动时向鉴权服务拉取，定期更新。且允许用户自定义获取 AK/SK 的源，在 RPC 层面保障安全性。
+As illustrated above, the overall implementation is based on the AK/SK mechanism. Applications communicate via HTTPS and pull data from the authentication service at startup, with periodic updates. It also allows users to customize the source of obtaining AK/SK, ensuring security at the RPC layer.
 
-## 8. 回顾与展望
+## 8. Review and Outlook
 
-目前 dubbo-go 已经到了一个比较稳定成熟的状态。在接下来的版本里面，我们将集中精力在云原生上。下一个版本，我们将首先实现应用维度的服务注册，这是一个和现有注册模型完全不同的新的注册模型。也是我们朝着云原生努力的一个关键版本。
+Currently, dubbo-go has reached a relatively stable and mature state. In upcoming versions, we will focus on cloud-native features. The next version will first implement service registration at the application dimension, which will be a completely new registration model distinct from existing ones. This will be a key version in our efforts toward cloud-native architecture.
 
-在可观测性上，我们计划在整个 dubbo-go 的框架内，引入更多的埋点，收集更加多的内部状态。这需要实际生产环境用户的使用反馈，从而知道该如何埋点，收集何种数据。
+In terms of observability, we plan to introduce more logging points across the dubbo-go framework, collecting more internal states. This requires feedback from users in actual production environments on how to log and what kind of data to collect.
 
-在限流和熔断上，可以进一步扩展。当下的限流算法，是一种静态的算法--限流参数并没有实时根据当前服务器的状态来推断是否应该限流，它可能仅仅是用户的经验值。其缺点在于，用户难以把握应该如何配置，例如 TPS 究竟应该设置在多大。所以计划引入一种基于规则的限流和熔断。这种基于规则的限流和熔断，将允许用户设置一些系统状态的状态，如 CPU 使用率，磁盘 IO，网络 IO 等。当系统状态符合用户规则时，将触发熔断。
+Regarding rate limiting and circuit breaking, further extensions can be made. The current rate limiting algorithm is static—it does not deduce whether to rate limit based on the current state of the server; it may just be user experience values. Its drawback is that users struggle to determine how to configure it, such as what the TPS should actually be set to. Therefore, we plan to introduce rule-based rate limiting and circuit breaking, which will enable users to set certain system states, like CPU utilization, disk IO, and network IO, etc. When the system state meets the user's rules, circuit breaking will be triggered.
 
-目前这些规划的 任务清单[^4]，都已经放入在 dubbo-go 项目的 issue 里面，欢迎感兴趣的朋友认领参与开发。dubbo-go 社区在 **钉钉群 23331795** 欢迎你的加入。
+Currently, these planned tasks[^4] have been placed in the dubbo-go project's issues, and interested friends are welcome to participate in development. The dubbo-go community welcomes your joining in the **DingTalk group 23331795**.
 
 [^1]: https://github.com/apache/dubbo-go-samples/tree/1.5/registry/kubernetes
 [^2]: https://github.com/dubbogo/dubbo-samples/tree/master/golang/router/condition
 [^3]: https://github.com/dubbogo/dubbo-samples/tree/master/golang/configcenter/nacos
 [^4]: https://github.com/apache/dubbo-go/milestone/1
+

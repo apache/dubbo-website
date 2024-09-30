@@ -1,72 +1,71 @@
 ---
-title: "启发式流控制"
-linkTitle: "启发式流控制"
+title: "Heuristic Flow Control"
+linkTitle: "Heuristic Flow Control"
 date: 2023-01-30
 author: Quanlu Liu
 description: >
 ---
 
-# 整体介绍
-本文所说的柔性服务主要是指**consumer端的负载均衡**和**provider端的限流**两个功能。在之前的dubbo版本中，
-* 负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。
-* 限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。
+# Overview
+The flexible services discussed in this article primarily refer to **load balancing on the consumer side** and **rate limiting on the provider side**. In previous versions of Dubbo,  
+* The load balancing component primarily focused on the principle of fairness, meaning that the consumer would choose from providers as equally as possible, which did not perform ideally in certain situations.  
+* The rate limiting component provided only static rate limiting schemes, requiring users to set static maximum concurrency values on the provider side, which are not easy for users to select reasonably.
 
-我们针对这些存在的问题进行了改进。
+We have made improvements to address these issues.
 
-## 负载均衡
-### 使用介绍
-在原本的dubbo版本中，有五种负载均衡的方案供选择，他们分别是 `Random`、`ShortestResponse`、`RoundRobin`、`LeastActive` 和 `ConsistentHash`。其中除 `ShortestResponse` 和 `LeastActive` 外，其他的几种方案主要是考虑选择时的公平性和稳定性。
+## Load Balancing
+### Introduction
+In the original version of Dubbo, there were five load balancing schemes to choose from: `Random`, `ShortestResponse`, `RoundRobin`, `LeastActive`, and `ConsistentHash`. Except for `ShortestResponse` and `LeastActive`, the other schemes mainly consider fairness and stability in selection.
 
-对于 `ShortestResponse` 来说，其设计目的是从所有备选的 provider 中选择 response 时间最短的以提高系统整体的吞吐量。然而存在两个问题：
-1. 在大多数的场景下，不同provider的response时长没有非常明显的区别，此时该算法会退化为随机选择。
-2. response的时间长短有时也并不能代表机器的吞吐能力。对于 `LeastActive` 来说，其认为应该将流量尽可能分配到当前并发处理任务较少的机器上。但是其同样存在和 `ShortestResponse` 类似的问题，即这并不能单独代表机器的吞吐能力。
+For `ShortestResponse`, its design aims to select the provider with the shortest response time from all available options to improve overall system throughput. However, there are two issues:
+1. In most scenarios, the response times of different providers do not show significant differences, causing the algorithm to degrade to random selection.
+2. The length of the response time does not always represent the machine's throughput capability. For `LeastActive`, it believes traffic should be allocated to machines currently handling fewer concurrent tasks, but it similarly faces issues like `ShortestResponse`, as it does not solely indicate the machine's throughput capability.
 
-基于以上分析，我们提出了两种新的负载均衡算法。一种是同样基于公平性考虑的单纯 `P2C` 算法，另一种是基于自适应的方法 `adaptive`，其试图自适应的衡量 provider 端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。
+Based on this analysis, we propose two new load balancing algorithms. One is a purely `P2C` algorithm based on fairness considerations, and the other is an `adaptive` method that attempts to measure the throughput capabilities of provider machines adaptively, allocating traffic to machines with higher throughput to enhance overall system performance.
 
-#### 总体效果
-对于负载均衡部分的有效性实验在两个不同的情况下进行的，分别是提供端机器配置比较均衡和提供端机器配置差距较大的情况。
+#### Overall Effect
+The effectiveness experiments for load balancing were conducted in two different scenarios: one with relatively balanced provider configurations and another with significant disparities in provider configurations.
 
 ![image.png](/imgs/blog/proposals/heuristic-flow-control/1675265258687-c3df68a8-80e0-4311-816c-63480494850c.png)
 
 ![image.png](/imgs/blog/proposals/heuristic-flow-control/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png)
 
-#### 使用方法
-使用方法与原本的负载均衡方法相同。只需要在consumer端将"loadbalance"设置为"p2c"或者"adaptive"即可。
+#### Usage Method
+The usage method is the same as the original load balancing methods. Simply set "loadbalance" to "p2c" or "adaptive" on the consumer side.
 
-#### 代码结构
-负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。
+#### Code Structure
+The algorithm implementation for the load balancing part only requires inheriting the LoadBalance interface within the existing load balancing framework.
 
-### 原理介绍
+### Principles
+#### P2C Algorithm
 
-#### P2C算法
+The Power of Two Choices algorithm is simple yet classic, and its main idea is as follows:
 
-Power of Two Choice算法简单但是经典，主要思路如下：
+1. For each call, make two random selections from the available provider list, choosing two nodes providerA and providerB.
+2. Compare the two nodes, providerA and providerB, and select the one with the smaller "current number of connections being processed".
 
-1. 对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。
-2. 比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。
+#### Adaptive Algorithm
 
-#### adaptive算法
+[Code GitHub Link](https://github.com/apache/dubbo/pull/10745)
 
-[代码的github地址](https://github.com/apache/dubbo/pull/10745)
-
-##### 相关指标
+##### Relevant Metrics
 1. cpuLoad
-![img](/imgs/blog/proposals/heuristic-flow-control/26808016bc7f1ee83ab425e308074f17.svg)。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。
+![img](/imgs/blog/proposals/heuristic-flow-control/26808016bc7f1ee83ab425e308074f17.svg). This metric is obtained on the provider side and passed to the consumer side through the invocation's attachments.
 
 2. rt
-rt为一次rpc调用所用的时间，单位为毫秒。
+rt is the time taken for a single RPC call, measured in milliseconds.
 
 3. timeout
-timeout为本次rpc调用超时剩余的时间，单位为毫秒。
+timeout is the remaining timeout for the current RPC call, measured in milliseconds.
 
 4. weight
-weight是设置的服务权重。
+weight is the configured service weight.
 
 5. currentProviderTime
-provider端在计算cpuLoad时的时间，单位是毫秒
+The time at which the provider side calculates cpuLoad, measured in milliseconds.
 
 6. currentTime
-currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。
+currentTime is the last time load was calculated, initialized to currentProviderTime, measured in milliseconds.
 7. multiple
 ![img](/imgs/blog/proposals/heuristic-flow-control/b60f036bd026b92129df8a6476922cc8.svg)
 
@@ -74,148 +73,148 @@ currentTime为最后一次计算load时的时间，初始化为currentProviderTi
 ![img](/imgs/blog/proposals/heuristic-flow-control/f2abbc771049cf4f3e492e93a258d699.svg)![img](/imgs/blog/proposals/heuristic-flow-control/8fb1af970b995232ebed2764a5706aab.svg)
 
 9. beta
-平滑参数，默认为0.5
+Smoothing parameter, default is 0.5.
 
 10. ewma
-lastLatency的平滑值![img](/imgs/blog/proposals/heuristic-flow-control/c26fdbae56f3a06c46434ae91185a3d6.svg)
+The smoothed value of lastLatency![img](/imgs/blog/proposals/heuristic-flow-control/c26fdbae56f3a06c46434ae91185a3d6.svg)
 
 11. inflight
-inflight为consumer端还未返回的请求的数量。
+inflight is the number of requests on the consumer side that have not yet been returned.
 ![img](/imgs/blog/proposals/heuristic-flow-control/f429c4726dec484e70ee73e6a37c88dd.svg)
 
 12. load
-对于备选后端机器x来说，若距离上次被调用的时间大于2*timeout，则其load值为0。
-否则,
+For the alternate backend machine x, if the time since the last call is greater than 2*timeout, its load value is 0.
+Otherwise,
 
 ![img](/imgs/blog/proposals/heuristic-flow-control/0f56746b3643dc3ed0e019c24ad5f377.svg)
 
-##### 算法实现
-依然是基于P2C算法。
+##### Algorithm Implementation
+Still based on the P2C algorithm.
 
-1. 从备选列表中做两次随机选择，得到providerA和providerB
-2. 比较providerA和providerB的load值，选择较小的那个。
+1. Randomly select two times from the alternative list to get providerA and providerB.
+2. Compare the load values of providerA and providerB, choosing the smaller one.
 
-## 自适应限流
-与负载均衡运行在consumer端不同的是，限流功能运行在provider端。其作用是限制provider端处理并发任务时的最大数量。从理论上讲，服务端机器的处理能力是存在上限的，对于一台服务端机器，当短时间内出现大量的请求调用时，会导致处理不及时的请求积压，使机器过载。在这种情况下可能导致两个问题：1.由于请求积压，最终所有的请求都必须等待较长时间才能被处理，从而使整个服务瘫痪。2.服务端机器长时间的过载可能有宕机的风险。因此，在可能存在过载风险时，拒绝掉一部分请求反而是更好的选择。在之前的dubbo版本中，限流是通过在provider端设置静态的最大并发值实现的。但是在服务数量多，拓扑复杂且处理能力会动态变化的局面下，该值难以通过计算静态设置。
-基于以上原因，我们需要一种自适应的算法，其可以动态调整服务端机器的最大并发值，使其可以在保证机器不过载的前提下，尽可能多的处理接收到的请求。因此，我们参考brpc等其他框架的基础上，在dubbo的框架内实现了两种自适应限流算法，分别是基于启发式平滑的"HeuristicSmoothingFlowControl"和基于窗口的"AutoConcurrencyLimier"。
+## Adaptive Rate Limiting
+Unlike load balancing, which runs on the consumer side, the rate limiting feature operates on the provider side. Its purpose is to limit the maximum number of concurrent tasks processed by the provider. Theoretically, the server's processing capacity has an upper limit. When a large number of request calls occur in a short period of time, it can lead to a backlog of unprocessed requests, overloading the machine. In such cases, two issues may arise: 1. Due to the request backlog, all requests must wait a long time to be processed, causing the entire service to go down. 2. Long-term overload of the server machine may risk crashing. Therefore, when there is potentially a risk of overload, rejecting some requests might be the better choice. In previous versions of Dubbo, rate limiting was implemented by setting a static maximum concurrency value on the provider side. However, in situations with numerous services and complex topology where processing capacity can dynamically change, it's challenging for users to set this value statically.
+For these reasons, we need an adaptive algorithm that can dynamically adjust the maximum concurrency values of server machines, allowing them to process as many received requests as possible while ensuring the machines do not become overloaded. Therefore, we implemented two adaptive rate limiting algorithms within the Dubbo framework, based on heuristic smoothing: "HeuristicSmoothingFlowControl" and a window-based "AutoConcurrencyLimier".
 
-[代码的github地址](https://github.com/apache/dubbo/pull/10642)
+[Code GitHub Link](https://github.com/apache/dubbo/pull/10642)
 
-### 使用介绍
-#### 总体效果
+### Introduction
+#### Overall Effect
 
-自适应限流部分的有效性实验我们在提供端机器配置尽可能大的情况下进行，并且为了凸显效果，在实验中我们将单次请求的复杂度提高，将超时时间尽可能设置的大，并且开启消费端的重试功能。
+The effectiveness experiments for adaptive rate limiting were conducted under the assumption of the provider's machine configuration being as large as possible. To highlight the effects, we increased the complexity of single requests, set the timeout as large as possible, and enabled the retry feature on the consumer side.
 ![image.png](/imgs/blog/proposals/heuristic-flow-control/1675267798831-3da99681-577f-4e5a-b122-b87c8aba7299.png)
 
-#### 使用方法
-要确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。
+#### Usage Method
+To ensure that multiple nodes exist on the server side and that the retry strategy is enabled on the consumer side, the rate limiting function can perform better.
 
-设置方法与静态的最大并发值设置类似，只需在provider端将"flowcontrol"设置为"autoConcurrencyLimier"或者"heuristicSmoothingFlowControl"即可。
+The configuration method is similar to setting the static maximum concurrency value; simply set "flowcontrol" to "autoConcurrencyLimier" or "heuristicSmoothingFlowControl" on the provider side.
 
-#### 代码结构
-1. FlowControlFilter：在provider端的filter负责根据限流算法的结果来对provider端进行限流功能。
-2. FlowControl：根据dubbo的spi实现的限流算法的接口。限流的具体实现算法需要继承自该接口并可以通过dubbo的spi方式使用。
-3. CpuUsage：周期性获取cpu的相关指标
-4. HardwareMetricsCollector：获取硬件指标的相关方法
-5. ServerMetricsCollector：基于滑动窗口的获取限流需要的指标的相关方法。比如qps等。
-6. AutoConcurrencyLimier：自适应限流的具体实现算法。
-7. HeuristicSmoothingFlowControl：自适应限流的具体实现方法。
+#### Code Structure
+1. FlowControlFilter: The filter on the provider side responsible for implementing rate limiting based on the algorithm's results.
+2. FlowControl: The interface for rate limiting algorithms implemented based on Dubbo's SPI. The specific implementation algorithm needs to inherit from this interface and can be used through Dubbo's SPI.
+3. CpuUsage: Periodically fetches CPU-related metrics.
+4. HardwareMetricsCollector: Methods for obtaining hardware metrics.
+5. ServerMetricsCollector: Methods for obtaining the metrics necessary for rate limiting based on sliding windows, such as QPS, etc.
+6. AutoConcurrencyLimier: The specific implementation algorithm for adaptive rate limiting.
+7. HeuristicSmoothingFlowControl: The specific implementation method for adaptive rate limiting.
 
-### 原理介绍
+### Principles
 #### HeuristicSmoothingFlowControl
-##### 相关指标
+##### Relevant Metrics
 1. alpha
-alpha为可接受的延时的上升幅度，默认为0.3
+alpha is the acceptable increase in delay, defaulting to 0.3.
 
 2. minLatency
-在一个时间窗口内的最小的Latency值。
+The minimum Latency value within a time window.
 
 3. noLoadLatency
-noLoadLatency是单纯处理任务的延时，不包括排队时间。这是服务端机器的固有属性，但是并不是一成不变的。在HeuristicSmoothingFlowControl算法中，我们根据机器CPU的使用率来确定机器当前的noLoadLatency。当机器的CPU使用率较低时，我们认为minLatency便是noLoadLatency。当CPU使用率适中时，我们平滑的用minLatency来更新noLoadLatency的值。当CPU使用率较高时，noLoadLatency的值不再改变。
+noLoadLatency is the latency for purely processing tasks, excluding queue time. This is an inherent property of the server machine, but not static. In the HeuristicSmoothingFlowControl algorithm, we determine the current noLoadLatency based on the CPU usage of the machine. When the CPU usage is low, we consider minLatency to be noLoadLatency. When CPU usage is moderate, we smoothly use minLatency to update the value of noLoadLatency. When CPU usage is high, the value of noLoadLatency does not change.
 
 4. maxQPS
-一个时间窗口周期内的QPS的最大值。
+The maximum QPS within a time window cycle.
 
 5. avgLatency
-一个时间窗口周期内的Latency的平均值，单位为毫秒。
+The average Latency within a time window cycle, measured in milliseconds.
 
 6. maxConcurrency
-计算得到的当前服务提供端的最大并发值。
+The current maximum concurrency value calculated for the service provider.
 ![img](/imgs/blog/proposals/heuristic-flow-control/f40e48ebdb49648cf942714609808c52.svg)
 
-##### 算法实现
-当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从HeuristicSmoothingFlowControl算法中获得当前的maxConcurrency值。如果当前正在处理的请求数量超过了maxConcurrency，则拒绝该请求。
+##### Algorithm Implementation
+When the server receives a request, it first checks whether the CPU usage exceeds 50%. If it does not exceed 50%, the request is accepted for processing. If it exceeds 50%, it indicates that the current load is high, thus obtaining the current maxConcurrency value from the HeuristicSmoothingFlowControl algorithm. If the number of currently processing requests exceeds maxConcurrency, the request is rejected.
 
 #### AutoConcurrencyLimier
-##### 相关指标
+##### Relevant Metrics
 1. MaxExploreRatio
-默认设置为0.3
+Default set to 0.3.
 2. MinExploreRatio
-默认设置为0.06
+Default set to 0.06.
 3. SampleWindowSizeMs
-采样窗口的时长。默认为1000毫秒。
+Length of the sampling window. Defaults to 1000 milliseconds.
 4. MinSampleCount
-采样窗口的最小请求数量。默认为40。
+Minimum number of requests in the sampling window. Defaults to 40.
 5. MaxSampleCount
-采样窗口的最大请求数量。默认为500。
+Maximum number of requests in the sampling window. Defaults to 500.
 6. emaFactor
-平滑处理参数。默认为0.1。
+Smoothing processing parameter. Defaults to 0.1.
 7. exploreRatio
-探索率。初始设置为MaxExploreRatio。
-若avgLatency<=noLoadLatency*(1.0 + MinExploreRatio)或者qps>=maxQPS*(1.0 + MinExploreRatio)
-则exploreRatio=min(MaxExploreRatio,exploreRatio+0.02)
-否则
-exploreRatio=max(MinExploreRatio,exploreRatio-0.02)
+Exploration rate. Initially set to MaxExploreRatio.
+If avgLatency <= noLoadLatency * (1.0 + MinExploreRatio) or qps >= maxQPS * (1.0 + MinExploreRatio),
+then exploreRatio = min(MaxExploreRatio, exploreRatio + 0.02).
+Otherwise,
+exploreRatio = max(MinExploreRatio, exploreRatio - 0.02).
 
 8. maxQPS
-窗口周期内QPS的最大值。
+The maximum QPS within the window cycle.
 ![img](/imgs/blog/proposals/heuristic-flow-control/d5cf045bc17267befc176f3d76273267.svg)
 9. noLoadLatency
 ![img](/imgs/blog/proposals/heuristic-flow-control/8c700211f5c7a13403e3088df9cd9f43.svg)
 10. halfSampleIntervalMs
-半采样区间。默认为25000毫秒。
+Half sampling interval. Defaults to 25000 milliseconds.
 11. resetLatencyUs
-下一次重置所有值的时间戳，这里的重置包括窗口内值和noLoadLatency。单位是微秒。初始为0.
+The timestamp for the next reset of all values, including window values and noLoadLatency. Measured in microseconds. Initialized to 0.
 ![img](/imgs/blog/proposals/heuristic-flow-control/1af4a6134ede96985302ee8a27f93df7.svg)
 12. remeasureStartUs
-下一次重置窗口的开始时间。
+The start time for the next reset of the window.
 ![img](/imgs/blog/proposals/heuristic-flow-control/c7da904b9a4c890456499b09d01938d3.svg)
 13. startSampleTimeUs
-开始采样的时间。单位为微秒。
+The time to start sampling. Measured in microseconds.
 14. sampleCount
-当前采样窗口内请求的数量。
+The number of requests within the current sampling window.
 15. totalSampleUs
-采样窗口内所有请求的latency的和。单位为微秒。
+The sum of latencies for all requests in the sampling window. Measured in microseconds.
 16. totalReqCount
-采样窗口时间内所有请求的数量和。注意区别sampleCount。
+The total number of requests within the sampling window. Note the distinction from sampleCount.
 17. samplingTimeUs
-采样当前请求的时间戳。单位为微秒。
+The timestamp for the current request sampling. Measured in microseconds.
 18. latency
-当前请求的latency。
+The latency for the current request.
 19. qps
-在该时间窗口内的qps值。
+The QPS value within that time window.
 ![img](/imgs/blog/proposals/heuristic-flow-control/c0e8b30fc1ecf9438bc2d574fb3da8b6.svg)
 20. avgLatency
-窗口内的平均latency。
+The average latency within the window.
 ![img](/imgs/blog/proposals/heuristic-flow-control/3a3acfdb05be7d3985835d43e492d3b9.svg)
 21. maxConcurrency
-上一个窗口计算得到当前周期的最大并发值。
+The maximum concurrency value for the current cycle calculated from the previous window.
 22. nextMaxConcurrency
-当前窗口计算出的下一个周期的最大并发值。
+The next maximum concurrency value calculated for the current window.
 ![img](/imgs/blog/proposals/heuristic-flow-control/09852cc0ef125b43a37719796cb8baae.svg)
 
 ##### Little's Law
-* 当服务处于稳定状态时：concurrency=latency*qps。这是自适应限流理论的基础。
-* 当请求没有导致机器超载时，latency基本稳定，qps和concurrency处于线性关系。
-* 当短时间内请求数量过多，导致服务超载的时候，concurrency会和latency一起上升，qps则会趋于稳定。
+* When the service is in a stable state: concurrency = latency * qps. This is the basis for adaptive rate limiting theory.
+* When requests do not cause the machine to be overloaded, latency is generally stable, and qps and concurrency exhibit a linear relationship.
+* When the number of requests exceeds limits within a short time, causing the service to overload, both concurrency and latency will rise, and qps will tend to stabilize.
 
-##### 算法实现
-AutoConcurrencyLimier的算法使用过程和HeuristicSmoothingFlowControl类似。与HeuristicSmoothingFlowControl的最大区别是:
+##### Algorithm Implementation
+The algorithm use process of AutoConcurrencyLimier is similar to HeuristicSmoothingFlowControl. The major difference from HeuristicSmoothingFlowControl is that:
 
-AutoConcurrencyLimier是基于窗口的。每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到maxConcurrency。
-其次，利用exploreRatio来对剩余的容量进行探索。
+AutoConcurrencyLimier is window-based. Only when a certain amount of sampling data is accumulated within the window does it use the data to update maxConcurrency.
+Additionally, it uses exploreRatio to explore the remaining capacity.
 
-另外，每隔一段时间都会自动缩小max_concurrency并持续一段时间，以处理noLoadLatency上涨的情况。因为估计noLoadLatency时必须先让服务处于低负载的状态，因此对maxConcurrency的缩小是难以避免的。
+Furthermore, every once in a while, max_concurrency will automatically be reduced and maintained for some time to address situations where noLoadLatency rises. This is difficult to avoid because estimating noLoadLatency requires the service to be at a low load state.
 
-由于 max_concurrency < concurrency 时，服务会拒绝掉所有的请求，限流算法将 "排空所有的经历过排队的等待请求的时间" 设置为 2*latency，以确保 minLatency 的样本绝大部分时没有经过排队等待的。
+Since max_concurrency < concurrency, the service will reject all requests and set the "waiting time for all queued requests" in the rate limiting algorithm to 2 * latency, ensuring the majority of the minLatency samples have not undergone queuing.
 

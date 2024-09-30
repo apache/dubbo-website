@@ -1,202 +1,203 @@
 ---
-title: "政采云基于Dubbo的混合云数据跨网实践"
-linkTitle: "政采云基于Dubbo的混合云数据跨网实践"
-tags: ["apachecon2023", "用户案例", "政采云"]
+title: "Zhengcaiyun's Hybrid Cloud Data Cross-Network Practice Based on Dubbo"
+linkTitle: "Zhengcaiyun's Hybrid Cloud Data Cross-Network Practice Based on Dubbo"
+tags: ["apachecon2023", "case study", "Zhengcaiyun"]
 date: 2023-10-07
-authors: ["王晓彬"]
-description: 政采云基于Dubbo的混合云数据跨网实践
+authors: ["Wang Xiaobin"]
+description: Zhengcaiyun's Hybrid Cloud Data Cross-Network Practice Based on Dubbo
 ---
 
-摘要：本文整理自政采云资深开发工程师王晓彬的分享。本篇内容主要分为四个部分：
+Abstract: This article is organized from the sharing of Wang Xiaobin, a senior development engineer at Zhengcaiyun. The content is mainly divided into four parts:
 
-* 一、项目背景
-* 二、为什么叫高速公路
-* 三、修路实践
-* 四、未来规划
+* 1. Project Background
+* 2. Why is it called the Highway
+* 3. Road Construction Practice
+* 4. Future Planning
 
-## 一、项目背景
+## 1. Project Background
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img.png)
 
-我们有一个云岛业务叫政采云，它是政府的购物网站，类似于淘宝。政府采购会在政采云上做企业采购、政府采购的业务。
+We have a cloud island business called Zhengcaiyun, which is a shopping website for the government, similar to Taobao. Government procurement conducts corporate purchases and government procurement business on Zhengcaiyun.
 
-云岛中的"云"是指我们的云平台，云平台是我们公司自己部署的一套购物网站，它对应的是一套微服务框架。而"岛"是指，比如安徽或者山西它们都有自己的局域网，如果我们在它们那里也部署一套这个框架，就叫"岛"。我们的云主要是给浙江省和相关的区划用的。
+The "cloud" in cloud island refers to our cloud platform, a self-deployed shopping website corresponding to a microservice framework. The "island" refers to local networks in places like Anhui or Shanxi where we would deploy this framework, calling it an "island". Our cloud is mainly used by Zhejiang Province and related regional divisions.
 
-我们的云和岛之间存在数据传输的问题，举个例子，比如我现在收到一个政府的公告，而这个公告肯定是全国性的。所以我可能会在云平台的管理平台上去录公告，再把它推送出去，这个时候云和岛之间就存在了一些数据的跨网。
+There is a data transmission issue between our cloud and island. For example, if I receive a government announcement that's national, I may record it on the management platform of the cloud and then push it out, creating cross-network data between the cloud and the island.
 
-1. 云岛网络
+1. Cloud Island Network
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_1.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_1.png)
 
-对我们云平台来说，这个局域网是我们公司内部完全可控的。比如你要开个端口，很快就能开起来。导端它可能是局域网或者是私有网络，比如我们之前做了一个浙商银行的项目，它是完全隔离的一个岛。他们的安全策略和开端口的东西都是他们自己定义的，这就是我们云岛的业务结构。
+For our cloud platform, the local area network is completely controllable within our company. For instance, opening a port is straightforward. The import side may be a local or private network; for instance, we previously worked on a project with Zhejiang Merchants Bank, which is a fully isolated island. They define their own security policies and port openings, reflecting the business structure of our cloud island.
 
-2. 混合云岛网络
+2. Hybrid Cloud Island Network
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_2.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_2.png)
 
-上图是大概的数据链路图。云平台下面有分支机构、分公司，它们会对应一套业务的系统。政务云是我刚才说的省级（安徽省）或者市级（无锡市）对应的区块，隔离的政务云。私有部署是银行、国企、军队、政企等典型的混合云的网络架构。
+The above graphic is a general data link diagram. Below the cloud platform are branches and subsidiaries correspondingly linked to a set of business systems. The government cloud refers to the provincial (Anhui Province) or municipal (Wuxi City) segmented areas, resulting in isolated government clouds. Private deployments involve typical hybrid cloud network architecture such as banks, state-owned enterprises, military, and government enterprises.
 
-3. 混合云岛网络的特点
+3. Characteristics of Hybrid Cloud Island Network
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_3.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_3.png)
 
-我们混合云网络架构的特点包括：
+Our hybrid cloud network architecture features:
 
-- 平台的一致性。我们部署在公有云、云平台、政务云、私有云上的那一套的代码是一样的。我们把一套代码部署在不同的地方就变成了多个平台。
-- 网络连接与能力复用。我们会依赖一些第三方的能力，比如短信，但私有云上它的网络管控比较严，所以和第三方互通端口或者网络的流程就会比较复杂。这个时候我们希望去复用我们云平台的能力，这个时候他们之间又有一些数据的交互。
-- 跨域访问迁移。
-- 统一的平台管理。像我刚才举的例子，如果要发公告，我们希望可以在一个平台上就可以管理起来。而不是浙江发一条，安徽发一条，那样维护的成本也会比较高。
+- Consistency of the platform. The code deployed on public clouds, cloud platforms, government clouds, and private clouds is identical. Deploying one set of code in various locations translates into multiple platforms.
+- Network connection and capability reuse. We depend on some third-party services, such as SMS, but private clouds have stringent network controls complicating the process of connecting with third parties. Here, we intend to reuse the capabilities of our cloud platform, leading to data exchange.
+- Cross-domain access migration.
+- Unified platform management. For instance, if we need to issue an announcement, we hope to manage it on one platform instead of separate ones for Zhejiang and Anhui, which would increase maintenance costs.
 
-4. 政企网络痛点
+4. Pain Points in Government and Enterprise Networks
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_4.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_4.png)
 
-很多公司都会和政府打交道，政企网络有以下几个特点：
+Many companies interact with the government, and government-enterprise networks have the following characteristics:
 
-网络复杂。比如银行的网络，它们的安全性和内部的东西很复杂，流程的开通也比较多，需要你要经常去跑，跑完了之后发现有新的问题，又要去跑。
+Complex networks. For example, bank networks are intricate due to their security requirements and numerous processes that require regular follow-ups, leading to new issues after evaluations.
 
-安全要求高。比如在开通端口的时候，我们需要去传数据，如果里面的那些序列化的协议不符合它们的规范，它们就会拿掉。这个时候给我们的业务其实是超时的，或者是那种通用的异常。而我们并不知道发生了什么，这就会带来未知的风险。
+High security requirements. For example, when opening ports, data transmission needs to comply with specific serialization protocols; otherwise, these requests get rejected, leading to timeouts or generic exceptions, creating unknown risks.
 
-业务驱动运维。我们有了业务才会去部署，才会去做事情。我们就会多次、重复的投入，这就会导致人力、时间成本会比较高，私有部署的时候会更多。
+Business-driven operations. Deployment occurs only after business requirements arise, leading to repetitive investments of time and manpower, especially for private deployments.
 
-5. 现有方案
+5. Existing Solutions
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_5.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_5.png)
 
-基于以上的痛点，我们做了两个方案。
+Based on the aforementioned pain points, we devised two solutions.
 
-第一个方案，基于Dubbo Filter的单向方案。这个方案的历史比较久一些，它有两个特点。
+The first solution is a unidirectional plan based on Dubbo Filter. This approach is fairly historic with two characteristics.
 
-第一个特点，单向传输。它是从"岛"到"云"只有一个方向，它基于Dubbo Filter的原因是，我们公司内部的微服务都是通过Dubbo来调用的，所以我们是强依赖的来Dubbo的。所以做数据跨网的方案肯定会基于Dubbo的特性来做。
+The first characteristic is unidirectional transmission. It moves from the "island" to the "cloud" in one direction, and this is based on Dubbo Filter since our company’s internal microservices are all called through Dubbo, making it a strong dependency for cross-network data solutions.
 
-第二个特点，在本地部署业务的provider过滤器是运维上的负担。当导端需要把数据同步给云端的时候，也就是从岛端的业务Web传输到云端的业务provider。这个时候我必须在导端也部署一套业务的provider才可以。部署它的原因是它要拦截这个请求，然后把这个请求转发给部署在云平台的Dubbo网关。
+The second characteristic is that the locally deployed business provider as a filter creates an operational burden. When the import side needs to sync data to the cloud side, data is transmitted from the island's business web to the cloud's business provider. Hence, I must also deploy a business provider on the import side. The need for this deployment arises from the requirement to intercept requests and forward them to the Dubbo gateway deployed on the cloud platform.
 
-但这个时候就会给我们带来负担。如果导端本来就有数据的入库就还好，因为provider本来就存在，但一些业务只是做跨网用的，没有本地的入库，那么这个时候业务的provider就是多余的了。
+However, this creates a burden. If the import side already has data storage, this could be manageable as the provider exists. But if some business processes are solely for cross-network use without local storage, then the business provider becomes redundant.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_6.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_6.png)
 
-第二个方案，网状点对点方案。因为岛和岛之间需要网络互通，所以就会单独开通这个点和你需要传输的点之间的端口。开通之后我们就可以调用了，调用的形式可以用Dubbo。
+The second solution is a mesh point-to-point approach. Because there's a need for network interconnectivity between islands, ports are specifically opened between this point and the destination point. Once opened, calls can be made, typically through Dubbo.
 
-这个方案有一个很明显的缺陷，线特别多，所以点和点之间开通的复杂度也很高，对后面的扩展可能也非常不利。
+This solution has a clear flaw; there are numerous lines which increase the complexity of establishing connections between points and may hinder future scaling.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_7.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_7.png)
 
-以上方案存在的问题包括单向传输、白名单开通成本高、平台维护成本高、公共功能的缺失。
+The aforementioned solutions encounter issues including unidirectional transmission, high whitelist opening costs, high platform maintenance costs, and the absence of shared functionalities.
 
-基于以上的问题，我们做了一个新的方案，叫高速公路。
+Based on the above issues, we created a new plan called the Highway.
 
-## 二、为什么叫高速公路
+## 2. Why is it called the Highway
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_8.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_8.png)
 
-为什么叫告诉公路呢？主要因为我们想要达到的效果是：
+Why it is called the Highway? Primarily because the desired effect is:
 
-只建一次，可复用。比如北京到上海的高速公路，它只要够宽，一条就够了。如果你是从上海到北京或者从杭州到北京，是可以复用的，不用单独再修建一条。
+Built once, reusable. For example, the highway from Beijing to Shanghai only needs to be wide enough; one road suffices. You can reuse this for travel from Shanghai to Beijing or Hangzhou to Beijing, without needing to build another.
 
-隧道机制。因为高速公路修建的地方不一定都在平原，可能会在河、海、山等等附近。如果我们在高速公路下面搭建一条隧道，这个时候对于司机来说就是无感的。我们的目的是一样的，如果你觉得政企网络很复杂，那么我们就帮你把它屏蔽掉，这样你也是无感的了。
+Tunnel mechanism. Highways don't only traverse plains; they may run near rivers, seas, or mountains. If we construct a tunnel under the highway, it's seamless for drivers. Our goal aligns with this; if the government-enterprise network seems intricate to you, we aim to shield that complexity, so you won't have to perceive it.
 
-考虑传输性能。如果每个业务部门都自己搭建一套传输链路，那么传输性能只要能承载自己的业务就够了，因为不一定要给别人用，或者给别人用了也是小范围的。但如果搭建的是一条可复用的链路，就必须考虑传输的性能了。
+Considering transmission performance. If each business department builds its own transmission path, the performance only needs to sustain their own operations, as it is not necessarily shared. However, if establishing a reusable path, transmission performance must be prioritized.
 
-## 三、修路实践
+## 3. Road Construction Practice
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_9.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_9.png)
 
-接下来介绍一下我们在修建高速公路的时候遇到的一些问题以及具体的做法。我们在客户端接入上遇到了以下问题：
+Next, we will detail the challenges encountered during highway construction as well as specific practices. We faced the following issues when integrating with clients:
 
-第一个问题，强依赖Dubbo。
+The first issue is a strong dependence on Dubbo.
 
-第二个问题，透明传输，不改变使用Dubbo的方式。也就是我不需要自己写一些注解代替Dubbo，或者写一些API调用Dubbo。因为写了之后，一些新人可能并不能理解或者不能习惯，也不知道里面有什么坑。所以我们用原始的Dubbo来做可能会对用户更加无感。
+The second issue is transparent transmission without altering how Dubbo is used. In other words, I should not need to write annotations to replace Dubbo or API calls to Dubbo. Writing such interactions could be alienating for newcomers who may not grasp or adapt to them and might not realize potential pitfalls. Therefore, using the original Dubbo might facilitate a better experience for users.
 
-第三个问题，接入灵活，支持多种形态。虽然我们强依赖Dubbo必须支持Dubbo，但我们也需要支持其他的形式，比如HTTP。但在接入之前，我们需要考虑接入灵活性的问题。
+The third issue is flexible integration supporting multiple forms. Although we must support Dubbo due to our strong reliance, we also need to endorse other forms, like HTTP. However, flexibility must be considered prior to integration.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_10.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_10.png)
 
-下面我们先介绍一下Dubbo的方式。Dubbo的客观接入主要有以下三种方式：
+Now, let's introduce Dubbo integration methods. The objective means of integrating Dubbo includes three methods:
 
-第一种，注解方式。使用@DubboReference提供的通用parameters参数，设置路由目标，可以达到方法粒度的路由。路由信息写在中间parameters那里，parameters是Dubbo给我们提供的通用参数的传递。
+First, an annotation method. Using @DubboReference provides optional common parameters to set routing targets, achieving method-level routing. Routing information is written in the intermediate parameters, which are common parameters provided by Dubbo.
 
-如果是正常的，我写了这个信息，Dubbo是不做任何处理的，因为这个东西对它来说没有含义。但因为你引入了高速公路的SDK，所以在你写了这个东西之后，我们就会去解析，拦截Dubbo的请求，把parameters里的参数抓起来做一些路由处理，这种形式其实没有改变Dubbo的使用方式。
+If it's standard, and I write this information, Dubbo does not process anything as it holds no significance. However, because you introduced the highway SDK, when you write this, we will parse it, intercepting Dubbo requests and leveraging parameters for routing. This form does not change the usage of Dubbo.
 
-第二种，配置中心指定。比如我们用的是阿波罗的配置中心，它完全可以把接入方式替换掉，parameters的信息在配置中心配置也可以，只要SDK可以支持就好。这种方式其实代码是完全侵入的，就是跟跨网之前和跨网之后没有任何区别。但最后发现我们的业务并不喜欢这种方式，首先因为阿波罗大家不喜欢用，其次不好理解。如果是一个新人看这个代码，他就会认为是在调本地的接口。
+Second, specifying in the configuration center. If we utilize the Apollo configuration center, it can entirely replace the integration method; parameters can also be configured in the configuration center as long as the SDK supports it. This method actually has fully intrusive code, presenting no differences before and after cross-network implementation. Yet, it turns out our business doesn’t favor this method because Apollo is unpopular and it lacks clarity. If a newcomer views this code, they might assume they’re calling a local interface.
 
-第三种，线程指定。当你在线程里指定了路由信息，下面再去调用的时候，这次调用就会走你的路由。如果再调用一次，它就会调回本地。因为基于线程的形式，在Dubbo的扩展里，它会在调用完成之后把线程信息清理掉。所以需要注意一下，如果你想多次调用，就需要写多次。如果不想写多次，你可以用上面这种方式，你只要在当前的been里，都是路由到上海。
+Third, thread specification. When you specify routing information in a thread and call again, this call will follow your routing. If called again, it defaults to local. However, because this is thread-based, Dubbo extensions will clean up the thread info after the call is complete. So, be mindful, as multiple calls demand writing multiple specifications. If you want to avoid multiple writings, utilize the previous method, as long as you're in the current context, it will always route to Shanghai.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_11.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_11.png)
 
-接下来介绍一下高速公路的架构，刚才介绍点对点的方式，它的缺点是开通白名单比较复杂。现在我们的高速公路架构是一个新型的架构，所以它开通白名单的复杂度会低一点。
+Now, let’s discuss the highway architecture; the previous point-to-point method has complex whitelist openings. Our highway architecture is a novel construction, thus simplifying the complexity of opening whitelists.
 
-如上图所示，比如最左边的节点是上海，最上边的节点是安徽，我想从安徽到上海，这个时候中心网关就需要开通一个白名单。开完之后，这条链路就可以直接过去了。可以看到一共就六条线，所以它的复杂度也就下来了。
+As illustrated, for instance, the leftmost node is Shanghai, and the uppermost is Anhui. If I wish to move from Anhui to Shanghai, the central gateway needs to open a whitelist. Once opened, this link can be used directly. There are a total of six lines, hence the complexity has been reduced.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_12.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_12.png)
 
-18:30上图是高速公路里最核心的架构图。
+Above is the core architecture diagram of the highway.
 
-比如山西集群的APP1调APP2的时候，我想去调上海APP2，如果你什么都不做，它默认调的就是山西集群的APP2。如果你在APP调用的时候加了一些路由信息，放在山西集群APP1里的SDK就会把它的流量切走，切到山西集群的Dubbo网关。
+For example, when the Shanxi cluster’s APP1 interacts with APP2, and I want to connect to Shanghai’s APP2, if no action is taken, it defaults to call Shanxi cluster APP2. If during this APP call some routing information is added, the SDK in Shanxi cluster APP1 will direct its traffic to the Dubbo gateway in Shanxi cluster.
 
-之后Dubbo网关会通过HTTP的协议走统一网关，再通过HTTP的协议到上海集群的Dubbo网关。在这里会把路由信息拿到，包括调用的Service、方法、版本号、参数等等。然后通过泛化的形式调上海集群的APP1，最后返回，完成这次跨网的调用。
+Subsequently, the Dubbo gateway will traverse through the unified gateway via the HTTP protocol, then to the Shanghai cluster’s Dubbo gateway via the same protocol. Routing information will be gathered here, including the service called, methods, version numbers, parameters, etc. This information will then be used to invoke APP1 of the Shanghai cluster in a generalized manner, ultimately returning and completing this cross-network call.
 
-那么为什么要有Dubbo Proxy这个角色呢？为什么不直接从APP1切到统一网关？少一个步骤不好么？涉及到的原因有以下三点：
+So why is the Dubbo Proxy role necessary? Why not redirect directly from APP1 to the unified gateway? Wouldn't omitting one step be better? There are three reasons involved:
 
-虽然这个图上只画了一个APP1，但实际上山西集群里的调用非常多。如果几百个应用都直接到统一网关，网关就需要建立很多的长链接，而统一网关的资源是有限的。
+Although this diagram depicts only one APP1, numerous calls occur within the Shanxi cluster. If hundreds of applications connect directly to the unified gateway, it needs to establish many long connections, with limited resources available for the unified gateway.
 
-因为安全性的问题，可能每次调用都要走一下白名单来保证安全。这个时候如果加了一个Dubbo Proxy，就可以去收敛IP。岛内不用和Dubbo Proxy交互，因为它们是同一个环境，不用考虑安全的问题。当Dubbo Proxy请求到网关之后，因为网关和统一网关之间只有一条链接，所以IP是收敛的。
+For security concerns, each call may need to traverse the whitelist to ensure safety. Therefore, with Dubbo Proxy, IP aggregation can occur. The island doesn't need to interact with Dubbo Proxy as they exist within the same environment, negating security considerations. Once a request passes to the gateway from Dubbo Proxy, it follows only one link between the gateway and unified gateway; thus, IPs are aggregated.
 
-还有一个是功能的收敛，当后面要做升级的时候，如果更新SDK，就需要每个应用都升级，这就需要推动业务做升级，做起来会比较痛苦。所以我们希望把升级功能全放在一个应用里，对业务功能无感，连升级SDK都不需要。当然因为SDK就做了一件事情，就是切换路由，基本不需要更新。
+Moreover, there's a functional consolidation aspect. During future upgrades, if SDK updates are necessary, each application must upgrade, which can be labor-intensive. Hence, we aim to store upgrade functionalities within a single application, ensuring it remains unnoticed by the business functions, with no need for SDK updates as the SDK needs only to handle routing, minimizing updates.
 
-所以对于业务来说，它也解放了。我把它理解成是一个功能上的收益。这个模式叫分布式运行时，在现在也比较流行。我们可以把它理解成Dapper，把一些比较麻烦的操作放到公共的服务里，留给业务的SDK是很纯粹的。
+Consequently, for businesses, this liberates them. I perceive this as a functional benefit. This model is termed a distributed runtime, which is currently trending. We can interpret this as Dapper, moving burdensome operations to a shared service while keeping the business SDK very streamlined.
 
-另外，为什么要用HTTP协议呢？它也并不是很高效的协议。而Dubbo协议中的Dubbo2其实也是比较惊艳的，除了一些模糊全部都是数据。这样的话其实我们后面是可以考虑把HTTP升级掉，让它的性能更快一点。
+Additionally, why use the HTTP protocol? It's not necessarily the most efficient protocol. The Dubbo2 protocol inside Dubbo is actually quite impressive, consisting mostly of data aside from some ambiguities. Consequently, we could consider upgrading HTTP later to enhance performance.
 
-现在用HTTP协议的原因是，它是一个标准的协议，中间可能会通过很多设备，虽然我们这里只画了一个。HTTP协议是没有任何障碍的，如果用Dubbo协议，还需要一个个打通。
+Currently, the adoption of HTTP protocol is due to its standardized nature. Throughout various devices, even though we've illustrated only one link, HTTP protocol encounters no hindrances. If using Dubbo protocol, numerous connections would need to be established.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_13.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_13.png)
 
-为了实现这个架构，Dubbo本身并不能直接用。因为Dubbo没有提供跨网的特性，所以我们需要从Dubbo层面解决我们碰到的问题。
+To realize this architecture, Dubbo itself cannot be applied directly since it does not provide cross-network capabilities; thus, we need to address the challenges encountered at the Dubbo level.
 
-在动态IP切换方面，其实Dubbo是支持的，但因为这个特性比较新，所以也会出现一些问题。它的支持程度是部分支持，比如在最开始的时候Dubbo2不支持，Dubbo3支持。此外，还会有一些bug。
+In the facet of dynamic IP switching, Dubbo supports this feature; however, as it’s relatively new, some issues may arise. Its support is partial; for instance, earlier versions like Dubbo2 did not, while Dubbo3 does. Moreover, bugs may occur.
 
-在404扩展方面，对于HTTP来说，你要调一个接口，但这个接口不存在，就会返回给前端一个404的报错。比如当我们把流量从APP1切到Dubbo Proxy的时候，Dubbo Proxy其实是Dubbo的一个应用，它引入了一个Dubbo的jar包，它是Dubbo的一个空应用。这个流量到Dubbo的网关后，它不能识别，它的功能是要把它转发出去。这个时候我们就需要加入这个扩展。
+In terms of 404 extensions, with HTTP, requesting a non-existent interface returns a 404 error to the frontend. When directing the traffic from APP1 to Dubbo Proxy, the Dubbo Proxy acts as a Dubbo-based application that incorporates a Dubbo jar, functioning as a minimal application. When this traffic reaches the Dubbo gateway, it fails to recognize it and must forward it; thus, we need to integrate this extension.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_14.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_14.png)
 
-下面介绍一下隧道的机制。隧道机制的作用是屏蔽网络的复杂性，屏蔽中间的协议转换，给用户一个统一、透明的调用方式。
+Next, we'll discuss the tunnel mechanism. The tunnel mechanism aims to mask network complexities and intermediates protocol conversion, offering users a unified, transparent calling method.
 
-中间的HTTP协议里面的body带了一个原始的bodv。倒装之后再把它拆包拆出来，再通过泛化去调。这个时候隧道是可以匹配掉这些差异的。
+The HTTP protocol’s body carries an original body. After inversion, the packaging extracts it and utilizes generalization for calls. In such cases, tunnels can match these disparities.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_15.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_15.png)
 
-另外，隧道机制对Dubbo协议的支持力度更高。比如APP1和本地的APP 3，最终调到APP2的时候，它看到了二进制流是一样的。因为我并没有去做什么，我只是把它分装起来，最后拆包。中间除了一点路由信息之外其他都一模一样。
+Moreover, the tunnel mechanism offers higher support for the Dubbo protocol. For instance, when APP1 and local APP3 ultimately call APP2, the observed binary streams are identical. This is accomplished by merely wrapping the processes and ultimately unpacking them. Other than a bit of routing information, everything remains consistent.
 
-这个机制的好处是，基本上Dubbo的所有特性都能支持。但也有一些个例，比如token和网络相关的机制。
+The advantage of this method is that it supports almost all Dubbo features. Yet, there are exceptions, such as token or network-derived mechanisms.
 
-## 四、未来规划
+## 4. Future Planning
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_16.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_16.png)
 
-借用网络分层的架构对高速公路做了一些规划：
+Leveraging online network architecture layers, we have planned for the highway as follows:
 
-第一层，物理网络层打通。它其实跟我们关系不大，因为我理解的是开通端口，你开通了那么多事，可以总结一些经验或者方法论去加快这个事情。
+The first layer, physical network connectivity. This is somewhat peripheral as I interpret it as port openings, summarizing experiences or methodologies for expedited processes.
 
-第二层，通讯协议层加速。中间的HTTP协议转发，我们是可以加速的。比如Tripple协议也是基于HTTP2对网络设备进行了识别，然后把问题解决了。所以我们也可以考虑去调研，在通讯协议层去做优化。
+The second layer, acceleration of communication protocol. The HTTP protocol forwarding in between can be accelerated. For instance, the Triple protocol, based on HTTP2, enhances recognition of network devices and resolves issues. Thus, we may consider researching optimizations at the communication protocol layer.
 
-第三层，语言层编译加速。GraalVM之前我们也调研过，而且也真正的去试过。虽然没有落地，但编译加速是可以的。特别是网关层，它的特点是流量大，但是每个流量又特别小，对语言本身的性能要求比较高。如果把它用Go来实现，其实也是一个比较好的加速。
+The third layer, language layer compilation acceleration. Discussions on GraalVM had been held previously, and some genuine tests were undertaken; although not fully implemented, compilation acceleration is achievable. Especially at the gateway level, characterized by substantial traffic, yet each connection is minimal, creating high-performance demands on the language itself. Implementing this with Go would provide significant acceleration.
 
-第四层，框架层功能升级。中间件层我们也做了很多事情。
+The fourth layer, functional upgrades at the framework level. We also accomplished many initiatives at the middleware layer.
 
-第五层，通用任务调度与编排。调用其实会经过很多节点，比如a到b到c到d到e，随着业务越来越复杂，我们可能会有更多的路由。比如a到c，c和d汇合起来再到d，未来也将会规划进去。
+The fifth layer: General task scheduling and orchestration. Calls will typically pass through many nodes, e.g., from a to b to c to d to e; as operations grow more complex, additional routing may be necessary, e.g., from a to c while combining c and d before proceeding to d, with future adjustments planned.
 
-第六层: 定制任务调度与编排。
+The sixth layer: Custom task scheduling and orchestration.
 
-第七层: 监控 & 告警 & 可观测性。
+The seventh layer: Monitoring & Alerts & Observability.
 
-第八层: 规范 & 流程& 安全。
+The eighth layer: Standards & Procedures & Security.
 
-![dubbo企业实践-政采云](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_17.png)
+![dubbo enterprise practice - Zhengcaiyun](/imgs/blog/2023/8/apachecon-scripts/zhengcaiyun/img_17.png)
 
-最后做一个总结。
+In conclusion.
 
-为什么要做这个项目？之前的方案比较多，成本也比较高。所以我们需要有一个统一的方案考虑更多公共的测试把这个东西给推广起来。目前我们已经接入了非常多的应用，它已经成为了政法人员数据跨网的统一的标准方案。
+Why undertake this project? Existing solutions were relatively numerous, yet costly. We need a unified approach that accounts for broader public testing to promote this initiative. We have successfully integrated numerous applications, making it a standard solution for cross-network data among legal personnel.
 
-我们要达到的效果，项目架构，未来规划刚才都介绍过了，就不再重复了。
+The effects we aim to achieve have already been detailed in the project architecture and future plans.
 
-重点说一下我们的开源与社区的合作。刚才的方案其实是我们公司内部使用的，也对Dubbo做了深度的定制。一般我们会选择私有版本进行开发，但因为想要开源，所以在最开始的时候，我们就和Dubbo社区沟通，看能不能在开源层实施掉。一方面社区可以帮我们review这些特性，做一些安全上的把控。另一方面我们也能把自己做的一些事情，特别是把公共的东西抽出来反馈给社区。
+Emphasizing our open-source and community collaboration, the previous solutions were designed for internal company use, involving deep customizations of Dubbo. Typically, we prefer private versions for development; however, we intended to open-source from the outset, so we communicated with the Dubbo community to discuss implementing this at the open-source level. The community can assist in reviewing these features and ensuring safety controls. Additionally, we can share our developments with the community, especially pulling public elements back for communal benefit.
+

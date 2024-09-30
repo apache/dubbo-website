@@ -1,66 +1,66 @@
 ---
-title: "dubbo-go 中将 Kubernets 原⽣作为注册中⼼的设计和实现"
-linkTitle: "dubbo-go 中将 Kubernets 原⽣作为注册中⼼的设计和实现"
+title: "Design and Implementation of Using Kubernetes Native as a Registration Center in dubbo-go"
+linkTitle: "Design and Implementation of Using Kubernetes Native as a Registration Center in dubbo-go"
 tags: ["Go"]
 date: 2021-01-14
 description: >
-    随着云原⽣的推⼴，越来越多的公司或组织将服务容器化，并将容器化后的服务部署在 Kubernetes 集群中。
+    With the promotion of cloud-native, more and more companies or organizations containerize their services and deploy these containerized services in Kubernetes clusters.
 ---
 
-今天这篇⽂章将会介绍 dubbo-go 将 Kubernetes 作为注册中⼼的服务注册的初衷、设计⽅案，以及具体实现。
+Today's article will introduce the intention, design plan, and specific implementation of dubbo-go using Kubernetes as a service registry.
 
-到⽬前为⽌该⽅案的实现已经被合并到 dubbo-go 的 master 分⽀。具体实现为关于 Kubernetes 的 [PullRequest](https://github.com/apache/dubbo-go/pull/400) 。
+So far, the implementation of this plan has been merged into the master branch of dubbo-go. The specific implementation is regarding Kubernetes [PullRequest](https://github.com/apache/dubbo-go/pull/400).
 
-## Kubernetes管理资源的哲学
+## Philosophy of Managing Resources in Kubernetes
 
-Kubernetes 作为容器集群化管理⽅案管理资源的维度可主观的分为服务进程管理和服务接⼊管理。
+Kubernetes, as a container orchestration management solution, can be subjectively divided into service process management and service access management.
 
-- 服务实例管理，主要体现⽅式为 Pod 设计模式加控制器模式，控制器保证具有特定标签 （ Kubernetes-Label ）的 Pod 保持在恒定的数量（多删，少补）。
-- 服务管理，主要为 Kubernetes-Service ，该 Service 默认为具有特定标签（ Kubernetes-Label ）的 Pod 统⼀提供⼀个 VIP（ Kubernetes-ClusterIP ）所有需要请求该组 Pod 的请求都默认会按照 round-robin 的负载策略转发到真正提供服务的 Pod 。并且 CoreDNS 为该 Kubernetes-Service 提供集群内唯⼀的域名。
+- Service instance management is primarily reflected in the Pod design pattern and the controller pattern, where controllers ensure that Pods with specific labels (Kubernetes-Label) remain at a constant number (more deletion, less addition).
+- Service management is mainly through Kubernetes-Service, which by default provides a VIP (Kubernetes-ClusterIP) for Pods with specific labels (Kubernetes-Label), and all requests to that group of Pods are forwarded to the real service provider Pods according to a round-robin load strategy. CoreDNS provides a unique domain name for this Kubernetes-Service within the cluster.
 
-## Kubernetes的服务发现模型
+## Service Discovery Model in Kubernetes
 
-为了明确 K8s 在服务接入管理提供的解决方案，我们以 kube-apiserver 提供的 API(HTTPS) 服务为例。K8s 集群为该服务分配了一个集群内有效的 ClusterIP ，并通过 CoreDNS 为其分配了唯一的域名 kubernetes 。如果集群内的 Pod 需要访问该服务时直接通过 https://kubernetes:443 即可完成。
+To clarify the solutions provided by K8s in service access management, let's take the API (HTTPS) service provided by kube-apiserver as an example. The K8s cluster assigns a valid ClusterIP for the service and allocates a unique domain name "kubernetes" through CoreDNS. When Pods within the cluster need to access this service, they can directly use https://kubernetes:443.
 
 ![img](/imgs/blog/dubbo-go/k8s/k8s-service-discovery.png)
 
-具体流程如上图所示 ( 红⾊为客户端，绿⾊为 kube-apiserver )：
+The specific process is shown in the image above (red for client, green for kube-apiserver):
 
-1. ⾸先客户端通过 CoreDNS 解析域名为 **kubernetes** 的服务获得对应的 Cluster IP 为 10.96.0.1。
-2. 客户端向 10.96.0.1 发起 HTTP 请求。
-3. HTTP 请求 kube-proxy 所创建的 IP tables 拦截随机 DNAT 为 10.0.2.16 或者 10.0.2.15 。
-4. Client 与最终提供服务的 Pod 建⽴连接并交互。
+1. The client first resolves the domain name "kubernetes" via CoreDNS to obtain the corresponding Cluster IP of 10.96.0.1.
+2. The client initiates an HTTP request to 10.96.0.1.
+3. The HTTP request is intercepted by IP tables created by kube-proxy and randomly DNATs to 10.0.2.16 or 10.0.2.15.
+4. The client establishes a connection and interacts with the Pod providing the service.
 
-由此可⻅，Kubernetes 提供的服务发现为域名解析级别。
+Thus, it can be seen that the service discovery provided by Kubernetes is at the domain name resolution level.
 
-## dubbo 的服务发现模型
+## Service Discovery Model in Dubbo
 
-同样为了明确 dubbo 服务发现的模型，以⼀个简单的 dubbo-consumer 发现并访问 Provider 的具体流程为例。
+Similarly, to clarify the service discovery model of dubbo, let's take a simple example of a dubbo-consumer discovering and accessing a Provider.
 
 ![img](/imgs/blog/dubbo-go/k8s/dubbo-service-discovery.png)
 
-具体流程如上图所示：
+The specific process is shown in the image above:
 
-1. Provider 将本进程的元数据注册到 Registry 中，包括 IP，Port，以及服务名称等。
-2. Consumer 通过 Registry 获取 Provider 的接⼊信息，直接发起请求
+1. The Provider registers the metadata of the current process in the Registry, including IP, Port, and service name, etc.
+2. The Consumer retrieves the access information of the Provider from the Registry and initiates a request directly.
 
-由此可⻅，dubbo 当前的服务发现模型是针对 Endpoint 级别的，并且注册的信息不只 IP 和端⼝包括其他的⼀些元数据。
+Thus, it can be seen that the current service discovery model of dubbo is at the Endpoint level, and the registered information not only includes IP and Port but also other metadata.
 
-## 无法直接使用 Kubernetes 服务发现模型的原因
+## Reasons for Not Using Kubernetes Service Discovery Model Directly
 
-通过上述两个⼩节，答案基本已经⽐较清晰了。总结⼀下，⽆法直接使⽤ Kubernetes 作为注册中⼼的原因主要为以下⼏点:
+From the above two sections, the reasons for not being able to directly use Kubernetes as a registration center are mainly summarized as follows:
 
-1. Kubernetes-Service 标准的资源对象具有的服务描述字段 中并未提供完整的 dubbo 进程元数据字段因此，⽆法直接使⽤Kubernetes-Service 进⾏服务注册与发现。
-2.  dubbo-go 的服务注册是基于每个进程的，每个 dubbo 进程均需进⾏独⽴的注册。
-3.  Kubernetes-Service 默认为服务创建 VIP，提供 round-robin 的负载策略也与 dubbo-go⾃有的 Cluster 模块的负载策略形成了冲突。
+1. The service description fields of the standard resource objects in Kubernetes-Service do not provide the complete dubbo process metadata fields, thus it cannot use Kubernetes-Service for service registration and discovery directly.
+2. The service registration in dubbo-go is based on each process, and each dubbo process needs to perform independent registration.
+3. The default creation of VIP for Kubernetes-Service and the round-robin load strategy conflicts with the load strategy of the existing Cluster module in dubbo-go.
 
-## Dubbo-go 所采⽤的注册/发现⽅案
+## Registration/Discovery Solution Adopted by Dubbo-go
 
-### 服务注册
+### Service Registration
 
-Kubernetes 基于 Service 对象实现服务注册／发现。可是 dubbo 现有⽅案为每个 dubbo-go 进程独⽴注册，因此 dubbo-go选择将该进程具有的独有的元数据写⼊运⾏该 **dubbo-go** 进程的 **Pod** 在 **Kubernetes**中的 **Pod** 资源对象的描述信息中。每个运⾏ dubbo 进程的 Pod 将本进程的元数据写⼊ Kubernetes-Pod Annotations 字段。为了避免与其他使⽤Annotations 字段的 Operator 或者其他类型的控制器（ Istio ） 的字段冲突。dubbo-go 使⽤ Key 为 **dubbo.io/annotation** value 为具体存储的 K/V 对的数组的 json 编码后的 base64 编码。
+Kubernetes implements service registration/discovery based on the Service object. However, the existing dubbo scheme is to register each dubbo-go process independently. Therefore, dubbo-go chooses to write the unique metadata of this process into the description of the Pod resource object in Kubernetes running this **dubbo-go** process. Each Pod running a dubbo process writes its metadata into the Kubernetes-Pod Annotations field. To avoid conflicts with other Operators or other types of controllers (like Istio) that use the Annotations field, dubbo-go uses a key of **dubbo.io/annotation** and a value of JSON-encoded arrays of K/V pairs that are base64 encoded.
 
-样例为：
+An example is:
 
 ```yaml
 apiVersion: v1
@@ -78,33 +78,31 @@ LjE3LjAuOCUyRlVzZXJQcm92aWRlciUzRmNhdGVnb3J5JTNEY29uc3VtZXJzJTI2ZHViYm8lM0RkdW
 Jib2dvLWNvbnN1bWVyLTIuNi4wJTI2cHJvdG9jb2wlM0RkdWJibyIsInYiOiIifV0=
 ```
 
-由于每个 dubbo-go 的 Pod 均只负责注册本进程的元数据，因此 Annotations 字段⻓度也不会因为运⾏ dubbo-go 进程的 Pod 数量增加⽽增加。
+Since each dubbo-go Pod is only responsible for registering its process's metadata, the length of the Annotations field will not increase with the number of running dubbo-go Pods.
 
-### 服务发现
+### Service Discovery
 
-依赖kubernetes Api-Server 提供了Watch的功能。可以观察特定namespace内各Pod对象的变化。 dubbo-go为了避免dubbo-go进程watch到与dubbo-go进程⽆关的Pod的变化，dubbo-go将watch的条件限制在当前Pod所在的namespace，以及 watch 具有 Key为**dubbo.io/label** Value为 **dubbo.io-value** 的Pod。在Watch到对应Pod的变化后实时更新本地Cache，并通过Registry提供的Subscribe通
+Relying on the Kubernetes API Server provides the Watch feature. It can observe changes to Pod objects within a specific namespace. dubbo-go restricts the watch conditions to the namespace where the current Pod resides and watches Pods with a key of **dubbo.io/label** and a value of **dubbo.io-value**. When the corresponding Pod's changes are watched, the local cache is updated in real-time and service cluster management is established through the Registry's Subscribe notification.
 
-知建⽴在注册中⼼之上的服务集群管理，或者其他功能。
-
-### 总体设计图
+### Overall Design Diagram
 
 ![img](/imgs/blog/dubbo-go/k8s/design.png)
 
-具体流程如上图所示：
+The specific process is shown in the image above:
 
-1. 启动 dubbo-go 的 Deployment 或其他类型控制器使⽤ Kubernetes Downward-Api 将本 Pod 所在 namespace 通过环境变量的形式注⼊ dubbo-go 进程。
-2. dubbo-go 进程的 Pod 启动后通过环境变量获得当前的 namespace 以及该 Pod 名称，调⽤ Kubernetes-Apiserver PATCH 功能为本 Pod 添加 Key 为 **dubbo.io/label** Value为 **dubbo.io-value**的label。
-3. dubbo-go 进程调⽤ Kubernetes-Apiserver 将本进程的元数据通过 PATCH 接⼝写⼊当前 Pod 的 Annotations 字段。
-4. dubbo-go 进程 LIST 当前 namespace 下其他具有同样标签的 Pod，并解码对应的 Annotations 字段 获取其他 Pod 的信息。
-5. dubbo-go 进程 WATCH 当前 namespace 下其他具有同样标签的 Pod 的 Annotations 的字段变化。
+1. The dubbo-go Deployment or other types of controllers use the Kubernetes Downward-Api to inject the namespace of the current Pod into the dubbo-go process as an environment variable.
+2. After the dubbo-go process's Pod starts, it retrieves the current namespace and Pod name through environment variables, invoking the Kubernetes-Apiserver PATCH functionality to add a key of **dubbo.io/label** and a value of **dubbo.io-value** to the Pod's label.
+3. The dubbo-go process calls the Kubernetes-Apiserver to write its metadata into the current Pod's Annotations field through the PATCH interface.
+4. The dubbo-go process LISTs other Pods with the same label in the current namespace and decodes the corresponding Annotations field to obtain information about other Pods.
+5. The dubbo-go process WATCHes the Annotations field changes of other Pods with the same label in the current namespace.
 
-## 总结
+## Conclusion
 
-K8s 已经为其承载的服务提供了一套服务发现，服务注册，以及服务集群管理机制。而  dubbo-go 的同时也拥有自成体系的服务集群管理。这两个功能点形成了冲突，在无法调谐两者的情况， dubbo-go 团队决定保持 dubbo 自有的服务集群管理系，而选择性的放弃了 Service 功能，将元数据直接写入到 Pod 对象的 Annotations 中。
+K8s has already provided a set of service discovery, service registration, and service cluster management mechanisms for the services it hosts. Meanwhile, dubbo-go also has its own service cluster management system. These two functionalities are in conflict, and without a way to tune the two, the dubbo-go team decided to maintain the service cluster management unique to dubbo while selectively abandoning the Service functionality, writing metadata directly into the Pod object's Annotations.
 
+Of course, this is just one of the schemes of dubbo-go using K8s as a service registration center. In the future, the community will interface with K8s in a more "cloud-native" manner, so let's wait and see.
 
-当然这只是 dubbo-go 在将 K8s 作为服务注册中心的方案之一，后续社区会以更加“云原生”的形式对接 K8s ，让我们拭目以待吧。
+dubbo-go community DingTalk group: 23331795, you are welcome to join.
 
-dubbo-go 社区钉钉群 :23331795 ,欢迎你的加入。
+> Author Information: Wang Xiang, GitHub ID: sxllwx, employed at Chengdu Datun Technology Co., Ltd., Golang developer.
 
-> 作者信息： 王翔，GithubID: sxllwx，就职于成都达闼科技有限公司，golang开发工程师。

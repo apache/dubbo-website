@@ -1,69 +1,70 @@
 ---
-title: "聚焦稳定性，Dubbo Java 发版规划公布"
-linkTitle: "Dubbo Java 发版规划"
+title: "Focusing on Stability, Dubbo Java Release Plan Announced"
+linkTitle: "Dubbo Java Release Plan"
 date: 2022-10-22
-tags: ["新闻动态"]
+tags: ["News"]
 weight: 10
 description: >
-  聚焦稳定性，Dubbo 发版规划公布
+  Focusing on stability, the Dubbo release plan has been announced.
 ---
 
-## Dubbo 简介
-Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下的服务治理与通信问题，官方提供了 Java、Golang 等多语言 SDK 实现。使用 Dubbo 开发的微服务原生具备相互之间的远程地址发现与通信能力， 利用 Dubbo 提供的丰富服务治理特性，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。Dubbo 被设计为高度可扩展，用户可以方便的实现流量拦截、选址的各种定制逻辑。
+## Introduction to Dubbo
+Apache Dubbo is an RPC service development framework designed to address service governance and communication issues in microservice architectures. Official SDK implementations are available in multiple languages, including Java and Golang. Microservices developed with Dubbo possess built-in capabilities for remote address discovery and communication, leveraging Dubbo's rich service governance features to achieve needs such as service discovery, load balancing, and traffic scheduling. Dubbo is designed for high extensibility, allowing users to easily implement various customized logic for traffic interception and service selection.
 
-## 我应该如何选择版本？
-对于这个问题，一直以来 Dubbo 都没有很好地去回答。究其原因保证所有版本的稳定性是一件非常有挑战的事情。比如在 Dubbo 2.7 的一些版本中，出现了一些前后不兼容的问题，给一些用户升级带来了困扰。为此，很多用户从保障稳定性的视角出发，选择了更保守的策略，即生产环境采用被采用最多的版本，此后就不再更新，避免升级过程中出现意外。
+## How Should I Choose a Version?
+Historically, Dubbo has not effectively answered this question. Ensuring the stability of all versions is quite challenging. For instance, some versions of Dubbo 2.7 experienced backward compatibility issues, causing upgrade difficulties for some users. Many chose a more conservative strategy to maintain stability by using the most commonly adopted version in production and then stopping updates to avoid unexpected issues during upgrades.
 
-但是这种方式无疑是有问题的，一方面这将导致永远无法用上社区新的功能，得到技术演进的红利；另一方面，对于安全漏洞和带来不稳定因素的 bug 等已知问题如果不升级永远会存在，久而久之将给应用带来巨大的风险，很有可能导致严重的安全生产事故。
+However, this approach has significant drawbacks, as it prevents users from accessing new community features and the benefits of technological evolution. Known issues, such as security vulnerabilities and bugs causing instability, will persist without upgrades, leading to substantial risks over time, potentially resulting in severe safety incidents.
 
-因此，为了更好地回答这个问题，Dubbo 制定了未来的版本迭代规划，明确版本的稳定性维护机制，提升开发者使用 Dubbo 的信心。
+To address this, Dubbo has formulated a future version iteration plan with a clear stability maintenance mechanism, boosting developer confidence in using Dubbo.
 
-## 现状
-在此前，Dubbo 总共维护了 2.6.x、2.7.x 以及 3.x 三个大版本，其中 2.7.x 为捐献进入 Apache 基金会之后的版本。
+## Current Status
+Previously, Dubbo maintained three major versions: 2.6.x, 2.7.x, and 3.x, with 2.7.x being the version donated to the Apache Foundation.
 
-2.6.x 在去年已经宣布生命周期结束（EOL）了，而 2.7.x 累计维护了四年的时间了。这四年的时间里，2.7.x 版本经历了多次大的修改，如 2.7.3 版本中对 Nacos 的注册方式进行了修改、2.7.6 版本中添加了应用级服务发现、2.7.9 版本中对应用级服务发现进行大的重构等。
+The 2.6.x version was declared end-of-life (EOL) last year, while 2.7.x has been maintained for four years. During this time, 2.7.x underwent significant modifications, including changes to the registration method for Nacos in version 2.7.3, the addition of application-level service discovery in version 2.7.6, and a major rework of application-level service discovery in version 2.7.9.
 
-这些修改都对 2.7.x 版本的稳定性带来了巨大的风险隐患，导致 2.7.x 中很多版本或多或少存在不同的问题，用户无法选择一个最稳定的版本进行使用。
+These changes presented significant risks to the stability of the 2.7.x version, resulting in various issues across many versions. Users were unable to select the most stable version for use.
 
-因此，我们希望在 3.x 版本中将这种不稳定的情况通过发版机制给收敛掉，提高 Dubbo 版本的稳定性。
+Thus, we aim to stabilize this situation in the 3.x version through a release mechanism that enhances the stability of Dubbo versions.
 
-## 未来总体规划
-在接下来，Dubbo 将以每 6 个月为一个周期，对每个版本包括了新功能合入、稳定性维护以及安全漏洞修复三个大方向的内容。
+## Overall Future Plan
+Moving forward, Dubbo will adopt a six-month cycle for each version, focusing on three main areas: new feature incorporation, stability maintenance, and security vulnerability fixes.
 
-新功能合入是指将 Dubbo 开发过程中所有新的特性、性能优化、破坏性修改都会被合入的行为。由于新功能是需要一段时间迭代稳定的，所以新功能的合入会给对应版本带来不稳定因素，因此只能在每个版本最开始的时候进行。
+New feature incorporation involves integrating all new features, performance optimizations, and disruptive changes developed during Dubbo's evolution. As new features require time to stabilize, their incorporation will introduce instability and can only occur at the start of each version.
 
-稳定性维护是指修复**已有**功能的非预期行为，进一步提升版本的稳定性。特别的，对于一些大的问题修复，如功能需要整体重构的，或者回带来破坏性影响的提交将被视为新功能提交，执行新功能合入的流程。避免因为修复一个问题而来带更多问题的严重后果。
+Stability maintenance refers to fixing non-expected behavior of **existing** features to further enhance stability. Significant issue fixes requiring massive rework will be treated as new feature submissions and will follow the new feature incorporation process to avoid introducing more issues while resolving one.
 
-安全维护是指修复使用中的安全风险问题，这一块主要是解决来自白帽子提交的漏洞问题。
+Security maintenance involves addressing security risks in use, mainly focusing on vulnerabilities reported by white hat hackers.
 
-新功能合入在每个版本中会持续 **6** 个月，稳定性维护在每个版本中会持续 **12** 个月，安全维护在每个版本中会持续 **18** 个月。
+New feature incorporation will continue for **6** months in each version, stability maintenance will last for **12** months, and security maintenance will extend for **18** months.
 
-因此，从整体迭代规划来看，每 6 个月 Dubbo 会开始一个新的版本迭代，与之同时的，也会有一个版本宣布生命周期结束（EOL）。
+Overall, Dubbo will start a new version iteration every 6 months, simultaneously announcing the end-of-life (EOL) for one version.
 
-## 逐版本维护规划
+## Version-Specific Maintenance Plan
 
 ![image.png](/imgs/blog/release/release-roadmap.png)
 
-上图为具体到每个版本在每个时间点的维护状态图。
+The image shows the maintenance status for each version at given time points.
 
-对于 Dubbo 2.7 以及 3.0 版本，目前已经进入了安全维护阶段，将在 2023 年 3 月宣布版本维护周期结束。
+Currently, Dubbo 2.7 and 3.0 have entered the security maintenance phase, with the version maintenance cycle ending in March 2023.
 
-对于 Dubbo 3.1 版本，目前已经是稳定性维护阶段，如前一小节所述，目前只会继续合入和稳定性修改的修改。处于稳定性维护阶段的版本也是社区推荐生产使用的最新版本。稳定性维护工作将持续到 2023 年 3 月，在此之后会有持续 6 个月的安全维护阶段，最终在 2023 年 9 月结束其版本的生命周期。
+Dubbo 3.1 is in the stability maintenance phase, where only stability modifications will continue. This version is also recommended for production use within the community. Stability maintenance work will continue until March 2023, after which a 6-month security maintenance phase will begin, ending in September 2023.
 
-对于 Dubbo 3.2 版本，目前仍处在新功能合入的阶段，发布的是 beta 版本。此阶段适合一些尝鲜使用，版本稳定性相较于已经进入仅稳定性维护阶段的版本稍欠。在 2023 年 3 月，Dubbo 3.2 将结束新功能合入周期，进行充分的稳定性验证，并正式发布生产可用的 GA 版本。此后在 2023 年 9 月之前会进行稳定性的维护，在 2024 年 3 月结束版本的生命周期。
+Dubbo 3.2 is still in the new feature incorporation phase and is releasing as a beta version. This phase is suitable for early adopters, as stability is slightly less than in versions already in stability maintenance. In March 2023, Dubbo 3.2 will conclude the new feature incorporation phase, undergo thorough stability validation, and officially release a production-ready GA version. After that, it will receive stability maintenance until March 2024, when its lifecycle will end.
 
-对于 Dubbo 3.3 版本，将在 2023 年 3 月紧随着 3.2 版本结束新功能合入阶段后正式开始开发。因此，Dubbo 3.3 版本的第一个 beta release 也将会在 2023 年 3 月发布。同样的，经过 6 个月的新功能合入阶段之后，Dubbo 3.3 版本将会在 2023 年 9 月正式发布生产可用 GA 版本，同时进入稳定性维护阶段。之后在 2024 年 3 月进入安全维护阶段，在 2024 年 9 月结束版本的生命周期。
+Development for Dubbo 3.3 will formally commence in March 2023 after the conclusion of the new feature incorporation phase for 3.2. Consequently, the first beta release for Dubbo 3.3 will also be issued in March 2023. After a 6-month new feature incorporation phase, Dubbo 3.3 will officially release a production-ready GA version in September 2023 and enter the stability maintenance phase. Subsequently, it will enter the security maintenance phase in March 2024 and conclude its lifecycle in September 2024.
 
-## 总结
+## Conclusion
 
-对于绝大多数的生产用户，我们建议使用**当前处于仅稳定性维护阶段的版本的最新小版本**。如在 2022 年 9 月至 2023 年 3 月这段时间，Dubbo 3.1 是处于仅稳定性维护阶段的，因此首选 Dubbo 3.1 版本。而对于如 3.1.0、3.1.1、3.1.2 等的 Dubbo 3.1.x 的多个小版本，我们建议直接使用最新的小版本。由于各个小版本之间仅包含稳定性修复，所以越往后的版本是越稳定的。
+For most production users, we recommend using the **latest minor version of the version currently in stability maintenance**. For example, from September 2022 to March 2023, Dubbo 3.1 is in stability maintenance, so the preference is for Dubbo 3.1. For minor versions like 3.1.0, 3.1.1, and 3.1.2, we recommend directly using the latest minor version. As minor versions only contain stability fixes, later versions are generally more stable.
 
-对于愿意尝鲜、体验新功能的用户，可以直接基于最新的开发版本进行测试。即使是开发版本，Dubbo 也有一整套的质量保障机制，如果使用过程中遇到问题，欢迎向社区提交反馈。
+For users eager to try new features, you can directly test the latest development versions. Even in development versions, Dubbo has a comprehensive quality assurance mechanism. If you encounter any issues during use, please feel free to provide feedback to the community.
 
-目前，阿里巴巴集团已经基于 Dubbo 3.0 的稳定版本完美支撑了整个核心电商今年双十一的所有调用，现在也正在升级到 Dubbo 3.1 这个最新的稳定版本上来。我们欢迎更多的用户一起升级到 Dubbo 3.1 版本上，在升级过程中可以参考官网给出的升级指南，遇到任何问题也可以通过 issue、微信群、钉钉群及时反馈社区，我们将尽全力协助。
+Currently, Alibaba Group has perfectly supported all calls for the core e-commerce this Double Eleven with the stable version of Dubbo 3.0 and is now upgrading to the latest stable version, Dubbo 3.1. We welcome more users to upgrade to Dubbo 3.1 and refer to the upgrade guidelines provided on the official website during the upgrade process. If you encounter any issues, you can promptly provide feedback to the community through issues, WeChat groups, or DingTalk groups. We will do our best to assist.
 
-## 更多
+## More
 
-在版本规划的方向上，除了本次发布的迭代线路图，Dubbo 还将通过一系列的机制保障用户的使用体验是连续的、稳定的。在大版本升级方面，Dubbo 将建设**完善的版本升级指南**，如 Dubbo 3.1 版本升级到 Dubbo 3.2 版本中的重大修改点，让用户在升级的时候能够清晰的了解其中的风险点，更好的规划升级节奏。
+In terms of version planning, aside from the iterative roadmap released this time, Dubbo will ensure a continuous and stable user experience through a series of mechanisms. For major version upgrades, Dubbo will build a **complete version upgrade guide**, highlighting significant changes when upgrading from Dubbo 3.1 to 3.2, enabling users to clearly understand the risk points and better plan the upgrade pace.
 
-此外，对于目前人在大范围使用的 Dubbo 2.7 版本，在近期 Dubbo 社区也将推出**针对 Dubbo 2.7 版本的升级的指南与工具**，通过工程化的方式让所有的 Dubbo 2.7 用户都可以提前查出所有的版本差异点，平滑升级到 Dubbo 3 上来。
+Additionally, for the currently widely used Dubbo 2.7 version, the Dubbo community will soon launch **guides and tools for upgrading from Dubbo 2.7**, allowing all Dubbo 2.7 users to identify differences in advance and smoothly upgrade to Dubbo 3.
+

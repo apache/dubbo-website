@@ -1,67 +1,67 @@
 ---
-title: "dubbo-go 中如何实现远程配置管理？"
-linkTitle: "dubbo-go 中如何实现远程配置管理？"
+title: "How to Implement Remote Configuration Management in dubbo-go?"
+linkTitle: "How to Implement Remote Configuration Management in dubbo-go?"
 tags: ["Go"]
 date: 2021-01-11
-description: 本文介绍了如何在 dubbo-go 中使用配置中心进行远程配置管理
+description: This article explains how to use the configuration center for remote configuration management in dubbo-go
 ---
 
-之前在 Apache/dubbo-go（以下简称 dubbo-go ）社区中，有同学希望配置文件不仅可以放于本地，还可以放于配置管理中心里。那么，放在本地和配置管理中心究竟有哪些不一样呢？
+Previously, some students in the Apache/dubbo-go (hereinafter referred to as dubbo-go) community hoped that configuration files could be placed not only locally but also in a configuration management center. So, what are the differences between local and configuration management center?
 
-放在本地，每次更新需要重启，配置文件管理困难，无法做到实时更新即刻生效。此外，本地文件还依赖人工版本控制，在微服务的场景下，大大的增加了运维的成本与难度。
+Locally, every update requires a restart, making configuration file management difficult and unable to achieve real-time updates. Additionally, local files rely on manual version control, significantly increasing operational costs and complexity in microservices scenarios.
 
-而配置管理中心提供了统一的配置文件管理，支持文件更新、实时同步、统一版本控制、权限管理等功能。
+The configuration management center provides unified management of configuration files, supporting file updates, real-time synchronization, unified version control, and permission management features.
 
-## 目标
+## Goals
 
-基于以上几个背景，可以总结出以下**目标**
+Based on the above context, the following **goals** can be summarized:
 
-- 与 Dubbo 现有的配置中心内的配置文件兼容，降低新增语言栈的学习成本；
-- 支持多种配置文件格式；
-- 支持主流配置中心，适应不一样的使用场景，实现高扩展的配置下发；
+- Compatibility with existing configuration files in Dubbo's configuration center, reducing the learning curve for new language stacks;
+- Support for multiple configuration file formats;
+- Support for mainstream configuration centers, adapting to different use cases, and achieving highly extensible configuration delivery;
 
-## 配置中心
+## Configuration Center
 
-配置中心在 dubbo-go 中主要承担以下场景的职责：
+The configuration center in dubbo-go mainly assumes the following responsibilities:
 
-1. 作为外部化配置中心，即存储 dubbo.properties 配置文件，此时，key 值通常为文件名如 dubbo.properties , value 则为配置文件内容。
-2. 存储单个配置项，如各种开关项、常量值等。
-3. 存储服务治理规则，此时 key 通常按照 “服务名 + 规则类型” 的格式来组织，而 value 则为具体的治理规则。
+1. As an externalized configuration center, i.e., storing the dubbo.properties configuration file, where the key is typically the filename (e.g., dubbo.properties) and the value is the contents of the configuration file.
+2. Storing individual configuration items, such as various switches and constant values.
+3. Storing service governance rules, usually organized in the format of "service name + rule type", with values being the specific governance rules.
 
-就目前而言，dubbo-go 首要支持的是 Dubbo 中支持的开源配置中心，包括：
-1. Apollo：携程框架部门研发的分布式配置中心，能够集中化管理应用不同环境、不同集群的配置，配置修改后能够实时推送到应用端，并且具备规范的权限、流程治理等特性，适用于微服务配置管理场景。
-2. ZooKeeper：一个分布式的，开放源码的分布式应用程序协调服务，是 Google 的 Chubby 一个开源的实现，是 Hadoop 和 Hbase 的重要组件。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、域名服务、分布式同步、组服务等。
-3. Nacos: Alibaba 开源的配置管理组件，提供了一组简单易用的特性集，帮助您实现动态服务发现、服务配置管理、服务及流量管理。
+Currently, dubbo-go primarily supports open-source configuration centers supported by Dubbo, including:
+1. Apollo: A distributed configuration center developed by Ctrip’s framework department, enabling centralized management of application configurations across different environments and clusters, with real-time push to applications and features like permission and process governance, suitable for microservice configuration management.
+2. ZooKeeper: A distributed, open-source coordination service for distributed applications, is an open-source implementation of Google’s Chubby, and is an important component of Hadoop and HBase. It provides consistency services for distributed applications, including configuration maintenance, domain name services, distributed synchronization, group services, etc.
+3. Nacos: An Alibaba open-source configuration management component, providing a set of easy-to-use features to help achieve dynamic service discovery, service configuration management, and traffic management.
 
-而考虑到某些公司内部有自身的研发的配置中心，又或者当前流行而 Dubbo 尚未支持的配置中心，如 etcd，我们的核心在于设计一套机制，允许我们，也包括用户，可以通过扩展接口新的实现，来快速接入不同的配置中心。
+Considering that some companies have their own developed configuration centers or currently popular configuration centers not yet supported by Dubbo, such as etcd, our core design is to establish a mechanism that allows us, including users, to quickly access different configuration centers through extensible interfaces.
 
-那在 dubbo-go 中究竟怎么实现呢？我们的答案是：**基于动态的插件机制在启动时按需加载配置中心的不同实现。**
+So how do we implement this in dubbo-go? Our answer is: **load different implementations of the configuration center on demand based on a dynamic plugin mechanism at startup.**
 
-实现该部分功能放置于一个独立的子项目中，见： https://github.com/apache/dubbo-go/tree/master/config_center
+The functionality is placed in a separate subproject, see: https://github.com/apache/dubbo-go/tree/master/config_center
 
-### dubbo-go 设计
+### dubbo-go Design
 
-原逻辑为：启动时读取本地配置文件，将其加载进内存，通过配置文件中的配置读取注册中心的信息获取服务提供者，注册服务消费者。
+The original logic was to read the local configuration file at startup, loading it into memory, and then reading information from the configuration file to obtain service providers and register service consumers.
 
-有些读者会有点困惑，不是说好了使用配置中心的，为什么现在又要读取本地配置呢？答案就是，读取的这部分信息分成两部分：
+Some readers may be confused; didn't we say we'd use the configuration center? Why read the local configuration now? The answer is that the information read is divided into two parts:
 
-- 使用什么作为配置中心；
-- 该配置中心的元数据，比如说使用 zookeeper 作为配置中心，那么 zookeeper 的链接信息就是元数据，毕竟我们只有在知道了链接信息之后才能连上 zookeeper；
+- What to use as the configuration center;
+- The metadata of the configuration center, for example, using ZooKeeper as the configuration center, so ZooKeeper's connection information is the metadata, because we can only connect to ZooKeeper once we know the connection information;
 
-在改造的时候，需要考虑以下的问题：
+When making changes, the following issues need to be considered:
 
-**1、如何实现支持多个配置中心？如何实现按需加载？**
+**1. How to support multiple configuration centers? How to achieve on-demand loading?**
 
-通过抽象 DynamicConfiguration 让开发者可以快速支持多个配置中心。使用者导入指定的组件包后，在启动阶段将需要的组件加载进内存中，以便给程序按需调用，如下图绿色部分。
+By abstracting DynamicConfiguration, developers can quickly support multiple configuration centers. Once the required components are imported, they will be loaded into memory during startup to be called as needed by the program, as shown in the green part of the diagram.
 
-**2、配置中心的配置加载阶段在什么时候？**
+**2. When is the configuration loading phase for the configuration center?**
 
-应在读取配置文件阶段后，读取并解析本地配置文件中配置中心信息。初始化配置中心链接，读取 /dubbo/config/dubbo/dubbo.properties 与 /dubbo/config/dubbo/应用名/dubbo.properties ，并将其加载到内存之中覆盖原有配置，监听其变更，实时更新至内存，如下图蓝色部分:
+It should happen after reading the configuration file, reading and parsing the configuration center information from the local configuration file. Initialize the configuration center connection, read /dubbo/config/dubbo/dubbo.properties and /dubbo/config/dubbo/applicationName/dubbo.properties, and load them into memory to override the original configuration, listening to changes and updating them in real time, as shown in the blue part of the diagram:
 ![img](/imgs/blog/dubbo-go/config-center/config-center-class.jpg)
 
 #### ConfigCenterFactory
 
-使用者加载对应配置中心模块后，在初始化阶段加入各配置中心模块往其中注册其初始化类。
+After loading the corresponding configuration center module, users register their initialization classes for each configuration center module during the initialization phase.
 
 ```golang
 package extension
@@ -90,7 +90,7 @@ func GetConfigCenterFactory(name string) config_center.DynamicConfigurationFacto
 
 #### DynamicConfigurationFactory
 
-整个动态配置中心的关键点就在 DynamicConfigurationFactory 上，其中通过解析内部自定义的 URL ，获取其协议类型，反射其参数，用于创建配置中心的链接。
+The key point of the dynamic configuration center lies in DynamicConfigurationFactory, where the internal custom URL is parsed to obtain its protocol type and reflect its parameters for creating configuration center links.
 
 ```golang
 package config_center
@@ -105,9 +105,9 @@ type DynamicConfigurationFactory interface {
 }
 ```
 
-如：
+For example:
 
-配置文件中配置：
+Configuration file settings:
 
 ```yaml
 config_center:
@@ -116,28 +116,28 @@ config_center:
   namespace: test
 ```
 
-dubbo-go 内部会解析为：
+In dubbo-go, this will be parsed as:
 
 ```
 zookeeper://127.0.0.1:2181?namespace=test
 ```
 
-在内部传递，用于初始化配置中心链接。
+Internally passed for initializing the configuration center connection.
 
-**PS:** 在 dubbo-go 中到处可见这种内部协议，透彻理解这个内部协议对阅读 dubbo-go 代码很有帮助。
+**PS:** This internal protocol is commonly seen in dubbo-go, and understanding it thoroughly aids in reading dubbo-go code.
 
 #### DynamicConfiguration
 
-该接口规定了各个配置中心需要实现的功能：
+This interface stipulates the functions that each configuration center needs to implement:
 
-- 配置数据反序列化方式：目前只有 Properties 转换器，参见：DefaultConfigurationParser 。
-- 增加监听器：用于增加监听数据变化后增加特定逻辑（受限于配置中心 client 端实现）。
-- 删除监听器：删除已有监听器（受限于配置中心 client 端实现，目前所知 nacos client 没有提供该方法）。
-- 获取路由配置：获取路由表配置。
-- 获取应用级配置：获取应用层级配置，如：协议类型配置等。
+- Configuration data deserialization method: currently only the Properties converter, see: DefaultConfigurationParser.
+- Add listener: for adding specific logic upon data changes (limited by the configuration center client implementation).
+- Remove listener: for deleting existing listeners (limited by the configuration center client implementation; currently known, the Nacos client does not provide this method).
+- Get routing configuration: to obtain routing table configuration.
+- Get application-level configuration: to retrieve application-level settings, such as protocol type configuration, etc.
 
 ```golang
-// DynamicConfiguration for modify listener and get properties file
+// DynamicConfiguration for modifying listener and getting properties file
 type DynamicConfiguration interface {
 	Parser() parser.ConfigurationParser
 	SetParser(parser.ConfigurationParser)
@@ -163,58 +163,58 @@ type DynamicConfiguration interface {
 }
 ```
 
-### 实现
+### Implementation
 
 ![img](/imgs/blog/dubbo-go/config-center/design.png)
 
-优先考虑与现有 Dubbo 设计兼容，从而降低使用者的学习成本，dubbo-admin 作为服务提供者实现应用级配置管理， dubbo-go 作为消费端实现配置下发管理功能。下面以 ZooKeeper 为例，对服务提供者与服务消费者进行整体流程分析。
+Priority is given to compatibility with existing Dubbo design to reduce users' learning costs. dubbo-admin implements application-level configuration management as a service provider, while dubbo-go implements configuration delivery management as a consumer. Below, we analyze the overall process for both service providers and consumers using ZooKeeper as an example.
 
-#### 如何存储配置管理
+#### How to Store Configuration Management
 
-dubbo-admin 配置管理中增加 global 配置，ZooKeeper 中会自动生成其对应配置节点，内容均为 dubbo-admin 中设置的配置。
+In dubbo-admin's configuration management, add a global configuration, and ZooKeeper will automatically generate the corresponding configuration node, with contents set in dubbo-admin.
 
-1. /dubbo/config/dubbo/dubbo.properties 对应全局配置文件。
-2. /dubbo/config/dubbo/ 应用名 /dubbo.properties 对应指定应用配置文件。
+1. /dubbo/config/dubbo/dubbo.properties corresponds to the global configuration file.
+2. /dubbo/config/dubbo/applicationName/dubbo.properties corresponds to the specified application configuration file.
 
-##### 节点路径
+##### Node Paths
 
 ![img](/imgs/blog/dubbo-go/config-center/key-struct.png)
 
-上图展示了 dubbo.properties 文件在 ZooKeeper 和 Apollo 中的存储结构：
+The above illustrates the storage structure of the dubbo.properties file in ZooKeeper and Apollo:
 
 **ZooKeeper**
 
-- 命名空间 namespace 都为：Dubbo
-- 分组 group ：全局级别为 dubbo , 所有应用共享；应用级别为应用名 demo-provider ，只对该应用生效
-- key : dubbo.properties
+- Namespace namespace is: Dubbo
+- Group group: global level is dubbo, shared by all applications; application level is application name demo-provider, only effective for that application
+- Key: dubbo.properties
 
 **Apollo**
 
-- app_id : 自由指定，默认：dubbo ，最好与 zookeeper  namespace 一致
-- cluster : 自由指定，最好与 zookeeper group 一致
-- 命名空间 namespace : dubbo.properties
+- app_id: freely specified, default: dubbo, preferably consistent with zookeeper namespace
+- Cluster: freely specified, preferably consistent with zookeeper group
+- Namespace: dubbo.properties
 
-ZooKeeper 与 Apollo 最大的不一样就在于 dubbo.properties 所在的节点。
+The biggest difference between ZooKeeper and Apollo lies in the node where dubbo.properties is located.
 
-#### 实现配置管理中心支持
+#### Implementing Support for Configuration Management Center
 
-以 Apollo 为例，简单的介绍，如何实现支持一个新的配置管理中心。
+Taking Apollo as an example, here’s a simple introduction on how to support a new configuration management center.
 
-##### 选择配置管理中心 Client / SDK
+##### Choose Configuration Management Center Client / SDK
 
-本例中使用的 Apollo Go Client 为：https://github.com/zouyx/agollo 。
+The Apollo Go Client used in this example is: https://github.com/zouyx/agollo.
 
-**PS:** 如没找到，自己实现也是可以的哦。
+**PS:** If not found, implementing your own is also acceptable.
 
-##### 节点路径
+##### Node Paths
 
-因为每个配置管理中心的存储结构各有特点，导致 Dubbo 在使用外部配置管理中心时，存储配置节点的结构不一样。在 dubbo-configcenter 找到希望支持的配置管理中心，而本例中 Apollo 则在 ApolloDynamicConfiguration.java 。
+Due to the unique storage structure of each configuration management center, when using an external configuration management center, the structure of the stored configuration nodes in Dubbo differs. Find the desired configuration management center support in dubbo-configcenter; in this example, Apollo can be found in ApolloDynamicConfiguration.java.
 
-注释中表明，Apollo namespace = governance (governance .properties) 用于治理规则，namespace = dubbo (dubbo.properties) 用于配置文件。
+Comments indicate that Apollo's namespace = governance (governance.properties) is for governance rules, and namespace = dubbo (dubbo.properties) is for configuration files.
 
-##### 实现 DynamicConfiguration
+##### Implement DynamicConfiguration
 
-新建创建客户端方法，最好客户端保持为单例。
+Create a new client method, keeping it as a singleton.
 
 ```golang
 func newApolloConfiguration(url *common.URL) (*apolloConfiguration, error) {
@@ -241,28 +241,28 @@ func newApolloConfiguration(url *common.URL) (*apolloConfiguration, error) {
 }
 ```
 
-以下为必须实现的方法，以下方法用于获取配置中心配置。
+The following methods must implement methods to obtain the configuration from the configuration center.
 
-- GetInternalProperty：在配置文件（Apollo 为 namespace）中，根据 key 获取对应 value；
-- GetRule：获取治理配置文件（Apollo 为 namespace）；
-- GetProperties：获取整个配置文件（Apollo 为 namespace）；
+- GetInternalProperty: get the corresponding value according to the key in the configuration file (Apollo as namespace);
+- GetRule: get the governance configuration file (Apollo as namespace);
+- GetProperties: get the entire configuration file (Apollo as namespace);
 
-可选择实现的方法，如不实现，则不能动态更新 dubbo-go 中配置信息。
+Optionally implementable methods, if not implemented, cannot dynamically update configuration information in dubbo-go.
 
 - RemoveListener
 - AddListener
 
-而 Parser & SetParser 使用默认实现即可，默认为 Properties 转换器。
+Parser & SetParser can use default implementations, defaulting to Properties converters.
 
-更多信息，参考：dubbo-go-apollo ，详情参考： https://github.com/apache/dubbo-go/tree/release-1.5/config_center/apollo
+For more information, refer to: dubbo-go-apollo, detailed reference: https://github.com/apache/dubbo-go/tree/release-1.5/config_center/apollo
 
-### 使用方法
+### Usage
 
-从上面的设计里面，也能大概猜到怎么使用了：
+From the above design, one can roughly guess how to use it:
 
 ![img](/imgs/blog/dubbo-go/config-center/zookeeper-usercase.png)
 
-很显然，使用配置中心并不复杂，只需要把对应的依赖引入进来。在包初始化的时候，会创建出来对应的配置中心的实现。比如说加载 ZooKeeper 或者 Apollo 作为配置中心：
+Clearly, using a configuration center is not complicated; just import the corresponding dependencies. During package initialization, the corresponding implementation of the configuration center will be created. For example, loading ZooKeeper or Apollo as the configuration center:
 
 **ZooKeeper**
 
@@ -276,7 +276,7 @@ _ "github.com/apache/dubbo-go/config_center/zookeeper"
 _ "github.com/apache/dubbo-go/config_center/apollo"
 ```
 
-当然仅仅加载还不够，比如说虽然我加载了 zookeeper，但是我还需要知道怎么连上这个配置中心，即前面提到的配置中心的元数据，这部分信息是需要在本地配置出来的。比如说：
+Of course, simply loading is not enough; for example, even if I load ZooKeeper, I still need to know how to connect to this configuration center, i.e., the aforementioned metadata of the configuration center has to be configured locally. For example:
 
 **ZooKeeper**
 
@@ -288,7 +288,7 @@ config_center:
 
 **Apollo**
 
-如果需要使用 Apollo 作为配置中心，请提前创建 namespace: dubbo.properties，用于配置管理。
+If you need to use Apollo as the configuration center, please create the namespace: dubbo.properties in advance for configuration management.
 
 ```yaml
 config_center:
@@ -298,17 +298,18 @@ config_center:
   cluster: dev
 ```
 
-## 总结
+## Conclusion
 
-更加具体的实现，我就不详细论述，大家可以去看源码，欢迎大家持续关注，或者贡献代码。
+I will not elaborate on the more specific implementations; you can check the source code. Feel free to continue following or contribute code.
 
-整个配置中心的功能，麻雀虽小，但五脏俱全。目前并不算是十分完善，但是整个框架层面上来说，是走在了正确的路上。从扩展性来说，是比较便利。目前支持的配置中心还不够丰富，只有 ZooKeeper 与 Apollo ，支持的配置文件格式也只有 properties ，虽然能满足基本使用场景，距离完善还有还长远的路。
+The entire functionality of the configuration center, while small, is comprehensive. It is not yet fully refined, but from a framework perspective, it is moving in the right direction. From an extensibility standpoint, it is quite convenient. Currently, the supported configuration centers are not abundant, only ZooKeeper and Apollo, and the supported configuration file formats are limited to properties, which, while sufficient for basic use cases, have a long way to go for completeness.
 
-**未来计划：**
+**Future Plans:**
 
-- Nacos（等待发布 ）
-- etcd（正在开发）
-- consul（未支持）
-- 丰富的文件配置格式，如：yml , xml 等
+- Nacos (waiting for release)
+- etcd (under development)
+- consul (not supported)
+- Richer file configuration formats, such as: yml, xml, etc.
 
-**本文作者：** 邹毅贤，Github ID @zouyx，开源爱好者，就职于 SheIn 供应链部门，负责供应链开放平台
+**Author:** Zou Yixian, GitHub ID @zouyx, an open-source enthusiast working in SheIn’s supply chain department, responsible for the open platform in the supply chain.
+

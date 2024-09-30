@@ -1,63 +1,63 @@
 ---
-title: "Dubbo测试验证"
-linkTitle: "Dubbo测试验证"
+title: "Dubbo Testing Validation"
+linkTitle: "Dubbo Testing Validation"
 tags: ["Java"]
 date: 2019-12-02
 description: >
-    对正在开发的功能进行验证测试，或者单独调用某台机器的服务
+    Validation tests for features under development or calling services from a specific machine
 ---
 
-除了线上常规的使用场景以外，我们在日常使用中还需要一些特定的使用方式，比如对正在开发的功能进行验证测试，比如单独调用某台机器的服务，这篇文章就来介绍一下这些场景下的使用方式。
+In addition to the usual online usage scenarios, we also need some specific usage methods in our daily use, such as validating features under development or calling services from a specific machine. This article introduces the usage methods in these scenarios.
 
-### 只订阅  
-为方便开发测试，经常会在线下共用一个所有服务可用的注册中心，这时，如果一个正在开发中的服务提供者注册，可能会影响消费者不能正常运行。
+### Subscribe Only  
+To facilitate development testing, an all-service available registry is often shared in offline environments. If a service provider under development registers, it may affect the proper functioning of consumers.
 
-可以让服务提供者开发方，只订阅服务(开发的服务可能依赖其它服务)，而不注册正在开发的服务，通过直连测试正在开发的服务。     
+The service provider's development team can subscribe only to the service (as the developed service may depend on other services), without registering the service under development, testing the developing service through a direct connection.     
 ![subscribe-only](/imgs/blog/subscribe-only.jpg)
-禁用注册配置
+Disable registration configuration
 
     <dubbo:registry address="10.20.153.10:9090" register="false" />
-或者
+or
 
     <dubbo:registry address="10.20.153.10:9090?register=false" />
 
-### 指定IP调用  
-在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者，这时候可能需要点对点直连，点对点直联方式，将以服务接口为单位，忽略注册中心的提供者列表，A 接口配置点对点，不影响 B 接口从注册中心获取列表  
+### Specify IP for Calling  
+In development and testing environments, we often need to bypass the registry and test specific service providers. This may require point-to-point connections, where point-to-point connections ignore the provider list from the registry and configure point-to-point for service interfaces, without affecting other interfaces from retrieving lists from the registry.  
 ![subscribe-only](/imgs/blog/dubbo-directly.jpg)
 
-可以通过以下几种配置来指定IP调用   
+You can specify IP calling through the following configurations:   
 
-* XML 配置： 如果是线上需求需要点对点，可在 <dubbo:reference> 中配置 url 指向提供者，将绕过注册中心，多个地址用分号隔开，配置如下：
+* XML configuration: If point-to-point is required in the online demand, you can configure the URL pointing to the provider in `<dubbo:reference>`, which will bypass the registry, with multiple addresses separated by semicolons, as follows:
     `<dubbo:reference id="xxxService" interface="com.alibaba.xxx.XxxService" url="dubbo://localhost:20890" />`   
-* 通过-D参数指定： 在 JVM 启动参数中加入-D参数映射服务地址，如：`java -Dcom.alibaba.xxx.XxxService=dubbo://localhost:20890`  
-* 通过文件映射: 如果服务比较多，也可以用文件映射，用 -Ddubbo.resolve.file 指定映射文件路径，此配置优先级高于 <dubbo:reference> 中的配置，如：
+* Specify using -D parameter: Add -D parameter to JVM startup parameters to map service address, e.g., `java -Dcom.alibaba.xxx.XxxService=dubbo://localhost:20890`  
+* File mapping: If there are many services, file mapping can be used; specify the mapping file path using -Ddubbo.resolve.file. This configuration takes precedence over the one in `<dubbo:reference>`, like:
 `java -Ddubbo.resolve.file=xxx.properties`  
-然后在映射文件 xxx.properties 中加入配置，其中 key 为服务名，value 为服务提供者 URL：`com.alibaba.xxx.XxxService=dubbo://localhost:20890`  
+Then add the configuration in the mapping file xxx.properties, where the key is the service name and the value is the service provider URL: `com.alibaba.xxx.XxxService=dubbo://localhost:20890`  
 
-### 回声测试
-#### 使用方式
-回声测试用于检测服务是否可用，回声测试按照正常请求流程执行，能够测试整个调用是否通畅，可用于监控。
+### Echo Testing
+#### Usage  
+Echo testing is used to check the availability of services. It executes according to the normal request process, allowing testing of the whole call flow and can be used for monitoring.
 
-所有服务自动实现 EchoService 接口，只需将任意服务引用强制转型为 EchoService，即可使用。
+All services automatically implement the EchoService interface. You just need to force any service reference to be cast to EchoService to use it.
 
-Spring 配置：
+Spring Configuration:
 
     <dubbo:reference id="memberService" interface="com.xxx.MemberService" />
-代码：
+Code:
 
 ```
-// 远程服务引用
+// Remote service reference
 MemberService memberService = ctx.getBean("memberService"); 
  
-EchoService echoService = (EchoService) memberService; // 强制转型为EchoService
+EchoService echoService = (EchoService) memberService; // Force cast to EchoService
 
-// 回声测试可用性
+// Echo test availability
 String status = echoService.$echo("OK"); 
  
 assert(status.equals("OK"));
 ```  
-#### 实现原理  
-我们在实现，注册服务的时候，并没有配置EchoService这个接口，为什么可以直接使用呢？原来是Dubbo在生成proxy的时候，已经实现了`EchoService这个接口`    
+#### Implementation Principle  
+When we implemented the registration of services, we did not configure the EchoService interface. Why can it be used directly? It turns out that Dubbo generates the proxy by already implementing the `EchoService interface`    
 
 ```java
   @Override
@@ -81,7 +81,7 @@ assert(status.equals("OK"));
         return getProxy(invoker, interfaces);
     }
 ```  
-通过这种方式，任何bean都可以被转换成EchoService的实例，但是并没有实现`$echo`这个方法，这里，Dubbo使用filter机制做了处理：  
+In this way, any bean can be converted into an instance of EchoService, but the method `$echo` is not implemented. Here, Dubbo uses the filter mechanism to handle it:  
 
 ```java
 public class EchoFilter implements Filter {
@@ -95,5 +95,5 @@ public class EchoFilter implements Filter {
 
 }
 ```
-在经过EchoFilter.invoke方法时，如果调用的是`$echo`，会中断当前的调用过程，直接返回`$echo`的入参，否则会继续执行Filter链。  
-通过动态代理和EchoFilter机制，使得回声测试的整个过程对用户透明，不需要做任何额外的配置，直接调用即可。
+When passing through the EchoFilter.invoke method, if the call is `$echo`, it will interrupt the current call process and directly return the argument of `$echo`; otherwise, it will continue to execute the filter chain. Through dynamic proxy and the EchoFilter mechanism, the entire echo testing process is transparent to the user, requiring no additional configuration; it can be called directly.
+

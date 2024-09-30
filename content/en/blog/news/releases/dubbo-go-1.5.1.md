@@ -4,66 +4,66 @@ linkTitle: "dubbo-go 1.5.1"
 date: 2021-6-12
 weight: 60
 description: >
-    Dubbo-go 团队近期发布了 Dubbo-go v1.5.1，Dubbo-go 是 Apache Dubbo 项目的 Go 实现。
+    The Dubbo-go team recently released Dubbo-go v1.5.1, which is the Go implementation of the Apache Dubbo project.
 ---
 
-近期我们发布了 dubbo-go v1.5.1，虽然是 v1.5 的一个子版本，但相比于 v1.5.0， 社区还是投入了很大人力添加了如下重大改进。
+We recently released dubbo-go v1.5.1. Although it is a sub-version of v1.5, the community has invested significant effort compared to v1.5.0 to add the following major improvements.
 
-## 1 应用维度注册模型
+## 1 Application Dimension Registration Model
 
-在新模型 release 后，我们发现 Provider 每个 URL 发布元数据都会注册 ServiceInstance，影响性能需要优化。
+After the new model release, we found that each URL published by the Provider registers a ServiceInstance, impacting performance and requiring optimization.
 
-我们的优化方案是：
+Our optimization approach is:
 
-去除 ServiceDiscoveryRegistry 中注册 ServiceInstance 的代码，在 config_loader 中的loadProviderConfig 方法的最后注册 ServiceInstance
+Removing the code that registers the ServiceInstance in ServiceDiscoveryRegistry and registering the ServiceInstance at the end of the loadProviderConfig method in config_loader.
 
-具体步骤：
-1. 获取所有注册的 Registry，过滤出 ServiceDiscoveryRegistry，拿取所有 ServiceDiscovery。
-2. 创建 ServiceInstance。
-3. 每个 ServiceDiscovery 注册 ServiceInstance。
+Specific steps:
+1. Retrieve all registered Registries, filter out ServiceDiscoveryRegistry, and get all ServiceDiscoveries.
+2. Create ServiceInstance.
+3. Each ServiceDiscovery registers the ServiceInstance.
 
-保证 Provider 在注册成功之后，才暴露元数据信息。
+Ensure that the Provider exposes metadata information only after successful registration.
 
-## 2 支持基于 Seata 的事务
+## 2 Support for Seata-based Transactions
 
-基于 Seata 扩展实现。通过增加过滤器，在服务端接收  xid 并结合 [seata-golang](https://github.com/seata-golang/seata-golang) 达到支持分布式事务的目的。 从而使 Dubbo-go 在分布式场景下，让用户有更多的选择，能适应更多的个性化场景。
+Extension implemented based on Seata. By adding filters, the server can receive xid and combine with [seata-golang](https://github.com/seata-golang/seata-golang) to support distributed transactions. This allows Dubbo-go to offer users more choices and adapt to various personalized scenarios in distributed settings.
 
-我们在 dubbo-samples 中给出了 [事务测试用例](https://github.com/apache/dubbo-go-samples/tree/1.5/seata) 。
+In dubbo-samples, we provided [transaction test cases](https://github.com/apache/dubbo-go-samples/tree/1.5/seata).
 
-## 3 多注册中心集群负载均衡
+## 3 Multi-Registry Cluster Load Balancing
 
-对于多注册中心订阅的场景，选址时的多了一层注册中心集群间的负载均衡：
+For scenarios with subscriptions from multiple registries, an additional layer of load balancing among the registry clusters is introduced:
 
-在 Cluster Invoker 这一级，我们支持的选址策略有：
+At the Cluster Invoker level, the supported selection strategies are:
 
-- 指定优先级
-- 同 zone 优先
-- 权重轮询
+- Specified priority
+- Same zone priority
+- Weighted round-robin
 
-## 4 传输链路安全性
+## 4 Security of Transmission Link
 
-该版本在传输链路的安全性上做了尝试，对于内置的 Dubbo getty Server 提供了基于 TLS 的安全链路传输机制。
+This version attempts to enhance the security of the transmission link, providing a TLS-based secure link transmission mechanism for the built-in Dubbo getty Server.
 
-为尽可能保证应用启动的灵活性，TLS Cert 的指定通过配置文件方式，具体请参见 Dubbo-go 配置读取规则与 TLS 示例：
+To ensure flexibility in application startup, the specification of the TLS Cert is done via configuration files. Please refer to the Dubbo-go configuration reading rules and TLS examples for more details.
 
-## 5 路由功能增强
+## 5 Enhanced Routing Functionality
 
-本次路由功能重点支持了 动态标签路由 和 应用/服务级条件路由。
+This routing functionality mainly supports dynamic tag routing and application/service-level conditional routing.
 
-### 5.1 动态标签路由
+### 5.1 Dynamic Tag Routing
 
-标签路由通过将某一个或多个服务的提供者划分到同一个分组，约束流量只在指定分组中流转，从而实现流量隔离的目的，可以作为蓝绿发布、灰度发布等场景的能力基础。
+Tag routing isolates traffic within specified groups by grouping one or more service providers together, thus achieving traffic isolation, which can serve as a foundational capability for blue-green releases and gray releases.
 
-标签主要是指对 Provider 端应用实例的分组，目前有两种方式可以完成实例分组，分别是`动态规则打标`和`静态规则打标`，其中动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。
+Tags refer to the grouping of Provider application instances, with two ways to complete instance grouping: `dynamic rule tagging` and `static rule tagging`, where dynamic rules take precedence over static rules. In case of conflict when both rules coexist, the dynamic rule prevails.
 
-#### 5.1.1 动态规则打标
+#### 5.1.1 Dynamic Rule Tagging
 
-可随时在[服务治理控制台](/en/docsv2.7/user/examples/routing-rule/)下发标签归组规则
+Tag grouping rules can be issued anytime from the [service governance console](/en/docsv2.7/user/examples/routing-rule/).
 
 ```yaml
-# governance-tagrouter-provider应用增加了两个标签分组tag1和tag2
-# tag1包含一个实例 127.0.0.1:20880
-# tag2包含一个实例 127.0.0.1:20881
+# governance-tagrouter-provider application adds two tag groups tag1 and tag2
+# tag1 includes one instance 127.0.0.1:20880
+# tag2 includes one instance 127.0.0.1:20881
 ---
   force: false
   runtime: true
@@ -77,9 +77,9 @@ description: >
  ...
 ```
 
-#### 5.1.2 静态规则打标
+#### 5.1.2 Static Rule Tagging
 
-可以在 server 配置文件的 tag 字段里设置
+Can be set in the tag field of the server configuration file.
 
 ```yaml
 services:
@@ -97,7 +97,7 @@ services:
       loadbalance: "random"
 ```
 
-consumer  添加 tag 至 attachment 即可
+The consumer adds tag to the attachment. 
 
 ```go
 ctx := context.Background()
@@ -107,29 +107,29 @@ ctx = context.WithValue(ctx, constant.AttachmentKey, attachment)
 err := userProvider.GetUser(ctx, []interface{}{"A001"}, user)
 ```
 
-请求标签的作用域为每一次 invocation，使用 attachment 来传递请求标签，注意保存在 attachment 中的值将会在一次完整的远程调用中持续传递，得益于这样的特性，我们只需要在起始调用时，通过一行代码的设置，达到标签的持续传递。
+The request tag's scope is for each invocation, using attachment to pass request tags, and the value stored in attachment will persist throughout a complete remote call. Thanks to this characteristic, we only need one line of code to set it for continuous tag transmission.
 
-#### 5.1.3 规则详解
+#### 5.1.3 Rule Explanation
 
-##### 格式
+##### Format
 
-- `Key`明确规则体作用到哪个应用。**必填**。
-- `enabled=true` 当前路由规则是否生效，可不填，缺省生效。
-- `force=false` 当路由结果为空时，是否强制执行，如果不强制执行，路由结果为空的路由规则将自动失效，可不填，缺省为 `false`。
-- `runtime=false` 是否在每次调用时执行路由规则，否则只在提供者地址列表变更时预先执行并缓存结果，调用时直接从缓存中获取路由结果。如果用了参数路由，必须设为 `true`，需要注意设置会影响调用的性能，可不填，缺省为 `false`。
-- `priority=1` 路由规则的优先级，用于排序，优先级越大越靠前执行，可不填，缺省为 `0`。
-- `tags` 定义具体的标签分组内容，可定义任意n（n>=1）个标签并为每个标签指定实例列表。**必填**
-- - name， 标签名称
-- addresses， 当前标签包含的实例列表
+- `Key` clarifies which application the rule applies to. **Required**.
+- `enabled=true` whether this routing rule is effective, optional, defaults to effective.
+- `force=false` whether to enforce execution when the routing result is empty; if not enforced, routing rules with empty routing results will automatically become invalid, optional, defaults to `false`.
+- `runtime=false` whether to execute routing rules on each call; if not, it will execute the rules only when the provider address list changes and cache the results, retrieving the routing results directly from the cache during the call. If parameter routing is used, it must be set to `true`; be aware that this can affect call performance, optional, defaults to `false`.
+- `priority=1` determines the routing rule's priority for sorting, with a higher priority executed first, optional, defaults to `0`.
+- `tags` defines the specific tag group content, allowing for the definition of any n (n>=1) tags and specifying instance lists for each tag. **Required**
+- - name, tag name
+- addresses, the instance list contained within the current tag
 
-##### 降级约定
+##### Degradation Convention
 
-1. `dubbo.tag=tag1` 时优先选择 标记了 `tag=tag1` 的 provider。若集群中不存在与请求标记对应的服务，默认将降级请求 tag 为空的 provider；如果要改变这种默认行为，即找不到匹配 tag1 的 provider 返回异常，需设置`dubbo.force.tag=true`。
-2. `dubbo.tag` 未设置时，只会匹配 tag 为空的 provider。即使集群中存在可用的服务，若 tag 不匹配也就无法调用，这与约定 1 不同，携带标签的请求可以降级访问到无标签的服务，但不携带标签/携带其他种类标签的请求永远无法访问到其他标签的服务。
+1. When `dubbo.tag=tag1`, providers marked with `tag=tag1` are prioritized. If no corresponding service exists for the requested tag in the cluster, the request defaults to a provider without tags; to change this default behavior to throw an exception when unable to find a matching provider for tag1, set `dubbo.force.tag=true`.
+2. When `dubbo.tag` is not set, it will only match providers without tags. Even if available services exist in the cluster, mismatched tags will prevent invocation. This is different from convention 1, where tagged requests can degrade to access untagged services, but requests not carrying tags or carrying other types of tags can never access services with distinct tags.
 
-###  5.2 应用/服务级条件路由
+### 5.2 Application/Service Level Conditional Routing
 
-您可以在路由规则配置中配置多个条件路由及其粒度
+Multiple conditional routings and their granularities can be configured in the routing rule configuration.
 
 Sample:
 
@@ -149,32 +149,33 @@ routerRules:
     conditions : ["host = 192.168.199.208 => host = 192.168.199.208 "]
 ```
 
-#### 5.2.1 规则详解
+#### 5.2.1 Rule Explanation
 
-##### 各字段含义
+##### Meaning of Each Field
 
-- scope表示路由规则的作用粒度，scope的取值会决定key的取值。必填。
-- - service 服务粒度
-- application 应用粒度
-- Key明确规则体作用在哪个服务或应用。必填。
-- - scope=service时，key取值为[{group}/]{service}[:{version}]的组合
-- scope=application时，key取值为application名称
-- enabled=true 当前路由规则是否生效，可不填，缺省生效。
-- force=false 当路由结果为空时，是否强制执行，如果不强制执行，路由结果为空的路由规则将自动失效，可不填，缺省为 false。
-- runtime=false 是否在每次调用时执行路由规则，否则只在提供者地址列表变更时预先执行并缓存结果，调用时直接从缓存中获取路由结果。如果用了参数路由，必须设为 true，需要注意设置会影响调用的性能，可不填，缺省为 false。
-- priority=1 路由规则的优先级，用于排序，优先级越大越靠前执行，可不填，缺省为 0。
-- conditions 定义具体的路由规则内容。必填。
+- Scope indicates the granularity of the routing rule, which determines the key's value. Required.
+- - service service granularity
+- application application granularity
+- `Key` clarifies which service or application the rule applies to. Required.
+- - When scope=service, key's value must be a combination of [{group}/]{service}[:{version}].
+- When scope=application, key's value is the application name.
+- `enabled=true` whether the current routing rule is effective, optional, defaults to effective.
+- `force=false` whether to enforce execution when the routing result is empty; if not enforced, the routing rule with an empty result automatically becomes invalid, optional, defaults to false.
+- `runtime=false` whether to execute routing rules on every call; if not, it will execute and cache results only when the provider address list changes, retrieving routing results from cache during the call. If parameter routing is utilized, it must be set to true; be cautious as this may affect call performance, optional, defaults to false.
+- `priority=1` the priority of the routing rule for sorting, with higher priorities executed first, optional, defaults to 0.
+- `conditions` defines the specific content of routing rules. Required.
 
-## 6 回顾与展望
+## 6 Review and Outlook
 
-Dubbo-go 处于一个比较稳定成熟的状态。目前新版本正处于往云原生方向的尝试，应用服务维度注册是首先推出的功能，这是一个和之前模型完全不一样的新注册模型。该版本是我们朝云原生迈进新一步的关键版本。除此之外，包含在该版本也有一些之前提到的优化。
+Dubbo-go is in a stable and mature state. The new version is currently experimenting with cloud-native directions, with application service dimension registration being the first feature launched, representing a completely new registration model. This version is a key step towards cloud-native development. Additionally, it includes some previously mentioned optimizations.
 
-下一个版本 v1.5.2，本次的关注重点以通信模型改进为主，除此之外，与 2.7.x 的兼容性、易用性及质量保证也是本次关注的信息。
+The next version, v1.5.2, will focus on improvements to the communication model, alongside compatibility, usability, and quality assurance with 2.7.x.
 
-在**服务发现**，会支持更加多的方式，如：文件、Consul。 从而使 Dubbo-go 在服务发现场景下，让用户有更多的选择，能适应更多的个性化场景。
+In **service discovery**, more methods will be supported, such as: file, Consul. This will give users more options in service discovery scenarios and allow for more personalized scenarios.
 
-另外 **易用性及质量保证**，主要关注的是 samples 与自动化构建部分。可降低用户上手 Dubbo-go 的难度，提高代码质量。
+Additionally, **usability and quality assurance** mainly focus on samples and automated build parts, reducing the difficulty for users to get started with Dubbo-go and improving code quality.
 
-目前下一个版本正在紧锣密鼓的开发中，具体规划及任务清单[^1] ，都已经在 Github 上体现。
+The next version is under active development, with specific planning and task lists[^1] already reflected on GitHub.
 
 [^1]: https://github.com/apache/dubbo-go/projects/10 
+

@@ -1,5 +1,6 @@
 ---
-title: "技术方案"
-linkTitle: "技术方案"
+title: "Technical Solutions"
+linkTitle: "Technical Solutions"
 weight: 12
 ---
+

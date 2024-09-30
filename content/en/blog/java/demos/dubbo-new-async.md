@@ -1,38 +1,38 @@
 ---
-title: "如何基于Dubbo实现全异步调用链"
-linkTitle: "如何基于Dubbo实现全异步调用链"
+title: "How to Implement Fully Asynchronous Call Chains Based on Dubbo"
+linkTitle: "How to Implement Fully Asynchronous Call Chains Based on Dubbo"
 tags: ["Java"]
 date: 2018-09-02
 description: >
-    本文回顾了 2.6.x 版本的异步实现，然后引出了 2.7.0 版本基于 CompletableFuture 的异步编程方式。
+    This article reviews the asynchronous implementation in version 2.6.x, and introduces the improvements made in version 2.7.0 based on CompletableFuture.
 ---
 
-基于Dubbo实现全异步编程，是在2.7.0版本中对现有异步方式增强后新引入的功能。本文先是回顾2.6.x及之前版本对异步的支持情况及存在的问题，引出了2.7.0版本基于CompletableFuture做了哪些针对性的增强，通过几个示例详细阐述了增强后的异步编程的使用方式，最后总结了引入异步模式带来的新问题及Dubbo的解决方法。通过阅读这篇文章，可以很容易的基于Dubbo2.7.0+版本实现一个全异步的远程服务调用链路。
+Implementing fully asynchronous programming based on Dubbo is a new feature introduced in version 2.7.0 after enhancing the existing asynchronous methods. This article first reviews the asynchronous support and issues in versions 2.6.x and earlier, then highlights the targeted enhancements made in version 2.7.0 based on CompletableFuture. It elaborates on the usage of the enhanced asynchronous programming through several examples, and finally summarizes the new problems introduced by adopting the asynchronous model and Dubbo's solutions to them. By reading this article, you can easily implement a fully asynchronous remote service call chain using Dubbo 2.7.0+.
 
-从3.0.0版本开始，Dubbo框架提供了对Reactive编程范式的支持，除了编程接口之外，在跨进程的RPC通信中引入了Reactive的语义。如果你所在的环境需要使用Reactive编程范式，或者你的RPC调用需要支持流式传输，Reactive应该会给你带来帮助，具体请参考发布在阿里巴巴中间件公众号上的响应式编程支持相关文章。
-> 注意，你可能并不是总需要Reactive的语义，尤其是在RPC的场景，CompletableFuture本身也能带给你Reactive模式的编程模型，在选择Reactive（RxJava、Reactor之类）而不是理解及使用成本更低的CompletableFuture前，请尝试关注以下问题：
-> 1. 你是请求/响应是一次性传输的还是流式传输的，一个明显特征是你定义的数据类型是 `List<String>` 还是 `Stream<String>`
-> 2. 你的RPC请求有没有要求是Cold，即在subscribe后触发，因为CompletableFuture总是hot的
-> 3. 你依赖的编程上下文中是否已经在大量使用Reactive的编程接口
-> 4. 你是否需要Rx框架提供的更丰富的Operator，而这点和1又是密切相关的
+Starting from version 3.0.0, the Dubbo framework provides support for the Reactive programming paradigm. Besides programming interfaces, Reactive semantics have been introduced in inter-process RPC communication. If your environment requires the Reactive programming paradigm or your RPC calls need to support streaming, Reactive should help you. For more information, please refer to the articles on Reactive programming support published on Alibaba Middleware's official account. 
+> Note: You may not always need Reactive semantics, especially in RPC scenarios. CompletableFuture itself can also provide a Reactive-style programming model. Before choosing Reactive (such as RxJava or Reactor) over the more easily understood and utilized CompletableFuture, please consider the following questions:
+> 1. Are your request/response transmissions one-off or streaming? A clear indicator is whether your defined data type is `List<String>` or `Stream<String>`.
+> 2. Is your RPC request required to be Cold, i.e., triggered after subscription, since CompletableFuture is always hot?
+> 3. Are Reactive programming interfaces already widely used in your programming context?
+> 4. Do you need the richer operators provided by the Rx framework, which closely relates to point 1 above? 
                                                                                                                         
 
 
-## 2.6.x版本之前的异步方式
+## Asynchronous Methods Before Version 2.6.x
 
-在2.6.x及之前的版本提供了一定的异步编程能力，包括Consumer端[异步调用](/en/docsv2.7/user/examples/async-call/)、[参数回调](/en/docsv2.7/user/examples/callback-parameter/)、[事件通知](/en/docsv2.7/user/examples/events-notify/)等，在上面的文档链接中有关于使用方式的简单介绍和Demo。
+In versions 2.6.x and earlier, certain asynchronous programming capabilities were provided, including Consumer-side [asynchronous calls](/en/docsv2.7/user/examples/async-call/), [parameter callbacks](/en/docsv2.7/user/examples/callback-parameter/), [event notifications](/en/docsv2.7/user/examples/events-notify/), etc. The above documentation links provide a brief introduction and demo on usage.
 
-关于参数回调，其本质上是一种服务端的数据推送能力，这是终端应用很常见的一种需求，关于这部分的重构计划，不在本文讨论范围。
+Regarding parameter callbacks, it essentially serves as a data-pushing capability from the server-side, a common requirement for terminal applications. The restructuring plan for this part is beyond the scope of this article.
 
-但当前的异步方式存在以下问题：
+However, the current asynchronous methods present the following issues:
 
-- Future获取方式不够直接
-- Future接口无法实现自动回调，而自定义ResponseFuture虽支持回调但支持的异步场景有限，如不支持Future间的相互协调或组合等
-- 不支持Provider端异步
+- The way to obtain Future is not straightforward.
+- The Future interface cannot achieve automatic callbacks, while custom ResponseFuture supports callbacks but only for limited asynchronous scenarios, such as not supporting interactions or combinations between Futures, etc.
+- Does not support asynchronous operations on the Provider side.
 
-以Consumer端异步使用方式为例：
+Taking the Consumer's asynchronous usage as an example:
 
-1. 定义一个普通的同步接口并声明支持异步调用
+1. Define a normal synchronous interface and declare support for asynchronous calls
 
 ```java
 public interface FooService {
@@ -46,22 +46,22 @@ public interface FooService {
 </dubbo:reference>
 ```
 
-2. 通过RpcContext获取Future
+2. Obtain Future via RpcContext
 
 ```java
-// 此调用会立即返回null
+// This call will immediately return null
 fooService.findFoo(fooId);
-// 拿到调用的Future引用，当结果返回后，会被通知和设置到此Future
+// Obtain the Future reference; when the result returns, it will be notified and set to this Future
 Future<Foo> fooFuture = RpcContext.getContext().getFuture();
 fooFuture.get();
 ```
 
-或
+or
 
 ```java
-// 此调用会立即返回null
+// This call will immediately return null
 fooService.findFoo(fooId);
-// 拿到Dubbo内置的ResponseFuture并设置回调
+// Obtain the built-in ResponseFuture from Dubbo and set a callback
 ResponseFuture future = ((FutureAdapter)RpcContext.getContext().getFuture()).getFuture();
 future.setCallback(new ResponseCallback() {
     @Override
@@ -76,116 +76,99 @@ future.setCallback(new ResponseCallback() {
 });
 ```
 
-从这个简单的示例我们可以体会到一些使用中的不便之处：
+From this simple example, we can observe some inconveniences in usage:
 
-1. findFoo的同步接口，不能直接返回代表异步结果的Future，通过RpcContext进一步获取。
-2. Future只支持阻塞式的get()接口获取结果。
-3. 通过获取内置的ResponseFuture接口，可以设置回调。但获取ResponseFuture的API使用不便，且仅支持设置回调其他异步场景均不支持，如多个Future协同工作的场景等。
+1. The synchronous interface findFoo cannot directly return the Future representing the asynchronous result but needs further retrieval through RpcContext.
+2. Future only supports blocking get() for retrieving results.
+3. By obtaining the built-in ResponseFuture interface, a callback can be set. However, the API for obtaining ResponseFuture is inconvenient, and it only supports setting callbacks while other asynchronous scenarios, such as multiple Futures collaborating, are unsupported.
 
-## 2.7.0基于CompletableFuture的增强
+## Enhancements Based on CompletableFuture in Version 2.7.0
 
-了解Java中Future演进历史的同学应该知道，Dubbo 2.6.x及之前版本中使用的Future是在java 5中引入的，所以存在以上一些功能设计上的问题，而在java 8中引入的CompletableFuture进一步丰富了Future接口，很好的解决了这些问题。
+For those familiar with the evolution history of Future in Java, it should be noted that, the Future used in versions 2.6.x and earlier was introduced in Java 5, which led to the above design issues. In contrast, the CompletableFuture introduced in Java 8 significantly enriches the Future interface and addresses these problems effectively.
 
-Dubbo在2.7.0版本已经升级了对Java 8的支持，同时基于CompletableFuture对当前的异步功能进行了增强。
+Dubbo has upgraded its support for Java 8 in version 2.7.0 while enhancing the current asynchronous functionality based on CompletableFuture.
 
-1. 支持直接定义返回CompletableFuture的服务接口。通过这种类型的接口，我们可以更自然的实现Consumer、Provider端的异步编程。
+1. Support for defining service interfaces that directly return CompletableFuture. Through this type of interface, we can more naturally implement asynchronous programming on the Consumer and Provider sides.
 
-   
+```java
+public interface AsyncService {
+    CompletableFuture<String> sayHello(String name);
+}
+```
 
-   ```java
-   public interface AsyncService {
-       CompletableFuture<String> sayHello(String name);
-   }
-   ```
-   
+2. If you do not want to define the return value of your interface as a Future type, or if you have an already defined synchronous type interface, you can choose to overload the original method and define the return value as CompletableFuture for the new method.
 
-2. 如果你不想将接口的返回值定义为Future类型，或者存在定义好的同步类型接口，则可以选择重载原始方法并为新方法定义CompletableFuture类型返回值。
+```java
+public interface GreetingsService {
+    String sayHi(String name);
+}
+```
 
-   
+```java
+public interface GreetingsService {
+    String sayHi(String name);
+    // To ensure the service governance rules at the method level remain valid, it is recommended to keep the method name unchanged: sayHi
+    // Use default implementation to avoid additional implementation cost for service providers
+    // boolean placeHolder is added only for overload; you may use any method overloading technique as long as Java syntax permits
+    default CompletableFuture<String> sayHi(String name, boolean placeHolder) {
+        return CompletableFuture.completedFuture(sayHello(name));
+    }
+}
+```
 
-   ```java
-   public interface GreetingsService {
-       String sayHi(String name);
-   }
-   ```
+In this way, the Provider can still only implement the sayHi method, while the Consumer can obtain a Future instance by directly calling the newly added overloaded sayHi method.
 
-   
+3. If your original interface definition is synchronous, and you want to implement asynchronous functionality on the Provider side, you can use AsyncContext (a programming interface similar to AsyncContext in Servlet 3.0).
 
-   ```java
-   public interface GreetingsService {
-       String sayHi(String name);
-       // 为了保证方法级服务治理规则依然有效，建议保持方法名不变: sayHi
-       // 使用default实现，避免给服务端提供者带来额外实现成本
-       // boolean placeHoler只是为了实现重载而增加，只要Java语法规则允许，你可以使用任何方法重载手段
-       default CompletableFuture<String> sayHi(String name, boolean placeHolder) {
-         return CompletableFuture.completedFuture(sayHello(name));
-       }
-   }
-   ```
+> Note: For interfaces already with CompletableFuture return types, it is not advised to use AsyncContext. Please directly leverage the asynchronous capabilities provided by CompletableFuture.
 
-   
+```
+public interface AsyncService {
+    String sayHello(String name);
+}
+```
 
-   这样，Provider依然可以只实现sayHi方法；而Consumer通过直接调用新增的sayHi重载方法可以拿到一个Future实例。
-   
+```
+public class AsyncServiceImpl implements AsyncService {
+    public String sayHello(String name) {
+        final AsyncContext asyncContext = RpcContext.startAsync();
+        new Thread(() -> {
+            asyncContext.write("Hello " + name + ", response from provider.");
+        }).start();
+        return null;
+    }
+}
+```
 
-3. 如果你的原始接口定义是同步的，这时要实现Provider端异步，则可以使用AsyncContext（类似Servlet 3.0里的AsyncContext的编程接口）。
+At the beginning of the method body, `RpcContext.startAsync()` starts the asynchronous process and executes the business logic in a new thread. After the time-consuming operation is completed, the result is written back using `asyncContext.write`.
 
-> 注意：在已有CompletabeFuture返回类型的接口上，不建议再使用AsyncContext，请直接利用CompletableFuture带来的异步能力。
- 
+4. RpcContext directly returns CompletableFuture
 
-   ```
-   public interface AsyncService {
-       String sayHello(String name);
-   }
-   ```
+```
+CompletableFuture<String> f = RpcContext.getContext().getCompletableFuture();
+```
 
-   
+All of the above enhancements are made on the basis of maintaining compatibility with existing asynchronous programming, so asynchronous programs written based on version 2.6.x can compile successfully without any modifications.
 
-   ```
-   public class AsyncServiceImpl implements AsyncService {
-       public String sayHello(String name) {
-           final AsyncContext asyncContext = RpcContext.startAsync();
-           new Thread(() -> {
-               asyncContext.write("Hello " + name + ", response from provider.");
-           }).start();
-           return null;
-       }
-   }
-   ```
+Next, let's see through several examples how to achieve a fully asynchronous Dubbo service call chain.
 
-   
+## Example 1: CompletableFuture Type Interface
 
-   在方法体的开始`RpcContext.startAsync()`启动异步，并开启新线程异步的执行业务逻辑，在耗时操作完成后通过`asyncContext.write`将结果写回。
+A CompletableFuture type interface can be used for both synchronous calls and asynchronous calls from Consumer or Provider. This example implements asynchronous calls on both the Consumer and Provider sides; see the code at [dubbo-samples-async-original-future](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-original-future).
 
-4. RpcContext直接返回CompletableFuture
+1. Define the interface
 
-   
+```java
+public interface AsyncService {
+    CompletableFuture<String> sayHello(String name);
+}
+```
 
-   ```
-   CompletableFuture<String> f = RpcContext.getContext().getCompletableFuture();
-   ```
+Note that the return type of the interface is `CompletableFuture<String>`.
 
-以上所有的增强，是在兼容已有异步编程的基础上进行的，因此基于2.6.x版本编写的异步程序不用做任何改造即可顺利编译通过。
+2. Provider Side
 
-接下来，我们通过几个示例看一下如何实现一个全异步的Dubbo服务调用链。
-
-## 示例1：CompletableFuture类型接口
-
-CompletableFuture类型的接口既可以用作同步调用，也可以实现Consumer或Provider的异步调用。本示例实现了Consumer和Provider端异步调用，代码参见[dubbo-samples-async-original-future](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-original-future)。
-
-1. 定义接口
-   
-   ```java
-   public interface AsyncService {
-       CompletableFuture<String> sayHello(String name);
-   }
-   ```
-
-   注意接口的返回类型是`CompletableFuture<String>`。
-
-2. Provider端
-
-   - 实现
+   - Implementation
 
      ```java
      public class AsyncServiceImpl implements AsyncService {
@@ -202,27 +185,27 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
      }
      ```
 
-     可以看到这里通过supplyAsync将业务代码切换到了新的线程执行，因此实现了Provider端异步。
+     Here, it is evident that by using supplyAsync, the business code is switched to execute in a new thread, thus achieving asynchronous functionality on the Provider side.
 
-   - 配置
+   - Configuration
 
      ```xml
      <bean id="asyncService" class="com.alibaba.dubbo.samples.async.impl.AsyncServiceImpl"/>
      <dubbo:service interface="com.alibaba.dubbo.samples.async.api.AsyncService" ref="asyncService"/>
      ```
 
-     配置方式和普通接口是一样的。
+     The configuration method is the same as for a normal interface.
 
-3. Consumer端
+3. Consumer Side
 
-   - 配置
+   - Configuration
 
    ```xml
    <dubbo:reference id="asyncService" timeout="10000" interface="com.alibaba.dubbo.samples.async.api.AsyncService"/>
    ```
-   ​	配置方式和普通接口是一样的。
+   The configuration method is the same as for a normal interface.
 
-   - 调用远程服务
+   - Call the remote service
 
    ```java
    public static void main(String[] args) throws Exception {
@@ -243,13 +226,13 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
        }
    ```
 
-   `CompletableFuture<String> future = asyncService.sayHello("async call request");`很自然的返回了Future示例，这样就实现了Consumer端的异步服务调用。
+   `CompletableFuture<String> future = asyncService.sayHello("async call request");` naturally returns a Future instance, thus achieving asynchronous service calls on the Consumer side.
 
-## 示例2：重载同步接口
+## Example 2: Overloading Synchronous Interface
 
-这个示例演示了如何在同步接口的基础上，通过增加重载方法实现消费端的异步调用，具体代码参见地址[dubbo-samples-async-generated-future](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-generated-future)
+This example demonstrates how to implement asynchronous calls on the consumer side through adding overload methods based on synchronous interfaces; see the code at [dubbo-samples-async-generated-future](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-generated-future).
 
-1. 定义接口
+1. Define the interface
 
    ```java
    @DubboAsync
@@ -258,7 +241,7 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
    }
    ```
 
-   修改接口，增加重载方法
+   Modify the interface by adding an overload method
 
     ```java
     public interface GreetingsService {
@@ -270,20 +253,16 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
     }
     ```
 
-2. Provider端
+2. Provider Side
 
-
-   - 配置
-
+   - Configuration
 
    ```xml
    <bean id="greetingsService" class="com.alibaba.dubbo.samples.async.impl.GreetingsServiceImpl"/>
    <dubbo:service interface="com.alibaba.dubbo.samples.api.GreetingsService" ref="greetingsService"/>
    ```
 
-   
-
-   - 服务实现
+   - Service implementation
 
    ```java
    public class GreetingsServiceImpl implements GreetingsService {
@@ -294,15 +273,15 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
    }
    ```
 
-3. Consumer端
+3. Consumer Side
 
-   - 配置
+   - Configuration
 
    ```xml
     <dubbo:reference id="greetingsService" interface="com.alibaba.dubbo.samples.api.GreetingsService"/>
    ```
 
-   - 调用服务
+   - Call the service
 
    ```java
     public static void main(String[] args) throws Exception {
@@ -317,17 +296,15 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
        }
    ```
 
-   
+   Thus, we can directly use `CompletableFuture<String> future = greetingsService.sayHi("async call reqeust", true);`, returning CompletableFuture directly.
 
-   这样，我们就可以直接使用`CompletableFuture<String> future = greetingsService.sayHi("async call reqeust", true);`，直接返回CompletableFuture。
+## Example 3: Using AsyncContext
 
-## 示例3：使用AsyncContext
+This example demonstrates how to achieve asynchronous execution on the Provider side through AsyncContext based on synchronous interfaces. See the example code at [dubbo-samples-async-provider](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-provider).
 
-本示例演示了如何在同步接口的基础上，通过AsyncContext实现Provider端异步执行，示例代码参见[dubbo-samples-async-provider](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-provider)。
+> As mentioned earlier, for interfaces that already have CompletableFuture signatures, there is no need to use AsyncContext to implement asynchronous functionality on the Provider side.
 
-> 之前已经提到过，已经是CompletableFuture签名的接口，要实现Provider端异步没必要再用AsyncContext。
-
-1. 定义接口
+1. Define the interface
 
    ```java
    public interface AsyncService {
@@ -335,17 +312,16 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
    }
    ```
 
-2. Provider端，和普通provider端配置完全一致
+2. Provider Side, configuration is completely consistent with ordinary provider
 
-   - 配置
+   - Configuration
 
    ```xml
    <bean id="asyncService" class="com.alibaba.dubbo.samples.async.impl.AsyncServiceImpl"/>
    <dubbo:service async="true" interface="com.alibaba.dubbo.samples.async.api.AsyncService" ref="asyncService"/>
    ```
 
-   - 异步执行实现
-   
+   - Asynchronous implementation
    ```java
    public class AsyncServiceImpl implements AsyncService {
        public String sayHello(String name) {
@@ -364,15 +340,15 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
    }
    ```
 
-3. Consumer端
+3. Consumer Side
 
-   - 配置
+   - Configuration
 
    ```xml
    <dubbo:reference id="asyncService" interface="com.alibaba.dubbo.samples.async.api.AsyncService"/>
    ```
 
-   - 服务调用
+   - Service Call
 
    ```java
     public static void main(String[] args) throws Exception {
@@ -386,17 +362,17 @@ CompletableFuture类型的接口既可以用作同步调用，也可以实现Con
        }
    ```
 
-## 异步引入的新问题
+## New Issues Introduced by Asynchronous
 
-### Filter链
+### Filter Chain
 
-以下是一次普通Dubbo调用的完整Filter链(Filter链路图待补充)。
+The following is a complete Filter chain for a regular Dubbo call (Filter chain diagram pending supplementary).
 
-而采用异步调用后，由于异步结果在异步线程中单独执行，所以流经后半段Filter链的Result是空值，当真正的结果返回时已无法被Filter链处理。
+With asynchronous calls, the asynchronous result executes separately in the asynchronous thread, so the Result flowing through the latter half of the Filter chain is empty, and when the actual result returns, it can no longer be processed by the Filter chain.
 
-为了解决这个问题，2.7.0中为Filter增加了回调接口onResponse。
+To address this issue, version 2.7.0 adds a callback interface onResponse to filters.
 
-以下是一个扩展Filter并支持异步Filter链的例子
+Below is an example of an extended Filter that supports asynchronous Filter chains.
 
 ```java
 @Activate(group = {Constants.PROVIDER, Constants.CONSUMER})
@@ -415,19 +391,19 @@ public class AsyncPostprocessFilter implements Filter {
 }
 ```
 
-### 上下文传递
+### Context Passing
 
-这里的上下文问题主要是指在提供端异步的场景。
+The context issue here mainly refers to the scenario of providing asynchronous operations.
 
-当前我们考虑的上下文主要是指保存在RpcContext中的数据，大多数场景是需要用户在切换业务线程前自己完成Context的传递。
+Currently, the context we consider mainly points to data stored in RpcContext. Most scenarios require users to manually complete the context passing before switching business threads.
 
 ```java
 public class AsyncServiceImpl implements AsyncService {
-    // 保存当前线程的上下文
+    // Save the context of the current thread
     RpcContext context = RpcContext.getContext();
     public CompletableFuture<String> sayHello(String name) {
         return CompletableFuture.supplyAsync(() -> {
-            // 设置到新线程中
+            // Set into the new thread
             RpcContext.setContext(context);
             try {
                 Thread.sleep(5000);
@@ -440,7 +416,7 @@ public class AsyncServiceImpl implements AsyncService {
 }
 ```
 
-不过AsyncContext也提供了signalContextSwitch()的方法来实现方便的Context切换。
+However, AsyncContext also provides the signalContextSwitch() method for easy context switching.
 
 ```java
 public class AsyncServiceImpl implements AsyncService {
@@ -459,4 +435,3 @@ public class AsyncServiceImpl implements AsyncService {
     }
 }
 ```
-

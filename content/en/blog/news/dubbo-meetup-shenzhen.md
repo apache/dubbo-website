@@ -1,14 +1,14 @@
 ---
-title: "第三届Dubbo开发者沙龙在深圳成功举办"
-linkTitle: "第三届Dubbo开发者沙龙在深圳成功举办"
+title: "The Third Dubbo Developer Salon Held Successfully in Shenzhen"
+linkTitle: "The Third Dubbo Developer Salon Held Successfully in Shenzhen"
 date: 2018-07-30
-tags: ["新闻动态"]
-description: 第三届Dubbo开发者沙龙在深圳成功举办
+tags: ["News"]
+description: The Third Dubbo Developer Salon Held Successfully in Shenzhen
 ---
 
-第三届Dubbo开发者沙龙在深圳成功举办，超过2000位开发者报名，现场参与人数700+，通过阿里云天池、云栖社区、大咖说引导线上直播观看次数17000+
+The third Dubbo Developer Salon was successfully held in Shenzhen, with over 2,000 developers registering, more than 700 participants on-site, and a total of 17,000 online views guided by Alibaba Cloud's Tianchi, Yunqi Community, and Daka Talk.
 
-分享嘉宾
-  * 陈志轩: Dubbo开源现状和2.7规划
-  * 康彬: 乐信集团的微服务化之路
-  * 林佳梁: Sentinel——企业用户的全方位流量哨兵 
+Speakers
+  * Chen Zhixuan: The Current State of Dubbo Open Source and the Plan for 2.7
+  * Kang Bin: The Microservices Journey of Lexin Group
+  * Lin Jialiang: Sentinel - The All-Round Traffic Sentinel for Enterprise Users

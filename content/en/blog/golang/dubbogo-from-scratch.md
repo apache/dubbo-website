@@ -1,41 +1,41 @@
 ---
-title: "dubbo-go 白话文"
-linkTitle: "dubbo-go 白话文"
+title: "dubbo-go in Plain Language"
+linkTitle: "dubbo-go in Plain Language"
 tags: ["Go"]
 date: 2021-02-20
 description: >
-    本文手把手教你使用 dubbogo 调用 dubbogo 或 dubbo 提供的服务提供方
+    This article teaches you step by step how to use dubbogo to call service providers offered by dubbogo or dubbo.
 ---
 
 
 
-## 一、前言
+## I. Introduction
 
 
-> 本文基于 dubbogo [1.5.4](https://github.com/apache/dubbo-go/releases/tag/v1.5.4) 版本
-
-
-
-最近开始参与 dubbogo 的一些开发测试，之前都是直接拿 [samples](https://github.com/apache/dubbo-go-samples) 的例子验证功能，而这次为了复现一个功能问题，打算从零开始搭建一个 dubbo-go 和 dubbo 调用的工程，踩到了一些新人使用 dubbogo 的坑，把这个过程记录下供大家参考。
-
-
-通过本文你可以了解到：
-
-- 如何常规配置 dubbogo 消费方去调用 dubbo 和 dubbogo 服务提供方
-- 通过一个实际的 BUG 介绍解决问题的思路
+> This article is based on dubbogo [1.5.4](https://github.com/apache/dubbo-go/releases/tag/v1.5.4) version
 
 
 
-## 二、解决问题
+Recently, I started participating in some development and testing of dubbogo. Previously, I would directly verify functions using examples from [samples](https://github.com/apache/dubbo-go-samples), but this time, to reproduce a functional issue, I plan to build a dubbogo and dubbo calling project from scratch. I encountered some pitfalls that new users might face when using dubbogo, and I documented this process for reference.
 
 
-### 2.1 准备 dubbo 服务提供者
+Through this article, you can learn about:
+
+- How to configure dubbogo consumers to call dubbo and dubbogo service providers.
+- An introduction to the problem-solving ideas through an actual BUG.
 
 
-#### 2.1.1 基本定义
+
+## II. Solving the Problem
 
 
-定义 `DemoService` 接口：
+### 2.1 Preparing the Dubbo Service Provider
+
+
+#### 2.1.1 Basic Definition
+
+
+Define the `DemoService` interface:
 
 
 ```java
@@ -51,7 +51,7 @@ public interface DemoService {
 ```
 
 
-定义 `User` 对象：
+Define the `User` object:
 
 
 ```java
@@ -66,48 +66,48 @@ public class User implements Serializable {
 ```
 
 
-#### 2.1.2 启动 dubbo 服务提供者
+#### 2.1.2 Starting the Dubbo Service Provider
 
 
-用的 [dubbo 官方示例代码](/en/docsv2.7/user/configuration/api/):
+Using the [official dubbo sample code](/en/docsv2.7/user/configuration/api/):
 
 
 ```java
 public static void main(String[] args) throws IOException {
-    // 服务实现
+    // Service implementation
     DemoService demoService = new DemoServiceImpl();
 
-    // 当前应用配置
+    // Current application configuration
     ApplicationConfig application = new ApplicationConfig();
     application.setName("demoProvider");
 
-    // 连接注册中心配置
+    // Connect to registry configuration
     RegistryConfig registry = new RegistryConfig();
     registry.setAddress("127.0.0.1:2181");
     registry.setProtocol("zookeeper");
     registry.setUsername("");
     registry.setPassword("");
 
-    // 服务提供者协议配置
+    // Service provider protocol configuration
     ProtocolConfig protocol = new ProtocolConfig();
     protocol.setName("dubbo");
     protocol.setPort(12345);
     protocol.setThreads(200);
 
-    // 注意：ServiceConfig为重对象，内部封装了与注册中心的连接，以及开启服务端口
+    // Note: ServiceConfig is a heavy object that internally encapsulates the connection to the registry and opens the service port.
 
-    // 服务提供者暴露服务配置
-    ServiceConfig<DemoService> service = new ServiceConfig<>(); // 此实例很重，封装了与注册中心的连接，请自行缓存，否则可能造成内存和连接泄漏
+    // Service provider exposes service configuration
+    ServiceConfig<DemoService> service = new ServiceConfig<>(); // This instance is heavy and encapsulates the connection to the registry. Please cache it as it may cause memory and connection leaks.
     service.setApplication(application);
-    service.setRegistry(registry); // 多个注册中心可以用setRegistries()
-    service.setProtocol(protocol); // 多个协议可以用setProtocols()
+    service.setRegistry(registry); // Multiple registries can be set using setRegistries()
+    service.setProtocol(protocol); // Multiple protocols can be set using setProtocols()
     service.setInterface(DemoService.class);
     service.setRef(demoService);
     service.setVersion("1.0.0");
     service.setGroup("tc");
     service.setTimeout(60 * 1000);
 
-    // 暴露及注册服务
+    // Expose and register service
     service.export();
 
     System.in.read();
@@ -115,7 +115,7 @@ public static void main(String[] args) throws IOException {
 ```
 
 
-查看 zookeeper 看是否注册成功：
+Check Zookeeper to see if registration was successful:
 
 
 ```bash
@@ -124,16 +124,16 @@ $ls /dubbo/com.funnycode.DemoService/providers
 ```
 
 
-如上的输出表示服务提供方已经启动。
+The output above indicates that the service provider has started.
 
 
-### 2.2 准备 dubbogo 服务消费者
+### 2.2 Preparing the Dubbogo Service Consumer
 
 
-#### 2.2.1 基本定义
+#### 2.2.1 Basic Definition
 
 
-定义 `User` 对象：
+Define the `User` object:
 
 
 ```go
@@ -148,7 +148,7 @@ func (User) JavaClassName() string {
 ```
 
 
-定义 `DemoProvider` 接口：
+Define the `DemoProvider` interface:
 
 
 ```go
@@ -164,7 +164,7 @@ func (p *DemoProvider) Reference() string {
 ```
 
 
-#### 2.2.2 启动 dubbogo 消费者
+#### 2.2.2 Starting the Dubbogo Consumer
 
 
 ```go
@@ -203,18 +203,18 @@ func main() {
 ```
 
 
-### 2.3 请求结果分析
+### 2.3 Request Result Analysis
 
 
-#### 2.3.1 直接调用
+#### 2.3.1 Direct Invocation
 
 
-> 确认问题的存在
+> Confirming the existence of the issue
 
 
 
-第一个接口的参数是字符串，可以正常返回 `[2020-12-03/18:59:12 main.main: client.go: 29] response result: Hello tc`
-第二、三两个接口存在 `User` 对象，无法调用成功。错误信息如下：
+The first interface's parameter is a string, which returns normally with `[2020-12-03/18:59:12 main.main: client.go: 29] response result: Hello tc`
+The second and third interfaces have `User` objects and cannot be successfully called. The error message is as follows:
 
 
 ```bash
@@ -231,29 +231,29 @@ func main() {
 ```
 
 
-错误正如 [issue](https://github.com/apache/dubbo-go/issues/900) 中描述的一模一样，因为错误信息返回到了消费端，可以看到 Java 那边的错误堆栈信息，所以直接去看 `DecodeableRpcInvocation.decode#134`。
+The error is as described in [issue](https://github.com/apache/dubbo-go/issues/900), as the error message returned to the consumer reveals Java's error stack trace, allowing us to see `DecodeableRpcInvocation.decode#134` directly.
 
 
-#### 2.3.2 断点查看
+#### 2.3.2 Breaking Point Viewing
 
 
-代码如下：
+The code is as follows:
 
 
 ```java
-// 反序列化
+// Deserialization
 public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Decodeable {
     public Object decode(Channel channel, InputStream input) throws IOException {
       ......
       if (serviceDescriptor != null) {
-          // 方法描述里面根据方法名查找
+          // Find method in the method descriptor
           MethodDescriptor methodDescriptor = serviceDescriptor.getMethod(getMethodName(), desc);
           if (methodDescriptor != null) {
               pts = methodDescriptor.getParameterClasses();
               this.setReturnTypes(methodDescriptor.getReturnTypes());
           }
       }
-      // 表示没有找到方法        
+      // Indicates that the method was not found        
       if (pts == DubboCodec.EMPTY_CLASS_ARRAY) {
           if (!RpcUtils.isGenericCall(path, getMethodName()) && !RpcUtils.isEcho(path, getMethodName())) {
               throw new IllegalArgumentException("Service not found:" + path + ", " + getMethodName());
@@ -266,19 +266,19 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
 ```
 
 
-- 查看 `MethodDescriptor`，即找方法是否存在，存在的话就会设置好 `ParameterClasses`
-- 如果上面没找到，`pts == DubboCodec.EMPTY_CLASS_ARRAY` 就会满足条件，进而判断是否是泛化调用或者是 echo 调用，如果都不是则报服务找不到方法错误
-- desc 是 `Ljava/lang/Object` ，很明显并没有参数是 Object 的方法，所以必然是会报错的
+- Check `MethodDescriptor` to see if the method exists, if it exists, `ParameterClasses` is set accordingly
+- If not found, and `pts == DubboCodec.EMPTY_CLASS_ARRAY` satisfies the condition, it verifies if it is a generic call or an echo call, if neither, an error thrown for a method not found
+- `desc` is `Ljava/lang/Object`, which clearly does not have a method with Object as a parameter, leading to the error.
 
 
 
-补充说明：
+Additional Explanation:
 
 
-**方法查询**
+**Method Query**
 
 
-代码如下：
+The code is as follows:
 
 
 ```java
@@ -292,55 +292,55 @@ public MethodDescriptor getMethod(String methodName, String params) {
 ```
 
 
-优点：
+Advantages:
 
 
-比之前的版本加了方法的元信息缓存起来，不使用反射可以提高效率，可以理解用空间换时间。
+Compared to previous versions, it caches the method metadata to avoid using reflection, which improves efficiency and can be understood as trading space for time.
 
 
 ![dfsa01.jpg](/imgs/blog/dubbo-go/from-scratch/dfsa01.jpg)
 
 
-### 2.4 解决问题
+### 2.4 Solving the Issue
 
 
-> 因为直接撸代码并 hold 不住，所以通过比较来查看问题所在。
+> As I directly coded and could not hold up, I compared to find the problem.
 
 
 
-#### 2.4.1 启动 dubbo 服务消费者
+#### 2.4.1 Starting the Dubbo Service Consumer
 
 
-通过 api 模式启动，参考官方例子。启动这个是为了查看 Java 版本的传输内容。
+Start using API mode, referring to the official example. The purpose is to check the Java version of the transport content.
 
 
 ```java
 public static void main(String[] args) throws InterruptedException {
-    // 当前应用配置
+    // Current application configuration
     ApplicationConfig application = new ApplicationConfig();
     application.setName("demoProvider2");
 
-    // 连接注册中心配置
+    // Connect to registry configuration
     RegistryConfig registry = new RegistryConfig();
     registry.setAddress("127.0.0.1:2181");
     registry.setProtocol("zookeeper");
     registry.setUsername("");
     registry.setPassword("");
-    // 注意：ReferenceConfig为重对象，内部封装了与注册中心的连接，以及与服务提供方的连接
+    // Note: ReferenceConfig is a heavy object that internally encapsulates the connection to the registry and the connection to the service provider.
 
-    // 引用远程服务
+    // Reference remote service
     ReferenceConfig<DemoService> reference
-        = new ReferenceConfig<>(); // 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏
+        = new ReferenceConfig<>(); // This instance is heavy, encapsulating connections. Please cache it as it may cause memory and connection leaks.
     reference.setApplication(application);
-    reference.setRegistry(registry); // 多个注册中心可以用setRegistries()
+    reference.setRegistry(registry); // Multiple registries can be set using setRegistries()
     reference.setInterface(DemoService.class);
     reference.setVersion("1.0.0");
     reference.setGroup("tc");
     reference.setCheck(true);
     reference.setTimeout(1000 * 60);
 
-    // 和本地bean一样使用xxxService
-    DemoService demoService = reference.get(); // 注意：此代理对象内部封装了所有通讯细节，对象较重，请缓存复用
+    // Use xxxService locally
+    DemoService demoService = reference.get(); // Note: This proxy object encapsulates all communication details and is heavy, so cache it for reuse.
     System.out.println(demoService.sayHello(new User("tc", 18)));
 
     TimeUnit.MINUTES.sleep(10);
@@ -351,19 +351,19 @@ public static void main(String[] args) throws InterruptedException {
 ![dfsa02.png](/imgs/blog/dubbo-go/from-scratch/dfsa02.png)
 
 
-desc 肉眼可见的是 `Lcom/funnycode/User`，这个就是正确的对象了。
+The `desc` is visibly `Lcom/funnycode/User`, which is the correct object.
 
 
-#### 2.4.2 查找 dubbogo 为什么不对
+#### 2.4.2 Finding Out Why Dubbogo is Not Correct
 
 
-代码位置：
+Code location:
 
 
 `protocol/dubbo/impl/hessian.go:120#marshalRequest`
 
 
-代码实现：
+Code implementation:
 
 
 ```go
@@ -395,7 +395,7 @@ func marshalRequest(encoder *hessian.Encoder, p DubboPackage) ([]byte, error) {
 ```
 
 
-断点可以发现，types 返回的时候就已经是 `Object` 了，没有返回 `User`，那么继续跟进去查看代码。
+By the breakpoint, `types` is already being returned as `Object`, which means to follow up to see the code.
 
 
 - `protocol/dubbo/impl/hessian.go:394#getArgsTypeList`
@@ -405,7 +405,7 @@ func marshalRequest(encoder *hessian.Encoder, p DubboPackage) ([]byte, error) {
 
 ```go
 func getArgType(v interface{}) string {
-  // 常见的类型处理
+  // Handle common types
 
   ......
 
@@ -423,13 +423,13 @@ func getArgType(v interface{}) string {
 ```
 
 
-很明显当发现是 `reflect.Struct` 的时候就返回了 `java.lang.Object`，所以参数就变成了 `Object`，那么因为 Java 代码那边依赖这个类型所以就调用失败了。
+It is clear that when discovering `reflect.Struct`, it returns `java.lang.Object`, hence the parameter turns into `Object`, causing a failure due to Java code dependency on this type.
 
 
-#### 2.4.3 其它版本验证
+#### 2.4.3 Other Version Validation
 
 
-因为反馈是 2.7.7 出错，所以先考虑到在之前的版本是否功能正常，于是把服务提供者切换到 dubbo 2.7.3，发现调用仍然有错误，如下：
+Since the feedback indicated that 2.7.7 was erroneous, I first considered whether it functioned correctly in earlier versions, thus switching the service provider to dubbo 2.7.3, finding that there were still errors as follows:
 
 
 ```bash
@@ -472,13 +472,13 @@ Caused by: org.apache.dubbo.common.bytecode.NoSuchMethodException: Not found met
 ```
 
 
-虽然和 2.7.7 的代码是不一样的，但是通过错误也能看出来是在代理增强类里面方法找不到，大概率是反射找不到方法，所以归根结底也是参数的问题。
+Although the code is different from 2.7.7, the error indicates that the method cannot be found in the proxy enhanced class, most likely due to reflection failing to find the method, thus ultimately also relating to parameter issues.
 
 
-#### 2.4.4 修复问题
+#### 2.4.4 Fixing the Problem
 
 
-修复相对简单，就是拿到 `struct` 定义的 `JavaClassName`。
+The fix is straightforward: obtain the `JavaClassName` defined in `struct`.
 
 
 ```go
@@ -491,10 +491,10 @@ case reflect.Struct:
 ```
 
 
-#### 2.4.3 验证结果
+#### 2.4.5 Validation Results
 
 
-再次执行消费者，运行（提供方 2.7.7 和 2.7.3）正常，输出如下：
+Re-executing the consumer with both the provider at versions 2.7.7 and 2.7.3 successfully outputs as follows:
 
 
 ```bash
@@ -506,22 +506,22 @@ case reflect.Struct:
 ```
 
 
-## 三、细节叨叨
+## III. Detail Notes
 
 
-### 3.1 如何配置 dubbgo 消费者
+### 3.1 How to Configure Dubbgo Consumer
 
 
-细心的你是否已经发现，在我 dubbogo 的消费端接口叫 `DemoProvider`，然后发现提供者叫 `DemoService`，这个又是如何正常运行的？
+Have you noticed that in my dubbogo consumer side, the interface is called `DemoProvider`, while the provider is called `DemoService`? How does this run correctly?
 
 
-实际上和 `client.yml` 中配置项 `references` 有关，在配置文件详细说明了 `interface`，`version`，`group` 等，你还可以通过 methods 配置方法的超时时间等信息。
+This is related to the `references` option in the `client.yml` configuration, which details `interface`, `version`, `group`, etc. You can also configure method timeout information through methods.
 
 
 ```yaml
 references:
   "DemoProvider":
-    # 可以指定多个registry，使用逗号隔开;不指定默认向所有注册中心注册
+    # You can specify multiple registries separated by commas; omitting it defaults to registering with all registries.
     registry: "zk1"
     protocol: "dubbo"
     interface: "com.funnycode.DemoService"
@@ -535,14 +535,14 @@ references:
 ```
 
 
-### 3.2 全局的 group 和 version 怎么配置
+### 3.2 How to Configure Global Group and Version
 
 
-配置文件如下：
+The configuration file is as follows:
 
 
 ```yaml
-# application config
+# Application config
 application:
   organization: "dubbogoproxy.com"
   name: "Demo Micro Service"
@@ -554,7 +554,7 @@ application:
 
 references:
   "DemoProvider":
-    # 可以指定多个registry，使用逗号隔开;不指定默认向所有注册中心注册
+    # You can specify multiple registries separated by commas; omitting defaults to registering with all registries.
     registry: "zk1"
     protocol: "dubbo"
     interface: "com.funnycode.DemoService"
@@ -567,7 +567,7 @@ references:
 ```
 
 
-从使用的习惯来讲，肯定是 `application` 表示了全局的配置，但是我发现启动的时候在 `application` 配置的 `version` 和 `group` 并不会赋值给接口，启动会报服务提供方找不到，如下：
+From a usage perspective, `application` represents the global configuration, but I discovered that during startup, the `version` and `group` in `application` do not get assigned to the interface, leading to errors stating that the service provider cannot be found, as shown below:
 
 
 ```bash
@@ -575,16 +575,16 @@ references:
 ```
 
 
-`version` 和 `group` 都是空。必须把 `DemoProvider` 下的 `version` 和 `group` 注释打开。
+Both `version` and `group` are empty. You must uncomment the `version` and `group` under `DemoProvider`.
 
 
-### 3.3 怎么指定调用的方法名
+### 3.3 How to Specify Method Names for Invocation
 
 
-#### 3.3.1 go 调用 java
+#### 3.3.1 Go Calling Java
 
 
-dubbogo 调用 dubbo，因为 go 是大写的方法名，java 里面是小写的方法名，所以会出现如下错误：
+Dubbogo calls dubbo, as Go uses CamelCase for method names while Java uses lowercase, leading to the following error:
 
 
 ```bash
@@ -602,20 +602,20 @@ java.lang.IllegalArgumentException: Service not found:com.funnycode.DemoService,
 ```
 
 
-细心的读者可能已经注意到了，我在消费端的接口声明是有个 `dubbo:"sayHello"` 的，表示方法名是 sayHello，这样在服务提供方就可以得到 sayHello 这个方法名。
+Attentive readers may have noticed that I declare the interface on the consumer side with `dubbo:"sayHello"`, meaning that the method name is sayHello, allowing the service provider to get the method name sayHello.
 
 
-还有我声明的三个方法都指明它们的方法名叫 `dubbo:"sayHello"`，这是因为 Java 可以方法名字一样进行重载，而 go 是不能方法名重复的。
+Moreover, I've indicated that all three declared methods are named `dubbo:"sayHello"` because Java allows method name overloading, while Go does not permit duplicate method names.
 
 
-#### 3.3.2 go 调用 go
+#### 3.3.2 Go Calling Go
 
 
-> 直接贴能跑通的代码
+> Here is code that runs correctly:
 
 
 
-我的提供者接口：
+My provider interface:
 
 
 ```go
@@ -645,24 +645,24 @@ func (p *DemoProvider) MethodMapper() map[string]string {
 ```
 
 
-我的消费者接口：
+My consumer interface:
 
 
 ```go
 type DemoProvider struct {
-  // 调用 java 和 go
+  // Call to Java and Go
 	SayHello  func(ctx context.Context, name string) (string, error)             `dubbo:"sayHello"`
-  // 只调用 java
+  // Only call to Java
 	SayHello2 func(ctx context.Context, user *User) (string, error)              `dubbo:"sayHello"`
 	SayHello3 func(ctx context.Context, user *User, name string) (string, error) `dubbo:"sayHello"`
-  // 只调用 go
+  // Only call to Go
 	SayHello4 func(ctx context.Context, user *User) (string, error)
 	SayHello5 func(ctx context.Context, user *User, name string) (string, error)
 }
 ```
 
 
-启动服务消费者：
+Start the service consumer:
 
 
 ```go
@@ -701,16 +701,16 @@ func main() {
 ```
 
 
-这里需要注意 `MethodMapper` 方法，有时候需要在这个方法中配置方法名的映射关系，否则还是会出现找不到方法的错误。
+It is important to note the `MethodMapper` method; at times, you need to configure method name mapping in this method, otherwise, you will still encounter difficulties finding the method.
 
 
-比如因为配置 `dubbo:"sayHello"` ，所以在 go 里面请求 `SayHello` 变成了 `sayHello`，那么服务提供方通过 `MethodMapper` 方法配置后使得提供方也是 `sayHello`，这样 go 和 java 下暴露的都是小写的 `sayHello`。
+For instance, due to the `dubbo:"sayHello"` configuration, calling `SayHello` in Go becomes `sayHello`, so the service provider also needs to configure `MethodMapper` to enable both Go and Java to expose the same lowercase `sayHello`.
 
 
-### 3.4 为什么会用 hessian2
+### 3.4 Why Use Hessian2
 
 
-老司机都懂，在 dubbo 中 SPI 机制的默认值就是 hessian2
+Experienced users understand that in dubbo, the default value of the SPI mechanism is hessian2.
 
 
 ```java
@@ -720,7 +720,7 @@ public interface Serialization {
 ```
 
 
-而在 dubbo-go 中：
+In dubbo-go:
 
 
 ```go
@@ -737,25 +737,25 @@ func NewDubboCodec(reader *bufio.Reader) *ProtocolCodec {
 ```
 
 
-### 3.5 hessian序列化源码
+### 3.5 Hessian Serialization Source Code
 
 
-> 可以自行断点查看，两边基本上一样，我也是通过两边比出来的，RpcInvocation.getParameterTypesDesc() 就是方法的参数
-
-
-
-- go 代码 `protocol/dubbo/impl/hessian.go:120#marshalRequest`
-- java 代码 `org.apache.dubbo.rpc.protocol.dubbo.DubboCodec#encodeRequestData(org.apache.dubbo.remoting.Channel, org.apache.dubbo.common.serialize.ObjectOutput, java.lang.Object, java.lang.String)`
+> You can view breakpoints yourself; both sides are basically the same. I also deduced this by comparing both sides; `RpcInvocation.getParameterTypesDesc()` is the method's parameters.
 
 
 
-### 3.6 dubbogo 服务提供者的方法对象需要是指针对象
+- Go code `protocol/dubbo/impl/hessian.go:120#marshalRequest`
+- Java code `org.apache.dubbo.rpc.protocol.dubbo.DubboCodec#encodeRequestData(org.apache.dubbo.remoting.Channel, org.apache.dubbo.common.serialize.ObjectOutput, java.lang.Object, java.lang.String)`
 
 
-之前的例子都是 copy 的，这次是纯手打的，才发现了这个问题。
+
+### 3.6 Dubbogo Service Provider's Method Object Needs to Be a Pointer Object
 
 
-如果你的提供类似：`func (p *DemoProvider) SayHello4(ctx context.Context, user User) (string, error)`，那么会出现如下错误：
+In earlier examples, due to copying, this issue was overlooked until I hand-typed it.
+
+
+If your provider is similar to: `func (p *DemoProvider) SayHello4(ctx context.Context, user User) (string, error)`, it may lead to errors like:
 
 
 ```bash
@@ -764,10 +764,10 @@ github.com/apache/dubbo-go/remoting/getty.(*RpcServerHandler).OnMessage.func1
 ```
 
 
-参数里面的 `User` 需要改成 `*User`。
+In the parameter, `User` needs to be changed to `*User`.
 
 
-### 3.7 dubbogo 服务消费者的方法对象可以是非指针对象
+### 3.7 Dubbogo Service Consumer's Method Object Can Be Non-Pointer Objects
 
 
 ```go
@@ -777,7 +777,7 @@ SayHello4 func(ctx context.Context, user User) (string, error)
 ```
 
 
-因为在参数序列化的时候会对指针做操作：
+As during parameter serialization, pointers are manipulated:
 
 
 ```go
@@ -788,22 +788,22 @@ if reflect.Ptr == t.Kind() {
 ```
 
 
-[完整代码](https://github.com/apache/dubbo-go/blob/v1.5.4/protocol/dubbo/impl/hessian.go#L486)
+[Complete Code](https://github.com/apache/dubbo-go/blob/v1.5.4/protocol/dubbo/impl/hessian.go#L486)
 
 
-### 3.8 配置文件说明
+### 3.8 Configuration File Description
 
 
-dubbogo 主要有三个配置文件：
+Dubbogo mainly has three configuration files:
 
 
-- server.yaml 服务提供方的配置文件
-- client.yaml 服务消费方的配置文件
-- log.yaml 日志文件
+- server.yaml for service provider configuration
+- client.yaml for service consumer configuration
+- log.yaml for log configuration
 
 
 
-如果你什么都不配置，会出现：
+If you don’t configure anything, you will encounter:
 
 
 ```bash
@@ -813,10 +813,10 @@ dubbogo 主要有三个配置文件：
 ```
 
 
-这样是没法正常使用的。如果你是服务提供方，必须要配置 server.yaml 文件，如果你是服务消费方，必须要配置 client.yaml，实际我们的应用应该既是消费者又是提供者，所以往往两个文件都是需要配置的。
+This will prevent normal usage. If you are a service provider, you must configure the server.yaml file, and if you are a service consumer, you must configure the client.yaml. In reality, our applications should act as both consumers and providers, so usually, both files need configuration.
 
 
-服务提供方正常启动是会有如下输出的：
+When the service provider starts normally, you will see outputs like:
 
 
 ```bash
@@ -825,7 +825,7 @@ dubbogo 主要有三个配置文件：
 ```
 
 
-### 3.9 复现代码
+### 3.9 Reproduction Code
 
 
 - [https://github.com/cityiron/java_study/tree/master/dubbo2.7.7/dg-issue900](https://github.com/cityiron/java_study/tree/master/dubbo2.7.7/dg-issue900)
@@ -833,7 +833,7 @@ dubbogo 主要有三个配置文件：
 
 
 
-## 四、参考
+## IV. References
 
 - [https://dubbo.apache.org/zh-cn/docsv2.7/user/configuration/api/](/en/docsv2.7/user/configuration/api/)
 - [https://github.com/apache/dubbo-go/issues/257](https://github.com/apache/dubbo-go/issues/257)
@@ -842,7 +842,4 @@ dubbogo 主要有三个配置文件：
 
 
 
-篇幅有限，就介绍到这里。欢迎有兴趣的同学来参与 [dubbogo3.0](https://github.com/apache/dubbo-go/tree/release-3.0) 的建设，感谢阅读。
-
-
-
+Due to space constraints, I will stop here. Interested students are welcome to participate in the development of [dubbogo3.0](https://github.com/apache/dubbo-go/tree/release-3.0). Thank you for reading.

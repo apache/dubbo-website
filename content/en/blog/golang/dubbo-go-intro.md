@@ -1,160 +1,161 @@
 ---
-title: "冲上云原生，Dubbo 发布 Go 版本"
-linkTitle: "Dubbo Go 发布"
+title: "Rushing to Cloud Native, Dubbo Releases Go Version"
+linkTitle: "Dubbo Go Release"
 tags: ["Go"]
 date: 2021-01-11
-description: 本文记录了 OSCHINA 对何鑫铭的采访，原文出处：https://www.oschina.net/question/3820517_2306822
+description: This article documents an interview with He Xinming by OSCHINA. Original source: https://www.oschina.net/question/3820517_2306822
 ---
 
-5 月 21 日，经过一年多的孵化，Apache Dubbo 从 Apache 软件基金会毕业，成为 Apache 顶级项目。
+On May 21, after more than a year of incubation, Apache Dubbo graduated from the Apache Software Foundation and became an Apache top-level project.
 
 ![img](/imgs/blog/dubbo-go/dubbo-tlp-twitter.jpg)
 
 
-Dubbo 是阿里于 2011 年开源的一款高性能 RPC 框架，在 Java 生态中具有不小的影响力。当初经历过一段被外界诟病的“停止维护”灰暗时光，后来在 2017 年 Dubbo 浪子回头，官方宣布重新重点维护。
+Dubbo is a high-performance RPC framework open-sourced by Alibaba in 2011, which has significant influence in the Java ecosystem. After experiencing a period of criticism for "stopping maintenance," Dubbo announced a renewed focus on maintenance in 2017.
 
-重新启航的 Dubbo 将首要目标定位于重新激活社区，赢回开发者的信任，并且逐渐将 Dubbo 打造成一个国际化与现代化的项目，目前距离宣布重启已经过了一年半的时间。
+The re-launched Dubbo aims to reactivate the community, regain developer trust, and gradually transform into an internationalized and modernized project. 
 
-在这个过程中，Dubbo 发布了多个版本，并逐渐从一个 RPC 框架向微服务生态系统转变，18 年年初 Dubbo 入驻 Apache 软件基金会孵化器，开始以 Apache 之道发展社区。
+During this process, Dubbo released multiple versions and gradually transformed from an RPC framework to a microservices ecosystem. At the beginning of 2018, Dubbo entered the Apache Software Foundation incubator.
 
-一年之后，Dubbo 在 Apache 孵化器中发布了重启维护以来的首个里程碑版本 2.7.0，添加了社区呼声很高的异步化支持，以及注册中心与配置中心分离等特性。
+A year later, Dubbo released its first milestone version 2.7.0, featuring highly requested asynchronous support and the separation of the registration center and configuration center.
 
-这期间 Dubbo 3.0 的开发工作也被提上了日程，今年 4 月中旬，官方正式公布了 Dubbo 3.0 的进度，此版本新特性包括支持 Filter 链的异步化、响应式编程、云原生/Service Mesh 方向的探索，以及与阿里内外融合。
+In April this year, the official progress of Dubbo 3.0 was announced, including new features like asynchronous Filter chains, reactive programming, cloud-native/Service Mesh exploration, and integration with Alibaba both internally and externally.
 
-然后，Dubbo 毕业了。毕业后的 Dubbo 近期有什么消息呢？生态还在发展，Dubbo 社区在前几日公开了 [Dubbo Roadmap 2019](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201905@beijing/DUBBO%20ROADMAP%202019.pdf)，计划在 2020 年 2 月份发布 Dubbo 3.0 正式版，感兴趣的同学可以详细查阅。
+Then, Dubbo graduated. What’s new for Dubbo recently? The ecosystem is still developing. The Dubbo community recently unveiled the [Dubbo Roadmap 2019](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201905@beijing/DUBBO%20ROADMAP%202019.pdf), planning to release the official version of Dubbo 3.0 in February 2020.
 
 ![img](/imgs/blog/dubbo-go/dubbo-roadmap-2019.jpg)
 
-而最近官方又**宣布 Go 语言加入 Dubbo 生态**，发布了 [dubbo-go](https://github.com/dubbo/go-for-apache-dubbo) 项目。
+Recently, the official team also **announced the addition of Go language to the Dubbo ecosystem**, releasing the [dubbo-go](https://github.com/dubbo/go-for-apache-dubbo) project.
 
 ![img](/imgs/blog/dubbo-go/dubbo-go-logo.jpg)
 
-在此之前 Dubbo 的跨语言可扩展性已经有一些实现，支持的语言包括 PHP、Node.js 与 Python，同时也基于标准 Java REST API - JAX-RS 2.0 实现了 REST 的调用支持，具体情况如下：
+Before this, Dubbo's cross-language extensibility had some implementations, supporting languages such as PHP, Node.js, and Python, while also implementing REST call support based on the standard Java REST API - JAX-RS 2.0 as follows:
 
-* **PHP**：php-for-apache-dubbo，by 乐信，提供客户端和服务端
-* **Node.js**：dubbo2.js，by 千米网，提供客户端
-* **Node.js**：egg-dubbo-rpc，by 蚂蚁金服 egg 团队，提供客户端和服务端
-* **Python**：py-client-for-apache-dubbo，by 千米网，提供客户端
+* **PHP**: php-for-apache-dubbo, by Lexin, providing both client and server
+* **Node.js**: dubbo2.js, by Qianmi, providing a client
+* **Node.js**: egg-dubbo-rpc, by Ant Financial's egg team, providing both client and server
+* **Python**: py-client-for-apache-dubbo, by Qianmi, providing a client
 
-现在加入了 dubbo-go，Go 开发者也终于可以尝到 Dubbo 的滋味了。据悉，dubbo-go 项目将于**本周完成往 Apache 软件基金会的迁移**，作为 Apache Dubbo 顶级项目的子项目，届时 dubbo-go 项目的新地址也将变为：https://github.com/apache/dubbo-go。
+With the addition of dubbo-go, Go developers can finally experience Dubbo. It’s reported that the dubbo-go project will complete its migration to the Apache Software Foundation **this week**, and as a subproject of Apache Dubbo, the new address will be: https://github.com/apache/dubbo-go.
 
-关于项目的研发背景与具体技术细节等相关内容，我们第一时间采访了项目共同发起人，目前在携程基础中台研发部的何鑫铭。
+Regarding the project background and technical details, we interviewed He Xinming, one of the project's co-founders, currently working in the R&D department of Trip.com.
 
-*OSCHINA*：dubbo-go 是什么，定位是什么，为什么做这个项目？
+*OSCHINA*: What is dubbo-go, what is its positioning, and why create this project?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-**dubbo-go 是 Dubbo 的完整 Go 语言实现**。
+**dubbo-go is a complete Go language implementation of Dubbo**.
 
-我们知道 Dubbo 本身基于 Java，很多公司也都以 Java 开发为主，并且使用 Dubbo 作 RPC 或微服务开发框架。
+We know Dubbo itself is based on Java, with many companies primarily using Java for development and leveraging Dubbo for RPC or microservice development.
 
-而最近 Go 语言生态发展比较迅速，因其语言优势，我们已经有部门开始尝试使用 Go 开发一些新的项目，就会存在亟需解决的问题：
+Recently, the Go language ecosystem has been growing rapidly. Due to its advantages, departments have begun experimenting with Go to develop new projects, leading to urgent problems:
 
-* 如何实现 Go 项目和 Java & Dubbo 项目的互通？
-* 另外，Go 项目本身也有对 RPC 与微服务开发框架的诉求，如何解决？
+* How to achieve interoperability between Go projects and Java & Dubbo projects?
+* Additionally, Go projects have demands for RPC and microservice development frameworks; how to address this?
 
-基于这两个问题，我们携程团队基于 dubbo-go 的早期项目，重构开发了更易于扩展且功能更加完善的 dubbo-go v1.0.0 版本，并贡献回了社区，它**首要目的就是解决 Go 项目与 Java & Dubbo 项目的互通问题，同时也为 Go 项目提供了一种 RPC 与微服务开发框架的选择**。
+Based on these two concerns, our Trip.com team restructured and developed the more extensible and feature-rich dubbo-go v1.0.0 version, addressing the interoperability between Go projects and Java & Dubbo projects while also providing an RPC and microservice development framework option for Go projects.
 
-dubbo-go 提供客户端与服务器端，目前 dubbo-go 社区作为 Dubbo 生态最活跃的社区之一，后面的定位需要配合 Dubbo 官方的要求与社区用户的需求。
+Dubbo-go provides both client and server sides, and currently, the dubbo-go community is one of the most active communities in the Dubbo ecosystem.
 
-*OSCHINA*：我们知道 Dubbo 在 Java 生态上是有非常高的成就的，而目前 Go 生态本身也有一些知名的微服务框架，那 dubbo-go 之于 Go 生态，是否有与其它框架比拼的能力？
+*OSCHINA*: We know Dubbo has significant achievements in the Java ecosystem, and there are already known microservice frameworks in the Go ecosystem. Does dubbo-go have the capability to compete with these other frameworks?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-我们最大的能力就是作为 Dubbo 的 Go 语言版本，打通了两种语言之间的 gap，**让 Dubbo 更加贴近云原生**，为开发者也提供了最大的灵活性，显著降低企业现有服务上云的成本，让企业在云原生时代多了一种选择。
+Our greatest strength is acting as the Go language version of Dubbo, bridging the gap between the two languages, **bringing Dubbo closer to cloud-native**, providing maximum flexibility for developers, and significantly reducing the cost of migrating existing services to the cloud, offering enterprises more options in the cloud-native era.
 
-*OSCHINA*：Go 的特性有没有在 dubbo-go 中得到相应的体现？（比如 Go 的高并发是怎么从基于 Java 的 Dubbo 中改造到 dubbo-go 中的？）
+*OSCHINA*: Are the features of Go reflected in dubbo-go? (For example, how is Go's high concurrency transformed from Java-based Dubbo to dubbo-go?)
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-我对于 Go 语言的认知是，首先学习成本比较小，相比于 Java 的学习成本，Go 语言更容易学习和上手。
+My understanding of Go is that first, the learning curve is smaller compared to Java; Go is easier to learn and get started with.
 
-其次 Go 在语言层面上，比如其 CSP 编程模型在高并发处理上的简单高效、轻量级协程的优势，相比较基于 JVM 的 Java 程序来说，基于 runtime 的 Go 程序瞬时启动能力等特性都吸引着很多开发者，这里就不详细阐述了。
+Secondly, Go has advantages in language design, such as its CSP programming model for efficient handling of high concurrency, and the lightweight coroutine characteristics that attract many developers compared to JVM-based Java programs.
 
-最后就是作为云原生语言的优势，随着 Docker、k8s 与 Istio 等优秀项目的出现，云原生底层基本被 Go 语言统一了，相信企业在云原生模式下开发的日子已经不远了。我觉得 Go 语言的生态应该会越来越好，也会有越来越多的人使用它。
+Finally, as a cloud-native language, with the emergence of excellent projects like Docker, Kubernetes, and Istio, Go has unified the cloud-native foundation, and I believe that days of developing businesses in the cloud-native model are not far off. I think the Go ecosystem will only get better, with more people using it.
 
-将基于 Java 的 Dubbo 引入到 Go 中，像前边讲的，dubbo-go 带来的优势就是可以快速融入云原生的领域。要说 Go 语言特性体现的话，可以参考一下 **dubbo-go 中异步网络 I/O 模型的设计，这部分将 Go 语言轻量级协程的优势体现了出来**。
+Integrating Java-based Dubbo into Go allows dubbo-go to quickly enter the cloud-native domain. As for the expression of Go language features, one can look at the **asynchronous network I/O model design in dubbo-go, which showcases the advantages of Go's lightweight coroutines**.
 
-这里也说一下 Go 语言不足的地方：
+It is also worth mentioning some limitations of Go:
 
-* Go 相对 Java 来说还是很年轻的语言，没有模板库可用，所以社区在编写并维护Hessian 2 协议库上付出了很高的开发成本；
-* 比起 Java 的 try/catch 错误处理方式，Go 的 error 处理能力偏弱；
-* 总体生态还是不如 Java，如没有像 Netty 一样的强有力网络 I/O 库。
+* Compared to Java, Go is still a young language with no template libraries available, leading to high development costs for the community in writing and maintaining the Hessian 2 protocol library.
+* Go’s error handling is less robust compared to Java’s try/catch.
+* Overall, the ecosystem is not as strong as Java's; for example, there is no powerful networking I/O library like Netty.
 
-为什么提到这一点呢，因为 Dubbo 自身使用了 Netty 和 Hessian 2 协议官方 Java 库，而 dubbo-go 在开始做的时候这些都是没有的，这使得 **dubbo-go 一路走来非常艰辛，但是社区最终都克服了，并且额外贡献了开源的 Getty 和 Hessian2 项目**。
+Why mention this? Because Dubbo uses Netty and the official Java library for Hessian 2, and at the start of dubbo-go's development, these resources were unavailable, making it **a difficult journey for dubbo-go, but the community ultimately overcame these challenges and contributed the open-source Getty and Hessian2 projects**.
 
-这里特别感谢 dubbo-go 社区早期的组织者于雨，项目的早期版本是 **2016 年**在其领导胡长城和同事刘畏三支持下开发的，他贡献的 Hessian2 和 Getty 项目，也为最新版本的 dubbo-go 打好了坚实的基础。
+A special thanks to early organizer Yu Yu from the dubbo-go community. The project's early versions were developed in **2016** under the leadership of Hu Changcheng and Liu Wei, who contributed to the Hessian2 and Getty projects, laying a solid foundation for the latest version of dubbo-go.
 
-*OSCHINA*：前不久 Dubbo 才宣布之后会在 3.0 中强调 Service Mesh ，这就是语言无关的了，那 dubbo-go 还有必要在这时候加入生态吗？
+*OSCHINA*: Not long ago, Dubbo announced it would emphasize Service Mesh in version 3.0, which is language-agnostic. So, does it make sense for dubbo-go to join the ecosystem at this time?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-Service Mesh 确实是微服务未来发展的的一个大方向，但是现阶段在国内大公司还没有看到非常成功的案例，很多中小公司自身微服务还未拆分完毕甚至于还未开始，目前 dubbo-go 社区优先解决这种类型企业微服务技术落地环节中遇到的问题，专注于补齐相关功能、优化整体性能和解决 bug。至于未来，我相信随着 Dubbo Mesh 在 Service Mesh 领域的探索，dubbo-go 肯定会跟进并扮演重要角色。
+Service Mesh is indeed a major direction for the future of microservices; however, at this stage, we haven't seen very successful cases in major companies in China. Many small and medium-sized companies have yet to complete or even start breaking down their microservices. Currently, the dubbo-go community primarily addresses issues these types of enterprises face in implementing microservices technologies, focusing on improving relevant functionalities, optimizing overall performance, and fixing bugs. As for the future, I believe that with Dubbo Mesh's exploration in the Service Mesh field, dubbo-go will certainly follow suit and play an important role.
 
-*OSCHINA*：dubbo-go 与 Dubbo 的更新关系是怎么样的？是同步更新特性还是有自己的一些创新？
+*OSCHINA*: What is the update relationship between dubbo-go and Dubbo? Does it synchronize features, or does it have some innovations of its own?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-我们现在发布的最新版本是 v1.0.0，我们在每一次 release 新的版本后，都会明确说明可以兼容的 Dubbo 版本。所以，dubbo-go 需要兼容对应 Dubbo 版本号的功能，会同步更新一些 Dubbo 特性。
+Our latest version released is v1.0.0. After each new release, we clearly specify which Dubbo versions are compatible. Therefore, dubbo-go needs to be compatible with the functionalities corresponding to the Dubbo version numbers and will synchronize some Dubbo features.
 
-*OSCHINA*：新发布版本带来什么值得关注的特性？
+*OSCHINA*: What noteworthy features does the newly released version bring?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-当前发布的 v1.0.0 版本支持的功能如下：
+The currently released v1.0.0 version supports the following functionalities:
 
-* 角色：Consumer(√)、Provider(√)
-* 传输协议：HTTP(√)、TCP(√)
-* 序列化协议：JsonRPC v2(√)、Hessian v2(√)
-* 注册中心：ZooKeeper(√)
-* 集群策略：Failover(√)
-* 负载均衡：Random(√)
-* 过滤器：Echo Health Check(√)
-* extension 扩展机制
+* Role: Consumer(√), Provider(√)
+* Transport Protocol: HTTP(√), TCP(√)
+* Serialization Protocol: JsonRPC v2(√), Hessian v2(√)
+* Registration Center: ZooKeeper(√)
+* Cluster Strategy: Failover(√)
+* Load Balancing: Random(√)
+* Filter: Echo Health Check(√)
+* Extension mechanism
 
-dubbo-go v1.0.0 版本，主要由我和同在携程的同事[方银城](https://github.com/fangyincheng)维护，社区成员[周子庆](https://github.com/u0x01)与[高辛格](https://github.com/gaoxinge)参与贡献，该版本沿用了 Dubbo 的代码分层解耦设计。Dubbo 2.6.x 的主要功能都会逐渐在 dubbo-go 中实现，包括 Dubbo 基于 SPI 的代码拓展机制，dubbo-go 也有对应的 extension 扩展机制与之对应。
+The dubbo-go v1.0.0 version is primarily maintained by myself and my colleague[ Fang Yincheng](https://github.com/fangyincheng) at Trip.com, with community members [Zhou Ziqing](https://github.com/u0x01) and [Gao Xinge](https://github.com/gaoxinge) contributing. This version retains Dubbo's code layering and decoupling design. The main functionalities of Dubbo 2.6.x will gradually be implemented in dubbo-go, including the SPI-based code extension mechanism, which has a corresponding extension mechanism.
 
-我们在未来将逐渐推出目前可扩展模块的更多实现，如补齐更多的 Loadbalance 负载均衡、Cluster Strategy 集群策略实现（目前这些任务由社区伙伴主动认领，希望更多的 Go 语言爱好者朋友可以加入社区贡献）；又如云原生领域非常流行的 k8s，我们也将同步 Dubbo 的 roadmap，跟进 k8s 作为注册中心的支持，目前由社区成员[张海彬](https://github.com/NameHaibinZhang)负责跟进。
+In the future, we will gradually roll out more implementations of currently extensible modules, such as completing more Loadbalance, Cluster Strategy implementations (currently these tasks are undertaken by community partners, and we hope more Go enthusiasts can join the community to contribute); similarly, for Kubernetes, which is quite popular in the cloud-native field, we will synchronize Dubbo's roadmap to follow up on Kubernetes as a registration center, led by community member [Zhang Haibin](https://github.com/NameHaibinZhang).
 
-当然广大开发者们也可以对这些模块接口进行新的实现，通过 extension 拓展，以完成自己的特殊需求而无需修改源代码。同时，我们非常欢迎开发者为社区贡献有用的拓展实现。
+Of course, developers can also implement new interfaces for these modules through extensions to cater to their unique needs without modifying the source code. We also warmly welcome developers to contribute useful extension implementations to the community.
 
-此版本解决了一大重点问题：与 **Dubbo Java 版本互通的解决方案**。我们将这部分提取出了 [Hessian2](https://github.com/dubbogo/hessian2) 项目，该项目源自社区[于雨](https://github.com/AlexStocks)的早期贡献，现在由社区成员[望哥](https://github.com/wongoo)负责维护，[周子庆](https://github.com/u0x01)与[高辛格](https://github.com/gaoxinge)参与贡献。目前该项目已经完成了对 Java 大部分类型的兼容支持。大家也可以单独将该项目集成到自己的项目中，它的开源协议是 Apache-2.0。
+This version addresses a significant problem: the **solution for interoperability with the Dubbo Java version**. We extracted this part into the [Hessian2](https://github.com/dubbogo/hessian2) project, which originated from early community contributions by [Yu Yu](https://github.com/AlexStocks) and is now maintained by community member [Wang Ge](https://github.com/wongoo), with contributions from [Zhou Ziqing](https://github.com/u0x01) and [Gao Xinge](https://github.com/gaoxinge). This project has completed compatibility support for most Java types. Everyone can also integrate this project into their projects; its open-source license is Apache-2.0.
 
-另外一个比较重要的就是 **dubbo-go 现在使用的 TCP 异步网络 I/O 库**，该库也是基于于雨早期写的 Getty 项目，目前由社区的[望哥](https://github.com/wongoo)与[方银城](https://github.com/fangyincheng)负责维护，它同样也是 Apache-2.0 的开源协议。下一版本我们**会针对 dubbo-go 和 Getty 的网络 I/O 与线程派发这一部分进行进一步优化**。
+Another critical aspect is the **TCP asynchronous network I/O library now used by dubbo-go**, which is also based on an early project by Yu Yu. It is currently maintained by community members [Wang Ge](https://github.com/wongoo) and [Fang Yincheng](https://github.com/fangyincheng), and it is also under the Apache-2.0 open-source license. In the next version, we **will further optimize the network I/O and thread dispatch aspects for dubbo-go and Getty**.
 
-除此之外，我们计划下一步支持 Dubbo 的另外几大重要功能，如：
+Additionally, we plan to support several other critical functionalities of Dubbo in the next steps, such as:
 
-* routing rule 路由规则(dubbo v2.6.x)
-* dynamic configuration 动态配置中心(dubbo v2.* 7.x)
-* metrics 指标与监控(dubbo v2.7.x)
-* trace 链路监控(dubbo ecos)
+* routing rule (dubbo v2.6.x)
+* dynamic configuration center (dubbo v2.* 7.x)
+* metrics and monitoring (dubbo v2.7.x)
+* trace monitoring (dubbo ecos)
 
-*OSCHINA*：目前项目的应用情况如何？
+*OSCHINA*: What is the current application status of the project?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-dubbo-go 现在已经开始被一些企业尝试应用于 Go 语言应用融入企业已有 Java & Dubbo 技术栈，以及搭建全新 Go 语言分布式应用等场景。比如中通快递内部 Go 调用 Java Dubbo 服务；作为携程 Go 语言应用的服务框架以及 Go、Java 应用互通。
+dubbo-go has now started being attempted by some enterprises to integrate Go language applications into their existing Java & Dubbo tech stack and to build entirely new Go language distributed applications. For example, Zhongtong Express internally calls Java Dubbo services using Go; as a service framework for Trip.com's Go language applications and for interoperability between Go and Java applications.
 
-具体的应用情况可以查看： https://github.com/dubbo/go-for-apache-dubbo/issues/2
+For specific application details, please refer to: https://github.com/dubbo/go-for-apache-dubbo/issues/2
 
-*OSCHINA*：接下来的演进方向是怎么样的？
+*OSCHINA*: What is the direction of future evolution?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-在 dubbo-go 迁往 Apache 软件基金会作为 Apache Dubbo 的子项目后，首先最重要的是**性能的进一步优化**，目前性能上虽然能够达到应用的生产级别要求，但我们觉得还没有发挥出 Go 语言的优势，还有比较大的优化空间。比如前边提到的 Getty，下一版本会针对 dubbo-go 应用 Getty 的网络 I/O 模型与线程派发做一些优化。
+After dubbo-go migrates to the Apache Software Foundation as a subproject of Apache Dubbo, the most important task is **further optimization of performance**. Currently, while the performance meets production-level application requirements, we believe it hasn't fully leveraged Go's advantages, and there is considerable room for optimization. For instance, as mentioned earlier, the next version will optimize the network I/O model and thread dispatch of Getty in dubbo-go applications.
 
-另外包含上面提到的我们近期需要补全一些重要功能，最大限度地在**功能完整性**上能够跟 Dubbo 兼容。关于未来 dubbo-go 的发展，也会向 Dubbo 2.7.x 版本这条线上的路线图演进。
+Additionally, as highlighted above, we need to complete some important functionalities, maximizing **functional completeness** to align with Dubbo's capabilities. Regarding the future development of dubbo-go, it will evolve along the line of the Dubbo 2.7.x roadmap.
 
-*OSCHINA*：说到性能，当前性能情况具体如何？
+*OSCHINA*: Speaking of performance, what is the current performance situation?
 
-*dubbo-go 何鑫铭*：
+*dubbo-go He Xinming*:
 
-我们有做一个 [dubbo-go-benchmark](https://github.com/dubbogo/go-for-apache-dubbo-benchmark) 项目，在 CPU 型号为 Intel(R) Xeon(R) CPU E5-2609 0 @2.40GHz，CPU 核心数为 4*8 的硬件水平下，发送 1k 并返回 1k 的数据，100 并发数，100w 总请求数，qps 可以达到 1.2 万左右。
+We have created a [dubbo-go-benchmark](https://github.com/dubbogo/go-for-apache-dubbo-benchmark) project, where at the hardware level of Intel(R) Xeon(R) CPU E5-2609 0 @2.40GHz with 4*8 CPU cores, sending 1k and returning 1k data with 100 concurrent requests and a total of 1 million requests, the QPS can reach around 12,000.
 
-CPU 性能换成比较高的配置如 Intel Core i9 2.9GHz，qps 可以到达 2 万左右。
+With a higher CPU configuration like Intel Core i9 at 2.9GHz, QPS can reach around 20,000.
 
-我们后面会对 Hessian2 库和 Getty 库进行持续性能优化，以给广大使用者节约资源。
+In the future, we will continue performance optimization for the Hessian2 library and Getty library to save resources for users.
 
-#### 采访嘉宾介绍
+#### Interview Guest Introduction
 
-**何鑫铭**，携程基础中台研发部技术专家，dubbo-go 主要作者。目前专注于 Golang & Java、中台架构、中间件与区块链等技术。
+**He Xinming**, Technical Expert of R&D Department at Trip.com, main author of dubbo-go. Currently focused on technologies such as Golang & Java, middle platform architecture, middleware, and blockchain.
+

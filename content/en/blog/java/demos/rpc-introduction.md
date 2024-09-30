@@ -1,135 +1,136 @@
 ---
-title: "浅谈 RPC"
-linkTitle: "浅谈 RPC"
+title: "A Brief Discussion on RPC"
+linkTitle: "A Brief Discussion on RPC"
 tags: ["Java"]
 date: 2019-01-07
 description: >
-    RPC-远程过程调用，它是一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议。
+    RPC - Remote Procedure Call, it is a protocol that allows requesting services from a remote computer program via a network without needing to understand the underlying network technology.
 ---
 
-近几年随着微服务化项目的崛起，逐渐成为许多公司中大型分布式系统架构的主流方式，而今天所说的 RPC 在这其中扮演着至关重要的角色。随着这段日子公司项目微服务化的演进，发现在日常开发中都在隐式或显式的使用 RPC，一些刚刚接触 RPC 的小伙伴会感觉无所适从，而一些入行多年的老手虽然使用 RPC 经验丰富，但有些对其原理也一知半解，缺乏对原理的深入理解，往往也会造成开发中的一些误用。
+In recent years, with the rise of microservices, it has gradually become a mainstream method for large distributed system architectures in many companies. The RPC discussed today plays a crucial role in this process. As companies evolve their projects into microservices, it's observed that RPC is being used implicitly or explicitly in daily development. Some newcomers who just started with RPC may feel confused, while seasoned developers may have extensive experience but lack a deep understanding of its principles, leading to some misuses during development.
 
-## 什么是RPC？
+## What is RPC?
 
-RPC（Remote Procedure Call）—远程过程调用，它是一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议。也就是说两台服务器A，B，一个应用部署在A服务器上，想要调用B服务器上应用提供的方法，由于不在一个内存空间，不能直接调用，需要通过网络来表达调用的语义和传达调用的数据。
+RPC (Remote Procedure Call) is a protocol for requesting services from remote computer programs via a network. In other words, when one application deployed on server A wants to call a method provided by an application on server B, since they are not in the same memory space, it cannot be called directly; the invocation must be expressed through the network.
 
-RPC协议假定某些传输协议的存在，如TCP或UDP，为通信程序之间携带信息数据。在OSI网络通信模型中，RPC跨越了传输层和应用层。RPC使得开发包括网络分布式多程序在内的应用程序更加容易。现在业界有很多开源的优秀 RPC 框架，例如 Spring Cloud、Dubbo、Thrift 等。
+RPC assumes the existence of certain transport protocols, such as TCP or UDP, for carrying information between programs. In the OSI networking model, RPC spans the transport layer and application layer, making it easier to develop applications, including network-distributed multiprograms. There are many excellent open-source RPC frameworks in the industry, such as Spring Cloud, Dubbo, and Thrift.
 
-## RPC 起源
+## Origin of RPC
 
-RPC 这个概念术语在上世纪 80 年代由 **Bruce Jay Nelson** 提出。这里我们追溯下当初开发 RPC 的原动机是什么？在 Nelson 的论文 "Implementing Remote Procedure Calls" 中他提到了几点：
-* 简单：RPC 概念的语义十分清晰和简单，这样建立分布式计算就更容易。
-* 高效：过程调用看起来十分简单而且高效。
-* 通用：在单机计算中过程往往是不同算法部分间最重要的通信机制。 
+The concept of RPC was proposed by **Bruce Jay Nelson** in the 1980s. The motivations for developing RPC can be traced back to a few points mentioned in Nelson's paper "Implementing Remote Procedure Calls":
+* Simplicity: The semantics of RPC are clear and simple, making distributed computing easier.
+* Efficiency: Procedure calling appears simple and efficient.
+* Universality: In single-machine computing, procedures often serve as the most important communication mechanism between different algorithm parts.
 
-通俗一点说，就是一般程序员对于本地的过程调用很熟悉，那么我们把 RPC 作成和本地调用完全类似，那么就更容易被接受，使用起来毫无障碍。Nelson 的论文发表于 30 年前，其观点今天看来确实高瞻远瞩，今天我们使用的 RPC 框架基本就是按这个目标来实现的。
+In simpler terms, since programmers are generally familiar with local procedure calls, making RPC function similarly to local calls makes it easier to adopt and use. Nelson's paper, published 30 years ago, was indeed visionary; the RPC frameworks we use today are essentially built around this goal.
 
-## RPC 结构
+## RPC Structure
 
-Nelson 的论文中指出实现 RPC 的程序包括 5 个部分：
+Nelson's paper identifies five components necessary to implement RPC:
 1. User
 2. User-stub
 3. RPCRuntime
 4. Server-stub
 5. Server
 
-![RPC结构](/imgs/blog/rpc/rpc-structure-1.png)
+![RPC Structure](/imgs/blog/rpc/rpc-structure-1.png)
 
-这里 user 就是 client 端，当 user 想发起一个远程调用时，它实际是通过本地调用 user-stub。user-stub 负责将调用的接口、方法和参数通过约定的协议规范进行编码并通过本地的 RPCRuntime 实例传输到远端的实例。远端 RPCRuntime 实例收到请求后交给 server-stub 进行解码后发起本地端调用，调用结果再返回给 user 端。
+Here, the user represents the client side. When the user wants to initiate a remote call, it is actually making a local call to the user-stub. The user-stub is responsible for encoding the called interface, method, and parameters according to an agreed protocol and transmitting them to the remote instance through the local RPCRuntime instance. Upon receipt of the request, the remote RPCRuntime instance hands it over to the server-stub for decoding before invoking a local call, and the result is returned to the user.
 
-以上是粗粒度的 RPC 实现概念结构，接下来我们进一步细化它应该由哪些组件构成，如下图所示。
+The above demonstrates a coarse-grained conceptual structure of RPC implementation, and we will further detail the components as shown in the diagram below.
 
-![RPC 结构拆解](/imgs/blog/rpc/rpc-structure-2.png)
+![RPC Structure Breakdown](/imgs/blog/rpc/rpc-structure-2.png)
 
-RPC 服务方通过 RpcServer 去导出（export）远程接口方法，而客户方通过 RpcClient 去引入（import）远程接口方法。客户方像调用本地方法一样去调用远程接口方法，RPC 框架提供接口的代理实现，实际的调用将委托给代理RpcProxy 。代理封装调用信息并将调用转交给RpcInvoker 去实际执行。在客户端的RpcInvoker 通过连接器RpcConnector 去维持与服务端的通道RpcChannel，并使用RpcProtocol 执行协议编码（encode）并将编码后的请求消息通过通道发送给服务方。
+The RPC service provider uses RpcServer to export remote interface methods, while the client side uses RpcClient to import remote interface methods. The client calls remote interface methods as if they were local, with the RPC framework providing the proxy implementation of the interface. The actual call will be delegated to RpcProxy. The proxy encapsulates call information and forwards the call to RpcInvoker for execution. On the client side, the RpcInvoker maintains the channel with the service provider through the RpcConnector, using RpcProtocol for protocol encoding and sending encoded messages through the channel.
 
-RPC 服务端接收器 RpcAcceptor 接收客户端的调用请求，同样使用RpcProtocol 执行协议解码（decode）。解码后的调用信息传递给RpcProcessor 去控制处理调用过程，最后再委托调用给RpcInvoker 去实际执行并返回调用结果。如下是各个部分的详细职责：
+The RPC server's receiver, RpcAcceptor, accepts client call requests and uses RpcProtocol for protocol decoding. The decoded call information is passed to RpcProcessor to control the call process and delegate the call to RpcInvoker for actual execution, returning the result. Below are the detailed responsibilities of each component:
 
 ```
 1. RpcServer  
 
-   负责导出（export）远程接口  
+   Responsible for exporting remote interfaces  
 
 2. RpcClient  
 
-   负责导入（import）远程接口的代理实现  
+   Responsible for importing the proxy implementation of remote interfaces  
 
 3. RpcProxy  
 
-   远程接口的代理实现  
+   Proxy implementation of remote interfaces  
 
 4. RpcInvoker  
 
-   客户方实现：负责编码调用信息和发送调用请求到服务方并等待调用结果返回  
+   Client-side implementation: responsible for encoding call information and sending it to the service side and waiting for the result.  
 
-   服务方实现：负责调用服务端接口的具体实现并返回调用结果  
+   Service-side implementation: responsible for implementing the server interface and returning results.  
 
 5. RpcProtocol  
 
-   负责协议编/解码  
+   Responsible for protocol encoding/decoding  
 
 6. RpcConnector  
 
-   负责维持客户方和服务方的连接通道和发送数据到服务方  
+   Responsible for maintaining the connection channel between the client and server and sending data to the service side  
 
 7. RpcAcceptor  
 
-   负责接收客户方请求并返回请求结果  
+   Responsible for receiving client requests and returning results  
 
 8. RpcProcessor  
 
-   负责在服务方控制调用过程，包括管理调用线程池、超时时间等  
+   Responsible for controlling the call process on the server side, including managing call thread pools, timeout settings, etc.  
 
 9. RpcChannel  
 
-   数据传输通道 
+   Data transmission channel 
 ```
 
-## RPC 工作原理
+## Working Principle of RPC
 
-RPC的设计由Client，Client stub，Network ，Server stub，Server构成。 其中Client就是用来调用服务的，Cient stub是用来把调用的方法和参数序列化的（因为要在网络中传输，必须要把对象转变成字节），Network用来传输这些信息到Server stub， Server stub用来把这些信息反序列化的，Server就是服务的提供者，最终调用的就是Server提供的方法。
+RPC design consists of Client, Client stub, Network, Server stub, and Server. The Client is used to call the service, while the Client stub serializes the calling method and parameters (since objects must be converted to bytes for network transmission). The Network transmits this information to the Server stub, which deserializes it. The Server provides the service and executes the method ultimately called.
 
-![RPC工作原理](/imgs/blog/rpc/rpc-work-principle.png)
+![Working Principle of RPC](/imgs/blog/rpc/rpc-work-principle.png)
 
-1. Client像调用本地服务似的调用远程服务； 
+1. The Client calls the remote service as if it were calling a local service; 
 
-2. Client stub接收到调用后，将方法、参数序列化 
+2. The Client stub serializes the method and parameters upon receipt; 
 
-3. 客户端通过sockets将消息发送到服务端 
+3. The client sends the message to the server through sockets; 
 
-4. Server stub 收到消息后进行解码（将消息对象反序列化） 
+4. The Server stub receives the message and decodes it (deserializes the message object); 
 
-5. Server stub 根据解码结果调用本地的服务 
+5. The Server stub calls the local service based on the decoded results; 
 
-6. 本地服务执行(对于服务端来说是本地执行)并将结果返回给Server stub 
+6. The local service executes (locally, for the server) and returns the results to the Server stub; 
 
-7. Server stub将返回结果打包成消息（将结果消息对象序列化） 
+7. The Server stub packages the return results into a message (serializes the result message object); 
 
-8. 服务端通过sockets将消息发送到客户端
+8. The server sends the message back to the client through sockets; 
 
-9. Client stub接收到结果消息，并进行解码（将结果消息反序列化） 
+9. The Client stub receives the result message and decodes it (deserializes the result message object); 
 
-10. 客户端得到最终结果。
+10. The client gets the final result.
 
-RPC 调用分以下两种：
+RPC calls can be categorized into two types:
 
-1. 同步调用：客户方等待调用执行完成并返回结果。
+1. Synchronous calls: The client waits for the call to complete and return results.
 
-2. 异步调用：客户方调用后不用等待执行结果返回，但依然可以通过回调通知等方式获取返回结果。若客户方不关心调用返回结果，则变成单向异步调用，单向调用不用返回结果。
+2. Asynchronous calls: The client does not wait for the execution result upon calling but can still obtain it through callbacks, etc. If the client doesn't care about the return result, it becomes a one-way asynchronous call, where no result is returned.
 
-异步和同步的区分在于是否等待服务端执行完成并返回结果。
-   
-## RPC 能干什么？
+The distinction between asynchronous and synchronous lies in whether to wait for the server's execution to complete and return results.
 
-RPC 的主要功能目标是让构建分布式计算（应用）更容易，在提供强大的远程调用能力时不损失本地调用的语义简洁性。为实现该目标，RPC 框架需提供一种透明调用机制，让使用者不必显式的区分本地调用和远程调用，在之前给出的一种实现结构，基于 stub 的结构来实现。下面我们将具体细化 stub 结构的实现。
+## What Can RPC Do?
 
-* 可以做到分布式，现代化的微服务
-* 部署灵活
-* 解耦服务
-* 扩展性强
+The main goal of RPC is to ease the construction of distributed computing (applications) while providing robust remote calling capabilities without losing the semantic simplicity of local calls. To achieve this goal, the RPC framework needs to offer a transparent calling mechanism, so users do not have to explicitly distinguish between local and remote calls. The previously mentioned implementation structure is based on a stub structure. Let's detail the stub structure's implementation further.
 
-RPC的目的是让你在本地调用远程的方法，而对你来说这个调用是透明的，你并不知道这个调用的方法是部署哪里。通过RPC能解耦服务，这才是使用RPC的真正目的。
+* It supports distributed, modern microservices.
+* Flexible deployment.
+* Decouples services.
+* Strong extensibility.
 
-## 总结
+The purpose of RPC is to allow you to call remote methods as if they were local, making the invocation transparent, so you may not even know where the method is deployed. By using RPC, services can be decoupled, which is the true intent behind using RPC.
 
-这篇文章介绍了 RPC 的一些基本原理，相信到这里您已经对 RPC 有了一定理解。其实发现实现一个 RPC 不算难，难的是实现一个高性能高可靠的RPC框架。比如，既然是分布式了，那么一个服务可能有多个实例，你在调用时，要如何获取这些实例的地址呢？这时候就需要一个服务注册中心，比如在Dubbo中，就可以使用Zookeeper作为注册中心，在调用时，从Zookeeper获取服务的实例列表，再从中选择一个进行调用。那么选哪个调用好呢？这时候就需要负载均衡了，于是你又得考虑如何实现复杂均衡，比如Dubbo就提供了好几种负载均衡策略。所以请继续关注我的另外两篇文章**RPC与服务化的关系**和**注册中心，配置中心， 服务发现浅谈**，相信会帮助对RPC设计和实现有更多的理解。
+## Conclusion
+
+This article introduced some basic principles of RPC, and I believe you've gained a certain understanding of it by now. Implementing RPC is not particularly difficult; the challenge lies in creating a high-performance and reliable RPC framework. For instance, since it is distributed, a service may have multiple instances. How do you obtain the addresses of these instances during calls? You will need a service registry, such as Zookeeper in Dubbo. During calls, you retrieve the list of service instances from Zookeeper and choose one to call. Which instance to call? This brings in the need for load balancing, and you need to consider how to implement complex balancing; Dubbo offers several load balancing strategies. So, please stay tuned for my other two articles, **The Relationship Between RPC and Serviceization** and **A Brief Discussion on Service Registration Center, Configuration Center, and Service Discovery**, which will undoubtedly provide a deeper understanding of RPC design and implementation.
+

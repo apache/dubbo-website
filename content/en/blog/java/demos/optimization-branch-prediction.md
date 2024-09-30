@@ -1,33 +1,33 @@
 ---
-title: "提前if判断帮助CPU分支预测"
-linkTitle: "提前if判断帮助CPU分支预测"
+title: "Early if Judgment Helps CPU Branch Prediction"
+linkTitle: "Early if Judgment Helps CPU Branch Prediction"
 tags: ["Java"]
 date: 2019-02-03
 description: >
-    本文介绍了通过提前if判断帮助CPU分支预测的优化技巧
+    This article introduces optimization techniques that help CPU branch prediction through early if judgments.
 ---
 
-## 分支预测
+## Branch Prediction
 
-在stackoverflow上有一个非常有名的问题：[为什么处理有序数组要比非有序数组快？](
-https://stackoverflow.com/questions/11227809/why-is-it-faster-to-process-a-sorted-array-than-an-unsorted-array)，可见分支预测对代码运行效率有非常大的影响。
+There is a very famous question on Stack Overflow: [Why is it faster to process a sorted array than an unsorted array?](
+https://stackoverflow.com/questions/11227809/why-is-it-faster-to-process-a-sorted-array-than-an-unsorted-array), which shows that branch prediction has a significant impact on code execution efficiency.
 
-现代CPU都支持分支预测(branch prediction)和指令流水线(instruction pipeline)，这两个结合可以极大提高CPU效率。对于像简单的if跳转，CPU是可以比较好地做分支预测的。但是对于switch跳转，CPU则没有太多的办法。switch本质上是据索引，从地址数组里取地址再跳转。
+Modern CPUs support branch prediction and instruction pipelining, which together can greatly enhance CPU efficiency. For simple if statements, CPUs can do a good job of branch prediction. However, for switch statements, the CPU has limited options. Switch essentially uses indexing to fetch addresses from an array and then jumps.
 
-要提高代码执行效率，一个重要的原则就是尽量避免CPU把流水线清空，那么提高分支预测的成功率就非常重要。
+To improve code execution efficiency, an important principle is to avoid clearing the CPU pipeline as much as possible, making it vital to enhance the success rate of branch prediction.
 
-那么对于代码里，如果某个switch分支概率很高，是否可以考虑代码层面帮CPU把判断提前，来提高代码执行效率呢？
+In cases where a certain switch branch has a high probability, could we consider helping the CPU with early judgment to improve code execution efficiency?
 
-## Dubbo里ChannelEventRunnable的switch判断
+## Switch Judgment in ChannelEventRunnable of Dubbo
 
-在`ChannelEventRunnable`里有一个switch来判断channel state，然后做对应的逻辑：[查看](
+In `ChannelEventRunnable`, there is a switch that assesses the channel state and performs corresponding logic: [View](
 https://github.com/hengyunabc/dubbo/blob/dubbo-2.6.1/dubbo-remoting/dubbo-remoting-api/src/main/java/com/alibaba/dubbo/remoting/transport/dispatcher/ChannelEventRunnable.java#L54)
 
-一个channel建立起来之后，超过99.9%情况它的state都是`ChannelState.RECEIVED`，那么可以考虑把这个判断提前。
+Once a channel is established, in over 99.9% of instances, its state is `ChannelState.RECEIVED`, so it may be worth considering moving this judgment ahead.
 
-## benchmark验证
+## Benchmark Validation
 
-下面通过jmh来验证下：
+Below we verify with jmh:
 
 ```java
 public class TestBenchMarks {
@@ -114,10 +114,10 @@ public class TestBenchMarks {
 	}
 }
 ```
-* benchSiwtch里是纯switch判断
-* benchIfAndSwitch 里用一个if提前判断state是否`ChannelState.RECEIVED`
+* benchSiwtch involves pure switch judgment
+* benchIfAndSwitch makes an early if judgment to check if state is `ChannelState.RECEIVED`
 
-benchmark结果是：
+Benchmark results are:
 
 ```
 Result "io.github.hengyunabc.jmh.TestBenchMarks.benchSiwtch":
@@ -133,11 +133,12 @@ TestBenchMarks.benchIfAndSwitch  1000000  thrpt  100  1535.867 ± 61.212  ops/s
 TestBenchMarks.benchSiwtch       1000000  thrpt  100   576.745 ±  6.806  ops/s
 ```
 
-可以看到提前if判断的确提高了代码效率，这种技巧可以放在性能要求严格的地方。
+It can be seen that the early if judgment indeed improved code efficiency; this technique can be applied in performance-critical areas.
 
-Benchmark代码：https://github.com/hengyunabc/jmh-demo
+Benchmark code: https://github.com/hengyunabc/jmh-demo
 
-## 总结
+## Conclusion
 
-* switch对于CPU来说难以做分支预测
-* 某些switch条件如果概率比较高，可以考虑单独提前if判断，充分利用CPU的分支预测机制
+* Switch statements are difficult for CPUs to perform branch prediction.
+* For certain switch conditions with high probabilities, consider early if judgments to fully leverage the CPU's branch prediction mechanism.
+

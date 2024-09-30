@@ -1,56 +1,56 @@
 ---
-title: "Dubbo2.7 三大新特性详解"
-linkTitle: "Dubbo2.7 三大新特性详解"
+title: "Detailed Explanation of Three Major New Features in Dubbo 2.7"
+linkTitle: "Detailed Explanation of Three Major New Features in Dubbo 2.7"
 tags: ["Java"]
 date: 2018-08-15
 description: >
-    异步化改造,三大中心改造,服务治理增强
+    Asynchronous transformation, transformation of three major centers, enhanced service governance
 ---
 
-## 1 背景介绍
+## 1 Background Introduction
 
-自 2017 年 7 月阿里重启 Dubbo 开源，到目前为止 github star 数，contributor 数都有了非常大的提升。2018 年 2 月 9 日阿里决定将 Dubbo 项目贡献给 Apache，经过一周的投票，顺利成为了 Apache 的孵化项目，也就是大家现在看到的 **Incubator Dubbo**。预计在 2019 年 4 月，Dubbo 可以达成毕业，成为 Apache 的顶级项目。
+Since Alibaba relaunched Dubbo as an open-source project in July 2017, there has been a significant increase in GitHub stars and contributors. On February 9, 2018, Alibaba decided to donate the Dubbo project to Apache, and after a week of voting, it successfully became an Apache incubation project, currently known as **Incubator Dubbo**. It is expected that by April 2019, Dubbo will graduate and become a top-level Apache project.
 
-## 2 分支介绍
+## 2 Branch Introduction
 
-![分支](/imgs/blog/270/branches.png)
+![Branches](/imgs/blog/270/branches.png)
 
-Dubbo 目前有如图所示的 5 个分支，其中 2.7.1-release 只是一个临时分支，忽略不计，对其他 4 个分支进行介绍。
+Dubbo currently has five branches as shown in the figure, among which 2.7.1-release is just a temporary branch and can be ignored; the other four branches will be introduced.
 
-- 2.5.x 近期已经通过投票，Dubbo 社区即将停止对其的维护。
-- 2.6.x 为长期支持的版本，也是 Dubbo 贡献给 Apache 之前的版本，其包名前缀为：com.alibaba，JDK 版本对应 1.6。
-- 3.x-dev 是前瞻性的版本，对 Dubbo 进行一些高级特性的补充，如支持 rx 特性。
-- master 为长期支持的版本，版本号为 2.7.x，也是 Dubbo 贡献给 Apache 的开发版本，其包名前缀为：org.apache，JDK 版本对应 1.8。
+- 2.5.x is approaching the end of its maintenance.
+- 2.6.x is a long-term support version, which is also the version of Dubbo prior to its contribution to Apache, with package prefix: com.alibaba, and JDK version corresponding to 1.6.
+- 3.x-dev is a forward-looking version that adds some advanced features to Dubbo, such as supporting rx features.
+- master is a long-term supported version, version number 2.7.x, which is the development version of Dubbo contributed to Apache, with package prefix: org.apache, and JDK version corresponding to 1.8.
 
-> 如果想要研究 Dubbo 的源码，建议直接浏览 master 分支。
+> If you want to study the Dubbo source code, it is recommended to browse the master branch directly.
 
-## 3 Dubbo 2.7 新特性
+## 3 New Features of Dubbo 2.7
 
-Dubbo 2.7.x 作为 Apache 的孵化版本，除了代码优化之外，还新增了许多重磅的新特性，本文将会介绍其中最典型的三个新特性：
+Dubbo 2.7.x, as the Apache incubation version, has introduced many heavyweight new features in addition to code optimization. This article will introduce three of the most typical new features:
 
-- 异步化改造
-- 三大中心改造
-- 服务治理增强
+- Asynchronous transformation
+- Transformation of three major centers
+- Enhanced service governance
 
-## 4 异步化改造
+## 4 Asynchronous Transformation
 
-### 4.1 几种调用方式
+### 4.1 Several Calling Methods
 
-![调用方式](/imgs/blog/270/invokes.png)
+![Calling Methods](/imgs/blog/270/invokes.png)
 
-在远程方法调用中，大致可以分为这 4 种调用方式。oneway 指的是客户端发送消息后，不需要接受响应。对于那些不关心服务端响应的请求，比较适合使用 oneway 通信。
+In remote method calls, there are roughly four types of calling methods. The oneway method means that the client sends a message without needing to receive a response. For requests that do not care about the server response, oneway communication is more suitable.
 
-> 注意，void hello() 方法在远程方法调用中，不属于 oneway 调用，虽然 void 方法表达了不关心返回值的语义，但在 RPC 层面，仍然需要做通信层的响应。
+> Note that the void hello() method does not belong to oneway calls in remote method calls, although the void method implies the disregard for return values, it still requires a communication layer response at the RPC level.
 
-sync 是最常用的通信方式，也是默认的通信方法。
+sync is the most commonly used communication method and is the default communication method.
 
-future 和 callback 都属于异步调用的范畴，他们的区别是：在接收响应时，future.get() 会导致线程的阻塞;callback 通常会设置一个回调线程，当接收到响应时，自动执行，不会对当前线程造成阻塞。
+future and callback both fall into the category of asynchronous calls, with the difference being: receiving responses using future.get() will cause thread blocking; callbacks typically set a callback thread that automatically executes upon receiving a response without blocking the current thread.
 
-### 4.2 Dubbo 2.6 异步化
+### 4.2 Dubbo 2.6 Asynchronous
 
-异步化的优势在于客户端不需要启动多线程即可完成并行调用多个远程服务，相对多线程开销较小。介绍 2.7 中的异步化改造之前，先回顾一下如何在 2.6 中使用 Dubbo 异步化的能力。
+The advantage of asynchronous calls is that clients do not need to start multiple threads to achieve parallel calls to multiple remote services, which is relatively lightweight compared to multi-threading. Before introducing asynchronous changes in 2.7, let's review how to use Dubbo's asynchronous capabilities in 2.6.
 
-1. 将同步接口声明成 `async=true`
+1. Declare the synchronous interface as `async=true`
     ```xml
     <dubbo:reference id="asyncService" interface="org.apache.dubbo.demo.api.AsyncService" async="true"/>
     ```
@@ -59,18 +59,18 @@ future 和 callback 都属于异步调用的范畴，他们的区别是：在接
         String sayHello(String name);
     }
     ```
-2. 通过上下文类获取 future
+2. Obtain future through the context class
     ```java
     AsyncService.sayHello("Han Meimei");
     Future<String> fooFuture = RpcContext.getContext().getFuture();
     fooFuture.get();
     ```
 
-可以看出，这样的使用方式，不太符合异步编程的习惯，竟然需要从一个上下文类中获取到 Future。如果同时进行多个异步调用，使用不当很容易造成上下文污染。而且，Future 并不支持 callback 的调用方式。这些弊端在 Dubbo 2.7 中得到了改进。
+This usage approach does not conform to asynchronous programming habits and requires obtaining the Future from a context class. If multiple asynchronous calls are made simultaneously, improper usage can easily lead to context pollution. Moreover, Future does not support callback calling methods. These drawbacks have been improved in Dubbo 2.7.
 
-### 4.3 Dubbo 2.7 异步化
+### 4.3 Dubbo 2.7 Asynchronous
 
-1. 无需配置中特殊声明，显式声明异步接口即可
+1. No special declaration in configuration is needed; just explicitly declare the asynchronous interface
     ```java
     public interface AsyncService {
         String sayHello(String name);
@@ -79,7 +79,7 @@ future 和 callback 都属于异步调用的范畴，他们的区别是：在接
         }
     }
     ```
-2. 使用 callback 方式处理返回值
+2. Use callback methods to handle return values
     ```java
     CompletableFuture<String> future = asyncService.sayHiAsync("Han MeiMei");
     future.whenComplete((retValue, exception) -> {
@@ -91,49 +91,49 @@ future 和 callback 都属于异步调用的范畴，他们的区别是：在接
     });
     ```
 
-Dubbo 2.7 中使用了 JDK1.8 提供的 `CompletableFuture` 原生接口对自身的异步化做了改进。`CompletableFuture` 可以支持 future 和 callback 两种调用方式，用户可以根据自己的喜好和场景选择使用，非常灵活。
+Dubbo 2.7 has improved its asynchronous capabilities by utilizing the native interface `CompletableFuture` provided by JDK 1.8. `CompletableFuture` supports both future and callback calling methods, providing users with great flexibility to choose based on their preferences and scenarios.
 
-### 4.4 异步化设计 FAQ
+### 4.4 Asynchronous Design FAQ
 
-Q：如果 RPC 接口只定义了同步接口，有办法使用异步调用吗？
+Q: If the RPC interface only defines synchronous interfaces, is there a way to use asynchronous calls?
 
-A：2.6 中的异步调用唯一的优势在于，不需要在接口层面做改造，又可以进行异步调用，这种方式仍然在 2.7 中保留；使用 Dubbo 官方提供的 compiler hacker，编译期自动重写同步方法，请[在此](https://github.com/dubbo/dubbo-async-processor#compiler-hacker-processer)讨论和跟进具体进展。
-
----
-
-Q：关于异步接口的设计问题，为何不提供编译插件，根据原接口，自动编译出一个 XxxAsync 接口？
-
-A：Dubbo 2.7 采用过这种设计，但接口的膨胀会导致服务类的增量发布，而且接口名的变化会影响服务治理的一些相关逻辑，改为方法添加 Async 后缀相对影响范围较小。
+A: The only advantage of asynchronous calls in 2.6 was that they could be executed without modifying the interface layer, and this method is still retained in 2.7; by using the compiler hacker provided by Dubbo, synchronous methods can be automatically rewritten at compile time, please [discuss and follow up here](https://github.com/dubbo/dubbo-async-processor#compiler-hacker-processer).
 
 ---
 
-Q：Dubbo 分为了客户端异步和服务端异步，刚刚你介绍的是客户端异步，为什么不提服务端异步呢？
+Q: Regarding the design of asynchronous interfaces, why not provide a compiler plugin to automatically compile an XxxAsync interface based on the original interface?
 
-A：Dubbo 2.7 新增了服务端异步的支持，但实际上，Dubbo 的业务线程池模型，本身就可以理解为异步调用，个人认为服务端异步的特性较为鸡肋。
+A: Dubbo 2.7 adopted this design, but the proliferation of interfaces led to incremental releases of service classes and the change in interface names affected some relevant logic in service governance. Adding `Async` as a suffix to methods had a relatively smaller impact.
 
-## 5 三大中心改造
+---
 
-三大中心指的：注册中心，元数据中心，配置中心。
+Q: Dubbo is divided into client asynchronous and server asynchronous; you just introduced client asynchronous, why not mention server asynchronous?
 
-在 2.7 之前的版本，Dubbo 只配备了注册中心，主流使用的注册中心为 zookeeper。新增加了元数据中心和配置中心，自然是为了解决对应的痛点，下面我们来详细阐释三大中心改造的原因。
+A: Dubbo 2.7 added support for server asynchronous, but in fact, the business thread pool model of Dubbo itself can be understood as asynchronous calls. I believe that the features of server asynchronous are somewhat redundant.
 
-### 5.1 元数据改造
+## 5 Transformation of Three Major Centers
 
-元数据是什么？元数据定义为描述数据的数据，在服务治理中，例如服务接口名，重试次数，版本号等等都可以理解为元数据。在 2.7 之前，元数据一股脑丢在了注册中心之中，这造成了一系列的问题：
+The three major centers refer to: the registry center, the metadata center, and the configuration center.
 
-**推送量大 -> 存储数据量大 -> 网络传输量大 -> 延迟严重**
+Before version 2.7, Dubbo was only equipped with a registry center, with the mainstream registry being Zookeeper. The addition of the metadata center and configuration center was naturally to solve corresponding pain points, and below we will explain in detail the reasons for the transformation of the three major centers.
 
-生产者端注册 30+ 参数，有接近一半是不需要作为注册中心进行传递；消费者端注册 25+ 参数，只有个别需要传递给注册中心。有了以上的理论分析，Dubbo 2.7 进行了大刀阔斧的改动，只将真正属于服务治理的数据发布到注册中心之中，大大降低了注册中心的负荷。
+### 5.1 Metadata Transformation
 
-同时，将全量的元数据发布到另外的组件中：元数据中心。元数据中心目前支持 redis（推荐），zookeeper。这也为 Dubbo 2.7 全新的 Dubbo Admin 做了准备，关于新版的 Dubbo Admin，我将会后续准备一篇独立的文章进行介绍。
+What is metadata? Metadata is defined as data that describes other data. In service governance, metadata such as service interface names, retry counts, version numbers, etc., can all be understood as metadata. Before 2.7, metadata was indiscriminately tossed into the registry center, causing a series of problems:
 
-示例：使用 zookeeper 作为元数据中心
+**Large Push Volume -> Large Storage Volume -> Large Network Transmission -> Significant Latency**
+
+Producers register 30+ parameters, with nearly half not needing to be passed to the registry center; consumers register 25+ parameters, with only a few needing to be passed. With the above theoretical analysis, Dubbo 2.7 made major changes, only publishing data that truly belongs to service governance to the registry center, greatly reducing the load on the registry center.
+
+At the same time, all metadata is published to another component: the metadata center. The metadata center currently supports Redis (recommended) and Zookeeper. This also prepares for the new Dubbo Admin in Dubbo 2.7. I will prepare a separate article to discuss the new version of Dubbo Admin in the future.
+
+Example: Using Zookeeper as the metadata center
 
 ```xml
 <dubbo:metadata-report address="zookeeper://127.0.0.1:2181"/>
 ```
 
-### 5.2 Dubbo 2.6 元数据 
+### 5.2 Dubbo 2.6 Metadata 
 
 ```shell
 dubbo://30.5.120.185:20880/com.alibaba.dubbo.demo.DemoService?
@@ -152,17 +152,17 @@ side=provider&
 timestamp=1552965771067
 ```
 
-从本地的 zookeeper 中取出一条服务数据，通过解码之后，可以看出，的确有很多参数是不必要。
+From the local Zookeeper, a service data entry is retrieved, and upon decoding, it can be seen that many parameters are indeed unnecessary.
 
-### 5.3 Dubbo 2.7 元数据
+### 5.3 Dubbo 2.7 Metadata
 
-在 2.7 中，如果不进行额外的配置，zookeeper 中的数据格式仍然会和 Dubbo 2.6 保持一致，这主要是为了保证兼容性，让 Dubbo 2.6 的客户端可以调用 Dubbo 2.7 的服务端。如果整体迁移到 2.7，则可以为注册中心开启简化配置的参数：
+In 2.7, if no additional configuration is made, the data format in Zookeeper will remain consistent with Dubbo 2.6 mainly for compatibility, allowing Dubbo 2.6 clients to call Dubbo 2.7 servers. If migrating entirely to 2.7, configuration parameters can be simplified for the registry center:
 
 ```xml
-<dubbo:registry address=“zookeeper://127.0.0.1:2181” simplified="true"/>
+<dubbo:registry address="zookeeper://127.0.0.1:2181" simplified="true"/>
 ```
 
-Dubbo 将会只上传那些必要的服务治理数据，一个简化过后的数据如下所示：
+Dubbo will only upload the necessary service governance data, and a simplified data entry is shown below:
 
 ```shell
 dubbo://30.5.120.185:20880/org.apache.dubbo.demo.api.DemoService?
@@ -172,60 +172,61 @@ release=2.7.0&
 timestamp=1552975501873
 ```
 
-对于那些非必要的服务信息，仍然全量存储在元数据中心之中：
+Non-essential service information will still be stored in full in the metadata center:
 
-![元数据](/imgs/blog/270/metadata.png)
+![Metadata](/imgs/blog/270/metadata.png)
 
-> 元数据中心的数据可以被用于服务测试，服务 MOCK 等功能。目前注册中心配置中 simplified 的默认值为 false，因为考虑到了迁移的兼容问题，在后续迭代中，默认值将会改为 true。
+> Data in the metadata center can be used for service testing, service MOCK, etc. Currently, the default value of simplified in registry center configurations is false due to migration compatibility issues, which will be changed to true in subsequent iterations.
 
-### 5.4 配置中心支持
+### 5.4 Configuration Center Support
 
-衡量配置中心的必要性往往从三个角度出发：
+The necessity of a configuration center is often evaluated from three perspectives:
 
-1. 分布式配置统一管理
+1. Unified management of distributed configurations
 
-2. 动态变更推送
+2. Dynamic change push
 
-3. 安全性
+3. Security
 
-Spring Cloud Config, Apollo, Nacos 等分布式配置中心组件都对上述功能有不同程度的支持。在 2.7 之前的版本中，在 zookeeper 中设置了部分节点：configurators，routers，用于管理部分配置和路由信息，它们可以理解为 Dubbo 配置中心的雏形。在 2.7 中，Dubbo 正式支持了配置中心，目前支持的几种注册中心 Zookeeper，Apollo，Nacos（2.7.1-release 支持）。
+Components such as Spring Cloud Config, Apollo, Nacos, etc., offer varying degrees of support for the aforementioned features. In versions before 2.7, specific nodes in Zookeeper were set up: configurators, routers, used to manage some configuration and routing information; they can be understood as a primitive configuration center for Dubbo. In 2.7, Dubbo officially supports configuration centers, with supported registry centers being Zookeeper, Apollo, Nacos (supported in 2.7.1-release).
 
-在 Dubbo 中，配置中心主要承担了两个作用
+In Dubbo, the configuration center primarily serves two functions:
 
-- 外部化配置。启动配置的集中式存储
+- Externalized configuration: centralized storage for startup configurations
 
-- 服务治理。服务治理规则的存储与通知
+- Service governance: storage and notification of service governance rules
 
-示例：使用 Zookeeper 作为配置中心
+Example: Using Zookeeper as the configuration center
 
 ```xml
 <dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 ```
 
-引入配置中心后，需要注意配置项的覆盖问题，优先级如图所示
+After introducing the configuration center, care must be taken with configuration item overrides, with priorities as shown in the figure.
 
-![配置覆盖优先级](/imgs/blog/configuration.jpg)
+![Configuration Override Priority](/imgs/blog/configuration.jpg)
 
-## 6 服务治理增强
+## 6 Enhanced Service Governance
 
-我更倾向于将 Dubbo 当做一个服务治理框架，而不仅仅是一个 RPC 框架。在 2.7 中，Dubbo 对其服务治理能力进行了增强，增加了标签路由的能力，并抽象出了应用路由和服务路由的概念。在最后一个特性介绍中，着重对标签路由 TagRouter 进行探讨。
+I prefer to view Dubbo as a service governance framework rather than merely an RPC framework. In 2.7, Dubbo has enhanced its service governance capabilities by adding tag routing and abstracting the concepts of application routing and service routing. In the final feature introduction, we will focus on the TagRouter.
 
->  在服务治理中，路由层和负载均衡层的对比。区别 1，Router：m 选 n，LoadBalance：n 选 1；区别 2，路由往往是叠加使用的，负载均衡只能配置一种。
+> In service governance, the comparison between routing layer and load balancing layer. Distinction 1, Router: m selects n, LoadBalance: n selects 1; Distinction 2, routing is usually combined, while load balancing can only configure one.
 
-在很长的一段时间内，Dubbo 社区经常有人提的一个问题是：Dubbo 如何实现流量隔离和灰度发布，直到 2.7 提供了标签路由，用户可以使用这个功能，来实现上述的需求。
+For a long time, a common question raised by the Dubbo community was: How does Dubbo achieve traffic isolation and gray release? With the introduction of tag routing in 2.7, users can utilize this feature to meet the above needs.
 
-![标签路由](/imgs/blog/270/tag-route.png)
+![Tag Routing](/imgs/blog/270/tag-route.png)
 
-标签路由提供了这样一个能力，当调用链路为 A -> B -> C -> D 时，用户给请求打标，最典型的打标方式可以借助 attachment（他可以在分布式调用中传递下去），调用会优先请求那些匹配的服务端，如 A -> B，C -> D，由于集群中未部署 C 节点，则会降级到普通节点。
+Tag routing provides the capability that when the call link is A -> B -> C -> D, the user can apply tags to the request. The most typical tagging method can utilize attachments (they can be passed along in distributed calls), and the call will prioritize requesting those matched servers, such as A -> B, C -> D. If the C node is not deployed in the cluster, it will degrade to ordinary nodes.
 
-打标方式会受到集成系统差异的影响，从而导致很大的差异，所以 Dubbo 只提供了 `RpcContext.getContext().setAttachment()` 这样的基础接口，用户可以使用 SPI 扩展，或者 server filter 的扩展，对测试流量进行打标，引导进入隔离环境/灰度环境。
+Tagging methods may be influenced by the differences in integrated systems, leading to significant variance. Therefore, Dubbo only provides the basic interface `RpcContext.getContext().setAttachment()` allowing users to use SPI extension or server filter extension to tag test traffic, guiding it into isolated environments/gray environments.
 
-新版的 Dubbo Admin 提供了标签路由的配置项：
+The new version of Dubbo Admin provides configuration options for tag routing:
 
-![标签路由配置](/imgs/blog/270/tag-route-config.png)
+![Tag Routing Configuration](/imgs/blog/270/tag-route-config.png)
 
-Dubbo 用户可以在自己系统的基础上对标签路由进行二次扩展，或者借鉴标签路由的设计，实现自己系统的流量隔离，灰度发布。
+Dubbo users can extend tag routing based on their own systems or refer to the design of tag routing to achieve traffic isolation and gray release in their systems.
 
-## 7 总结
+## 7 Conclusion
 
-本文介绍了 Dubbo 2.7 比较重要的三大新特性：异步化改造，三大中心改造，服务治理增强。Dubbo 2.7 还包含了很多功能优化、特性升级，可以在项目源码的 [CHANGES.md](https://github.com/apache/dubbo/blob/master/CHANGES.md) 中浏览全部的改动点。最后提供一份 Dubbo 2.7 的升级文档：[2.7迁移文档](/en/docsv2.7/user/versions/version-270/)，欢迎体验。
+This article introduced three important new features of Dubbo 2.7: asynchronous transformation, transformation of three major centers, and enhanced service governance. Dubbo 2.7 also includes many functional optimizations and feature upgrades, which can be explored in the project's source code in [CHANGES.md](https://github.com/apache/dubbo/blob/master/CHANGES.md). Finally, a migration document for Dubbo 2.7 is provided: [2.7 Migration Document](/en/docsv2.7/user/versions/version-270/), welcome to experience.
+

@@ -1,127 +1,128 @@
 ---
-title: "基于 Triple 实现 Web 移动端后端全面打通"
-linkTitle: "基于 Triple 实现 Web 移动端后端全面打通"
+title: "Web Mobile Backend Integration Based on Triple"
+linkTitle: "Web Mobile Backend Integration Based on Triple"
 tags: ["apachecon2023", "triple", "protocol"]
 date: 2023-10-07
-authors: ["陈有为"]
-description: 基于 Triple 实现 Web 移动端后端全面打通
+authors: ["Chen Youwei"]
+description: Web Mobile Backend Integration Based on Triple
 ---
 
-摘要：本文整理自陌陌研发工程师、Apache Dubbo PMC陈有为在 Community Over Code 2023 大会上的分享，本篇内容主要分为四个部分：
+Abstract: This article is compiled from a presentation by Momo R&D engineer and Apache Dubbo PMC Chen Youwei at the Community Over Code 2023 conference. The content is mainly divided into four parts:
 
-- 一、RPC 协议开发微服务
-- 二、全新升级的 Triple 协议
-- 三、Triple 协议开发微服务
-- 四、Dubbo 为 Triple 协议带来治理能力
+- 1. Developing Microservices with RPC Protocols
+- 2. The Newly Upgraded Triple Protocol
+- 3. Developing Microservices with Triple Protocol
+- 4. Governance Capability of Dubbo for Triple Protocol
 
-## 一、RPC 协议开发微服务
+## 1. Developing Microservices with RPC Protocols
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img.png)
 
-在我们正常开发微服务的时候，传统RPC服务可能在最底层。上层可能是浏览器、移动端、外界的服务器、自己的测试、curl等等。我们可能会通过Tomcat这种外部服务器去组装我们的RPC层，也就是BFF。或者我们没有BFF，我们的RPC就是对外提供服务。但因为浏览器要访问，所以我们需要有一个网关，比如说Apisix或者ShenYu等HTTP网关。
+When we normally develop microservices, traditional RPC services may be at the bottom layer. The upper layers may include browsers, mobile devices, external servers, internal testing, curl, etc. We might use an external server like Tomcat to assemble our RPC layer, which is also known as BFF. Alternatively, if we don't have a BFF, our RPC directly provides services. However, since browsers need to access it, we require a gateway, such as Apisix or ShenYu HTTP gateway.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_1.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_1.png)
 
-上图展示的是我们的流程，但是存在一些问题。
+The above figure shows our process, but there are some issues.
 
-如果我们的服务是非常轻的，我们只需要一个转发层，我们是不是很麻烦。无论是配网关还是起一个webserver去转发，肯定都很麻烦。
+If our service is lightweight, needing only a forwarding layer can be troublesome. Whether it's setting up a gateway or starting a web server for forwarding, it can be quite complicated.
 
-此外，RPC服务大部分都是基于二进制的，而二进制正常在本地是没法测试的。因此我们的公司内都可能就会开发一种后台或者中间的Process让我们去测试。但这个的前提是你至少得把它部署到测试环境，所以还是没法在本地测试。
+Additionally, most RPC services are binary-based, which cannot be tested locally. Hence, our company might develop some background or intermediary processes to facilitate our testing. However, this requires deployment to a testing environment, thus still not allowing for local testing.
 
-总体来说，这两个问题的易用性比较低，且开发成本相对较高，因为要做一些重复劳动。
+Overall, these two issues make ease of use quite low and development costs relatively high due to repetitive tasks.
 
-## 二、全新升级的 Triple 协议
+## 2. The Newly Upgraded Triple Protocol
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_2.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_2.png)
 
-基于上边的两个问题，我们来介绍一下Triple协议。
+Addressing the above two problems, let's introduce the Triple protocol.
 
-先来说一下上一代协议，它产出的原因是什么。我们应该都知道Dubbo原来是Dubbo协议，它是基于tcp的，它有一个包。因为它的包的设计，导致了网关无法做一些特殊规则判断、过滤等操作。但也不是绝对的，如果你愿意牺牲性能把包完全解出来，组装回去再透传还是可以做到的，但一般大家都不太能接受。
+First, let’s mention why the previous generation protocol was developed. We all know Dubbo originally used the Dubbo protocol, which is TCP-based and has a specific package design. This design limits the gateway's ability to perform special rule judgments and filtering operations. While it is possible to sacrifice performance to fully unpack the package, reassemble it, and then transparently pass it through, most people are not willing to compromise on performance.
 
-所以我们就在想能不能把原数据和真正的包分开。现在我们有现成的HTTP，又有一个业界主流的gRPC，所以我们的目标就是兼容gRPC。因为gRPC目前都是用IDL，而IDL有一个问题，尤其在Java侧。因为大家都是写一些接口，定义一些包去实现，这样就会非常麻烦。Go侧就还好，因为大家已经习惯了这种开发模式。
+So we wondered if we could separate the original data from the actual package. We now have an existing HTTP and a mainstream gRPC, so our goal is to be compatible with gRPC. gRPC currently uses IDL, which poses problems, especially on the Java side. The complexity arises from writing interfaces and defining packages, making it cumbersome. The Go side is more manageable as developers are accustomed to this development model.
 
-所以我们开发了Triple协议，首先它兼容了gRPC，所以我们能实现和gRPC的完全互通。其次，我们兼容了自己定义接口的方法。虽然会损失一定的性能，但提升了一些易用性。而且RPC一般不是业务的瓶颈，大多数瓶颈还是在DB。
+Thus, we developed the Triple protocol, which is fully compatible with gRPC, allowing complete interoperability with gRPC. Additionally, we’ve introduced self-defined interface methods, sacrificing some performance for increased ease of use, as RPC is generally not the bottleneck for business; most bottlenecks are still found in the database.
 
-但还有个问题，虽然我们兼容了gRPC，但gRPC是基于TPC的，所以如果前端或者其他第三方系统只有HTTP，它还是接受不了我们的系统。
+However, there's one more issue: although we support gRPC, it is based on TPC, so if the front-end or other third-party systems only use HTTP, they still cannot accept our system.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_3.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_3.png)
 
-基于此，我们想推出一个全新的Triple协议。为了解决上述的所有问题，我们参考了gRPC、gRPC Web、通用HTTP等多种协议，做到浏览器访问，支持Streaming，还支持同时运行在 HTTP/1、HTTP/2 协议上。因为目前HTTP/3还没有大规模推广，未来也会支持HTTP/3。
+To address all of the above issues, we aim to launch a brand new Triple protocol. We reference various protocols such as gRPC, gRPC Web, and general HTTP to facilitate browser access, support Streaming, and run simultaneously on HTTP/1 and HTTP/2 protocols. Currently, HTTP/3 has not been widely adopted, but we will support HTTP/3 in the future.
 
-最终的设计实现是完全基于HTTP的，且对人类、开发调试友好。我们可以通过简单的浏览器访问或者curl访问，尤其是对unary RPC。此外，我们和gRPC是完全互通的，用HTTP的业务不用担心兼容性的问题，也不用担心签协议的问题。为了稳定性，我们只会采用业界流行的网络库，比如Java的netty、Go的基础的net包。
+The final design is entirely based on HTTP, making it friendly for both human users and developers. We can access it through simple browser requests or curl, especially for unary RPC. Furthermore, we have complete interoperability with gRPC, meaning HTTP traffic does not have to worry about compatibility issues or protocol signing issues. For stability, we only use popular industry networking libraries like Java's Netty or Go's basic net package.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_4.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_4.png)
 
-虽然Triple协议和gRPC协议都基于HTTP，但gRPC是基于HTTP/2的，而Triple是基于HTTP/1和HTTP/2的。
+Although both the Triple and gRPC protocols are based on HTTP, gRPC operates on HTTP/2, while Triple works on both HTTP/1 and HTTP/2.
 
-我们在进入gRPC的同时，我们为了易用性扩展了一些功能。比如请求里我们支持application Json，curl访问，此外上一版的协议，为了支持传统定义接口的方式，我们有一个二次序列化的过程。我们想在这里通过一个特殊的tag来决定我们的body的结构，解决二次序列化的问题。同时这个东西是可以扩展的，理论上HTTP的所有future我们在Triple协议上都可以实现，也可以拓展。
+As we entered the gRPC space, we extended some functionalities for ease of use. For instance, we support application JSON, curl access, and in the previous protocol, we supported a secondary serialization process for traditional interface definitions. Here, we aim to use a special tag to define the structure of our body, resolving the secondary serialization issue. Moreover, this feature is extensible, so theoretically, any future HTTP functionalities can be implemented within the Triple protocol.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_5.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_5.png)
 
-用了Triple协议之后，我们的开发流程也发生了改变。如果你不需要进行组装，或者没有外层的代理，可能你的接入流程就是从外部的请求浏览器、对方的服务器、curl、自己测试等直接到了server。
+With the introduction of the Triple protocol, our development process has also transformed. If you don’t require assembly or there’s no external proxy, your access process may go directly from external requests (browser, other servers, curl, internal testing) straight to the server.
 
-和其他的gRPC的通信也是没有问题的，流程就相当于少了一层。对于大多数用户，如果你不需要这个场景，其实是有很大的好处。
+Communication with other gRPC services poses no problem, and the process effectively eliminates a layer. For most users who don’t need this scenario, it brings substantial advantages.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_6.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_6.png)
 
-Triple协议因为最开始兼容gRPC，那个时候只基于HTTP/2，HTTP/2有Streaming的能力，所以它天然支持Streaming。但这里比较特殊的是，我们新版的协议在HTTP/1也支持了Stream，但仅支持了Server Stream。也就是客户端发一个，服务端发好几个回去，这个HTTP/1的Server Push实现的。
+The Triple protocol, at its inception, was compatible with gRPC, which was based on HTTP/2 and had Streaming capabilities, thus it inherently supports Streaming. Specially, our new protocol also allows Stream under HTTP/1, but it only supports Server Stream, meaning the client sends one request, and the server sends several responses back—this implements HTTP/1 Server Push.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_7.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_7.png)
 
-Client Stream和Bi Stream就没什么可说的了。但有一个特别的是，在Java侧没有Bi Stream，从编码上就没有，但从实现上是有的。
+Client Stream and Bi Stream are straightforward. However, notably, there is no Bi Stream on the Java side; it’s not present in the encoding yet is implemented.
 
-## 三、Triple 协议开发微服务
+## 3. Developing Microservices with Triple Protocol
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_8.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_8.png)
 
-目前Triple协议比较灵活的支持两种定义方式，分别是IDL定义和直接定义。直接定义支持同步、异步、手写。还有比较极端一点的，比如在自己定义接口的时候用IDL生成probuff的类，我们不定义它的service，只用它的接口也是没问题的，它会自动识别接口使用pb还是不使用pb。
+Currently, the Triple protocol flexibly supports two definition methods: IDL definition and direct definition. Direct definitions can be synchronous, asynchronous, or handwritten. Moreover, in a more extreme case, while defining an interface, one can utilize IDL to generate protobuf classes; not defining its service and only using its interface is also feasible—it will automatically recognize whether the interface uses protobuf or not.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_9.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_9.png)
 
-Server就是把它的务实现一下。上图是一个例子，我就直接拿了API的组装方式，真正的业务上可能是注解或者XML的方式。
+The server only needs to implement its service. The figure above provides an example; I employed the API assembly method directly— in true business settings, it could be achieved via annotations or XML.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_10.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_10.png)
 
-因为我们支持了HTTP这个标准的协议，理论上我们的测试就会变得很简单。
+By supporting the standard HTTP protocol, our testing theoretically simplifies significantly.
 
-因为我们支持gRPC，所以我们可以用gRPC curl去调用我们的服务。但前提是你得有反射服务，然后手动开启一下，它不是默认开启的。然后它就可以通过反射拿到接口的源数据，通过Json转成pb格式发过去。或者我们直接用Application Json的方式直接调过去。这里有一点比较特别的是在HTTP/1下我们也可以用Sream。
+Since we support gRPC, we can invoke our service using gRPC curl. However, there are prerequisites: you must have a reflective service and then manually enable it, as it is not enabled by default. It can retrieve interface source data via reflection and convert it to pb format in JSON. Alternatively, we can directly call it using Application JSON. Notably, under HTTP/1, we can also use Stream.
 
-另外，因为我们支持HTTP，理论上所有第三方的HTTP客户端都是可以调用的。然后我们的admin也可以进行测试，前提是你得把它注册上。
+Additionally, as we support HTTP, theoretically, any third-party HTTP client can call our service. Furthermore, our admin can conduct tests, but it must be registered first.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_11.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_11.png)
 
-调用端不管是POJO还是IDL，它们都没有本质的区别。
+For the calling client, whether using POJO or IDL, there is essentially no difference.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_12.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_12.png)
 
-现在我们有了Triple协议，但如果这个协议没有承载方也是行不通的。因此我们还得有一个框架，有一些服务治理才是我们的微服务。所以服务治理也是微服务中不可或缺的一部分。
+Now that we have the Triple protocol, it’s not operational without a host for the protocol. Therefore, we still need a framework with some service governance for our microservices. Service governance is also an indispensable part of microservices.
 
-## 四、Dubbo 为 Triple 协议带来治理能力
+## 4. Governance Capability of Dubbo for Triple Protocol
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_13.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_13.png)
 
-Triple的定位只是Dubbo里的其中一个协议，当然你也可以为了兼容性，用原来的Dubbo协议或者其他的协议。而且我们支持在同一个端口上开多个协议，可以按需选择。
+The positioning of Triple is just one of the protocols in Dubbo. Of course, for compatibility, you may continue to use the original Dubbo protocol or other protocols. Moreover, we support multiple protocols on the same port, enabling users to choose as needed.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_14.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_14.png)
 
-同时Dubbo 为 Triple 提供了多语言的实现。目前会在Rust、Go、Java、JS、node、Python这几部分实现官方的实现。这样用户就不用自己根据实验协议的spec去实现了。如果你有一些定制需求，比如内部的一些框架，你根据spec实现也是可以的。
+At the same time, Dubbo offers a multi-language implementation for Triple. Currently, the official implementations will be available in Rust, Go, Java, JS, Node, and Python. This means users do not need to implement it based on the experimental protocol specifications. If you have some customization needs, such as internal frameworks, you can implement it based on the specifications as well.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_15.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_15.png)
 
-Dubbo和服务框架集成的很好，理论上在开发流程中，尤其是在Java侧服务定义、服务治理、服务注册发现等都不用客户来操心，是开箱即用的。
+Dubbo integrates well with service frameworks. Theoretically, during the development process, especially on the Java side, service definitions, governance, and service registration/discovery do not require concern from clients; it's ready to use out of the box.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_16.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_16.png)
 
-Dubbo 提供了丰富的生态，第三方的生态包括Nacos、Zookeeper等等，我们不用创新，直接引入相应的包即可。
+Dubbo provides a rich ecosystem, including third-party ecosystems like Nacos and Zookeeper; we don’t need to innovate but directly introduce the necessary packages.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_17.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_17.png)
 
-这是我们使用Triple协议服务注册的例子。上面你可以选Nacos、Zookeeper、K8s，左边是一个Client和一个Server，这么调用。
+This shows an example of service registration using the Triple protocol. You can select Nacos, Zookeeper, or K8s above, with a Client and a Server on the left, making the call.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_18.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_18.png)
 
-我们在admin上看一下实现。这里提一句，我们的admin也在新版重构，是用Go实现的，大家可以期待一下。
+Let’s take a look at the implementation on the admin side. It’s worth mentioning that our admin has also been restructured in the new version, implemented using Go, so stay tuned.
 
-![dubbo-triple-协议](/imgs/blog/2023/8/apachecon-scripts/triple/img_19.png)
+![dubbo-triple-protocol](/imgs/blog/2023/8/apachecon-scripts/triple/img_19.png)
 
-我们经常会遇到灰度发布或者流量染色的需求。我们可以从admin上发一个tag下去，把一些实例打上tag，然后这个流量从入口就会挨个下去。
+We often encounter needs for gray release or traffic shaping. We can send a tag from the admin, label some instances, and the traffic will sequentially flow from the entrance. 
+

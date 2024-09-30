@@ -2,13 +2,14 @@
 aliases:
   - /en/overview/tasks/rate-limit/resilience4j/
   - /en/overview/tasks/rate-limit/resilience4j/
-description: "使用 Resilience4j 断路器、限流器、重试、隔离机制保护 Dubbo 应用"
+description: "Protect Dubbo applications using Resilience4j circuit breakers, rate limiters, retries, and isolation mechanisms"
 linkTitle: Resilience4j
-title: 使用 Resilience4j 断路器、限流器、重试、隔离机制保护 Dubbo 应用
-tags: ["Java", "Resilience4j", "限流降级"]
+title: Protect Dubbo Applications Using Resilience4j Circuit Breakers, Rate Limiters, Retries, and Isolation Mechanisms
+tags: ["Java", "Resilience4j", "Rate Limit Degradation"]
 date: 2023-12-14
 ---
 
-Resilience4j 提供了一组高阶函数（装饰器），包括断路器，限流器，重试，隔离，可以对任何的函数式接口，lambda表达式，或方法的引用进行增强，并且这些装饰器可以进行叠加。这样做的好处是，你可以根据需要选择特定的装饰器进行组合。
+Resilience4j provides a set of higher-order functions (decorators) including circuit breakers, rate limiters, retries, and isolation, which can enhance any functional interface, lambda expression, or method reference, and these decorators can be layered. The benefit of doing this is that you can choose specific decorators to combine as needed.
 
-关于 Resilience4j 与 Dubbo 集成的使用示例请参见 [dubbo-samples-resilience4j](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-resilience4j)
+For usage examples of integrating Resilience4j with Dubbo, please refer to [dubbo-samples-resilience4j](https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-resilience4j)
+

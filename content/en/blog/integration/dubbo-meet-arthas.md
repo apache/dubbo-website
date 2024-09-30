@@ -1,33 +1,33 @@
 ---
-title: "当Dubbo遇上Arthas：排查问题的实践"
-linkTitle: "当Dubbo遇上Arthas：排查问题的实践"
+title: "When Dubbo Meets Arthas: Problem Diagnosis in Practice"
+linkTitle: "When Dubbo Meets Arthas: Problem Diagnosis in Practice"
 date: 2019-02-02
-tags: ["生态", "Java"]
+tags: ["Ecosystem", "Java"]
 description: >
-    使用Alibaba开源的应用诊断利器Arthas来排查Dubbo应用的问题。
+    Using Alibaba's open-source application diagnosis tool Arthas to diagnose issues in Dubbo applications.
 ---
 
 
 
-Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用户。
+Apache Dubbo is Alibaba's open-source high-performance RPC framework with a large user base in China.
 
 * Github: https://github.com/apache/dubbo
-* 文档：http://dubbo.apache.org/zh-cn/
+* Documentation: http://dubbo.apache.org/en-us/
 
-Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。
+Arthas is Alibaba's open-source application diagnosis tool, which has gained over 6000 stars on Github within three months of its release in September.
 
 * Github: https://github.com/alibaba/arthas
-* 文档：https://arthas.aliyun.com/doc/
-* Arthas开源交流QQ群: 916328269
-* Arthas开源交流钉钉群: 21965291
+* Documentation: https://arthas.aliyun.com/doc/
+* Arthas open-source exchange QQ Group: 916328269
+* Arthas open-source exchange DingTalk Group: 21965291
 
-当Dubbo遇上Arthas，会碰撞出什么样的火花呢？下面来分享Arthas排查Dubbo问题的一些经验。
+What sparks will fly when Dubbo meets Arthas? Here are some experiences in diagnosing Dubbo issues using Arthas.
 
 ### dubbo-arthas-demo
 
-下面的排查分享基于这个`dubbo-arthas-demo`，非常简单的一个应用，浏览器请求从Spring MVC到Dubbo Client，再发送到Dubbo Server。
+The following diagnostic sharing is based on the `dubbo-arthas-demo`, a very simple application where browser requests go from Spring MVC to Dubbo Client and then to Dubbo Server.
 
-Demo里有两个spring boot应用，可以先启动`server-demo`，再启动`client-demo`。
+The demo includes two Spring Boot applications; start `server-demo` first, then `client-demo`.
 
 * https://github.com/hengyunabc/dubbo-arthas-demo
 
@@ -36,7 +36,7 @@ Demo里有两个spring boot应用，可以先启动`server-demo`，再启动`cli
    Browser           Dubbo Client          Dubbo Server
 ```
 
-Client端：
+Client side:
 
 ```java
 @RestController
@@ -51,7 +51,7 @@ public class UserController {
 	}
 ```
 
-Server端：
+Server side:
 
 ```java
 @Service(version = "1.0.0")
@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 	}
 ```
 
-### Arthas快速开始
+### Arthas Quick Start
 
 * https://arthas.aliyun.com/doc/install-detail.html
 
@@ -79,7 +79,7 @@ $ wget https://arthas.aliyun.com/arthas-boot.jar
 $ java -jar arthas-boot.jar
 ```
 
-启动后，会列出所有的java进程，选择1，然后回车，就会连接上`ServerDemoApplication`
+After starting, it will list all Java processes; select 1 and press enter to connect to `ServerDemoApplication`.
 
 ```bash
 $ java -jar arthas-boot.jar
@@ -105,16 +105,15 @@ time: 2018-12-05 16:23:52
 $
 ```
 
-
-### Dubbo线上服务抛出异常，怎么获取调用参数？
+### How to Get Call Parameters When Dubbo Online Service Throws Exceptions?
 
 * https://arthas.aliyun.com/doc/watch.html
 
-当线上服务抛出异常时，最着急的是什么参数导致了抛异常？
+When an online service throws an exception, the most urgent question is what parameters caused the exception.
 
-在demo里，访问 http://localhost:8080/user/0 ，`UserServiceImpl`就会抛出一个异常，因为user id不合法。
+In the demo, access http://localhost:8080/user/0, and `UserServiceImpl` will throw an exception because the user id is illegal.
 
-在Arthas里执行 `watch com.example.UserService * -e -x 2 '{params,throwExp}'` ，然后再次访问，就可以看到watch命令把参数和异常都打印出来了。
+In Arthas, execute `watch com.example.UserService * -e -x 2 '{params,throwExp}'`, then access again to see the parameters and exceptions printed out by the watch command.
 
 ```
 $ watch com.example.UserService * -e -x 2 '{params,throwExp}'
@@ -134,15 +133,15 @@ ts=2018-12-05 16:26:44; [cost=3.905523ms] result=@ArrayList[
 	at com.alibaba.dubbo.rpc.filter.ExceptionFilter.invoke(ExceptionFilter.java:61)
 ```
 
-### 怎样线上调试Dubbo服务代码?
+### How to Dynamically Debug Dubbo Service Code Online?
 
 * https://arthas.aliyun.com/doc/redefine.html
 
-在本地开发时，可能会用到热部署工具，直接改代码，不需要重启应用。但是在线上环境，有没有办法直接动态调试代码？比如增加日志。
+During local development, hot deployment tools may be used to modify code without restarting the application. However, is there a way to debug code dynamically in a live environment, such as adding logs?
 
-在Arthas里，可以通过`redefine`命令来达到线上不重启，动态更新代码的效果。
+In Arthas, you can use the `redefine` command to update the code dynamically without restarting the application.
 
-比如我们修改下`UserServiceImpl`，用`System.out`打印出具体的`User`对象来：
+For example, modify `UserServiceImpl` to print the specific `User` object using `System.out`:
 
 ```java
 	public User findUser(int id) {
@@ -159,26 +158,26 @@ ts=2018-12-05 16:26:44; [cost=3.905523ms] result=@ArrayList[
 	}
 ```
 
-本地编绎后，把`server-demo/target/classes/com/example/UserServiceImpl.class`传到线上服务器，然后用`redefine`命令来更新代码：
+After local compilation, upload `server-demo/target/classes/com/example/UserServiceImpl.class` to the online server, and use the `redefine` command to update the code:
 
 ```
 $ redefine -p /tmp/UserServiceImpl.class
 redefine success, size: 1
 ```
 
-这样子更新成功之后，访问 http://localhost:8080/user/1 ，在`ServerDemoApplication`的控制台里就可以看到打印出了user信息。
+After the update is successful, accessing http://localhost:8080/user/1 will print the user information in the `ServerDemoApplication` console.
 
-### 怎样动态修改Dubbo的logger级别?
+### How to Dynamically Change the Logger Level of Dubbo?
 
 * https://arthas.aliyun.com/doc/ognl.html
 * https://arthas.aliyun.com/doc/sc.html
 * https://commons.apache.org/dormant/commons-ognl/language-guide.html
 
-在排查问题时，需要查看到更多的信息，如果可以把logger级别修改为`DEBUG`，就非常有帮助。
+When troubleshooting issues, the ability to see more information is very helpful; it's beneficial to change the logger level to `DEBUG`.
 
-`ognl`是apache开源的一个轻量级表达式引擎。下面通过Arthas里的`ognl`命令来动态修改logger级别。
+`ognl` is a lightweight expression engine open-sourced by Apache. The following example uses the `ognl` command in Arthas to dynamically change the logger level.
 
-首先获取Dubbo里`TraceFilter`的一个logger对象，看下它的实现类，可以发现是log4j。
+First, obtain a logger object for `TraceFilter` in Dubbo and see its implementation class, which is log4j.
 
 ```bash
 $ ognl '@com.alibaba.dubbo.rpc.protocol.dubbo.filter.TraceFilter@logger.logger'
@@ -188,7 +187,7 @@ $ ognl '@com.alibaba.dubbo.rpc.protocol.dubbo.filter.TraceFilter@logger.logger'
 ]
 ```
 
-再用`sc`命令来查看具体从哪个jar包里加载的：
+Then use the `sc` command to see which jar is loaded:
 
 ```bash
 $ sc -d org.apache.log4j.Logger
@@ -217,9 +216,9 @@ $ sc -d org.apache.log4j.Logger
 Affect(row-cnt:1) cost in 126 ms.
 ```
 
-**可以看到log4j是通过slf4j代理的。**
+**It can be seen that log4j is proxied through slf4j.**
 
-那么通过`org.slf4j.LoggerFactory`获取`root` logger，再修改它的level：
+Then, get the `root` logger using `org.slf4j.LoggerFactory` and change its level:
 
 ```
 $ ognl '@org.slf4j.LoggerFactory@getLogger("root").setLevel(@ch.qos.logback.classic.Level@DEBUG)'
@@ -227,15 +226,15 @@ null
 $ ognl '@org.slf4j.LoggerFactory@getLogger("root").getLevel().toString()'
 @String[DEBUG]
 ```
-可以看到修改之后，`root` logger的level变为`DEBUG`。
+It can be seen that after modification, the `root` logger level changed to `DEBUG`.
 
-### 怎样减少测试小姐姐重复发请求的麻烦?
+### How to Reduce the Trouble of Repeatedly Sending Requests from Testers?
 
 * https://arthas.aliyun.com/doc/tt.html
 
-在平时开发时，可能需要测试小姐姐发请求过来联调，但是我们在debug时，可能不小心直接跳过去了。这样子就尴尬了，需要测试小姐姐再发请求过来。
+During development, testers may need to send requests for joint debugging. However, while debugging, if we accidentally skip this, it can be awkward and require the testers to send requests again.
 
-Arthas里提供了`tt`命令，可以减少这种麻烦，可以直接重放请求。
+Arthas provides the `tt` command to reduce this hassle, allowing direct replay of requests.
 
 ```bash
 $ tt -t com.example.UserServiceImpl findUser
@@ -248,7 +247,7 @@ Affect(class-cnt:1 , method-cnt:1) cost in 145 ms.
  1002       2018-12-05 17:48:11    90.324335     true       false     0x3233483    UserServiceImpl    findUser
 ```
 
-上面的`tt -t`命令捕获到了3个请求。然后通过`tt --play`可以重放请求：
+The above `tt -t` command captured 3 requests. Then, you can replay the request with `tt --play`:
 
 ```bash
 $ tt --play -i 1000
@@ -268,13 +267,13 @@ Time fragment[1000] successfully replayed.
 Affect(row-cnt:1) cost in 4 ms.
 ```
 
-### Dubbo运行时有哪些Filter? 耗时是多少?
+### What Filters Are There in Dubbo Runtime? How Much Time Do They Take?
 
 * https://arthas.aliyun.com/doc/trace.html
 
-Dubbo运行时会加载很多的Filter，那么一个请求会经过哪些Filter处理，Filter里的耗时又是多少呢？
+Dubbo loads many filters at runtime, so which filters will a request go through, and what is the time taken by each filter?
 
-通过Arthas的`trace`命令，可以很方便地知道Filter的信息，可以看到详细的调用栈和耗时。
+Using Arthas's `trace` command, you can easily obtain filter information and see detailed call stacks and timings.
 
 ```bash
 $ trace com.alibaba.dubbo.rpc.Filter *
@@ -296,12 +295,12 @@ Affect(class-cnt:19 , method-cnt:59) cost in 1441 ms.
                         +---[0.01481ms] com.alibaba.dubbo.rpc.Invocation:getMethodName()
 ```
 
-### Dubbo动态代理是怎样实现的?
+### How Does Dubbo Dynamic Proxy Work?
 
 * https://arthas.aliyun.com/doc/jad.html
 * com.alibaba.dubbo.common.bytecode.Wrapper
 
-通过Arthas的`jad`命令，可以看到Dubbo通过javaassist动态生成的Wrappr类的代码：
+Using Arthas's `jad` command, you can see the code for the Wrapper class dynamically generated by Dubbo through javaassist:
 
 ```java
 $ jad com.alibaba.dubbo.common.bytecode.Wrapper1
@@ -340,12 +339,11 @@ implements ClassGenerator.DC {
         }
 ```
 
-### 获取Spring context
+### Accessing Spring Context
 
-除了上面介绍的一些排查技巧，下面分享一个获取Spring Context，然后“为所欲为”的例子。
+In addition to the diagnostic techniques introduced above, here's an example of accessing the Spring Context and "doing whatever you want."
 
-在Dubbo里有一个扩展`com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory`，把Spring Context保存到了里面。
-因此，我们可以通过`ognl`命令获取到。
+In Dubbo, there is an extension `com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory` that saves the Spring Context. Therefore, we can obtain it through the `ognl` command.
 
 ```bash
 $ ognl '#context=@com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory@contexts.iterator.next, #context.getBean("userServiceImpl").findUser(1)'
@@ -355,13 +353,14 @@ $ ognl '#context=@com.alibaba.dubbo.config.spring.extension.SpringExtensionFacto
 ]
 ```
 
-* `SpringExtensionFactory@contexts.iterator.next` 获取到`SpringExtensionFactory`里保存的spring context对象
-* `#context.getBean("userServiceImpl").findUser(1)` 获取到`userServiceImpl`再执行一次调用
+* `SpringExtensionFactory@contexts.iterator.next` gets the spring context object saved in `SpringExtensionFactory`
+* `#context.getBean("userServiceImpl").findUser(1)` gets `userServiceImpl` and executes a call
 
-只要充分发挥想像力，组合Arthas里的各种命令，可以发挥出神奇的效果。
+By fully utilizing imagination and combining various commands in Arthas, you can achieve magical effects.
 
-## 总结
+## Summary
 
-本篇文章来自杭州Dubbo Meetup的分享《当DUBBO遇上Arthas - 排查问题的实践》，希望对大家线上排查Dubbo问题有帮助。
+This article is derived from a sharing session at the Hangzhou Dubbo Meetup titled "When DUBBO Meets Arthas - Problem Diagnosis in Practice," hoping to assist everyone in diagnosing Dubbo issues online.
 
-分享的PDF可以在 https://github.com/alibaba/arthas/issues/327 里下载。
+The shared PDF can be downloaded from https://github.com/alibaba/arthas/issues/327.
+

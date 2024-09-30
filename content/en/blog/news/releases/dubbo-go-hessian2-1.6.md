@@ -6,48 +6,48 @@ description: >
     What's new in Dubbo-go-hessian2 v1.6.0
 ---
 
-## 1. 增加缓存优化
+## 1. Cache Optimization
 
-dubbo-go-hessian2 在解析数据的数据大量使用到了 struct 的结构信息，这部分信息可以缓存起来反复利用，使得性能提升了一倍。优化过程记录可以详细阅读[《记一次对 dubbo-go-hessian2 的性能优化》](https://mp.weixin.qq.com/s/ouVxldQAt0_4BET7srjJ6Q).
+dubbo-go-hessian2 extensively uses struct type information for data parsing, and this information can be cached and reused, resulting in a twofold performance improvement. For detailed optimization process records, refer to [“Performance Optimization of dubbo-go-hessian2”](https://mp.weixin.qq.com/s/ouVxldQAt0_4BET7srjJ6Q).
 
-对应 pr [#179](https://github.com/apache/dubbo-go-hessian2/pull/179)，作者 [micln](https://github.com/micln)。
+Corresponding PR [#179](https://github.com/apache/dubbo-go-hessian2/pull/179), author [micln](https://github.com/micln).
 
-## 2. string 解析性能优化
+## 2. String Parsing Performance Optimization
 
-由于 hessian （ dubbo 序列化协议，下称：hessian ）对 string 的定义是16 bit 的 unicode 的 UTF-8 表示形式，字符长度表示是16 bit 的字符数。这是仅针对 java 制定的规范，java 中一个字符是16 bit，对应到 UTF-16. hessian 库也是对每一个字符进行转码序列化。但 golang 里面字符是和 UTF-8 对应的，dubbo-go-hessian2 里面的 rune 是 32bit，和 unicode一一映射。对于 U+10000 ~ U+10FFFF 的字符，需按照 UTF16 的规范，将字符转换为 2 个字节的代理字符，再做转换，才能和 java 的序列化方式对应起来。
+Due to the definition of string in Hessian (Dubbo serialization protocol referred to as Hessian), which represents it as a 16-bit Unicode UTF-8 format, the character length is represented as a 16-bit character count. This specification was established only for Java, where a character is 16 bits corresponding to UTF-16. The Hessian library also serializes each character. However, in Go, characters correspond to UTF-8, and the rune in dubbo-go-hessian2 is 32 bits, mapping one-to-one with Unicode. For character ranges U+10000 to U+10FFFF, they need to be converted to two-byte surrogate pairs to align with Java's serialization method.
 
-原来不管是编码还是解析都是一个字符一个字符处理，特别是解析的时候，从流里面一个字节一个字节读取并组装成 rune，然后再转换为 string，这样效率特别低。我们的优化方案是，批次读取字节流到 buffer 中，对 buffer 进行解析转为 UTF-8 数组，并统计字符数量。其中需要对代理对字符将其转换为标准 UTF-8 子节数组。如果统计的字符数量不足，再进一步读取流种的数据进行解析。通过此方式提升一倍的解析效率。
+Originally, both encoding and parsing processes handled characters one by one, especially during parsing, where each byte was read from the stream and constructed into a rune before being converted to a string, leading to inefficiencies. Our optimization strategy is to batch read byte streams into a buffer, parse the buffer into a UTF-8 array, and count the characters, converting surrogate pairs into standard UTF-8 byte arrays. If the character count is insufficient, more data is read from the stream for parsing. This method enhances parsing efficiency twofold.
 
-对应 pr [#188](https://github.com/apache/dubbo-go-hessian2/pull/188)，作者 [zonghaishang](https://github.com/zonghaishang)。
+Corresponding PR [#188](https://github.com/apache/dubbo-go-hessian2/pull/188), author [zonghaishang](https://github.com/zonghaishang).
 
-## 3. 解析忽略不存在的字段
+## 3. Ignore Non-Existent Fields During Parsing
 
-hessian 库在解析数据的时候，对于一个 class 字段，如果不存在，则直接忽略掉。但 v1.6.0 版本之前 dubbo-go-hessian2 解析数据，如果遇到不存在的字段，会返回 error。从 v1.6.0 开始，与 hessian 一样，忽略不存在的字段。**因为这是一个特性的变更，所以升级的同学一定要注意了。**
+The Hessian library ignores class fields that do not exist when parsing data. However, prior to version 1.6.0, dubbo-go-hessian2 would return an error when encountering non-existent fields. Starting with version 1.6.0, it will ignore these fields just like Hessian. **Due to this being a feature change, users upgrading should be aware.**
 
-对应 pr [#201](https://github.com/apache/dubbo-go-hessian2/pull/201)，作者 [micln](https://github.com/micln) & [fangyincheng](https://github.com/fangyincheng)。
+Corresponding PR [#201](https://github.com/apache/dubbo-go-hessian2/pull/201), authors [micln](https://github.com/micln) & [fangyincheng](https://github.com/fangyincheng).
 
-## 4. 解决浮点数精度丢失问题
+## 4. Resolve Floating Point Precision Loss Issues
 
-在对 float32 类型进行序列化时，我们一律强制转换为 float64 再进行序列化操作。由于浮点数的精度问题，在这个转换过程中可能出现小数点后出现多余的尾数，例如 (float32)99.8-->(float64)99.80000305175781。
+When serializing `float32`, we forcibly convert to `float64` before serialization. Due to floating-point precision issues, excess decimal points may occur in this conversion, e.g., `(float32)99.8--> (float64)99.80000305175781`.
 
-1.6.0 版本对 float32 的序列化进行了优化：
+Version 1.6.0 optimized `float32` serialization:
 
-- 如果小数尾数小于 3 位，根据 hessian2 协议序列化为 double 32-bit 格式
-- 否则先转换为 string 类型，再转换为 float64 类型，这样做可以避免由于浮点数精度问题产生多余的尾数，最后对 float64 进行序列化。
+- If the decimal tail is less than 3 digits, serialize to double 32-bit format according to Hessian2 protocol.
+- Otherwise, convert to string and then to float64 to avoid excess decimal points, and finally serialize the float64.
 
-虽然对 float32 类型进行了优化，但是依然建议使用浮点数的时候优先使用 float64 类型。
+Although optimizations have been made for `float32`, it is still recommended to prefer `float64` for floating-point numbers.
 
-对应 pr [#196](https://github.com/apache/dubbo-go-hessian2/pull/196)，作者 [willson-chen](https://github.com/willson-chen)。
+Corresponding PR [#196](https://github.com/apache/dubbo-go-hessian2/pull/196), author [willson-chen](https://github.com/willson-chen).
 
-## 5. 解决 attachment 空值丢失问题
+## 5. Resolve Attachment Null Value Loss Issue
 
-dubbo 请求中包含 attachment 信息，之前如果 attachment 里面含有如 `"key1":""`，这种 value 为空的情况，解析出来的结果会直接丢失这个属性 key1 ，v1.6.0 修复了此问题，现在解析出来的 attachment 会正确解析出空 value 的属性。
+The Dubbo request includes attachment information. Previously, if the attachment contained a case like `"key1":""`, this property would be lost upon parsing. Version 1.6.0 fixed this, and now the parsed attachment correctly acknowledges empty value properties.
 
-对应 pr [#191](https://github.com/apache/dubbo-go-hessian2/pull/191)，作者 [champly](https://github.com/champly)。
+Corresponding PR [#191](https://github.com/apache/dubbo-go-hessian2/pull/191), author [champly](https://github.com/champly).
 
-## 6. 支持 ‘继承’ 和忽略冗余字段
+## 6. Support 'Inheritance' and Ignore Redundant Fields
 
-由于 go 没有继承的概念，所以在之前的版本，Java 父类的字段不被 dubbo-go-hessian2 所支持。新版本中，dubbo-go-hessian2 将Java来自父类的字段用匿名结构体对应，如：
+Since Go does not have an inheritance concept, in previous versions, fields from Java parent classes were not supported by dubbo-go-hessian2. In the new version, dubbo-go-hessian2 maps Java fields from parent classes using anonymous structs, like:
 
 ```go
 type Dog struct {
@@ -57,6 +57,6 @@ type Dog struct {
 }
 ```
 
-同时，就像 json 编码中通过 immediately 可以在序列化中忽略该字段，同理，通过 hessian:"-" 用户也可以让冗余字段不参与 hessian 序列化。
+Also, similar to how JSON encoding can ignore a field using "immediately", in Hessian, users can also exclude redundant fields from serialization by using `hessian:"-"`.
 
-对应pr [#154](https://github.com/apache/dubbo-go-hessian2/pull/154)，作者 [micln](https://github.com/micln)
+Corresponding PR [#154](https://github.com/apache/dubbo-go-hessian2/pull/154), author [micln](https://github.com/micln)

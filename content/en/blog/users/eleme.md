@@ -1,57 +1,49 @@
 ---
-title: "饿了么全站成功升级 Dubbo3 "
-linkTitle: "饿了么"
+title: "Ele.me Successfully Upgrades to Dubbo3"
+linkTitle: "Ele.me"
 date: 2023-01-15
-tags: ["用户案例"]
+tags: ["User Cases"]
 weight: 3
 ---
-### 升级目标
+### Upgrade Goals
 ![elem-arc](/imgs/user/eleme/elem-arc.png)
 
-这里是饿了么的的基本部署架构图。
+Here is the basic deployment architecture diagram of Ele.me.
 
-在升级之前，饿了么的微服务框架采用的是 HSF2，跨单元的 RPC 调用是通过 proxy 中转代理，在这个过程中 proxy 所承载的机器数和流量迅速增长，比较突出的一点是 proxy 在订阅所有的地址数据后资源消耗和稳定性都收到严峻挑战。
+Before the upgrade, Ele.me's microservice framework used HSF2, and inter-unit RPC calls were routed through a proxy. During this time, the number of machines and traffic supported by the proxy increased rapidly. Notably, after subscribing to all address data, the resource consumption and stability of the proxy faced severe challenges.
 
-通过全站升级 Dubbo3，业务线期望达到两个目标：
-* 将地址模型切换到应用级服务发现大幅减轻中心化节点和消费端节点的资源消耗压力。
-* 以应用级服务发现架构下的全局共享注册中心取代 proxy 模式，实现跨单元节点通信直连。
+By upgrading the entire site to Dubbo3, the business line aims to achieve two goals:
+* Switch the address model to application-level service discovery, greatly reducing the resource consumption pressure on centralized nodes and consumer nodes.
+* Replace the proxy model with a globally shared registration center under the application-level service discovery architecture, achieving direct communication between inter-unit nodes.
 
-
-### 升级过程
+### Upgrade Process
 ![eleme-upgrade1](/imgs/user/eleme/elem-upgrade1.png)
 
-不论是针对 Dubbo2 还是 HSF2，我们都做了全面的 API 兼容，因此 Dubbo3 基本可以做到零改造升级，并且每个应用都是独立透明升级，不需要关心它的上下游应用的升级状态，因为 Dubbo3 升级之后不论是从地址发现模型还是协议的默认行为都保持与 2.0 版本兼容，用户可以在任意时间点对任意应用按需切换 Dubbo3 行为。
-如右图所示，我们模拟展示了饿了么集群 Dubbo3 升级过程的一个中间状态，其中灰色标记的是老版本 HSF2 应用，橙色和绿色标记的是已经升级 Dubbo3 的应用，橙色部分的应用及其调用链路代表不但已经升级到 Dubbo3，同时也完成了 Dubbo3 行为的切换，在这里是指已经切换到了应用级地址模型。这里的升级过程主要为了说明 Dubbo3 框架升级的兼容性和独立性。
+Whether for Dubbo2 or HSF2, we have ensured comprehensive API compatibility, allowing for almost zero transformation upgrades to Dubbo3. Each application can upgrade independently and transparently, without concerning the upgrade status of upstream or downstream applications. After upgrading to Dubbo3, the address discovery model and the default behavior of the protocol remain compatible with version 2.0, allowing users to switch Dubbo3 behavior on-demand for any application at any time.
+As shown in the figure on the right, we simulated a mid-state of the Dubbo3 upgrade process for the Ele.me cluster, where the gray markers indicate the old version HSF2 applications, and the orange and green markers indicate applications that have already upgraded to Dubbo3. The applications represented in orange and their invocation chains indicate upgrades to Dubbo3 and switching to application-level address model. This upgrade process primarily illustrates the compatibility and independence of the Dubbo3 framework.
 
-接下来，我们详细分析一下橙色部分节点往 Dubbo3 应用级发现迁移的具体过程。
+Next, we'll analyze the detailed process of the orange-marked nodes migrating to Dubbo3 application-level discovery.
 
 ![elem-upgrade-provider](/imgs/user/eleme/elem-upgrade-provider.png)
 
-首先看 Provider 侧，服务提供者在升级 Dubbo3 后会默认保持双注册行为，即同时注册接口级地址和应用级地址到注册中心，一方面保持兼容，另一方面为未来消费端迁移做好准备。双注册的开关可通过 -Ddubbo.application.register-mode=al/interface/interface控制，我们推荐保持双注册的默认行为以减少后续迁移成本。
+First, looking at the provider side, after upgrading to Dubbo3, service providers will by default maintain a dual registration behavior, registering both interface-level addresses and application-level addresses to the registration center. This maintains compatibility and prepares for future consumer-side migration. The dual registration switch can be controlled via -Ddubbo.application.register-mode=al/interface/interface. We recommend keeping the default dual registration behavior to reduce subsequent migration costs.
 
-大家可能担心双注册给注册中心带来的存储压力，实际上在应用级服务发现模型下这并不是一个问题，因为大家如果回想前面我们对应用级服务发现工作原理的分析，注册地址已经被大幅精简，根据我们实际推算，每多注册一条应用级服务发现 URL 地址，只会增加 0.1% ～ 1% 的额外开销。
+Some may worry about the storage pressure on the registration center caused by dual registration; however, this is not an issue under the application-level service discovery model, as we have significantly streamlined the registration addresses. According to our actual calculations, each additional application-level service discovery URL registered will only increase overhead by 0.1% to 1%.
 
 ![elem-upgrade-consumer](/imgs/user/eleme/elem-upgrade-consumer.png)
 
-与提供端类似，要实现平滑迁移消费端也要经历双订阅的过程，流程上就不再赘述。消费端的双订阅行为也可通过规则或开关进行动态调整，控制消费端的消费的某个服务、应用迁移到应用级地址模型；除此之外，Dubbo3 还内置了自动决策机制，在发现应用级地址可用的情况下即会自动完成切换，并且这个行为是默认的。
+Similar to the provider side, the consumer side must also undergo a dual subscription process for smooth migration, which we will not elaborate on further. The consumer's dual subscription behavior can also be dynamically adjusted through rules or switches to control the migration of a certain service or application to the application-level address model. Additionally, Dubbo3 has a built-in automatic decision mechanism that will automatically complete the switch when application-level addresses are available, and this behavior is default.
 
 以下是消费端双订阅时的选址流程：
 
 ![elem-upgrade-consumer1](/imgs/user/eleme/elem-upgrade-consumer1.png)
 
-### 升级效果
+### Upgrade Effects
 
 ![elem-result](/imgs/user/eleme/elem-result.png)
 
-饿了么成功升级 Dubbo3 及应用级服务发现模型，实现了去 proxy 架构的目标，在我们关心的服务发现数据链路上：
-* 数据注册与订阅的传输量下降 90%
-* 注册中心数据存储的总体资源占用下降 90%
-* 消费端服务框架自身的常驻内存消耗下降达 50%
-集群总体的稳定性、性能都得到明显提升，也为未来容量扩展做好准备。
-
-
-
-
-
-
-
+Ele.me successfully upgraded to Dubbo3 and the application-level service discovery model, achieving the goal of eliminating the proxy architecture. In the data link of service discovery we care about:
+* Data registration and subscription transmission reduced by 90%
+* Overall resource consumption of the registration center’s data storage decreased by 90%
+* Permanent memory consumption of the consumer framework itself decreased by 50%
+The overall stability and performance of the cluster have significantly improved, also preparing for future capacity expansion.
