@@ -5,70 +5,69 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/local-mock/
-description: 了解如何在 Dubbo 中利用本地伪装实现服务降级
-linkTitle: 服务降级
-title: 服务讲解（本地伪装）
+description: Learn how to achieve service downgrade using local mocking in Dubbo
+linkTitle: Service Downgrade
+title: Service Explanation (Local Mock)
 type: docs
 weight: 10
 ---
 
-## 特性说明
+## Feature Description
 
-在 Dubbo3 中有一种机制可以实现轻量级的服务降级，也就是本地伪装。
+In Dubbo3, there is a mechanism for lightweight service downgrading, that is, local mocking.
 
-Mock 是 Stub 的一个子集，便于服务提供方在客户端执行容错逻辑，因经常需要在出现 RpcException (比如网络失败，超时等)时进行容错，而在出现业务异常(比如登录用户名密码错误)时不需要容错，
-如果用 Stub，可能就需要捕获并依赖 RpcException 类，而用 Mock 就可以不依赖 RpcException，因为它的约定就是只有出现 RpcException 时才执行。
+Mock is a subset of Stub, facilitating service providers to implement fault tolerance logic on the client side. It is often necessary to handle exceptions during `RpcException` (e.g., network failures, timeouts), while fault tolerance is not needed for business exceptions (e.g., login username/password errors). Using Stub may require capturing and depending on `RpcException`, whereas Mock does not, since its agreement is to only execute when `RpcException` occurs.
 
-## 使用场景
+## Usage Scenarios
 
-本地伪装常被用于服务降级。比如某验权服务，当服务提供方全部挂掉后，假如此时服务消费方发起了一次远程调用，那么本次调用将会失败并抛出一个 `RpcException` 异常。为了避免出现这种直接抛出异常的情况出现，那么客户端就可以利用本地伪装来提供 Mock 数据返回授权失败。
+Local mocking is often used for service downgrading. For example, if an authentication service is completely down, and a service consumer initiates a remote call, this call will fail and throw an `RpcException`. To avoid such situations where exceptions are directly thrown, the client can use local mocking to return mock data indicating authorization failure.
 
-其他使用场景包括：
-- 某服务或接口负荷超出最大承载能力范围，需要进行降级应急处理，避免系统崩溃
-- 调用的某非关键服务或接口暂时不可用时，返回模拟数据或空，业务还能继续可用
-- 降级非核心业务的服务或接口，腾出系统资源，尽量保证核心业务的正常运行
-- 某上游基础服务超时或不可用时，执行能快速响应的降级预案，避免服务整体雪崩
+Other usage scenarios include:
+- When a service or interface exceeds its maximum load, needing emergency downgrade processing to prevent system crashes.
+- When a non-critical service or interface is temporarily unavailable, returning mock data or empty, allowing the business to remain operational.
+- Downgrading non-core business services or interfaces to free up system resources, ensuring core business operations run normally.
+- When an upstream foundational service times out or is unavailable, executing a rapid response downgrade plan to avoid an overall service avalanche.
 
-## 使用方式
+## Usage Method
 
-完整示例源码请参见 [dubbo-samples-mock](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-mock)
+For complete example source code, please refer to [dubbo-samples-mock](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-mock)
 
-### 开启 Mock 配置
+### Enable Mock Configuration
 
-在 Spring XML 配置文件中按以下方式配置：
+In the Spring XML configuration file, configure as follows:
 
 ```xml
 <dubbo:reference interface="com.foo.BarService" mock="true" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:reference interface="com.foo.BarService" mock="com.foo.BarServiceMock" />
 ```
 
-在工程中提供 Mock 实现 [^2]：
-在 interface 旁放一个 Mock 实现，它实现 BarService 接口，并有一个无参构造函数。同时，如果没有在配置文件中显式指定 Mock 类的时候，那么需要保证 Mock 类的全限定类名是 `原全限定类名+Mock` 的形式，例如 `com.foo.BarServiceMock`，否则将会 Mock 失败。
+Provide Mock implementation in the project [^2]:
+Place a Mock implementation next to the interface that implements the BarService interface and has a no-argument constructor. If the Mock class is not explicitly specified in the configuration file, ensure the fully qualified class name of the Mock class is in the form of `original qualified class name + Mock`, e.g., `com.foo.BarServiceMock`, otherwise the Mock will fail.
 ```java
 package com.foo;
 public class BarServiceMock implements BarService {
     public String sayHello(String name) {
-        // 你可以伪造容错数据，此方法只在出现RpcException时被执行
-        return "容错数据";
+        // You can fabricate fault tolerance data; this method is only executed if RpcException occurs
+        return "Fault Tolerance Data";
     }
 }
 ```
 
-### 使用 return 关键字 Mock 返回值 
+### Use return Keyword to Mock Return Value 
 
-使用 `return` 来返回一个字符串表示的对象，作为 Mock 的返回值。合法的字符串可以是：
-- *empty*：代表空，返回基本类型的默认值、集合类的空值、自定义实体类的空对象，如果返回值是一个实体类，那么此时返回的将会是一个属性都为默认值的空对象而不是 `null`。
-- *null*：返回 `null`
-- *true*：返回 `true`
-- *false*：返回 `false`
-- *JSON 字符串*：返回反序列化 JSON 串后所得到的对象
+Use `return` to return a string representation of an object as the Mock return value. Valid strings can include:
+- *empty*: Represents empty, returning the default value for primitive types, empty for collections, or an empty object for custom entity classes. If the return value is an entity class, it will return an object with all properties set to default values instead of `null`.
+- *null*: Returns `null`
+- *true*: Returns `true`
+- *false*: Returns `false`
+- *JSON String*: Returns the object obtained after deserializing the JSON string
 
-举个例子，如果服务的消费方经常需要 try-catch 捕获异常，如：
+For example, if the service consumer frequently needs to try-catch exceptions, like:
 
 ```java
 public class DemoService {
@@ -86,77 +85,77 @@ public class DemoService {
 }
 ```
 
-那么请考虑改为 Mock 实现，并在 Mock 实现中 `return null`。如果只是想简单的忽略异常，在 `2.0.11` 以上版本可用：
+Consider changing this to a Mock implementation and returning `null` in the Mock implementation. If you simply want to ignore the exception, in versions `2.0.11` and above, you can use:
 
 ```xml
 <dubbo:reference interface="com.foo.BarService" mock="return null" />
 ```
 
-### 使用 throw 关键字 Mock 抛出异常
+### Use throw Keyword to Mock Throw Exceptions
 
-使用 `throw` 来返回一个 Exception 对象，作为 Mock 的返回值。
+Use `throw` to return an Exception object as the Mock return value.
 
-当调用出错时，抛出一个默认的 RPCException:
+When an error occurs during the call, throw a default `RPCException`:
 
 ```xml
 
 <dubbo:reference interface="com.foo.BarService" mock="throw"/>
 ```
 
-当调用出错时，抛出指定的 Exception：
+When an error occurs during the call, throw a specified Exception:
 
-自定义异常必须拥有一个入参为 `String` 的构造函数，该构造函数将用于接受异常信息。
+Custom exceptions must have a constructor with a `String` parameter that will be used to accept the exception message.
 ```xml
 
 <dubbo:reference interface="com.foo.BarService" mock="throw com.foo.MockException"/>
 ```
 
-### 使用 force 和 fail 关键字来配置 Mock 的行为
+### Use force and fail Keywords to Configure Mock Behavior
 
-`force:` 代表强制使用 Mock 行为，在这种情况下不会走远程调用。
+`force:` represents enforcing the use of Mock behavior, in which case remote calls will not be made.
 
-`fail:` 与默认行为一致，只有当远程调用发生错误时才使用 Mock 行为。也就是说，配置的时候其实是可以不使用 `fail` 关键字的，直接使用 `throw` 或者 `return` 就可以了。 
+`fail:` behaves as default, only using Mock behavior when remote calls fail. That is, it is possible not to use the `fail` keyword in the configuration, directly using `throw` or `return`.
 
-`force:` 和 `fail:` 都支持与 `throw` 或者 `return` 组合使用。
+`force:` and `fail:` can both be combined with `throw` or `return`.
 
-强制返回指定值：
+Force returning a specified value:
 
 ```xml
 
 <dubbo:reference interface="com.foo.BarService" mock="force:return fake"/>
 ```
 
-强制抛出指定异常：
+Force throwing a specified exception:
 
 ```xml
 
 <dubbo:reference interface="com.foo.BarService" mock="force:throw com.foo.MockException"/>
 ```
 
-调用失败时返回指定值：
+Return a specified value on call failure:
 ```xml
 
 <dubbo:reference interface="com.foo.BarService" mock="fail:return fake"/>
 
-<!-- 等价于以下写法 -->
+<!-- Equivalent to the following -->
 <dubbo:reference interface="com.foo.BarService" mock="return fake"/>
 ```
 
-调用失败时抛出异常
+Throw an exception on call failure
 
 ```xml
 
 <dubbo:reference interface="com.foo.BarService" mock="fail:throw com.foo.MockException"/>
 
-<!-- 等价于以下写法 -->
+<!-- Equivalent to the following -->
 <dubbo:reference interface="com.foo.BarService" mock="throw com.foo.MockException"/>
 ```
 
-### 在方法级别配置 Mock
+### Configure Mock at the Method Level
 
-Mock 可以在方法级别上指定，假定 `com.foo.BarService` 上有好几个方法，我们可以单独为 `sayHello()` 方法指定 Mock 行为。
+Mock can be specified at the method level. Assume `com.foo.BarService` has several methods; we can specifically set Mock behavior for the `sayHello()` method.
 
-具体配置如下所示，在本例中，只要 `sayHello()` 被调用到时，强制返回 "fake":
+The specific configuration is as follows. In this example, whenever `sayHello()` is called, it will force a return of "fake":
 
 ```xml
 
@@ -165,29 +164,29 @@ Mock 可以在方法级别上指定，假定 `com.foo.BarService` 上有好几�
 </dubbo:reference>
 ```
 
-### 配合 dubbo-admin 使用
+### Use with dubbo-admin
 
-* 应用消费端引入 <a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-mock-extensions" target="_blank">`dubbo-mock-admin`</a>依赖
+* Application consumer side introduce <a href="https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-mock-extensions" target="_blank">`dubbo-mock-admin`</a> dependency
 
-* 应用消费端启动时设置 JVM 参数，`-Denable.dubbo.admin.mock=true`
+* Set the JVM parameter when the application consumer starts: `-Denable.dubbo.admin.mock=true`
 
-* 启动 dubbo-admin，在服务 Mock-> 规则配置菜单下设置 Mock 规则
+* Start dubbo-admin and set the Mock rules under the service Mock -> Rule Configuration menu
 
-以服务方法的维度设置规则，设置返回模拟数据，动态启用/禁用规则
-
-
-### 使用专业限流组件
-
-如果您有更高级、专业的限流诉求，我们推荐使用专业的限流降级组件如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)，以达到最佳体验。参考示例实践：[微服务治理/限流降级](/en/overview/mannual/java-sdk/tasks/rate-limit/)
-
-服务降级是指服务在非正常情况下进行降级应急处理。
+Set rules at the level of service methods, dynamically enabling/disabling rules that return mock data
 
 
-{{% alert title="注意事项" color="primary" %}}
+### Use Professional Rate Limiting Components
 
-Dubbo 启动时会检查配置，当 mock 属性值配置有误时会启动失败，可根据错误提示信息进行排查
+If you have more advanced and professional rate-limiting requirements, we recommend using professional rate limiting and downgrading components such as [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html) for the best experience. Refer to example practices: [Microservices Governance/Rate Limiting and Downgrading](/en/overview/mannual/java-sdk/tasks/rate-limit/)
 
-- 配置格式错误，如 `return+null` 会报错，被当做 mock 类型处理，`return` 后面可省略不写或者跟空格后再跟返回值
-- 类型找不到错误，如自定义 mock 类、throw 自定义异常，请检查类型是否存在或是否有拼写错误
+Service downgrading refers to emergency handling of services under abnormal conditions.
+
+
+{{% alert title="Notes" color="primary" %}}
+
+Dubbo will check the configuration at startup, and if the mock property value is misconfigured, the startup will fail. You can troubleshoot based on the error message.
+
+- Configuration format errors, such as `return+null`, will cause errors and be treated as mock types. The text after `return` can be omitted or followed by the return value after a space.
+- Type not found errors, such as custom mock classes or throwing custom exceptions, please check whether the types exist or if there are spelling errors.
 {{% /alert %}}
 

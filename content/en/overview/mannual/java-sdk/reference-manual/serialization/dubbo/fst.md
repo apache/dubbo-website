@@ -2,24 +2,24 @@
 aliases:
     - /en/overview/what/ecosystem/serialization/fst/
     - /en/overview/what/ecosystem/serialization/fst/
-description: "本文介绍 FST 序列化"
+description: "This article introduces FST serialization"
 linkTitle: FST
 title: FST
 type: docs
 weight: 6
 ---
 
-## 1 介绍
+## 1 Introduction
 
-FST序列化全称是Fast Serialization，它是对Java序列化的替换实现。既然前文中提到Java序列化的两点严重不足，在FST中得到了较大的改善，FST的特征如下：
+FST serialization stands for Fast Serialization, which is a replacement implementation for Java serialization. Since the previous discussion highlighted two serious shortcomings of Java serialization, these have been significantly improved in FST. The characteristics of FST are as follows:
 
-1. 比JDK提供的序列化提升了10倍，体积也减少 3-4 倍多
-2. 支持堆外Maps，和堆外Maps的持久化
-3. 支持序列化为JSON
+1. Improved performance by 10 times compared to JDK serialization, with size reduction of more than 3-4 times
+2. Supports off-heap Maps and the persistence of off-heap Maps
+3. Supports serialization to JSON
 
-## 2 使用方式
+## 2 Usage
 
-### 2.1 添加依赖
+### 2.1 Adding Dependencies
 
 ```xml
 <dependencies>
@@ -36,8 +36,7 @@ FST序列化全称是Fast Serialization，它是对Java序列化的替换实现�
 </dependencies>
 ```
 
-### 2.2 配置启用
-
+### 2.2 Configuring Activation
 
 ```yaml
 # application.yml (Spring Boot)
@@ -45,7 +44,7 @@ dubbo:
  protocol:
    serialization: fst
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.serialization=fst
@@ -56,7 +55,7 @@ dubbo.consumer.serialization=fst
 # or
 dubbo.reference.com.demo.DemoService.serialization=fst
 ```
-或
+or
 ```xml
 <dubbo:protocol serialization="fst" />
 
@@ -67,11 +66,11 @@ dubbo.reference.com.demo.DemoService.serialization=fst
 <dubbo:reference interface="xxx" serialization="fst" />
 ```
 
-## 3 注册被序列化类
+## 3 Registering Serializable Classes
 
-要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，实现如下
+To fully leverage the high performance of Kryo and FST, it is best to register the classes that need to be serialized into the Dubbo system, implemented as follows.
 
-**回调接口**
+**Callback Interface**
 ```java
 public class SerializationOptimizerImpl implements SerializationOptimizer {
 
@@ -88,19 +87,19 @@ public class SerializationOptimizerImpl implements SerializationOptimizer {
 }
 ```
 
-然后在XML配置中添加：
+Then add in the XML configuration:
 
 ```xml
 <dubbo:protocol name="dubbo" serialization="kryo" optimizer="org.apache.dubbo.demo.SerializationOptimizerImpl"/>
 ```
 
-在注册这些类后，序列化的性能可能被大大提升，特别针对小数量的嵌套对象的时候。
+After registering these classes, serialization performance may be greatly enhanced, particularly for small numbers of nested objects.
 
-当然，在对一个类做序列化的时候，可能还级联引用到很多类，比如Java集合类。
+Of course, when serializing a class, it might also reference many other classes, such as Java collection classes.
 
-针对这种情况，我们已经自动将JDK中的常用类进行了注册，所以你不需要重复注册它们（当然你重复注册了也没有任何影响)。
+In this case, we have automatically registered commonly used classes from the JDK, so you don't need to register them again (though registering them again has no impact).
 
-包括
+Including
 ```
 GregorianCalendar
 InvocationHandler
@@ -134,21 +133,21 @@ float[]
 double[]
 ```
 
-由于注册被序列化的类仅仅是出于性能优化的目的，所以即使你忘记注册某些类也没有关系。
+Since registering the serializable classes is solely for performance optimization, it doesn't matter if you forget to register some classes.
 
-事实上，即使不注册任何类，Kryo和FST的性能依然普遍优于hessian和dubbo序列化。
+In fact, even without registering any classes, the performance of Kryo and FST is generally superior to that of Hessian and Dubbo serialization.
 
-> 当然，有人可能会问为什么不用配置文件来注册这些类？这是因为要注册的类往往数量较多，导致配置文件冗长；而且在没有好的IDE支持的情况下，配置文件的编写和重构都比java类麻烦得多；最后，这些注册的类一般是不需要在项目编译打包后还需要做动态修改的。
+> Of course, some may ask why we don't use a configuration file to register these classes. This is because the number of classes to be registered is often large, leading to lengthy configuration files; furthermore, without good IDE support, writing and refactoring configuration files is much more cumbersome than dealing with Java classes; finally, these registered classes generally do not need to be dynamically modified after the project is compiled and packaged.
 
-> 另外，有人也会觉得手工注册被序列化的类是一种相对繁琐的工作，是不是可以用annotation来标注，然后系统来自动发现并注册。但这里annotation的局限是，它只能用来标注你可以修改的类，而很多序列化中引用的类很可能是你没法做修改的（比如第三方库或者JDK系统类或者其他项目的类）。另外，添加annotation毕竟稍微的“污染”了一下代码，使应用代码对框架增加了一点点的依赖性。
+> Additionally, some might find manually registering serializable classes relatively cumbersome and wonder if annotations could be used to mark them for automatic discovery and registration. However, the limitation of annotations here is that they can only mark classes that you can modify, while many classes referenced in serialization may be unmodifiable (e.g., from third-party libraries, JDK system classes, or classes from other projects). Moreover, adding annotations does slightly "pollute" the code, increasing the dependency of application code on the framework.
 
-> 除了annotation，我们还可以考虑用其它方式来自动注册被序列化的类，例如扫描类路径，自动发现实现Serializable接口（甚至包括Externalizable）的类并将它们注册。当然，我们知道类路径上能找到Serializable类可能是非常多的，所以也可以考虑用package前缀之类来一定程度限定扫描范围。
+> Apart from annotations, we could also consider other ways to automatically register serializable classes, such as scanning the classpath to automatically discover and register classes that implement the Serializable interface (including Externalizable). Of course, we know that there could be a large number of Serializable classes found in the classpath, so using package prefixes to some extent to limit the scanning range could also be considered.
 
-> 当然，在自动注册机制中，特别需要考虑如何保证服务提供端和消费端都以同样的顺序（或者ID）来注册类，避免错位，毕竟两端可被发现然后注册的类的数量可能都是不一样的。
+> Of course, in an automatic registration mechanism, it is particularly important to ensure that the provider and consumer register classes in the same order (or ID) to avoid misalignment, as the number of classes discoverable and registrable on both ends may be different.
 
-### 无参构造函数和Serializable接口
+### No-Argument Constructor and Serializable Interface
 
-如果被序列化的类中不包含无参的构造函数，则在Kryo的序列化中，性能将会大打折扣，因为此时我们在底层将用Java的序列化来透明的取代Kryo序列化。所以，尽可能为每一个被序列化的类添加无参构造函数是一种最佳实践（当然一个java类如果不自定义构造函数，默认就有无参构造函数）。
+If a serializable class does not include a no-argument constructor, its performance in Kryo serialization will be significantly reduced, as we will transparently use Java serialization to replace Kryo serialization. Therefore, adding a no-argument constructor to each serializable class is considered a best practice (of course, a Java class will have a no-argument constructor by default if no custom constructors are defined).
 
-另外，Kryo和FST本来都不需要被序列化的类实现Serializable接口，但我们还是建议每个被序列化类都去实现它，因为这样可以保持和Java序列化以及dubbo序列化的兼容性，另外也使我们未来采用上述某些自动注册机制带来可能。
+Moreover, while Kryo and FST don't require the serializable classes to implement the Serializable interface, we still recommend that each serializable class does so, as this ensures compatibility with Java serialization and Dubbo serialization, thus potentially easing the use of some of the aforementioned automatic registration mechanisms in the future.
 

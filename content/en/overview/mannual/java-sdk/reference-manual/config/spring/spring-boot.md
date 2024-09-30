@@ -89,6 +89,7 @@ Here is the list of starters provided by the Dubbo official community (version 3
 
 {{% alert title="Note" color="info" %}}
 * For the versions of third-party components compatible with each starter, please refer to the [Component Version Mapping Table](/en/overview/mannual/java-sdk/versions/#版本说明).
-* Each starter has corresponding application.yml configuration items; please refer to the above [Configuration Items List](./#配置示例) for detailed usage.
+* Each starter has corresponding application.yml configuration items; please refer to the above [Configuration Items List](./#Configuration%20Example) for detailed usage.
 {{% /alert %}}
+
 

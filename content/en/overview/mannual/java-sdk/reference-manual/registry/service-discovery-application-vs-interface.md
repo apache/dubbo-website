@@ -1,120 +1,117 @@
 ---
-description: "本文介绍了 Dubbo 应用级服务发现与接口级服务发现的详细设计与实现。"
-linkTitle: 应用级vs接口级
-title: 应用级服务发现 vs 接口级服务发现
+description: "This article introduces the detailed design and implementation of Dubbo application-level service discovery and interface-level service discovery."
+linkTitle: Application Level vs Interface Level
+title: Application Level Service Discovery vs Interface Level Service Discovery
 type: docs
 weight: 6
 ---
 
-Dubbo3 目前支持，其中接口级服务发现
+Dubbo3 currently supports interface-level service discovery.
 
-## 应用级服务发现
+## Application Level Service Discovery
 
-### 设计目标
-* 显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。
-* 适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。
+### Design Goals
+* Significantly reduce resource consumption during the service discovery process, including enhancing the registration center's capacity and reducing resource usage for consumer address resolution, allowing the Dubbo3 framework to support service governance for larger clusters and achieve unlimited horizontal scaling.
+* Adapt to underlying infrastructure service discovery models, such as Kubernetes and Service Mesh.
 
-### 对比接口级
+### Comparison with Interface Level
 ![interface-arc](/imgs/blog/proposals/discovery/arc.png)
 
-我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。
+Starting from the most classic working principle diagram of Dubbo, service address discovery has been built into Dubbo since its inception. Providers register addresses with the registration center, and consumers subscribe to real-time updates of these addresses from the registration center. Upon receiving the address list, consumers initiate RPC calls to providers based on specific load balancing strategies.
 
-在这个过程中：
-* 每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；
-* 注册中心通过这个 key 对 provider 实例地址进行聚合；
-* Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；
+In this process:
+* Each provider registers its accessible address with the registration center using a specific key.
+* The registration center aggregates provider instance addresses based on this key.
+* Consumers subscribe using the same key to receive the aggregated address list in a timely manner.
 
 ![interface-data1](/imgs/blog/proposals/discovery/interface-data1.png)
 
-这里，我们对接口级地址发现的内部数据结构进行详细分析。
+Here, we conduct a detailed analysis of the internal data structure of interface-level address discovery.
 
-首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。
+First, let's look at the data and behavior within the provider instance at the bottom right. Typically, a provider-deployed application will have multiple services (the services defined in Dubbo2), each potentially having its unique configurations. The process we discuss regarding service publication is essentially the address URL generation process based on this service configuration, as shown in the generated address data; likewise, other services will also generate addresses.
 
-然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。
+Next, let's examine the address data storage structure of the registration center. The registration center divides the data based on the service name, aggregating all address data of a service as sub-nodes, where the content of the sub-nodes represents the actual accessible IP addresses, i.e., the URLs in Dubbo.
 
 ![interface-data2](/imgs/blog/proposals/discovery/interface-data2.png)
 
-这里把 URL 地址数据划分成了几份：
-* 首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体
-* 其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明
-* 下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。
-* 最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。
+Here, the URL address data is divided into several parts:
+* First is the instance accessible address, with key information including IP and port, which the consumer will use to establish TCP network links for subsequent RPC data transmission.
+* Next is the RPC metadata, defining and describing an RPC request; it indicates that this address data is related to a specific RPC service, including its version number, group, and method-related information.
+* The next part is RPC configuration data, with some configurations controlling the behavior of RPC calls and others synchronizing the status of provider process instances, such as timeout duration and serialization method for data encoding.
+* The last part is custom metadata, unlike the predefined configurations, offering users greater flexibility to expand and add custom metadata to further enrich instance status.
 
-结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：
-* 第一，地址发现聚合的 key 就是 RPC 粒度的服务
-* 第二，注册中心同步的数据不止包含地址，还包含了各种元数据以及配置
-* 得益于 1 与 2，Dubbo 实现了支持应用、RPC 服务、方法粒度的服务治理能力
+Combining the above two pages of analysis on the Dubbo2 interface-level address model and the fundamental principle diagram of Dubbo, we can deduce the following conclusions:
+* First, the key for address discovery aggregation is the RPC-granular service.
+* Second, the data synchronized by the registration center includes not just addresses but also various metadata and configurations.
+* Thanks to points 1 and 2, Dubbo has achieved service governance capabilities that support applications, RPC services, and method granularity.
 
-这就是一直以来 Dubbo2 在易用性、服务治理功能性、可扩展性上强于很多服务框架的真正原因。
+This is the true reason why Dubbo2 has always excelled over many service frameworks in terms of usability, service governance functionality, and scalability.
 
 ![interface-defect](/imgs/blog/proposals/discovery/interface-defect.png)
 
-一个事物总是有其两面性，Dubbo2 地址模型带来易用性和强大功能的同时，也给整个架构的水平可扩展性带来了一些限制。这个问题在普通规模的微服务集群下是完全感知不到的，而随着集群规模的增长，当整个集群内应用、机器达到一定数量时，整个集群内的各个组件才开始遇到规模瓶颈。在总结包括阿里巴巴、工商银行等多个典型的用户在生产环境特点后，我们总结出以下两点突出问题（如图中红色所示）：
-* 首先，注册中心集群容量达到上限阈值。由于所有的 URL 地址数据都被发送到注册中心，注册中心的存储容量达到上限，推送效率也随之下降。
-* 而在消费端这一侧，Dubbo2 框架常驻内存已超 40%，每次地址推送带来的 cpu 等资源消耗率也非常高，影响正常的业务调用。
+Every system has its duality. While Dubbo2's address model brings ease of use and powerful features, it also imposes certain limitations on the horizontal scalability of the entire architecture. This issue remains unnoticed in standard-scale microservice clusters, but as the cluster scales, components within the cluster begin to encounter capacity bottlenecks when applications and machines reach a certain number. After summarizing the characteristics of several typical users in production environments, including Alibaba and Industrial and Commercial Bank, we outline the following prominent issues (highlighted in red in the diagram):
+* First, the capacity of the registration center cluster reaches its upper limit. As all URL address data is sent to the registration center, the storage capacity reaches its limit, leading to a decrease in push efficiency.
+* On the consumer side, the memory usage of the Dubbo2 framework exceeds 40%, with each address push causing high resource consumption such as CPU, affecting normal business calls.
 
-为什么会出现这个问题？我们以一个具体 provider 示例进行展开，来尝试说明为何应用在接口级地址模型下容易遇到容量问题。
-青蓝色部分，假设这里有一个普通的 Dubbo Provider 应用，该应用内部定义有 10 个 RPC Service，应用被部署在 100 个机器实例上。这个应用在集群中产生的数据量将会是 “Service 数 * 机器实例数”，也就是 10 * 100 = 1000 条。数据被从两个维度放大：
-* 从地址角度。100 条唯一的实例地址，被放大 10 倍
-* 从服务角度。10 条唯一的服务元数据，被放大 100 倍
+Why does this issue arise? We will elaborate with a specific provider example to illustrate why applications under the interface-level address model are prone to capacity issues. In the cyan section, suppose there is an ordinary Dubbo provider application with 10 RPC services defined, deployed on 100 machine instances. The data generated by this application in the cluster will be "service count * machine instance count," which translates to 10 * 100 = 1000 entries. The data is amplified from two dimensions:
+* From the address perspective, the 100 unique instance addresses are amplified by 10 times.
+* From the service perspective, the 10 unique service metadata entries are amplified by 100 times.
 
-### 详细设计
+### Detailed Design
 
 ![app-principle](/imgs/blog/proposals/discovery/app-principle.png)
 
-面对这个问题，在 Dubbo3 架构下，我们不得不重新思考两个问题：
-* 如何在保留易用性、功能性的同时，重新组织 URL 地址数据，避免冗余数据的出现，让 Dubbo3 能支撑更大规模集群水平扩容？
-* 如何在地址发现层面与其他的微服务体系如 Kubernetes、Spring Cloud 打通？
+Faced with this problem, we must rethink two questions under the Dubbo3 architecture:
+* How can we reorganize URL address data while retaining usability and functionality, avoiding redundant data, to enable Dubbo3 to support larger-scale cluster horizontal scaling?
+* How can we connect address discovery at this level with other microservice systems like Kubernetes and Spring Cloud?
 
 ![app-data1](/imgs/blog/proposals/discovery/app-data1.png)
 
-Dubbo3 的应用级服务发现方案设计本质上就是围绕以上两个问题展开。其基本思路是：地址发现链路上的聚合元素也就是我们之前提到的 Key 由服务调整为应用，这也是其名称叫做应用级服务发现的由来；另外，通过注册中心同步的数据内容上做了大幅精简，只保留最核心的 ip、port 地址数据。
+The design of Dubbo3's application-level service discovery solution fundamentally revolves around the above two questions. Its basic approach is to adjust the aggregation element along the address discovery chain from service to application, hence its name as application-level service discovery; additionally, the data content synchronized by the registration center has been significantly streamlined, retaining only the core IP and port address data.
 
 ![app-data2](/imgs/blog/proposals/discovery/app-data2.png)
 
-这是升级之后应用级地址发现的内部数据结构进行详细分析。
-对比之前接口级的地址发现模型，我们主要关注橙色部分的变化。首先，在 provider 实例这一侧，相比于之前每个 RPC Service 注册一条地址数据，一个 provider 实例只会注册一条地址到注册中心；而在注册中心这一侧，地址以应用名为粒度做聚合，应用名节点下是精简过后的 provider 实例地址；
+This is a detailed analysis of the internal data structure after upgrading to application-level address discovery. Compared to the previous interface-level discovery model, we mainly focus on the changes in the orange section. First, on the provider instance side, instead of registering an address data entry for each RPC service, a provider instance registers only one address with the registration center; on the registration center side, addresses are aggregated by application name, with the application name node containing the streamlined provider instance addresses.
 
 ![app-metadataservice](/imgs/blog/proposals/discovery/app-metadataservice.png)
 
-应用级服务发现的上述调整，同时实现了地址单条数据大小和总数量的下降，但同时也带来了新的挑战：我们之前 Dubbo2 强调的易用性和功能性的基础损失了，因为元数据的传输被精简掉了，如何精细的控制单个服务的行为变得无法实现。
+The above adjustments to application-level service discovery not only achieve a decrease in the size and total number of address data entries but also introduce new challenges: the loss of the foundational usability and functionality emphasized in Dubbo2 because the transmission of metadata has been simplified. How to control the behaviors of individual services finely becomes unachievable.
 
-针对这个问题，Dubbo3 的解法是引入一个内置的 MetadataService 元数据服务，由中心化推送转为 Consumer 到 Provider 的点对点拉取，在这个模式下，元数据传输的数据量将不在是一个问题，因此可以在元数据中扩展出更多的参数、暴露更多的治理数据。
+To address this issue, Dubbo3 introduces a built-in MetadataService, transforming centralized push into a peer-to-peer pull from consumer to provider. In this model, the volume of metadata transmission data will no longer be a problem, so more parameters can be expanded, and more governance data can be exposed.
 
 ![app-metadataservice](/imgs/blog/proposals/discovery/app-workflow.png)
 
-这里我们个重点看消费端 Consumer 的地址订阅行为，消费端从分两步读取地址数据，首先是从注册中心收到精简后的地址，随后通过调用 MetadataService 元数据服务，读取对端的元数据信息。在收到这两部分数据之后，消费端会完成地址数据的聚合，最终在运行态还原出类似 Dubbo2 的 URL 地址格式。因此从最终结果而言，应用级地址模型同时兼顾了地址传输层面的性能与运行层面的功能性。
+Here, we focus on the address subscription behavior of the consumer, where the consumer reads address data in two steps: first, it receives the streamlined address from the registration center, and then it invokes the MetadataService to read the downstream metadata information. Once these two parts of data are received, the consumer completes the address data aggregation and ultimately restores a URL address format similar to Dubbo2 in runtime. Therefore, in ultimate terms, the application-level address model balances performance at the address transmission layer with functionality at the runtime layer.
 
-以上就是的应用级服务发现背景、工作原理部分的所有内容。
+This concludes the background and working principle discussion of application-level service discovery.
 
 
-## 接口级服务发现
+## Interface Level Service Discovery
 
-接口级服务发现在 Dubbo3 实现中被继续保留了下来，并且继续作为框架默认的服务发现模型，这主要是考虑对于老版本的兼容性。在未来版本中，我们会将默认模型切换为应用级别服务发现。
+Interface-level service discovery continues to be supported in the implementation of Dubbo3 and remains the framework's default service discovery model, mainly for compatibility with older versions. In future versions, we will switch the default model to application-level service discovery.
 
-{{% alert title="解决接口级服务发现性能问题" color="info" %}}
-如果您的集群规模足够大，已经遇到了接口级服务发现中的性能瓶颈问题，并且您暂时无法切换到应用级服务发现。可以暂时通过简化 URL 参数达到性能优化的目的。
+{{% alert title="Resolving Performance Issues in Interface-Level Service Discovery" color="info" %}}
+If your cluster is sufficiently large and has encountered performance bottlenecks in interface-level service discovery, and you are temporarily unable to switch to application-level service discovery, you can achieve performance optimization by simplifying URL parameters.
 {{% /alert %}}
 
-### URL参数简化
-**设计目标与宗旨：**
-1. 期望简化进入注册中心的 provider 和 consumer 配置数量。
-2. 期望将部分配置项以其他形式存储。这些配置项需要满足：不在服务调用链路上，同时这些配置项不在注册中心的核心链路上(服务查询，服务列表)。
+### URL Parameter Simplification
+**Design Goals and Objectives:**
+1. Simplify the number of provider and consumer configurations entering the registration center.
+2. Store certain configuration items in other forms. These configuration items need to satisfy: they do not exist on the service call path, and they do not belong to the core link of the registration center (service query, service list).
 
-Dubbo provider 中的服务配置项有接近 [30 个配置项](/en/docs/references/xml/dubbo-parameter)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
+Service configuration items in the Dubbo provider have nearly [30 configuration items](/en/docs/references/xml/dubbo-parameter). Excluding the needs for registration center service governance, a substantial number of configuration items are used internally by the provider and do not need to be passed to consumers. This data does not need to enter the registration center but can be persistently stored in key-value format.
 
-Dubbo consumer 中的配置项也有 [20+个配置项](/en/docs/references/xml/dubbo-consumer)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。
-这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心 (如 zookeeper) 的网络开销增大，性能降低。
+Similarly, there are [20+ configuration items](/en/docs/references/xml/dubbo-consumer) in the Dubbo consumer. Within the registration center, the consumer list only needs to focus on a small number of configurations such as application, version, group, IP, and Dubbo version, while other configurations can also be persisted in key-value format. Registering this data on a service basis leads to data volume inflation, resulting in increased network overhead and reduced performance for the registration center (e.g., Zookeeper).
 
-{{% alert title="注意" color="warning" %}}
-简化注册中心的配置，只在 2.7 之后的版本中进行支持。
+{{% alert title="Note" color="warning" %}}
+Simplifying registration center configurations is only supported in versions after 2.7.
 {{% /alert %}}
 
-以下是开启 provider 或者 consumer 简化配置之后，URL 中默认保留的配置项：
+The following are the default configuration items retained in the URL after enabling provider or consumer simplified configuration:
 
-**provider 侧：**
+**Provider Side:**
 
-| 源码静态变量  | URL Key           | 说明 |
+| Static Variable | URL Key           | Description |
 | ------ |---------------| ------ |
 | APPLICATION_KEY | application   |  |
 | CODEC_KEY | codec         |  |
@@ -136,25 +133,24 @@ Dubbo consumer 中的配置项也有 [20+个配置项](/en/docs/references/xml/d
 | RELEASE_KEY | release       |  |
 | SIDE_KEY | side          |  |
 
+**Consumer Side:**
 
-**consumer 侧：**
-
-| 源码静态变量  | URL Key  | 说明 |
+| Static Variable | URL Key  | Description |
 | ------ | ------ | ------ |
 | APPLICATION_KEY | application |  |
 | VERSION_KEY |  version |  |
 | GROUP_KEY | group |  |
 | DUBBO_VERSION_KEY | dubbo |  |
 
-下面我们通过示例介绍如何开启 URL 简化模式使，所有内容都可以 [在 sample 中查看源码](https://github.com/dubbo/dubbo-samples/tree/master)。
+Let's proceed with an example of how to enable URL simplification, with all content available for [source code in the sample](https://github.com/dubbo/dubbo-samples/tree/master).
 
-#### 如何开启URL精简（示例使用方式）
+#### How to Enable URL Simplification (Example Usage)
 
-我们接下来从没开启 URL 精简的示例开始，分别对比开启 URL 精简的 Provider 和开启 URL 精简的 Consumer
+We will start with an example that has not enabled URL simplification and compare it with a provider that has enabled URL simplification and a consumer that has enabled URL simplification.
 
-##### 未开启 URL 精简的示例
+##### Example Without URL Simplification
 
-工程源码 [dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-nosimple](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-nosimple)。注意，跑 sample 前，先跑下 ZKClean 进行配置项清理。
+Project source code [dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-nosimple](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-nosimple). Note to run ZKClean for configuration cleanup before running the sample.
 
 dubbo-provider.xml
 
@@ -167,7 +163,7 @@ dubbo-provider.xml
                executes="4500" retries="7" owner="vict" timeout="5300"/>
 ```
 
-启动 provider 的 main 方法之后，查看 zookeeper 的叶子节点（路径为：/dubbo/org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService/providers 目录下）的内容
+After starting the provider's main method, check the leaf nodes in Zookeeper (path: /dubbo/org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService/providers directory):
 
 ```
 dubbo://30.5.124.158:20880/org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService
@@ -191,24 +187,22 @@ dubbo://30.5.124.158:20880/org.apache.dubbo.samples.simplified.registry.nosimple
 &version=1.2.3
 ```
 
-从中能看到有：`executes`, `retries`, `owner`, `timeout`。但是这些字段不是每个都需要传递给 dubbo ops 或者 dubbo consumer。 同样的，consumer 也有这个问题，可以在例子中启动 Consumer 的 main 方法进行查看。
+From this, we can see fields such as: `executes`, `retries`, `owner`, `timeout`. However, not all of these fields need to be passed to Dubbo ops or Dubbo consumers. Similarly, the consumer has this issue, which can be observed by starting the consumer's main method in the example.
 
+##### Example with URL Simplification Enabled (XML Mode)
 
-##### 开启 URL 精简的示例 (XML模式)
-
-工程源码 [dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-xml](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-xml)。注意，跑 sample 前，先跑下 ZKClean 进行配置项清理。
-
+Project source code [dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-xml](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-xml). Make sure to clean up configurations with ZKClean before running the sample.
 
 ```properties
 dubbo.registry.simplified=true
 dubbo.registry.extra-keys=retries,owner
 ```
-和上面的 **现有功能 sample** 进行对比，上面的 sample 中，executes, retries, owner, timeout 四个配置项都进入了注册中心。但是本实例不是，配置情况分为：
+In comparison to the previous **existing functionality sample**, the above sample includes four configuration items: executes, retries, owner, and timeout all entering the registration center. However, in this instance, the configuration situation is as follows:
 
-* 配置：dubbo.registry.simplified=true， 默认情况下，timeout 在默认的配置项列表，所以还是会进入注册中心；
-* 配置：dubbo.registry.extra-keys=retries,owner ， 所以 retries，owner 也会进入注册中心。
+* Configuration: dubbo.registry.simplified=true; by default, timeout is in the default configuration item list, thus will still enter the registration center.
+* Configuration: dubbo.registry.extra-keys=retries,owner; hence retries and owner will also enter the registration center.
 
-**1. provider 端**
+**1. Provider Side**
 
 ```xml
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -225,7 +219,7 @@ dubbo.registry.extra-keys=retries,owner
 
 </beans>
 ```
-得到的 zookeeper 的叶子节点的值
+The value of the leaf node in Zookeeper obtained is:
 ```
 dubbo://30.5.124.149:20880/org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService
 ?application=simplified-registry-xml-provider
@@ -238,10 +232,10 @@ dubbo://30.5.124.149:20880/org.apache.dubbo.samples.simplified.registry.nosimple
 &version=1.2.3
 ```
 
-**2. consumer 端**
+**2. Consumer Side**
 
-* 配置：dubbo.registry.simplified=true
-* 默认情况：application,version,group,dubbo 在默认的配置项列表，所以还是会进入注册中心。
+* Configuration: dubbo.registry.simplified=true.
+* By default: application, version, group, dubbo are in the default configuration item list; thus will still enter the registration center.
 ```xml
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
@@ -259,7 +253,7 @@ dubbo://30.5.124.149:20880/org.apache.dubbo.samples.simplified.registry.nosimple
 
 </beans>
 ```
-得到的 zookeeper 的叶子节点的值
+The value of the leaf node in Zookeeper obtained is:
 ```
 consumer://30.5.124.149/org.apache.dubbo.samples.simplified.registry.nosimple.api.DemoService
 ?actives=6
@@ -272,20 +266,20 @@ consumer://30.5.124.149/org.apache.dubbo.samples.simplified.registry.nosimple.ap
 &version=1.2.3
 ```
 
-##### 开启 URL 精简的示例（API 模式）
+##### Example with URL Simplification Enabled (API Mode)
 
-工程源码 [dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-annotation](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-annotation)。注意，跑 sample 前，先跑下 ZKClean 进行配置项清理。
+Project source code [dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-annotation](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-simplified-registry/dubbo-samples-simplified-registry-annotation). Make sure to clean up configurations with ZKClean before running the sample.
 
-和上面 sample 中的 dubbo.properties 的效果是一致的。
+The effects are consistent with the dubbo.properties in the previous sample.
 
-* 默认情况：timeout 在默认的配置项列表，所以还是会进入注册中心；
-* 配置： retries,owner 作为额外的 key 进入注册中心 ， 所以 retries，owner 也会进入注册中心。
+* By default: timeout is in the default configuration item list, and thus will still enter the registration center.
+* Configuration: retries, owner are treated as extra keys entering the registration center. So retries and owner will also enter the registration center.
 
 
-**1. provider 端 bean 配置**
+**1. Provider Side Bean Configuration**
 
 ```java
-// 等同于dubbo.properties配置，用@Bean形式进行配置
+// Equivalent to the dubbo.properties configuration, configured in @Bean style
 @Bean
 public RegistryConfig registryConfig() {
     RegistryConfig registryConfig = new RegistryConfig();
@@ -297,7 +291,7 @@ public RegistryConfig registryConfig() {
 ```
 
 ```java
-// 暴露服务
+// Expose Service
 @Service(version = "1.1.8", group = "d-test", executes = 4500, retries = 7, owner = "victanno", timeout = 5300)
 public class AnnotationServiceImpl implements AnnotationService {
     @Override
@@ -308,13 +302,13 @@ public class AnnotationServiceImpl implements AnnotationService {
 }
 ```
 
-**2. Consumer 配置**
+**2. Consumer Configuration**
 
-和上面 sample 中 **consumer 端配置** 是一样的。
+The consumer side configuration is the same as above.
 
-默认情况：  application,version,group,dubbo 在默认的配置项列表，所以还是会进入注册中心。
+By default: application, version, group, dubbo are in the default configuration item list, and thus will still enter the registration center.
 
-#### consumer 端 bean 配置
+#### Consumer Side Bean Configuration
 ```java
 @Bean
 public RegistryConfig registryConfig() {
@@ -322,10 +316,10 @@ public RegistryConfig registryConfig() {
     registryConfig.setAddress("zookeeper://127.0.0.1:2181");
     registryConfig.setSimplified(true);
     return registryConfig;
-  }
+}
 ```
 
-消费服务
+Service Consumption
 
 ```java
 @Component("annotationAction")
@@ -339,7 +333,7 @@ public class AnnotationAction {
 }
 ```
 
-> 注意: 如果一个应用中既有 provider 又有 consumer，那么配置需要合并成如下
+> Note: If an application contains both a provider and a consumer, the configuration needs to be combined as follows:
 
 ```java
 @Bean
@@ -347,31 +341,31 @@ public RegistryConfig registryConfig() {
     RegistryConfig registryConfig = new RegistryConfig();
     registryConfig.setAddress("zookeeper://127.0.0.1:2181");
     registryConfig.setSimplified(true);
-    //只对provider生效
+    // Only effective for provider
     registryConfig.setExtraKeys("retries,owner");
     return registryConfig;
 }
 ```
 
-### 定制URL参数
+### Customizing URL Parameters
 
-上面降到了两种控制 URL 中出现的参数的方法。
+The above methods have reduced the control of URL parameters to two. 
 
-第一种是使用 `dubbo.properties`：
+The first method is using `dubbo.properties`:
 
 ```properties
 dubbo.registry.simplified=true
 dubbo.registry.extra-keys=retries,owner
 ```
 
-第二种是通过 `RegistryConfig` 进行设置：
+The second method is through `RegistryConfig` settings:
 
 ```java
 registryConfig.setSimplified(true);
 registryConfig.setExtraKeys("retries,owner");
 ```
 
-还有第三种方法，就是通过扩展 `org.apache.dubbo.registry.integration.ServiceURLCustomizer` SPI，可以非常灵活的增加或减少 URL 中的参数：
+There is also a third method, which is to extend `org.apache.dubbo.registry.integration.ServiceURLCustomizer` SPI, allowing for very flexible addition or removal of parameters in the URL:
 
 ```java
 @SPI(scope = APPLICATION)
@@ -385,6 +379,3 @@ public interface ServiceURLCustomizer extends Prioritized {
     URL customize(URL serviceURL, ApplicationModel applicationModel);
 }
 ```
-
-
-

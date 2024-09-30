@@ -30,13 +30,6 @@ weight: 3
     <artifactId>dubbo-zookeeper-curator5-spring-boot-starter</artifactId>
     <version>${dubbo.version}</version>
 </dependency>
-<!-- 仅当 Zookeeper Server 版本是 3.4.x 及以下时，使用此依赖
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-zookeeper-spring-boot-starter</artifactId>
-    <version>${dubbo.version}</version>
-</dependency>
--->
 ```
 
 其中，dubbo-zookeeper-spring-boot-starter 或 `dubbo-zookeeper-curator5-spring-boot-starter` 负责管理 zookeeper 相关依赖。
@@ -60,14 +53,6 @@ weight: 3
         <version>${dubbo.version}</version>
         <type>pom</type>
     </dependency>
-    <!-- 仅当 Zookeeper Server 版本是 3.5.x 及以上时，使用此依赖
-	<dependency>
-		<groupId>org.apache.dubbo</groupId>
-		<artifactId>dubbo-dependencies-zookeeper-curator5</artifactId>
-		<version>${dubbo.version}</version>
-		<type>pom</type>
-	</dependency>
-	-->
 </dependencies>
 ```
 {{% /alert %}}

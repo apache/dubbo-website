@@ -2,32 +2,32 @@
 aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/logging/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/logging/
-description: Dubbo 框架的日志配置，
+description: Log configuration for the Dubbo framework.
 hide_summary: true
-linkTitle: 日志管理
+linkTitle: Log Management
 no_list: true
-title: 日志管理
+title: Log Management
 type: docs
 weight: 3
 ---
 
-## 支持的日志框架
-Dubbo 支持以下日志框架，用户可根据业务应用实际使用的日志框架进行配置。
+## Supported Log Frameworks
+Dubbo supports the following logging frameworks, and users can configure based on the logging framework actually used in their business applications.
 
-| 第三方日志框架                        | 优先级                                     | 说明                                     |
+| Third-party Log Framework             | Priority                                     | Description                                     |
 | ------------------------------------- | ------------------------------------------ | ------------------------------------------ |
-| Log4j                                 | 最高（默认就用这个）                       | log4j 的直接适配，需要增加 log4j-core、log4j-api 依赖与 log4j.properties |
-| SLF4J                                 | 次高（当前推荐）                   | 可支持 log4j、log4j2、logback 等实现。如 logback 可添加slf4j-api、logback-classic、logback-core 依赖与 logback.xml |
-| Log4j2                                | 次低                       | log4j2 的直接适配，需要增加 log4j2-core 依赖与 log4j2.xml 配置                   |
-| Common Logging(jcl就是common logging)  | 次低（Log4j和SLF4J在项目中均没有就用这个） | 较少项目使用                 |
-| JDK log                               | 最低（最后的选择）                         | 较少项目使用           |
+| Log4j                                 | Highest (used by default)                | Direct adaptation of Log4j, requires adding log4j-core, log4j-api dependencies and log4j.properties |
+| SLF4J                                 | Second highest (currently recommended)   | Supports log4j, log4j2, logback, etc. For logback, add slf4j-api, logback-classic, logback-core dependencies and logback.xml |
+| Log4j2                                | Second lowest                          | Direct adaptation of Log4j2, requires adding log4j2-core dependency and log4j2.xml configuration |
+| Common Logging (jcl is common logging) | Second lowest (used if neither Log4j nor SLF4J is in the project) | Rarely used in projects                 |
+| JDK log                               | Lowest (last resort)                      | Rarely used in projects           |
 
-{{% alert title="注意" color="warning" %}}
-无论使用哪种日志框架，除了 Dubbo 侧配置外，还需要确保应用中加入正确的日志框架依赖和配置文件。
+{{% alert title="Note" color="warning" %}}
+Regardless of the logging framework used, in addition to configuring on the Dubbo side, ensure the application includes the correct logging framework dependencies and configuration files.
 {{% /alert %}}
 
-### 使用 slf4j
-对于 spring boot 用户，通过在 `application.yaml` 或 `application.properties` 增加以下配置，开启 slf4j 日志：
+### Using slf4j
+For Spring Boot users, enable slf4j logging by adding the following configuration to `application.yaml` or `application.properties`:
 
 ```yaml
 dubbo:
@@ -39,14 +39,14 @@ dubbo:
 dubbo.application.logger=slf4j
 ```
 
-除此之外，还可以使用使用 JVM 参数进行设置：
+Additionally, you can also set it using JVM arguments:
 ```shell
 java -Ddubbo.application.logger=slf4j
 ```
 
-#### 使用 slf4j-log4j2 提供日志输出
+#### Using slf4j-log4j2 for Log Output
 
-增加依赖：
+Add dependencies:
 
 ```xml
 <!-- SLF4J API -->
@@ -75,30 +75,29 @@ java -Ddubbo.application.logger=slf4j
 </dependency>
 ```
 
-配置一个name是"org.apache.dubbo"的logger就可以了，然后关联到对应的appender。如下：
+Configure a logger with the name "org.apache.dubbo" and associate it with the corresponding appender, as follows:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-		<File name="Dubbo" fileName="dubbo.log">
-		  <PatternLayout>
-			<Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Pattern>
-		  </PatternLayout>
-		</File>
+        <File name="Dubbo" fileName="dubbo.log">
+          <PatternLayout>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Pattern>
+          </PatternLayout>
+        </File>
     </Appenders>
     <Loggers>
         <Logger name="org.apache.dubbo" level="info" additivity="false">
-		    <AppenderRef ref="Dubbo"/>
-		</Logger>
+            <AppenderRef ref="Dubbo"/>
+        </Logger>
     </Loggers>
 </Configuration>
-
 ```
 
-#### 使用 slf4j-logback 提供日志输出
+#### Using slf4j-logback for Log Output
 
-增加依赖：
+Add dependencies:
 
 ```xml
 <!-- SLF4J API -->
@@ -122,7 +121,7 @@ java -Ddubbo.application.logger=slf4j
 </dependency>
 ```
 
-增加 logback 配置文件：
+Add a logback configuration file:
 
 ```xml
 <timestamp key="byDate" datePattern="yyyyMMdd"/>
@@ -147,34 +146,33 @@ java -Ddubbo.application.logger=slf4j
     </logger>
 ```
 
-
-### 使用 log4j
-对于 spring boot 用户，通过在 `application.yaml` 或 `application.properties` 增加以下配置，开启 log4j 日志：
+### Using log4j
+For Spring Boot users, enable log4j logging by adding the following configuration to `application.yaml` or `application.properties`:
 ```yaml
 dubbo:
   application:
     logger: log4j
 ```
 
-使用 log4j2：
+Using log4j2:
 ```yaml
 dubbo:
   application:
     logger: log4j2
 ```
 
-## 访问日志-accesslog
+## Access Logs - accesslog
 
-如果想记录每一次请求的详细信息，可开启访问日志，类似于 apache/tomcat server 的访问日志。
+If you want to log detailed information for each request, you can enable access logs like the access logs of apache/tomcat server.
 
-在 `application.yaml` 文件中，可以通过以下方式，开启访问日志，日志内容将输出到当前应用正在使用的日志框架（如 log4j、logback 等）。
+In the `application.yaml` file, you can enable access logging as follows, and the log content will be output to the currently used log framework (such as log4j, logback, etc.).
 ```yaml
 dubbo:
   provider:
     accesslog: true
 ```
 
-也可以指定访问日志输出到指定文件：
+You can also specify the access log to be output to a specified file:
 
 ```yaml
 dubbo:
@@ -182,96 +180,96 @@ dubbo:
     accesslog: /home/dubbo/foo/bar.log
 ```
 
-{{% alert title="注意" color="warning" %}}
-无论要动态开启或关闭访问日志，请参考 [流量管控](../../traffic-management/accesslog/) 一节的具体说明。
+{{% alert title="Note" color="warning" %}}
+Refer to the [Traffic Control](../../traffic-management/accesslog/) section for specific instructions on dynamically enabling or disabling access logs.
 {{% /alert %}}
 
-## 动态修改日志级别
-自 3.3 版本开始，Dubbo 框架支持通过 http 或 telnet 命令，在运行态动态修改日志配置（级别、框架等）。以下是使用示例，关于 telnet 命令的更多内容，可查看 [qos 命令指南](/en/overview/mannual/java-sdk/reference-manual/qos/qos-list/)。
+## Dynamically Modify Log Level
+Starting from version 3.3, the Dubbo framework supports dynamically modifying log configuration (level, framework, etc.) at runtime through http or telnet commands. Below is an example of usage; for more on telnet commands, refer to the [qos Command Guide](/en/overview/mannual/java-sdk/reference-manual/qos/qos-list/).
 
-1. 查询日志配置
-	命令：`loggerInfo`
+1. Query Log Configuration
+    Command: `loggerInfo`
 
-	**示例**
-	```bash
-	> telnet 127.0.0.1 22222
-	> loggerInfo
-	```
+    **Example**
+    ```bash
+    > telnet 127.0.0.1 22222
+    > loggerInfo
+    ```
 
-	**输出**
-	```
-	Trying 127.0.0.1...
-	Connected to localhost.
-	Escape character is '^]'.
-	   ___   __  __ ___   ___   ____
-	  / _ \ / / / // _ ) / _ ) / __ \
-	 / // // /_/ // _  |/ _  |/ /_/ /
-	/____/ \____//____//____/ \____/
-	dubbo>loggerInfo
-	Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
-	```
+    **Output**
+    ```
+    Trying 127.0.0.1...
+    Connected to localhost.
+    Escape character is '^]'.
+       ___   __  __ ___   ___   ____
+      / _ \ / / / // _ ) / _ ) / __ \
+     / // // /_/ // _  |/ _  |/ /_/ /
+    /____/ \____//____//____/ \____/
+    dubbo>loggerInfo
+    Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+    ```
 
-2. 修改日志级别
-	命令：`switchLogLevel {level}`
+2. Modify Log Level
+    Command: `switchLogLevel {level}`
 
-	level: `ALL`, `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`
+    level: `ALL`, `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`
 
-	**示例**
-	```bash
-	> telnet 127.0.0.1 22222
-	> switchLogLevel WARN
-	```
+    **Example**
+    ```bash
+    > telnet 127.0.0.1 22222
+    > switchLogLevel WARN
+    ```
 
-	**输出**
-	```
-	Trying 127.0.0.1...
-	Connected to localhost.
-	Escape character is '^]'.
-	   ___   __  __ ___   ___   ____
-	  / _ \ / / / // _ ) / _ ) / __ \
-	 / // // /_/ // _  |/ _  |/ /_/ /
-	/____/ \____//____//____/ \____/
-	dubbo>loggerInfo
-	Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
-	dubbo>switchLogLevel WARN
-	OK
-	dubbo>loggerInfo
-	Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: WARN```
-	```
+    **Output**
+    ```
+    Trying 127.0.0.1...
+    Connected to localhost.
+    Escape character is '^]'.
+       ___   __  __ ___   ___   ____
+      / _ \ / / / // _ ) / _ ) / __ \
+     / // // /_/ // _  |/ _  |/ /_/ /
+    /____/ \____//____//____/ \____/
+    dubbo>loggerInfo
+    Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
+    dubbo>switchLogLevel WARN
+    OK
+    dubbo>loggerInfo
+    Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: WARN
+    ```
 
-3. 修改日志输出框架
-	命令：`switchLogger {loggerAdapterName}`
+3. Change Log Output Framework
+    Command: `switchLogger {loggerAdapterName}`
 
-	loggerAdapterName: `slf4j`, `jcl`, `log4j`, `jdk`, `log4j2`
+    loggerAdapterName: `slf4j`, `jcl`, `log4j`, `jdk`, `log4j2`
 
-	**示例**
-	```bash
-	> telnet 127.0.0.1 22222
-	> switchLogger slf4j
-	```
+    **Example**
+    ```bash
+    > telnet 127.0.0.1 22222
+    > switchLogger slf4j
+    ```
 
-	**输出**
-	```
-	Trying 127.0.0.1...
-	Connected to localhost.
-	Escape character is '^]'.
-	   ___   __  __ ___   ___   ____
-	  / _ \ / / / // _ ) / _ ) / __ \
-	 / // // /_/ // _  |/ _  |/ /_/ /
-	/____/ \____//____//____/ \____/
-	dubbo>loggerInfo
-	Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [log4j]. Log level: INFO
-	dubbo>switchLogger slf4j
-	OK
-	dubbo>loggerInfo
-	Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [slf4j]. Log level: INFO
-	```
+    **Output**
+    ```
+    Trying 127.0.0.1...
+    Connected to localhost.
+    Escape character is '^]'.
+       ___   __  __ ___   ___   ____
+      / _ \ / / / // _ ) / _ ) / __ \
+     / // // /_/ // _  |/ _  |/ /_/ /
+    /____/ \____//____//____/ \____/
+    dubbo>loggerInfo
+    Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [log4j]. Log level: INFO
+    dubbo>switchLogger slf4j
+    OK
+    dubbo>loggerInfo
+    Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [slf4j]. Log level: INFO
+    ```
 
-## 工作原理
+## Working Principle
 
-在 Dubbo 框架内所有的日志输出都是通过 LoggerFactory 这个静态工厂类来获得 Logger 的对象实体，并且抽离了一个 LoggerAdapter 用于对接第三方日志框架，所以就有了JDKLoggerAdapter, Log4jLoggerAdapter, SLF4JLoggerAdapter等一些实现子类，分别对接了不同 Log 第三方实现。既然 Dubbo 能够支持这么多log实现，那么这些实现在 Dubbo 中优先级是在呢么样的呢？这里的优先级是指未配置指定的 logger 提供方的情况下，由 Dubbo 框架自己选择。
+In the Dubbo framework, all log outputs are obtained through the static factory class LoggerFactory to gain Logger object instances. Additionally, a LoggerAdapter is abstracted to interface with third-party logging frameworks, leading to implementations like JDKLoggerAdapter, Log4jLoggerAdapter, SLF4JLoggerAdapter, etc., which interface with different third-party log implementations. Since Dubbo can support so many logging implementations, what is the priority of these implementations in Dubbo? This priority refers to the situation when no specific logger provider is configured, and the Dubbo framework chooses on its own.
 
-Dubbo 日志的调用方式，针对不同的日志打印系统，采用统一的 API 调用及输出，如：
+The way Dubbo logs is to adopt a uniform API call and output for different log printing systems, such as:
 
 ```java
 /**
@@ -282,11 +280,11 @@ public class ChannelHandlerDispatcher implements ChannelHandler {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ChannelHandlerDispatcher.class);
 ```
 
-Dubbo 采用的日志输出方式是首先从 dubbo.application.logger 系统变量中获取属性值，来判断到底采用哪种日志输出方式，如果没设置则按照默认的加载顺序加载相应的日志输出类，直到成功加载：
+The logging output method adopted by Dubbo first obtains the property value from the dubbo.application.logger system variable to determine which logging output method to use; if not set, it loads the corresponding logging output class in the default loading order until successfully loaded:
 
-顺序为：log4jLogger > slf4jLogger > JclLogger > JdkLogger
+Order: log4jLogger > slf4jLogger > JclLogger > JdkLogger
 
-LoggerFactory 在类加载过程中变量的初始化过程：
+The initialization process of the variables in LoggerFactory during class loading:
 
 ```java
 // search common-used logging frameworks
@@ -358,4 +356,4 @@ static {
 }
 ```
 
-上面这段静态块是在LoggerFactory里面，说明只要LoggerFactory类一加载就会去选择对应的日志提供方。大家可能会发现对日志的提供方其实是可以通过配置来指定的，因为静态块一开始是从当前jvm环境中获取dubbo.application.logger，这个参数是同java -Ddubbo.application.logger=xxxx去指定的，如果是放在容器里面，就需要配置在容器启动的jvm参数里面。
+The above static block resides in LoggerFactory, indicating that as soon as the LoggerFactory class is loaded, it will select the corresponding log provider. You will notice that the log provider can actually be designated by configuration, as the static block initially fetches dubbo.application.logger from the current JVM environment. This parameter can be specified using `java -Ddubbo.application.logger=xxxx`, and if deployed in a container, it needs to be configured in the JVM parameters during container startup.

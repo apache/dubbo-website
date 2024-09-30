@@ -2,115 +2,115 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/config/principle/
     - /en/docs3-v2/java-sdk/reference-manual/config/principle/
-description: Dubbo 配置方式和工作原理的深度解读，包括配置格式、设计思路、来源、加载流程等。
-linkTitle: 配置加载流程
-title: 配置工作原理
+description: An in-depth interpretation of Dubbo's configuration methods and working principles, including configuration formats, design ideas, sources, loading processes, etc.
+linkTitle: Configuration Loading Process
+title: Configuration Working Principle
 type: docs
 weight: 5
 ---
 
-本文主要讲解 Dubbo 配置相关的 API 与工作原理，学习 Dubbo 的多种配置源、每种配置源的具体配置方式、不同配置源之间的优先级与覆盖关系。
+This article mainly explains the APIs and working principles related to Dubbo configuration, learning about Dubbo's multiple configuration sources, the specific configuration methods for each source, and the priority and coverage relationships between different configuration sources.
 
-## 实现原理
+## Implementation Principles
 
-为了更好地管理各种配置，Dubbo 抽象了一套结构化的配置组件，各组件总体以用途划分，分别控制不同作用域的行为。
+To better manage various configurations, Dubbo abstracts a structured configuration component set, dividing the components by purpose to control behaviors in different scopes.
 
 ![dubbo-config](/imgs/user/dubbo-config.jpg)
 
 
-组件名称 | 描述 | 范围 | 是否必须配置
+Component Name | Description | Scope | Is Configuration Required
 ------ | ------ | ------ | ------
-application |  指定应用名等应用级别相关信息 |  一个应用内只允许出现一个 |  必选
-service |  声明普通接口或实现类为 Dubbo 服务 |  一个应用内可以有 0 到多个 service |  service/reference 至少一种
-reference |  声明普通接口为 Dubbo 服务 |  一个应用内可以有 0 到多个 reference |  service/reference 至少一种
-protocol |  要暴露的 RPC 协议及相关配置如端口号等 |  一个应用可配置多个，一个 protocol 可作用于一组 service&reference |  可选，默认 dubbo
-registry |  注册中心类型、地址及相关配置 |  一个应用内可配置多个，一个 registry 可作用于一组 service&reference|  必选
-config-center | 配置中心类型、地址及相关配置 |  一个应用内可配置多个，所有服务共享 |  可选
-metadata-report |  元数据中心类型、地址及相关配置 |  一个应用内可配置多个，所有服务共享 |  可选
-consumer |  reference 间共享的默认配置 |  一个应用内可配置多个，一个 consumer 可作用于一组 reference |  可选
-provider |  service 间共享的默认配置 |  一个应用内可配置多个，一个 provider 可作用于一组 service |  可选
-monitor |  监控系统类型及地址 |  一个应用内只允许配置一个 |  可选
-metrics |  数据采集模块相关配置 |  一个应用内只允许配置一个 |  可选
-ssl |  ssl/tls 安全链接相关的证书等配置 |  一个应用内只允许配置一个 |  可选
-method | 指定方法级的配置 | service 和 reference 的子配置 |  可选
-argument | 某个方法的参数配置 | method的子配置 |  可选
+application | Specifies application name and other application-level related information | Only one allowed per application | Required
+service | Declares a normal interface or implementation class as a Dubbo service | Can have 0 to multiple services in an application | At least one service/reference
+reference | Declares a normal interface as a Dubbo service | Can have 0 to multiple references in an application | At least one service/reference
+protocol | RPC protocol to be exposed and related configurations like port number | Multiple allowed in an application, a protocol can apply to a group of services & references | Optional, default is dubbo
+registry | Registry type, address, and related configurations | Multiple allowed in an application, a registry can apply to a group of services & references| Required
+config-center | Configuration center type, address, and related configurations | Multiple allowed in an application, shared by all services | Optional
+metadata-report | Metadata center type, address, and related configurations | Multiple allowed in an application, shared by all services | Optional
+consumer | Default configuration shared between references | Multiple allowed in an application, a consumer can apply to a group of references | Optional
+provider | Default configuration shared between services | Multiple allowed in an application, a provider can apply to a group of services | Optional
+monitor | Monitoring system type and address | Only one allowed in an application | Optional
+metrics | Configuration related to data collection module | Only one allowed in an application | Optional
+ssl | Configuration related to ssl/tls secure links, etc. | Only one allowed in an application | Optional
+method | Method-level configuration | Sub-configuration of service and reference | Optional
+argument | Argument configuration for a method | Sub-configuration of method | Optional
 
 
-> 从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 [Blog](/en/blog/2019/10/17/dubbo-中的-url-统一模型/#rpc调用)。
+> From the perspective of implementation principles, all configuration items in Dubbo will ultimately be assembled into URLs, using URLs as carriers during subsequent startup and RPC calls to control framework behaviors. To learn more, please refer to the Dubbo source code analysis series of documents or [Blog](/en/blog/2019/10/17/dubbo-中的-url-统一模型/#rpc调用).
 
-> 各组件支持的具体配置项及含义请参考 [配置项手册](../properties)
+> For specific configuration items supported by each component and their meanings, please refer to [configuration item manual](../properties).
 
 
-{{% alert title="注意" color="info" %}}
-**背景**
+{{% alert title="Note" color="info" %}}
+**Background**
 
-在每个dubbo应用中某些种类的配置类实例只能出现一次（比如`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`），有些能出现多次（比如`RegistryConfig`、`ProtocolConfig`等）。
+In each Dubbo application, certain types of configuration class instances can only appear once (such as `ApplicationConfig`, `MonitorConfig`, `MetricsConfig`, `SslConfig`, `ModuleConfig`), while some can appear multiple times (e.g., `RegistryConfig`, `ProtocolConfig`, etc.).
 
-如果应用程序意外的扫描到了多个唯一配置类实例（比如用户在一个dubbo应用中错误了配置了两个`ApplicationConfig`），应该以哪种策略来处理这种情况呢？是直接抛异常？是保留前者忽略后者？是忽略前者保留后者？还是允许某一种形式的并存（比如后者的属性覆盖到前者上）？
+When the application unexpectedly scans multiple unique configuration class instances (like mistakenly configuring two `ApplicationConfig` in one Dubbo application), what strategy should be used to handle this situation? Should it throw an exception directly? Should it retain the former and ignore the latter? Should it ignore the former and keep the latter? Or should it allow some form of coexistence (for example, the latter's attributes overriding those of the former)?
 
-目前dubbo中的唯一配置类类型和以及某唯一配置类型找到多个实例允许的配置模式/策略如下。
+Currently, in Dubbo, the unique configuration class types and allowed configuration patterns/strategies for finding multiple instances of a unique configuration type are as follows.
 
-**唯一配置类类型**
+**Unique Configuration Class Types**
 
-`ApplicationConfig`、`MonitorConfig`、`MetricsConfig`、`SslConfig`、`ModuleConfig`。
+`ApplicationConfig`, `MonitorConfig`, `MetricsConfig`, `SslConfig`, `ModuleConfig`.
 
-前四个属于应用级别的，最后一个属于模块级别的。
+The first four belong to application-level, while the last one belongs to module-level.
 
-**配置模式**
+**Configuration Patterns**
 
-- `strict`：严格模式。直接抛异常。
-- `override`：覆盖模式。忽略前者保留后者。
-- `ignore`：忽略模式。忽略后者保留前者。
-- `override_all`：属性覆盖模式。不管前者的属性值是否为空，都将后者的属性覆盖/设置到前者上。
-- `override_if_absent`：若不存在则属性覆盖模式。只有前者对应属性值为空，才将后者的属性覆盖/设置到前者上。
+- `strict`: Strict mode. Throws an exception directly.
+- `override`: Override mode. Ignores the former and keeps the latter.
+- `ignore`: Ignore mode. Ignores the latter and keeps the former.
+- `override_all`: Attribute override mode. Regardless of whether the former's attribute values are empty, the latter's attributes will override/set to the former.
+- `override_if_absent`: If absent, attribute override mode. Only if the former corresponding attribute values are empty, will the latter's attributes override/set to the former.
 
-注：后两种还影响配置实例的属性覆盖。因为dubbo有多种配置方式，即存在多个配置源，配置源也有优先级。比如通过xml方式配置了一个`ServiceConfig`且指定属性`version=1.0.0`，同时我们又在外部配置(配置中心)中配置了`dubbo.service.{interface}.version=2.0.0`，在没有引入`config-mode`配置项之前，按照原有的配置源优先级，最终实例的`version=2.0.0`。但是引入了`config-mode`配置项之后，配置优先级规则也不再那么严格，即如果指定`config-mode为override_all`则为`version=2.0.0`，如果`config-mode为override_if_absent`则为`version=1.0.0`，`config-mode`为其他值则遵循原有配置优先级进行属性设值/覆盖。
+Note: The last two also affect the attribute override of configuration instances. Since Dubbo has multiple configuration methods, there exist multiple configuration sources with priorities. For example, if a `ServiceConfig` is configured through XML with the property `version=1.0.0`, while we also have `dubbo.service.{interface}.version=2.0.0` configured in an external configuration (configuration center), without introducing the `config-mode` configuration item, based on the original configuration source priority, the final instance's `version=2.0.0`. However, once the `config-mode` configuration item is introduced, the priority rules are not that strict anymore; if `config-mode` is set to `override_all`, it will be `version=2.0.0`, and if `config-mode` is `override_if_absent`, it will be `version=1.0.0`, and if `config-mode` has other values, it will follow the original configuration priority for attribute setting/overriding.
 
-**配置方式**
+**Configuration Methods**
 
-配置的key为`dubbo.config.mode`，配置的值为如上描述的几种，默认的策略值为`strict`。下面展示了配置示例
+The configuration key is `dubbo.config.mode`, and the value is one of the types described above, with the default strategy value being `strict`. Below are examples of configurations:
 
 ```properties
 # JVM -D
 -Ddubbo.config.mode=strict
 
-# 环境变量
+# Environment Variable
 DUBBO_CONFIG_MODE=strict
 
-# 外部配置(配置中心)、Spring应用的Environment、dubbo.properties
+# External Configuration (Configuration Center), Spring application Environment, dubbo.properties
 dubbo.config.mode=strict
 ```
 {{% /alert %}}
 
-### service 与 reference
-`service` 与 `reference` 是 Dubbo 最基础的两个配置项，它们用来将某个指定的接口或实现类注册为 Dubbo 服务，并通过配置项控制服务的行为。
-* `service` 用于服务提供者端，通过 `service` 配置的接口和实现类将被定义为标准的 Dubbo 服务，从而实现对外提供 RPC 请求服务。
-* `reference` 用于服务消费者端，通过 `reference` 配置的接口将被定义为标准的 Dubbo 服务，生成的 proxy 可发起对远端的 RPC 请求。
+### service and reference
+`service` and `reference` are the two most fundamental configuration items in Dubbo, used to register a specified interface or implementation class as a Dubbo service and control the service's behavior through configuration items.
+* `service` is used on the service provider side; the interfaces and implementation classes configured by `service` will be defined as standard Dubbo services, thereby providing RPC request services externally.
+* `reference` is used on the consumer side; interfaces configured by `reference` will be defined as standard Dubbo services, and the generated proxy can initiate RPC requests to the remote service.
 
-> 一个应用中可以配置任意多个 `service` 与 `reference`。
+> An application can configure any number of `service` and `reference`.
 
-### consumer 与 provider
-* 当应用内有多个 `reference` 配置时，`consumer` 指定了这些 `reference` 共享的默认值，如共享的超时时间等以简化繁琐的配置，如某个 `reference` 中单独设置了配置项值则该 `reference` 中的配置优先级更高。
-* 当应用内有多个 `service` 配置时，`provider` 指定了这些 `service` 共享的默认值，如某个 `service` 中单独设置了配置项值则该 `service` 中的配置优先级更高。
+### consumer and provider
+* When there are multiple `reference` configurations in the application, `consumer` specifies the default values shared among these `reference`, such as shared timeout values, to simplify complex configurations. If a configuration item value is set individually in a `reference`, the priority of that configuration will be higher.
+* When there are multiple `service` configurations in the application, `provider` specifies the default values shared among these `service`, such that if a configuration item value is set individually in a `service`, the priority of that configuration will be higher.
 
-> consumer 组件还可以对 reference 进行虚拟分组，不通分组下的 reference 可有不同的 consumer 默认值设定；如在 XML 格式配置中，<dubbo:reference /> 标签可通过嵌套在 <dubbo:consumer /> 标签之中实现分组。provider 与 service 之间也可以实现相同的效果。
+> The consumer component can also virtual-group references; references in different groups can have different default value settings, such as in XML format configuration, the <dubbo:reference /> tag can be nested within the <dubbo:consumer /> tag to achieve grouping. The same effect can be achieved between provider and service.
 
-## 配置方式
+## Configuration Methods
 
-### 属性配置
-根据属性Key-value生成配置组件，类似SpringBoot的ConfigurationProperties，具体请参考[属性配置](../properties)。
+### Property Configuration
+Generate configuration components based on property Key-value, similar to Spring Boot's ConfigurationProperties; please refer to [Property Configuration](../properties).
 
-属性配置的另外一个重要的功能特性是[属性覆盖](../principle/#32-属性覆盖)，使用外部属性的值覆盖已创建的配置组件属性。
+Another important feature of property configuration is [Property Overrides](../principle/#32-Property Overrides), which uses values from external properties to override the properties of already created configuration components.
 
-如果要将属性配置放到外部的配置中心，请参考[外部化配置](../principle/#33-外部化配置)。
+Please refer to [Externalized Configuration](../principle/#33-Externalized Configuration) for placing property configurations in external configuration centers.
 
-除了外围驱动方式上的差异，Dubbo 的配置读取总体上遵循了以下几个原则：
+Apart from the differences in outer driving methods, Dubbo's configuration reading generally follows these principles:
 
-1. Dubbo 支持了多层级的配置，并按预定优先级自动实现配置间的覆盖，最终所有配置汇总到数据总线URL后驱动后续的服务暴露、引用等流程。
-2. 配置格式以 Properties 为主，在配置内容上遵循约定的 `path-based` 的[命名规范](../principle/#1-配置格式)
+1. Dubbo supports multi-level configurations and automatically implements the overrides between configurations based on predetermined priorities. Ultimately, all configurations are summarized to the data bus URL to drive subsequent service exposure and reference processes.
+2. The configuration format is primarily Properties, following the agreed-upon `path-based` [naming conventions](../principle/#1-Configuration Format).
 
-### API 配置
-> 以Java编码的方式组织配置，包括Raw API和Bootstrap API，具体请参考[API配置](../api)。
+### API Configuration
+> Organizing configurations in Java code, including Raw API and Bootstrap API, please refer to [API Configuration](../api).
 
 ```java
 public static void main(String[] args) throws IOException {
@@ -125,8 +125,8 @@ public static void main(String[] args) throws IOException {
 }
 ```
 
-### XML 配置
-> 以XML方式配置各种组件，支持与Spring无缝集成，具体请参考[XML配置](../xml)。
+### XML Configuration
+> Configuring various components in XML format, supporting seamless integration with Spring; please refer to [XML Configuration](../xml).
 
 ```xml
   <!-- dubbo-provier.xml -->
@@ -142,11 +142,11 @@ public static void main(String[] args) throws IOException {
   <dubbo:service interface="org.apache.dubbo.samples.basic.api.DemoService" ref="demoService"/>
 ```
 
-### Annotation 配置
-> 以注解方式暴露服务和引用服务接口，支持与Spring无缝集成，具体请参考[Annotation配置](../annotation)。
+### Annotation Configuration
+> Exposing service and reference service interfaces using annotations, supporting seamless integration with Spring; please refer to [Annotation Configuration](../annotation).
 
 ```java
-  // AnnotationService服务实现
+  // AnnotationService service implementation
 
   @DubboService
   public class AnnotationServiceImpl implements AnnotationService {
@@ -167,8 +167,8 @@ dubbo.protocol.name=dubbo
 dubbo.protocol.port=20880
 ```
 
-### Spring Boot 配置
-> 使用 Spring Boot 减少非必要配置，结合 Annotation 与 application.properties/application.yml 开发 Dubbo 应用，具体请参考[Annotation 配置](../annotation)。
+### Spring Boot Configuration
+> Using Spring Boot to reduce unnecessary configurations, combining Annotation with application.properties/application.yml to develop Dubbo applications; please refer to [Annotation Configuration](../annotation).
 
 ```properties
 ## application.properties
@@ -194,20 +194,16 @@ dubbo.registry.address=N/A
 demo.service.version=1.0.0
 ```
 
-## 配置规范与来源
+## Configuration Specifications and Sources
 
-Dubbo 遵循一种 [path-based 的配置规范](../principle/)，每一个配置组件都可以通过这种方式进行表达。而在配置的来源上，总共支持 6 种配置来源，即 Dubbo 会分别尝试从以下几个位置尝试加载配置数据：
+Dubbo adheres to a [path-based configuration specification](../principle/), where each configuration component can be expressed in this manner. In terms of configuration sources, a total of 6 types of configuration sources are supported; that is, Dubbo will try to load configuration data from the following locations:
 
-- JVM System Properties，JVM -D 参数
-- System environment，JVM进程的环境变量
-- Externalized Configuration，[外部化配置](../principle/#33-外部化配置)，从配置中心读取
-- Application Configuration，应用的属性配置，从Spring应用的Environment中提取"dubbo"打头的属性集
-- API / XML /注解等编程接口采集的配置可以被理解成配置来源的一种，是直接面向用户编程的配置采集方式
-- 从classpath读取配置文件 dubbo.properties
-
-
-
-
+- JVM System Properties, JVM -D arguments
+- System environment, JVM process's environment variables
+- Externalized Configuration, [Externalized Configuration](../principle/#33-Externalized Configuration), reading from configuration centers
+- Application Configuration, the application's property configuration, extracting attribute sets starting with "dubbo" from the Spring application's Environment
+- API / XML / annotation and other programming interfaces that can be understood as a type of configuration source, a method aimed directly at user programming for configuration collection
+- Reading configuration files dubbo.properties from the classpath
 
 
 > [dubbo-spring-boot-samples](https://github.com/apache/dubbo-spring-boot-project/tree/master/dubbo-spring-boot-samples)
@@ -235,44 +231,44 @@ Dubbo 遵循一种 [path-based 的配置规范](../principle/)，每一个配置
   ## service default version
   dubbo.provider.version=1.0.0
 ```
-接下来，我们就围绕这个示例，分别从配置格式、配置来源、加载流程三个方面对 Dubbo 配置的工作原理进行分析。
+Next, we'll analyze the working principles of Dubbo configuration from three aspects: configuration format, configuration sources, and loading processes.
 
-## 1 配置格式
+## 1 Configuration Format
 
-目前Dubbo支持的所有配置都是`.properties`格式的，包括`-D`、`Externalized Configuration`等，`.properties`中的所有配置项遵循一种`path-based`的配置格式。
+All configurations currently supported by Dubbo are in `.properties` format, including `-D`, `Externalized Configuration`, etc., with all configuration items in `.properties` following a `path-based` configuration format.
 
-在Spring应用中也可以将属性配置放到`application.yml`中，其树层次结构的方式可读性更好一些。
+In Spring applications, property configurations can also be placed in `application.yml`, which is more readable with its tree hierarchical structure.
 
 ```properties
-# 应用级配置（无id）
+# Application-level configuration (no id)
 dubbo.{config-type}.{config-item}={config-item-value}
 
-# 实例级配置（指定id或name）
+# Instance-level configuration (specifying id or name)
 dubbo.{config-type}s.{config-id}.{config-item}={config-item-value}
 dubbo.{config-type}s.{config-name}.{config-item}={config-item-value}
 
-# 服务接口配置
+# Service interface configuration
 dubbo.service.{interface-name}.{config-item}={config-item-value}
 dubbo.reference.{interface-name}.{config-item}={config-item-value}
 
-# 方法配置
+# Method configuration
 dubbo.service.{interface-name}.{method-name}.{config-item}={config-item-value}
 dubbo.reference.{interface-name}.{method-name}.{config-item}={config-item-value}
 
-# 方法argument配置
+# Method argument configuration
 dubbo.reference.{interface-name}.{method-name}.{argument-index}.{config-item}={config-item-value}
 
 ```
 
-### 1.1 应用级配置（无id）
+### 1.1 Application-level Configuration (no id)
 
-应用级配置的格式为：配置类型单数前缀，无id/name。
+The format for application-level configuration is: singular prefix for configuration type, without id/name.
 ```properties
-# 应用级配置（无id）
+# Application-level configuration (no id)
 dubbo.{config-type}.{config-item}={config-item-value}
 ```
 
-类似 `application`、`monitor`、`metrics` 等都属于应用级别组件，因此仅允许配置单个实例；而 `protocol`、`registry` 等允许配置多个的组件，在仅需要进行单例配置时，可采用此节描述的格式。常见示例如下：
+Similar to `application`, `monitor`, `metrics`, etc., these belong to application-level components, thus only allowing single instances to be configured; components like `protocol`, `registry`, etc., allow multiple configurations, and one may use the described format when only needing a singleton configuration. Common examples are as follows:
 
 ```properties
 dubbo.application.name=demo-provider
@@ -284,21 +280,21 @@ dubbo.protocol.name=dubbo
 dubbo.protocol.port=-1
 ```
 
-### 1.2 实例级配置（指定id或name）
+### 1.2 Instance-level Configuration (specifying id or name)
 
-针对某个实例的属性配置需要指定id或者name，其前缀格式为：配置类型复数前缀 + id/name。适用于 `protocol`、`registry` 等支持多例配置的组件。
+The property configuration of a specific instance requires specifying id or name, where the prefix format is: plural prefix for configuration type + id/name. Applicable to components supporting multiple instance configurations like `protocol`, `registry`, etc.
 
 ```properties
-# 实例级配置（指定id或name）
+# Instance-level configuration (specifying id or name)
 dubbo.{config-type}s.{config-id}.{config-item}={config-item-value}
 dubbo.{config-type}s.{config-name}.{config-item}={config-item-value}
 ```
 
-* 如果不存在该id或者name的实例，则框架会基于这里列出来的属性创建配置组件实例。
-* 如果已存在相同id或name的实例，则框架会将这里的列出的属性作为已有实例配置的补充，详细请参考[属性覆盖](../principle#32-属性覆盖)。
-* 具体的配置复数形式请参考[单复数配置对照表](../principle#17-配置项单复数对照表)
+* If the instance with such an id or name doesn't exist, the framework will create configuration component instances based on the properties listed here.
+* If an identical id or name instance exists, the framework will use the listed properties as supplements to the existing instance configuration; refer to [Property Overrides](../principle#32-Property Overrides) for details.
+* For specific plural configuration forms, refer to [Singular-Plural Configuration Correspondence Table](../principle#17-Configuration Item Singular-Plural Correspondence).
 
-配置示例：
+Configuration examples:
 
 ```properties
 dubbo.registries.unit1.address=zookeeper://127.0.0.1:2181
@@ -311,27 +307,27 @@ dubbo.protocols.hessian.name=hessian
 dubbo.protocols.hessian.port=8089
 ```
 
-### 1.3 服务接口配置
+### 1.3 Service Interface Configuration
 
 ```properties
 dubbo.service.org.apache.dubbo.samples.api.DemoService.timeout=5000
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.timeout=6000
 ```
 
-### 方法配置
+### Method Configuration
 
-方法配置格式:
+Method configuration format:
 
 ```properties
-# 方法配置
+# Method configuration
 dubbo.service.{interface-name}.{method-name}.{config-item}={config-item-value}
 dubbo.reference.{interface-name}.{method-name}.{config-item}={config-item-value}
 
-# 方法argument配置
+# Method argument configuration
 dubbo.reference.{interface-name}.{method-name}.{argument-index}.{config-item}={config-item-value}
 ```
 
-方法配置示例：
+Method configuration examples:
 ```properties
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.timeout=7000
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.oninvoke=notifyService.onInvoke
@@ -340,7 +336,7 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.onthrow=notify
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.0.callback=true
 ```
 
-等价于XML配置：
+Equivalent to XML configuration:
 
 ```xml
 <dubbo:reference interface="org.apache.dubbo.samples.api.DemoService" >
@@ -351,41 +347,41 @@ dubbo.reference.org.apache.dubbo.samples.api.DemoService.sayHello.0.callback=tru
 </dubbo:reference>
 ```
 
-### 1.4 参数配置
+### 1.4 Parameter Configuration
 
-parameters参数为map对象，支持xxx.parameters=[{key:value},{key:value}]方式进行配置。
+The parameters are a map object, supporting the configuration in the format of xxx.parameters=[{key:value},{key:value}].
 ```properties
 dubbo.application.parameters=[{item1:value1},{item2:value2}]
 dubbo.reference.org.apache.dubbo.samples.api.DemoService.parameters=[{item3:value3}]
 ```
 
-### 1.5 传输层配置
+### 1.5 Transport Layer Configuration
 
-triple协议采用Http2做底层通信协议，允许使用者自定义Http2的[6个settings参数](https://datatracker.ietf.org/doc/html/rfc7540#section-6.5.2)
+The triple protocol uses HTTP2 as the underlying communication protocol, allowing users to customize six settings parameters for HTTP2 [6 settings parameters](https://datatracker.ietf.org/doc/html/rfc7540#section-6.5.2)
 
-配置格式如下：
+The configuration format is as follows:
 
 ```properties
-# 通知对端header压缩索引表的上限个数
+# Limit on the number of entries in the header compression index table for the other end
 dubbo.rpc.tri.header-table-size=4096
 
-# 启用服务端推送功能
+# Enable server push functionality
 dubbo.rpc.tri.enable-push=false
 
-# 通知对端允许的最大并发流数
+# The maximum number of concurrent streams allowed for the other end
 dubbo.rpc.tri.max-concurrent-streams=2147483647
 
-# 声明发送端的窗口大小
+# The window size declared by the sender
 dubbo.rpc.tri.initial-window-size=1048576
 
-# 设置帧的最大字节数
+# Set the maximum number of bytes for frames
 dubbo.rpc.tri.max-frame-size=32768
 
-# 通知对端header未压缩的最大字节数
+# Maximum number of bytes for uncompressed headers permitted for the other end
 dubbo.rpc.tri.max-header-list-size=8192
 ```
 
-等价于yml配置：
+Equivalent to YAML configuration:
 
 ```yaml
 dubbo:
@@ -401,121 +397,121 @@ dubbo:
 
 
 
-### 1.6 属性与XML配置映射规则
+### 1.6 Property and XML Configuration Mapping Rules
 
-可以将 xml 的 tag 名和属性名组合起来，用 ‘.’ 分隔。每行一个属性。
+The tag names and property names of XML can be combined with a ‘.’ separator. One property per line.
 
-* `dubbo.application.name=foo` 相当于 `<dubbo:application name="foo" />`
-* `dubbo.registry.address=10.20.153.10:9090` 相当于 `<dubbo:registry address="10.20.153.10:9090" /> `
+* `dubbo.application.name=foo` is equivalent to `<dubbo:application name="foo" />`
+* `dubbo.registry.address=10.20.153.10:9090` is equivalent to `<dubbo:registry address="10.20.153.10:9090" /> `
 
-如果在 xml 配置中有超过一个的 tag，那么你可以使用 ‘id’ 进行区分。如果你不指定id，它将作用于所有 tag。
+If there are more than one tags in XML configuration, you can use ‘id’ to distinguish. If you do not specify id, it will apply to all tags.
 
-* `dubbo.protocols.rmi.port=1099` 相当于 `<dubbo:protocol id="rmi" name="rmi" port="1099" /> `
-* `dubbo.registries.china.address=10.20.153.10:9090` 相当于 `<dubbo:registry id="china" address="10.20.153.10:9090" />`
+* `dubbo.protocols.rmi.port=1099` is equivalent to `<dubbo:protocol id="rmi" name="rmi" port="1099" /> `
+* `dubbo.registries.china.address=10.20.153.10:9090` is equivalent to `<dubbo:registry id="china" address="10.20.153.10:9090" />`
 
-### 1.7 配置项单复数对照表
-复数配置的命名与普通单词变复数的规则相同：
+### 1.7 Configuration Item Singular-Plural Correspondence Table
+The naming for plural configurations follows the same rules for pluralizing ordinary words:
 
-1. 字母y结尾时，去掉y，改为ies
-2. 字母s结尾时，加es
-3. 其它加s
+1. If it ends with the letter y, change y to ies.
+2. If it ends with the letter s, add es.
+3. Otherwise, add s.
 
-| Config Type                       | 单数配置                                                     | 复数配置                            |
-| --------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
-| application                       | dubbo.application.xxx=xxx                                    | dubbo.applications.{id}.xxx=xxx <br/> dubbo.applications.{name}.xxx=xxx    |
-| protocol                          | dubbo.protocol.xxx=xxx                                       | dubbo.protocols.{id}.xxx=xxx <br/> dubbo.protocols.{name}.xxx=xxx       |
-| module                            | dubbo.module.xxx=xxx                                         | dubbo.modules.{id}.xxx=xxx <br/> dubbo.modules.{name}.xxx=xxx         |
-| registry                          | dubbo.registry.xxx=xxx                                       | dubbo.registries.{id}.xxx=xxx       |
-| monitor                           | dubbo.monitor.xxx=xxx                                        | dubbo.monitors.{id}.xxx=xxx         |
-| config-center                     | dubbo.config-center.xxx=xxx                                  | dubbo.config-centers.{id}.xxx=xxx   |
-| metadata-report                   | dubbo.metadata-report.xxx=xxx                                | dubbo.metadata-reports.{id}.xxx=xxx |
-| ssl                               | dubbo.ssl.xxx=xxx                                            | dubbo.ssls.{id}.xxx=xxx             |
-| metrics                           | dubbo.metrics.xxx=xxx                                        | dubbo.metricses.{id}.xxx=xxx        |
-| provider                          | dubbo.provider.xxx=xxx                                       | dubbo.providers.{id}.xxx=xxx        |
-| consumer                          | dubbo.consumer.xxx=xxx                                       | dubbo.consumers.{id}.xxx=xxx        |
-| service                           | dubbo.service.{interfaceName}.xxx=xxx                        | 无                                  |
-| reference                         | dubbo.reference.{interfaceName}.xxx=xxx                      | 无                                  |
-| method                            | dubbo.service.{interfaceName}.{methodName}.xxx=xxx <br/> dubbo.reference.{interfaceName}.{methodName}.xxx=xxx | 无                                  |
-| argument                          | dubbo.service.{interfaceName}.{methodName}.{arg-index}.xxx=xxx | 无                                  |
+| Config Type                       | Singular Configuration                                      | Plural Configuration                          |
+| --------------------------------- | ---------------------------------------------------------- | --------------------------------------------- |
+| application                       | dubbo.application.xxx=xxx                                  | dubbo.applications.{id}.xxx=xxx <br/> dubbo.applications.{name}.xxx=xxx |
+| protocol                          | dubbo.protocol.xxx=xxx                                     | dubbo.protocols.{id}.xxx=xxx <br/> dubbo.protocols.{name}.xxx=xxx  |
+| module                            | dubbo.module.xxx=xxx                                       | dubbo.modules.{id}.xxx=xxx <br/> dubbo.modules.{name}.xxx=xxx      |
+| registry                          | dubbo.registry.xxx=xxx                                     | dubbo.registries.{id}.xxx=xxx                |
+| monitor                           | dubbo.monitor.xxx=xxx                                      | dubbo.monitors.{id}.xxx=xxx                  |
+| config-center                     | dubbo.config-center.xxx=xxx                                | dubbo.config-centers.{id}.xxx=xxx            |
+| metadata-report                   | dubbo.metadata-report.xxx=xxx                              | dubbo.metadata-reports.{id}.xxx=xxx          |
+| ssl                               | dubbo.ssl.xxx=xxx                                          | dubbo.ssls.{id}.xxx=xxx                       |
+| metrics                           | dubbo.metrics.xxx=xxx                                      | dubbo.metricses.{id}.xxx=xxx                  |
+| provider                          | dubbo.provider.xxx=xxx                                     | dubbo.providers.{id}.xxx=xxx                  |
+| consumer                          | dubbo.consumer.xxx=xxx                                     | dubbo.consumers.{id}.xxx=xxx                  |
+| service                           | dubbo.service.{interfaceName}.xxx=xxx                      | None                                          |
+| reference                         | dubbo.reference.{interfaceName}.xxx=xxx                    | None                                          |
+| method                            | dubbo.service.{interfaceName}.{methodName}.xxx=xxx <br/> dubbo.reference.{interfaceName}.{methodName}.xxx=xxx | None                                          |
+| argument                          | dubbo.service.{interfaceName}.{methodName}.{arg-index}.xxx=xxx | None                                          |
 
 
-## 2 配置来源
+## 2 Configuration Sources
 
-Dubbo 默认支持 6 种配置来源：
+Dubbo supports six configuration sources by default:
 
-- JVM System Properties，JVM -D 参数
-- System environment，JVM进程的环境变量
-- Externalized Configuration，[外部化配置](#33-外部化配置)，从配置中心读取
-- Application Configuration，应用的属性配置，从Spring应用的Environment中提取"dubbo"打头的属性集
-- API / XML /注解等编程接口采集的配置可以被理解成配置来源的一种，是直接面向用户编程的配置采集方式
-- 从classpath读取配置文件 dubbo.properties
+- JVM System Properties, JVM -D arguments
+- System environment, JVM process's environment variables
+- Externalized Configuration, [Externalized Configuration](#33-Externalized Configuration), reading from configuration centers
+- Application Configuration, the application's property configuration, extracting attribute sets starting with "dubbo" from the Spring application's Environment
+- API / XML / annotation and other programming interfaces that can be understood as a configuration source, a method aimed directly at user programming for configuration collection
+- Reading configuration files dubbo.properties from the classpath
 
-关于dubbo.properties属性：
+Regarding the dubbo.properties attributes:
 
-1. 如果在 classpath 下有超过一个 dubbo.properties 文件，比如，两个 jar 包都各自包含了 dubbo.properties，dubbo 将随机选择一个加载，并且打印错误日志。
-2. Dubbo 可以自动加载 classpath 根目录下的 dubbo.properties，但是你同样可以使用 JVM 参数来指定路径：`-Ddubbo.properties.file=xxx.properties`。
+1. If there are more than one dubbo.properties files in the classpath (for example, two jar packages each containing dubbo.properties), Dubbo will randomly select one to load and print an error log.
+2. Dubbo can automatically load dubbo.properties from the root directory of the classpath, but you can also specify the path using the JVM parameter: `-Ddubbo.properties.file=xxx.properties`.
 
-### 2.1 覆盖关系
+### 2.1 Cover Relationship
 
-如果通过多种配置来源指定了相同的配置项，则会出现配置项的互相覆盖，具体覆盖关系和优先级请参考下一小节。
+If the same configuration item is specified through multiple configuration sources, overlaps may occur, and specific coverage relationships and priorities are referenced in the next subsection.
 
-## 3 配置加载流程
+## 3 Configuration Loading Process
 
-### 3.1 处理流程
+### 3.1 Handling Process
 
-Dubbo 配置加载大概分为两个阶段：
+Dubbo's configuration loading roughly consists of two stages:
 
-![配置加载流程](/imgs/v3/config/config-load.svg)
+![Configuration Loading Process](/imgs/v3/config/config-load.svg)
 
-* 第一阶段为DubboBootstrap初始化之前，在Spring context启动时解析处理XML配置/注解配置/Java-config 或者是执行API配置代码，创建config bean并且加入到ConfigManager中。
-* 第二阶段为DubboBootstrap初始化过程，从配置中心读取外部配置，依次处理实例级属性配置和应用级属性配置，最后刷新所有配置实例的属性，也就是[属性覆盖](../principle#32-属性覆盖)。
+* The first stage involves parsing and processing XML configuration/annotation configuration/Java configuration or executing API configuration code before the DubboBootstrap initialization, creating config beans and adding them to the ConfigManager.
+* The second stage involves the DubboBootstrap initialization process, reading external configurations from the configuration center, processing instance-level attribute configurations and application-level attribute configurations in sequence, and finally refreshing all configuration instances' attributes, i.e., [Property Overrides](../principle#32-Property Overrides).
 
-### 3.2 属性覆盖
+### 3.2 Property Overrides
 
-发生属性覆盖可能有两种情况，并且二者可能是会同时发生的：
-1. 不同配置源配置了相同的配置项
-2. 相同配置源，但在不同层次指定了相同的配置项
+Property overrides may occur in two ways, and both may happen simultaneously:
+1. Different configuration sources specify the same configuration item.
+2. The same configuration source, but the same configuration item is specified at different levels.
 
-#### 3.2.1 不同配置源
+#### 3.2.1 Different Configuration Sources
 
-![覆盖关系](/imgs/blog/configuration.jpg)
+![Cover Relationship](/imgs/blog/configuration.jpg)
 
-#### 3.2.1 相同配置源
+#### 3.2.2 Same Configuration Sources
 
-属性覆盖是指用配置的属性值覆盖config bean实例的属性，类似Spring [PropertyOverrideConfigurer](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/PropertyOverrideConfigurer.html) 的作用。
+Property override refers to using the configured attribute values to override the properties of config bean instances, similar to Spring's [PropertyOverrideConfigurer](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/PropertyOverrideConfigurer.html).
 
 > Property resource configurer that overrides bean property values in an application context definition. It pushes values from a properties file into bean definitions.
 Configuration lines are expected to be of the following form:
 >
 > beanName.property=value
 
-但与`PropertyOverrideConfigurer`的不同之处是，Dubbo的属性覆盖有多个匹配格式，优先级从高到低依次是：
+However, unlike `PropertyOverrideConfigurer`, Dubbo's property overrides have multiple matching formats, with priorities ranked from high to low as follows:
 
 ```properties
-#1. 指定id的实例级配置
+#1. Instance-level configuration specifying id
 dubbo.{config-type}s.{config-id}.{config-item}={config-item-value}
 
-#2. 指定name的实例级配置
+#2. Instance-level configuration specifying name
 dubbo.{config-type}s.{config-name}.{config-item}={config-item-value}
 
-#3. 应用级配置（单数配置）
+#3. Application-level configuration (singular)
 dubbo.{config-type}.{config-item}={config-item-value}
 ```
 
-属性覆盖处理流程：
+Property overriding handling process:
 
-按照优先级从高到低依次查找，如果找到此前缀开头的属性，则选定使用这个前缀提取属性，忽略后面的配置。
+The search is conducted from high to low priority; if a preceding prefix property is found, the properties using this prefix will be selected, ignoring subsequent configurations.
 
-![属性覆盖流程](/imgs/v3/config/properties-override.svg)
+![Property Override Process](/imgs/v3/config/properties-override.svg)
 
-### 3.3 外部化配置
+### 3.3 Externalized Configuration
 
-外部化配置目的之一是实现配置的集中式管理，这部分业界已经有很多成熟的专业配置系统如 Apollo, Nacos 等，Dubbo 所做的主要是保证能配合这些系统正常工作。
+One of the aims of externalized configuration is to achieve centralized management of configurations. There are many mature professional configuration systems in the industry, such as Apollo and Nacos. What Dubbo does primarily is ensure proper functionality with these systems.
 
-外部化配置和其他本地配置在内容和格式上并无区别，可以简单理解为 `dubbo.properties` 的外部化存储，配置中心更适合将一些公共配置如注册中心、元数据中心配置等抽取以便做集中管理。
+Externalized configurations differ in content and format, and can simply be understood as the external storage of `dubbo.properties`, allowing the configuration centers to better manage common configurations such as registry addresses and metadata center configurations.
 
 ```properties
-# 将注册中心地址、元数据中心地址等配置集中管理，可以做到统一环境、减少开发侧感知。
+# Centralize the management of registry address, metadata center address, etc., enabling unified environments and reducing development-side awareness.
 dubbo.registry.address=zookeeper://127.0.0.1:2181
 dubbo.registry.simplified=true
 
@@ -527,32 +523,32 @@ dubbo.protocol.port=20880
 dubbo.application.qos.port=33333
 ```
 
-- 优先级
-  外部化配置默认较本地配置有更高的优先级，因此这里配置的内容会覆盖本地配置值，关于各配置形式间的[覆盖关系](#21-覆盖关系) 有单独一章说明。
+- Priority
+  By default, externalized configurations have a higher priority than local configurations, so the contents configured here will override local configuration values; details regarding the [cover relationship](#21-Cover Relationship) are explained separately in one chapter.
 
-- 作用域
-  外部化配置有全局和应用两个级别，全局配置是所有应用共享的，应用级配置是由每个应用自己维护且只对自身可见的。当前已支持的扩展实现有 Zookeeper、Apollo、Nacos。
+- Scope
+  Externalized configurations come in global and application levels. Global configurations are shared among all applications, while application-level configurations are maintained by each application and are only visible to them. Current supported extended implementations include Zookeeper, Apollo, and Nacos.
 
-#### 3.3.1 外部化配置使用方式
+#### 3.3.1 Using Externalized Configuration
 
-1. 增加 config-center 配置
+1. Add config-center configuration
 
 ```xml
 <dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 ```
 
-2. 在相应的配置中心（zookeeper、Nacos 等）增加全局配置项，如下以 Nacos 为例：
+2. Add global configuration items in the corresponding configuration center (Zookeeper, Nacos, etc.), as shown below in Nacos, for example:
 
 ![nacos-extenal-properties](/imgs/v3/config-center/nacos-extenal-properties.png)
 
-开启外部化配置后，registry、metadata-report、protocol、qos 等全局范围的配置理论上都不再需要在应用中配置，应用开发侧专注业务服务配置，一些全局共享的全局配置转而由运维人员统一配置在远端配置中心。
+After enabling externalized configuration, global configurations for registry, metadata-report, protocol, qos, etc. theoretically no longer need to be configured in the application, allowing application developers to focus on business service configurations. Shared global configurations can instead be uniformly set by the operations team in remote configuration centers.
 
-这样能做到的效果就是，应用只需要关心：
-* 服务暴露、订阅配置
-* 配置中心地址
-当部署到不同的环境时，其他配置就能自动的被从对应的配置中心读取到。
+This allows for the scenario where application only needs to care about:
+* Service exposure and subscription configurations
+* Configuration center address
+When deployed in different environments, other configurations can automatically be retrieved from the corresponding configuration center.
 
-举例来说，每个应用中 Dubbo 相关的配置只有以下内容可能就足够了，其余的都托管给相应环境下的配置中心：
+For instance, Dubbo-related configurations in each application may only need to include the following content, while the rest are managed by the specific environment's configuration center:
 
 ```yaml
 dubbo
@@ -562,17 +558,18 @@ dubbo
     address: nacos://127.0.0.1:8848
 ```
 
-#### 3.3.2 自行加载外部化配置
+#### 3.3.2 Custom Loading of Externalized Configuration
 
-所谓 Dubbo 对配置中心的支持，本质上就是把 `.properties` 从远程拉取到本地，然后和本地的配置做一次融合。理论上只要 Dubbo 框架能拿到需要的配置就可以正常的启动，它并不关心这些配置是自己加载到的还是应用直接塞给它的，所以Dubbo还提供了以下API，让用户将自己组织好的配置塞给 Dubbo 框架（配置加载的过程是用户要完成的），这样 Dubbo 框架就不再直接和 Apollo 或 Zookeeper 做读取配置交互。
+Dubbo's support for configuration centers essentially involves pulling `.properties` files from remote sources to the local machine, then merging them with the local configurations. Theoretically, as long as the Dubbo framework can obtain the necessary configurations, it can start normally. It doesn't matter whether these configurations were loaded by itself or directly provided by the application. Thus, Dubbo provides the following API, allowing users to push configured settings to the Dubbo framework themselves (users need to handle the configuration loading process), so that Dubbo no longer directly interacts with Apollo or Zookeeper for configuration reading.
 
 ```java
-// 应用自行加载配置
+// Application loads configurations by itself
 Map<String, String> dubboConfigurations = new HashMap<>();
 dubboConfigurations.put("dubbo.registry.address", "zookeeper://127.0.0.1:2181");
 dubboConfigurations.put("dubbo.registry.simplified", "true");
 
-//将组织好的配置塞给Dubbo框架
+// Push the organized configurations to the Dubbo framework
 ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setExternalConfig(dubboConfigurations);
 ```
+

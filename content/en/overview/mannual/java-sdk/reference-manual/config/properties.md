@@ -93,6 +93,7 @@ weight: 6
 |---|----|-----------|-------------|-----------|
 | enabled| java.lang.Boolean| Whether to enable correlation of the baggage context with logging contexts.| true| |
 | fields| java.util.List&lt;java.lang.String&gt;| List of fields that should be correlated with the logging context. That means that these fields would end up as key-value pairs in e.g. MDC.| | |
+
 ### dubbo.tracing.tracing-exporter.otlp-config
 **Class:** `org.apache.dubbo.config.nested.ExporterConfig$OtlpConfig`
 
@@ -102,6 +103,7 @@ weight: 6
 | endpoint| java.lang.String| URL to the Otlp API.| | |
 | headers| java.util.Map&lt;java.lang.String,java.lang.String&gt;| | | |
 | timeout| java.time.Duration| The maximum time to wait for the collector to process an exported batch of spans. (seconds)| 10| |
+
 ### dubbo.tracing.tracing-exporter.zipkin-config
 **Class:** `org.apache.dubbo.config.nested.ExporterConfig$ZipkinConfig`
 
@@ -110,6 +112,7 @@ weight: 6
 | connect-timeout| java.time.Duration| Connection timeout for requests to Zipkin. (seconds)| 1| |
 | endpoint| java.lang.String| URL to the Zipkin API.| | |
 | read-timeout| java.time.Duration| Read timeout for requests to Zipkin. (seconds)| 10| |
+
 ### dubbo.metrics.prometheus.exporter
 **Class:** `org.apache.dubbo.config.nested.PrometheusConfig$Exporter`
 
@@ -118,6 +121,7 @@ weight: 6
 | enable-http-service-discovery| java.lang.Boolean| Enable http service discovery for prometheus| | |
 | enabled| java.lang.Boolean| Enable prometheus exporter| | |
 | http-service-discovery-url| java.lang.String| Http service discovery url| | |
+
 ### dubbo.metrics.prometheus.pushgateway
 **Class:** `org.apache.dubbo.config.nested.PrometheusConfig$Pushgateway`
 
@@ -129,6 +133,7 @@ weight: 6
 | password| java.lang.String| Login password of the Prometheus Pushgateway| | |
 | push-interval| java.lang.Integer| Frequency with which to push metrics| | |
 | username| java.lang.String| Login user of the Prometheus Pushgateway| | |
+
 ### Unknown group
 **Class:** `Unknown`
 
@@ -142,6 +147,7 @@ weight: 6
 | dubbo.env.keys| java.lang.String| The keys for specify environment-specific keys, allowing for differentiation and utilization of various runtime environments (e.g., development, testing, production), the multiple-value is delimited by comma.| | |
 | dubbo.labels| java.lang.String| The labels for these service providers, enabling categorization and grouping, thereby enhancing their management and monitoring, the multiple-value is delimited by &#x27;;&#x27;.| | |
 | dubbo.scan.base-packages| java.util.Set&lt;java.lang.String&gt;| The basePackages to scan, the multiple-value is delimited by comma @see EnableDubbo#scanBasePackages().| | |
+
 ### dubbo.tracing.baggage
 **Class:** `org.apache.dubbo.config.nested.BaggageConfig`
 
@@ -149,23 +155,27 @@ weight: 6
 |---|----|-----------|-------------|-----------|
 | enabled| java.lang.Boolean| Whether baggage is enabled or not.| true| |
 | remote-fields| java.util.List&lt;java.lang.String&gt;| List of fields that are referenced the same in-process as it is on the wire. For example, the field &quot;x-vcap-request-id&quot; would be set as-is including the prefix.| | |
+
 ### dubbo.tracing.propagation
 **Class:** `org.apache.dubbo.config.nested.PropagationConfig`
 
 |Key|Type|Description|Default value|Deprecation|
 |---|----|-----------|-------------|-----------|
 | type| java.lang.String| Tracing context propagation type.| W3C| |
+
 ### dubbo.tracing.sampling
 **Class:** `org.apache.dubbo.config.nested.SamplingConfig`
 
 |Key|Type|Description|Default value|Deprecation|
 |---|----|-----------|-------------|-----------|
 | probability| java.lang.Float| Probability in the range from 0.0 to 1.0 that a trace will be sampled.| 0.1| |
+
 ### dubbo.tracing.tracing-exporter
 **Class:** `org.apache.dubbo.config.nested.ExporterConfig`
 
 |Key|Type|Description|Default value|Deprecation|
 |---|----|-----------|-------------|-----------|
+
 ### dubbo.rpc.tri
 **Class:** `org.apache.dubbo.config.TripleConfig`
 
@@ -177,6 +187,7 @@ weight: 6
 | max-concurrent-streams| java.lang.String| Maximum concurrent streams.| | |
 | max-frame-size| java.lang.String| Maximum frame size.| | |
 | max-header-list-size| java.lang.String| Maximum header list size.| | |
+
 ### dubbo
 **Class:** `org.apache.dubbo.spring.boot.autoconfigure.DubboConfigurationProperties`
 
@@ -192,6 +203,7 @@ weight: 6
 | providers| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ProviderConfig&gt;| Multiple configurations for Provider.| | |
 | registries| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.RegistryConfig&gt;| Multiple configurations for Registry.| | |
 | tracings| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.TracingConfig&gt;| Multiple configurations for TracingConfig.| | |
+
 ### dubbo.application
 **Class:** `org.apache.dubbo.config.ApplicationConfig`
 
@@ -251,6 +263,7 @@ weight: 6
 | startup-probe| java.lang.String| The probe for checking the startup of the application.| | |
 | trust-serialize-class-level| java.lang.Integer| The trust level for serialized classes.| | |
 | version| java.lang.String| The application version.| | |
+
 ### dubbo.config-center
 **Class:** `org.apache.dubbo.config.ConfigCenterConfig`
 
@@ -278,6 +291,7 @@ weight: 6
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | timeout| java.lang.Long| The timeout for accessing the config center. Default value is 30000L.| | |
 | username| java.lang.String| Username for authentication with the config center.| | |
+
 ### dubbo.consumer
 **Class:** `org.apache.dubbo.config.ConsumerConfig`
 
@@ -353,6 +367,7 @@ weight: 6
 | url-merge-processor| java.lang.String| Url Merge Processor Used to customize the URL merge of consumer and provider| | |
 | validation| java.lang.String| Enable JSR303 standard annotation validation for method parameters.| | |
 | version| java.lang.String| Version of the remote service referenced by the consumer/provider.| | |
+
 ### dubbo.metadata-report
 **Class:** `org.apache.dubbo.config.MetadataReportConfig`
 
@@ -382,6 +397,7 @@ weight: 6
 | sync-report| java.lang.Boolean| Synchronization report, with the default value as asynchronous.| | |
 | timeout| java.lang.Integer| The request timeout in milliseconds for the metadata center.| | |
 | username| java.lang.String| The username used to log in to the metadata center.| | |
+
 ### dubbo.metrics
 **Class:** `org.apache.dubbo.config.MetricsConfig`
 
@@ -409,6 +425,7 @@ weight: 6
 | rpc-level| java.lang.String| The level of metrics collection, which can be &quot;SERVICE&quot; or &quot;METHOD&quot;. The default is &quot;METHOD&quot;.| | |
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | use-global-registry| java.lang.Boolean| Decide whether to use the global registry of Micrometer.| | |
+
 ### dubbo.module
 **Class:** `org.apache.dubbo.config.ModuleConfig`
 
@@ -433,6 +450,7 @@ weight: 6
 | registry| org.apache.dubbo.config.RegistryConfig| | | |
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | version| java.lang.String| The module version| | |
+
 ### dubbo.monitor
 **Class:** `org.apache.dubbo.config.MonitorConfig`
 
@@ -452,6 +470,7 @@ weight: 6
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | username| java.lang.String| The monitor username| | |
 | version| java.lang.String| The monitor version| | |
+
 ### dubbo.protocol
 **Class:** `org.apache.dubbo.config.ProtocolConfig`
 
@@ -502,6 +521,7 @@ weight: 6
 | threadpool| java.lang.String| The name of the thread pool.| | |
 | threads| java.lang.Integer| The fixed size of the thread pool.| | |
 | transporter| java.lang.String| The transporter used for communication.| | |
+
 ### dubbo.provider
 **Class:** `org.apache.dubbo.config.ProviderConfig`
 
@@ -601,6 +621,7 @@ weight: 6
 | wait| java.lang.Integer| The wait time when stopping the service.| | |
 | warmup| java.lang.Integer| Warm-up period for the service.| | |
 | weight| java.lang.Integer| The service weight.| | |
+
 ### dubbo.registry
 **Class:** `org.apache.dubbo.config.RegistryConfig`
 
@@ -644,11 +665,13 @@ weight: 6
 | wait| java.lang.Integer| Wait time before stopping.| | Reason: null, use for replacement: null|
 | weight| java.lang.Integer| Affects traffic distribution among registries, useful when subscribing to multiple registries. Takes effect only when no preferred registry is specified.| | |
 | zone| java.lang.String| The region where the registry belongs, usually used to isolate traffics.| | |
+
 ### dubbo.rpc
 **Class:** `org.apache.dubbo.spring.boot.autoconfigure.DubboConfigurationProperties$RpcConfig`
 
 |Key|Type|Description|Default value|Deprecation|
 |---|----|-----------|-------------|-----------|
+
 ### dubbo.ssl
 **Class:** `org.apache.dubbo.config.SslConfig`
 
@@ -678,6 +701,7 @@ weight: 6
 | server-private-key-path-stream| java.io.InputStream| Input stream for the server&#x27;s private key (if provided).| | |
 | server-trust-cert-collection-path| java.lang.String| Path to the server&#x27;s trust certificate collection file.| | |
 | server-trust-cert-collection-path-stream| java.io.InputStream| Input stream for the server&#x27;s trust certificate collection (if provided).| | |
+
 ### dubbo.tracing
 **Class:** `org.apache.dubbo.config.TracingConfig`
 
@@ -690,6 +714,7 @@ weight: 6
 | need-refresh| java.lang.Boolean| Specifies if this configuration should be refreshed (true for refreshing).| true| |
 | prefixes| java.util.List&lt;java.lang.String&gt;| | | |
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
+
 ### dubbo.metrics.aggregation
 **Class:** `org.apache.dubbo.config.nested.AggregationConfig`
 
@@ -703,6 +728,7 @@ weight: 6
 | enabled| java.lang.Boolean| Enable aggregation or not.| | |
 | qps-time-window-mill-seconds| java.lang.Integer| The time window in milliseconds for QPS (Queries Per Second) aggregation.| | |
 | time-window-seconds| java.lang.Integer| The time window in seconds for time window quantile.| | |
+
 ### dubbo.metrics.histogram
 **Class:** `org.apache.dubbo.config.nested.HistogramConfig`
 
@@ -715,6 +741,7 @@ weight: 6
 | max-expected-ms| java.lang.Integer| Maximum expected value in milliseconds for the histograms. Values higher than this will be considered outliers.| | |
 | min-expected-ms| java.lang.Integer| Minimum expected value in milliseconds for the histograms. Values lower than this will be considered outliers.| | |
 | percentiles| java.lang.Double[]| Array of percentiles to be calculated for the histograms. Each percentile is a double value.| | |
+
 ### dubbo.metrics.prometheus
 **Class:** `org.apache.dubbo.config.nested.PrometheusConfig`
 
