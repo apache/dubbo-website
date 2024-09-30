@@ -175,8 +175,6 @@ First, the initial scenario is to enable interoperability between the Dubbo syst
 
 Imagine you are in charge of a business line, and you have a microservice cluster developed based on Dubbo, where services communicate using the triple binary protocol. There is another important business within the company running on a microservice cluster developed based on Spring Cloud, where the services communicate using HTTP+JSON. Now you want to enable communication between these two businesses; how can services interact? The triple protocol supporting REST format access can solve this problem, allowing the Dubbo microservice cluster to communicate internally using the triple binary protocol while externally using the REST request format provided by triple.
 
-For specific usage examples in this area, please refer to the blog [Zero Modification Best Practices in Microservices for Interoperation between Spring Cloud and Apache Dubbo](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/) .
-
 ### Gateway Traffic Access
 
 Another very valuable scenario for supporting REST format access is that it facilitates gateway traffic access. Accessing binary-format RPC protocols has always been a challenge. Previously, Dubbo provided `generic calls` to solve this problem; gateways could implement `HTTP -> Dubbo` protocol conversion to access backend microservice clusters.

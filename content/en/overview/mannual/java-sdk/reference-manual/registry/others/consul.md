@@ -47,8 +47,3 @@ or
 ```xml
 <dubbo:registry protocol="redis" address="10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379" />
 ```
-
-## Use Cases
-
-Using Consul as a shared registration center can facilitate the [interoperability or migration between Dubbo and Spring Cloud systems](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)
-

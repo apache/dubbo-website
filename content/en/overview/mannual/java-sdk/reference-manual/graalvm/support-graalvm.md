@@ -15,7 +15,6 @@ In the Dubbo 3.3.0 version, we officially released the Dubbo AOT static solution
 {{% alert title="Dubbo GraalVM adaptation document may be out of date" color="warning" %}}
 Due to the rapid development of Dubbo AOT technology, this document may not always be up to date. Please refer to the following content for the latest information and usage:
 * <a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry" target="_blank">Sample project source code</a>
-* <a href="/zh-cn/blog/2023/06/28/走向-native-化springdubbo-aot-技术示例与原理讲解/" target="_blank">Blog articles and talks</a>
 
 For more information about GraalVm, you can read the document at https://www.graalvm.org/docs/getting-started/container-images/.
 {{% /alert %}}

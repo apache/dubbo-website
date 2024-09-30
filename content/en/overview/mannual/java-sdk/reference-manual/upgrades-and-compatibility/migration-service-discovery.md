@@ -11,8 +11,8 @@ weight: 3
 ---
 
 {{% alert title="Note" color="warning" %}}
-* The contents of this document are not mandatory for upgrading to Dubbo 3. You can absolutely just upgrade the framework and use the [default behavior of the framework's service discovery](/en/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/#启用应用级服务发现).
-* This document is more suitable for old Dubbo 2 users to understand the transition process and working principle of the service discovery model in the framework after upgrading to Dubbo 3. New users should directly [configure to enable application-level service discovery](/en/overview/mannual/java-sdk/tasks/service-discovery/nacos/#13-配置并启用-nacos).
+* The contents of this document are not mandatory for upgrading to Dubbo 3. You can absolutely just upgrade the framework and use the [default behavior of the framework's service discovery](/en/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/).
+* This document is more suitable for old Dubbo 2 users to understand the transition process and working principle of the service discovery model in the framework after upgrading to Dubbo 3. New users should directly [configure to enable application-level service discovery](/en/overview/mannual/java-sdk/tasks/service-discovery/nacos/).
 {{% /alert %}}
 
 For old Dubbo 2 users, there are two choices when upgrading to Dubbo 3, and the only consideration for the decision is performance.
@@ -69,8 +69,4 @@ By default, the Dubbo 3 framework will register both interface-level and applica
 By default, the Dubbo 3 framework has the capability to discover both Dubbo 2 and Dubbo 3 address lists simultaneously. By default, if there are Dubbo 3 addresses available for consumption in the cluster, it will automatically consume Dubbo 3 addresses; if there are no new addresses, it will automatically consume Dubbo 2 addresses (Dubbo 3 provides a switch to control this behavior), as illustrated in the figure below:
 
 <img alt="dubbo application-level service discovery" style="max-width:800px;height:auto;" src="/imgs/v3/migration/consumer-subscription.png"/>
-
-### Status Convergence
-
-For more detailed explanations regarding the above dual registration and dual subscription behaviors, and how to quickly complete the convergence of the service discovery model, please refer to the blog article [Smooth Migration Steps and Principles for Dubbo 3 Service Discovery](/en/blog/2024/05/13/如何从接口级服务发现平滑迁移到应用级服务发现/)。
 

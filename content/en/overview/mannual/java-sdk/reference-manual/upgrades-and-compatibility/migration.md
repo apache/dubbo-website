@@ -228,11 +228,11 @@ If you are using a Spring Boot application, you can also use `org.apache.dubbo:d
 
 ### Step 2: Upgrade Other Component Dependencies
 
-You need to upgrade the registry (Nacos, Zookeeper, or others) and other third-party components; please refer to the detailed instructions for upgrading discussed in the previous section about [Upgrading from 2.7.x to Dubbo3](./#步骤二升级其它组件依赖). The operations in both cases are exactly the same.
+You need to upgrade the registry (Nacos, Zookeeper, or others) and other third-party components; please refer to the detailed instructions for upgrading discussed in the previous section about Upgrading from 2.7.x to Dubbo3. The operations in both cases are exactly the same.
 
 {{% alert title="Please Pay Attention to Third-Party Component Versions" color="info" %}}
 * For many old users of Dubbo 2.6.x and below, the components (such as registries) used may be quite old. Carefully analyze all functionalities and core dependency components before upgrading to Dubbo3 to assess the target version for component upgrades.
-* For some Zookeeper users, if the Zookeeper version is quite old, it is recommended to first upgrade the Zookeeper Server to version 3.8.x or higher, and then manage dependencies using Dubbo3's `dubbo-zookeeper-curator5-spring-boot-starter`, as described in the previous [2.7.x Upgrade](./#步骤二升级其它组件依赖) section.
+* For some Zookeeper users, if the Zookeeper version is quite old, it is recommended to first upgrade the Zookeeper Server to version 3.8.x or higher, and then manage dependencies using Dubbo3's `dubbo-zookeeper-curator5-spring-boot-starter`, as described in the previous 2.7.x Upgrade section.
 {{% /alert %}}
 
 ### Step 3: Compatibility Checks
@@ -297,5 +297,5 @@ If your company maintains a custom SPI extension library, be sure to ensure its 
 
 ### Step 4: Go Live Verification
 
-Refer to the verification methods discussed in the previous section about [Upgrading from 2.7.x to Dubbo3](./#步骤四上线验证).
+Refer to the verification methods discussed in the previous section about Upgrading from 2.7.x to Dubbo3.
 

@@ -6,7 +6,7 @@ type: docs
 weight: 3
 ---
 
-For the design and implementation ideas of adaptive flow control, please refer to [Dubbo Adaptive Flow Control Function](/en/overview/reference/proposals/heuristic-flow-control/#自适应限流). Adaptive flow control can ensure the stability and reliability of distributed systems, especially in scenarios where service provider resources are limited and variable.
+For the design and implementation ideas of adaptive flow control, please refer to [Dubbo Adaptive Flow Control Function](/en/overview/reference/proposals/heuristic-flow-control/). Adaptive flow control can ensure the stability and reliability of distributed systems, especially in scenarios where service provider resources are limited and variable.
 
 ## Use Cases
 - Service Degradation Prevention: When service providers face performance degradation due to resource exhaustion, adaptive flow control temporarily reduces the number of requests it accepts until normal operations resume.

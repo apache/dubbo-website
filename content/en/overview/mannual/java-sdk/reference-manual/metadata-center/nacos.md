@@ -23,7 +23,7 @@ The steps to integrate Dubbo with Nacos as a metadata center are very simple, ma
 ### 2.1 Add Maven Dependency
 If the project has already enabled Nacos as the registry, no additional configuration is needed.
 
-If Nacos registry has not been enabled, please refer to [Adding Nacos Dependency for Registry](/en/overview/mannual/java-sdk/reference-manual/registry/nacos/#12-nacos-版本).
+If Nacos registry has not been enabled, please refer to [Adding Nacos Dependency for Registry](/en/overview/mannual/java-sdk/reference-manual/registry/nacos/).
 
 ### 2.2 Enable Nacos Configuration Center
 ```xml
@@ -51,7 +51,7 @@ MetadataReportConfig metadataConfig = new MetadataReportConfig();
 metadataConfig.setAddress("nacos://127.0.0.1:8848");
 ```
 
-For the format of `address`, please refer to [Nacos Registry - Enable Configuration](../../registry/nacos/#22-配置并启用-nacos).
+For the format of `address`, please refer to [Nacos Registry - Enable Configuration](../../registry/nacos/).
 
 ## 3 Advanced Configuration
 
@@ -59,7 +59,7 @@ For complete configuration parameters, please refer to [metadata-report-config](
 
 ## 4 Working Principle
 
-### 4.1 [Service Operation Metadata](../overview/#2-服务运维元数据)
+### 4.1 Service Operation Metadata
 
 You can see the operational metadata information related to registered service providers and consumers on the Nacos console:
 
@@ -85,7 +85,7 @@ Consumers interface information details (controlled by `report-consumer-definiti
 
 ![image-dubbo-metadata-nacos-4.png](/imgs/blog/dubbo-metadata-nacos-4.png)
 
-### 4.2 [Address Discovery - Interface-Application Mapping](../overview//#11-接口---应用映射关系)
+### 4.2 Address Discovery - Interface-Application Mapping
 As mentioned above, the service name and application name may be one-to-many. In Nacos, a single key-value is used for storage, with multiple application names separated by commas. Since data is stored as a single key-value, there may be concurrent overwrite issues in the case of multiple clients. Therefore, we use the publishConfigCas capability in Nacos to solve this problem. In Nacos, using publishConfigCas requires the user to provide a parameter casMd5, which is the md5 value of the previous configuration content. Different clients check the content value of Nacos before updating to compute the md5 value, which serves as a local credential. During the update, the credential md5 is sent to the server for comparison. If the values do not match, it indicates that it has been modified by another client during this time, requiring the credential to be retrieved again for a retry (CAS). Currently, if the retry fails 6 times, the mapping update action will be abandoned.
 
 Nacos API:
@@ -98,7 +98,7 @@ Mapping information is located in namespace: 'public', dataId: '{service name}',
 
 ![nacos-metadata-report-service-name-mapping.png](/imgs/user/nacos-metadata-report-service-name-mapping.png)
 
-### 4.3 [Address Discovery - Interface Configuration Metadata](../overview/#12-接口配置元数据)
+### 4.3 Address Discovery - Interface Configuration Metadata
 
 To enable remote interface configuration metadata registration, the following configuration must be added to the application, as by default, Dubbo3 application-level service discovery enables service introspection mode and does not register data to the metadata center.
 

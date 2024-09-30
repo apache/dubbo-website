@@ -11,7 +11,7 @@ Dubbo provides full support for the Spring framework, and we recommend using the
 ## Creating a Project
 The fastest way to create a Dubbo application is to use the official project scaffold tool - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> online service. It helps developers create Spring Boot structured applications and automatically manage dependencies like `dubbo-spring-boot-starter` along with necessary configurations.
 
-Additionally, Jetbrain also provides an Apache Dubbo project plugin for quickly creating Dubbo Spring Boot projects, which is on par with start.dubbo.apache.org. For specific installation and usage, please refer to the [blog post](/en/blog/2023/10/23/intellij-idea%EF%B8%8Fapache-dubboidea官方插件正式发布/).
+Additionally, Jetbrain also provides an Apache Dubbo project plugin for quickly creating Dubbo Spring Boot projects, which is on par with start.dubbo.apache.org. For specific installation and usage.
 
 ## dubbo-spring-boot-starter
 In the [Quick Start](/en/overview/mannual/java-sdk/quick-start/), we have detailed typical Dubbo Spring Boot project source code and its project structure. Developers who are unfamiliar can refer there.
@@ -69,7 +69,7 @@ dubbo:
 
 Other components besides service and reference can be set in the application.yml file, and for specifics, please refer to the [configuration list](/en/overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml).
 
-Service and reference components can also be associated with global components in the application by using `id`, as in the following configuration. To extend the annotation configuration of service or reference, you need to add the `dubbo.properties` configuration file or use other non-annotation methods like Java Config; please see the section on [Extending Annotation Configuration](#扩展注解配置) for details. 
+Service and reference components can also be associated with global components in the application by using `id`, as in the following configuration. To extend the annotation configuration of service or reference, you need to add the `dubbo.properties` configuration file or use other non-annotation methods like Java Config; please see the section on Extending Annotation Configuration for details. 
 
 ```yaml
 dubbo:
@@ -182,7 +182,7 @@ public class ProviderConfiguration {
 ```
 
 #### Supplementing Configuration Through dubbo.properties
-For scenarios using `DubboService` or `DubboReference`, additional configuration can be provided by adding a dubbo.properties file under the project's resources directory. [Specific format](../principle/#1-配置格式) has more detailed explanations here.
+For scenarios using `DubboService` or `DubboReference`, additional configuration can be provided by adding a dubbo.properties file under the project's resources directory. [Specific format](../principle/) has more detailed explanations here.
 
 ```properties
 dubbo.service.org.apache.dubbo.springboot.demo.DemoService.timeout=5000
@@ -198,7 +198,6 @@ dubbo.reference.org.apache.dubbo.springboot.demo.DemoService.timeout=6000
     * [Spring XML](/en/overview/mannual/java-sdk/reference-manual/config/spring/xml/)
 
 ## Relationship Between Dubbo and Spring Cloud
-Dubbo and Spring Cloud are two parallel microservice development and solution frameworks. Both provide the capability for defining, publishing, and governing microservices. For microservice developers, we recommend making a clear choice between Apache Dubbo and Spring Cloud at the beginning of development to minimize the complexity of maintaining different systems within the same cluster. For scenarios that require both systems to coexist, we provide a solution for communication issues between them in [Best Practices for Intercommunication between Dubbo and Spring Cloud Heterogeneous Microservice Systems](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/).
 
 Dubbo and Spring Boot have a complementary relationship, where Dubbo provides complete microservice development and governance capabilities atop the Spring Boot framework. More detailed explanations on this can be found in another article: [Dubbo, Spring Cloud, and Istio](/en/overview/what/xyz-difference/).
 

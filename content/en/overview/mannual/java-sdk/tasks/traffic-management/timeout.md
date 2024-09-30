@@ -12,7 +12,7 @@ weight: 2
 Dubbo provides the ability to dynamically adjust service timeout, allowing adjustments without restarting the application, which is very effective for temporarily resolving issues of invocation failure due to unstable upstream and downstream service dependencies.
 
 ## Before You Start
-* [Deploy the Shop mall project](../#部署商场系统)
+* Deploy the Shop mall project
 * Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
 
 ## Task Details

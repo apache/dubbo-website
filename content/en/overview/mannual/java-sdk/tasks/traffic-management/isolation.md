@@ -21,7 +21,7 @@ Using Dubbo's tag routing capability allows for very flexible traffic isolation.
 
 ## Before You Begin
 
-* [Deploy the Shop Mall Project](../#部署商场系统)
+* Deploy Shop Mall Project
 * Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
 
 ## Task Details

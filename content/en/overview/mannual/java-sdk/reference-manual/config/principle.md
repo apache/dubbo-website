@@ -36,7 +36,7 @@ method | Method-level configuration | Sub-configuration of service and reference
 argument | Argument configuration for a method | Sub-configuration of method | Optional
 
 
-> From the perspective of implementation principles, all configuration items in Dubbo will ultimately be assembled into URLs, using URLs as carriers during subsequent startup and RPC calls to control framework behaviors. To learn more, please refer to the Dubbo source code analysis series of documents or [Blog](/en/blog/2019/10/17/dubbo-中的-url-统一模型/#rpc调用).
+> From the perspective of implementation principles, all configuration items in Dubbo will ultimately be assembled into URLs, using URLs as carriers during subsequent startup and RPC calls to control framework behaviors.
 
 > For specific configuration items supported by each component and their meanings, please refer to [configuration item manual](../properties).
 

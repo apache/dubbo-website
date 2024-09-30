@@ -88,7 +88,7 @@ Here is the list of starters provided by the Dubbo official community (version 3
 * `dubbo-tracing-otel-zipkin-spring-boot-starter`, manages brave/zipkin, micrometer, and related dependencies, uses OpenTelemetry as Tracer, and exports Trace information to Zipkin.
 
 {{% alert title="Note" color="info" %}}
-* For the versions of third-party components compatible with each starter, please refer to the [Component Version Mapping Table](/en/overview/mannual/java-sdk/versions/#版本说明).
+* For the versions of third-party components compatible with each starter, please refer to the [Component Version Mapping Table](/en/overview/mannual/java-sdk/versions/).
 * Each starter has corresponding application.yml configuration items; please refer to the above [Configuration Items List](./#Configuration%20Example) for detailed usage.
 {{% /alert %}}
 
