@@ -8,5 +8,5 @@ title: Installation
 toc_hide: true
 type: docs
 weight: 50
-###
+---
 

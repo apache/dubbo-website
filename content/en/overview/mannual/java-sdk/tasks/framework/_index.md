@@ -6,4 +6,3 @@ type: docs
 weight: 6
 ---
 
-{{% docs/section_list %}}

@@ -5,5 +5,3 @@ title: Dubbo 作为轻量 RPC 框架解决组件通信问题
 type: docs
 weight: 100
 ---
-
-{{% docs/section_list %}}
