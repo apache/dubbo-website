@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/rust-sdk/quick-start/
     - /en/overview/quickstart/rust/
     - /en/overview/quickstart/rust/
-description: 使用 Rust 快速开发 Dubbo 服务。
-linkTitle: 快速开始
-title: 快速开始
+description: Quickly develop Dubbo services using Rust.
+linkTitle: Quick Start
+title: Quick Start
 type: docs
 weight: 1
 ---
@@ -16,15 +16,15 @@ weight: 1
 
 
 
-请在此查看完整 [示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
+View the complete [example](https://github.com/apache/dubbo-rust/tree/main/examples/greeter) here.
 
-## 1 前置条件
-- 安装 [Rust](https://rustup.rs/) 开发环境
-- 安装 [protoc](https://grpc.io/docs/protoc-installation/) 工具
+## 1 Prerequisites
+- Install the [Rust](https://rustup.rs/) development environment
+- Install the [protoc](https://grpc.io/docs/protoc-installation/) tool
 
-## 2 使用 IDL 定义 Dubbo 服务
+## 2 Define Dubbo Services Using IDL
 
-Greeter 服务定义如下，包含一个 Unary(request-response) 模型的 Dubbo 服务。
+The Greeter service is defined as follows, including a Dubbo service with a Unary (request-response) model.
 
 ```protobuf
 // ./proto/greeter.proto
@@ -51,7 +51,7 @@ service Greeter{
 }
 ```
 
-## 3 添加 Dubbo-rust 及相关依赖到项目
+## 3 Add Dubbo-rust and Related Dependencies to the Project
 ```toml
 # ./Cargo.toml
 [package]
@@ -84,9 +84,9 @@ dubbo-config = "0.1.0"
 dubbo-build = "0.1.0"
 ```
 
-## 4 配置 dubbo-build 编译 IDL
+## 4 Configure dubbo-build to Compile IDL
 
-在项目根目录创建 (not /src)，创建 `build.rs` 文件并添加以下内容：
+Create a `build.rs` file in the project root directory (not /src) and add the following content:
 
 ```rust
 // ./build.rs
@@ -96,11 +96,11 @@ fn main() {
         .unwrap();
 }
 ```
-这样配置之后，编译项目就可以生成 Dubbo Stub 相关代码，路径一般在`./target/debug/build/example-greeter-<id>/out/org.apache.dubbo.sample.tri.rs`。
+After this configuration, compiling the project will generate related Dubbo Stub code, usually located at `./target/debug/build/example-greeter-<id>/out/org.apache.dubbo.sample.tri.rs`.
 
-## 5 编写 Dubbo 业务代码
+## 5 Write Dubbo Business Code
 
-### 5.1 编写 Dubbo Server
+### 5.1 Write Dubbo Server
 
 ```rust
 // ./src/greeter/server.rs
@@ -147,9 +147,9 @@ impl Greeter for GreeterServerImpl {
 }
 ```
 
-### 5.2 配置dubbo.yaml
+### 5.2 Configure dubbo.yaml
 
-dubbo.yaml指示server端的配置，包括暴露的服务列表、协议配置、监听配置等。
+The dubbo.yaml file specifies the server-side configuration, including the exposed service list, protocol configuration, listening configuration, etc.
 
 ```yaml
 # ./dubbo.yaml
@@ -173,7 +173,7 @@ protocols:
     name: triple
 ```
 
-### 5.3 编写 Dubbo Client
+### 5.3 Write Dubbo Client
 
 ```rust
 // ./src/greeter/client.rs
@@ -198,32 +198,31 @@ async fn main() {
 }
 ```
 
-## 6 运行并总结
+## 6 Run and Summarize
 
-1. 编译
+1. Compile
 
-执行`cargo build`来编译server和client。
+Run `cargo build` to compile the server and client.
 
-2. 运行server
+2. Run the server
 
-执行`./target/debug/greeter-server`来运行server，如上文dubbo.yaml所配置，server会监听8888端口，并以triple协议提供RPC服务：
+Run `./target/debug/greeter-server` to start the server, which will listen on port 8888 and provide RPC services using the triple protocol as configured in dubbo.yaml:
 
 ```sh
 $ ./target/debug/greeter-server
 2022-09-28T23:33:28.104577Z  INFO dubbo::framework: url: Some(Url { uri: "triple://0.0.0.0:8888/org.apache.dubbo.sample.tri.Greeter", protocol: "triple", location: "0.0.0.0:8888", ip: "0.0.0.0", port: "8888", service_key: ["org.apache.dubbo.sample.tri.Greeter"], params: {} })
 ```
 
-3. 运行client，验证调用是否成功
+3. Run the client to verify successful invocation
 
-执行`./target/debug/greeter-client`来运行client，调用`triple://127.0.0.1:8888/org.apache.dubbo.sample.tri.Greeter`下的各种方法：
-
+Run `./target/debug/greeter-client` to execute the client and call various methods under `triple://127.0.0.1:8888/org.apache.dubbo.sample.tri.Greeter`:
 
 ```sh
 $ ./target/debug/greeter-client
 Response: GreeterReply { message: "hello, dubbo-rust" }
 ```
 
-## 7 更多示例
+## 7 More Examples
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -233,9 +232,9 @@ Response: GreeterReply { message: "hello, dubbo-rust" }
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/rust-sdk/streaming/" >}}'>Streaming 通信模式</a>
+                     <a href='{{< relref "../../mannual/rust-sdk/streaming/" >}}'>Streaming Communication Mode</a>
                 </h4>
-                <p>使用 Dubbo Rust 实现 Streaming 通信模型。</p>
+                <p>Implement Streaming communication model using Dubbo Rust.</p>
             </div>
         </div>
     </div>
@@ -243,9 +242,9 @@ Response: GreeterReply { message: "hello, dubbo-rust" }
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/rust-sdk/java-interoperability/" >}}'>与 Dubbo Java 互通</a>
+                     <a href='{{< relref "../../mannual/rust-sdk/java-interoperability/" >}}'>Interoperability with Dubbo Java</a>
                 </h4>
-                <p>实现与其他 Dubbo 多语言服务的互通</p>
+                <p>Implement interoperability with other Dubbo multi-language services.</p>
             </div>
         </div>
     </div>
@@ -254,3 +253,4 @@ Response: GreeterReply { message: "hello, dubbo-rust" }
 </div>
 
 {{< /blocks/section >}}
+

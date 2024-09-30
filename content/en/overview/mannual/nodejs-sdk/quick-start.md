@@ -2,36 +2,36 @@
 aliases:
     - /en/overview/quickstart/nodejs/
     - /en/overview/quickstart/nodejs/
-description: 使用 Node.js 开发后端微服务
-linkTitle: 快速开始
-title: 快速开始
+description: Develop backend microservices using Node.js
+linkTitle: Quick Start
+title: Quick Start
 type: docs
 weight: 1
 ---
 
-基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Node.js SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
+Based on the Triple protocol defined by Dubbo, you can easily write browser and gRPC compatible RPC services that run simultaneously on HTTP/1 and HTTP/2. The Dubbo Node.js SDK supports defining services using IDL or language-specific methods and provides a lightweight API for publishing or invoking these services.
 
-本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。
+This example demonstrates the RPC communication model based on the Triple protocol, using Protocol Buffers to define RPC services, and illustrating processes such as code generation, service publishing, and service access.
 
-## <span id="precondition">前置条件</span>
+## <span id="precondition">Preconditions</span>
 
-因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `@bufbuild/protoc-gen-es`、`@bufbuild/protobuf`、`@apachedubbo/protoc-gen-apache-dubbo-es`、`@apachedubbo/dubbo`。
+Due to the use of Protocol Buffers, we first need to install the relevant code generation tools, including `@bufbuild/protoc-gen-es`, `@bufbuild/protobuf`, `@apachedubbo/protoc-gen-apache-dubbo-es`, `@apachedubbo/dubbo`.
 
 ```Shell
 npm install @bufbuild/protoc-gen-es @bufbuild/protobuf @apachedubbo/protoc-gen-apache-dubbo-es @apachedubbo/dubbo
 ```
 
-## <span id="defineService">定义服务</span>
+## <span id="defineService">Define Service</span>
 
-现在，使用 Protocol Buffer (IDL) 来定义一个 Dubbo 服务。
+Now, use Protocol Buffers (IDL) to define a Dubbo service.
 
-创建目录，并生成文件
+Create a directory and generate a file.
 
 ```Shell
 mkdir -p proto && touch proto/example.proto
 ```
 
-写入内容
+Write the content.
 
 ```Protobuf
 syntax = "proto3";
@@ -51,17 +51,17 @@ service ExampleService {
 }
 ```
 
-这个文件声明了一个叫做 `ExampleService` 的服务，为这个服务定义了 `Say` 方法以及它的请求参数 `SayRequest` 和返回值 `SayResponse`。
+This file declares a service called `ExampleService`, defining a `Say` method along with its request parameter `SayRequest` and return value `SayResponse`.
 
-## <span id="generateCode">生成代码</span>
+## <span id="generateCode">Generate Code</span>
 
-创建 gen 目录，做为生成文件放置的目标目录
+Create a gen directory as the target directory for generated files.
 
 ```
 mkdir -p gen
 ```
 
-运行以下命令，在 gen 目录下生成代码文件
+Run the following command to generate code files in the gen directory.
 
 ```Shell
 PATH=$PATH:$(pwd)/node_modules/.bin \
@@ -73,7 +73,7 @@ PATH=$PATH:$(pwd)/node_modules/.bin \
   example.proto
 ```
 
-运行命令后，应该可以在目标目录中看到以下生成的文件:
+After running the command, you should see the following generated files in the target directory:
 
 ```Plain Text
 ├── gen
@@ -83,11 +83,11 @@ PATH=$PATH:$(pwd)/node_modules/.bin \
 │   └── example.proto
 ```
 
-## <span id="implementService">实现服务</span>
+## <span id="implementService">Implement Service</span>
 
-接下来我们就需要添加业务逻辑了，实现 ExampleService ，并将其注册到 DubboRouter 中。
+Next, we'll need to add business logic to implement ExampleService and register it with DubboRouter.
 
-创建 dubbo.ts 文件
+Create a dubbo.ts file.
 
 ```typescript
 import { DubboRouter } from "@apachedubbo/dubbo";
@@ -105,17 +105,15 @@ export default (router: DubboRouter) =>
   }, { serviceGroup: 'dubbo', serviceVersion: '1.0.0' });
 ```
 
-## <span id="startServer">启动 Server</span>
+## <span id="startServer">Start Server</span>
 
-Dubbo 服务可以嵌入到普通的 Node.js 服务器、Next.js、Express 或 Fastify 中。
-在这里我们将使用 Fastify，所以让我们安装 Fastify 以及我们为 Fastify 准备的插件。
+Dubbo services can be embedded into a regular Node.js server, Next.js, Express, or Fastify. Here we will use Fastify, so let's install Fastify and the plugin we prepared for Fastify.
 
 ```Shell
 npm install fastify @apachedubbo/dubbo-fastify
 ```
 
-创建 server.ts 文件，新建一个 Server，把上一步中实现的 `ExampleService` 注册给它。
-接下来就可以直接初始化和启动 Server 了，它将在指定的端口接收请求。
+Create a server.ts file, create a Server, and register the implemented `ExampleService` from the previous step. Then initialize and start the Server, which will receive requests on the specified port.
 
 ```typescript
 import { fastify } from "fastify";
@@ -138,15 +136,15 @@ async function main() {
 void main();
 ```
 
-最后，运行代码启动服务
+Finally, run the code to start the service.
 
 ```Shell
 npx tsx server.ts
 ```
 
-## <span id="accessService">访问服务</span>
+## <span id="accessService">Access Service</span>
 
-最简单方式是使用 HTTP/1.1 POST 请求访问服务，参数则作以标准 JSON 格式作为 HTTP 负载传递。如下是使用 cURL 命令的访问示例:
+The simplest way to access the service is to use an HTTP/1.1 POST request, passing parameters in standard JSON format as the HTTP payload. Below is an example using the cURL command:
 
 ```Shell
 curl \
@@ -157,9 +155,9 @@ curl \
  http://localhost:8080/apache.dubbo.demo.example.v1.ExampleService/Say
 ```
 
-也可以使用标准的 Dubbo client 请求服务，我们首先需要从生成代码即 dubbo-node 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起起 RPC 调用了。
+You can also use a standard Dubbo client to request the service. We first need to get the service proxy from the generated code, i.e., the dubbo-node package, specify the server address for it, and initialize it before we can make the RPC call.
 
-创建 client.ts 文件。
+Create a client.ts file.
 
 ```typescript
 import { createPromiseClient } from "@apachedubbo/dubbo";
@@ -179,8 +177,9 @@ async function main() {
 void main();
 ```
 
-运行客户端
+Run the client.
 
 ```Shell
 npx tsx client.ts
 ```
+

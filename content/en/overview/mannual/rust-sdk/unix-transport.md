@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/rust-sdk/unix-transport/
     - /en/docs3-v2/rust-sdk/unix-transport/
-description: 介绍使用 Dubbo Rust Triple 协议使用 Unix 套接字连接器实现通信。
-linkTitle: 使用Unix套接字连接器通信
-title: 使用Unix套接字连接器通信
+description: Introduction to using the Dubbo Rust Triple protocol to implement communication via the Unix socket connector.
+linkTitle: Communication using Unix Socket Connector
+title: Communication using Unix Socket Connector
 type: docs
 weight: 3
 ---
@@ -14,27 +14,27 @@ weight: 3
 
 
 
-本文重点讲解 Dubbo Rust Triple 协议使用Unix 套接，请先查看 [Quick Start](../quick-start) 了解 Dubbo Rust 基本使用，在此查看本文的[完整示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
+This article focuses on using the Dubbo Rust Triple protocol with Unix sockets. Please refer to the [Quick Start](../quick-start) for basic usage of Dubbo Rust, and you can see the [complete example](https://github.com/apache/dubbo-rust/tree/main/examples/greeter) here.
 
-## 1 使用 Unix 套接字连接器 说明
-> #[cfg(any(target_os = "macos", target_os="unix"))] 当操作系统符合cfg配置时，unix 模块会被编译使用，否则无法使用
+## 1 Explanation of Using Unix Socket Connector
+> #[cfg(any(target_os = "macos", target_os="unix"))] The unix module will be compiled for use when the operating system meets the cfg configuration, otherwise it cannot be used.
 
-## 2 使用 client/connection 使用 Unix 套接字连接器编写逻辑
+## 2 Logic for Using Unix Socket Connector with client/connection
 
-### 2.1 编写 Client 端
+### 2.1 Writing the Client Side
 
 ```rust
 // examples/echo/src/echo/client.rs
-// 使用 ClientBuilder 初始化 Client
+// Initialize Client using ClientBuilder
 let builder = ClientBuilder::new().with_connector("unix").with_host("unix://127.0.0.1:8888");
 let mut cli = EchoClient::build(builder);
 ```
 
-### 2.2 编写 Server 端
+### 2.2 Writing the Server Side
 
 ```rust
 // examples/echo/src/echo/server.rs
-// 通过 serverbuilder 来初始化 Server
+// Initialize Server using serverbuilder
 let builder = ServerBuilder::new()
     .with_listener("unix".to_string())
     .with_service_names(vec!["grpc.examples.echo.Echo".to_string()])
@@ -43,24 +43,24 @@ builder.build().serve().await.unwrap();
 
 ```
 
-## 3 运行示例
+## 3 Running Example
 
-1. 编译
+1. Compile
 
-执行`cargo build`来编译server和client。
+Run `cargo build` to compile the server and client.
 
-2. 运行server
+2. Run the server
 
-执行`cargo run --bin echo-server`来运行server，如上文dubbo.yaml所配置，server会监听8888端口，并以triple协议提供RPC服务：
+Run `cargo run --bin echo-server` to start the server. As configured in the dubbo.yaml above, the server will listen on port 8888 and provide RPC services using the triple protocol:
 
 ```sh
 $ cargo run --bin echo-server
 2023-01-19T08:36:25.663138Z  INFO dubbo::triple::server::builder: server starting. addr: Some(127.0.0.1:8888)
 ```
 
-3. 运行client，可以看到 Unix 通信效果
+3. Run the client to see Unix communication in action
 
-执行`cargo run --bin echo-client`来运行client，调用`triple://127.0.0.1:8888/org.apache.dubbo.sample.tri.Greeter`下的各种方法：
+Run `cargo run --bin echo-client` to start the client, calling various methods under `triple://127.0.0.1:8888/org.apache.dubbo.sample.tri.Greeter`:
 
 
 ```sh
@@ -82,3 +82,4 @@ reply: EchoResponse { message: "msg2 from server" }
 reply: EchoResponse { message: "msg3 from server" }
 trailer: Some(Metadata { inner: {"grpc-status": "0", "content-type": "application/grpc", "grpc-message": "poll trailer successfully.", "grpc-accept-encoding": "gzip,identity"} })
 ```
+

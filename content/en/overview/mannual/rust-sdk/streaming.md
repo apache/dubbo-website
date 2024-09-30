@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/rust-sdk/streaming/
     - /en/docs3-v2/rust-sdk/streaming/
-description: 介绍使用 Dubbo Rust 快速开发 Client streaming、Server streaming、Bidirectional streaming 模型的服务。
-linkTitle: Streaming通信模型
-title: Streaming 通信模型
+description: Introduction to using Dubbo Rust to quickly develop services for Client streaming, Server streaming, and Bidirectional streaming models.
+linkTitle: Streaming Communication Model
+title: Streaming Communication Model
 type: docs
 weight: 3
 ---
@@ -14,11 +14,11 @@ weight: 3
 
 
 
-本文重点讲解 Dubbo Rust Streaming 通信模式，请先查看 [Quick Start](../quick-start) 了解 Dubbo Rust 基本使用，在此查看本文的[完整示例](https://github.com/apache/dubbo-rust/tree/main/examples/greeter)。
+This article focuses on the Dubbo Rust Streaming communication pattern. Please refer to the [Quick Start](../quick-start) to understand the basic usage of Dubbo Rust and view the [complete example](https://github.com/apache/dubbo-rust/tree/main/examples/greeter) for this article.
 
-## 1 IDL 中增加 Streaming 模型定义
+## 1 Adding Streaming Model Definitions in IDL
 
-完整 Greeter 服务定义如下，包含一个 Unary、Client stream、Server stream、Bidirectional stream 模型的 Dubbo 服务。
+The complete Greeter service definition is as follows, which includes a Unary, Client stream, Server stream, and Bidirectional stream model for Dubbo services.
 
 ```protobuf
 // ./proto/greeter.proto
@@ -56,9 +56,9 @@ service Greeter{
 }
 ```
 
-## 2 使用 Streaming 模型定义编写逻辑
+## 2 Writing Logic with Streaming Model Definitions
 
-### 2.1 编写 Streaming Server
+### 2.1 Writing the Streaming Server
 
 ```rust
 // ./src/greeter/server.rs
@@ -97,7 +97,7 @@ async fn main() {
             let r = RootConfig::new();
             match r.load() {
                 Ok(config) => config,
-                Err(_err) => panic!("err: {:?}", _err), // response was droped
+                Err(_err) => panic!("err: {:?}", _err), // response was dropped
             }
         })
         .start()
@@ -178,19 +178,10 @@ impl Greeter for GreeterServerImpl {
         let mut in_stream = request.into_inner();
         let (tx, rx) = mpsc::channel(128);
 
-        // this spawn here is required if you want to handle connection error.
-        // If we just map `in_stream` and write it back as `out_stream` the `out_stream`
-        // will be drooped when connection error occurs and error will never be propagated
-        // to mapped version of `in_stream`.
         tokio::spawn(async move {
             while let Some(result) = in_stream.next().await {
                 match result {
                     Ok(v) => {
-                        // if v.name.starts_with("msg2") {
-                        //     tx.send(Err(dubbo::status::Status::internal(format!("err: args is invalid, {:?}", v.name))
-                        //     )).await.expect("working rx");
-                        //     continue;
-                        // }
                         tx.send(Ok(GreeterReply {
                             message: format!("server reply: {:?}", v.name),
                         }))
@@ -200,8 +191,6 @@ impl Greeter for GreeterServerImpl {
                     Err(err) => {
                         if let Some(io_err) = match_for_io_error(&err) {
                             if io_err.kind() == ErrorKind::BrokenPipe {
-                                // here you can handle special case when client
-                                // disconnected in unexpected way
                                 eprintln!("\tclient disconnected: broken pipe");
                                 break;
                             }
@@ -209,7 +198,7 @@ impl Greeter for GreeterServerImpl {
 
                         match tx.send(Err(err)).await {
                             Ok(_) => (),
-                            Err(_err) => break, // response was droped
+                            Err(_err) => break,
                         }
                     }
                 }
@@ -217,7 +206,6 @@ impl Greeter for GreeterServerImpl {
             println!("\tstream ended");
         });
 
-        // echo just write the same data that was received
         let out_stream = ReceiverStream::new(rx);
 
         Ok(Response::new(
@@ -242,7 +230,7 @@ fn match_for_io_error(err_status: &dubbo::status::Status) -> Option<&std::io::Er
 }
 ```
 
-### 2.2 编写 Streaming Client
+### 2.2 Writing the Streaming Client
 
 ```rust
 // ./src/greeter/client.rs
@@ -348,25 +336,24 @@ async fn main() {
 }
 ```
 
-## 3 运行示例
+## 3 Running the Example
 
-1. 编译
+1. Build
 
-执行`cargo build`来编译server和client。
+Run `cargo build` to compile the server and client.
 
-2. 运行server
+2. Run the server
 
-执行`./target/debug/greeter-server`来运行server，如上文dubbo.yaml所配置，server会监听8888端口，并以triple协议提供RPC服务：
+Run `./target/debug/greeter-server` to start the server. As configured in the above dubbo.yaml, the server will listen on port 8888 and provide RPC services via the triple protocol:
 
 ```sh
 $ ./target/debug/greeter-server
 2022-09-28T23:33:28.104577Z  INFO dubbo::framework: url: Some(Url { uri: "triple://0.0.0.0:8888/org.apache.dubbo.sample.tri.Greeter", protocol: "triple", location: "0.0.0.0:8888", ip: "0.0.0.0", port: "8888", service_key: ["org.apache.dubbo.sample.tri.Greeter"], params: {} })
 ```
 
-3. 运行client，可以看到 Streaming 通信效果
+3. Run the client to see the Streaming communication effects
 
-执行`./target/debug/greeter-client`来运行client，调用`triple://127.0.0.1:8888/org.apache.dubbo.sample.tri.Greeter`下的各种方法：
-
+Run `./target/debug/greeter-client` to execute the client, calling various methods under `triple://127.0.0.1:8888/org.apache.dubbo.sample.tri.Greeter`:
 
 ```sh
 $ ./target/debug/greeter-client
@@ -387,3 +374,4 @@ reply: GreeterReply { message: "msg2 from server" }
 reply: GreeterReply { message: "msg3 from server" }
 trailer: Some(Metadata { inner: {"content-type": "application/grpc", "grpc-status": "0", "grpc-message": "poll trailer successfully.", "grpc-accept-encoding": "gzip,identity"} })
 ```
+

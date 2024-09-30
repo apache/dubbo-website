@@ -1,7 +1,8 @@
 ---
-description: Node.js SDK 使用手册
+description: Node.js SDK User Manual
 linkTitle: Node.js SDK
-title: Node.js SDK 手册
+title: Node.js SDK Manual
 type: docs
 weight: 3
 ---
+

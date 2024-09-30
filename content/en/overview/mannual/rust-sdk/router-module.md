@@ -2,18 +2,17 @@
 aliases:
   - /en/docs3-v2/rust-sdk/router-module/
   - /en/docs3-v2/rust-sdk/router-module/
-description: "服务路由"
-linkTitle: 服务路由
-title: 服务路由规则
+description: "Service Routing"
+linkTitle: Service Routing
+title: Service Routing Rules
 type: docs
 weight: 2
 ---
 
-## 条件路由
-使用模式与 [条件路由文档](/en/overview/core-features/traffic/condition-rule/) 中的模式类似，但配置格式略有不同，以下是条件路由规则示例。
+## Conditional Routing
+The usage pattern is similar to the [Conditional Routing Documentation](/en/overview/core-features/traffic/condition-rule/), but the configuration format is slightly different. Below is an example of conditional routing rules.
 
-基于以下示例规则，所有 `org.apache.dubbo.sample.tri.Greeter` 服务 `greet` 
-方法的调用都将被转发到有 `port=8888` 标记的地址子集 
+Based on the following example rule, all calls to the `greet` method of the `org.apache.dubbo.sample.tri.Greeter` service will be forwarded to a subset of addresses marked with `port=8888`. 
 
 ```yaml
 configVersion: v1.0
@@ -24,11 +23,11 @@ key: "org.apache.dubbo.sample.tri.Greeter"
 conditions:
   - method=greet => port=8888
 ```
-注：<br>
-dubbo rust目前还没有实现对于**应用粒度**的区分，无法区分服务来自哪个应用<br>
-因此对于标签路由和条件路由，都仅能配置一条应用级别的配置<br>
-对于应用级别的配置，默认key指定为application，此配置将对全部服务生效<br>
-例如：
+Note:<br>
+The Dubbo Rust currently does not distinguish at the **application level**, and cannot differentiate the origin of the service.<br>
+Therefore, for tag routing and conditional routing, only one application-level configuration can be specified.<br>
+For application-level configuration, the default key is set to application, and this configuration will affect all services.<br>
+For example:
 ```yaml
 configVersion: v1.0
 scope: "application"
@@ -39,28 +38,28 @@ conditions:
   - ip=127.0.0.1 => port=8000~8888
 ```
 
-#### 匹配/过滤条件
+#### Match/Filter Conditions
 
-**参数支持**
+**Parameter Support**
 
-* 服务调用上下文，如：service_name, method等
-* URL 本身的字段，如：location, ip, port等
-* URL params中存储的字段信息
+* Service call context, such as: service_name, method, etc.
+* URL fields, such as: location, ip, port, etc.
+* Field information stored in URL params.
 
-**条件支持**
+**Condition Support**
 
-* 等号 = 表示 "匹配"，如：method = getComment
-* 不等号 != 表示 "不匹配"，如：method != getComment
+* Equal sign = indicates "match", e.g.: method = getComment
+* Not equal != indicates "no match", e.g.: method != getComment
 
-**值支持**
+**Value Support**
 
-* 以逗号 , 分隔多个值，如：ip != 10.20.153.10,10.20.153.11
-* 以星号 * 结尾，表示通配，如：ip != 10.20.*
-* 整数值范围，如：port = 80~8080
+* Multiple values separated by comma, e.g.: ip != 10.20.153.10,10.20.153.11
+* Asterisk * at the end indicates a wildcard, e.g.: ip != 10.20.*
+* Integer value range, e.g.: port = 80~8080
 
 
-## 标签路由
-使用模式与 [标签路由文档](/en/overview/core-features/traffic/tag-rule/)中的模式类似，但配置格式略有不同，以下是标签路由规则示例
+## Tag Routing
+The usage pattern is similar to the [Tag Routing Documentation](/en/overview/core-features/traffic/tag-rule/), but the configuration format is slightly different. Below is an example of tag routing rules.
 ```yaml
 configVersion: v1.0
 force: false
@@ -72,12 +71,12 @@ tags:
       - key: ip
         value: 127.0.0.1
 ```
-在此配置中，所有ip=127.0.0.1的服务提供者/消费者均会被打上local的标签
+In this configuration, all service providers/consumers with ip=127.0.0.1 will be tagged with local.
 
-## 动态配置
-### 动态下发配置 简介
-动态下发配置使用 Nacos 作为配置中心实现，需要在项目的 application.yaml 配置文件中对 Nacos 进行配置,若不进行配置则使用本地路由配置。
-### 使用方式：
+## Dynamic Configuration
+### Overview of Dynamic Configuration
+Dynamic configuration uses Nacos as the configuration center. It needs to be configured in the project's application.yaml file; if not configured, local routing configuration will be used.
+### Usage:
 ```yaml
 nacos:
     addr: "127.0.0.1:8848"
@@ -87,38 +86,38 @@ nacos:
       auth_username: username
       auth_password: password
 ```
-app：路由配置项在Nacos中所处的app
-namespace：配置信息在Nacos所处的namespace
-addr：Nacos服务地址
-enable_auth：可选配置项，若启用了Nacos的认证功能，则需要配置此项，auth_username对应帐号，auth_password对应密钥
+app: the app where routing configurations are placed in Nacos.
+namespace: the namespace where configuration information is located in Nacos.
+addr: the Nacos service address.
+enable_auth: optional configuration; if Nacos's authentication feature is enabled, this must be specified. auth_username corresponds to the account, auth_password to the key.
 
 
-#### 配置条件路由
+#### Configuring Conditional Routing
 
-在nacos中创建条件路由配置项时，
-app和namespace为配置nacos时所填写的信息;
-group：固定为condition;
-name：需要和 服务名称 保持一致;
+When creating conditional routing configurations in Nacos,
+app and namespace are the information input during Nacos configuration;
+group: fixed as condition;
+name: must match the service name;
 
 
-#### 配置标签路由
-在nacos中创建标签路由配置项时，
+#### Configuring Tag Routing
+When creating tag routing configurations in Nacos,
 
-app：配置nacos时所填写的app;
-namespace：配置nacos时所填写的namespace;
-group：固定为tag;
-name：固定为application;
+app: the app filled in during Nacos configuration;
+namespace: the namespace filled in during Nacos configuration;
+group: fixed as tag;
+name: fixed as application;
 
-#### 注意事项
-dubbo rust目前还没有实现对于**应用**的区分，无法区分服务来自哪个应用；
-故对于应用级别的配置项，默认对所有服务生效
-因此对于标签路由和条件路由，都仅能配置一条应用级别的配置，配置名称（name）指定为application
+#### Notes
+Dubbo Rust does not currently differentiate at the **application** level and cannot identify the source of a service; 
+therefore, application-level configurations will apply to all services by default.
+Thus, for tag routing and conditional routing, only one application-level configuration can be specified with the name designated as application.
 
-#### 例：
+#### Example:
 ![nacos-example.png](/imgs/rust/router-example/nacos-example.png)
-#### 对应的配置项：
+#### Corresponding Configuration Items:
 
-*服务级别的条件路由配置：*
+*Service Level Conditional Routing Configuration:*
 ```yaml
 configVersion: v1.0
 scope: "service"
@@ -128,7 +127,7 @@ key: "org.apache.dubbo.sample.tri.Greeter"
 conditions:
   - method=greet => ip=127.*
 ```
-*标签路由配置：*
+*Tag Routing Configuration:*
 ```yaml
 configVersion: v1.0
 force: true
@@ -141,7 +140,7 @@ tags:
         value: 127.0.0.1
 ```
 
-*应用级别的条件路由配置：*
+*Application Level Conditional Routing Configuration:*
 ```yaml
 configVersion: v1.0
 scope: "application"
@@ -151,3 +150,4 @@ key: application
 conditions:
   - ip=127.0.0.1 => port=8000~8888
 ```
+

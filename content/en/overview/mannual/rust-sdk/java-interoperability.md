@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/rust-sdk/java-interoperability/
     - /en/docs3-v2/rust-sdk/java-interoperability/
-description: 使用 Rust 调用 Java 开发的 Dubbo 服务。
-linkTitle: Rust和Java互相调用
-title: Rust和Java互相调用
+description: Call Dubbo services developed in Java using Rust.
+linkTitle: Interoperability between Rust and Java
+title: Interoperability between Rust and Java
 type: docs
 weight: 2
 ---
@@ -14,48 +14,48 @@ weight: 2
 
 
 
-## 1 前置条件
-- 安装 [Rust](https://rustup.rs/) 开发环境
-- 安装 [protoc](https://grpc.io/docs/protoc-installation/) 工具
-- 安装 Java 开发环境
+## 1 Prerequisites
+- Install the [Rust](https://rustup.rs/) development environment
+- Install the [protoc](https://grpc.io/docs/protoc-installation/) tool
+- Install the Java development environment
 
-## 2 运行示例 Java 版本的 Dubbo provider
+## 2 Run the Example Java Version of Dubbo Provider
 
-Java 版本的 Dubbo provider 示例源码见<https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple>。
+The source code for the Java version of the Dubbo provider can be found at <https://github.com/apache/dubbo-samples/tree/master/3-extensions/protocol/dubbo-samples-triple>.
 
-Clone 源代码、编译构建，并运行 provider：
+Clone the source code, compile, and run the provider:
 
 ```sh
-$ # clone 源代码
+$ # clone the source code
 $ git clone https://github.com/apache/dubbo-samples.git
 $ cd dubbo-samples/dubbo-samples-triple/
 
-$ # 构建
+$ # build
 $ mvn clean compile package -DskipTests
 
-$ # 运行 provider
+$ # run the provider
 $ java -Dprovider.port=8888 -jar ./target/dubbo-samples-triple-1.0-SNAPSHOT.jar
-# ……省略部分日志
+# … omitted part of the logs
 Dubbo triple stub server started, port=8888
 ```
 
-[Java 侧的接口定义](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/proto/greeter.proto)
+[Interface definition on the Java side](https://github.com/apache/dubbo-samples/blob/master/3-extensions/protocol/dubbo-samples-triple/src/main/proto/greeter.proto)
 
-## 3 运行 Rust 版本的 Dubbo consumer
+## 3 Run the Rust Version of Dubbo Consumer
 
-Rust 版本的 Dubbo consumer 示例源码见<https://github.com/apache/dubbo-rust/tree/main/examples/greeter>。
+The source code for the Rust version of the Dubbo consumer can be found at <https://github.com/apache/dubbo-rust/tree/main/examples/greeter>.
 
-Clone 源代码、编译构建，并运行 consumer：
+Clone the source code, compile, and run the consumer:
 
 ```sh
-$ # clone 源代码
+$ # clone the source code
 $ git clone https://github.com/apache/dubbo-rust.git
 $ cd dubbo-rust/examples/greeter/
 
-$ # 构建
+$ # build
 $ cargo build
 
-$ # 运行 consumer，调用provider
+$ # run the consumer, call the provider
 $ ../../target/debug/greeter-client
 # unary call
 Response: GreeterReply { message: "hello, dubbo-rust" }
@@ -75,4 +75,5 @@ reply: GreeterReply { message: "msg3 from server" }
 trailer: Some(Metadata { inner: {"content-type": "application/grpc", "grpc-message": "poll trailer successfully.", "grpc-accept-encoding": "gzip,identity", "grpc-status": "0"} })
 ```
 
-[Rust侧的接口定义](https://github.com/apache/dubbo-rust/blob/main/examples/greeter/proto/greeter.proto)
+[Interface definition on the Rust side](https://github.com/apache/dubbo-rust/blob/main/examples/greeter/proto/greeter.proto)
+

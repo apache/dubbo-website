@@ -4,21 +4,21 @@ aliases:
     - /en/docs3-v2/
     - /en/docs3-v2/
 always_unfold: true
-description: Dubbo SDK 用户手册
+description: Dubbo SDK User Manual
 feature:
     description: |
-        提供 Java、Golang、Rust、Node.js、Python 等多语言 SDK 实现，支持基于 IDL 的跨语言服务定义和基于 Protobuf、Json 的数据编码
-    title: 多语言 SDK
-linkTitle: 用户手册
+        Provides multi-language SDK implementations such as Java, Golang, Rust, Node.js, Python, etc., supporting language-agnostic service definitions based on IDL and data encoding based on Protobuf and JSON.
+    title: Multi-language SDK
+linkTitle: User Manual
 no_list: true
-title: Dubbo SDK 用户手册
+title: Dubbo SDK User Manual
 type: docs
 weight: 6
 ---
 
-> 本文档基于 Dubbo3 编写，由于 Dubbo3 完全兼容 2.7 版本用法，因此文档中的通用功能（除 3.x 版本特有功能外）同样适用于 2.7 版本用户。
+> This document is based on Dubbo3. Since Dubbo3 is fully compatible with 2.7 version usage, the general features in this document (except those specific to 3.x version) are also applicable to 2.7 version users.
 >
-> 点此可查看 <a href="/zh-cn/docsv2.7" target="_blank">老版本文档</a>
+> Click here to view the <a href="/zh-cn/docsv2.7" target="_blank">old version documentation</a>
 >
 
 
@@ -32,7 +32,7 @@ weight: 6
                 <h4 class="card-title">
                     <a  href='{{< relref "./java-sdk" >}}'>Java SDK</a>
                 </h4>
-                <p>Dubbo Java SDK 手册</p>
+                <p>Dubbo Java SDK Manual</p>
             </div>
         </div>
     </div>
@@ -42,7 +42,7 @@ weight: 6
                 <h4 class="card-title">
                     <a href='{{< relref "./golang-sdk" >}}'>Go SDK</a>
                 </h4>
-                <p>Dubbo Golang SDK 手册</p>
+                <p>Dubbo Golang SDK Manual</p>
             </div>
         </div>
     </div>
@@ -52,7 +52,7 @@ weight: 6
                 <h4 class="card-title">
                     <a href='{{< relref "./nodejs-sdk" >}}'>Node.js</a>
                 </h4>
-                <p>Dubbo Node.js SDK 手册</p>
+                <p>Dubbo Node.js SDK Manual</p>
             </div>
         </div>
     </div>
@@ -62,7 +62,7 @@ weight: 6
                 <h4 class="card-title">
                     <a href='{{< relref "./web-sdk" >}}'>Web SDK</a>
                 </h4>
-                <p>Dubbo Web SDK 手册</p>
+                <p>Dubbo Web SDK Manual</p>
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@ weight: 6
                 <h4 class="card-title">
                     <a href='{{< relref "./rust-sdk" >}}'>Rust SDK</a>
                 </h4>
-                <p>Dubbo Rust SDK 手册</p>
+                <p>Dubbo Rust SDK Manual</p>
             </div>
         </div>
     </div>
@@ -81,3 +81,4 @@ weight: 6
 </div>
 
 {{< /blocks/section >}}
+

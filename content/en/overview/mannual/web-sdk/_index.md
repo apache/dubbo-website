@@ -1,7 +1,8 @@
 ---
-description: Web SDK 使用手册
+description: Web SDK User Guide
 linkTitle: Web SDK
-title: Web SDK 手册
+title: Web SDK Manual
 type: docs
 weight: 4
 ---
+
