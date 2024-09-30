@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Deploying Applications on Apache Dubbo</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/</link><description>Recent content in Deploying Applications on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/index.xml" rel="self" type="application/rss+xml"/><item><title>Deploying Istio Environment</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/istio/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/istio/</guid><description>&lt;h2 id="1-preparation">1. Preparation&lt;/h2>
+&lt;ul>
+&lt;li>Docker, Helm, and kubectl environments are installed.&lt;/li>
+&lt;li>Dubbo-go CLI tools and dependencies are installed.&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-deploy-istio-environment">2. Deploy Istio Environment&lt;/h2>
+&lt;ol>
+&lt;li>Install the Istio base CRD and istiod components using Helm. You can also refer to the &lt;a href="https://istio.io/">Istio Documentation&lt;/a> for installation using istioctl.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ helm repo add istio https://istio-release.storage.googleapis.com/charts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ kubectl create namespace istio-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istio-base istio/base -n istio-system
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istiod istio/istiod --namespace istio-system
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>
+&lt;p>Delete the Istio horizontal pod autoscaler resources&lt;/p></description></item><item><title>Deploying Dubbo-go application in Istio environment</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/deploy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/deploy/</guid><description>&lt;p>In this chapter, we will quickly create a set of Dubbo-go Server and Client applications using the application template and deploy them in an Istio cluster; observe, debug, and verify service discovery and successful calls.&lt;/p>
+&lt;h2 id="1-preparation">1. Preparation&lt;/h2>
+&lt;ul>
+&lt;li>The dubbo-go CLI tool and dependency tools are installed, grpc_cli (for local debugging if needed).&lt;/li>
+&lt;li>The docker, helm, and kubectl environments are installed. (Arm machines must support docker buildx)&lt;/li>
+&lt;li>The task &lt;a href="../istio/">Deployment of Istio Environment&lt;/a> is complete.&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-developing-the-server-side-dubbo-go-application">2. Developing the Server-side Dubbo-go Application&lt;/h2>
+&lt;h3 id="21-create-project-template-with-dubbogo-cli">2.1 Create Project Template with dubbogo-cli&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>$ mkdir mesh-app-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd mesh-app-server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp . 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ tree .
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── api.proto
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── build
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── Dockerfile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── chart
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── serviceaccount.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── nacos_env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── Chart.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── templates
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── _helpers.tpl
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── deployment.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── service.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── values.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── app.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── conf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── dubbogo.yaml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── pkg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service.go
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The generated project includes several directories:&lt;/p></description></item><item><title>Traffic Management</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/traffic_management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/traffic_management/</guid><description>&lt;p>In this section, we will continue from the previous task &lt;a href="../deploy/">【Deploying Dubbo-go Applications in Istio Environment】&lt;/a>.&lt;/p>
+&lt;p>In the previous task, we deployed a set of Dubbo-go Server and Client applications in the cluster and verified that service discovery and invocation were successful. In this section, we will create a new version of the server application. By configuring VirtualService and DestinationRule, we will achieve routing management and traffic shifting capabilities.&lt;/p>
+&lt;h2 id="1-preparation">1. Preparation&lt;/h2>
+&lt;ul>
+&lt;li>The dubbo-go CLI tool and dependencies have been installed, as well as grpc_cli (for local debugging if needed).&lt;/li>
+&lt;li>Docker, Helm, and kubectl environments have been installed. (Arm machines need to support docker buildx)&lt;/li>
+&lt;li>The task &lt;a href="../deploy/">【Deploying Dubbo-go Applications in Istio Environment】&lt;/a> has been completed.&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-develop-multi-version-dubbo-go-applications">2. Develop Multi-Version Dubbo-go Applications.&lt;/h2>
+&lt;h3 id="21-create-another-project-template-using-dubbogo-cli">2.1 Create Another Project Template Using dubbogo-cli&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp . 
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-develop-and-deploy-client-dubbo-go-application-v2">2.2 Develop and Deploy Client Dubbo-go Application v2:&lt;/h3>
+&lt;h4 id="write-business-logic">Write Business Logic&lt;/h4>
+&lt;ul>
+&lt;li>Modify the implementation method of package/service/service.go to return version number v2.0.0&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterServerImpl) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>
+&lt;p>Modify the following configuration file to use the xds protocol as the registration center, loading the service structure named GreeterServerImpl.&lt;/p></description></item><item><title>Graceful Shutdown</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/graceful_shutdown/</guid><description>&lt;h1 id="graceful-shutdown">Graceful Shutdown&lt;/h1>
+&lt;h2 id="background">Background&lt;/h2>
+&lt;p>In a stable production environment, container scheduling is fully managed by k8s, and microservice governance is maintained and managed by the service framework or operations personnel. In scenarios like releasing a new version or scaling up/down, old container instances will be terminated and replaced with new ones. If this replacement process is not handled properly in high-traffic online production environments, it can lead to a large number of erroneous requests in a short time, triggering alarms and even affecting normal business operations. For larger organizations, the losses from issues during the release process can be enormous. Hence, the need for graceful shutdown has arisen. This requires the service framework to provide stable guarantees during the service offline process on top of stable service invocation and traditional service governance capabilities, thus reducing operational costs and improving application stability.&lt;/p></description></item><item><title>Proxyless Service Mesh</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/proxyless_service_mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/deploy2/proxyless_service_mesh/</guid><description>&lt;h2 id="1-what-is-proxyless-service-mesh">1. What is Proxyless Service-Mesh?&lt;/h2>
+&lt;h3 id="11-brief-analysis-of-service-mesh">1.1 Brief Analysis of Service Mesh&lt;/h3>
+&lt;p>Istio is the most popular open-source service mesh today. It consists of a control plane and a data plane, as shown in the architecture below, image sourced from &lt;a href="https://istio.io/">istio official website&lt;/a>&lt;/p>
+&lt;p>&lt;img alt="After using Istio" src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/service-mesh.svg">&lt;/p>
+&lt;p>The control plane located at the bottom half of the image is responsible for the distribution of resources like configurations, service information, and certificates. The data plane, located at the upper half, focuses on the communication traffic between services; traditional service meshes intercept all business network traffic through proxies, which need to be aware of the configuration resources issued by the control plane to manage traffic directions as required.&lt;/p></description></item></channel></rss>

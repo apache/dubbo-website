@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Configuration Manual on Apache Dubbo</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/</link><description>Recent content in Configuration Manual on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/index.xml" rel="self" type="application/rss+xml"/><item><title>Configuration of the Dubbo Maven Plugin</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/maven-plugin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/maven-plugin/</guid><description>&lt;p>This article mainly explains the configuration of the Dubbo Maven Plugin.&lt;/p>
+&lt;p>The current Dubbo Maven Plugin supports the following features:&lt;/p>
+&lt;ul>
+&lt;li>Dubbo Maven Plugin For Protobuf: Generates Stub code for Dubbo service interfaces&lt;/li>
+&lt;li>Dubbo Maven Plugin For Native Image: Generates necessary Metadata information for Native Image based on AOT mechanism&lt;/li>
+&lt;/ul>
+&lt;h2 id="dubbo-maven-plugin-for-protobuf">Dubbo Maven Plugin For Protobuf&lt;/h2>
+&lt;h3 id="how-to-use-dubbo-maven-plugin-to-generate-protobuf-stub-code">How to use Dubbo Maven Plugin to generate Protobuf Stub code&lt;/h3>
+&lt;h4 id="1-write-the-proto-file">1. Write the .proto file&lt;/h4>
+&lt;p>greeter.proto&lt;/p></description></item><item><title>Configuration Working Principle</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/principle/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/principle/</guid><description>&lt;p>This article mainly explains the APIs and working principles related to Dubbo configuration, learning about Dubbo&amp;rsquo;s multiple configuration sources, the specific configuration methods for each source, and the priority and coverage relationships between different configuration sources.&lt;/p>
+&lt;h2 id="implementation-principles">Implementation Principles&lt;/h2>
+&lt;p>To better manage various configurations, Dubbo abstracts a structured configuration component set, dividing the components by purpose to control behaviors in different scopes.&lt;/p>
+&lt;p>&lt;img alt="dubbo-config" src="https://dubbo.apache.org/imgs/user/dubbo-config.jpg">&lt;/p>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">Component Name&lt;/th>
+ &lt;th style="text-align: left">Description&lt;/th>
+ &lt;th style="text-align: left">Scope&lt;/th>
+ &lt;th style="text-align: left">Is Configuration Required&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">application&lt;/td>
+ &lt;td style="text-align: left">Specifies application name and other application-level related information&lt;/td>
+ &lt;td style="text-align: left">Only one allowed per application&lt;/td>
+ &lt;td style="text-align: left">Required&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">service&lt;/td>
+ &lt;td style="text-align: left">Declares a normal interface or implementation class as a Dubbo service&lt;/td>
+ &lt;td style="text-align: left">Can have 0 to multiple services in an application&lt;/td>
+ &lt;td style="text-align: left">At least one service/reference&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">reference&lt;/td>
+ &lt;td style="text-align: left">Declares a normal interface as a Dubbo service&lt;/td>
+ &lt;td style="text-align: left">Can have 0 to multiple references in an application&lt;/td>
+ &lt;td style="text-align: left">At least one service/reference&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">protocol&lt;/td>
+ &lt;td style="text-align: left">RPC protocol to be exposed and related configurations like port number&lt;/td>
+ &lt;td style="text-align: left">Multiple allowed in an application, a protocol can apply to a group of services &amp;amp; references&lt;/td>
+ &lt;td style="text-align: left">Optional, default is dubbo&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">registry&lt;/td>
+ &lt;td style="text-align: left">Registry type, address, and related configurations&lt;/td>
+ &lt;td style="text-align: left">Multiple allowed in an application, a registry can apply to a group of services &amp;amp; references&lt;/td>
+ &lt;td style="text-align: left">Required&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">config-center&lt;/td>
+ &lt;td style="text-align: left">Configuration center type, address, and related configurations&lt;/td>
+ &lt;td style="text-align: left">Multiple allowed in an application, shared by all services&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">metadata-report&lt;/td>
+ &lt;td style="text-align: left">Metadata center type, address, and related configurations&lt;/td>
+ &lt;td style="text-align: left">Multiple allowed in an application, shared by all services&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">consumer&lt;/td>
+ &lt;td style="text-align: left">Default configuration shared between references&lt;/td>
+ &lt;td style="text-align: left">Multiple allowed in an application, a consumer can apply to a group of references&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">provider&lt;/td>
+ &lt;td style="text-align: left">Default configuration shared between services&lt;/td>
+ &lt;td style="text-align: left">Multiple allowed in an application, a provider can apply to a group of services&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">monitor&lt;/td>
+ &lt;td style="text-align: left">Monitoring system type and address&lt;/td>
+ &lt;td style="text-align: left">Only one allowed in an application&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">metrics&lt;/td>
+ &lt;td style="text-align: left">Configuration related to data collection module&lt;/td>
+ &lt;td style="text-align: left">Only one allowed in an application&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">ssl&lt;/td>
+ &lt;td style="text-align: left">Configuration related to ssl/tls secure links, etc.&lt;/td>
+ &lt;td style="text-align: left">Only one allowed in an application&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">method&lt;/td>
+ &lt;td style="text-align: left">Method-level configuration&lt;/td>
+ &lt;td style="text-align: left">Sub-configuration of service and reference&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">argument&lt;/td>
+ &lt;td style="text-align: left">Argument configuration for a method&lt;/td>
+ &lt;td style="text-align: left">Sub-configuration of method&lt;/td>
+ &lt;td style="text-align: left">Optional&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;blockquote>
+&lt;p>From the perspective of implementation principles, all configuration items in Dubbo will ultimately be assembled into URLs, using URLs as carriers during subsequent startup and RPC calls to control framework behaviors.&lt;/p></description></item><item><title/><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/properties/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/config/properties/</guid><description>&lt;p>aliases:&lt;/p>
+&lt;ul>
+&lt;li>/en/docs3-v2/java-sdk/reference-manual/config/properties/&lt;/li>
+&lt;li>/en/docs3-v2/java-sdk/reference-manual/config/properties/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/performance/dump/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/performance/lazy-connect/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/performance/stickiness/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/service/delay-publish/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/service/preflight-check/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/service/registry-only/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/&lt;/li>
+&lt;li>/en/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/
+description: Contains all configuration components supported by Dubbo and all configuration items supported by each configuration component.
+linkTitle: Configuration Manual
+title: Configuration Reference Manual
+type: docs
+weight: 6&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h2 id="jvm--d-parameters">JVM (-D) Parameters&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">JVM Parameter&lt;/th>
+ &lt;th style="text-align: left">Example Value&lt;/th>
+ &lt;th style="text-align: left">Description&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.{config-name}.{property}&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.application.name=&amp;ldquo;dubbo-demo&amp;rdquo;&lt;br/>&lt;br/>-Ddubbo.registry.address=&amp;ldquo;nacos://host:port&amp;rdquo;&lt;br/>&lt;br/>-Ddubbo.protocol.port=&amp;ldquo;20880&amp;rdquo;&lt;br/>&lt;br/>&amp;hellip;&amp;hellip;&lt;/td>
+ &lt;td style="text-align: left">Dubbo supports specifying &lt;a href="aaa">all configuration items&lt;/a> in the JVM parameter format. Here, &lt;code>config&lt;/code> refers to items such as application, registry, protocol, and &lt;code>property&lt;/code> refers to specific properties within each configuration item.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.resolve.file&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.resolve.file=/home/ken/&amp;hellip;/dubbo-resolve.properties&lt;/td>
+ &lt;td style="text-align: left">Specifies the direct connection URL for each interface in the file, e.g., org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.graalvm.nativeimage.imagecode&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java&lt;/a>&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.properties.file&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.properties.file=foo.properties&lt;/td>
+ &lt;td style="text-align: left">Specifies the properties configuration file path, which can be an absolute path or a classpath-relative path. Default value is &lt;code>dubbo.properties&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.jstack-dump.max-line&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.jstack-dump.max-line=20&lt;/td>
+ &lt;td style="text-align: left">Dubbo supports automatic printing of the call stack. This parameter controls the number of stack lines, e.g., only the first 20 lines will be printed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.json-framework.prefer&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.json-framework.prefer=gson&lt;/td>
+ &lt;td style="text-align: left">Sets the specific implementation of JSON serialization in the framework. Currently available implementations are &lt;code>fastjson2&lt;/code>, &lt;code>fastjson&lt;/code>, &lt;code>gson&lt;/code>, &lt;code>jackson&lt;/code>. The framework automatically finds the available implementation in decreasing order of preference.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.network.interface.ignored&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.network.interface.ignored=eth1,eth2&lt;/td>
+ &lt;td style="text-align: left">In multi-network card environments, used when you need to manually control the network card address registered with the registry. It is used to exclude certain network cards.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.network.interface.preferred&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.network.interface.ignored=eth0&lt;/td>
+ &lt;td style="text-align: left">In multi-network card environments, used to specify a particular network card for registration with the registry.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">sun.rmi.transport.tcp.responseTimeout&lt;/td>
+ &lt;td style="text-align: left">-Dsun.rmi.transport.tcp.responseTimeout=5000&lt;/td>
+ &lt;td style="text-align: left">Sets the timeout for RMI protocol, in milliseconds.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">env&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">Specific parameter for Apollo configuration center.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">app.id&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">Specific parameter for Apollo configuration center.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">apollo.cluster&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">Specific parameter for Apollo configuration center.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">apollo.meta&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">Specific parameter for Apollo configuration center.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.mapping.cache.filePath&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.mapping.cache.filePath=~/.dubbo/mapping/&lt;/td>
+ &lt;td style="text-align: left">Sets the cache file for &lt;code>interface-application&lt;/code> mapping, usually for service discovery. The file&amp;rsquo;s absolute path address.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.mapping.cache.fileName&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.mapping.cache.fileName=dubbo-mapping&lt;/td>
+ &lt;td style="text-align: left">Sets the cache file for &lt;code>interface-application&lt;/code> mapping, usually for service discovery. The file name; the final file will be stored as &lt;code>dubbo-mapping.dubbo.cache&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.mapping.cache.entrySize&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.mapping.cache.maxFileSize=300&lt;/td>
+ &lt;td style="text-align: left">Sets the maximum number of entries in the &lt;code>interface-application&lt;/code> mapping cache file, usually for service discovery.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.mapping.cache.maxFileSize&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.mapping.cache.maxFileSize=104857600&lt;/td>
+ &lt;td style="text-align: left">Sets the maximum space for the &lt;code>interface-application&lt;/code> mapping cache file, usually for service discovery, in bytes.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.meta.cache.filePath&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.meta.cache.filePath=~/.dubbo/meta/&lt;/td>
+ &lt;td style="text-align: left">Sets the cache file for &lt;code>metadata&lt;/code> cache, usually for service discovery. The file&amp;rsquo;s absolute path address.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.meta.cache.fileName&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.meta.cache.fileName=dubbo-meta&lt;/td>
+ &lt;td style="text-align: left">Sets the cache file for &lt;code>metadata&lt;/code> cache, usually for service discovery. The file name; the final file will be stored as &lt;code>dubbo-meta.dubbo.cache&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.meta.cache.entrySize&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.meta.cache.maxFileSize=300&lt;/td>
+ &lt;td style="text-align: left">Sets the maximum number of entries in the &lt;code>metadata&lt;/code> cache file, usually for service discovery.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.meta.cache.maxFileSize&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.meta.cache.maxFileSize=104857600&lt;/td>
+ &lt;td style="text-align: left">Sets the maximum space for the &lt;code>metadata&lt;/code> cache file, usually for service discovery, in bytes.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.application.use-secure-random-request-id&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.application.use-secure-random-request-id=true&lt;/td>
+ &lt;td style="text-align: left">Sets the rule for generating the request ID for each RPC call. If not set, an incremental value will be used.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.protocol.default-close-timeout&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.protocol.default-close-timeout=10000&lt;/td>
+ &lt;td style="text-align: left">Sets the TCP server shutdown wait time, in milliseconds.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.protocol.default-heartbeat&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.protocol.default-heartbeat=10000&lt;/td>
+ &lt;td style="text-align: left">Sets the interval for initiating heartbeat, in milliseconds.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.hessian.allowNonSerializable&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">Allows serialization of classes that do not implement the &lt;code>Serializable&lt;/code> interface, effective for Hessian serialization.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.application.hessian2.whitelist&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.application.hessian2.whitelist=true&lt;/td>
+ &lt;td style="text-align: left">Enables a whitelist mechanism for Hessian serialization. If set to true, it will continue to configure the following allow rules; otherwise, it will configure the deny rules.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.application.hessian2.allow&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.application.hessian2.allow=org.apache.dubbo.&lt;em>;com.company.&lt;/em>&lt;/td>
+ &lt;td style="text-align: left">If true, configures allow rules (refer to the documentation for more details).&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.application.hessian2.deny&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.application.hessian2.deny=org.apache.dubbo.&lt;em>;io.commons.&lt;/em>&lt;/td>
+ &lt;td style="text-align: left">If false, configures deny rules (refer to the documentation for more details).&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.application.manual-register&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.application.manual-register=true&lt;/td>
+ &lt;td style="text-align: left">When set, all services will not be automatically registered to the registry until the user calls &lt;code>online&lt;/code> or other commands to manually complete registration.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.compact.enable&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.migration-file.enable&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.migration-file.enable=true&lt;/td>
+ &lt;td style="text-align: left">Whether to enable rule file reading during migration to application-level address discovery.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.migration.file&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.migration.file=dubbo-migration.yaml&lt;/td>
+ &lt;td style="text-align: left">Specifies the path to the rule file for migrating to application-level address discovery, which can be an absolute or classpath-relative path. Default value is &lt;code>dubbo-migration.yaml&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.application.logger&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.application.logger=slf4j&lt;/td>
+ &lt;td style="text-align: left">Sets the logging component used by the Dubbo framework. After setting, Dubbo&amp;rsquo;s own logs will be printed here (does not affect application logs). Currently supported components are &lt;code>slf4j&lt;/code>, &lt;code>log4j&lt;/code>, &lt;code>log4j2&lt;/code>, etc. Ensure that the corresponding component dependency is added to the application.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.properties.file&lt;/td>
+ &lt;td style="text-align: left">-Ddubbo.properties.file=foo.properties&lt;/td>
+ &lt;td style="text-align: left">Specifies the properties configuration file path, which can be an absolute or classpath-relative path. Default value is &lt;code>dubbo.properties&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="environment-variables">Environment Variables&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">Environment Variable&lt;/th>
+ &lt;th style="text-align: left">Example Value&lt;/th>
+ &lt;th style="text-align: left">Description&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_{CONFIG-NAME}.{PROPERTY}&lt;/td>
+ &lt;td style="text-align: left">DUBBO_APPLICATION_NAME=&amp;ldquo;dubbo-demo&amp;rdquo;&lt;br/>&lt;br/>DUBBO_REGISTRY_ADDRESS=&amp;ldquo;nacos://host:port&amp;rdquo;&lt;br/>&lt;br/>DUBBO_PROTOCOL_PORT=&amp;ldquo;20880&amp;rdquo;&lt;br/>&lt;br/>&amp;hellip;&amp;hellip;&lt;/td>
+ &lt;td style="text-align: left">Dubbo supports specifying &lt;a href="aaa">all configuration items&lt;/a> as environment variables. &lt;code>CONFIG-NAME&lt;/code> refers to items such as application, registry, protocol, and &lt;code>PROPERTY&lt;/code> refers to specific properties within each item.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_DEFAULT_SERIALIZATION&lt;/td>
+ &lt;td style="text-align: left">DUBBO_DEFAULT_SERIALIZATION=&amp;ldquo;hessian2&amp;rdquo;&lt;/td>
+ &lt;td style="text-align: left">Sets the default serialization method for the framework, e.g., &lt;code>hessian2&lt;/code>, &lt;code>fastjson2&lt;/code>, &lt;code>msgpack&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO2_COMPACT_ENABLE&lt;/td>
+ &lt;td style="text-align: left">DUBBO2_COMPAT_ENABLE=&amp;ldquo;true&amp;rdquo;&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_ENV_KEYS&lt;/td>
+ &lt;td style="text-align: left">DUBBO_LABELS=&amp;ldquo;tag1=value1; tag2=value2&amp;rdquo;&lt;/td>
+ &lt;td style="text-align: left">&lt;code>tag1=value1&lt;/code> will be reported as an additional parameter to the URL, serving as a system environment variable for instance tagging, etc.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_LABELS&lt;/td>
+ &lt;td style="text-align: left">DUBBO_ENV_KEYS=&amp;ldquo;DUBBO_TAG1, DUBBO_TAG2&amp;rdquo;&lt;/td>
+ &lt;td style="text-align: left">Dubbo will read &lt;code>DUBBO_TAG1&lt;/code>, &lt;code>DUBBO_TAG2&lt;/code> environment variables, and report values such as &lt;code>DUBBO_TAG1=value&lt;/code> as additional parameters to the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">POD_NAMESPACE&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">Specifies the namespace for Kubernetes Service scenarios.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">CLUSTER_DOMAIN&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">Specifies the cluster name for Kubernetes Service scenarios, default is &lt;code>default&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_IP_TO_REGISTRY&lt;/td>
+ &lt;td style="text-align: left">DUBBO_IP_TO_REGISTRY=30.123.45.187&lt;/td>
+ &lt;td style="text-align: left">Specifies the IP address to register in the registry URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_PORT_TO_REGISTRY&lt;/td>
+ &lt;td style="text-align: left">DUBBO_PORT_TO_REGISTRY=20880&lt;/td>
+ &lt;td style="text-align: left">Specifies the port number to register in the registry URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_{PROTOCOL}_PORT_TO_REGISTRY&lt;/td>
+ &lt;td style="text-align: left">DUBBO_DUBBO_IP_TO_REGISTRY=30.123.45.187&lt;br/>&lt;br/>DUBBO_TRI_IP_TO_REGISTRY=30.123.45.187&lt;/td>
+ &lt;td style="text-align: left">Specifies the IP address to register in the registry URL, and can specify different IPs for different protocols.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_{PROTOCOL}_PORT_TO_REGISTRY&lt;/td>
+ &lt;td style="text-align: left">DUBBO_DUBBO_PORT_TO_REGISTRY=20880&lt;br/>&lt;br/>DUBBO_TRI_PORT_TO_REGISTRY=50051&lt;/td>
+ &lt;td style="text-align: left">Specifies the port number to register in the registry URL, and can specify different ports for different protocols.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_IP_TO_BIND&lt;/td>
+ &lt;td style="text-align: left">DUBBO_IP_TO_BIND=30.123.45.187&lt;/td>
+ &lt;td style="text-align: left">Specifies the IP address for TCP binding.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_PORT_TO_BIND&lt;/td>
+ &lt;td style="text-align: left">DUBBO_PORT_TO_BIND=20880&lt;/td>
+ &lt;td style="text-align: left">Specifies the port for TCP binding.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_{PROTOCOL}_IP_TO_BIND&lt;/td>
+ &lt;td style="text-align: left">DUBBO_DUBBO_IP_TO_BIND=30.123.45.187&lt;br/>&lt;br/>DUBBO_TRI_IP_TO_BIND=30.123.45.187&lt;/td>
+ &lt;td style="text-align: left">Specifies the IP address for TCP binding, and can specify different IPs for different protocols.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">DUBBO_{PROTOCOL}_PORT_TO_BIND&lt;/td>
+ &lt;td style="text-align: left">DUBBO_DUBBO_PORT_TO_BIND=20880&lt;br/>&lt;br/>DUBBO_TRI_PORT_TO_BIND=50051&lt;/td>
+ &lt;td style="text-align: left">Specifies the port for TCP binding, and can specify different ports for different protocols.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.properties.file&lt;/td>
+ &lt;td style="text-align: left">dubbo.properties.file=foo.properties&lt;/td>
+ &lt;td style="text-align: left">Specifies the properties configuration file path, which can be an absolute or classpath-relative path. Default value is &lt;code>dubbo.properties&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">dubbo.migration.file&lt;/td>
+ &lt;td style="text-align: left">dubbo.migration.file=dubbo-migration.yaml&lt;/td>
+ &lt;td style="text-align: left">Specifies the migration rule file path for application-level address discovery, which can be an absolute or classpath-relative path. Default value is &lt;code>dubbo-migration.yaml&lt;/code>.&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="configuration-manual">Configuration Manual&lt;/h2>
+&lt;p>Regardless of whether you are using Spring Boot, XML, annotations, or APIs to write Dubbo applications, you can refer to the table below to understand the specific meaning of each configuration item.&lt;/p></description></item></channel></rss>

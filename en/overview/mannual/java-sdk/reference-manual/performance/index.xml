@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Performance Reference Manual on Apache Dubbo</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/</link><description>Recent content in Performance Reference Manual on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/index.xml" rel="self" type="application/rss+xml"/><item><title>Application-Level Service Discovery Benchmark Testing</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/benchmarking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/benchmarking/</guid><description>&lt;h2 id="1-benchmark-conclusions">1 Benchmark Conclusions&lt;/h2>
+&lt;p>Compared to version 2.x, Dubbo 3 version&lt;/p>
+&lt;ul>
+&lt;li>Resource utilization for service discovery has significantly improved.
+&lt;ul>
+&lt;li>Compared to interface-level service discovery, the resident memory on a single machine decreased by 50%, and the GC consumption during address changes decreased an order of magnitude (hundreds -&amp;gt; tens).&lt;/li>
+&lt;li>Compared to application-level service discovery, the resident memory on a single machine decreased by 75%, and the number of GCs approached zero.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>Here are the detailed pressure test processes and data&lt;/p></description></item><item><title>RPC Protocol Triple&amp;Dubbo Benchmark Testing</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/rpc-benchmarking/</guid><description>&lt;ul>
+&lt;li>The implementation of the &lt;em>Dubbo protocol&lt;/em> in Dubbo3 is basically on par with the Dubbo2 version in terms of performance.&lt;/li>
+&lt;li>Since the Triple protocol is built on HTTP/2, RPC calls over a single link do not show an improvement compared to Dubbo2 based on TCP, and there is actually a certain decrease in some calling scenarios. However, the &lt;em>Triple protocol&lt;/em> has greater advantages in gateway penetration, universality, and overall throughput improvement brought by the Stream communication model.&lt;/li>
+&lt;li>Triple is expected to perform better under gateway proxy scenarios, and benchmarks were not provided in the current stress test environment.&lt;/li>
+&lt;/ul>
+&lt;h2 id="11-environment">1.1 Environment&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;/th>
+ &lt;th style="text-align: left">Description&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;strong>Machine&lt;/strong>&lt;/td>
+ &lt;td style="text-align: left">4C8G Linux JDK 1.8 (Provider) 4C8G Linux JDK 1.8 (Consumer)&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;strong>Stress Test Cases&lt;/strong>&lt;/td>
+ &lt;td style="text-align: left">RPC method types include: no-parameter no return value, ordinary pojo return value, pojo list return value&lt;br />&lt;br />Version 2.7 Dubbo protocol (Hessian2 serialization)&lt;br />Version 3.0 Dubbo protocol (Hessian2 serialization)&lt;br />Version 3.0 Dubbo protocol (Protobuf serialization)&lt;br />Version 3.0 Triple protocol (Protobuf serialization)&lt;br />Version 3.0 Triple protocol (Protobuf plus Hessian2 serialization)&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;strong>Stress Testing Method&lt;/strong>&lt;/td>
+ &lt;td style="text-align: left">In a single link scenario, the consumer starts 32 concurrent threads (the current machine configuration has a balanced qps rt concurrency), continuously collecting test data&lt;br /> Test data is obtained from &lt;a href="https://github.com/apache/dubbo-benchmark">https://github.com/apache/dubbo-benchmark&lt;/a>&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;br />
+&lt;h2 id="12-data-analysis">1.2 Data Analysis&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Dubbo + Hessian2&lt;br />2.7&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Dubbo + Hessian2&lt;br />3.0&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Dubbo + Protobuf&lt;br />3.0&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Triple + Protobuf&lt;br />3.0&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Triple + Protobuf(Hessian)&lt;br />3.0&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;strong>No-parameter Method&lt;/strong>&lt;/td>
+ &lt;td style="text-align: left">30333 ops/s&lt;br />2.5ms P99&lt;/td>
+ &lt;td style="text-align: left">30414 ops/s&lt;br />2.4ms P99&lt;/td>
+ &lt;td style="text-align: left">24123 ops/s&lt;br />3.2ms P99&lt;/td>
+ &lt;td style="text-align: left">7016 ops/s&lt;br />8.7ms P99&lt;/td>
+ &lt;td style="text-align: left">6635 ops/s&lt;br />9.1ms P99&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;strong>Pojo Return Value&lt;/strong>&lt;/td>
+ &lt;td style="text-align: left">8984 ops/s&lt;br />6.1 ms P99&lt;/td>
+ &lt;td style="text-align: left">12279 ops/s&lt;br />5.7 ms P99&lt;/td>
+ &lt;td style="text-align: left">21479 ops/s&lt;br />3.0 ms P99&lt;/td>
+ &lt;td style="text-align: left">6255 ops/s&lt;br />8.9 ms P99&lt;/td>
+ &lt;td style="text-align: left">6491 ops/s&lt;br />10 ms P99&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;strong>Pojo List Return Value&lt;/strong>&lt;/td>
+ &lt;td style="text-align: left">1916 ops/s&lt;br />34 ms P99&lt;/td>
+ &lt;td style="text-align: left">2037 ops/s&lt;br />34 ms P99&lt;/td>
+ &lt;td style="text-align: left">12722 ops/s&lt;br />7.7 ms P99&lt;/td>
+ &lt;td style="text-align: left">6920 ops/s&lt;br />9.6 ms P99&lt;/td>
+ &lt;td style="text-align: left">2833 ops/s&lt;br />27 ms P99&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="121-comparison-of-different-versions-of-dubbo-protocol-implementations">1.2.1 Comparison of Different Versions of Dubbo Protocol Implementations&lt;/h3>
+&lt;p>&lt;img alt="//imgs/v3/performance/rpc-dubbo.svg" src="https://dubbo.apache.org/imgs/v3/performance/rpc-dubbo.svg">&lt;/p></description></item><item><title>RPC Benchmark Testing Console</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/page-benchmarking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/performance/page-benchmarking/</guid><description>&lt;html lang="">
+&lt;head>
+ &lt;meta charset="utf-8">
+ &lt;meta http-equiv="X-UA-Compatible" content="IE=edge">
+ &lt;meta name="viewport" content="width=device-width,initial-scale=1">
+ &lt;title>dubbo-benchmark&lt;/title>
+ &lt;script defer="defer" src="https://dubbo.apache.org/js/chunk-vendors.js">&lt;/script>
+ &lt;script defer="defer" src="https://dubbo.apache.org/js/app.js">&lt;/script>
+ &lt;link href="https://dubbo.apache.org/css/chunk-vendors.css" rel="stylesheet">
+ &lt;link href="https://dubbo.apache.org/css/app.css" rel="stylesheet">
+&lt;/head>
+&lt;body>
+&lt;noscript>&lt;strong>We're sorry but dubbo-benchmark doesn't work properly without JavaScript enabled. Please enable it to
+ continue.&lt;/strong>&lt;/noscript>
+&lt;div id="app">&lt;/div>
+&lt;/body>
+&lt;/html></description></item></channel></rss>

@@ -1,0 +1,1041 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Detailed Introduction to Dubbo SPI Plugin Definition and Usage on Apache Dubbo</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/</link><description>Recent content in Detailed Introduction to Dubbo SPI Plugin Definition and Usage on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/index.xml" rel="self" type="application/rss+xml"/><item><title>Protocol Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/protocol/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>RPC protocol extension, encapsulating remote call details.&lt;/p>
+&lt;p>Contract:&lt;/p>
+&lt;ul>
+&lt;li>When the user calls the &lt;code>invoke()&lt;/code> method of the &lt;code>Invoker&lt;/code> object returned by &lt;code>refer()&lt;/code>, the protocol should execute the &lt;code>invoke()&lt;/code> method of the &lt;code>Invoker&lt;/code> object passed in by remote &lt;code>export()&lt;/code> with the same URL.&lt;/li>
+&lt;li>The &lt;code>Invoker&lt;/code> returned by &lt;code>refer()&lt;/code> is implemented by the protocol, which usually sends a remote request within this &lt;code>Invoker&lt;/code>. The &lt;code>Invoker&lt;/code> passed in by &lt;code>export()&lt;/code> is implemented and provided by the framework, which the protocol does not need to be concerned about.&lt;/li>
+&lt;/ul>
+
+
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">Note&lt;/h4>
+
+ &lt;ul>
+&lt;li>The protocol does not concern itself with the transparent proxying of business interfaces; it is &lt;code>Invoker&lt;/code> centric, with the outer layer converting &lt;code>Invoker&lt;/code> to the business interface.&lt;/li>
+&lt;li>The protocol does not necessarily have to be TCP network communication, such as through shared files, IPC inter-process communication, etc.&lt;/li>
+&lt;/ul>
+
+
+&lt;/div>
+
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.Protocol&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.Exporter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.Invoker&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">Protocol&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Expose remote service:&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 1. The protocol, upon receiving requests, should record the request source address information: RpcContext.getContext().setRemoteAddress();&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 2. export() must be idempotent, meaning exposing the same URL&amp;#39;s Invoker twice is the same as exposing it once.&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 3. The Invoker passed to export() is provided by the framework, and the protocol does not need to be concerned.&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param &amp;lt;T&amp;gt; Service type
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param invoker Service execution body
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return exporter Reference to exposed service for cancellation
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @throws RpcException Thrown when an error occurs in exposing the service, such as port occupied.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Exporter&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">export&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> invoker) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Reference a remote service:&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 1. When the user calls invoke() on the Invoker object returned by refer(), the protocol should execute the invoke() method of the Invoker object passed in by remote export() with the same URL.&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 2. The Invoker returned by refer() is implemented by the protocol, typically sending the remote request within this Invoker.&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 3. When check=false is set in the URL, connection failures should not throw exceptions but should automatically recover internally.&amp;lt;br&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param &amp;lt;T&amp;gt; Service type
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param type Service type
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param url Remote service&amp;#39;s URL
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return invoker Local proxy of the service
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @throws RpcException Thrown when connection to the service provider fails.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">refer&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> type, URL url) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Declare protocol, if no id is configured, name will be used as id --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;xxx1&amp;#34;&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Reference protocol, if no protocol attribute is configured, it will automatically scan protocol configuration in ApplicationContext --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;xxx1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value for referenced protocol, used when &amp;lt;dubbo:service&amp;gt; does not configure protocol attribute --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;xxx1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.protocol.rmi.RmiProtocol&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.protocol.http.HttpProtocol&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.protocol.http.hessian.HessianProtocol&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.support.MockProtocol&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p></description></item><item><title>Call Interceptor Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/filter/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>The interception during the call process of service providers and consumers is mainly implemented based on this extension point. This interceptor is executed each time a remote method is invoked, so be mindful of its impact on performance.&lt;/p>
+&lt;p>Convention:&lt;/p>
+&lt;ul>
+&lt;li>User-defined filters are executed after built-in filters by default.&lt;/li>
+&lt;li>The special value &lt;code>default&lt;/code> indicates the position where the default extension point is inserted. For example: &lt;code>filter=&amp;quot;xxx,default,yyy&amp;quot;&lt;/code> means &lt;code>xxx&lt;/code> is before the default filter, and &lt;code>yyy&lt;/code> is after it.&lt;/li>
+&lt;li>The special symbol &lt;code>-&lt;/code> indicates exclusion. For example: &lt;code>filter=&amp;quot;-foo1&amp;quot;&lt;/code> excludes the default extension point &lt;code>foo1&lt;/code>. For instance: &lt;code>filter=&amp;quot;-default&amp;quot;&lt;/code> excludes all default extension points.&lt;/li>
+&lt;li>When filters are configured for both provider and service, all filters are accumulated rather than overridden. For example: &lt;code>&amp;lt;dubbo:provider filter=&amp;quot;xxx,yyy&amp;quot;/&amp;gt;&lt;/code> and &lt;code>&amp;lt;dubbo:service filter=&amp;quot;aaa,bbb&amp;quot; /&amp;gt;&lt;/code> means &lt;code>xxx&lt;/code>, &lt;code>yyy&lt;/code>, &lt;code>aaa&lt;/code>, &lt;code>bbb&lt;/code> will all be effective. To override, configure: &lt;code>&amp;lt;dubbo:service filter=&amp;quot;-xxx,-yyy,aaa,bbb&amp;quot; /&amp;gt;&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.Filter&lt;/code>&lt;/p></description></item><item><title>Invoker Listener Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/invoker-listener/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/invoker-listener/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>This event is triggered when there is a service reference.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.InvokerListener&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Reference Service Listener --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> listener=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default Listener for Reference Services --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&lt;/span> listener=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span> 
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.listener.DeprecatedInvokerListener&lt;/code>&lt;/p>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxInvokerListener.java (implements InvokerListener interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.InvokerListener (text file containing: xxx=com.xxx.XxxInvokerListener)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxInvokerListener.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.InvokerListener;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxInvokerListener&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> InvokerListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">referred&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">destroyed&lt;/span>(Invoker&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> invoker) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.rpc.InvokerListener:&lt;/p></description></item><item><title>Export Listener Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/exporter-listener/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/exporter-listener/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>This event is triggered when services are exposed.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.ExporterListener&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Service export listener --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> listener=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default listener for service export --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> listener=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extension">Known Extension&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.registry.directory.RegistryExporterListener&lt;/code>&lt;/p>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxExporterListener.java (implements ExporterListener interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.ExporterListener (plain text file, content: xxx=com.xxx.XxxExporterListener)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxExporterListener.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.ExporterListener;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Exporter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxExporterListener&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ExporterListener {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">exported&lt;/span>(Exporter&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> exporter) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">unexported&lt;/span>(Exporter&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> exporter) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.rpc.ExporterListener:&lt;/p></description></item><item><title>Cluster extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/cluster/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/cluster/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>When there are multiple service providers, organize them into a cluster and masquerade as a single provider.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.cluster.Cluster&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default configuration; if &amp;lt;dubbo:protocol&amp;gt; does not configure cluster, this configuration will be used --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> cluster=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.wrapper.MockClusterWrapper&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.FailoverCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.FailfastCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.FailsafeCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.FailbackCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.ForkingCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.AvailableCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.MergeableCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.BroadcastCluster&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.support.registry.ZoneAwareCluster&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxCluster.java (implements Cluster interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.cluster.Cluster (plain text file with content: xxx=com.xxx.XxxCluster)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxCluster.java:&lt;/p></description></item><item><title>Router Extensions</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/router/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Select one from multiple service providers to call.&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.RouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.Router&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.router.ScriptRouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.router.FileRouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.router.condition.config.AppRouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.CacheableRouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.router.condition.ConditionRouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.router.mock.MockRouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.router.condition.config.ServiceRouterFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.router.tag.TagRouterFactory&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxRouterFactory.java (implements RouterFactory interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.cluster.RouterFactory (plain text file, content: xxx=com.xxx.XxxRouterFactory)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxRouterFactory.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.RouterFactory;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invoker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.Invocation;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.RpcException;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxRouterFactory&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> RouterFactory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Router &lt;span style="color:#268bd2">getRouter&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.rpc.cluster.RouterFactory:&lt;/p></description></item><item><title>Load Balance Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/load-balance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/load-balance/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Select one from multiple service providers for invocation.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.cluster.LoadBalance&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value settings, when &amp;lt;dubbo:protocol&amp;gt; does not configure loadbalance, this configuration is used --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.loadbalance.ShortestResponseLoadBalance&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxLoadBalance.java (implements LoadBalance interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.cluster.LoadBalance (plain text file, content: xxx=com.xxx.XxxLoadBalance)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxLoadBalance.java：&lt;/p></description></item><item><title>Merger Result Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/merger/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/merger/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Merging return results, used for grouping aggregation.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.cluster.Merger&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> merger=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.ArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.ListMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.SetMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.MapMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.ByteArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.CharArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.ShortArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.IntArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.LongArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.FloatArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.DoubleArrayMerger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.cluster.merger.BooleanArrayMerger&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxMerger.java (implements Merger interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.cluster.Merger (plain text file, content: xxx=com.xxx.XxxMerger)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxMerger.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.rpc.cluster.Merger;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxMerger&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Merger&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> T &lt;span style="color:#268bd2">merge&lt;/span>(T... results) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.rpc.cluster.Merger：&lt;/p></description></item><item><title>Registry Center Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/registry/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Responsible for the registration and discovery of services.&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.registry.RegistryFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.registry.Registry&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Define the registry --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;xxx1&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;xxx://ip:port&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Reference the registry, if the registry attribute is not configured, it will automatically scan the registry configuration in the ApplicationContext --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;xxx1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Reference the default value of the registry, when &amp;lt;dubbo:service&amp;gt; does not configure the registry attribute, use this configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;xxx1&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="extension-contracts">Extension Contracts&lt;/h2>
+&lt;p>RegistryFactory.java：&lt;/p></description></item><item><title>Monitoring Center Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/monitor/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/monitor/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Responsible for monitoring service call counts and call times.&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.monitor.MonitorFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.monitor.Monitor&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Define the monitoring center --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:monitor&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;xxx://ip:port&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;p>org.apache.dubbo.monitor.support.dubbo.DubboMonitorFactory&lt;/p>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxMonitorFactory.java (implements the MonitorFactory interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxMonitor.java (implements the Monitor interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.monitor.MonitorFactory (text file, content: xxx=com.xxx.XxxMonitorFactory)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxMonitorFactory.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.monitor.MonitorFactory;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.monitor.Monitor;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.URL;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxMonitorFactory&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> MonitorFactory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Monitor &lt;span style="color:#268bd2">getMonitor&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> XxxMonitor(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxMonitor.java：&lt;/p></description></item><item><title>Extension Point Loading Extensions</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/extension-factory/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/extension-factory/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>The loading container for extension points, capable of loading extension points from different containers.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.common.extension.ExtensionFactory&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> compiler=&lt;span style="color:#2aa198">&amp;#34;jdk&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.common.extension.factory.SpiExtensionFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.config.spring.extension.SpringExtensionFactory&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxExtensionFactory.java (implements ExtensionFactory interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.common.extension.ExtensionFactory (plain text file, content: xxx=com.xxx.XxxExtensionFactory)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxExtensionFactory.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.extension.ExtensionFactory;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxExtensionFactory&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ExtensionFactory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">getExtension&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> type, String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.common.extension.ExtensionFactory:&lt;/p></description></item><item><title>Dynamic Proxy Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/proxy-factory/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/proxy-factory/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Converts the &lt;code>Invoker&lt;/code> interface into a business interface.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.rpc.ProxyFactory&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> proxy=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default configuration, used when the &amp;lt;dubbo:protocol&amp;gt; does not configure the proxy attribute --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> proxy=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.rpc.proxy.JdkProxyFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.proxy.JavassistProxyFactory&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxProxyFactory.java (implements ProxyFactory interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.rpc.ProxyFactory (plain text file, content: xxx=com.xxx.XxxProxyFactory)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxProxyFactory.java:&lt;/p></description></item><item><title>Liveness Probe</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/liveness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/liveness/</guid><description>&lt;h2 id="extended-description">Extended Description&lt;/h2>
+&lt;p>Expands the detection points for application liveness.&lt;/p>
+&lt;h2 id="extended-interface">Extended Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.probe.LivenessProbe&lt;/code>&lt;/p>
+&lt;h2 id="extended-configuration">Extended Configuration&lt;/h2>
+&lt;p>Dubbo QOS &lt;code>live&lt;/code> command auto-discovery&lt;/p>
+&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;p>No default implementation available&lt;/p>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxLivenessProbe.java (Implements LivenessProbe interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.qos.probe.LivenessProbe (Plain text file, content: xxx=com.xxx.XxxLivenessProbe)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxLivenessProbe.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxLivenessProbe&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> LivenessProbe {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">check&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.qos.probe.LivenessProbe:&lt;/p></description></item><item><title>Readiness Probe</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/readiness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/readiness/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Extend application readiness detection points.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.probe.ReadinessProbe&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;p>Dubbo QOS &lt;code>ready&lt;/code> command auto-discovery&lt;/p>
+&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.qos.probe.impl.BootstrapReadinessProbe&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.qos.probe.impl.ProviderReadinessProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxReadinessProbe.java (implements ReadinessProbe interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.qos.probe.ReadinessProbe (plain text file, content: xxx=com.xxx.XxxReadinessProbe)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxReadinessProbe.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxReadinessProbe&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ReadinessProbe {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">check&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.qos.probe.ReadinessProbe:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>xxx=com.xxx.XxxReadinessProbe
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Startup Probe</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/startup/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/startup/</guid><description>&lt;h2 id="expansion-description">Expansion Description&lt;/h2>
+&lt;p>Detection points for extended application startup.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.probe.StartupProbe&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;p>Dubbo QOS &lt;code>startup&lt;/code> command auto-discovery&lt;/p>
+&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.qos.probe.impl.BootstrapLivenessProbe&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxStartupProbe.java (implements StartupProbe interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.qos.probe.StartupProbe (plain text file, content: xxx=com.xxx.XxxStartupProbe)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxStartupProbe.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxStartupProbe&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> StartupProbe {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">check&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.qos.probe.StartupProbe:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>xxx=com.xxx.XxxStartupProbe
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Compiler Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/compiler/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/compiler/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Java code compiler for dynamically generating bytecode to accelerate calls.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.common.compiler.Compiler&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;p>Automatically loaded&lt;/p>
+&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.common.compiler.support.JdkCompiler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.compiler.support.JavassistCompiler&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxCompiler.java (implements Compiler interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.common.compiler.Compiler (text file containing: xxx=com.xxx.XxxCompiler)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxCompiler.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.compiler.Compiler;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxCompiler&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Compiler {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">getExtension&lt;/span>(Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> type, String name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.common.compiler.Compiler：&lt;/p></description></item><item><title>Configuration Center Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/config-center/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/config-center/</guid><description>&lt;h2 id="design-purpose">Design Purpose&lt;/h2>
+&lt;p>The core function of the configuration center is to serve as a Key-Value storage. The Dubbo framework informs the configuration center of the keys it is concerned about, and the configuration center returns the corresponding value for those keys.&lt;/p>
+&lt;p>Divided by application scenario, the configuration center primarily undertakes the following responsibilities in the Dubbo framework:&lt;/p>
+&lt;ul>
+&lt;li>As an externalized configuration center, storing the dubbo.properties configuration file, where the key is usually the filename, such as dubbo.properties, and the value is the content of the configuration file.&lt;/li>
+&lt;li>Storing individual configuration items, such as various switches and constant values.&lt;/li>
+&lt;li>Storing service governance rules, where the key is usually organized in the format of &amp;ldquo;service name + rule type,&amp;rdquo; and the value is the specific governance rule.&lt;/li>
+&lt;/ul>
+&lt;p>To further implement grouped management of key-values, Dubbo&amp;rsquo;s configuration center has also integrated the concepts of namespace and group, which are reflected in many professional third-party configuration centers. Generally, the namespace is used to isolate different tenants, while the group is used to group the collection of keys for the same tenant.&lt;/p></description></item><item><title>Metadata Center Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/metadata-report/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/metadata-report/</guid><description>&lt;h2 id="design-purpose">Design Purpose&lt;/h2>
+&lt;p>Please refer to the &lt;a href="../../../metadata-center/overview/">Metadata Center Manual&lt;/a>&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.metadata.store.MetadataReportFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.metadata.store.MetadataReport&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;h2 id="implementation-principles">Implementation Principles&lt;/h2>
+&lt;h3 id="spi-definition">SPI Definition&lt;/h3>
+&lt;p>Reference: org.apache.dubbo.metadata.store.MetadataReportFactory, org.apache.dubbo.metadata.store.MetadataReport&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SPI&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;redis&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetadataReportFactory&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Adaptive&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;protocol&amp;#34;&lt;/span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MetadataReport &lt;span style="color:#268bd2">getMetadataReport&lt;/span>(URL url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="custom-metadata-storage">Custom Metadata Storage&lt;/h3>
+&lt;p>The following example describes the Redis storage.&lt;/p>
+&lt;p>Create a new project that needs to support the following modifications:&lt;/p>
+&lt;h4 id="extend-abstractmetadatareport">Extend AbstractMetadataReport&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RedisMetadataReport&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> AbstractMetadataReport {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> Logger logger &lt;span style="color:#719e07">=&lt;/span> LoggerFactory.getLogger(RedisMetadataReport.class);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">final&lt;/span> JedisPool pool;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">RedisMetadataReport&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">super&lt;/span>(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pool &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> JedisPool(&lt;span style="color:#719e07">new&lt;/span> JedisPoolConfig(), url.getHost(), url.getPort());
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doStoreProviderMetadata&lt;/span>(ProviderMetadataIdentifier providerMetadataIdentifier, String serviceDefinitions) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.storeMetadata(providerMetadataIdentifier, serviceDefinitions);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">doStoreConsumerMetadata&lt;/span>(ConsumerMetadataIdentifier consumerMetadataIdentifier, String value) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.storeMetadata(consumerMetadataIdentifier, value);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">storeMetadata&lt;/span>(MetadataIdentifier metadataIdentifier, String v) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> (Jedis jedis &lt;span style="color:#719e07">=&lt;/span> pool.getResource()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> jedis.set(metadataIdentifier.getIdentifierKey() &lt;span style="color:#719e07">+&lt;/span> META_DATA_SOTRE_TAG, v);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Throwable e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.error(&lt;span style="color:#2aa198">&amp;#34;Failed to put &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> metadataIdentifier &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; to redis &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> v &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, cause: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> e.getMessage(), e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RpcException(&lt;span style="color:#2aa198">&amp;#34;Failed to put &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> metadataIdentifier &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; to redis &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> v &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;, cause: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> e.getMessage(), e);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="extend-abstractmetadatareportfactory">Extend AbstractMetadataReportFactory&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">RedisMetadataReportFactory&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> AbstractMetadataReportFactory {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> MetadataReport &lt;span style="color:#268bd2">createMetadataReport&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RedisMetadataReport(url);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="add-metadatareportfactory">Add MetadataReportFactory&lt;/h4>
+&lt;blockquote>
+&lt;p>META-INF/dubbo/internal/org.apache.dubbo.metadata.store.MetadataReportFactory&lt;/p></description></item><item><title>Message Dispatch Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/dispatcher/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/dispatcher/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Channel information dispatcher, used to specify thread pool model.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.remoting.Dispatcher&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> dispatcher=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value setting. When &amp;lt;dubbo:protocol&amp;gt; does not configure the dispatcher attribute, this configuration is used --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> dispatcher=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.dispatcher.all.AllDispatcher&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.dispatcher.direct.DirectDispatcher&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.dispatcher.message.MessageOnlyDispatcher&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.dispatcher.execution.ExecutionDispatcher&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.dispatcher.connection.ConnectionOrderedDispatcher&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxDispatcher.java (implements Dispatcher interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.remoting.Dispatcher (plain text file, content: xxx=com.xxx.XxxDispatcher)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxDispatcher.java：&lt;/p></description></item><item><title>Thread Pool Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/threadpool/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/threadpool/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>The thread pool implementation strategy for service providers requires creating a thread in the thread pool to execute the service provider&amp;rsquo;s business logic when the server receives a request.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.common.threadpool.ThreadPool&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> threadpool=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value configuration, used when &amp;lt;dubbo:protocol&amp;gt; does not configure threadpool --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> threadpool=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.common.threadpool.FixedThreadPool&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.threadpool.CachedThreadPool&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxThreadPool.java (implements ThreadPool interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.common.threadpool.ThreadPool (plain text file, content: xxx=com.xxx.XxxThreadPool)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxThreadPool.java:&lt;/p></description></item><item><title>Serialization Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/serialize/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/serialize/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Convert objects into byte streams for network transmission, and convert byte streams into objects for restoring the received byte stream data back into objects.&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.common.serialize.Serialization&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.serialize.ObjectInput&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.serialize.ObjectOutput&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Serialization method for the protocol --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value setting, when &amp;lt;dubbo:protocol&amp;gt; does not configure serialization, use this configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.common.serialize.dubbo.DubboSerialization&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.serialize.hessian.Hessian2Serialization&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.serialize.java.JavaSerialization&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.serialize.java.CompactedJavaSerialization&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxSerialization.java (implements Serialization interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxObjectInput.java (implements ObjectInput interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxObjectOutput.java (implements ObjectOutput interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.common.serialize.Serialization (plain text file, content: xxx=com.xxx.XxxSerialization)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxSerialization.java：&lt;/p></description></item><item><title>Network Transport Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/remoting/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/remoting/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Implementations for remote communication servers and client transports.&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.remoting.Transporter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.Server&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.Client&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Server and client use the same transport implementation --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> transporter=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Server and client use different transport implementations --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> client=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default settings, used when &amp;lt;dubbo:protocol&amp;gt; does not configure transporter/server/client attributes --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> transporter=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> server=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> client=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.transporter.netty.NettyTransporter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.transporter.mina.MinaTransporter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.transport.transporter.grizzly.GrizzlyTransporter&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxTransporter.java (implements Transporter interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxServer.java (implements Server interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxClient.java (implements Client interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.remoting.Transporter (plain text file, contents: xxx=com.xxx.XxxTransporter)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxTransporter.java：&lt;/p></description></item><item><title>Information Exchange Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/exchanger/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/exchanger/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Implement the Request-Response information exchange semantics based on the transport layer.&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.remoting.exchange.Exchanger&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.exchange.ExchangeServer&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.exchange.ExchangeClient&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> exchanger=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value setting, when &amp;lt;dubbo:protocol&amp;gt; does not configure the exchanger attribute, this configuration is used --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> exchanger=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extension">Known Extension&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.remoting.exchange.exchanger.HeaderExchanger&lt;/code>&lt;/p>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxExchanger.java (implements Exchanger interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxExchangeServer.java (implements ExchangeServer interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxExchangeClient.java (implements ExchangeClient interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.remoting.exchange.Exchanger (plain text file, content: xxx=com.xxx.XxxExchanger)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxExchanger.java：&lt;/p></description></item><item><title>Networking Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/networker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/networker/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Peer network node networker.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.remoting.p2p.Networker&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> networker=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default setting. When &amp;lt;dubbo:protocol&amp;gt; does not configure the networker attribute, use this configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> networker=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span> 
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.remoting.p2p.support.MulticastNetworker&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.p2p.support.FileNetworker&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxNetworker.java (implements Networker interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.remoting.p2p.Networker (plain text file, content: xxx=com.xxx.XxxNetworker)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxNetworker.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.remoting.p2p.Networker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxNetworker&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Networker {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Group &lt;span style="color:#268bd2">lookup&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.remoting.p2p.Networker:&lt;/p></description></item><item><title>Peer-to-peer network node aggregator extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/page/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/page/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Peer-to-peer network node aggregator.&lt;/p>
+&lt;h2 id="extension-interfaces">Extension Interfaces&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.container.page.PageHandler&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> page=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value settings, when &amp;lt;dubbo:protocol&amp;gt; does not configure the page attribute, use this configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> page=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.container.page.pages.HomePageHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.container.page.pages.StatusPageHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.container.page.pages.LogPageHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.container.page.pages.SystemPageHandler&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxPageHandler.java (implements PageHandler interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.container.page.PageHandler (plain text file with content: xxx=com.xxx.XxxPageHandler)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxPageHandler.java：&lt;/p></description></item><item><title>Telnet Command Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/telnet-handler/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/telnet-handler/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>All servers support telnet access for manual intervention.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.remoting.telnet.TelnetHandler&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> telnet=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value setting, when &amp;lt;dubbo:protocol&amp;gt; does not configure the telnet attribute, use this configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> telnet=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.remoting.telnet.support.ClearTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.telnet.support.ExitTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.telnet.support.HelpTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.remoting.telnet.support.StatusTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.telnet.ListTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.telnet.ChangeTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.telnet.CurrentTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.telnet.InvokeTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.telnet.TraceTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.telnet.CountTelnetHandler&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.telnet.PortTelnetHandler&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxTelnetHandler.java (implements TelnetHandler interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.remoting.telnet.TelnetHandler (plain text file, content: xxx=com.xxx.XxxTelnetHandler)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxTelnetHandler.java:&lt;/p></description></item><item><title>Status Check Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/status-checker/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/status-checker/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Checks the status of various resources that the service depends on. This status check can be used for both telnet&amp;rsquo;s status command and hosting&amp;rsquo;s status page.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.common.status.StatusChecker&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value setting. When the &amp;lt;dubbo:protocol&amp;gt; does not have a status attribute configured, this configuration is used --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> status=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.common.status.support.MemoryStatusChecker&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.status.support.LoadStatusChecker&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.status.ServerStatusChecker&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.dubbo.status.ThreadPoolStatusChecker&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.registry.directory.RegistryStatusChecker&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.config.spring.status.SpringStatusChecker&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.rpc.config.spring.status.DataSourceStatusChecker&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p></description></item><item><title>Container Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/container/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/container/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Service container extension for customizing loading content.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.container.Container&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>java org.apache.dubbo.container.Main spring jetty log4j
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.container.spring.SpringContainer&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.container.spring.JettyContainer&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.container.spring.Log4jContainer&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxContainer.java (implements Container interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.container.Container (plain text file, content: xxx=com.xxx.XxxContainer)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxContainer.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>org.apache.dubbo.container.Container;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxContainer&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Container {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Status &lt;span style="color:#268bd2">start&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Status &lt;span style="color:#268bd2">stop&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.container.Container：&lt;/p></description></item><item><title>Cache Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/cache/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/cache/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Use request parameters as keys to cache return results.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.cache.CacheFactory&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> cache=&lt;span style="color:#2aa198">&amp;#34;lru&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Method-level caching --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&amp;gt;&amp;lt;dubbo:method&lt;/span> cache=&lt;span style="color:#2aa198">&amp;#34;lru&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&amp;lt;/dubbo:service&amp;gt;&lt;/span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value setting, used when &amp;lt;dubbo:service&amp;gt; does not configure the cache property --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> cache=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span> 
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.cache.support.lru.LruCacheFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.cache.support.threadlocal.ThreadLocalCacheFactory&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.cache.support.jcache.JCacheFactory&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-examples">Extension Examples&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxCacheFactory.java (implements CacheFactory interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.cache.CacheFactory (plain text file, content: xxx=com.xxx.XxxCacheFactory)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxCacheFactory.java:&lt;/p></description></item><item><title>Validation Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/validation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/validation/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Parameter validation extension point.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.validation.Validation&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> validation=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- Default value setting, when &amp;lt;dubbo:service&amp;gt; does not configure the validation attribute, use this configuration --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> validation=&lt;span style="color:#2aa198">&amp;#34;xxx,yyy&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.validation.support.jvalidation.JValidation&lt;/code>&lt;/p>
+&lt;h2 id="extension-examples">Extension Examples&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxValidation.java (implements Validation interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.validation.Validation (plain text file, content: xxx=com.xxx.XxxValidation)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxValidation.java：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.validation.Validation;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxValidation&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Validation {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">getValidator&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxValidator.java：&lt;/p></description></item><item><title>Logger Adapter Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/logger-adapter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/logger-adapter/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>Log output adaptation extension point.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.common.logger.LoggerAdapter&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> logger=&lt;span style="color:#2aa198">&amp;#34;xxx&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>-Ddubbo:application.logger&lt;span style="color:#719e07">=&lt;/span>xxx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="known-extensions">Known Extensions&lt;/h2>
+&lt;ul>
+&lt;li>&lt;code>org.apache.dubbo.common.logger.slf4j.Slf4jLoggerAdapter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.logger.jcl.JclLoggerAdapter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.logger.log4j.Log4jLoggerAdapter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.logger.log4j2.Log4j2LoggerAdapter&lt;/code>&lt;/li>
+&lt;li>&lt;code>org.apache.dubbo.common.logger.jdk.JdkLoggerAdapter&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxLoggerAdapter.java (implements LoggerAdapter interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.common.logger.LoggerAdapter (plain text file, content: xxx=com.xxx.XxxLoggerAdapter)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxLoggerAdapter.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.common.logger.LoggerAdapter;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxLoggerAdapter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> LoggerAdapter {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Logger &lt;span style="color:#268bd2">getLogger&lt;/span>(URL url) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxLogger.java:&lt;/p></description></item><item><title>QoS Anonymous Access Permission Verification Extension</title><link>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/qos-permission/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/description/qos-permission/</guid><description>&lt;h2 id="extension-description">Extension Description&lt;/h2>
+&lt;p>QoS anonymous access permission verification extension point.&lt;/p>
+&lt;h2 id="extension-interface">Extension Interface&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.permission.PermissionChecker&lt;/code>&lt;/p>
+&lt;h2 id="extension-configuration">Extension Configuration&lt;/h2>
+&lt;p>Dubbo QoS &lt;code>dubbo.application.qos-anonymous-access-permission-level&lt;/code> anonymous access permission verification.&lt;/p>
+&lt;h2 id="default-implementation">Default Implementation&lt;/h2>
+&lt;p>&lt;code>org.apache.dubbo.qos.permission.DefaultAnonymousAccessPermissionChecker&lt;/code>&lt;/p>
+&lt;h2 id="extension-example">Extension Example&lt;/h2>
+&lt;p>Maven project structure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>src
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-main
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-java
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-com
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-xxx
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-XxxPermissionChecker.java (Implementing the PermissionChecker interface)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-resources
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-META-INF
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-dubbo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-org.apache.dubbo.qos.permission.PermissionChecker` (Plain text file, content: qosPermissionChecker=com.xxx.XxxPermissionChecker)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>XxxPermissionChecker.java:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> com.xxx.qos.permission;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.qos.permission.PermissionChecker;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxAnonymousAccessPermissionChecker&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> PermissionChecker {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">access&lt;/span>(CommandContext commandContext, PermissionLevel defaultCmdRequiredPermissionLevel) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>META-INF/dubbo/org.apache.dubbo.qos.permission.PermissionChecker:&lt;/p></description></item></channel></rss>
