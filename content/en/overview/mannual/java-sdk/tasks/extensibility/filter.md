@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/tasks/extensibility/filter/
     - /en/overview/tasks/extensibility/filter/
-description: In this article, we will learn how to extend custom filter implementations: a unified Filter processor that can handle and validate returned results, reducing disruptions to developers.
+description: "In this article, we will learn how to extend custom filter implementations: a unified Filter processor that can handle and validate returned results, reducing disruptions to developers."
 linkTitle: Filter
 no_list: true
 title: Filter
