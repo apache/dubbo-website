@@ -3,56 +3,56 @@ aliases:
   - /en/overview/reference/admin/mock/
   - /en/overview/reference/admin/mock/
 description: ""
-linkTitle: 服务Mock
+linkTitle: Service Mock
 no_list: true
-title: Admin 服务 Mock 功能简介
+title: Introduction to Admin Service Mock Functionality
 type: docs
 weight: 4
 working_in_progress: true
 ---
 
-Mock 功能是设计用来提升微服务研发与测试效率的，它可以短路 Consumer 侧发起的远程调用，提前返回预先设定好的 Mock 值，这样即使在没有 Provider 可用的情况下，消费端也能正常的推进开发、测试进程。除此之外，mock 也可用于快速模拟负责返回值的测试数据、模拟服务端异常等场景
+The mock functionality is designed to enhance the efficiency of microservices development and testing. It can short circuit remote calls initiated by the consumer side and return pre-set mock values in advance, allowing the consumer to continue development and testing even when no provider is available. Additionally, mocking can be used for quickly simulating test data responsible for return values and simulating server exceptions.
 
-需要注意的是，Mock 能力仅限用于测试环境，应避免将其用于生产环境。
+It is important to note that the mock capability is limited to the testing environment and should be avoided in the production environment.
 
-# 设计背景
-在跨团队或是多应用开发时，在前期开发中往往会出现依赖的服务还未开发完成的情况，这样就会导致流程的阻塞，影响研发效率。基于这种情况，Dubbo Admin 提供了 mock 能力来解耦 Consumer 与 Provider 之间的依赖，以确保在 Provider 未就绪的情况下 Consumer 仍能正常开展测试，提高研发效率。
+# Design Background
+During cross-team or multi-application development, there are often situations where dependent services have not yet been finished, leading to process blockage and impacting development efficiency. To address this, Dubbo Admin provides mock capabilities to decouple dependencies between consumer and provider, ensuring that the consumer can continue testing even when the provider is not ready, thereby enhancing development efficiency.
 
-Dubbo 框架本身设计有服务降级（有时也称为 mock）能力，通过配置 `org.apache.dubbo.config.ReferenceConfig` 的 mock 字段（可设置为true或是对应接口的Mock实现）或动态配置规则，此时就可以启动服务降级能力。这种服务降级能力是为生产环境的限流降级准备的，虽然也可以用于本地开发测试场景，但灵活度并不高，基于提升开发效率的根本诉求，我们设计了基于 Admin 的服务降级能力。
+The Dubbo framework itself has service degradation (sometimes referred to as mock) capabilities, which can be activated by configuring the `mock` field of `org.apache.dubbo.config.ReferenceConfig`, allowing it to be set to true or an implementation of the corresponding interface. This service degradation capability is primarily designed for production environments to manage traffic and degradation, although it can also be used in local development scenarios, its flexibility is limited. To fundamentally enhance development efficiency, we have designed a service degradation capability based on Admin.
 
-Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用于开发测试阶段的，目标是提升微服务场景下的整体研发效率。需求详见：[Dubbo Admin Mock需求](https://github.com/apache/dubbo-admin/issues/757)。
+The Dubbo Admin service mock is a lighter and more convenient implementation primarily used during the development and testing phases, aiming to enhance overall development efficiency in microservice scenarios. For details on requirements, see: [Dubbo Admin Mock Requirements](https://github.com/apache/dubbo-admin/issues/757).
 
-## 架构设计
+## Architecture Design
 
 ![admin-mock-architecture.png](/imgs/v3/reference/admin/console/mock-architecture.png)
 
-**实现 Mock 能力，Dubbo 框架与 Admin 侧要支持的能力**
+**Capabilities to Implement Mock in Dubbo Framework and Admin Side**
 
 * Dubbo Admin
-    * 规则管理
-        * 规则新增
-        * 规则查询
-        * 规则修改
-        * 规则删除
-    * 请求历史记录
-    * Mock 请求数据查询
+    * Rule Management
+        * Add Rule
+        * Query Rule
+        * Modify Rule
+        * Delete Rule
+    * Request History
+    * Query Mock Request Data
     * MockService Provider
-        * 根据规则生成 Mock 数据
-        * 响应 Consumer Mock 请求
-        * 保存请求和返回数据
+        * Generate Mock Data According to Rules
+        * Respond to Consumer Mock Requests
+        * Save Requests and Returned Data
 * Dubbo
-    * 根据 mock 开关配置，转发请求到 Admin 注册的 MockService
-    * 处理 mock 返回值并转换为匹配方法签名的强类型数据
+    * Forward Requests to Admin Registered MockService Based on Mock Switch Configuration
+    * Process Mock Return Values and Convert Them to Strongly Typed Data Matching Method Signatures
 
-**Mock 请求原理时序图**
+**Mock Request Principle Sequence Diagram**
 
 ![admin-mock-workflow.png](/imgs/v3/reference/admin/console/mock-workflow.png)
 
-## 使用方式
+## Usage
 
-1. 在 Consumer 应用中添加依赖
+1. Add dependencies in the Consumer application
 
-    开启 Mock 前，请确保在消费端应用中引入以下依赖：
+    Before enabling Mock, make sure to include the following dependency in the consumer application:
 
     ```xml
     <dependency>
@@ -62,27 +62,27 @@ Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用�
     </dependency>
     ```
 
-    > 查看 [dubbo-mock-admin 的可用版本](/en/download/spi-extensions/)
+    > Check [available versions of dubbo-mock-admin](/en/download/spi-extensions/)
 
-2. 配置 `-Denable.dubbo.admin.mock=true` 参数开启 Mock 并重启进程
-3. 打开 Admin 配置 Mock 规则
+2. Enable Mock by configuring `-Denable.dubbo.admin.mock=true` and restarting the process.
+3. Open Admin to configure Mock rules
 
-    用户可以通过在控制台上指定需要被 mock 的消费端IP、服务名和方法和具体的 mock 行为，实现对调用结果的 mock。
+    Users can specify the consumer IP, service name, method, and specific mock behavior that needs to be mocked via the console to achieve mocked calling results.
 
     ![admin-mock](/imgs/v3/reference/admin/console/mock-rule-screenshot.png)
 
-    一些支持的规则类型与示例
+    Some Supported Rule Types and Examples
 
     ```
-    数字类型：123
+    Numeric Type: 123
 
-    字符串："hello, world!"
+    String: "hello, world!"
 
-    数组、列表：[1, 2, 3]
+    Array, List: [1, 2, 3]
 
-    枚举："ENUM_TYPE"
+    Enum: "ENUM_TYPE"
 
-    Map、对象：
+    Map, Object:
       {
         "prop1": "value1",
         "prop2": ["a", "b", "c"]
@@ -91,32 +91,32 @@ Dubbo Admin 服务 mock 是一种更为轻量和便捷实现方式，主要用�
     null: null
     ```
 
-4. 此时，消费端再次发起远程调用，就会得到预期 Mock 返回值。
+4. At this point, when the consumer initiates a remote call again, it will receive the expected Mock return value.
 
-    > 注意事项
-    > 1. Mock 仅限用于测试开发环境，因此为了确保核心依赖的稳定性，社区没有将 mock 组件打包在核心框架包中，用户可以自行决策是否将其作为应用的默认依赖在公司内推广
-    > 2. 即使添加了 mock 二进制依赖，mock 功能也不会默认开启，需要设置 `-Denable.dubbo.admin.mock=true` 后才能开启。
+    > Notes
+    > 1. Mock is restricted to test and development environments, therefore to ensure the stability of core dependencies, the community has not packaged the mock component in the core framework package. Users can decide whether to promote it as a default dependency within their company.
+    > 2. Even if the mock binary dependency is added, the mock function will not be enabled by default; it must be configured with `-Denable.dubbo.admin.mock=true` to be activated.
 
-## 实现原理
+## Implementation Principles
 
-Consumer 调用发起的调用会被本地的 MockServiceFilter 拦截，如果 mock 开关开启，则 MockServiceFilter 将请求转发到 MockService (由 Dubbo Admin 发布的服务)，MockService 根据请求的服务、方法等查询用户预先配置的 mock 规则，如果查询到则返回规则中的 mock 值，Consumer 收到 mock 值后调用成功返回。
+Calls initiated by the consumer will be intercepted by the local MockServiceFilter. If the mock switch is enabled, the MockServiceFilter will forward the request to the MockService (provided by Dubbo Admin). The MockService will look up the user's preconfigured mock rules based on the requested service and method; if found, it will return the mock value from the rules, and the consumer will receive the mock value and return successfully.
 
-### Mock 返回值如何定义？
+### How are Mock Return Values Defined?
 
-当前 Admin 支持录入 JSON 或者基本类型数据，如：
+Currently, Admin supports inputting JSON or basic type data, such as:
 
-* 返回数字值 (当方法签名返回值是数字类型)
+* Returning numeric values (when the method signature returns a numeric type)
 
 ```
 123
 ```
 
-* 返回字符串 (当方法签名返回值是字符串类型)
+* Returning strings (when the method signature returns a string type)
 ```
 "hello, world!"
 ```
 
-* 返回 JSON (当方法签名返回值是 Map 或对象类型)
+* Returning JSON (when the method signature returns a Map or object type)
 ```
 {
     "prop1": "value1",
@@ -124,53 +124,50 @@ Consumer 调用发起的调用会被本地的 MockServiceFilter 拦截，如果 
 }
 ```
 
-* 返回数组 (当方法签名返回值是数组或列表)
+* Returning arrays (when the method signature returns an array or list)
 ```
 [1, 2, 3]
 ```
 
-### 消费端如何发起 MockService 调用？
+### How does the Consumer Initiate MockService Calls?
 
-`dubbo-mock-admin` 将为消费端引入 MockServiceFilter 请求拦截器，如果用户打开 mock 开关，那么 Filter 会将请求转发到 Admin MockService 服务。
+`dubbo-mock-admin` will introduce the MockServiceFilter request interceptor for the consumer. If the user opens the mock switch, the Filter will forward the request to the Admin MockService.
 
-### Mock 值如何转换为原始类型值？
+### How are Mock Values Converted to Primitive Type Values?
 
-MockService 支持返回标准 JSON 格式或者基本类型数据，消费端会基于 Dubbo 内置类型转换器将 JSON 等值转为原始对象类型。
+MockService supports returning standard JSON format or basic type data. The consumer will use Dubbo's built-in type converter to convert JSON values to primitive object types.
 
-### 未来优化点
-* 保存 Mock 开关到配置中心，用户可以通过 Admin 动态控制开关。
-* 开启 Mysql 数据库链接池
+### Future Optimization Points
+* Save the Mock switch to the configuration center, allowing users to dynamically control the switch through Admin.
+* Enable MySQL database connection pooling.
 
-### 表结构设计
-Admin 依赖 Mysql 数据库存储用户配置的 mock 规则，具体的表结构设计如下。
+### Table Structure Design
+Admin relies on MySQL database to store user-configured mock rules. The specific table structure design is as follows.
 
 #### Mock Rule
 
 ```sql
 CREATE TABLE `mock_rule` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `service_name` varchar(255) DEFAULT NULL COMMENT '服务名',
-  `method_name` varchar(255) DEFAULT NULL COMMENT '方法名',
-  `rule` text NULL DEFAULT COMMENT '规则',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `service_name` varchar(255) DEFAULT NULL COMMENT 'Service Name',
+  `method_name` varchar(255) DEFAULT NULL COMMENT 'Method Name',
+  `rule` text NULL DEFAULT COMMENT 'Rule',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Time',
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update Time',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='服务mock方法表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Service Mock Method Table';
 ```
 #### Mock Log
 
 ```sql
 CREATE TABLE `mock_log` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `method_id` int(11) DEFAULT NULL COMMENT '规则id',
-  `request` text COMMENT '请求数据',
-  `response` text COMMENT '返回值',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Primary Key ID',
+  `method_id` int(11) DEFAULT NULL COMMENT 'Rule ID',
+  `request` text COMMENT 'Request Data',
+  `response` text COMMENT 'Return Value',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Time',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update Time',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='mock请求记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Mock Request Record Table';
 ```
-
-
-
 

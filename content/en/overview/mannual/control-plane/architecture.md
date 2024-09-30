@@ -3,45 +3,45 @@ aliases:
   - /en/overview/reference/admin/architecture/
   - /en/overview/reference/admin/architecture/
 description: ""
-linkTitle: 架构与安装
+linkTitle: Architecture and Installation
 no_list: true
-title: Admin 整体架构与安装步骤
+title: Admin Overall Architecture and Installation Steps
 type: docs
 weight: 1
 working_in_progress: true
 ---
 
-回顾 [Dubbo 服务治理体系的总体架构](../../../what/overview/)，Admin 是服务治理控制面中的一个核心组件，负责微服务集群的服务治理、可视化展示等。
+Reviewing the [overall architecture of the Dubbo service governance system](../../../what/overview/), Admin is a core component in the service governance control plane, responsible for service governance and visualization display for microservice clusters.
 
-## Admin 部署架构
+## Admin Deployment Architecture
 
 ![admin-core-components.png](/imgs/v3/reference/admin/admin-core-components.png)
 
-总体上来说，Admin 部署架构分为以下几个部分：
-* Admin 主进程，包括服务发现元数据管理、可视化控制台、安全认证策略管控、其他定制化服务治理能力等组件。
-* 强依赖组件，包括 Mysql 数据库、注册/配置/元数据中心（可以是 Kubernetes、Nacos、Zookeeper 等）
-* 可选依赖组件，包括 Prometheus、Grafana、Zipkin 等
+Overall, the Admin deployment architecture is divided into the following parts:
+* The Admin main process, including service discovery metadata management, a visualization console, security authentication policy control, and other customized service governance capabilities.
+* Strong dependency components, including Mysql database, registration/configuration/metadata centers (which can be Kubernetes, Nacos, Zookeeper, etc.)
+* Optional dependency components, including Prometheus, Grafana, Zipkin, etc.
 
-## 安装 Admin
+## Install Admin
 
-### Dubboctl 安装
+### Dubboctl Installation
 #### Download
-当前Dubboctl未正式发行，可按以下方式进行尝试。
-拉取Dubbo Admin并编译Dubboctl
+Currently, Dubboctl is not formally released and can be tried as follows.
+Pull Dubbo Admin and compile Dubboctl
 ```shell
 git clone https://github.com/apache/dubbo-admin.git
 cd dubbo-admin/cmd/dubboctl
 go build -o dubboctl .
 ```
 
-将 dubboctl 放入可执行路径
+Place dubboctl in an executable path
 ```shell
 ln -s dubbo-admin/cmd/dubboctl/dubboctl /usr/local/bin/dubboctl
 ```
 #### Install
-安装过程会依次：
+The installation process will sequentially:
 
-1. 将用户自定义的配置profile以及set参数覆盖于默认profile，得到最终的profile
+1. Overlay the user-defined configuration profile and setting parameters onto the default profile to obtain the final profile
 ```yaml
 # default profile
 apiVersion: dubbo.apache.org/v1alpha1
@@ -77,7 +77,7 @@ spec:
       repoURL: https://openzipkin.github.io/zipkin
       version: 0.3.0
 ```
-建议使用自定义profile进行配置，在componentsMeta中开启或关闭组件，在components下配置各组件。其中components下各组件的配置值都是helm chart的values，各组件的具体配置请参考：
+It is recommended to use a custom profile for configuration, enabling or disabling components in componentsMeta and configuring each component under components. The configuration values of each component are the values of helm charts. For specific component configurations, please refer to:
 Grafana: https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
 Zookeeper: https://github.com/bitnami/charts/tree/main/bitnami/zookeeper/#installing-the-chart
 Prometheus: https://github.com/prometheus-community/helm-charts/tree/main/charts
@@ -107,10 +107,10 @@ spec:
       testFramework:
         enabled: false
 ```
-2. 根据profile拉取所需组件并生成manifest，目前Admin，Nacos已在本地，无需拉取；Grafana，Zookeeper，Prometheus，Skywalking，Zipkin将从官方chart库拉取，具体地址和版本可见上方default profile
-3. 将manifest应用于k8s集群
+2. Pull the required components based on the profile and generate the manifest. Currently, Admin and Nacos are local, no need to pull; Grafana, Zookeeper, Prometheus, Skywalking, Zipkin will pull from the official chart repository, specific addresses and versions can be seen in the above default profile
+3. Apply the manifest to the k8s cluster
 ```shell
-dubboctl manifest install # 使用默认 manifests 安装
+dubboctl manifest install # Install using default manifests
 
 # or
 
@@ -118,34 +118,34 @@ dubboctl manifest generate | kubectl apply -f -
 ```
 
 ```shell
-dubboctl install --set spec.components.admin.replicas=2 # 设置组件的配置
+dubboctl install --set spec.components.admin.replicas=2 # Set component configuration
 ```
 
 ```shell
 dubboctl install --set spec.componentsMeta.admin.enabled=true, spec.componentsMeta.grafana.enabled=false
-# 开启或关闭组件
+# Enable or disable components
 ```
 
 ```shell
 dubboctl install --set spec.componentsMeta.grafana.repoURL=https://grafana.github.io/helm-charts, spec.componentsMeta.grafana.version=6.31.0
-# 设置需远程拉取组件的仓库地址与版本
+# Set repository address and version for remotely pulled components
 ```
 
-检查安装效果
+Check installation effect
 ```shell
 kubectl get pod -n dubbo-system
 ```
 
-#### 打开 Admin 控制台
+#### Open Admin Console
 ```shell
 kubectl port-forward svc/dubbo-admin -n dubbo-system 38080:38080
 ```
 
-打开浏览器，访问： `http://127.0.0.1:38080/`
+Open the browser and visit: `http://127.0.0.1:38080/`
 
-### Helm 安装
+### Helm Installation
 
-获取图表
+Get the charts
 ```
 helm repo add https://charts.bitnami.com/bitnami
 helm repo add https://prometheus-community.github.io/helm-charts
@@ -153,45 +153,45 @@ helm repo add https://grafana.github.io/helm-charts
 helm repo add https://apache.jfrog.io/artifactory/skywalking-helm
 helm repo add https://openzipkin.github.io/zipkin
 ```
-安装 zookeeper
+Install zookeeper
 ```bash
 helm install zookeeper bitnami/zookeeper -n dubbo-system
 ```
 
-安装 prometheus
+Install prometheus
 ```bash
 helm install prometheus prometheus-community/prometheus -n dubbo-system
 ```
 
-安装 grafana
+Install grafana
 ```bash
 helm install grafana grafana/grafana -n dubbo-system
 ```
 
-安装 skywalking
+Install skywalking
 ```bash
 helm install skywalking skywalking/skywalking -n dubbo-system
 ```
 
-安装 zipkin
+Install zipkin
 ```
 helm install zipkin openzipkin/zipkin -n dubbo-system
 ```
 
-检查安装状态
+Check installation status
 ```shell
-helm ls -n dubbo-system ；kubectl get pods -n dubbo-system --output wide
+helm ls -n dubbo-system ; kubectl get pods -n dubbo-system --output wide
 ```
 
-### VM 安装
+### VM Installation
 #### Download
-下载 Dubbo Admin 发行版本
+Download the Dubbo Admin release version
 ```shell
 curl -L https://dubbo.apache.org/installer.sh | VERSION=0.1.0 sh -
-# Admin 要组织好发行版本
+# Admin needs to organize the release version
 ```
 
-将 dubboctl 放入可执行路径
+Place dubboctl in an executable path
 ```shell
 ln -s dubbo-admin-0.1.0/bin/dubbo-admin /usr/local/bin/dubbo-admin
 ```
@@ -199,9 +199,8 @@ ln -s dubbo-admin-0.1.0/bin/dubbo-admin /usr/local/bin/dubbo-admin
 ```shell
 dubbo-admin run -f override-configuration.yml
 ```
-## 配置手册 (Configuration)
-配置用于控制 dubbo-admin 的行为
-
+## Configuration Manual (Configuration)
+Configuration used to control the behavior of dubbo-admin
 
 ```yaml
 # Environment type. Available values are: "kubernetes" or "universal"
@@ -289,8 +288,9 @@ external-services:
       # Public facing URL of Grafana
       url: 'http://my-ingress-host/grafana'
 
-# 更多配置
+# More configurations
 ```
-#### 打开 Admin 控制台
+#### Open Admin Console
 
-打开浏览器，访问： `http://127.0.0.1:38080/`
+Open the browser and visit: `http://127.0.0.1:38080/`
+
