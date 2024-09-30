@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/adapter/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/adapter/
-    - /zh-cn/overview/reference/pixiu/user/adapter/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/adapter/
+    - /en/docs3-v2/dubbo-go-pixiu/user/adapter/
+    - /en/docs3-v2/dubbo-go-pixiu/user/adapter/
+    - /en/overview/reference/pixiu/user/adapter/
+    - /en/overview/mannual/dubbo-go-pixiu/user/adapter/
 description: Adapter 介绍
 linkTitle: Adapter 介绍
 title: Adapter 介绍

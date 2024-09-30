@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/proposals/support-more-content-type/
+    - /en/overview/reference/proposals/support-more-content-type/
 author: 武钰皓
 description: |
     本文主要介绍Triple对更多Http标准Content-Type的支持方式，以及服务该如何接收这些请求。

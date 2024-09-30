@@ -1,7 +1,7 @@
 ---
 aliases:
-   - /zh/docs3-v2/golang-sdk/quickstart/
-   - /zh-cn/docs3-v2/golang-sdk/quickstart/
+   - /en/docs3-v2/golang-sdk/quickstart/
+   - /en/docs3-v2/golang-sdk/quickstart/
 description: Dubbo-go 快速开始
 linkTitle: 开发微服务应用
 title: 开发微服务
@@ -32,7 +32,7 @@ $ cd dubbo-go-samples/registry/nacos
 
 ### 启动 Nacos
 
-由于示例应用中启用了服务发现能力且使用 Nacos 作为注册中心，在运行示例之前需要先启动注册中心。请参考 [Nacos 本地安装](/zh-cn/overview/reference/integrations/nacos/) 了解如何快速安装和启动 Nacos。
+由于示例应用中启用了服务发现能力且使用 Nacos 作为注册中心，在运行示例之前需要先启动注册中心。请参考 [Nacos 本地安装](/en/overview/reference/integrations/nacos/) 了解如何快速安装和启动 Nacos。
 
 ### 运行 server
 在 `go-server/cmd` 示例目录：

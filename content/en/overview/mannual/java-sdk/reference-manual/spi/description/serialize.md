@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/serialize/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/serialize/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/serialize/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/serialize/
 description: 序列化扩展
 linkTitle: 序列化扩展
 title: 序列化扩展

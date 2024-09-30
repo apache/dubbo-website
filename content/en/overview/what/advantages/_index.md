@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/overview/what/advantages/
+    - /en/overview/what/advantages/
 description: ""
-linkTitle: 核心优势
-title: 核心优势
+linkTitle: Core Advantages
+title: Core Advantages
 type: docs
 weight: 4
 ---

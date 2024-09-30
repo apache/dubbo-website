@@ -1,12 +1,12 @@
 ---
 aliases:
-    - /zh/overview/tasks/develop/generic/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-reference/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-service/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-service/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-reference/
-    - /zh-cn/overview/mannual/java-sdk/tasks/framework/more/generic/
+    - /en/overview/tasks/develop/generic/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-reference/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-service/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-service/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-reference/
+    - /en/overview/mannual/java-sdk/tasks/framework/more/generic/
 description: 泛化调用，用于在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用
 linkTitle: 泛化调用
 title: 泛化调用
@@ -15,7 +15,7 @@ weight: 9
 ---
 
  {{% alert title="注意" color="warning" %}}
- 泛化调用适用于老版本 dubbo 通信协议，如果您使用的是 3.3 及之后版本的 triple 协议，请直接使用 triple 自带的 http application/json 能力直接发起服务调用，相关示例可参考 [网关接入说明](/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/)。
+ 泛化调用适用于老版本 dubbo 通信协议，如果您使用的是 3.3 及之后版本的 triple 协议，请直接使用 triple 自带的 http application/json 能力直接发起服务调用，相关示例可参考 [网关接入说明](/en/overview/mannual/java-sdk/tasks/gateway/triple/)。
  {{% /alert %}}
 
 泛化调用（客户端泛化调用）是指在调用方没有服务提供方 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。调用方没有接口及模型类元，知道服务的接口的全限定类名和方法名的情况下，可以通过泛化调用调用对应接口。

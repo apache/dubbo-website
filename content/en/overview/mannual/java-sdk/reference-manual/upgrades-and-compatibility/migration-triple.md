@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
-    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
-    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/migration-triple/
+    - /en/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
+    - /en/docs3-v2/java-sdk/upgrades-and-compatibility/migration-triple/
+    - /en/overview/mannual/java-sdk/upgrades-and-compatibility/migration-triple/
 description: "如何平滑的从 dubbo 协议升级到 triple 协议。"
 linkTitle: 升级到triple协议
 title: 升级到triple协议
@@ -12,7 +12,7 @@ weight: 2
 
 {{% alert title="请注意" color="warning" %}}
 * 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并继续使用 dubbo 通信协议。
-* 如果您是 Dubbo 新用户，强烈建议直接 [使用 triple 协议](/zh-cn/overview/mannual/java-sdk/tasks/protocol/) 即可。
+* 如果您是 Dubbo 新用户，强烈建议直接 [使用 triple 协议](/en/overview/mannual/java-sdk/tasks/protocol/) 即可。
 {{% /alert %}}
 
 本文档适合服务已经运行在 dubbo 协议之上的老用户，请先参考上一篇文档 [如何从 Dubbo2 升级到 Dubbo3](../migration/) 完成框架版本升级，然后遵循以下步骤以最小改动平滑迁移到 triple 协议。

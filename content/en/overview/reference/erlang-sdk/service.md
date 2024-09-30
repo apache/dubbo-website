@@ -1,24 +1,19 @@
 ---
 aliases:
-    - /zh/docs3-v2/erlang-sdk/service/
-    - /zh-cn/docs3-v2/erlang-sdk/service/
-    - /zh-cn/overview/mannual/erlang-sdk/service/
-    - /zh-cn/overview/reference/erlang-sdk/service/
-description: 在 erlang 中配置服务提供者
-linkTitle: 提供者配置
-title: 提供者配置
+    - /en/docs3-v2/erlang-sdk/service/
+    - /en-us/docs3-v2/erlang-sdk/service/
+    - /en-us/overview/mannual/erlang-sdk/service/
+    - /en-us/overview/reference/erlang-sdk/service/
+description: Configuring service providers in Erlang
+linkTitle: Provider Configuration
+title: Provider Configuration
 type: docs
 weight: 3
 ---
 
+## Basic Configuration
 
-
-
-
-
-## 基本配置
-
-提供者配置项需要添加到 `sys.config` 文件 `dubboerl` 应用配置项里。
+Provider configuration items need to be added to the `sys.config` file under the `dubboerl` application configuration item.
 
 ```erlang
 {dubboerl,[
@@ -33,8 +28,9 @@ weight: 3
 
 | ConfigName | Type | DefaultValue | Remarks |
 | --- | --- | --- | --- |
-| module_implements | atom() | - | The service implements module name|
-| interface_module | atom() | - | Interface module name is transfer form java jar |
-| interface_fullname | binary() | - | Interface full name is the java class name |
+| module_implements | atom() | - | The service implementation module name |
+| interface_module | atom() | - | Interface module name converted from java jar |
+| interface_fullname | binary() | - | Fully qualified name of the interface's Java class |
 
 Option is to be added.
+

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/troubleshoot/request-failed/
-    - /zh-cn/overview/tasks/troubleshoot/request-failed/
+    - /en/overview/tasks/troubleshoot/request-failed/
+    - /en/overview/tasks/troubleshoot/request-failed/
 description: 在 Dubbo 请求成功率低时的排查思路
 linkTitle: 请求成功率低
 title: 请求成功率低

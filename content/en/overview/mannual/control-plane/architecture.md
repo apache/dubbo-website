@@ -1,7 +1,7 @@
 ---
 aliases:
-  - /zh/overview/reference/admin/architecture/
-  - /zh-cn/overview/reference/admin/architecture/
+  - /en/overview/reference/admin/architecture/
+  - /en/overview/reference/admin/architecture/
 description: ""
 linkTitle: 架构与安装
 no_list: true

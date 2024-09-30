@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/validation/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/validation/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/validation/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/validation/
 description: 验证扩展
 linkTitle: 验证扩展
 title: 验证扩展

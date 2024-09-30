@@ -6,7 +6,7 @@ type: docs
 weight: 3
 ---
 
-自适应限流的设计与实现思路请参考 [Dubbo 自适应限流功能](/zh-cn/overview/reference/proposals/heuristic-flow-control/#自适应限流)。自适应限流能够确保分布式系统稳定性和可靠性，例如在服务提供商资源有限且多变的场景下。
+自适应限流的设计与实现思路请参考 [Dubbo 自适应限流功能](/en/overview/reference/proposals/heuristic-flow-control/#自适应限流)。自适应限流能够确保分布式系统稳定性和可靠性，例如在服务提供商资源有限且多变的场景下。
 
 ## 使用场景
 - 服务降级预防：当服务提供者因资源耗尽而性能下降时，使用自适应限流暂时减少其接受的请求数直至恢复正常。

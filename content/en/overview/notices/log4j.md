@@ -1,26 +1,25 @@
-
 ---
-title: "Log4j 漏洞影响"
-linkTitle: "Log4j 漏洞影响"
-description: "Log4j CVE-2021-44228 漏洞影响"
+title: "Log4j Vulnerability Impact"
+linkTitle: "Log4j Vulnerability Impact"
+description: "Log4j CVE-2021-44228 Vulnerability Impact"
 aliases:
-- /zh-cn/blog/1/01/01/安全漏洞/
+- /en/blog/1/01/01/security-vulnerabilities/
 weight: 90
 type: docs
 ---
 
-最近，主流日志组件 [log4j2](https://logging.apache.org/log4j/2.x/) 爆出[安全漏洞 CVE-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228)。
+Recently, the mainstream logging component [log4j2](https://logging.apache.org/log4j/2.x/) exposed a [security vulnerability CVE-2021-44228](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228).
 
-以下是漏洞 CVE-2021-44228 对 Apache Dubbo 框架的影响总结及用户应对指南。
+Below is a summary of the impact of vulnerability CVE-2021-44228 on the Apache Dubbo framework and user response guidelines.
 
-## Dubbo 影响范围
-**该漏洞对 Dubbo 框架使用安全并无影响。**
+## Dubbo Impact Range
+**This vulnerability does not affect the security use of the Dubbo framework.**
 
-Dubbo 本身不强依赖 log4j2 框架，也不会通过依赖传递将 log4j2 带到业务工程中去，因此，正在使用 Dubbo 2.7.x、3.0.x 等版本的用户均无需强制升级 Dubbo 版本。
+Dubbo itself does not strongly depend on the log4j2 framework, nor does it bring log4j2 into the business project through dependencies. Therefore, users using Dubbo versions 2.7.x, 3.0.x, etc., do not need to forcibly upgrade the Dubbo version.
 
-以下是 Dubbo 各组件对 log4j2 的依赖分析，涉及 `dubbo-common`、`dubbo-spring-boot-starter`、`dubbo-spring-boot-actuator`：
+Below is the dependency analysis of various Dubbo components on log4j2, involving `dubbo-common`, `dubbo-spring-boot-starter`, `dubbo-spring-boot-actuator`:
 
-* dubbo-common 包含对 `log4j-core` 的可选依赖，请检查项目自身是否启用了 log4j 依赖，如启用则对应升级即可。
+* dubbo-common includes an optional dependency on `log4j-core`. Please check whether the project itself has enabled log4j dependencies. If enabled, upgrade accordingly.
 ```xml
 [INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ dubbo-common ---
 [INFO] org.apache.dubbo:dubbo-common:jar:2.7.14-SNAPSHOT
@@ -29,7 +28,7 @@ Dubbo 本身不强依赖 log4j2 框架，也不会通过依赖传递将 log4j2 �
 
 ```
 
-* dubbo-spring-boot-starter 通过 spring-boot 组件传递了 log4j-api 依赖，log4j-api 本身并无安全问题，升级 log4j-core 组件时注意与 log4j-api 的兼容性
+* dubbo-spring-boot-starter passes the log4j-api dependency through the spring-boot component. The log4j-api itself has no security issues. Pay attention to the compatibility with log4j-api when upgrading the log4j-core component.
 
 ```xml
 [INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ dubbo-spring-boot-starter ---
@@ -41,7 +40,7 @@ Dubbo 本身不强依赖 log4j2 框架，也不会通过依赖传递将 log4j2 �
 
 ```
 
-* dubbo-spring-boot-actuator 通过 spring-boot 组件传递了 log4j-api 依赖，log4j-api 本身并无安全问题，升级 log4j-core 组件时应注意与 log4j-api 的兼容性
+* dubbo-spring-boot-actuator passes the log4j-api dependency through the spring-boot component. The log4j-api itself has no security issues. Pay attention to the compatibility with log4j-api when upgrading the log4j-core component.
 
 ```xml
 [INFO] org.apache.dubbo:dubbo-spring-boot-actuator:jar:2.7.14-SNAPSHOT

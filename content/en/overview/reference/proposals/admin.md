@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/proposals/admin/
+    - /en/overview/reference/proposals/admin/
 author: Jun Liu
 date: 2023-02-28T00:00:00Z
 description: |

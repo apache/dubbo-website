@@ -1,7 +1,7 @@
 ---
 aliases:
-  - /zh/overview/tasks/protocols/dubbo/
-  - /zh-cn/overview/tasks/protocols/dubbo/
+  - /en/overview/tasks/protocols/dubbo/
+  - /en/overview/tasks/protocols/dubbo/
 description: "演示了如何开发基于 `dubbo` 协议通信的服务。"
 linkTitle: dubbo协议
 title: "基于 TCP 的 RPC 通信协议 - dubbo"
@@ -115,5 +115,5 @@ dubbo:
 ### 共享连接
 对 dubbo 协议实现来说，**消费端机器A与提供者机器B之间默认是使用的同一个链接**，即不论在 A 与 B 之间有多少服务调用，默认都始终使用同一个 tcp 连接。当然，Dubbo 框架提供了方法可以让您调整 A 与 B 之间的 tcp 连接数。
 
-此外，dubbo 协议还支持配置如 payload 限制、序列化、连接数、连接超时时间、心跳等，具体请参见[【参考手册 - dubbo协议】](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/dubbo/)。
+此外，dubbo 协议还支持配置如 payload 限制、序列化、连接数、连接超时时间、心跳等，具体请参见[【参考手册 - dubbo协议】](/en/overview/mannual/java-sdk/reference-manual/protocol/dubbo/)。
 

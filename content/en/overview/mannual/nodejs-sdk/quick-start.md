@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/quickstart/nodejs/
-    - /zh-cn/overview/quickstart/nodejs/
+    - /en/overview/quickstart/nodejs/
+    - /en/overview/quickstart/nodejs/
 description: 使用 Node.js 开发后端微服务
 linkTitle: 快速开始
 title: 快速开始

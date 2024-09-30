@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/observability/tracing/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/tracing/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/tracing/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/tracing/
 description: Dubbo 内置了全链路追踪能力，你可以通过引入 spring-boot-starter 或者相关依赖开启链路跟踪能力，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等后端系统，可以实现全链路跟踪数据的分析与可视化展示。
 hide_summary: true
 linkTitle: 链路追踪
@@ -30,8 +30,8 @@ Dubbo 目前借助 Micrometer Observation 完成 Tracing 的所有埋点工作�
 ```
 
 更多完整示例请参见：
-* [使用 Zipkin 实现 Dubbo 全链路追踪](/zh-cn/overview/tasks/observability/tracing/zipkin/)
-* [使用 Skywalking 实现 Dubbo 全链路追踪](/zh-cn/overview/tasks/observability/tracing/skywalking/)
+* [使用 Zipkin 实现 Dubbo 全链路追踪](/en/overview/tasks/observability/tracing/zipkin/)
+* [使用 Skywalking 实现 Dubbo 全链路追踪](/en/overview/tasks/observability/tracing/skywalking/)
 
 ## 关联日志
 

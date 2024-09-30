@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/preface/design/architecture/
-    - /zh-cn/docs3-v2/golang-sdk/preface/design/architecture/
-    - /zh-cn/overview/mannual/golang-sdk/preface/design/architecture/
+    - /en/docs3-v2/golang-sdk/preface/design/architecture/
+    - /en/docs3-v2/golang-sdk/preface/design/architecture/
+    - /en/overview/mannual/golang-sdk/preface/design/architecture/
 description: 架构
 keywords: 架构
 title: 架构

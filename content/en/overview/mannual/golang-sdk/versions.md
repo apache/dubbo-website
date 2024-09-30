@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/refer/compatible_version/
-    - /zh-cn/docs3-v2/golang-sdk/refer/compatible_version/
-    - /zh-cn/overview/mannual/golang-sdk/preface/refer/compatible_version/
+    - /en/docs3-v2/golang-sdk/refer/compatible_version/
+    - /en/docs3-v2/golang-sdk/refer/compatible_version/
+    - /en/overview/mannual/golang-sdk/preface/refer/compatible_version/
 description: 依赖适配版本号
 title: 版本信息
 type: docs

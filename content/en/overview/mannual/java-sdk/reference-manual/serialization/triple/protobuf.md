@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/idl/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/triple/idl/
 description: "本文介绍 protobuf 序列化，如何在 triple 协议场景下使用 protobuf、json 序列化。"
 linkTitle: Protobuf
 title: 如何在 triple 协议场景下使用 protobuf、json 序列化
@@ -13,7 +13,7 @@ weight: 1
 <a href="" target="_blank">Protobuf（Protocol Buffers）</a> 是由 Google 开发的一种轻量级、高效的数据交换格式，它被用于结构化数据的序列化、反序列化和传输。 相比于XML 和JSON 等文本格式，Protobuf 具有更小的数据体积、更快的解析速度和更强的可扩展性。
 
 ## 2 使用方式
-**在使用 [Protobuf(IDL) 开发 triple 通信服务](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 的时候，dubbo server 将自动启用 protobuf、protobuf-json 序列化模式支持。**
+**在使用 [Protobuf(IDL) 开发 triple 通信服务](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 的时候，dubbo server 将自动启用 protobuf、protobuf-json 序列化模式支持。**
 
 ### 2.1 添加依赖
 使用 triple + protobuf 模式，必须添加以下依赖：
@@ -35,7 +35,7 @@ weight: 1
 ```
 
 ### 2.2 配置启用
-只要是基于 [Protobuf(IDL) 开发模式进行 triple 协议通信](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/) ，就会使用 protobuf 序列化，只要定义 protobuf 文件并启用 triple 协议即可。
+只要是基于 [Protobuf(IDL) 开发模式进行 triple 协议通信](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) ，就会使用 protobuf 序列化，只要定义 protobuf 文件并启用 triple 协议即可。
 
 当使用 cURL 访问 triple 服务时，是会启用 protobuf-json 序列化模式
 

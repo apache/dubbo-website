@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/bookinfo-proxyless/security/request-routing/
-    - /zh-cn/overview/tasks/mesh/bookinfo-proxyless/security/request-routing/
+    - /en/overview/tasks/mesh/bookinfo-proxyless/security/request-routing/
+    - /en/overview/tasks/mesh/bookinfo-proxyless/security/request-routing/
 description: This task shows you how to route requests dynamically to multiple versions of a microservice.
 linkTitle: Request Routing
 title: Request Routing

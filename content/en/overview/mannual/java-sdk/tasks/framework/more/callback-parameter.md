@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/callback-parameter/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/callback-parameter/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/callback-parameter/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/callback-parameter/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/callback-parameter/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/callback-parameter/
 description: 通过参数回调从服务器端调用客户端逻辑
 linkTitle: 服务端对客户端进行回调
 title: 服务端对客户端进行回调

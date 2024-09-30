@@ -1,72 +1,71 @@
 ---
 aliases:
-    - /zh/overview/core-features/more/
-    - /zh-cn/overview/core-features/more/
-description: 高级功能指南
-linkTitle: 更多高级功能
-title: 更多高级功能
+    - /en/overview/core-features/more/
+    - /en/overview/core-features/more/
+description: Advanced Features Guide
+linkTitle: More Advanced Features
+title: More Advanced Features
 type: docs
 weight: 11
 ---
 
+As a microservices framework closely related to application development and aimed at providing enterprise-level service governance capabilities for microservice clusters, Dubbo also offers many advanced features, covering service invocation behavior control, service diagnosis and tuning, service governance, and more.
 
-作为一款与应用开发紧密相关的微服务框架，同时旨在为微服务集群提供企业级服务治理能力，Dubbo 还提供了很多高级功能，涵盖服务调用行为控制、服务诊断与调优、服务治理等。
-
-多种语言 sdk 在功能实现、配置方式上会略有差异，具体功能列表和使用方式可参考如下文档：
+There may be slight differences in feature implementation and configuration methods across different language SDKs. For specific feature lists and usage, please refer to the following documents:
 * [Java](../../mannual/java-sdk/advanced-features-and-usage/)
 * [Golang](../../mannual/golang-sdk/tutorial/)
 
-## 控制服务调用行为
-* 服务版本
-* 服务分组
-* 分组聚合
-* 异步调用
-* 异步执行
-* 流式通信
-* 响应式编程
-* 泛化调用
-* 泛化实现
-* 调用链路传递隐式参数
-* RPC调用上下文
-* 调用触发事件通知
-* 服务端对客户端进行回调
-* 只订阅
-* 只注册
-* 运行时动态指定 IP 调用
-* 直连提供者
-* 启动时检查
-* 本地调用
-* 参数校验
-* 本地伪装
-* 本地存根
-* 回声测试
-* 调用信息记录
-* 延迟暴露
-* 集群容错
-* 服务降级
+## Controlling Service Invocation Behavior
+* Service Versioning
+* Service Grouping
+* Group Aggregation
+* Asynchronous Invocation
+* Asynchronous Execution
+* Streaming Communication
+* Reactive Programming
+* Generic Invocation
+* Generic Implementation
+* Implicit Parameter Passing in Invocation Chain
+* RPC Invocation Context
+* Invocation Trigger Event Notification
+* Server Callback to Client
+* Subscribe Only
+* Register Only
+* Dynamically Specify IP for Invocation at Runtime
+* Direct Connection to Provider
+* Startup Check
+* Local Invocation
+* Parameter Validation
+* Local Mock
+* Local Stub
+* Echo Test
+* Invocation Information Logging
+* Delayed Exposure
+* Cluster Fault Tolerance
+* Service Degradation
 
-## 诊断与调优
-* 端口协议复用
-* 线程池隔离
-* 多协议
-* 多注册中心
-* 请求耗时采样
-* 线程模型
-* 服务引用配置对象缓存
-* 路由状态采集
-* 负载均衡
-* 注册信息简化
-* 调用结果缓存
-* 并发控制
-* 连接控制
-* 延迟连接
-* 粘滞连接
-* 支持 Graal VM
-* 导出线程堆栈
-* Kryo 和 FST 序列化
-* 自定义服务容器
-* 优雅停机
-* 主机地址自定义暴露
-* 一致性哈希选址
-* 日志框架适配及运行时管理
-* Kubernetes 生命周期探针
+## Diagnosis and Tuning
+* Port Protocol Multiplexing
+* Thread Pool Isolation
+* Multiple Protocols
+* Multiple Registries
+* Request Time Sampling
+* Thread Model
+* Service Reference Configuration Object Caching
+* Route Status Collection
+* Load Balancing
+* Simplified Registration Information
+* Invocation Result Caching
+* Concurrency Control
+* Connection Control
+* Delayed Connection
+* Sticky Connection
+* Graal VM Support
+* Export Thread Stack
+* Kryo and FST Serialization
+* Custom Service Container
+* Graceful Shutdown
+* Custom Host Address Exposure
+* Consistent Hashing Addressing
+* Log Framework Adaptation and Runtime Management
+* Kubernetes Lifecycle Probes

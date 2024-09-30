@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/extensibility/
-    - /zh-cn/overview/tasks/extensibility/
+    - /en/overview/tasks/extensibility/
+    - /en/overview/tasks/extensibility/
 description: 演示 Dubbo 扩展能力特性的使用方式。
 linkTitle: 自定义扩展
 no_list: true

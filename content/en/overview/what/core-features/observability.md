@@ -1,60 +1,60 @@
 ---
 aliases:
-    - /zh/overview/core-features/observability/
-    - /zh-cn/overview/core-features/observability/
-description: 观测服务
+    - /en/overview/core-features/observability/
+    - /en/overview/core-features/observability/
+description: Observability Service
 feature:
     description: |
-        多维度的可观测指标（Metrics、Tracing、Accesslog）帮助了解服务运行状态，Admin 控制台、Grafana 等帮助实现数据指标可视化展示。
-    title: 可观测性
-linkTitle: 观测服务
-title: 观测服务
+        Multi-dimensional observable metrics (Metrics, Tracing, Accesslog) help understand the service running status. Admin console, Grafana, etc., help achieve data metrics visualization.
+    title: Observability
+linkTitle: Observability Service
+title: Observability Service
 type: docs
 weight: 7
 ---
 
 
 
-Dubbo 内部维护了多个纬度的可观测指标，并且支持多种方式的可视化监测。可观测性指标从总体上来说分为三个度量纬度：
+Dubbo internally maintains multiple dimensions of observable metrics and supports various ways of visual monitoring. Observable metrics are generally divided into three measurement dimensions:
 
-* **Admin** Admin 控制台可视化展示了集群中的应用、服务、实例及依赖关系，支持流量治理规则下发，同时还提供如服务测试、mock、文档管理等提升研发测试效率的工具。
+* **Admin** The Admin console visually displays applications, services, instances, and dependencies in the cluster. It supports the issuance of traffic governance rules and provides tools such as service testing, mock, and document management to improve R&D testing efficiency.
 
-* **Metrics** Dubbo 统计了一系列的流量指标如 QPS、RT、成功请求数、失败请求数等，还包括一系列的内部组件状态如线程池数、服务健康状态等。
+* **Metrics** Dubbo collects a series of traffic metrics such as QPS, RT, number of successful requests, number of failed requests, etc., as well as a series of internal component statuses such as thread pool count, service health status, etc.
 
-* **Tracing** Dubbo 与业界主流的链路追踪工作做了适配，包括 Skywalking、Zipkin、Jaeger 都支持 Dubbo 服务的链路追踪。
+* **Tracing** Dubbo is adapted to mainstream link tracing works in the industry, including Skywalking, Zipkin, and Jaeger, all of which support Dubbo service link tracing.
 
-* **Logging** Dubbo 支持多种日志框架适配。以 Java 体系为例，支持包括 Slf4j、Log4j2、Log4j、Logback、Jcl 等，用户可以基于业务需要选择合适的框架；同时 Dubbo 还支持 Access Log 记录请求踪迹。
+* **Logging** Dubbo supports multiple log framework adaptations. For example, in the Java ecosystem, it supports Slf4j, Log4j2, Log4j, Logback, Jcl, etc. Users can choose the appropriate framework based on business needs. Dubbo also supports Access Log to record request traces.
 
 ## Admin
-Admin 控制台可视化展示了集群中的应用、服务、实例及依赖关系，支持流量治理规则下发，同时还提供如服务测试、mock、文档管理等提升研发测试效率的工具
+The Admin console visually displays applications, services, instances, and dependencies in the cluster. It supports the issuance of traffic governance rules and provides tools such as service testing, mock, and document management to improve R&D testing efficiency.
 
-![Admin 效果图](/imgs/v3/feature/observability/admin.jpg)
+![Admin Effect](/imgs/v3/feature/observability/admin.jpg)
 
-* [Admin 部署与效果演示](../../tasks/observability/admin/)
+* [Admin Deployment and Effect Demonstration](../../tasks/observability/admin/)
 
 ## Metrics
-Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数，失败原因统计等在内的核心服务指标，同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如线程池数量、服务健康状态等。
+Dubbo runtime collects core service metrics including qps, rt, total calls, successful calls, failed calls, and failure reasons statistics. To better monitor the service running status, Dubbo also provides monitoring of core component statuses such as thread pool count and service health status.
 
-可以通过 Grafana 可视化的查看 Metrics 指标
+Metrics can be visualized through Grafana.
 
-![Grafana 效果图](/imgs/v3/feature/observability/provider-stat.png)
+![Grafana Effect](/imgs/v3/feature/observability/provider-stat.png)
 
-* [使用 Grafana 可视化展示 Metrics 指标](../../tasks/observability/grafana/)
-* [如何从 Prometheus 查询特定 Metrics 指标](../../tasks/observability/prometheus/)
+* [Visualize Metrics with Grafana](../../tasks/observability/grafana/)
+* [How to Query Specific Metrics from Prometheus](../../tasks/observability/prometheus/)
 
 ## Tracing
-全链路追踪对于监测分布式系统运行状态具有非常重要的价值，Dubbo 通过 Filter 拦截器实现了请求运行时的埋点跟踪，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等，可以实现全链路跟踪数据的分析与可视化展示。
+Full link tracing is of great value for monitoring the running status of distributed systems. Dubbo implements runtime request tracking through Filter interceptors. By exporting tracking data to some mainstream implementations such as Zipkin, Skywalking, Jaeger, etc., full link tracking data analysis and visualization can be achieved.
 
-![Tracing 效果图](/imgs/v3/feature/observability/tracing.png)
+![Tracing Effect](/imgs/v3/feature/observability/tracing.png)
 
-> 未来我们计划支持通过 Dubbo Admin 等治理平台动态调整 Dubbo 的链路追踪采样率。
+> In the future, we plan to support dynamically adjusting Dubbo's link tracing sampling rate through governance platforms such as Dubbo Admin.
 
-* [基于 Skywalking 实现全链路追踪](../../tasks/observability/tracing/skywalking/)
-* [基于 Zipkin 实现全链路追踪](../../tasks/observability/tracing/zipkin/)
-* [通过链路追踪关联日志系统](../../mannual/java-sdk/advanced-features-and-usage/observability/tracing#关联日志)
+* [Implement Full Link Tracing with Skywalking](../../tasks/observability/tracing/skywalking/)
+* [Implement Full Link Tracing with Zipkin](../../tasks/observability/tracing/zipkin/)
+* [Associate Logs with Link Tracing](../../mannual/java-sdk/advanced-features-and-usage/observability/tracing#关联日志)
 
 ## Logging
-访问日志可以帮助分析系统的流量情况，在有些场景下，开启访问日志对于排查问题也非常有帮助。
+Access logs can help analyze the system's traffic situation. In some scenarios, enabling access logs is also very helpful for troubleshooting issues.
 
-* [开启 Access Log](../../mannual/java-sdk/advanced-features-and-usage/service/accesslog/)
-* [你还在运行态开启 Access Log](../../tasks/traffic-management/accesslog/)
+* [Enable Access Log](../../mannual/java-sdk/advanced-features-and-usage/service/accesslog/)
+* [Enable Access Log at Runtime](../../tasks/traffic-management/accesslog/)

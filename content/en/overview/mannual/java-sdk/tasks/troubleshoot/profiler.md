@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/
 description: Dubbo 请求耗时采样
 linkTitle: 请求耗时采样
 title: 请求耗时采样
@@ -22,7 +22,7 @@ weight: 1
 
 ## 使用方式
 
-`simple profiler` 默认自动开启，对于请求处理时间超过超时时间 3/4 的，都会通过日志打印出慢调用信息。如果需要开启 `detail profiler` 模式或者修改超时告警比例，可以参考[性能采样命令](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/profiler/)文档。
+`simple profiler` 默认自动开启，对于请求处理时间超过超时时间 3/4 的，都会通过日志打印出慢调用信息。如果需要开启 `detail profiler` 模式或者修改超时告警比例，可以参考[性能采样命令](/en/overview/mannual/java-sdk/reference-manual/qos/profiler/)文档。
 
 ### 日志说明
 

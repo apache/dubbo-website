@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/
-    - /zh-cn/overview/tasks/mesh/
+    - /en/overview/tasks/mesh/
+    - /en/overview/tasks/mesh/
 description: '演示多种部署形态的 Dubbo Mesh 解决方案，以及 Dubbo Mesh 如何帮助用户实现架构的平滑迁移。 '
 linkTitle: 服务网格
 no_list: true

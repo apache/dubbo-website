@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
 description: "开启 Metrics 指标埋点"
 hide_summary: true
 linkTitle: Metrics
@@ -14,7 +14,7 @@ weight: 1
 
 ## 概述
 
-Dubbo Metrics 的总体设计请参考 [可观测性 Metrics Proposal](/zh-cn/overview/reference/proposals/metrics/)。
+Dubbo Metrics 的总体设计请参考 [可观测性 Metrics Proposal](/en/overview/reference/proposals/metrics/)。
 
 以下是 Dubbo Java 相关的具体实现与使用方式讲解。
 
@@ -31,7 +31,7 @@ Dubbo Metrics 的总体设计请参考 [可观测性 Metrics Proposal](/zh-cn/ov
 ```
 
 * 完整示例请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot" target="_blank">dubbo-samples-metrics-spring-boot</a>
-* 完整配置参数请参见 [Metrics 配置项手册](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties//)
+* 完整配置参数请参见 [Metrics 配置项手册](/en/overview/mannual/java-sdk/reference-manual/config/properties//)
 
 ## 实现原理解析
 
@@ -47,7 +47,7 @@ Dubbo Metrics 的总体设计请参考 [可观测性 Metrics Proposal](/zh-cn/ov
 ### 指标上报接口
 根据上图架构，指标接口是 Dubbo 对外暴露指标数据的出口，以下是指标接口的具体定义：
 
-> 另外，该 Service 还作为一些 [智能自适应流量调度算法](/zh-cn/overview/reference/proposals/heuristic-flow-control/) 的数据来源
+> 另外，该 Service 还作为一些 [智能自适应流量调度算法](/en/overview/reference/proposals/heuristic-flow-control/) 的数据来源
    
 ```java
 public interface MetricsService {
@@ -204,7 +204,7 @@ dubbo.metrics.aggregation.time-window-seconds=10
 ```
 
 #### 具体指标
-[具体指标](/zh-cn/overview/reference/metrics/standard_metrics/) 请参考 Dubbo Metrics 总体设计文档。
+[具体指标](/en/overview/reference/metrics/standard_metrics/) 请参考 Dubbo Metrics 总体设计文档。
 
 #### 聚合收集器实现
 

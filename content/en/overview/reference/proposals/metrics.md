@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/proposals/metrics/
+    - /en/overview/reference/proposals/metrics/
 author: Song Xiaosheng
 date: 2023-02-20T00:00:00Z
 description: 指标埋点

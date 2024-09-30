@@ -1,8 +1,8 @@
 ---
 aliases:
-- /zh/docs3-v2/java-sdk/faq/
-- /zh-cn/docs3-v2/java-sdk/faq/
-- /zh-cn/overview/mannual/java-sdk/faq/_index/
+- /en/docs3-v2/java-sdk/faq/
+- /en/docs3-v2/java-sdk/faq/
+- /en/overview/mannual/java-sdk/faq/_index/
 description: 错误码 FAQ
 linkTitle: 错误码 FAQ
 title: 错误码 FAQ

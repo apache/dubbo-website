@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/proposals/protocol-http/
+    - /en/overview/reference/proposals/protocol-http/
 description: 本文将介绍 Dubbo 的 REST/HTTP 协议设计。
 linkTitle: Rest 协议
 title: Rest 协议

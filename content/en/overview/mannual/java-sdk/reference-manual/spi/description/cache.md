@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/cache/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/cache/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/cache/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/cache/
 description: 缓存扩展
 linkTitle: 缓存扩展
 title: 缓存扩展

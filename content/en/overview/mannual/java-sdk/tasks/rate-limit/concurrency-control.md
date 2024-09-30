@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
 description: "Dubbo 框架内置的并发控制或者限流策略，通过限制从同一客户端到同一服务的并发请求数，防止恶意请求使服务器过载，确保服务的稳定性，并防止使用过多资源。"
 linkTitle: 框架内置限流
 title: Dubbo 框架内置的并发控制策略

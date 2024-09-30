@@ -1,6 +1,6 @@
 ---
 aliases:
-- /zh/overview/reference/integrations/skywalking/
+- /en/overview/reference/integrations/skywalking/
 description: "如何安装与配置 Higress，涵盖本地、docker、kubernetes 等环境。"
 linkTitle: Higress
 title: Higress

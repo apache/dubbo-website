@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/quickstart/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/quickstart/
-    - /zh-cn/overview/reference/pixiu/user/quickstart/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/quickstart/
+    - /en/docs3-v2/dubbo-go-pixiu/user/quickstart/
+    - /en/docs3-v2/dubbo-go-pixiu/user/quickstart/
+    - /en/overview/reference/pixiu/user/quickstart/
+    - /en/overview/mannual/dubbo-go-pixiu/user/quickstart/
 description: 快速开始
 linkTitle: 快速开始
 title: 快速开始

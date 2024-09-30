@@ -1,6 +1,6 @@
 ---
 aliases:
-- /zh/overview/reference/integrations/skywalking/
+- /en/overview/reference/integrations/skywalking/
 description: "如何安装与配置 Nacos，涵盖本地、docker、kubernetes等环境。"
 linkTitle: Nacos
 title: Nacos

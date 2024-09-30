@@ -1,8 +1,8 @@
 ---
 aliases:
-   - /zh/docs3-v2/golang-sdk/quickstart/
-   - /zh-cn/docs3-v2/golang-sdk/quickstart/
-   - /zh-cn/overview/mannual/golang-sdk/quickstart/quickstart_triple/
+   - /en/docs3-v2/golang-sdk/quickstart/
+   - /en/docs3-v2/golang-sdk/quickstart/
+   - /en/overview/mannual/golang-sdk/quickstart/quickstart_triple/
 description: Dubbo-go 快速开始
 linkTitle: 开发RPC服务
 title: 开发 RPC Server & RPC Client

@@ -11,12 +11,12 @@ Dubbo-go 框架内置提供了两款协议：triple、dubbo，除此之外，框
  * dubbo，基于 TCP 的高性能私有通信协议，缺点是通用性较差，更适合在 Dubbo SDK 间使用；
  * 任意协议扩展，通过扩展 protocol 可以之前任意 RPC 协议，官方生态库提供 JsonRPC、thrift 等支持。
 
-本篇文档中，我们将介绍关于 triple 协议的使用方式、如何实现与已有 dubbo2 系统的互相调用、扩展更多协议支持等。更多原理性介绍请参考 [协议规范](/zh-cn/overview/reference/protocols/triple-spec/) 或者 [dubbo java 中相关描述文档](/zh-cn/overview/mannual/java-sdk/tasks/protocols/protocol/)。
+本篇文档中，我们将介绍关于 triple 协议的使用方式、如何实现与已有 dubbo2 系统的互相调用、扩展更多协议支持等。更多原理性介绍请参考 [协议规范](/en/overview/reference/protocols/triple-spec/) 或者 [dubbo java 中相关描述文档](/en/overview/mannual/java-sdk/tasks/protocols/protocol/)。
 
 ## triple 协议
 triple 协议支持使用 protobuf 和 non-protobuf 两种开发模式，我们 **推荐使用 protobuf 模式开发服务**。
 
-目前我们大部分示例都是使用这个模式开发，可查看 [快速开始](/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/) 学习完整开发示例，以下是基本步骤：
+目前我们大部分示例都是使用这个模式开发，可查看 [快速开始](/en/overview/mannual/golang-sdk/quickstart/rpc/) 学习完整开发示例，以下是基本步骤：
 
 1. 先使用 protobuf 定义服务
 
@@ -38,7 +38,7 @@ service GreetService {
 }
 ```
 
-2. [安装 protoc 插件](/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/#前置条件)，编译生成代码：
+2. [安装 protoc 插件](/en/overview/mannual/golang-sdk/quickstart/rpc/#前置条件)，编译生成代码：
 ```shell
 protoc --go_out=. --go_opt=paths=source_relative \
     --go-triple_out=. --go-triple_opt=paths=source_relative \

@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/preface/concept/generic/
-    - /zh-cn/docs3-v2/golang-sdk/preface/concept/generic/
-    - /zh-cn/overview/mannual/golang-sdk/preface/concept/generic/
+    - /en/docs3-v2/golang-sdk/preface/concept/generic/
+    - /en/docs3-v2/golang-sdk/preface/concept/generic/
+    - /en/overview/mannual/golang-sdk/preface/concept/generic/
 description: 泛化调用
 keywords: 泛化调用
 title: 泛化调用

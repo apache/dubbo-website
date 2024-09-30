@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
 description: 使用 Nacos 作为注册中心
 title: 使用 Nacos 作为注册中心
 type: docs
@@ -34,7 +34,7 @@ srv, err := ins.NewServer()
 ## How to run
 
 ### Start Nacos server
-Follow this instruction to [install and start Nacos server](/zh-cn/overview/reference/integrations/nacos/).
+Follow this instruction to [install and start Nacos server](/en/overview/reference/integrations/nacos/).
 
 ### Run server
 ```shell

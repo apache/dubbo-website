@@ -1,12 +1,12 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/listener/triple/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/listener/triple/
-    - /zh-cn/overview/reference/pixiu/user/listener/triple/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/listener/triple/
-description: Triple Listener 介绍
-linkTitle: Triple Listener 介绍
-title: Triple Listener 介绍
+    - /docs3-v2/dubbo-go-pixiu/user/listener/triple/
+    - /en/docs3-v2/dubbo-go-pixiu/user/listener/triple/
+    - /en/overview/reference/pixiu/user/listener/triple/
+    - /en/overview/manual/dubbo-go-pixiu/user/listener/triple/
+description: Introduction to Triple Listener
+linkTitle: Introduction to Triple Listener
+title: Introduction to Triple Listener
 type: docs
 weight: 40
 ---
@@ -16,4 +16,5 @@ weight: 40
 
 
 
-欢迎认领补充此文档。
+Welcome to claim and enrich this document.
+

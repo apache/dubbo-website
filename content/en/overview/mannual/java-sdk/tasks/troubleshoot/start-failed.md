@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/troubleshoot/start-failed/
-    - /zh-cn/overview/tasks/troubleshoot/start-failed/
+    - /en/overview/tasks/troubleshoot/start-failed/
+    - /en/overview/tasks/troubleshoot/start-failed/
 description: 在 Dubbo 应用启动失败时的排查思路
 linkTitle: 应用启动失败
 title: 应用启动失败

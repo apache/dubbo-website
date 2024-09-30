@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/extensibility/protocol/
-    - /zh-cn/overview/tasks/extensibility/protocol/
+    - /en/overview/tasks/extensibility/protocol/
+    - /en/overview/tasks/extensibility/protocol/
 description: 本文讲解如何通过扩展 `org.apache.dubbo.rpc.Protocol` SPI，提供自定义的 RPC 协议实现。
 linkTitle: Protocol
 no_list: true
@@ -10,7 +10,7 @@ type: docs
 weight: 2
 ---
 
-在 [通信协议](/zh-cn/overview/mannual/java-sdk/tasks/protocols/) 一章中，我们了解了 Dubbo 内置的几个核心 RPC 协议 `dubbo`、`rest`、和`tri` 以及它们的使用方式。本文讲解如何通过扩展 `org.apache.dubbo.rpc.Protocol` SPI，提供自定义的 RPC 协议实现。
+在 [通信协议](/en/overview/mannual/java-sdk/tasks/protocols/) 一章中，我们了解了 Dubbo 内置的几个核心 RPC 协议 `dubbo`、`rest`、和`tri` 以及它们的使用方式。本文讲解如何通过扩展 `org.apache.dubbo.rpc.Protocol` SPI，提供自定义的 RPC 协议实现。
 
 自定义一套私有协议有两种方式，第一种是对原有的协议进行包装，添加一些特定的业务逻辑。另外一种是完全自定义一套协议。前者实现简单，在`dubbo`中也是有广泛的使用，比如：`ProtocolFilterWrapper`, `QosProtocolWrapper`, `ProtocolListenerWrapper`等。后者实现相对复杂，但却具有最大的灵活性，比如 Dubbo 框架内置的协议 `dubbo`、`triple` 协议都可以算作这种实现方式。
 

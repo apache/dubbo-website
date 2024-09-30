@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
 description: “基于 protobuf 实现 dubbo-java 与 dubbo-go 的 triple 协议互通。”
 title: 基于 protobuf 实现 triple 协议互通（适用于两边都用 protobuf 开发的场景）
 linkTitle: protobuf+triple 协议互通

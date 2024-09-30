@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
-    - /zh-cn/overview/mannual/golang-sdk/tutorial/governance/health/start-check/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
+    - /en/overview/mannual/golang-sdk/tutorial/governance/health/start-check/
 description: "缺省会在启动时检查依赖的服务是否可用（注册中心是否有可用地址），不可用时会抛出异常，阻止应用初始化完成。"
 keywords: 启动时检查
 title: 启动时检查

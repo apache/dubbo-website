@@ -1,17 +1,17 @@
 ---
 aliases:
-  - /zh/docs3-v2/dubbo-go-pixiu/user/httpfilter/dubbo/
-  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/httpfilter/dubbo/
-description: Dubbo HttpFilter 介绍
-linkTitle: Dubbo HttpFilter 介绍
-title: Dubbo HttpFilter 介绍
+  - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/dubbo/
+  - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/dubbo/
+description: Introduction to Dubbo HttpFilter
+linkTitle: Introduction to Dubbo HttpFilter
+title: Introduction to Dubbo HttpFilter
 type: docs
 weight: 10
 ---
 
-# 使用 HTTP 调用 Dubbo
+# Using HTTP to Call Dubbo
 
-## 定义Pixiu配置文件
+## Define Pixiu Configuration File
 
 ```yaml
 static_resources:
@@ -59,9 +59,9 @@ static_resources:
     reject_policy: "immediacy"
 ```
 
-## 准备Dubbo服务
+## Prepare Dubbo Service
 
-### 启动zookeeper,需要提前准备好docker和compose，如果本地有的话可以忽略
+### Start zookeeper, ensure docker and compose are prepared in advance. If available locally, this can be ignored.
 
 [docker-compose.yml](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbohttpproxy/server/dubbo/app)
 
@@ -69,7 +69,7 @@ static_resources:
 docker-compose -f {CURRENT_PATH}/dubbo-go-pixiu-samples/dubbohttpproxy/docker/docker-compose.yml && docker-compose up -d
 ```
 
-### 启动 Dubbo Server
+### Start Dubbo Server
 
 [Run](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbohttpproxy/server/dubbo/app)
 
@@ -78,17 +78,17 @@ export DUBBO_GO_CONFIG_PATH={CURRENT_PATH}/dubbo-go-pixiu-samples/dubbohttpproxy
 go run .
 ```
 
-## 启动 Pixiu
+## Start Pixiu
 
 ```shell
 ./dubbo-go-pixiu gateway start --config {CURRENT_PATH}pixiu/conf.yaml
 ```
 
-## 使用 curl 来做查询和更新
+## Use curl for querying and updating
 
-使用以下命令运行命令 curl：
+Run the following curl command:
 
-> 查询
+> Query
 
 ```shell
 curl http://localhost:8888/UserService/com.dubbogo.pixiu.UserService/GetUserByName -X POST \
@@ -100,7 +100,7 @@ curl http://localhost:8888/UserService/com.dubbogo.pixiu.UserService/GetUserByNa
   -d '{"types":"string","values":"tc"}'
 ```
 
-> 更新
+> Update
 
 ```shell
 curl http://localhost:8888/UserService/com.dubbogo.pixiu.UserService/UpdateUserByName -X POST \

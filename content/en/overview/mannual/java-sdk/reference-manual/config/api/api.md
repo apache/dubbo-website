@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config/api/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/api/
+    - /en/docs3-v2/java-sdk/reference-manual/config/api/
+    - /en/docs3-v2/java-sdk/reference-manual/config/api/
 description: 以 API 的方式来配置你的 Dubbo 应用
 linkTitle: API 配置
 title: API 配置
@@ -9,7 +9,7 @@ type: docs
 weight: 2
 ---
 
-作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 Dubbo 应用，关于如何使用原生API开发轻量RPC、微服务应用等的具体示例可查看 [使用教程 - API开发模式](/zh-cn/overview/mannual/java-sdk/tasks/develop/api/) 中的示例。它的适用场景包括以下两类：
+作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 Dubbo 应用，关于如何使用原生API开发轻量RPC、微服务应用等的具体示例可查看 [使用教程 - API开发模式](/en/overview/mannual/java-sdk/tasks/develop/api/) 中的示例。它的适用场景包括以下两类：
 * **轻量 RPC Server & Client**，通常用于一些应用内、基础组件、中间件等内的简单远程调用场景
 * **微服务应用**，不依赖 Spring、Spring Boot 的情况下，直接用 API 开发微服务；同时，直接使用 API 对于一些网关或测试平台集成场景也可能比较有用。
 
@@ -326,7 +326,7 @@ public class DemoConsumer {
 3. Module 与 Module 之间可以由用户自定义进行进行隔离，可以是热部署周期的一个状态、也可以是 Spring Context 的一个 Context。通过 Module，用户可以对 Dubbo 的生命周期粒度进行最小的管理。
 
 为了实现 Dubbo 多实例化，Dubbo 框架内做的最多的变化是修改掉大部分的从静态变量中获取的参数的逻辑，最明显的逻辑是 Dubbo 内部用于参数传递的 URL 对象带上了 ScopeModel 状态，这个 ScopeModel 对应的就是上面提到的三层模型的具体数据承载对象。
-关于多示例的更多实现原理、设计细节等，请参考 [源码架构 - 多实例设计与实现](/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/)。
+关于多示例的更多实现原理、设计细节等，请参考 [源码架构 - 多实例设计与实现](/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/)。
 
 
 ```java

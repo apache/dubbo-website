@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/proxy-factory/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/proxy-factory/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/proxy-factory/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/proxy-factory/
 description: 动态代理扩展
 linkTitle: 动态代理扩展
 title: 动态代理扩展

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/overview/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/overview/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/overview/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/overview/
 description: 协议概述
 linkTitle: 协议概述
 title: 协议概述
@@ -31,11 +31,11 @@ Dubbo 作为一款 RPC 框架内置了高效的 RPC 通信协议，帮助解决�
 
  {{% alert title="注意" color="warning" %}}
  * 自 3.3 版本开始，triple 协议支持以 rest 风格发布标准的 http 服务，因此框架中实际已不存在独立的 rest protocol 扩展实现，
- * 考虑到对过往版本的兼容性，当前 Dubbo 各个发行版本均默认使用 `dubbo` 通信协议。**对于新用户而言，我们强烈建议在一开始就明确配置使用 `triple` 协议**，老用户也尽快参考文档 [实现协议的平滑迁移](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/migration)。
+ * 考虑到对过往版本的兼容性，当前 Dubbo 各个发行版本均默认使用 `dubbo` 通信协议。**对于新用户而言，我们强烈建议在一开始就明确配置使用 `triple` 协议**，老用户也尽快参考文档 [实现协议的平滑迁移](/en/overview/mannual/java-sdk/reference-manual/protocol/triple/migration)。
  {{% /alert %}}
 
 ## 多协议扩展
-以下是当前 Dubbo 官方生态库提供的拓展协议实现。如果要扩展更多自定义协议，请参考 [SPI 扩展手册](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/) 或 [使用教程 - 协议扩展](/zh-cn/overview/mannual/java-sdk/tasks/extensibility/protocol/)。
+以下是当前 Dubbo 官方生态库提供的拓展协议实现。如果要扩展更多自定义协议，请参考 [SPI 扩展手册](/en/overview/mannual/java-sdk/reference-manual/spi/) 或 [使用教程 - 协议扩展](/en/overview/mannual/java-sdk/tasks/extensibility/protocol/)。
 
 | 协议 | 配置值 | 说明 |
 | --- | --- | --- |

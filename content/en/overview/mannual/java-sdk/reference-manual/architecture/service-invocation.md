@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/concepts-and-architecture/service-invocation/
-    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/service-invocation/
-    - /zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-invocation/
+    - /en/docs3-v2/java-sdk/concepts-and-architecture/service-invocation/
+    - /en/docs3-v2/java-sdk/concepts-and-architecture/service-invocation/
+    - /en/overview/mannual/java-sdk/concepts-and-architecture/service-invocation/
 description: 本文将介绍如何在 Dubbo Java 实现中自定义调用链路上核心的扩展点以满足您的需求。
 linkTitle: 服务调用
 title: 服务调用扩展点
@@ -86,7 +86,7 @@ public interface ClusterFilter extends BaseFilter {
 @Activate(group = CommonConstants.PROVIDER)
 ```
 
-> [调用拦截扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/)
+> [调用拦截扩展方式](/en/overview/mannual/java-sdk/reference-manual/spi/description/filter/)
 
 ## Router（路由选址）
 
@@ -125,7 +125,7 @@ public interface Router extends Comparable<Router> {
 }
 ```
 
-> [路由选址扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/router/)
+> [路由选址扩展方式](/en/overview/mannual/java-sdk/reference-manual/spi/description/router/)
 
 ## Cluster（集群规则）
 
@@ -142,7 +142,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
 ```
 
 
-> [集群规则扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/cluster/)
+> [集群规则扩展方式](/en/overview/mannual/java-sdk/reference-manual/spi/description/cluster/)
 
 ## LoadBalance（负载均衡）
 
@@ -156,4 +156,4 @@ public interface LoadBalance {
     <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
 }
 ```
-> [调用拦截扩展方式](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/filter/)
+> [调用拦截扩展方式](/en/overview/mannual/java-sdk/reference-manual/spi/description/filter/)

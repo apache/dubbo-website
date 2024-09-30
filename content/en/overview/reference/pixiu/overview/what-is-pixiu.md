@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/overview/what-is-pixiu/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/overview/what-is-pixiu/
-    - /zh-cn/overview/reference/pixiu/overview/what-is-pixiu/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/overview/what-is-pixiu/
+    - /en/docs3-v2/dubbo-go-pixiu/overview/what-is-pixiu/
+    - /en/docs3-v2/dubbo-go-pixiu/overview/what-is-pixiu/
+    - /en/overview/reference/pixiu/overview/what-is-pixiu/
+    - /en/overview/mannual/dubbo-go-pixiu/overview/what-is-pixiu/
 description: Pixiu 是一款开源的 Dubbo 生态的 API 网关和 接入 dubbo 集群的语言解决方案。作为 API 网关形态。
 linkTitle: Pixiu 是什么
 title: Pixiu 是什么

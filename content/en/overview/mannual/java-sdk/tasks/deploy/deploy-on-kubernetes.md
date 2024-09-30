@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/deploy/deploy-on-vm/
-    - /zh-cn/overview/tasks/deploy/deploy-on-vm/
+    - /en/overview/tasks/deploy/deploy-on-vm/
+    - /en/overview/tasks/deploy/deploy-on-vm/
 description: "部署 Dubbo 应用到 Kubernetes 环境，使用 Nacos 或者 Zookeeper 等作为注册中心。"
 linkTitle: Kubernetes
 title: 部署 Dubbo 应用到 Kubernetes 环境

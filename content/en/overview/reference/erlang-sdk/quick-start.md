@@ -1,62 +1,60 @@
 ---
 aliases:
-    - /zh/docs3-v2/erlang-sdk/quick-start/
-    - /zh-cn/docs3-v2/erlang-sdk/quick-start/
-    - /zh-cn/overview/mannual/erlang-sdk/quick-start/
-    - /zh-cn/overview/reference/erlang-sdk/quick-start/
-description: Erlang 快速开始
-linkTitle: 快速开始
-title: 快速开始
+    - /en/docs3-v2/erlang-sdk/quick-start/
+    - /en/overview/manual/erlang-sdk/quick-start/
+description: Erlang Quick Start
+linkTitle: Quick Start
+title: Quick Start
 type: docs
 weight: 1
 ---
 
-建议先使用 java 定义接口 jar，并使用 [erlanalysis](https://github.com/apache/dubbo-erlang/tree/master/tools/erlanalysis) 工具解析java接口至Erlang lib
+It is recommended to first define the interface jar using Java, and use the [erlanalysis](https://github.com/apache/dubbo-erlang/tree/master/tools/erlanalysis) tool to parse Java interfaces into Erlang lib.
 
-## 导入依赖库
+## Import Dependency Libraries
 
-### 使用 Rebar 编译工具。
-Add dubblerl to rebar.config with your project
+### Using the Rebar Build Tool.
+Add dubblerl to your project's `rebar.config`
 ```erlang
 {deps, [
     {dubboerl, {git, "https://github.com/apache/dubbo-erlang.git", {branch, "master"}}}
 ]}.
 ```
 
-### 使用 erlang.mk 编译工具
-`待补充`
+### Using the `erlang.mk` Build Tool
+`To be added`
 
-## 导入接口库
-Suppose the interface lib you exported is called dubbo_service.   
-* If you didn't upload your lib to your git repository, It is recommended that you copy the `dubbo_service` lib 
+## Import Interface Libraries
+Suppose the interface lib you exported is called `dubbo_service`.  
+* If you didn't upload your lib to your git repository, it is recommended that you copy the `dubbo_service` lib 
 into the project's `apps` directory.  
-* If it is upload to your git repository, you can import like this:
+* If it is uploaded to your git repository, you can import it like this:
 ```erlang
 {deps, [
     {dubboerl, {git, "https://github.com/apache/dubbo-erlang.git", {branch, "master"}}},
-    {dubbo_service,{git,"${INTERFACE_LIB_URL}",{branch,"master"}}} %% replace ${INTERFACE_LIB_URL} with your lib git repos url
+    {dubbo_service,{git,"${INTERFACE_LIB_URL}",{branch,"master"}}} %% replace ${INTERFACE_LIB_URL} with your lib git repo URL
 ]}.
 ```
 
-## 消费者配置
+## Consumer Configuration
 Please reference [Reference Config](../reference/)
 
-## Init dubbolib in your project
-It is need you 
+## Init `dubbolib` in Your Project
+It is need you to 
 ```erlang
 dubboerl:init().
 ```
 
-## 如何调用？
+## How to Call?
 
-### 同步调用
+### Synchronous Call
 ```erlang
 Request = #userInfoRequest{requestId = 123, username = "testname"},
-{ok,RequestRef,Response,RpcContent}  = userOperator:queryUserInfo(Request,#{sync=> true}).
+{ok,RequestRef,Response,RpcContent} = userOperator:queryUserInfo(Request,#{sync => true}).
 ```
-If it occur error, is reponse `{error,Reason}`. 
+If an error occurs, the response is `{error,Reason}`.
 
-### 异步调用
+### Asynchronous Call
 
 Default is Async call.
 ```erlang
@@ -64,8 +62,9 @@ Request = #userInfoRequest{requestId = 123, username = "testname"},
 {ok,RequestRef} = userOperator:queryUserInfo(Request).
 
 %% you can receive the message after.
-handle_cast({msg_back,RequestRef,Response,RpcContent},State).
+handle_cast({msg_back,RequestRef,Response,RpcContent}, State).
 ```
 
-## 示例
-参考项目 [dubboerl_demo](https://github.com/apache/dubbo-erlang/tree/master/samples)
+## Example
+Refer to the project [dubboerl_demo](https://github.com/apache/dubbo-erlang/tree/master/samples)
+

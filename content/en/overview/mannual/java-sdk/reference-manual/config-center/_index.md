@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config-center/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/
-    - /zh-cn/overview/what/ecosystem/config-center/
+    - /en/docs3-v2/java-sdk/reference-manual/config-center/
+    - /en/docs3-v2/java-sdk/reference-manual/config-center/
+    - /en/overview/what/ecosystem/config-center/
 description: Dubbo 配置中心的基本使用和工作原理
 linkTitle: 配置中心
 title: 配置中心

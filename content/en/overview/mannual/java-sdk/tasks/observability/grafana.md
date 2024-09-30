@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/observability/grafana/
-    - /zh-cn/overview/tasks/observability/grafana/
+    - /en/overview/tasks/observability/grafana/
+    - /en/overview/tasks/observability/grafana/
 description: ""
 linkTitle: Grafana
 no_list: true
@@ -14,8 +14,8 @@ weight: 3
 
 ## 在您开始之前
 - 一个可以访问的 Kubernetes 集群
-- 正确安装并配置 [普罗米修斯服务](/zh-cn/overview/reference/integrations/prometheus/#安装)
-- 安装 [Grafana](/zh-cn/overview/reference/integrations/grafana/)
+- 正确安装并配置 [普罗米修斯服务](/en/overview/reference/integrations/prometheus/#安装)
+- 安装 [Grafana](/en/overview/reference/integrations/grafana/)
 - 部署 [示例应用](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot) 并开启指标采集
 
 ## 确认组件正常运行

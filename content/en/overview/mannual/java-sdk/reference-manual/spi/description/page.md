@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/page/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/page/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/page/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/page/
 description: 对等网络节点组网器扩展
 linkTitle: 对等网络节点组网器扩展
 title: 对等网络节点组网器扩展

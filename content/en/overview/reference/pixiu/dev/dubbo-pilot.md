@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/dev/dubbo-pilot/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/dubbo-pilot/
-    - /zh-cn/overview/reference/pixiu/dev/dubbo-pilot/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/dev/dubbo-pilot/
+    - /en/docs3-v2/dubbo-go-pixiu/dev/dubbo-pilot/
+    - /en/docs3-v2/dubbo-go-pixiu/dev/dubbo-pilot/
+    - /en/overview/reference/pixiu/dev/dubbo-pilot/
+    - /en/overview/mannual/dubbo-go-pixiu/dev/dubbo-pilot/
 description: dubbo-pilot Control Plane 部署
 linkTitle: dubbo-pilot Control Plane 部署
 title: dubbo-pilot Control Plane 部署

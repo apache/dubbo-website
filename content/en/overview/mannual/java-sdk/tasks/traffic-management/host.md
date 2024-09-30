@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/traffic-management/host/
-    - /zh-cn/overview/tasks/traffic-management/host/
+    - /en/overview/tasks/traffic-management/host/
+    - /en/overview/tasks/traffic-management/host/
 description: ""
 linkTitle: 固定机器导流
 title: 将流量点对点引导到一台机器 (如排查问题)

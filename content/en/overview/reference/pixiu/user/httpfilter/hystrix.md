@@ -1,19 +1,15 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/httpfilter/hystrix/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/httpfilter/hystrix/
-    - /zh-cn/overview/reference/pixiu/user/httpfilter/hystrix/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/hystrix/
-description: 断路器介绍
-linkTitle: 断路器介绍
-title: 断路器介绍
+    - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/hystrix/
+    - /en-us/docs3-v2/dubbo-go-pixiu/user/httpfilter/hystrix/
+    - /en-us/overview/reference/pixiu/user/httpfilter/hystrix/
+    - /en-us/overview/manual/dubbo-go-pixiu/user/httpfilter/hystrix/
+description: Circuit Breaker Introduction
+linkTitle: Circuit Breaker Introduction
+title: Circuit Breaker Introduction
 type: docs
 weight: 30
 ---
 
+Welcome to contribute to supplement this documentation.
 
-
-
-
-
-欢迎认领补充此文档。

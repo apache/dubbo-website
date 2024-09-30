@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/qos/security/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/security/
+    - /en/docs3-v2/java-sdk/reference-manual/qos/security/
+    - /en/docs3-v2/java-sdk/reference-manual/qos/security/
 description: 序列化安全审计
 linkTitle: 序列化安全审计
 title: 序列化安全审计
@@ -80,5 +80,5 @@ dubbo>
 {{% alert title="注意" color="primary" %}}
 建议及时关注 `serializeWarnedClasses` 的结果，通过返回结果是否非空来判断是否受到攻击。
 
-[Dubbo 类检查机制](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/)。
+[Dubbo 类检查机制](/en/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/)。
 {{% /alert %}}

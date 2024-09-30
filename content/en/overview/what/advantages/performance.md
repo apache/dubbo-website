@@ -1,67 +1,67 @@
 ---
 aliases:
-    - /zh/overview/what/advantages/performance/
-description: 超高性能
-linkTitle: 超高性能
-title: 超高性能
+    - /en/overview/what/advantages/performance/
+description: Ultra-high performance
+linkTitle: Ultra-high performance
+title: Ultra-high performance
 type: docs
 weight: 2
 ---
 
 
-Dubbo 被设计用于解决阿里巴巴超大规模的电商微服务集群实践，并在各个行业头部企业经过多年的十万、百万规模的微服务实践检验，因此，Dubbo 在通信性能、稳定性方面具有无可比拟的优势，非常适合构建近乎无限水平伸缩的微服务集群，这也是 Dubbo 从实践层面优于业界很多同类的产品的巨大优势。
+Dubbo is designed to address Alibaba's large-scale e-commerce microservice cluster practices and has been tested in tens of thousands to millions of microservice practices in leading enterprises across various industries over the years. Therefore, Dubbo has unparalleled advantages in communication performance and stability, making it very suitable for building nearly infinitely scalable microservice clusters. This is also a significant advantage of Dubbo over many similar products in the industry from a practical perspective.
 
-## 高性能数据传输
-Dubbo 内置支持 Dubbo2、Triple 两款高性能通信协议。其中
-* Dubbo2 是基于 TCP 传输协议之上构建的二进制私有 RPC 通信协议，是一款非常简单、紧凑、高效的通信协议。
-* Triple 是基于 HTTP/2 的新一代 RPC 通信协议，在网关穿透性、通用性以及 Streaming 通信上具备优势，Triple 完全兼容 gRPC 协议。
+## High-performance data transmission
+Dubbo natively supports two high-performance communication protocols: Dubbo2 and Triple. Among them:
+* Dubbo2 is a binary private RPC communication protocol built on top of the TCP transport protocol. It is a very simple, compact, and efficient communication protocol.
+* Triple is a new generation RPC communication protocol based on HTTP/2, which has advantages in gateway penetration, generality, and streaming communication. Triple is fully compatible with the gRPC protocol.
 
-以下是基于 Dubbo 3.2 版本得出的压测指标数据，您也可以通过 [dubbo-benchmark](https://github.com/apache/dubbo-benchmark) 项目自行压测。
+Below are the benchmark data based on Dubbo 3.2 version. You can also perform your own benchmarking through the [dubbo-benchmark](https://github.com/apache/dubbo-benchmark) project.
 
 ### TCP protocol benchmark
 
-对比 Dubbo 2.x 及早期 3.x 版本
-* 较小报文场景 createUser、getUser 下，提升率约 180%。
-* 极小报文 existUser(仅一个boolean值)下提升率约 24%
-* 较大报文 listUser 提升率最高，达到了 1000%！
+Compared to Dubbo 2.x and early 3.x versions:
+* In smaller message scenarios like createUser and getUser, the improvement rate is about 180%.
+* In extremely small message scenarios like existUser (only a boolean value), the improvement rate is about 24%.
+* In larger message scenarios like listUser, the improvement rate is the highest, reaching 1000%!
 
 ![dubbo-rpc-protocol-benchmark](/imgs/v3/performance/rpc-dubbo.png)
 
 ### Triple protocol benchmark
 
-* 较小报文场景 createUser、existUser、getUser 下，较 3.1 版本性能提升约 40-45%，提升后的性能与 gRPC 同场景的性能基本持平。
-* 较大报文场景 listUser 下较 3.1 版本提升了约 17%，相较于同场景下的 gRPC 低 11%。
+* In smaller message scenarios like createUser, existUser, and getUser, the performance improvement is about 40-45% compared to version 3.1, and the improved performance is almost on par with gRPC in the same scenarios.
+* In larger message scenarios like listUser, the improvement is about 17% compared to version 3.1, which is 11% lower than gRPC in the same scenario.
 
 ![dubbo-http2-protobuf-benchmark](/imgs/v3/performance/rpc-triple.png)
 
-了解更多
-* [通信协议](../../../core-features/protocols)
-* [Benchmark 指标 (不定期更新)](https://github.com/apache/dubbo/issues/10558#issuecomment-1473015636)
+Learn more
+* [Communication Protocols](../../../core-features/protocols)
+* [Benchmark Metrics (periodically updated)](https://github.com/apache/dubbo/issues/10558#issuecomment-1473015636)
 
-## 构建可伸缩的微服务集群
-业务增长带来了集群规模的快速增长，而集群规模的增长会对服务治理架构带来挑战：
-* 注册中心的存储容量瓶颈
-* 节点动态变化带来的地址推送与解析效率下降
-* 消费端存储大量网络地址的资源开销
-* 复杂的网络链接管理
-* 高峰期的流量无损上下线
-* 异常节点的自动节点管理
+## Building scalable microservice clusters
+Business growth brings rapid growth in cluster size, and the growth in cluster size poses challenges to the service governance architecture:
+* Storage capacity bottleneck of the registry center
+* Decreased efficiency in address pushing and parsing due to dynamic changes in nodes
+* Resource overhead of storing a large number of network addresses on the consumer side
+* Complex network link management
+* Lossless online and offline traffic during peak periods
+* Automatic node management of abnormal nodes
 
-以上内容直接关系到微服务集群的稳定性，因此很容易成为影响集群和业务增长的瓶颈，集群规模越大，问题带来的影响面也就被进一步放大。很多开发者可能会想只有几个应用而已，当前不需要并不关心集群规模，但作为技术架构选型的关键因素之一，我们还是要充分考虑微服务集群未来的可伸缩性。并且基于对业界大量微服务架构和框架实现的调研，一些产品的性能瓶颈点可能很快就会到来（部分产品所能高效支持的瓶颈节点规模阈值都是比较低的，比如几十个应用、数百个节点）。
+The above issues are directly related to the stability of the microservice cluster, so they can easily become bottlenecks affecting cluster and business growth. The larger the cluster size, the more amplified the impact of these issues. Many developers might think that they only have a few applications and currently do not need to worry about cluster size. However, as a key factor in technical architecture selection, we must fully consider the future scalability of the microservice cluster. Based on extensive research on microservice architectures and framework implementations in the industry, some products' performance bottlenecks may arrive quickly (the threshold for efficiently supporting bottleneck nodes in some products is relatively low, such as dozens of applications and hundreds of nodes).
 
-Dubbo 的优势在于近乎无限水平扩容的集群规模，在阿里巴巴双十一场景万亿次调用的实践检验，通过以下内容了解 Dubbo 构建生产可用的、可伸缩的大规模微服务集群背后的原理：
-* [Dubbo3 服务发现](../../../core-features/service-discovery/)
-* [流量管控](../../../core-features/traffic/)
+Dubbo's advantage lies in its nearly infinite horizontal scalability of cluster size. Verified by the practice of trillions of calls in Alibaba's Double 11 scenario, understand the principles behind Dubbo's construction of production-ready, scalable large-scale microservice clusters through the following content:
+* [Dubbo3 Service Discovery](../../../core-features/service-discovery/)
+* [Traffic Control](../../../core-features/traffic/)
 
-## 智能化流量调度
-Dubbo3 内置了具备自适应感知集群负载状态、智能调节流量分布的限流与调度算法实现，从消费者、提供者两个不同视角智能调整流量分布，最大限度确保将流量调度到具有最佳处理能力的实例上，从而提升整个集群的吞吐量与稳定性。
+## Intelligent traffic scheduling
+Dubbo3 has built-in implementations of rate limiting and scheduling algorithms that can adaptively sense the cluster load status and intelligently adjust traffic distribution. From the perspectives of both consumers and providers, it intelligently adjusts traffic distribution to ensure that traffic is scheduled to instances with the best processing capabilities, thereby improving the throughput and stability of the entire cluster.
 
-### 自适应负载均衡
-自适应负载均衡是从消费者视角考虑如何将请求分配到当前具有最优处理能力的机器实例。Dubbo3 新引入了两种负载均衡算法
-* 一种是基于公平性考虑的单纯 `P2C` 算法
-* 另一种是基于自适应的方法 `adaptive`，其试图自适应的衡量 provider 端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。
+### Adaptive load balancing
+Adaptive load balancing considers how to allocate requests to the machine instances with the best processing capabilities from the consumer's perspective. Dubbo3 introduces two new load balancing algorithms:
+* One is the simple `P2C` algorithm based on fairness considerations.
+* The other is the adaptive method `adaptive`, which attempts to adaptively measure the throughput capacity of provider-side machines and then allocate traffic to machines with high throughput capacity as much as possible to improve the overall performance of the system.
 
-### 自适应限流
-与负载均衡运行在消费者端不同的是，限流功能运行在提供者端。其作用是限制提供端实例处理并发任务时的最大数量。从理论上讲，服务端机器的处理能力是存在上限的，因此当并发请求量达到或接近上限时，拒绝掉一部分请求反而是更好的选择。相比于人为提前设置静态最大并发值，自适应限流算法可以动态调整服务端机器的最大并发值，使其可以在保证机器不过载的前提下，尽可能多的处理接收到的请求。
+### Adaptive Rate Limiting
+Unlike load balancing, which operates on the consumer side, rate limiting functions on the provider side. Its purpose is to limit the maximum number of concurrent tasks that a provider instance can handle. Theoretically, the processing capacity of a server machine has an upper limit. Therefore, when the number of concurrent requests reaches or approaches this limit, rejecting some requests is actually a better choice. Compared to manually setting a static maximum concurrency value in advance, the adaptive rate limiting algorithm can dynamically adjust the maximum concurrency value of the server machine, allowing it to handle as many incoming requests as possible without overloading the machine.
 
-关于这部分请参考 [Dubbo3 服务柔性设计文档](../../../reference/proposals/heuristic-flow-control)
+For more details, please refer to the [Dubbo3 Service Resilience Design Document](../../../reference/proposals/heuristic-flow-control)

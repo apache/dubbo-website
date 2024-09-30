@@ -1,34 +1,34 @@
 ---
 aliases:
-    - /zh/overview/what/advantages/production-ready/
-description: 生产环境验证
-linkTitle: 生产环境验证
-title: 生产环境验证
+    - /en/overview/what/advantages/production-ready/
+description: Production Environment Verification
+linkTitle: Production Environment Verification
+title: Production Environment Verification
 type: docs
 weight: 4
 ---
 
 
 
-Apache Dubbo 是一款有着数以万计企业用户的国际化开源项目，经过了多年大规模集群生产环境的检验，影响了数百万开发者，带动了大量微服务开源生态发展。Dubbo 从企业实践中孵化并走向开源，又迅速在开源社区获得了成功，大量的生产实践用户是 Dubbo 长期保持先进性、稳定性和活跃度的核心驱动力。
+Apache Dubbo is an international open-source project with tens of thousands of enterprise users. It has been tested in large-scale cluster production environments for many years, influencing millions of developers and driving the development of a large microservices open-source ecosystem. Dubbo was incubated from enterprise practices and then open-sourced, quickly achieving success in the open-source community. A large number of production practice users are the core driving force for Dubbo's long-term advancement, stability, and activity.
 
-## Dubbo 在阿里巴巴的应用
-Dubbo 设计用于解决阿里巴巴内部复杂的电商微服务集群的开发和治理问题，在 2020 年，阿里巴巴与 Apache Dubbo 社区共同合作，基于 Dubbo2 & HSF2 发布了面向云原生架构的下一代服务框架 - Dubbo3，目前，Dubbo3 已经完全升级 HSF2、Dubbo2 成为阿里巴巴内部统一的服务框架，成功的跑在了数十万应用、数百万节点的双十一集群之上。
+## Dubbo's Application in Alibaba
+Dubbo was designed to solve the development and governance issues of Alibaba's complex e-commerce microservices clusters. In 2020, Alibaba collaborated with the Apache Dubbo community to release the next-generation service framework for cloud-native architecture - Dubbo3, based on Dubbo2 & HSF2. Currently, Dubbo3 has fully upgraded HSF2 and Dubbo2 to become Alibaba's unified service framework, successfully running on the Double Eleven cluster with hundreds of thousands of applications and millions of nodes.
 
-Dubbo3 吸取了 HSF2 框架所有大规模微服务集群的治理经验，解决了 Dubbo2 架构设计上长期积累的一些缺陷，同时增加了一系列面向云原生架构的新特性。
+Dubbo3 has absorbed all the large-scale microservices cluster governance experience from the HSF2 framework, addressed some long-standing architectural design flaws in Dubbo2, and added a series of new features for cloud-native architecture.
 
 ![production-ready](/imgs/v3/advantages/production-ready.png)
 
-* 阿里巴巴结合 HSF 框架的大规模集群实践经验，基于 Apache Dubbo、开源社区需求等推出了面向云原生架构的全新服务框架 - Dubbo3，Dubbo3 在完全兼容之前 API 模式的情况下，完成了彻底的云原生架构升级。
-* Dubbo 的高度可扩展能力是其广泛适用的重要前提，阿里巴巴基于 Dubbo3 内核维护了一套内部特有的适配插件体系以实现平滑升级，这包括注册中心扩展、路由组件扩展、监控组件扩展等。
-* 几乎所有主流云厂商、主流微服务开源社区都提供了 Dubbo 适配或托管服务。
+* Combining the large-scale cluster practice experience of the HSF framework, Alibaba, based on Apache Dubbo and the needs of the open-source community, launched a new service framework for cloud-native architecture - Dubbo3. Dubbo3 has completed a thorough cloud-native architecture upgrade while fully compatible with the previous API mode.
+* Dubbo's high scalability is an important premise for its wide applicability. Alibaba maintains a set of internally unique adaptation plugin systems based on the Dubbo3 kernel to achieve smooth upgrades. This includes registry extensions, routing component extensions, monitoring component extensions, etc.
+* Almost all mainstream cloud vendors and mainstream microservices open-source communities provide Dubbo adaptation or hosting services.
 
-关于阿里巴巴 Dubbo3 应用的更多细节，请参见 [博客文章](/zh-cn/blog/)
+For more details on Alibaba's Dubbo3 application, please refer to the [blog post](/en/blog/)
 
-## 更多案例
-据 [Wanted, Who's Using Dubbo](https://github.com/apache/dubbo/issues/1012) 统计，Dubbo 已知部分典型用户包括：
+## More Case Studies
+According to [Wanted, Who's Using Dubbo](https://github.com/apache/dubbo/issues/1012), some known typical users of Dubbo include:
 
-网联清算、银联商务、中国人寿、中国平安、中国银行、人民银行、工商银行、招商证券、平安保险、中国人寿、阿里巴巴、滴滴出行、携程网、小米、斗鱼直播、瓜子二手车、金蝶、亚信科技、中国电信、文思海辉、中科软、科大讯飞、恒生电子、红星凯美龙、海尔、新东方、软通动力、中远海运、昆明航空、中通快递、顺丰科技、普华永道等。
+UnionPay Clearing, UnionPay Commerce, China Life Insurance, Ping An Insurance, Bank of China, People's Bank of China, Industrial and Commercial Bank of China, China Merchants Securities, Ping An Insurance, China Life Insurance, Alibaba, Didi Chuxing, Ctrip, Xiaomi, Douyu Live, Guazi Used Cars, Kingdee, AsiaInfo, China Telecom, Pactera, Chinasoft International, iFlytek, Hundsun Technologies, Red Star Macalline, Haier, New Oriental, iSoftStone, COSCO Shipping, Kunming Airlines, ZTO Express, SF Technology, PwC, etc.
 
 
 {{< about/testimonials >}}

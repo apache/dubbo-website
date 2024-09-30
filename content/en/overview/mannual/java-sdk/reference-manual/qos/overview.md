@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/qos/overview/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/overview/
+    - /en/docs3-v2/java-sdk/reference-manual/qos/overview/
+    - /en/docs3-v2/java-sdk/reference-manual/qos/overview/
 description: "QoS 命令的设计目的、使用方法说明，包括如何开启、关闭 qos 命令等，支持 HTTP/Telnet 访问方式，"
 linkTitle: QOS 概述
 title: QOS 概述

@@ -1,6 +1,6 @@
 ---
 aliases:
-  - /zh-cn/overview/mannual/golang-sdk/tutorial/governance/features/custom-filter/
+  - /en/overview/mannual/golang-sdk/tutorial/governance/features/custom-filter/
 description: filter拦截器
 title: filter拦截器
 type: docs

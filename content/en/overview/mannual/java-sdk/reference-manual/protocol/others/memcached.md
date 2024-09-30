@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/memcached/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/memcached/
 description: Memcached 协议
 linkTitle: Memcached 协议
 title: Memcached 协议

@@ -1,7 +1,7 @@
 ---
 aliases:
-  - /zh/overview/reference/admin/documentation/
-  - /zh-cn/overview/reference/admin/documentation/
+  - /en/overview/reference/admin/documentation/
+  - /en/overview/reference/admin/documentation/
 description: ""
 linkTitle: 文档管理
 no_list: true

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/what/ecosystem/serialization/fastjson/
-    - /zh-cn/overview/what/ecosystem/serialization/fastjson/
+    - /en/overview/what/ecosystem/serialization/fastjson/
+    - /en/overview/what/ecosystem/serialization/fastjson/
 description: "本文介绍基于 Java 接口模式开发 triple 服务时，底层的序列化机制实现。"
 linkTitle: Protobuf Wrapper
 title: 基于 Java 接口模式开发 triple 服务时，底层的序列化机制实现
@@ -18,7 +18,7 @@ Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），开发者
 
 ## 2 使用方式
 
-**在使用 [Java 接口方式开发 triple 通信服务](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 的时候，dubbo server 将自动启用 protobuf、protobuf-json 序列化模式支持。**
+**在使用 [Java 接口方式开发 triple 通信服务](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 的时候，dubbo server 将自动启用 protobuf、protobuf-json 序列化模式支持。**
 
 ### 2.1 添加依赖
 
@@ -41,7 +41,7 @@ Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），开发者
 ```
 
 ### 2.2 配置启用
-只要是基于 [Java 接口方式模式使用 triple 协议](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/) ，就会使用 protobuf wrapper 序列化，只要定义 Java 接口并启用 triple 协议即可：
+只要是基于 [Java 接口方式模式使用 triple 协议](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) ，就会使用 protobuf wrapper 序列化，只要定义 Java 接口并启用 triple 协议即可：
 
 通过 Java 接口定义 Dubbo 服务：
 ```java

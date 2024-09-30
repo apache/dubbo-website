@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/ecosystem/gateway/
-    - /zh-cn/overview/tasks/ecosystem/gateway/
+    - /en/overview/tasks/ecosystem/gateway/
+    - /en/overview/tasks/ecosystem/gateway/
 description: |
     通过 Higress 云原生网关实现 Dubbo Service 代理，支持 triple 协议。
 linkTitle: triple协议
@@ -10,7 +10,7 @@ type: docs
 weight: 3
 ---
 
-在 [triple协议规范](/zh-cn/overview/reference/protocols/triple-spec/) 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：
+在 [triple协议规范](/en/overview/reference/protocols/triple-spec/) 中我们曾详细介绍了 triple 对于浏览器、网关的友好性设计，其中非常重要的一点是 triple 同时支持跑在 HTTP/1、HTTP/2 上：
 * 在后端服务之间使用高效的 triple 二进制协议。
 * 对于前端接入层，则支持所有标准 HTTP 工具如 cURL 等以标准 `application/json` 、`application/yaml` 等格式请求后端服务。
 
@@ -191,7 +191,7 @@ $ curl "localhost/org.apache.dubbo.samples.gateway.api.DemoService/sayHello?name
 
 在前面的示例中，如类似 `http://127.0.0.1:9080/triple/demo/hello` 会是更符合前端使用的访问方式，要做到这一点，我们可以通过在 Higress 等网关配置 uri rewrite 重写，实现前端 `/triple/demo/hello` 到后端 `/org.apache.dubbo.samples.gateway.api.DemoService/sayHello/` 的映射。
 
-除了配置网关 rewrite 重新规则之外，**Dubbo 框架还为 triple 服务暴露 REST 风格的 HTTP 访问路径提供了内置支持**，具体使用方式取决于你使用的是基于 [protobuf 的服务定义模式](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/)，还是基于 [java 接口的服务定义模式](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/interface/)：
+除了配置网关 rewrite 重新规则之外，**Dubbo 框架还为 triple 服务暴露 REST 风格的 HTTP 访问路径提供了内置支持**，具体使用方式取决于你使用的是基于 [protobuf 的服务定义模式](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/)，还是基于 [java 接口的服务定义模式](/en/overview/mannual/java-sdk/tasks/protocols/triple/interface/)：
 * Java 接口模式，通过直接为 java 接口增加注解可以同时发布 REST 风格服务，目前支持 Spring Web 与 JAX-RS 两套注解标准。
 * Protobuf 模式，通过使用 grpc-gateway 可发布 REST 风格服务。
 
@@ -212,7 +212,7 @@ public interface DemoService {
 {{% alert title="注意" color="info" %}}
 关于接口注解
 * 在之前的示例 [dubbo-samples-gateway-higress-triple](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-triple) 中已经启用，可查看源码了解实际用法。
-* 在[【进阶学习 - 协议 - rest】](/zh-cn/overview/mannual/java-sdk/tasks/protocols/rest/)一节中有详细的说明和使用示例，也可以前往查看。
+* 在[【进阶学习 - 协议 - rest】](/en/overview/mannual/java-sdk/tasks/protocols/rest/)一节中有详细的说明和使用示例，也可以前往查看。
 {{% /alert %}}
 
 这时我们的路由前缀配置如下，Nacos 地址配置与之前保持一致，path 前缀改为访问更为友好的 `/triple/demo`：
@@ -252,5 +252,5 @@ $ curl "localhost/triple/demo/hello?name=HigressTriple"
 {{% /alert %}}
 
 ## 参考连接
-* [使用 Apache APISIX 代理 triple 协议流量](/zh-cn/blog/2024/04/22/使用-apache-apisix-代理-dubbo-服务triple协议/)
+* [使用 Apache APISIX 代理 triple 协议流量](/en/blog/2024/04/22/使用-apache-apisix-代理-dubbo-服务triple协议/)
 * [Higress 实现基于 http 协议微服务发现与路由配置](https://higress.io/zh-cn/docs/user/spring-cloud)

@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/overview/tasks/develop/generic/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-reference/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-reference/
+    - /en/overview/tasks/develop/generic/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-reference/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-reference/
 description: 泛化实现，用于在提供方没有 API（SDK）的情况下，对外提供和发布服务
 linkTitle: 泛化实现
 title: 泛化实现

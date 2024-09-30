@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/deployment/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/deployment/
-    - /zh-cn/overview/reference/pixiu/user/deployment/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/deployment/
+    - /en/docs3-v2/dubbo-go-pixiu/user/deployment/
+    - /en/docs3-v2/dubbo-go-pixiu/user/deployment/
+    - /en/overview/reference/pixiu/user/deployment/
+    - /en/overview/mannual/dubbo-go-pixiu/user/deployment/
 description: 部署操作
 linkTitle: 部署操作
 title: 部署操作

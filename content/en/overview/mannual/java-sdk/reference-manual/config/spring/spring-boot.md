@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config/annotation/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/annotation/
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/config/annotation/
+    - /en/docs3-v2/java-sdk/reference-manual/config/annotation/
+    - /en/docs3-v2/java-sdk/reference-manual/config/annotation/
+    - /en/overview/mannual/java-sdk/reference-manual/config/annotation/
 description: 以 Annotation、Spring Boot 开发 Dubbo 应用
 linkTitle: Spring Boot
 title: Spring Boot
@@ -10,7 +10,7 @@ type: docs
 weight: 3
 ---
 
-关于 Spring Boot 的注解、基本使用方法等请参考 [使用教程 - Spring Boot](/zh-cn/overview/mannual/java-sdk/tasks/develop/springboot/)。以下是 spring boot 支持的配置详情与 starter 列表。
+关于 Spring Boot 的注解、基本使用方法等请参考 [使用教程 - Spring Boot](/en/overview/mannual/java-sdk/tasks/develop/springboot/)。以下是 spring boot 支持的配置详情与 starter 列表。
 
 ## application.yaml
 
@@ -88,6 +88,6 @@ dubbo:
 * `dubbo-tracing-otel-zipkin-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin。
 
 {{% alert title="注意" color="info" %}}
-* 关于每个 starter 适配的第三方组件版本，请查看 [组件版本映射表](/zh-cn/overview/mannual/java-sdk/versions/#版本说明)。
+* 关于每个 starter 适配的第三方组件版本，请查看 [组件版本映射表](/en/overview/mannual/java-sdk/versions/#版本说明)。
 * 每个 starter 都有对应的 application.yml 配置项，请跟随上文 [配置项列表](./#配置示例) 了解使用细节。
 {{% /alert %}}

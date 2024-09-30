@@ -1,23 +1,23 @@
 ---
 aliases:
-    - /zh/overview/core-features/traffic/configuration-rule/
-    - /zh-cn/overview/core-features/traffic/configuration-rule/
+    - /en/overview/core-features/traffic/configuration-rule/
+    - /en/overview/core-features/traffic/configuration-rule/
 description: ""
-linkTitle: 动态配置
-title: 动态配置规则
+linkTitle: Dynamic Configuration
+title: Configuration Rule
 type: docs
 weight: 4
 ---
 
 
-动态配置规则 (ConfigurationRule) 是 Dubbo 设计的在无需重启应用的情况下，动态调整 RPC 调用行为的一种能力，也称为动态覆盖规则，因为它是通过在运行态覆盖 Dubbo 实例或者 Dubbo 实例中 URL 地址的各种参数值，实现改变 RPC 调用行为的能力。
+Configuration Rule (ConfigurationRule) is a capability designed by Dubbo to dynamically adjust RPC call behavior without restarting the application. It is also known as a dynamic override rule because it changes RPC call behavior by overriding various parameter values of Dubbo instances or URLs within Dubbo instances at runtime.
 
-使用动态配置规则，有以下几条关键信息值得注意：
-* **设置规则生效过滤条件。** 配置规则支持一系列的过滤条件，用来限定规则只对符合特定条件的服务、应用或实例才生效。
-* **设置规则生效范围。** 一个 rpc 服务有服务发起方（消费者）和服务处理方（提供者）两个角色，对某一个服务定义的规则，可以具体到限制是对消费者还是提供者生效。
-* **选择规则管理粒度。** Dubbo 支持从服务和应用两个粒度来管理和下发规则。
+When using configuration rules, there are several key points to note:
+* **Set rule effective filter conditions.** Configuration rules support a series of filter conditions to limit the rules to only apply to services, applications, or instances that meet specific conditions.
+* **Set rule effective scope.** An RPC service has two roles: the service initiator (consumer) and the service handler (provider). Rules defined for a service can be specifically limited to take effect on either the consumer or the provider.
+* **Choose rule management granularity.** Dubbo supports managing and issuing rules from both service and application granularities.
 
-以下一个应用级别的配置示例，配置生效后，`shop-detail` 应用下提供的所有服务都将启用 accesslog，对 `shop-detail` 部署的所有实例生效。
+The following is an application-level configuration example. After the configuration takes effect, all services provided under the `shop-detail` application will enable accesslog, and it will take effect on all instances deployed under `shop-detail`.
 
 ```yaml
 configVersion: v3.0
@@ -29,7 +29,7 @@ configs:
       accesslog: 'true'
 ```
 
-以下是一个服务级别的配置示例，`key: org.apache.dubbo.samples.UserService` 和 `side: consumer` 说明这条配置对所有正在消费 UserService 的 Dubbo 实例生效，在调用失败后都执行 4 次重试。`match` 条件进一步限制了消费端的范围，限定为只对应用名为 `shop-frontend` 的这个消费端应用生效。
+The following is a service-level configuration example. `key: org.apache.dubbo.samples.UserService` and `side: consumer` indicate that this configuration applies to all Dubbo instances consuming UserService, executing 4 retries after a call failure. The `match` condition further restricts the scope of the consumer to only the consumer application named `shop-frontend`.
 
 ```yaml
 configVersion: v3.0
@@ -45,42 +45,42 @@ configs:
       retries: '4'
 ```
 ## ConfigurationRule
-配置规则主体，定义要设置的目标服务或应用、具体的规则配置。具体配置规则 (configs) 可以设置多条。
+The main body of the configuration rule, defining the target service or application to be set and the specific rule configuration. Multiple specific configuration rules (configs) can be set.
 
 | Field | Type | Description | Required |
 | --- | --- | --- | --- |
 | configVersion | string | The version of the configuration rule definition, currently available version is `v3.0` | Yes |
 | scope | string | Supports `service` and `application` scope configurations.  | Yes |
 | key | string | The identifier of the target service or application that this rule is about to apply to. <br/><br/>- If `scope:service`is set, then `key`should be specified as the Dubbo service key that this rule targets to control.<br/> - If `scope:application` is set, then `key`should be specified as the name of the application that this rule targets to control.| Yes |
-| enabled | bool | Whether enable this rule or not, set `enabled:false` to disable this rule. | Yes |
+| enabled | bool | Whether to enable this rule or not, set `enabled:false` to disable this rule. | Yes |
 | configs | Config[] | The `match condition` and `configuration` of this rule. | Yes |
 
 ## Config
-具体的规则配置定义，包含生效端 (consumer 或 provider) 和过滤条件。
+The specific rule configuration definition, including the effective side (consumer or provider) and filter conditions.
 
 | Field | Type | Description | Required |
 | --- | --- | --- | --- |
 | side | string | Especially useful when `scope:service`is set.<br/><br/>- `side: provider`means this Config will only take effect on the provider instances of the service key.<br/>- `side:consumer`means this Config will only take effect on the consumer instances of the service key| Yes |
 | parameters | map<string, string> | The keys and values this rule aims to change. | Yes |
-| match | MatchCondition | A set of criterion to be met in order for the rule/config to be applied to the Dubbo instance.  | No |
-| enabled | bool | Whether enable this Config or not, will use the value in ConfigurationRule if not set | No |
+| match | MatchCondition | A set of criteria to be met in order for the rule/config to be applied to the Dubbo instance.  | No |
+| enabled | bool | Whether to enable this Config or not, will use the value in ConfigurationRule if not set | No |
 | ~~addresses~~ | ~~string[]~~ | ~~replaced with address in MatchCondition~~ | ~~No~~ |
 | ~~providerAddresses~~ | ~~string[]~~ | ~~not supported anymore~~ | ~~No~~ |
 | ~~services~~ | ~~string[]~~ | ~~replaced with service in MatchCondition~~ | ~~No~~ |
 | ~~applications~~ | ~~string[]~~ | ~~replaced with application in MatchCondition~~ | ~~No~~ |
 
 ## MatchCondition
-过滤条件，用来设置规则对哪个服务 (service)、应用 (application)、实例 (address)，或者包含哪些参数 (param) 的实例生效。
+Filter conditions used to set rules for which service, application, instance (address), or instances containing specific parameters (param) are effective.
 
 | Field | Type | Description | Required |
 | --- | --- | --- | --- |
-| address | StringMatch | The instance address matching condition for this config rule to take effect.<br/><br/>- xact: "value" for exact string match<br/>- prefix: "value" for prefix-based match<br/>- regex: "value" for RE2 style regex-based match ([https://github.com/google/re2/wiki/Syntax)](https://github.com/google/re2/wiki/Syntax)).| No |
+| address | StringMatch | The instance address matching condition for this config rule to take effect.<br/><br/>- exact: "value" for exact string match<br/>- prefix: "value" for prefix-based match<br/>- regex: "value" for RE2 style regex-based match ([https://github.com/google/re2/wiki/Syntax)](https://github.com/google/re2/wiki/Syntax)).| No |
 | service | StringMatch (oneof) | The service matching condition for this config rule to take effect. Effective when `scope: application` is set.<br/><br/>- exact: "value" for exact string match<br/>- prefix: "value" for prefix-based match<br/>- regex: "value" for RE2 style regex-based match ([https://github.com/google/re2/wiki/Syntax)](https://github.com/google/re2/wiki/Syntax)).| No |
 | application | StringMatch (oneof) | The application matching condition for this config rule to take effect. Effective when `scope: service` is set.<br/><br/>- exact: "value" for exact string match<br/>- prefix: "value" for prefix-based match<br/>- regex: "value" for RE2 style regex-based match ([https://github.com/google/re2/wiki/Syntax)](https://github.com/google/re2/wiki/Syntax)).| No |
 | param | ParamCondition[] | The Dubbo url keys and values matching condition for this config rule to take effect. | No |
 
 ## ParamCondition
-定义实例参数 (param) 过滤条件，对应到 Dubbo URL 地址参数。
+Defines instance parameter (param) filter conditions, corresponding to Dubbo URL address parameters.
 
 | Field | Type | Description | Required |
 | --- | --- | --- | --- |
@@ -93,3 +93,5 @@ configs:
 | exact | string (oneof) | exact string match | No |
 | prefix | string (oneof) | prefix-based match | No |
 | regex | string (oneof) | RE2 style regex-based match ([https://github.com/google/re2/wiki/Syntax)](https://github.com/google/re2/wiki/Syntax)). | No |
+
+It seems like you haven't pasted the Markdown content yet. Please provide the content you need translated, and I'll assist you accordingly.

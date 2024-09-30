@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/protocols/
-    - /zh-cn/overview/tasks/protocols/
+    - /en/overview/tasks/protocols/
+    - /en/overview/tasks/protocols/
 description: "演示了如何开发基于 `triple` 协议通信的服务。"
 hide: true
 linkTitle: triple协议

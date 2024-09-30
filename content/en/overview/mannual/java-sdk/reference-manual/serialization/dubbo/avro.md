@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/what/ecosystem/serialization/avro/
-    - /zh-cn/overview/what/ecosystem/serialization/avro/
+    - /en/overview/what/ecosystem/serialization/avro/
+    - /en/overview/what/ecosystem/serialization/avro/
 description: "本文介绍 Avro 序列化"
 linkTitle: Avro
 title: Avro

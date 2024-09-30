@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/consistent-hash/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/consistent-hash/
 description: "通过示例演示如何使用 Nacos 作为注册中心实现自动服务发现。"
 linkTitle: nacos
 title: 使用 Nacos 作为注册中心实现自动服务发现

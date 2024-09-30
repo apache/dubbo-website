@@ -1,6 +1,6 @@
 ---
 aliases:
-- /zh/overview/reference/integrations/zipkin/
+- /en/overview/reference/integrations/zipkin/
 description: 配置 Zipkin 与 Dubbo 一起工作
 linkTitle: Zipkin
 title: Zipkin

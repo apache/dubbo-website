@@ -1,7 +1,7 @@
 ---
 aliases:
-   - /zh/overview/reference/admin/test/
-   - /zh-cn/overview/reference/admin/test/
+   - /en/overview/reference/admin/test/
+   - /en/overview/reference/admin/test/
 description: ""
 linkTitle: 服务测试
 no_list: true

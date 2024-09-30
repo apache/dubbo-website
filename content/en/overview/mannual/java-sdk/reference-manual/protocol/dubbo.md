@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
-    - /zh/overview/what/ecosystem/protocol/dubbo/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
+    - /en/overview/what/ecosystem/protocol/dubbo/
 description: "本文描述 Dubbo 协议 java 实现的特点与具体实现细节"
 linkTitle: dubbo
 title: Dubbo协议

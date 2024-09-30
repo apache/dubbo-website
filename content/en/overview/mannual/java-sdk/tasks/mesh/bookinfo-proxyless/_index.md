@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/bookinfo-proxyless/
-    - /zh-cn/overview/tasks/mesh/bookinfo-proxyless/
+    - /en/overview/tasks/mesh/bookinfo-proxyless/
+    - /en/overview/tasks/mesh/bookinfo-proxyless/
 description: 通过完整的 Bookinfo 示例操作演示 Dubbo Proxyless 接入 Istio 服务网格体系。
 linkTitle: Proxyless Bookinfo
 no_list: true

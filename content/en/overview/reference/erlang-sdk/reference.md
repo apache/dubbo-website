@@ -1,12 +1,12 @@
 ---
 aliases:
-    - /zh/docs3-v2/erlang-sdk/reference/
-    - /zh-cn/docs3-v2/erlang-sdk/reference/
-    - /zh-cn/overview/mannual/erlang-sdk/reference/
-    - /zh-cn/overview/reference/erlang-sdk/reference/
-description: 在 erlang 中配置消费者
-linkTitle: 消费者配置
-title: 消费者配置
+    - /en/docs3-v2/erlang-sdk/reference/
+    - /en-us/docs3-v2/erlang-sdk/reference/
+    - /en-us/overview/manual/erlang-sdk/reference/
+    - /en-us/overview/reference/erlang-sdk/reference/
+description: Configuring consumers in Erlang
+linkTitle: Consumer Configuration
+title: Consumer Configuration
 type: docs
 weight: 2
 ---
@@ -16,9 +16,9 @@ weight: 2
 
 
 
-## 基础配置
+## Basic Configuration
 
-消费者配置项需要添加到 `sys.config` 文件 `dubboerl` 应用配置项里。
+Consumer configurations need to be added to the `sys.config` file under the `dubboerl` application configuration.
 
 ```erlang
 {dubboerl,[
@@ -31,4 +31,5 @@ weight: 2
 ]}
 ```
 
-Option 配置项待添加中。
+Option configuration items are to be added.
+

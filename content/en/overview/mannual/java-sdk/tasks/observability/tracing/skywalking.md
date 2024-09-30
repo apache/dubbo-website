@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/observability/tracing/skywalking/
-    - /zh-cn/overview/tasks/observability/tracing/skywalking/
+    - /en/overview/tasks/observability/tracing/skywalking/
+    - /en/overview/tasks/observability/tracing/skywalking/
 description: "本文演示如何将 Dubbo 接入 Skywalking 全链路监控体系"
 linkTitle: Skywalking
 no_list: true

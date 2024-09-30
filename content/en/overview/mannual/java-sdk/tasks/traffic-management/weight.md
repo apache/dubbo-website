@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/traffic-management/weight/
-    - /zh-cn/overview/tasks/traffic-management/weight/
+    - /en/overview/tasks/traffic-management/weight/
+    - /en/overview/tasks/traffic-management/weight/
 description: ""
 linkTitle: 权重比例
 title: 基于权重值的比例流量转发

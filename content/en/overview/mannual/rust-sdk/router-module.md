@@ -1,7 +1,7 @@
 ---
 aliases:
-  - /zh/docs3-v2/rust-sdk/router-module/
-  - /zh-cn/docs3-v2/rust-sdk/router-module/
+  - /en/docs3-v2/rust-sdk/router-module/
+  - /en/docs3-v2/rust-sdk/router-module/
 description: "服务路由"
 linkTitle: 服务路由
 title: 服务路由规则
@@ -10,7 +10,7 @@ weight: 2
 ---
 
 ## 条件路由
-使用模式与 [条件路由文档](/zh/overview/core-features/traffic/condition-rule/) 中的模式类似，但配置格式略有不同，以下是条件路由规则示例。
+使用模式与 [条件路由文档](/en/overview/core-features/traffic/condition-rule/) 中的模式类似，但配置格式略有不同，以下是条件路由规则示例。
 
 基于以下示例规则，所有 `org.apache.dubbo.sample.tri.Greeter` 服务 `greet` 
 方法的调用都将被转发到有 `port=8888` 标记的地址子集 
@@ -60,7 +60,7 @@ conditions:
 
 
 ## 标签路由
-使用模式与 [标签路由文档](/zh/overview/core-features/traffic/tag-rule/)中的模式类似，但配置格式略有不同，以下是标签路由规则示例
+使用模式与 [标签路由文档](/en/overview/core-features/traffic/tag-rule/)中的模式类似，但配置格式略有不同，以下是标签路由规则示例
 ```yaml
 configVersion: v1.0
 force: false

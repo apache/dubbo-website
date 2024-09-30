@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/observability/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/observability/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/
 description: 可观测性
 linkTitle: 控制台
 title: 可观测性

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/what/ecosystem/serialization/fst/
-    - /zh-cn/overview/what/ecosystem/serialization/fst/
+    - /en/overview/what/ecosystem/serialization/fst/
+    - /en/overview/what/ecosystem/serialization/fst/
 description: "本文介绍 FST 序列化"
 linkTitle: FST
 title: FST

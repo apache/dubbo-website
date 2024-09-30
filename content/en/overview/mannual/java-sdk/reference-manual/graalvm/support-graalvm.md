@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/support-graalvm/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/support-graalvm/
 description: "Dubbo AOT 技术详解，如何使用 GraalVM Native Image 实现 Dubbo 应用静态化。"
 linkTitle: 支持 GraalVM Native Image
 title: "Dubbo AOT -- 如何使用 GraalVM Native Image 实现 Dubbo 应用静态化"

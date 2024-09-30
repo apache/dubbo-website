@@ -1,10 +1,10 @@
 ---
 aliases:
-    - /zh-cn/overview/tasks/ecosystem/rate-limit/
-    - /zh-cn/overview/what/ecosystem/rate-limit/
-    - /zh-cn/overview/what/ecosystem/rate-limit/sentinel/
-    - /zh/overview/tasks/rate-limit/sentinel/
-    - /zh-cn/overview/tasks/rate-limit/sentinel/
+    - /en/overview/tasks/ecosystem/rate-limit/
+    - /en/overview/what/ecosystem/rate-limit/
+    - /en/overview/what/ecosystem/rate-limit/sentinel/
+    - /en/overview/tasks/rate-limit/sentinel/
+    - /en/overview/tasks/rate-limit/sentinel/
 description: "使用 Sentinel 保护您的 Dubbo 应用，防止应用因个别服务的突发流量过载而出现稳定性问题。"
 linkTitle: Sentinel限流
 title: 使用 Sentinel 应对突发流量，保护您的应用

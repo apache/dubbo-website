@@ -1,6 +1,6 @@
 ---
 aliases:
-- /zh/overview/reference/integrations/skywalking/
+- /en/overview/reference/integrations/skywalking/
 description: 配置 Skywalking 与 Dubbo 一起工作
 linkTitle: Skywalking
 title: Skywalking

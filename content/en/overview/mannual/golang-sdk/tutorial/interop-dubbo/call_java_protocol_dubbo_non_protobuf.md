@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
 description: "如果您是 dubbo java 的老用户，可能您的 dubbo java 应用并没有使用 protobuf（直接使用 java interface 定义服务），这个时候您需要使用以下方式开发 dubbo go-client，来调用老版本的 dubbo 服务。"
 title: 非protoubf模式协议互通（适用于老版本 dubbo java 应用）
 linkTitle: 非protoubf模式协议互通

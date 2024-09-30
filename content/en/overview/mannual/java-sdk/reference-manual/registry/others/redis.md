@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/registry/redis/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/registry/redis/
-    - /zh-cn/overview/what/ecosystem/registry/redis/
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/registry/redis/
+    - /en/docs3-v2/java-sdk/reference-manual/registry/redis/
+    - /en/docs3-v2/java-sdk/reference-manual/registry/redis/
+    - /en/overview/what/ecosystem/registry/redis/
+    - /en/overview/mannual/java-sdk/reference-manual/registry/redis/
 description: Redis 注册中心的基本使用和工作原理。
 linkTitle: Redis
 title: Redis
@@ -14,14 +14,14 @@ weight: 5
 
 
 ## 前置条件
-* 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/starter/)
+* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
 * 安装并启动 [Redis](http://redis.io) 服务
 
 ## 使用说明
 
 ### 添加依赖
 
-从 Dubbo3 开始，redis 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/zh-cn/download/spi-extensions/#dubbo-registry)。
+从 Dubbo3 开始，redis 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-registry)。
 
 ```xml
 <dependency>

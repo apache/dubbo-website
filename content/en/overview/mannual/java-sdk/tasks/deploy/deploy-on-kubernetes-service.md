@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/deploy/deploy-on-vm/
-    - /zh-cn/overview/tasks/deploy/deploy-on-vm/
+    - /en/overview/tasks/deploy/deploy-on-vm/
+    - /en/overview/tasks/deploy/deploy-on-vm/
 description: "部署 Dubbo 应用到服务网格（Service Mesh），基于 Kubernetes Service 与控制面。"
 linkTitle: 服务网格
 title: 部署 Dubbo 应用到虚拟机环境
@@ -62,7 +62,7 @@ kind: deployment
 
 接口将自动获取当前应用所有 SPI 的实现，对应接口的 SPI 实现均成功就绪则接口返回成功。
 
-Dubbo3 SPI 更多扩展的介绍见 [Dubbo SPI扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/)
+Dubbo3 SPI 更多扩展的介绍见 [Dubbo SPI扩展](/en/overview/mannual/java-sdk/reference-manual/spi/description/)
 
 ## 使用场景
 `liveness probe` 来确定你的应用程序是否正在运行，查看是否存活。
@@ -77,18 +77,18 @@ Dubbo3 SPI 更多扩展的介绍见 [Dubbo SPI扩展](/zh-cn/overview/mannual/ja
 
 对于 livenessProbe 存活检测，由于 Dubbo3 框架本身无法获取到应用的存活状态，因此本接口无默认实现，且默认返回成功。开发者可以根据 SPI 定义对此 SPI 接口进行拓展，从应用层次对是否存活进行判断。
 
-关于 [liveness 存活探针](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/liveness/) 扩展示例
+关于 [liveness 存活探针](/en/overview/mannual/java-sdk/reference-manual/spi/description/liveness/) 扩展示例
 ### 就绪检测
 
 对于 readinessProbe 就绪检测，目前 Dubbo3 默认提供了两个检测维度，一是对 Dubbo3 服务自身是否启停做判断，另外是对所有服务是否存在已注册接口，如果所有服务均已从注册中心下线（可以通过 QOS 运维进行操作）将返回未就绪的状态。
 
-关于 [readiness 就绪探针](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/readiness/) 扩展示例
+关于 [readiness 就绪探针](/en/overview/mannual/java-sdk/reference-manual/spi/description/readiness/) 扩展示例
 
 ### 启动检测
 
 对于 startupProbe 启动检测，目前 Dubbo3 默认提供了一个检测维度，即是在所有启动流程（接口暴露、注册中心写入等）均结束后返回已就绪状态。
 
-关于 [startup 启动探针](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/startup/) 扩展示例
+关于 [startup 启动探针](/en/overview/mannual/java-sdk/reference-manual/spi/description/startup/) 扩展示例
 
 ### 参考示例
 ```yaml

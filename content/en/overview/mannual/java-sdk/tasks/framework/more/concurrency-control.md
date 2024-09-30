@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/concurrency-control/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/concurrency-control/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/concurrency-control/
 description: Dubbo 中的并发控制
 linkTitle: 并发控制
 title: 并发控制
@@ -75,7 +75,7 @@ weight: 28
 </dubbo:service>
 ```
 
-> 如果 `<dubbo:service>` 和 `<dubbo:reference>` 都配了actives，`<dubbo:reference>` 优先，参见：[配置的覆盖策略](/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle/)。
+> 如果 `<dubbo:service>` 和 `<dubbo:reference>` 都配了actives，`<dubbo:reference>` 优先，参见：[配置的覆盖策略](/en/overview/mannual/java-sdk/reference-manual/config/principle/)。
 
 ### Load Balance 均衡
 

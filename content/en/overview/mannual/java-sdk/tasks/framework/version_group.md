@@ -1,14 +1,14 @@
 ---
 aliases:
-    - /zh/overview/tasks/develop/version_group/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/service-group/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-versions/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/version_group/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/group-merger/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/service-group/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/service-version/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-versions/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/group-merger/
+    - /en/overview/tasks/develop/version_group/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/service-group/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/multi-versions/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/version_group/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/group-merger/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/service-group/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/service-version/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-versions/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/group-merger/
 description: ""
 linkTitle: 版本与分组
 title: 版本与分组
@@ -244,7 +244,7 @@ reference3.setGroup("*");
 ```
 ### 指定合并策略
 
-指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称 [合并结果扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/merger)
+指定合并策略，缺省根据返回值类型自动匹配，如果同一类型有两个合并器时，需指定合并器的名称 [合并结果扩展](/en/overview/mannual/java-sdk/reference-manual/spi/description/merger)
 
 ```xml
 <dubbo:reference interface="com.xxx.MenuService" group="*">

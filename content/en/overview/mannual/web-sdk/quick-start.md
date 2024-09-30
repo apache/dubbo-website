@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/rust-sdk/quick-start/
-    - /zh-cn/docs3-v2/rust-sdk/quick-start/
+    - /en/docs3-v2/rust-sdk/quick-start/
+    - /en/docs3-v2/rust-sdk/quick-start/
 description: 使用 dubbo-js 开发运行在浏览器页面的微服务。
 linkTitle: Web浏览器访问Dubbo服务
 title: Web 浏览器访问 Dubbo 服务

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/deploy/
-    - /zh-cn/overview/tasks/deploy/
+    - /en/overview/tasks/deploy/
+    - /en/overview/tasks/deploy/
 description: "学习在 Kubernetes、Service Mesh（Kubernetes Service）、虚拟机（Zookeeper、Nacos）等场景部署 Dubbo 应用。"
 feature:
     description: |

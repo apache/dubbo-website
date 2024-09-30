@@ -18,7 +18,7 @@ server.WithTpsLimiterXxx() // 设置限流相关阈值，请根据具体方法�
 
 Dubbo-go 内置限流策略相对简单，对于一些更复杂的场景，我们建议通过使用 Sentinel 等专业的第三方框架可以实现更丰富、更灵活的限流策略。
 
-可在此查看 [本示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/filter/sentinel)，也可以参考 [Dubbo+Sentinel 的 Java 示例](/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/sentinel/) 获得更多灵感。
+可在此查看 [本示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/filter/sentinel)，也可以参考 [Dubbo+Sentinel 的 Java 示例](/en/overview/mannual/java-sdk/tasks/rate-limit/sentinel/) 获得更多灵感。
 
 ## Provider 限流
 

@@ -1,34 +1,34 @@
 ---
-title: 如何安装 Protocol Buffer Compiler
-linkTitle: Protoc安装
-description: 如何安装 protocol buffer 编译器。
+title: How to Install Protocol Buffer Compiler
+linkTitle: Protoc Installation
+description: How to install the protocol buffer compiler.
 protoc-version: 3.15.8
 toc_hide: true
 type: docs
 ---
 
-虽然不是强制性的，但 Apache Dubbo 支持使用 [Protocol Buffers (proto3版本)](https://protobuf.dev/programming-guides/proto3) 作为服务定义和序列化协议。
+Although not mandatory, Apache Dubbo supports using [Protocol Buffers (proto3)](https://protobuf.dev/programming-guides/proto3) for service definitions and serialization protocols.
 
-在 Protocol buffer 体系下，我们使用 `.proto` 文件定义服务和消息体格式，使用 `protoc` 编译器编译 `.proto` 文件，你可以使用以下几种方式安装 `protoc`。
+Within the protocol buffer framework, we use `.proto` files to define services and message body formats, and the `protoc` compiler to compile `.proto` files. You can install `protoc` in the following ways.
 
-### 使用包管理器安装
+### Installing via Package Manager
 
-在 Linux 或 macOS 环境下，你可以使用包管理器安装 `protoc`。
+On Linux or macOS, you can use a package manager to install `protoc`.
 
 {{% alert title="Warning" color="warning" %}}
-**一定要注意检查所安装 `protoc` 的版本！** 检查方法如下文说述，因为有时一些包管理器安装的 `protoc` 版本是严重过时的。
+**Be sure to check the installed version of `protoc`!** This can be done as described below, since some package managers might install severely outdated versions of `protoc`.
 
-下一节所展示的 [使用预先编译好的二进制文件安装](#binary-install) 可以确保你安装正确的 `protoc` 版本。
+The [Binary Installation](#binary-install) method mentioned in the next section ensures that you install the correct version of `protoc`.
 {{% /alert %}}
 
-- Linux，使用 `apt` 或者 `apt-get`，比如：
+- Linux, using `apt` or `apt-get`, for example:
 
   ```sh
   $ apt install -y protobuf-compiler
   $ protoc --version  # Ensure compiler version is 3+
   ```
 
-- MacOS，使用 [Homebrew](https://brew.sh):
+- macOS, using [Homebrew](https://brew.sh):
 
   ```sh
   $ brew install protobuf
@@ -37,33 +37,33 @@ type: docs
 
 <a name="binary-install"></a>
 
-### 使用预先编译好的二进制文件安装（适用任何操作系统）
+### Binary Installation (for any OS)
 
-参考以下步骤安装 [最新版本](https://protobuf.dev/downloads#release-packages) 的 protoc 二进制包：
+Follow these steps to install the [latest version](https://protobuf.dev/downloads#release-packages) of the `protoc` binary package:
 
- 1. 根据你的操作系统类型，手动下载 [github.com/google/protobuf/releases](https://github.com/google/protobuf/releases) 二进制文件
-    (`protoc-<version>-<os>-<arch>.zip`)，你也可以使用以下命令直接下载：
+ 1. Manually download the binary files for your OS from [github.com/google/protobuf/releases](https://github.com/google/protobuf/releases) 
+    (`protoc-<version>-<os>-<arch>.zip`), or use the following commands to download directly:
 
     ```sh
     $ PB_REL="https://github.com/protocolbuffers/protobuf/releases"
     $ curl -LO $PB_REL/download/v{{< param protoc-version >}}/protoc-{{< param protoc-version >}}-linux-x86_64.zip
     ```
 
- 2. 将文件解压到`$HOME/.local` 目录，或者任意你想要的目录也可以。比如：
+ 2. Unzip the file to the `$HOME/.local` directory, or any directory of your choice. For example:
 
     ```sh
     $ unzip protoc-{{< param protoc-version >}}-linux-x86_64.zip -d $HOME/.local
     ```
 
- 3. 修改系统 `PATH` 路径，将 `protoc` 加入可执行文件路径。比如：
+ 3. Modify the system `PATH` to include the `protoc` executable. For example:
 
     ```sh
     $ export PATH="$PATH:$HOME/.local/bin"
     ```
 
-### 其他安装方法
+### Other Installation Methods
 
-如果你想要自行编译源码安装，或者想要安装老版本的二进制包。请参考 [下载 Protocol Buffers](https://protobuf.dev/downloads)
+If you want to compile from the source yourself, or if you want to install an older version of the binary package, please refer to [Download Protocol Buffers](https://protobuf.dev/downloads)
 
 [download]: https://protobuf.dev/downloads
 [github.com/google/protobuf/releases]: https://github.com/google/protobuf/releases
@@ -71,3 +71,4 @@ type: docs
 [latest release]: https://protobuf.dev/downloads#release-packages
 [pb]: https://developers.google.com/protocol-buffers
 [proto3]: https://protobuf.dev/programming-guides/proto3
+

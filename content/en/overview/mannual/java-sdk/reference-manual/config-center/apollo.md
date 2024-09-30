@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config-center/apollo/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/apollo/
-    - /zh-cn/overview/what/ecosystem/config-center/apollo/
+    - /en/docs3-v2/java-sdk/reference-manual/config-center/apollo/
+    - /en/docs3-v2/java-sdk/reference-manual/config-center/apollo/
+    - /en/overview/what/ecosystem/config-center/apollo/
 description: Apollo 配置中心的基本使用和工作原理。
 linkTitle: Apollo
 title: Apollo

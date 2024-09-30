@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/what/ecosystem/serialization/fastjson2/
-    - /zh-cn/overview/what/ecosystem/serialization/fastjson2/
+    - /en/overview/what/ecosystem/serialization/fastjson2/
+    - /en/overview/what/ecosystem/serialization/fastjson2/
 description: "本文介绍 Fastjson2 序列化"
 linkTitle: Fastjson2
 title: Fastjson2

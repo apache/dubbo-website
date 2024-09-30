@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
-    - /zh-cn/overview/what/ecosystem/config-center/zookeeper/
+    - /en/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
+    - /en/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
+    - /en/overview/what/ecosystem/config-center/zookeeper/
 description: Zookeeper 配置中心的基本使用和工作原理。
 linkTitle: Zookeeper
 title: Zookeeper
@@ -12,8 +12,8 @@ weight: 2
 
 
 ## 1 前置条件
-* 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/starter/)
-* 安装并启动 [Zookeeper](/zh-cn/overview/reference/integrations/zookeeper/)
+* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
+* 安装并启动 [Zookeeper](/en/overview/reference/integrations/zookeeper/)
 
 ## 2 使用说明
 在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/configcenter/dubbo-samples-configcenter-annotation)
@@ -21,7 +21,7 @@ weight: 2
 ### 2.1 增加 Maven 依赖
 如果项目已经启用 Zookeeper 作为注册中心，则无需增加任何额外配置。
 
-如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-增加-maven-依赖)。
+如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-增加-maven-依赖)。
 
 ### 2.2 启用 Zookeeper 配置中心
 ```xml

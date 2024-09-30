@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/metadata-center/redis/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/metadata-center/redis/
-    - /zh-cn/overview/what/ecosystem/metadata-center/redis/
+    - /en/docs3-v2/java-sdk/reference-manual/metadata-center/redis/
+    - /en/docs3-v2/java-sdk/reference-manual/metadata-center/redis/
+    - /en/overview/what/ecosystem/metadata-center/redis/
 description: "更多元数据中心扩展实现，包括 redis、etcd、consul 等"
 linkTitle: 扩展实现
 title: 更多元数据中心扩展实现

@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/concepts-and-architecture/code-architecture/
-    - /zh-cn/docs3-v2/java-sdk/concepts-and-architecture/code-architecture/
-    - /zh-cn/overview/mannual/java-sdk/concepts-and-architecture/code-architecture/
+    - /en/docs3-v2/java-sdk/concepts-and-architecture/code-architecture/
+    - /en/docs3-v2/java-sdk/concepts-and-architecture/code-architecture/
+    - /en/overview/mannual/java-sdk/concepts-and-architecture/code-architecture/
 description: 本文将介绍 Dubbo 代码架构。
 linkTitle: 代码架构
 title: 代码架构

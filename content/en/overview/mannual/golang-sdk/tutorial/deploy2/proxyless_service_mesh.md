@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/proxyless_service_mesh/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/proxyless_service_mesh/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/proxyless_service_mesh/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/proxyless_service_mesh/
 description: 无代理服务网格
 keywords: 无代理服务网格
 title: 无代理服务网格
@@ -84,7 +84,7 @@ Dubbo-go 拥有路由能力，通过 xds 协议客户端从 istiod 订阅路由�
 
 dubbogo-cli 是 Apache/dubbo-go 生态的子项目，为开发者提供便利的应用模板创建、工具安装、接口调试等功能，以提高用户的研发效率。
 
-详情可以参阅 [【dubbogo-cli 工具】](/zh-cn/overview/mannual/golang-sdk/refer/use_dubbogo_cli/)
+详情可以参阅 [【dubbogo-cli 工具】](/en/overview/mannual/golang-sdk/refer/use_dubbogo_cli/)
 
 ## 3. Dubbo-go-Mesh 的优势
 

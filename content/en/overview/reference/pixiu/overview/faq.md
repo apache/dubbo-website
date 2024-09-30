@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/overview/faq/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/overview/faq/
-    - /zh-cn/overview/reference/pixiu/overview/faq/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/overview/faq/
+    - /en/docs3-v2/dubbo-go-pixiu/overview/faq/
+    - /en/docs3-v2/dubbo-go-pixiu/overview/faq/
+    - /en/overview/reference/pixiu/overview/faq/
+    - /en/overview/mannual/dubbo-go-pixiu/overview/faq/
 description: Pixiu 常见问题
 linkTitle: Pixiu 常见问题
 title: Pixiu 常见问题

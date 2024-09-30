@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/overview/tasks/traffic-management/accesslog/
-    - /zh-cn/overview/tasks/traffic-management/accesslog/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/accesslog/
+    - /en/overview/tasks/traffic-management/accesslog/
+    - /en/overview/tasks/traffic-management/accesslog/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/accesslog/
 description: ""
 linkTitle: 访问日志
 title: 通过动态开启访问日志跟踪服务调用情况

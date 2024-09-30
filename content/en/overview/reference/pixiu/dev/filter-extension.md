@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/dev/filter-extension/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/filter-extension/
-    - /zh-cn/overview/reference/pixiu/dev/filter-extension/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/dev/filter-extension/
+    - /en/docs3-v2/dubbo-go-pixiu/dev/filter-extension/
+    - /en/docs3-v2/dubbo-go-pixiu/dev/filter-extension/
+    - /en/overview/reference/pixiu/dev/filter-extension/
+    - /en/overview/mannual/dubbo-go-pixiu/dev/filter-extension/
 description: Pixiu Filter体系介绍
 linkTitle: Pixiu Filter体系介绍
 title: Pixiu Filter体系介绍

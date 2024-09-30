@@ -1,10 +1,10 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/preface/
-    - /zh-cn/docs3-v2/golang-sdk/preface/
-    - /zh-cn/overview/mannual/golang-sdk/preface/
-    - /zh-cn/overview/mannual/golang-sdk/preface/concept/
-    - /zh-cn/overview/mannual/golang-sdk/preface/concept/protocol/
+    - /en/docs3-v2/golang-sdk/preface/
+    - /en/docs3-v2/golang-sdk/preface/
+    - /en/overview/mannual/golang-sdk/preface/
+    - /en/overview/mannual/golang-sdk/preface/concept/
+    - /en/overview/mannual/golang-sdk/preface/concept/protocol/
 description: Dubbo-go 框架
 linkTitle: 框架介绍
 title: 框架介绍
@@ -47,7 +47,7 @@ dubbo-go 总体上遵循 `框架内核+插件` 的的设计理念，左侧的 `�
 
 ### RPC
 #### Triple
-基于 Dubbo 定义的 [triple 协议](/zh-cn/overview/reference/protocols/triple/)，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。作为 Apache Dubbo 多语言 RPC体系的一环，dubbo-go 提供了 triple 协议的完整实现，支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。triple 协议让 dubbo-go 可以：
+基于 Dubbo 定义的 [triple 协议](/en/overview/reference/protocols/triple/)，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。作为 Apache Dubbo 多语言 RPC体系的一环，dubbo-go 提供了 triple 协议的完整实现，支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。triple 协议让 dubbo-go 可以：
 * **作为后端服务与 Dubbo 其他语言实现互通**
 * **接收浏览器等标准 http 工具发起的请求**
 * **与标准的 gRPC 体系互通**
@@ -102,7 +102,7 @@ Dubbo-go 支持的注册中心类型如下，具体配置方式请参考使用�
 | Polaris      | polaris                   |
 
 #### 可观测
-dubbo-go 的可视化指标采集遵循 Apache Dubbo 定义的 [metrics 指标规范](/zh-cn/overview/reference/Metrics/standard_metrics/)。在实现 metrics 指标采集后，接下来就是如何可视化展示的问题，当前最常用的式导出到 Prometheus 并通过 Grafana 实现数据可视化展示。
+dubbo-go 的可视化指标采集遵循 Apache Dubbo 定义的 [metrics 指标规范](/en/overview/reference/Metrics/standard_metrics/)。在实现 metrics 指标采集后，接下来就是如何可视化展示的问题，当前最常用的式导出到 Prometheus 并通过 Grafana 实现数据可视化展示。
 
 具体启用方式请参考使用手册中的 [可视化观测](../tutorial/observability/)。
 
@@ -113,8 +113,8 @@ dubbo-go 支持通过 Open Telemetry 接入 Zipkin、Jaeger、Skywalking 等全�
 
 #### 流量管控
 dubbo-go 实现的流量治理规则完全遵循 Dubbo 框架设计的流量治理能力，可以通过以下链接了解更多详情：
-* [Dubbo 流量治理规则设计](/zh-cn/overview/core-features/traffic/)
-* [Dubbo 流量治理示例任务](/zh-cn/overview/tasks/traffic-management/)
+* [Dubbo 流量治理规则设计](/en/overview/core-features/traffic/)
+* [Dubbo 流量治理示例任务](/en/overview/tasks/traffic-management/)
 
 
 

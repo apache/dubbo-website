@@ -1,6 +1,6 @@
 ---
 aliases:
-  - /zh-cn/overview/mannual/golang-sdk/tutorial/develop/features/custom-logger/
+  - /en/overview/mannual/golang-sdk/tutorial/develop/features/custom-logger/
 description: logger
 title: 配置和管理框架日志
 linkTitle: 框架日志

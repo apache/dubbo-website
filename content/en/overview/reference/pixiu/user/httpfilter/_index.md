@@ -1,12 +1,12 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/httpfilter/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/httpfilter/
-    - /zh-cn/overview/reference/pixiu/user/httpfilter/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/
-description: Http Filter 介绍
-linkTitle: Http Filter 介绍
-title: Http Filter 介绍
+    - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/
+    - /en/overview/reference/pixiu/user/httpfilter/
+    - /en/overview/manual/dubbo-go-pixiu/user/httpfilter/
+description: Introduction to Http Filter
+linkTitle: Introduction to Http Filter
+title: Introduction to Http Filter
 type: docs
 weight: 60
----
+###
+

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/bookinfo-proxyless/traffic/
-    - /zh-cn/overview/tasks/mesh/bookinfo-proxyless/traffic/
+    - /en/overview/tasks/mesh/bookinfo-proxyless/traffic/
+    - /en/overview/tasks/mesh/bookinfo-proxyless/traffic/
 description: Envoy Traffic Management Bookinfo 示例。
 linkTitle: Traffic Management
 no_list: true

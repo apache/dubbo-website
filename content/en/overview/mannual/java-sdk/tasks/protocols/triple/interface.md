@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
 description: "Triple 协议完全兼容 gRPC，但易用性更好不绑定 Protobuf，你可以继续使用 `Java 接口` 直接定义服务。"
 linkTitle: Java接口方式
 title: 使用 Java 接口方式开发 triple 通信服务
@@ -145,4 +145,4 @@ Protobuf 模式固然有一定的性能优势，但易用性与使用成本也�
 由于 gRPC 仅支持 protobuf 模式，因此本文介绍的 `接口+triple` 的模式无法与谷歌官方原生的 gRPC 协议互调。
 
 ### 前端流量接入
-对于来自前端的 HTTP 流量（比如浏览器或 web 应用），要想通过网关接入 triple，就要走 triple 内置的 `application/json` 模式发起调用，具体请参见[【使用教程-HTTP网关接入】](/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/)。
+对于来自前端的 HTTP 流量（比如浏览器或 web 应用），要想通过网关接入 triple，就要走 triple 内置的 `application/json` 模式发起调用，具体请参见[【使用教程-HTTP网关接入】](/en/overview/mannual/java-sdk/tasks/gateway/triple/)。

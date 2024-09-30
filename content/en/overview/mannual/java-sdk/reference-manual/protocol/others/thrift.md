@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/thrift/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/thrift/
 description: Thrift 协议
 linkTitle: Thrift 协议
 title: Thrift 协议

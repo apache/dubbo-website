@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/auth/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/security/auth/
 description: 了解 Dubbo 服务鉴权
 linkTitle: 服务鉴权
 title: 服务鉴权

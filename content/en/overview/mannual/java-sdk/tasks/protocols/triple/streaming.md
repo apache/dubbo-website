@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
 description: "演示了服务端流、双向流等 Streaming 流式通信的基本使用方法。"
 linkTitle: Streaming流式通信
 title: Streaming 通信
@@ -80,7 +80,7 @@ service Greeter{
 * `serverStream(GreeterRequest) returns (stream GreeterReply)` 服务端流
 
 ### 生成代码
-接下来，我们需要从 .proto 服务定义生成 Dubbo 客户端和服务器接口。protoc dubbo 插件可以帮助我们生成需要的代码，在使用 Gradle 或 Maven 时，protoc 构建插件可以生成必要的代码作为构建的一部分。具体 maven 配置及代码生成步骤我们在 [上一节](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 中有具体的描述。
+接下来，我们需要从 .proto 服务定义生成 Dubbo 客户端和服务器接口。protoc dubbo 插件可以帮助我们生成需要的代码，在使用 Gradle 或 Maven 时，protoc 构建插件可以生成必要的代码作为构建的一部分。具体 maven 配置及代码生成步骤我们在 [上一节](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 中有具体的描述。
 
 target/generated-sources/protobuf/java/org/apache/dubbo/samples/tri/streaming/ 目录中可以发现如下生成代码，其中我们将重点讲解 `DubboGreeterTriple.java`：
 

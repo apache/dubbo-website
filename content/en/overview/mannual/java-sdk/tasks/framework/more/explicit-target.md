@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/explicit-target/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/explicit-target/
 description: Dubbo 中点对点的直连方式
 linkTitle: 直连提供者
 title: 直连提供者

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/
 description: 本文主要介绍优雅下线的基本步骤和使用说明
 keywords: 优雅下线
 title: 优雅下线

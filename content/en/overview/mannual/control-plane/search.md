@@ -1,7 +1,7 @@
 ---
 aliases:
-  - /zh/overview/reference/admin/search/
-  - /zh-cn/overview/reference/admin/search/
+  - /en/overview/reference/admin/search/
+  - /en/overview/reference/admin/search/
 description: ""
 linkTitle: 文档查询
 title: Admin 服务查询

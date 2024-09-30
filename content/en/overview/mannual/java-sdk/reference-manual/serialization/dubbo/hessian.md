@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/what/ecosystem/serialization/hessian/
-    - /zh-cn/overview/what/ecosystem/serialization/hessian/
+    - /en/overview/what/ecosystem/serialization/hessian/
+    - /en/overview/what/ecosystem/serialization/hessian/
 description: "本文介绍 Hessian 序列化"
 linkTitle: Hessian
 title: Hessian

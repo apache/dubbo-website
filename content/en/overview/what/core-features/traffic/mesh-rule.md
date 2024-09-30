@@ -1,34 +1,31 @@
 ---
 type: docs
-title: "Mesh 路由规则"
-linkTitle: "Mesh 路由"
+title: "Mesh Routing Rules"
+linkTitle: "Mesh Routing"
 weight: 50
 description: ""
 ---
 
-Dubbo Mesh 路由规则是基于 Istio 的 VirtualService、DestinationRule 改造而来，总体思路和格式可以参考 Istio 流量管控规则参考手册：[Istio VirtualService](https://istio.io/latest/docs/reference/config/networking/virtual-service/) 和 [Istio DestinationRule](https://istio.io/latest/docs/reference/config/networking/destination-rule/)
+Dubbo Mesh routing rules are based on Istio's VirtualService and DestinationRule modifications. The overall idea and format can refer to Istio's traffic control rules reference manual: [Istio VirtualService](https://istio.io/latest/docs/reference/config/networking/virtual-service/) and [Istio DestinationRule](https://istio.io/latest/docs/reference/config/networking/destination-rule/)
 
-本文描述了 Dubbo Mesh 路由规则的设计原理，以及它和 Istio 规则的差异等。参考链接：https://www.yuque.com/docs/share/c132d5db-0dcb-487f-8833-7c7732964bd4?#。
+This article describes the design principles of Dubbo Mesh routing rules, as well as the differences between them and Istio rules. Reference link: https://www.yuque.com/docs/share/c132d5db-0dcb-487f-8833-7c7732964bd4?#.
 
-
-### 基本思想
-基于路由链，采用Pipeline的处理方式，如下图所示：
+### Basic Idea
+Based on the routing chain, the Pipeline processing method is adopted, as shown in the figure below:
 
 ![route-rule1.png](/imgs/user/route-rule1.png)
 
-
-可以把路由链的逻辑简单的理解为 target = rn(...r3(r2(r1(src))))。对于每一个 router 内部的逻辑，可以抽象为输入地址 addrs-in 与 router 中按全量地址 addrs-all 实现切分好的 n 个互不相交的地址池 addrs-pool-1 ... addrs-pool-n 按实现定义好的规则取交集作为输出 addrs-out。以此类推，完成整个路由链的计算。
+The logic of the routing chain can be simply understood as target = rn(...r3(r2(r1(src)))). For the internal logic of each router, it can be abstracted as the input address addrs-in and the n mutually exclusive address pools addrs-pool-1 ... addrs-pool-n that are split according to the full address addrs-all in the router. The intersection is taken as the output addrs-out according to the rules defined by the implementation. By analogy, the calculation of the entire routing chain is completed.
 
 ![route-rule2.png](/imgs/user/route-rule2.png)
 
-另外一方面，如果 router(n) 需要执行 fallback 逻辑的时候，那么需要经过 router(n) 就应该决定好 fallback 逻辑
+On the other hand, if router(n) needs to execute fallback logic, then after passing through router(n), the fallback logic should be determined.
 
+### Fallback Handling Principles
 
-### fallback 处理原则
+Due to multiple conditional components between multiple routers, it is easy for the address to be filtered out. In this case, we need to perform fallback handling to ensure that the business can smoothly find a valid address under the premise of correctness.
 
-由于多个 router 之间多个条件组件之后，很容易出现地址被筛选为空的情况，那么我们需要针对这情况进行 fallback 处理，保证业务在正确性的前提下，能够顺利找到有效地址。
-
-首先我们看一下以下规则
+First, let's look at the following rule
 
 ```yaml
 apiVersion: service.dubbo.apache.org/v1alpha1
@@ -109,11 +106,11 @@ spec:
 
 ```
 
-我们以脚本路由为例，这个脚本路由的匹配条件是遵循一个原则的，就是匹配的范围是从精确到广泛的一个过程，在这个示例来说，就是 sayHello(string)参数 -> sayHello 方法 -> 接口级路由 的一个匹配查找过程。
+Taking script routing as an example, the matching condition of this script routing follows a principle, which is that the matching range is a process from precise to broad. In this example, it is a matching search process from the sayHello(string) parameter -> sayHello method -> interface-level routing.
 
-那么如果我们已经满足某个条件，但是选到的 subset 地址为空，我们将如何进行 fallback 处理呢？
+So if we have met a certain condition but the selected subset address is empty, how do we perform fallback handling?
 
-以匹配 sayHello(string)参数 条件为例，我们选择到的是 v1 subset,如果是空，我们可以向上一级是寻找地址，也就是方法级去寻找地址，具体的配置为下
+Taking the matching sayHello(string) parameter condition as an example, we select the v1 subset. If it is empty, we can look for the address at the next level, which is to look for the address at the method level. The specific configuration is as follows
 
 ```yaml
        - name: sayHello-String-method-route
@@ -138,10 +135,9 @@ spec:
                   subset: v3
 ```
 
-此时我们选到的地址是 v2 方法级地址，如果 v2 还是没有地址，根据规则的定义，我们是可以 fallback 到 v3 接口级。
+At this time, the address we selected is the v2 method-level address. If v2 still has no address, according to the definition of the rule, we can fallback to the v3 interface level.
 
-假设我们有一个方法匹配时，如果没有地址，需要不进行 fallback，直接报错，我们可以这样配置
-
+Suppose we have a method match, if there is no address, we need not to perform fallback and directly report an error. We can configure it like this
 
 ```yaml
 apiVersion: service.dubbo.apache.org/v1alpha1
@@ -230,22 +226,21 @@ spec:
       sigma.ali/mg: v3-host
 ```
 
-从这个规则我们看出来匹配到 some-method  条件时对应的是 v4 subset，那么 v4 为空时，因为没有配置 fallback ，此时会直接报错
+From this rule, we can see that when matching the some-method condition, the corresponding v4 subset is selected. When v4 is empty, because there is no fallback configured, an error will be reported directly.
 
-#### fallback 处理原则总结
+#### Summary of Fallback Handling Principles
 
-- 我们应该在 VirtualService route 中配置好 Destination 的 fallback 处理逻辑
-- 在 fallback subset 时，如果对应的 subset 也配置有 fallback subset 时，也应递归处理；fallback subset 之间的关系也应该是从具体到广泛
-- 我们在编写匹配条件时，应该遵循从 具体条件到广泛条件 的原则
+- We should configure the fallback handling logic of the Destination in the VirtualService route.
+- When falling back to a subset, if the corresponding subset is also configured with a fallback subset, it should also be handled recursively; the relationship between fallback subsets should also be from specific to broad.
+- When writing matching conditions, we should follow the principle of from specific conditions to broad conditions.
 
-### RouteChain 的组装模式 (目前未实现)
+### RouteChain Assembly Mode (Not yet implemented)
 
 ![route-rule3.png](/imgs/user/route-rule3.png)
 
+As we can see in the above figure, in the routing process, we use the Pipeline processing method. The Router nodes in the Pipeline are sequential, and each Router has a unique corresponding VirtualService and **multiple** corresponding DestinationRules for description.
 
-我们看到上面的图，在路由的过程当中，我们是 Pipeline 的处理方式，Pipeline 的 Router 节点存在顺序，并且每个 Router 都有一个唯一对应的 VirtualService 和 **多个** 相应的 DestinationRule 进行描述。
-
-以 Nacos 上存着的路由规则配置为例，配置的格式如下：
+Taking the routing rule configuration stored in Nacos as an example, the configuration format is as follows:
 
 ```yaml
 DataId: Demo.rule.yaml
@@ -270,17 +265,17 @@ DestinationRule C
 ...
 ```
 
-`VirtualService A` 与 `DestinationRule A1` 、`DestinationRule A2` 组成一个 Router A，`VirtualService B` 与 `DestinationRule B` 组成 Router B,以此类推，完成整个 router 链的组装。
+`VirtualService A` and `DestinationRule A1`, `DestinationRule A2` form a Router A, `VirtualService B` and `DestinationRule B` form Router B, and so on, completing the assembly of the entire router chain.
 
-### 示例：按比例流量路由规则
+### Example: Proportional Traffic Routing Rules
 
-> 注意，虽然接下来的规则和 Istio 的 VirtualService、DestinationRule 很像，但工作过程和具体规则和 Istio 还是有一些差异，Dubbo 只是参考了 Istio 的设计。如果您想接入原生的 Istio 服务网格治理体系，请参考下文 [接入服务网格流量治理](#接入服务网格流量治理)。
+> Note, although the following rules are very similar to Istio's VirtualService and DestinationRule, there are some differences in the working process and specific rules compared to Istio. Dubbo only references Istio's design. If you want to integrate with the native Istio service mesh governance system, please refer to [Integrating Service Mesh Traffic Governance](#接入服务网格流量治理).
 
-在一些场景下，我们需要将相同属性的流量按比例的分发到不同的实例分组。一个典型的示例场景是 A/B 测试，比如我们需要将 20% 流量转发到服务新版本 v2 的实例，以验证新版本的稳定性，或者是将公司内部的一部分用户导流到新版本 v2 的实例进行测试验证。另一个应用场景是实现服务的金丝雀发布，通过逐步调整流量分配比例值，使得新版本的流量逐步提升并最终将全部流量完全迁移到新版本之上。
+In some scenarios, we need to distribute traffic with the same attributes proportionally to different instance groups. A typical example scenario is A/B testing, where we need to forward 20% of the traffic to the new version v2 of the service to verify the stability of the new version, or to direct a portion of internal company users to the new version v2 for testing and verification. Another application scenario is to achieve canary releases of services, gradually adjusting the traffic distribution ratio so that the new version's traffic gradually increases and eventually fully migrates all traffic to the new version.
 
-#### 按比例流量规则示例
+#### Example of Proportional Traffic Rules
 
-以下示例会将访问服务 `org.apache.dubbo.demo.DetailService` 特定方法 `getDetail` 的所有请求按比例进行转发。
+The following example will proportionally forward all requests to the `getDetail` method of the service `org.apache.dubbo.demo.DetailService`.
 
 ```yaml
 ...
@@ -324,9 +319,9 @@ spec:
 
 ##### Dubbo VirtualService
 
-> 此部分完全可参考 Istio VirtualService 语义，两者几乎完全相同，Dubbo 增加了 `dubbo` 协议标签（对应 http 协议位置）并对 `match` 条件进行了丰富。
+> This part can fully refer to the semantics of Istio VirtualService, as they are almost identical. Dubbo adds the `dubbo` protocol label (corresponding to the http protocol position) and enriches the `match` conditions.
 
-`match` 条件设置了流量规则只对访问服务 "org.apache.dubbo.demo.DetailService" 的 `getDetail` 方法的请求有效。
+The `match` condition sets the traffic rule to be effective only for requests to the `getDetail` method of the service "org.apache.dubbo.demo.DetailService".
 
 ```yaml
 match:
@@ -338,7 +333,7 @@ match:
       exact: "getDetail"
 ```
 
-以下 `route` 指定匹配后流量的目标实例子集，实例子集 `details-v1` `details-v2` 是通过下面的 DestinationRule 定义的。对于没有匹配的流量，则默认可以访问任何实例，不会做任何过滤。
+The following `route` specifies the target instance subsets for the matched traffic. The instance subsets `details-v1` and `details-v2` are defined through the DestinationRule below. For unmatched traffic, it can access any instance by default without any filtering.
 
 ```yaml
 route:
@@ -352,9 +347,9 @@ route:
 
 ##### Dubbo DestinationRule
 
-> 此部分完全可参考 Istio DestinationRule 语义，两者完全相同。
+> This part can fully refer to the semantics of Istio DestinationRule, as they are identical.
 
-以下规则通过匹配 `detail_version` 值将应用 details 划分为两个部署版本 `v1` 和 `v2`，分别命名为 `deatils-v1` 和 `details-v2`，同时 `deatils-v1` 和 `details-v2` 将成为 Dubbo VirtualService 的流量转发目标对象。
+The following rule divides the application details into two deployment versions `v1` and `v2` by matching the `detail_version` value, named `details-v1` and `details-v2` respectively. At the same time, `details-v1` and `details-v2` will become the traffic forwarding target objects of Dubbo VirtualService.
 
 ```yaml
 subsets:
@@ -366,8 +361,6 @@ subsets:
      detail_version: v2 # 'version' is a reserved key in Dubbo, so must not be used.
 ```
 
-> 和标签路由类似，这里牵涉到如何给您的实例打标（这里是 `detail_version`）的问题，请参考下文的 [如何给实例打标](#如何给实例打标) 一节。
+> Similar to label routing, this involves how to label your instances (here it is `detail_version`). Please refer to the section [How to Label Instances](#如何给实例打标) below.
 
-除了以上介绍的与 Istio 流量规则很相似的功能之外，Dubbo 的 VirtualService、DestinationRule 还可以实现方法参数路由等 Istio 规则不能做到的事情，具体查看 [参考手册]()。
-
-
+In addition to the functions introduced above that are very similar to Istio's traffic rules, Dubbo's VirtualService and DestinationRule can also achieve things that Istio rules cannot, such as method parameter routing. For details, see the [Reference Manual]().

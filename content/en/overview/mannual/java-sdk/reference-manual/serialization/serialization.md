@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/serialization/
 description: 在 Dubbo 中使用高效的 Java 序列化（Kryo 和 FST）
 linkTitle: 序列化概述
 title: Dubbo 序列化机制介绍
@@ -29,7 +29,7 @@ weight: 1
 
 序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。
 
-具体请查看 [参考手册 - 性能基准报告](/zh-cn/overview/mannual/java-sdk/reference-manual/performance/)。
+具体请查看 [参考手册 - 性能基准报告](/en/overview/mannual/java-sdk/reference-manual/performance/)。
 
 ## 切换序列化协议
 

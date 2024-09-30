@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
 description: 远程加载 dubbogo.yaml 配置文件
 title: 远程配置文件
 type: docs

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/registry/overview/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/registry/overview/
+    - /en/docs3-v2/java-sdk/reference-manual/registry/overview/
+    - /en/docs3-v2/java-sdk/reference-manual/registry/overview/
 description: ""
 linkTitle: 注册中心概述
 title: 注册中心概述
@@ -10,7 +10,7 @@ weight: 1
 ---
 
 
-注册中心是 Dubbo 服务治理的核心组件，Dubbo 依赖注册中心的协调实现服务（地址）发现，自动化的服务发现是微服务实现动态扩缩容、负载均衡、、流量治理的基础。Dubbo 的服务发现机制经历了 Dubbo2 时代的接口级服务发现、Dubbo3 时代的应用级服务发现，具体可参见 [服务发现机制](/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/) 解析了解具体演进过程。
+注册中心是 Dubbo 服务治理的核心组件，Dubbo 依赖注册中心的协调实现服务（地址）发现，自动化的服务发现是微服务实现动态扩缩容、负载均衡、、流量治理的基础。Dubbo 的服务发现机制经历了 Dubbo2 时代的接口级服务发现、Dubbo3 时代的应用级服务发现，具体可参见 [服务发现机制](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/) 解析了解具体演进过程。
 
 ![service-discovery](/imgs/v3/feature/service-discovery/arc.png)
 
@@ -36,7 +36,7 @@ dubbo
 3.3.0 及之后的版本可不配置注册中心。而在 3.3.0 版本之前的 Dubbo 应用必须指定注册中心配置，即使不启用注册中心也要配置（可通过设置地址为空 address='N/A' ）。
 {{% /alert %}}
 
-每个注册中心组件有自己特有的配置，可以用来控制命名空间、分组、鉴权等，具体可以参考 [registry 配置参考手册](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#registry)或通过 parameters 参数进行扩展。
+每个注册中心组件有自己特有的配置，可以用来控制命名空间、分组、鉴权等，具体可以参考 [registry 配置参考手册](/en/overview/mannual/java-sdk/reference-manual/config/properties/#registry)或通过 parameters 参数进行扩展。
 
 ## 配置中心与元数据中心
 配置中心、元数据中心是实现 Dubbo 高阶服务治理能力会依赖的组件，如流量管控规则等，相比于注册中心通常这两个组件的配置是可选的。

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/extensibility/filter/
-    - /zh-cn/overview/tasks/extensibility/filter/
+    - /en/overview/tasks/extensibility/filter/
+    - /en/overview/tasks/extensibility/filter/
 description: 在本文中，我们来了解如何扩展自定义的过滤器实现：一个可以对返回的结果进行统一的处理、验证等统一 Filter 处理器，减少对开发人员的打扰。
 linkTitle: Filter
 no_list: true

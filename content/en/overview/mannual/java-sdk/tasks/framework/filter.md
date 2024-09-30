@@ -1,10 +1,10 @@
 ---
 aliases:
-    - /zh/overview/tasks/develop/async/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/async-call/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async-call/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
+    - /en/overview/tasks/develop/async/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/async-call/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-call/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
 description: 使用 Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。
 linkTitle: Filter拦截器
 title: 使用 Filter 过滤器动态拦截请求（request）或响应（response）

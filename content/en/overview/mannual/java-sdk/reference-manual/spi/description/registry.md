@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/registry/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/registry/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/registry/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/registry/
 description: 注册中心扩展
 linkTitle: 注册中心扩展
 title: 注册中心扩展

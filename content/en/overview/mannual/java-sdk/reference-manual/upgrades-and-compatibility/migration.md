@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/migration/
+    - /en/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration/
 description: "从 dubbo2 升级到 dubbo3：涵盖 2.6.x、2.5.x、2.7.x 等版本升级。"
 linkTitle: 升级到Dubbo3
 title: 从 dubbo2 升级到 dubbo3（涵盖 2.5.x、2.6.x、2.7.x 等版本）

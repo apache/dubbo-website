@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/preface/design/app_and_interface/
-    - /zh-cn/docs3-v2/golang-sdk/preface/design/app_and_interface/
-    - /zh-cn/overview/mannual/golang-sdk/preface/design/app_and_interface/
+    - /en/docs3-v2/golang-sdk/preface/design/app_and_interface/
+    - /en/docs3-v2/golang-sdk/preface/design/app_and_interface/
+    - /en/overview/mannual/golang-sdk/preface/design/app_and_interface/
 description: Dubbo的应用和接口
 keywords: 基本概念
 title: Dubbo的应用和接口

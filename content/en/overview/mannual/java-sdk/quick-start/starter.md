@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config/overview/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/overview/
-    - /zh-cn/overview/mannual/java-sdk/quick-start/spring-boot/
+    - /en/docs3-v2/java-sdk/reference-manual/config/overview/
+    - /en/docs3-v2/java-sdk/reference-manual/config/overview/
+    - /en/overview/mannual/java-sdk/quick-start/spring-boot/
 description: 创建基于Spring Boot的Dubbo应用。
 linkTitle: 创建基于Spring Boot的Dubbo应用
 title: 创建基于Spring Boot的微服务应用

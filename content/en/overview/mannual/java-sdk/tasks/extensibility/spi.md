@@ -6,7 +6,7 @@ type: docs
 weight: 1
 ---
 
-下面以 `RPC 协议插件` 为例，说明如何利用 Dubbo 提供的 SPI 插件提供一个自定义的 RPC 协议实现。如果想了解 SPI 机制的工作原理以及框架内置的 SPI 扩展点列表，请查看 [参考手册 - SPI扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/overview)。
+下面以 `RPC 协议插件` 为例，说明如何利用 Dubbo 提供的 SPI 插件提供一个自定义的 RPC 协议实现。如果想了解 SPI 机制的工作原理以及框架内置的 SPI 扩展点列表，请查看 [参考手册 - SPI扩展](/en/overview/mannual/java-sdk/reference-manual/spi/overview)。
 
 ## 1. 提供 SPI 插件实现类
 提供一个 Java 类实现 `org.apache.dubbo.rpc.Protocol` 接口。

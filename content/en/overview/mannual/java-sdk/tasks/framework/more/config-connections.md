@@ -1,13 +1,13 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/stickiness/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/lazy-connect/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/stickiness/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/lazy-connect/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/config-connections/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/config-connections/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/stickiness/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/lazy-connect/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/config-connections/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/stickiness/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/lazy-connect/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/config-connections/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/config-connections/
 description: Dubbo 中服务端和客户端的连接控制
 linkTitle: 连接控制
 title: 连接控制
@@ -57,7 +57,7 @@ weight: 29
 <dubbo:service interface="com.foo.BarService" connections="10" />
 ```
 
-如果 `<dubbo:service>` 和 `<dubbo:reference>` 都配了 connections，`<dubbo:reference>` 优先，参见：[配置的覆盖策略](/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle/)
+如果 `<dubbo:service>` 和 `<dubbo:reference>` 都配了 connections，`<dubbo:reference>` 优先，参见：[配置的覆盖策略](/en/overview/mannual/java-sdk/reference-manual/config/principle/)
 
 [^1]: 因为连接在 Server上，所以配置在 Provider 上
 [^2]: 如果是长连接，比如 Dubbo 协议，connections 表示该服务对每个提供者建立的长连接数

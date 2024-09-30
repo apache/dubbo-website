@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/migration/
-    - /zh-cn/overview/tasks/mesh/migration/
+    - /en/overview/tasks/mesh/migration/
+    - /en/overview/tasks/mesh/migration/
 description: 演示 Dubbo Mesh 如何帮助用户实现架构的平滑迁移。
 linkTitle: Dubbo2 平滑迁移
 no_list: true

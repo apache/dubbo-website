@@ -1,41 +1,36 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/listener/http/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/listener/http/
-    - /zh-cn/overview/reference/pixiu/user/listener/http/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/listener/http/
-description: Http Listener 介绍
-linkTitle: Http Listener 介绍
-title: Http Listener 介绍
+    - /en/docs3-v2/dubbo-go-pixiu/user/listener/http/
+    - /en/docs3-v2/dubbo-go-pixiu/user/listener/http/
+    - /en/overview/reference/pixiu/user/listener/http/
+    - /en/overview/mannual/dubbo-go-pixiu/user/listener/http/
+description: Introduction to Http Listener
+linkTitle: Introduction to Http Listener
+title: Introduction to Http Listener
 type: docs
 weight: 10
 ---
 
-
-
-
-
-
-Http Listener 是专门负载接收 HTTP 请求的 Listener，它可以设置 HTTP 监听的地址和端口。它可以通过如下配置进行引入。
+Http Listener is a listener specifically designed to receive HTTP requests. It can set the address and port for HTTP listening. It can be introduced through the following configuration.
 
 ```
 static_resources:
   listeners:
     - name: "net/http"
-      protocol_type: "HTTP" # 表明是引入 HTTP Listener
+      protocol_type: "HTTP" # Indicates the HTTP Listener is being introduced
       address:
         socket_address:
-          address: "0.0.0.0" # 地址
-          port: 8883 # 端口
+          address: "0.0.0.0" # Address
+          port: 8883 # Port
 ```
 
-Http Listener 的具体实现可以参考 `pkg/listener/http`。
+The specific implementation of the Http Listener can be referred to in `pkg/listener/http`.
 
-有关 HTTP Listener 的案例，可以参考：
-- HTTP to Dubbo 请求的转换，[案例](/zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/http_to_dubbo/)
-- HTTP 请求代理，[案例](/zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/http_proxy/)
+For cases related to HTTP Listener, you can refer to:
+- Conversion of HTTP to Dubbo requests, [Case](/en/overview/mannual/dubbo-go-pixiu/user/samples/http_to_dubbo/)
+- HTTP request proxy, [Case](/en/overview/mannual/dubbo-go-pixiu/user/samples/http_proxy/)
 
-目前也支持 HTTPS 协议。可以将 `protocol_type` 修改为 `HTTPS`。并且添加 `domains` 和 `certs_dir` 来指定域名和 cert 文件目录。
+Currently, the HTTPS protocol is also supported. You can change `protocol_type` to `HTTPS` and add `domains` and `certs_dir` to specify the domain and certificate file directory.
 
 ```
   listeners:
@@ -50,4 +45,5 @@ Http Listener 的具体实现可以参考 `pkg/listener/http`。
           certs_dir: $PROJECT_DIR/cert
 ```
 
-具体案例可以查看 [案例](/zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/https/)
+For specific cases, you can check [Case](/en/overview/mannual/dubbo-go-pixiu/user/samples/https/)
+

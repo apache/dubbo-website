@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/
-    - /zh-cn/docs3-v2/java-sdk/
+    - /en/docs3-v2/java-sdk/
+    - /en/docs3-v2/java-sdk/
 content:
     - 快速开始:
         - description: 快速体验 Dubbo Java 微服务开发
@@ -19,7 +19,7 @@ content:
           name: '[版本迁移指南](reference-manual/upgrades-and-compatibility/)'
     - 历史版本文档:
             - description: 历史版本文档
-              name: '[2.x 及早期版本文档](/zh-cn/docsv2.7/)'
+              name: '[2.x 及早期版本文档](/en/docsv2.7/)'
 description: Java SDK 手册
 hide_feedback: true
 hide_summary: true

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/liveness/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/liveness/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/liveness/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/liveness/
 description: Liveness 存活探针
 linkTitle: 存活探针
 title: Liveness 存活探针

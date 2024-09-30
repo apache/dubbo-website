@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/observability/tracing/
-    - /zh-cn/overview/tasks/observability/tracing/
+    - /en/overview/tasks/observability/tracing/
+    - /en/overview/tasks/observability/tracing/
 description: ""
 linkTitle: 全链路追踪
 no_list: true

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/traffic-management/
-    - /zh-cn/overview/tasks/traffic-management/
+    - /en/overview/tasks/traffic-management/
+    - /en/overview/tasks/traffic-management/
 description: 演示 Dubbo 流量治理特性的使用方式。
 linkTitle: 示例应用架构
 title: 示例应用架构
@@ -12,7 +12,7 @@ weight: 1
 此任务基于一个简单的线上商城微服务系统演示了 Dubbo 的流量管控能力。
 
 {{% alert title="注意" color="warning" %}}
-本示例展示的所有能力均基于 [Dubbo 路由规则](/zh-cn/overview/what/core-features/traffic/introduction/) 实现，如想了解具体工作原理可查看详情。
+本示例展示的所有能力均基于 [Dubbo 路由规则](/en/overview/what/core-features/traffic/introduction/) 实现，如想了解具体工作原理可查看详情。
 {{% /alert %}}
 
 

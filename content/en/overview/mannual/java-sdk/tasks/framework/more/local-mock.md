@@ -1,10 +1,10 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/local-mock/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/local-mock/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/local-mock/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/local-mock/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/local-mock/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/service-downgrade/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/local-mock/
 description: 了解如何在 Dubbo 中利用本地伪装实现服务降级
 linkTitle: 服务降级
 title: 服务讲解（本地伪装）
@@ -178,7 +178,7 @@ Mock 可以在方法级别上指定，假定 `com.foo.BarService` 上有好几�
 
 ### 使用专业限流组件
 
-如果您有更高级、专业的限流诉求，我们推荐使用专业的限流降级组件如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)，以达到最佳体验。参考示例实践：[微服务治理/限流降级](/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/)
+如果您有更高级、专业的限流诉求，我们推荐使用专业的限流降级组件如 [Sentinel](https://sentinelguard.io/zh-cn/docs/open-source-framework-integrations.html)，以达到最佳体验。参考示例实践：[微服务治理/限流降级](/en/overview/mannual/java-sdk/tasks/rate-limit/)
 
 服务降级是指服务在非正常情况下进行降级应急处理。
 

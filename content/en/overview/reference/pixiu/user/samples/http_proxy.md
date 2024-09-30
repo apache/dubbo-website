@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/
-    - /zh-cn/overview/reference/pixiu/user/samples/http_proxy/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/http_proxy/
+    - /en/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/
+    - /en/docs3-v2/dubbo-go-pixiu/user/samples/http_proxy/
+    - /en/overview/reference/pixiu/user/samples/http_proxy/
+    - /en/overview/mannual/dubbo-go-pixiu/user/samples/http_proxy/
 description: Http Proxy 案例介绍
 linkTitle: Http Proxy 案例介绍
 title: Http Proxy 案例介绍

@@ -1,65 +1,65 @@
 ---
 aliases:
-    - /zh/overview/core-features/traffic/
-    - /zh-cn/overview/core-features/traffic/
-description: 流量管控
+    - /en/overview/core-features/traffic/
+    - /en/overview/core-features/traffic/
+description: Traffic Control
 feature:
     description: |
-        Dubbo 提供的基于路由规则的流量管控策略，可以帮助实现全链路灰度、金丝雀发布、按比例流量转发、动态调整调试时间、设置重试次数等服务治理能力。
-    title: 流量管控
-linkTitle: 流量管控
+        Dubbo provides traffic control strategies based on routing rules, which can help achieve full-link grayscale, canary release, proportional traffic forwarding, dynamic adjustment of debugging time, setting retry times, and other service governance capabilities.
+    title: Traffic Control
+linkTitle: Traffic Control
 no_list: true
-title: 流量管控
+title: Traffic Control
 type: docs
 weight: 4
 ---
 
 
 
-Dubbo 提供了丰富的流量管控策略
-* **地址发现与负载均衡**，地址发现支持服务实例动态上下线，负载均衡确保流量均匀的分布到每个实例上。
-* **基于路由规则的流量管控**，路由规则对每次请求进行条件匹配，并将符合条件的请求路由到特定的地址子集。
+Dubbo provides rich traffic control strategies
+* **Address Discovery and Load Balancing**: Address discovery supports dynamic online and offline service instances, and load balancing ensures that traffic is evenly distributed to each instance.
+* **Traffic Control Based on Routing Rules**: Routing rules perform conditional matching for each request and route requests that meet the conditions to a specific subset of addresses.
 
-服务发现保证调用方看到最新的提供方实例地址，服务发现机制依赖注册中心 (Zookeeper、Nacos、Istio 等) 实现。在消费端，Dubbo 提供了多种负载均衡策略，如随机负载均衡策略、一致性哈希负载、基于权重的轮询、最小活跃度优先、P2C 等。
+Service discovery ensures that the caller sees the latest provider instance addresses. The service discovery mechanism relies on the registry (Zookeeper, Nacos, Istio, etc.). On the consumer side, Dubbo provides various load balancing strategies, such as random load balancing, consistent hash load balancing, weight-based round-robin, least active priority, P2C, etc.
 
-Dubbo 的流量管控规则可以基于应用、服务、方法、参数等粒度精准的控制流量走向，根据请求的目标服务、方法以及请求体中的其他附加参数进行匹配，符合匹配条件的流量会进一步的按照特定规则转发到一个地址子集。流量管控规则有以下几种：
-* 条件路由规则
-* 标签路由规则
-* 脚本路由规则
-* 动态配置规则
+Dubbo's traffic control rules can precisely control traffic direction based on the granularity of applications, services, methods, parameters, etc. They match the target service, method, and other additional parameters in the request body. Traffic that meets the matching conditions will be further forwarded to a subset of addresses according to specific rules. The traffic control rules include:
+* Conditional Routing Rules
+* Tag Routing Rules
+* Script Routing Rules
+* Dynamic Configuration Rules
 
-如果底层用的是基于 HTTP 的 RPC 协议 (如 REST、gRPC、Triple 等)，则服务和方法等就统一映射为 HTTP 路径 (path)，此时 Dubbo 路由规则相当于是基于 HTTP path 和 headers 的流量分发机制。
+If the underlying RPC protocol is based on HTTP (such as REST, gRPC, Triple, etc.), then services and methods are uniformly mapped to HTTP paths. In this case, Dubbo routing rules are equivalent to traffic distribution mechanisms based on HTTP paths and headers.
 
-> Dubbo 中有应用、服务和方法的概念，一个应用可以发布多个服务，一个服务包含多个可被调用的方法，从抽象的视角来看，一次 Dubbo 调用就是某个消费方应用发起了对某个提供方应用内的某个服务特定方法的调用，Dubbo 的流量管控规则可以基于应用、服务、方法、参数等粒度精准的控制流量走向。
+> In Dubbo, there are concepts of applications, services, and methods. An application can publish multiple services, and a service contains multiple callable methods. From an abstract perspective, a Dubbo call is an invocation of a specific method of a service within a provider application initiated by a consumer application. Dubbo's traffic control rules can precisely control traffic direction based on the granularity of applications, services, methods, parameters, etc.
 
-## 工作原理
+## Working Principle
 
-以下是 Dubbo 单个路由器的工作过程，路由器接收一个服务的实例地址集合作为输入，基于请求上下文 (Request Context) 和 (Router Rule) 实际的路由规则定义对输入地址进行匹配，所有匹配成功的实例组成一个地址子集，最终地址子集作为输出结果继续交给下一个路由器或者负载均衡组件处理。
+The following is the working process of a single router in Dubbo. The router receives a set of instance addresses of a service as input, matches the input addresses based on the request context and the actual routing rule definitions. All successfully matched instances form a subset of addresses, and the final subset of addresses is handed over to the next router or load balancing component for processing.
 
 ![Router](/imgs/v3/feature/traffic/router1.png)
 
-通常，在 Dubbo 中，多个路由器组成一条路由链共同协作，前一个路由器的输出作为另一个路由器的输入，经过层层路由规则筛选后，最终生成有效的地址集合。
-* Dubbo 中的每个服务都有一条完全独立的路由链，每个服务的路由链组成可能不同，处理的规则各异，各个服务间互不影响。
-* 对单条路由链而言，即使每次输入的地址集合相同，根据每次请求上下文的不同，生成的地址子集结果也可能不同。
+Typically, in Dubbo, multiple routers form a routing chain that works together. The output of the previous router serves as the input for another router. After layer-by-layer routing rule filtering, an effective address set is finally generated.
+* Each service in Dubbo has a completely independent routing chain. The composition of the routing chain for each service may differ, and the rules processed vary, with no mutual influence between services.
+* For a single routing chain, even if the input address set is the same each time, the resulting subset of addresses may differ based on the different request contexts each time.
 
 ![Router](/imgs/v3/feature/traffic/router2.png)
 
-## 路由规则分类
-### 标签路由规则
+## Classification of Routing Rules
+### Tag Routing Rules
 
-标签路由通过将某一个服务的实例划分到不同的分组，约束具有特定标签的流量只能在指定分组中流转，不同分组为不同的流量场景服务，从而实现流量隔离的目的。标签路由可以作为蓝绿发布、灰度发布等场景能力的基础。
+Tag routing divides instances of a service into different groups, constraining traffic with specific tags to flow only within designated groups. Different groups serve different traffic scenarios, achieving traffic isolation. Tag routing can serve as the foundation for scenarios like blue-green deployment and grayscale release.
 
-标签路由规则是一个非此即彼的流量隔离方案，也就是匹配`标签`的请求会 100% 转发到有相同`标签`的实例，没有匹配`标签`的请求会 100% 转发到其余未匹配的实例。如果您需要按比例的流量调度方案，请参考示例 [基于权重的按比例流量路由](../../tasks/traffic-management/weight/)。
+Tag routing rules are an either-or traffic isolation solution, meaning requests that match the `tag` will be 100% forwarded to instances with the same `tag`, and requests that do not match the `tag` will be 100% forwarded to the remaining unmatched instances. If you need a proportional traffic scheduling solution, please refer to the example [Proportional Traffic Routing Based on Weight](../../tasks/traffic-management/weight/).
 
-`标签`主要是指对 Provider 端应用实例的分组，目前有两种方式可以完成实例分组，分别是`动态规则打标`和`静态规则打标`。`动态规则打标` 可以在运行时动态的圈住一组机器实例，而 `静态规则打标` 则需要实例重启后才能生效，其中，动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。
+`Tags` mainly refer to the grouping of provider application instances. Currently, there are two ways to complete instance grouping: `dynamic rule tagging` and `static rule tagging`. `Dynamic rule tagging` can dynamically enclose a group of machine instances at runtime, while `static rule tagging` requires instance restart to take effect. Among them, dynamic rules have higher priority than static rules, and when both rules exist and conflict, dynamic rules will prevail.
 
-#### 标签规则示例 - 静态打标
+#### Tag Rule Example - Static Tagging
 
-静态打标需要在服务提供者实例启动前确定，并且必须通过特定的参数 `tag` 指定。
+Static tagging needs to be determined before the service provider instance starts and must be specified through a specific parameter `tag`.
 
 ##### Provider
 
-在 Dubbo 实例启动前，指定当前实例的标签，如部署在杭州区域的实例，指定 `tag=gray`。
+Before the Dubbo instance starts, specify the tag for the current instance, such as specifying `tag=gray` for instances deployed in the Hangzhou region.
 
 ```xml
 <dubbo:provider tag="gray"/>
@@ -79,19 +79,19 @@ java -jar xxx-provider.jar -Ddubbo.provider.tag=gray
 
 ##### Consumer
 
-发起调用的一方，在每次请求前通过 `tag` 设置流量标签，确保流量被调度到带有同样标签的服务提供方。
+The party initiating the call sets the traffic tag via `tag` before each request to ensure that the traffic is routed to the service provider with the same tag.
 
 ```java
 RpcContext.getContext().setAttachment(Constants.TAG_KEY, "gray");
 ```
 
-#### 标签规则示例 - 动态打标
+#### Tag Rule Example - Dynamic Tagging
 
-相比于静态打标只能通过 `tag` 属性设置，且在启动阶段就已经固定下来，动态标签可以匹配任意多个属性，根据指定的匹配条件将 Provider 实例动态的划分到不同的流量分组中。
+Compared to static tagging, which can only be set via the `tag` attribute and is fixed at startup, dynamic tags can match any number of attributes and dynamically divide Provider instances into different traffic groups based on specified matching conditions.
 
 ##### Provider
 
-以下规则对 `shop-detail` 应用进行了动态归组，匹配 `env: gray` 的实例被划分到 `gray` 分组，其余不匹配 `env: gray` 继续留在默认分组 (无 tag)。
+The following rule dynamically groups the `shop-detail` application, with instances matching `env: gray` being grouped into the `gray` group, while others that do not match `env: gray` remain in the default group (no tag).
 
 ```yaml
 configVersion: v3.0
@@ -106,43 +106,42 @@ tags:
           exact: gray
 ```
 
-> 这里牵涉到如何给您的实例打各种原始 label 的问题，即上面示例中的 `env`，一种方式是直接写在配置文件中，如上面静态规则实例 provider 部分的配置所示，另一种方式是通过预设环境变量指定，关于这点请参考下文的 [如何给实例打标](#如何给实例打标) 一节。
+> This involves how to label your instances with various raw labels, such as `env` in the example above. One way is to write it directly in the configuration file, as shown in the provider section of the static rule example above. Another way is to specify it through preset environment variables. For more details, please refer to the section [How to Label Instances](#如何给实例打标) below.
 
 ##### Consumer
 
-服务发起方的设置方式和之前静态打标规则保持一致，只需要在每次请求前通过 `tag` 设置流量标签，确保流量被调度到带有同样标签的服务提供方。
+The settings for the service initiator are consistent with the previous static tagging rules. You only need to set the traffic tag via `tag` before each request to ensure that the traffic is routed to the service provider with the same tag.
 
 ```java
 RpcContext.getContext().setAttachment(Constants.TAG_KEY, "Hangzhou");
 ```
 
-设置了以上标签的流量，将全部导流到 `hangzhou-region` 划分的实例上。
+Traffic with the above tag will be routed to instances divided into the `hangzhou-region`.
 
-> 请求标签的作用域仅为一次点对点的 RPC 请求。比如，在一个 A -> B -> C 调用链路上，如果 A -> B 调用通过 `setAttachment` 设置了 `tag` 参数，则该参数不会在 B -> C 的调用中生效，同样的，在完成了 A -> B -> C 的整个调用同时 A 收到调用结果后，如果想要相同的 `tag` 参数，则在发起其他调用前仍需要单独设置 `setAttachment`。可以参考 [示例任务 - 环境隔离](../../tasks/traffic-management/isolation/) 了解更多 `tag` 全链路传递解决方案。
+> The scope of the request tag is limited to a single point-to-point RPC request. For example, in an A -> B -> C call chain, if the A -> B call sets the `tag` parameter via `setAttachment`, this parameter will not be effective in the B -> C call. Similarly, after completing the entire A -> B -> C call and A receives the result, if you want the same `tag` parameter, you still need to set `setAttachment` separately before initiating another call. You can refer to [Example Task - Environment Isolation](../../tasks/traffic-management/isolation/) for more information on the full-link transmission solution of `tag`.
 
-### 条件路由规则
+### Conditional Routing Rules
 
-条件路由与标签路由的工作模式非常相似，也是首先对请求中的参数进行匹配，符合匹配条件的请求将被转发到包含特定实例地址列表的子集。相比于标签路由，条件路由的匹配方式更灵活：
+Conditional routing works similarly to tag routing, where the parameters in the request are matched first, and requests that meet the matching conditions are forwarded to a subset of specific instance addresses. Compared to tag routing, conditional routing is more flexible in its matching method:
 
-* 在标签路由中，一旦给某一台或几台机器实例打了标签，则这部分实例就会被立马从通用流量集合中移除，不同标签之间不会再有交集。有点类似下图，地址集合在输入阶段就已经划分明确。
+* In tag routing, once a tag is assigned to one or more machine instances, those instances are immediately removed from the general traffic pool, and there is no overlap between different tags. It's somewhat like the diagram below, where the address set is clearly divided at the input stage.
 
 ![tag-condition-compare](/imgs/v3/feature/traffic/tag-condition-compare1.png)
 
-* 而从条件路由的视角，所有的实例都是一致的，路由过程中不存在分组隔离的问题，每次路由过滤都是基于全量地址中执行
+* From the perspective of conditional routing, all instances are consistent, and there is no grouping isolation during the routing process. Each routing filter is executed based on the full address set.
 
 ![tag-condition-compare](/imgs/v3/feature/traffic/tag-condition-compare2.png)
 
-条件路由规则的主体 `conditions` 主要包含两部分内容：
+The main content of the conditional routing rule `conditions` includes two parts:
 
-* => 之前的为请求参数匹配条件，指定的 `匹配条件指定的参数` 将与 `消费者的请求上下文 (URL)、甚至方法参数` 进行对比，当消费者满足匹配条件时，对该消费者执行后面的地址子集过滤规则。
-* => 之后的为地址子集过滤条件，指定的 `过滤条件指定的参数` 将与 `提供者实例地址 (URL)` 进行对比，消费者最终只能拿到符合过滤条件的实例列表，从而确保流量只会发送到符合条件的地址子集。
-    * 如果匹配条件为空，表示对所有请求生效，如：`=> status != staging`
-    * 如果过滤条件为空，表示禁止来自相应请求的访问，如：`application = product =>`
+* The part before `=>` is the request parameter matching condition. The `matching condition specified parameter` will be compared with the `consumer's request context (URL) or even method parameters`. When the consumer meets the matching condition, the address subset filtering rule after `=>` will be executed for that consumer.
+* The part after `=>` is the address subset filtering condition. The `filtering condition specified parameter` will be compared with the `provider instance address (URL)`. The consumer will ultimately get a list of instances that meet the filtering conditions, ensuring that traffic is only sent to the address subset that meets the conditions.
+    * If the matching condition is empty, it applies to all requests, such as: `=> status != staging`
+    * If the filtering condition is empty, it means access from the corresponding request is prohibited, such as: `application = product =>`
 
+#### Conditional Routing Rule Example
 
-#### 条件路由规则示例
-
-基于以下示例规则，所有 `org.apache.dubbo.demo.CommentService` 服务调用都将被转发到与当前消费端机器具有相同 `region` 标记的地址子集。`$region` 是特殊引用符号，执行过程中将读取消费端机器的实际的 `region` 值替代。
+Based on the following example rule, all `org.apache.dubbo.demo.CommentService` service calls will be forwarded to the address subset with the same `region` tag as the current consumer machine. `$region` is a special reference symbol that will be replaced with the actual `region` value of the consumer machine during execution.
 
 ```yaml
 configVersion: v3.0
@@ -153,29 +152,29 @@ conditions:
   - '=> region = $region'
 ```
 
-> 针对条件路由，我们通常推荐配置 `scope: service` 的规则，因为它可以跨消费端应用对所有消费特定服务 (service) 的应用生效。关于 Dubbo 规则中的 `scope` 以及 `service`、`application` 的说明请阅读 [条件路由规则手册](./condition-rule)。
+> For conditional routing, we usually recommend configuring rules with `scope: service` because it can take effect across consumer applications for all applications consuming a specific service. For more information on `scope` and `service`, `application` in Dubbo rules, please read the [Conditional Routing Rule Manual](./condition-rule).
 
-条件路由规则还支持设置具体的机器地址如 ip 或 port，这种情况下使用条件路由可以处理一些开发或线上机器的临时状况，实现**黑名单、白名单、实例临时摘除**等运维效果，如以下规则可以将机器 `172.22.3.91` 从服务的可用列表中排除。
+Conditional routing rules also support setting specific machine addresses such as IP or port. In this case, conditional routing can handle some temporary situations for development or online machines, achieving operational effects such as **blacklist, whitelist, temporary removal of instances**, etc. For example, the following rule can exclude the machine `172.22.3.91` from the available list of services.
 
 ```yaml
 => host != 172.22.3.91
 ```
 
-条件路由还支持基于请求参数的匹配，示例如下：
+Conditional routing also supports matching based on request parameters, as shown in the following example:
 
 ```yaml
 conditions:
   - method=getDetail&arguments[0]=dubbo => port=20880
 ```
 
-### 动态配置规则
-通过 Dubbo 提供的动态配置规则，您可以动态的修改 Dubbo 服务进程的运行时行为，整个过程不需要重启，配置参数实时生效。基于这个强大的功能，基本上所有运行期参数都可以动态调整，比如超时时间、临时开启 Access Log、修改 Tracing 采样率、调整限流降级参数、负载均衡、线程池配置、日志等级、给机器实例动态打标签等。与上文讲到的流量管控规则类似，动态配置规则支持应用、服务两个粒度，也就是说您一次可以选择只调整应用中的某一个或几个服务的参数配置。
+### Dynamic Configuration Rules
+Through the dynamic configuration rules provided by Dubbo, you can dynamically modify the runtime behavior of Dubbo service processes without restarting, and the configuration parameters take effect in real-time. Based on this powerful feature, almost all runtime parameters can be dynamically adjusted, such as timeout settings, temporarily enabling Access Log, modifying Tracing sampling rate, adjusting rate limiting and degradation parameters, load balancing, thread pool configuration, log levels, dynamically tagging machine instances, etc. Similar to the traffic control rules mentioned above, dynamic configuration rules support two granularities: application and service, meaning you can choose to adjust the parameter configuration of only one or several services in the application at a time.
 
-当然，出于系统稳定性、安全性的考量，有些特定的参数是不允许动态修改的，但除此之外，基本上所有参数都允许动态修改，很多强大的运行态能力都可以通过这个规则实现，您可以找个示例应用去尝试一下。通常 URL 地址中的参数均可以修改，这在每个语言实现的参考手册里也记录了一些更详细的说明。
+Of course, for the sake of system stability and security, some specific parameters are not allowed to be dynamically modified. But other than that, almost all parameters can be dynamically modified, and many powerful runtime capabilities can be achieved through this rule. You can try it out with a sample application. Usually, the parameters in the URL address can be modified, which is also recorded in more detail in the reference manuals for each language implementation.
 
-#### 动态配置规则示例 - 修改超时时间
+#### Dynamic Configuration Rule Example - Modify Timeout
 
-以下示例将 `org.apache.dubbo.samples.UserService` 服务的超时参数调整为 2000ms
+The following example adjusts the timeout parameter of the `org.apache.dubbo.samples.UserService` service to 2000ms
 
 ```yaml
 configVersion: v3.0
@@ -188,24 +187,24 @@ configs:
       timeout: 2000
 ```
 
-以下部分指定这个配置是服务粒度，具体变更的服务名为 `org.apache.dubbo.samples.UserService`。`scope` 支持 `service`、`application` 两个可选值，如果 `scope: service`，则 `key` 应该配置为 `version/service:group` 格式。
+The following section specifies that this configuration is at the service granularity, and the specific service name to be changed is `org.apache.dubbo.samples.UserService`. `scope` supports two optional values: `service` and `application`. If `scope: service`, then `key` should be configured in the format `version/service:group`.
 
 ```yaml
 scope: service
 key: org.apache.dubbo.samples.UserService
 ```
 
-> 关于 Dubbo 规则中的 `scope` 以及 `service`、`application` 的说明请参考 [动态配置参考手册](./configuration-rule/) 或 [动态配置示例](../../tasks/traffic-management/timeout/)。
+> For more information on `scope` and `service`, `application` in Dubbo rules, please refer to the [Dynamic Configuration Reference Manual](./configuration-rule/) or [Dynamic Configuration Example](../../tasks/traffic-management/timeout/).
 
-`parameters` 参数指定了新的修改值，这里将通过 `timeout: 2000` 将超时时间设置为 2000ms。
+The `parameters` parameter specifies the new modification value, here setting the timeout to 2000ms through `timeout: 2000`.
 
 ```yaml
 parameters:
  timeout: 2000
 ```
 
-### 脚本路由规则
-脚本路由是最直观的路由方式，同时它也是当前最灵活的路由规则，因为你可以在脚本中定义任意的地址筛选规则。如果我们为某个服务定义一条脚本规则，则后续所有请求都会先执行一遍这个脚本，脚本过滤出来的地址即为请求允许发送到的、有效的地址集合。
+### Script Routing Rules
+Script routing is the most intuitive routing method, and it is also the most flexible routing rule currently because you can define any address filtering rules in the script. If we define a script rule for a service, all subsequent requests will first execute this script, and the addresses filtered out by the script will be the set of valid addresses to which the request is allowed to be sent.
 
 ```yaml
 configVersion: v3.0
@@ -224,11 +223,11 @@ script: |
   } (invokers, invocation, context)); // 表示立即执行方法
 ```
 
-## 如何给实例打标
+## How to Tag Instances
 
-当前，有两种方式可以在启动阶段为 Dubbo 实例指定标签，一种是之前提到的应用内配置的方式，如在 xml 文件中设置 `<dubbo:provider tag="gray"/>`，应用打包部署后即自动被打标。
+Currently, there are two ways to specify tags for Dubbo instances at the startup stage. One is the method mentioned earlier, configuring within the application, such as setting `<dubbo:provider tag="gray"/>` in the XML file. The application will be automatically tagged after packaging and deployment.
 
-还有一种更灵活的方式，那就是通过读取所部署机器上的环境信息给应用打标，这样应用的标签就可以跟随实例动态的自动填充，避免每次更换部署环境就重新打包应用镜像的问题。当前 Dubbo 能自动读取以下环境变量配置：
+Another more flexible way is to tag the application by reading the environment information on the deployed machine. This way, the application's tags can dynamically and automatically populate with the instance, avoiding the need to repackage the application image every time the deployment environment changes. Currently, Dubbo can automatically read the following environment variable configurations:
 
 ```yaml
 spec:
@@ -254,22 +253,22 @@ spec:
       value: "gray"
 ```
 
-如果您有不同的实例环境保存机制，可以通过扩展 `InfraAdapter 扩展点` 来自定义自己的标签加载方式。如果您的应用是部署在 Kubernetes 环境下，并且已经接入了服务网格体系，则也可以使用标准 deployment 标签的方式打标，具体请跟随 [服务网格任务示例](../../tasks/mesh/) 学习。
+If you have a different instance environment storage mechanism, you can customize your own tag loading method by extending the `InfraAdapter extension point`. If your application is deployed in a Kubernetes environment and has integrated with the service mesh system, you can also use the standard deployment tag method for tagging. For details, please follow the [Service Mesh Task Example](../../tasks/mesh/).
 
-## 如何配置流量规则
-Dubbo 提供了控制台 Dubbo Admin，帮助您可视化的下发流量管控规则，并实时监控规则生效情况。
+## How to Configure Traffic Rules
+Dubbo provides a console called Dubbo Admin to help you visualize and issue traffic control rules, and monitor the effectiveness of the rules in real-time.
 
 ![Admin](/imgs/v3/what/admin.png)
 
-Dubbo 还提供了 `dubboctl` 命令行工具，需要有 Dubbo Admin 提前部署就绪，因为 dubboctl 是通过与 Admin 进行 http 通信完成规则下发的。
+Dubbo also provides the `dubboctl` command-line tool, which requires Dubbo Admin to be pre-deployed and ready, as dubboctl issues rules through HTTP communication with Admin.
 
-如果您使用的是如 Istio 的服务网格架构，还可以使用 Istioctl、kubectl 等下发 Istio 标准规则。
+If you are using a service mesh architecture like Istio, you can also use Istioctl, kubectl, etc., to issue Istio standard rules.
 
-## 接入服务网格
+## Integrating with Service Mesh
 
-以上介绍的都是 Dubbo 体系内的流量治理规则，如果您对服务网格架构感兴趣，则可以将 Dubbo 服务接入服务网格体系，这样，您就可以使用服务网格提供的流量治理能力，如 Istio 体系的 VirtualService 等。
+The above introduces traffic governance rules within the Dubbo system. If you are interested in service mesh architecture, you can integrate Dubbo services into the service mesh system. This way, you can use the traffic governance capabilities provided by the service mesh, such as Istio's VirtualService.
 
-具体请参见 [Dubbo 中的服务网格架构](../service-mesh)。
+For details, please refer to [Service Mesh Architecture in Dubbo](../service-mesh).
 
-## 跟随示例学习
-我们搭建了一个 [线上商城系统](../../tasks/traffic-management/) 供您学习流量规则的具体使用。
+## Learn by Example
+We have set up an [online shopping system](../../tasks/traffic-management/) for you to learn the specific usage of traffic rules.

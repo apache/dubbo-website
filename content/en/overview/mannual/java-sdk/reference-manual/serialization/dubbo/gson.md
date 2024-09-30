@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/what/ecosystem/serialization/gson/
-    - /zh-cn/overview/what/ecosystem/serialization/gson/
+    - /en/overview/what/ecosystem/serialization/gson/
+    - /en/overview/what/ecosystem/serialization/gson/
 description: "本文介绍 Gson 序列化"
 linkTitle: Gson
 title: Gson

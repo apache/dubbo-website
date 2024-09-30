@@ -1,7 +1,7 @@
 ---
 aliases:
-  - /zh/overview/tasks/protocols/
-  - /zh-cn/overview/tasks/protocols/
+  - /en/overview/tasks/protocols/
+  - /en/overview/tasks/protocols/
 description: "演示了如何以标准 `rest` 请求访问 triple、dubbo 协议发布的服务。"
 hide: true
 linkTitle: rest协议
@@ -17,7 +17,7 @@ weight: 3
 
 {{% alert title="注意" color="warning" %}}
 从 Dubbo 3.3 版本开始，rest 协议已移至 extensions 库，由 triple 协议来对 Rest 提供更全面的支持，新版本的内置协议实现只剩下 triple 和 dubbo。
-<br>因此，当我们提到 rest 时，都是指 triple 协议的 rest 访问支持能力，具体参见 [Triple Rest用户手册](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/tripe-rest-manual/)
+<br>因此，当我们提到 rest 时，都是指 triple 协议的 rest 访问支持能力，具体参见 [Triple Rest用户手册](/en/overview/mannual/java-sdk/reference-manual/protocol/tripe-rest-manual/)
 {{% /alert %}}
 
 在讲解 [triple 协议示例](../triple/interface/#curl) 时，我们曾提到 triple 协议支持以 `application/json` 格式直接访问：
@@ -135,7 +135,7 @@ curl -v -H "c: 3" -d 'name=Yang' "http://127.0.0.1:8081/org.apache.dubbo.rest.de
 #Hello Mr. Yang, 3
 ```
 
-代码讲解：<br />可以看到输出 Hello Mr. Yang, 3 ，没有双引号是因为通过指定后缀 txt 的方式要求用 `text/plain` 输出<br />通过这个例子可以了解如何通过 Mapping 注解来定制路径，通过 Param 注解来定制参数来源，并支持通过 post body 或 url方式传递参数，详细说明参见： [Basic使用指南](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/tripe-rest-manual/#GdlnC)
+代码讲解：<br />可以看到输出 Hello Mr. Yang, 3 ，没有双引号是因为通过指定后缀 txt 的方式要求用 `text/plain` 输出<br />通过这个例子可以了解如何通过 Mapping 注解来定制路径，通过 Param 注解来定制参数来源，并支持通过 post body 或 url方式传递参数，详细说明参见： [Basic使用指南](/en/overview/mannual/java-sdk/reference-manual/protocol/tripe-rest-manual/#GdlnC)
 <a name="KNfuq"></a>
 
 ### 观察日志
@@ -177,7 +177,7 @@ DEBUG .d.r.h.AbstractServerHttpChannelObserver :  [DUBBO] Http response headers 
 
 设想你是一条业务线负责人，你们有一套基于 Dubbo 开发的微服务集群，集群内服务间都是基于 triple 二进制协议通信；公司内还有一个重要业务，是跑在基于 Spring Cloud 开发的微服务集群上，而 Spring Cloud 集群内的服务间都是 http+json 协议通信。现在要实现这两个业务的互通，服务之间如何实现互调那？triple 协议支持 rest 格式访问可以解决这个问题，对于 Dubbo 微服务集群而言，相当于是对内使用 triple 二进制协议通信，对外交互使用 triple 提供的 rest 请求格式。
 
-关于这部分的具体使用示例，请参考博客 [微服务最佳实践零改造实现 Spring Cloud、Apache Dubbo 互通](/zh-cn/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)。
+关于这部分的具体使用示例，请参考博客 [微服务最佳实践零改造实现 Spring Cloud、Apache Dubbo 互通](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)。
 
 ### 网关流量接入
 

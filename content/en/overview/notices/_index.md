@@ -1,23 +1,24 @@
 ---
-title: "安全公告"
-linkTitle: "安全公告"
-description: "Dubbo 安全公告"
+title: "Security Announcements"
+linkTitle: "Security Announcements"
+description: "Dubbo Security Announcements"
 aliases:
-  - /zh-cn/blog/notices/
+  - /en/blog/notices/
 weight: 50
 type: docs
 ---
 
-## 报告安全问题
+## Reporting Security Issues
 
-Apache 软件基金会在消除针对其产品的安全问题和拒绝服务攻击方面采取了非常积极的立场。
+The Apache Software Foundation takes a very proactive stance in eliminating security issues and denial-of-service attacks against its products.
 
-我们强烈鼓励人们首先向我们的安全问题上报邮件列表报告此类问题，然后再在公共论坛上披露这些问题。
+We strongly encourage people to report such issues to our security mailing list before disclosing them in public forums.
 
-请注意，安全邮件列表仅应用于报告未公开的安全漏洞和管理修复此类漏洞的过程。我们无法在此地址接受定期错误报告或其他查询。发送到此地址的所有与我们源代码中未公开的安全问题无关的邮件都将被忽略。
+Please note that the security mailing list is only intended for reporting unpublicized security vulnerabilities and managing the process of fixing such vulnerabilities. We cannot accept regular bug reports or other inquiries at this address. All mail sent to this address that is not related to undisclosed security problems in our source code will be ignored.
 
-如果您需要报告非未公开安全漏洞的错误，请使用错误报告页面。
+If you need to report bugs that are not undisclosed security vulnerabilities, please use the bug report page.
 
-安全问题上报邮件地址：security@dubbo.apache.org
+Security issue reporting email: security@dubbo.apache.org
 
-有关 ASF 如何处理安全潜在问题的更多信息，请参阅 https://www.apache.org/security/
+For more information on how ASF handles potential security issues, please refer to https://www.apache.org/security/
+

@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/overview/terminology/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/overview/terminology/
-    - /zh-cn/overview/reference/pixiu/overview/terminology/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/overview/terminology/
+    - /en/docs3-v2/dubbo-go-pixiu/overview/terminology/
+    - /en/docs3-v2/dubbo-go-pixiu/overview/terminology/
+    - /en/overview/reference/pixiu/overview/terminology/
+    - /en/overview/mannual/dubbo-go-pixiu/overview/terminology/
 description: Pixiu 术语
 linkTitle: Pixiu 术语
 title: Pixiu 术语

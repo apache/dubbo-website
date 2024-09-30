@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/
+    - /en/overview/reference/
 description: ""
 linkTitle: 其他
 no_list: true

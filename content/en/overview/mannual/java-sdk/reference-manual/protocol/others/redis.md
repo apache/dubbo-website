@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/redis/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/redis/
 description: Redis 协议
 linkTitle: Redis 协议
 title: Redis 协议

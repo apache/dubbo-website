@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/tls/
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/tls/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/security/tls/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/tls/
 description: ' 了解在 Dubbo 的 TLS 保证传输安全'
 linkTitle: TLS支持
 title: TLS支持
@@ -58,7 +58,7 @@ if (!mutualTls) {}
 }
 ```
 
-为尽可能保证应用启动的灵活性，TLS Cert 的指定还能通过 -D 参数或环境变量等方式来在启动阶段根据部署环境动态指定，参考 Dubbo [配置读取规则](/zh-cn/docs/advanced/config-rule)
+为尽可能保证应用启动的灵活性，TLS Cert 的指定还能通过 -D 参数或环境变量等方式来在启动阶段根据部署环境动态指定，参考 Dubbo [配置读取规则](/en/docs/advanced/config-rule)
 
 
 > 在服务调用的安全性上，Dubbo 在后续的版本中会持续投入，其中服务发现/调用的鉴权机制预计在接下来的版本中就会和大家见面。

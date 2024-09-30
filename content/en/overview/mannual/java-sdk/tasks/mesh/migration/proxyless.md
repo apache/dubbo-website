@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/migration/proxyless/
-    - /zh-cn/overview/tasks/mesh/migration/proxyless/
+    - /en/overview/tasks/mesh/migration/proxyless/
+    - /en/overview/tasks/mesh/migration/proxyless/
 description: ""
 linkTitle: 其他问题？
 title: 其他问题？
@@ -47,7 +47,7 @@ public class AnnotatedGreetingService implements GreetingService {
 
 **由于原生 xDS 协议无法支持获取从接口到应用名的映射，因此需要配置 `providedBy` 参数来标记此服务来自哪个应用。**
 
-未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务映射](/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
+未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务映射](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
 
 ```java
 @Component("annotatedConsumer")
@@ -66,7 +66,7 @@ public class GreetingServiceConsumer {
 
 我们建议将 `protocol` 配置为 tri 协议（全面兼容 grpc 协议），以获得在 istio 体系下更好的体验。
 
-为了使 Kubernetes 感知到应用的状态，需要配置 `qosAcceptForeignIp` 参数，以便 Kubernetes 可以获得正确的应用状态，[对齐生命周期](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/)。
+为了使 Kubernetes 感知到应用的状态，需要配置 `qosAcceptForeignIp` 参数，以便 Kubernetes 可以获得正确的应用状态，[对齐生命周期](/en/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/)。
 
 ```properties
 dubbo.application.name=dubbo-samples-xds-provider
@@ -216,7 +216,7 @@ spec:
 3. providedBy
 
 由于当前 Dubbo 版本受限于 istio 的通信模型无法获取接口所对应的应用名，因此需要配置 `providedBy` 参数来标记此服务来自哪个应用。
-未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务映射](/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
+未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务映射](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
 
 4. protocol name
 
@@ -249,7 +249,7 @@ spec:
 dubbo.application.metadataServicePort=20885
 ```
 
-未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务元数据](/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
+未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务元数据](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
 
 6. qosAcceptForeignIp
 

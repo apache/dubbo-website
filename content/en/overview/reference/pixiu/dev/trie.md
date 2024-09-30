@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/dev/trie/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/trie/
-    - /zh-cn/overview/reference/pixiu/dev/trie/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/dev/trie/
+    - /en/docs3-v2/dubbo-go-pixiu/dev/trie/
+    - /en/docs3-v2/dubbo-go-pixiu/dev/trie/
+    - /en/overview/reference/pixiu/dev/trie/
+    - /en/overview/mannual/dubbo-go-pixiu/dev/trie/
 description: Trie 前缀树介绍
 linkTitle: Trie 前缀树介绍
 title: Trie 前缀树介绍

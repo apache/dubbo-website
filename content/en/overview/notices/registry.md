@@ -1,14 +1,14 @@
 ---
-title: "注册中心安全"
-linkTitle: "注册中心安全"
+title: "Registry Center Security"
+linkTitle: "Registry Center Security"
 weight: 3
 type: docs
-description: "在 Dubbo 中更安全的使用注册中心"
+description: "Using the registry center more securely in Dubbo"
 ---
 
-Dubbo 支持注册中心的扩展，理论上用户可以基于该扩展机制启用任意的注册中心，这带来了极大的灵活的，但同时也要意识到其中潜藏的安全性风险。
+Dubbo supports the extension of registry centers, theoretically allowing users to enable any registry center based on this extension mechanism. This brings great flexibility but also raises awareness of potential security risks.
 
-Dubbo 2.7 官方版本提供的注册中心有如下几种：
+The following registry centers are provided in the official version of Dubbo 2.7:
 * Zookeeper
 * Redis
 * Nacos
@@ -16,11 +16,12 @@ Dubbo 2.7 官方版本提供的注册中心有如下几种：
 * Consul
 * ……
 
-从 Dubbo 3.0 开始默认仅提供以下注册中心支持：
+Starting from Dubbo 3.0, only the following registry centers are supported by default:
 * Zookeeper
 * Nacos
 
-对于注册中心，Dubbo 只能完全信任其推送的数据，因此如果注册中心存在安全漏洞，可能会导致 Dubbo 服务被恶意注册或者是被恶意推送数据，从而导致服务被攻击。
-因此为了保证注册中心的安全性，Dubbo 官方建议您：
-* 开启注册中心的鉴权机制，如 Zookeeper 的 ACL 机制、Nacos 的用户名密码机制等
-* 避免将注册中心暴露在公网环境下，尽量将注册中心部署在可信内网环境下
+For registry centers, Dubbo can only fully trust the data they push. Therefore, if there are security vulnerabilities in the registry center, it may lead to malicious registration or data being maliciously pushed, causing service attacks.
+To ensure the security of the registry center, Dubbo officially recommends:
+* Enabling the authentication mechanism of the registry center, such as Zookeeper's ACL mechanism, Nacos’s username and password mechanism, etc.
+* Avoiding exposing the registry center to public networks and striving to deploy the registry center in a trusted internal network environment
+

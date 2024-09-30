@@ -8,14 +8,14 @@ weight: 5
 
 
 ## 前置条件
-* 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/starter/)
+* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
 * 安装并启动 [Consul](http://consul.io) 服务
 
 ## 使用说明
 
 ### 添加依赖
 
-从 Dubbo3 开始，consul 注册中国适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/zh-cn/download/spi-extensions/#dubbo-registry)。
+从 Dubbo3 开始，consul 注册中国适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-registry)。
 
 ```xml
 <dependency>
@@ -50,4 +50,4 @@ weight: 5
 
 ## 使用场景
 
-使用 Consul 作为共享注册中心实现，可用于 [Dubbo 与 Spring Cloud 体系的互通或迁移](/zh-cn/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)
+使用 Consul 作为共享注册中心实现，可用于 [Dubbo 与 Spring Cloud 体系的互通或迁移](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)

@@ -1,16 +1,16 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/config/properties/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/config/properties/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/dump/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/lazy-connect/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/stickiness/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/delay-publish/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/preflight-check/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/registry-only/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/
+    - /en/docs3-v2/java-sdk/reference-manual/config/properties/
+    - /en/docs3-v2/java-sdk/reference-manual/config/properties/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/dump/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/lazy-connect/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/stickiness/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/delay-publish/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/preflight-check/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/registry-only/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/
 description: 包含 Dubbo 支持的所有配置组件及每个配置组件支持的所有配置项
 linkTitle: 配置项手册
 title: 配置项参考手册

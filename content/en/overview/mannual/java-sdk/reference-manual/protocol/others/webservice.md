@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/webservice/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/webservice/
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/webservice/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/webservice/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/webservice/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/webservice/
 description: Webservice协议
 linkTitle: Webservice协议
 title: Webservice协议
@@ -34,7 +34,7 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 ## 使用方式
 ### 依赖
 
-从 Dubbo 3 开始，Webservice 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh-cn/download/spi-extensions/#dubbo-rpc)。
+从 Dubbo 3 开始，Webservice 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

@@ -101,9 +101,9 @@ Dubbo3 的应用级服务发现方案设计本质上就是围绕以上两个问�
 1. 期望简化进入注册中心的 provider 和 consumer 配置数量。
 2. 期望将部分配置项以其他形式存储。这些配置项需要满足：不在服务调用链路上，同时这些配置项不在注册中心的核心链路上(服务查询，服务列表)。
 
-Dubbo provider 中的服务配置项有接近 [30 个配置项](/zh-cn/docs/references/xml/dubbo-parameter)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
+Dubbo provider 中的服务配置项有接近 [30 个配置项](/en/docs/references/xml/dubbo-parameter)。 排除注册中心服务治理需要之外，很大一部分配置项是 provider 自己使用，不需要透传给消费者。这部分数据不需要进入注册中心，而只需要以 key-value 形式持久化存储。
 
-Dubbo consumer 中的配置项也有 [20+个配置项](/zh-cn/docs/references/xml/dubbo-consumer)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。
+Dubbo consumer 中的配置项也有 [20+个配置项](/en/docs/references/xml/dubbo-consumer)。在注册中心之中，服务消费者列表中只需要关注 application，version，group，ip，dubbo 版本等少量配置，其他配置也可以以 key-value 形式持久化存储。
 这些数据是以服务为维度注册进入注册中心，导致了数据量的膨胀，进而引发注册中心 (如 zookeeper) 的网络开销增大，性能降低。
 
 {{% alert title="注意" color="warning" %}}

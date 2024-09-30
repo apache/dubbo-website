@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
 description: Istio 环境部署 Dubbo-go 应用
 title: Istio 环境部署 Dubbo-go 应用
 type: docs
@@ -241,7 +241,7 @@ Forwarding from 127.0.0.1:20000 -> 20000
 Forwarding from [::1]:20000 -> 20000
 ```
 
-使用 grpc_cli 调试集群内的应用，参考任务[【使用 grpc_cli 调试 Dubbo-go 应用】](/zh-cn/overview/mannual/golang-sdk/tutorial/debugging/grpc_cli/)
+使用 grpc_cli 调试集群内的应用，参考任务[【使用 grpc_cli 调试 Dubbo-go 应用】](/en/overview/mannual/golang-sdk/tutorial/debugging/grpc_cli/)
 
 ```bash
 $ grpc_cli ls localhost:20000 -l

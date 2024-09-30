@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/observability/tracing/otlp/
-    - /zh-cn/overview/tasks/observability/tracing/otlp/
+    - /en/overview/tasks/observability/tracing/otlp/
+    - /en/overview/tasks/observability/tracing/otlp/
 description: "这个案例展示了在 Dubbo 项目中以 OpenTelemetry 作为 Tracer，将 Trace 信息上报到 Otlp Collector，再由 collector 转发至 Zipkin、Jagger。"
 linkTitle: OpenTelemetry
 no_list: true

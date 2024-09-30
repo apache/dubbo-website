@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/exporter-listener/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/exporter-listener/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/exporter-listener/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/exporter-listener/
 description: 暴露监听扩展
 linkTitle: 暴露监听扩展
 title: 暴露监听扩展

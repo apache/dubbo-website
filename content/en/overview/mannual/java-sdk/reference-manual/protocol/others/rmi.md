@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/rmi/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/rmi/
-    - /zh/overview/what/ecosystem/protocol/rmi/
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/rmi/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/rmi/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/rmi/
+    - /en/overview/what/ecosystem/protocol/rmi/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/rmi/
 description: Rmi协议
 linkTitle: Rmi协议
 title: Rmi协议
@@ -41,7 +41,7 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 
 ### 引入依赖
 
-从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh-cn/download/spi-extensions/#dubbo-rpc)。
+从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

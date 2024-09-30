@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/config-center/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/config-center/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/config-center/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/config-center/
 description: 配置中心扩展
 linkTitle: 配置中心扩展
 title: 配置中心扩展

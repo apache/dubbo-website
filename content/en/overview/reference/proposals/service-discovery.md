@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/proposals/service-discovery/
+    - /en/overview/reference/proposals/service-discovery/
 author: Jun Liu
 date: 2023-01-30T00:00:00Z
 description: 应用级服务发现设计

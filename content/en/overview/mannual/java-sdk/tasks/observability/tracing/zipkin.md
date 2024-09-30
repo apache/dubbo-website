@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/observability/tracing/zipkin/
-    - /zh-cn/overview/tasks/observability/tracing/zipkin/
+    - /en/overview/tasks/observability/tracing/zipkin/
+    - /en/overview/tasks/observability/tracing/zipkin/
 description: "这个示例演示了 Dubbo 集成 Zipkin 全链路追踪的基础示例"
 linkTitle: Zipkin
 no_list: true

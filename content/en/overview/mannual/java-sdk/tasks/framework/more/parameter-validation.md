@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/parameter-validation/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/parameter-validation/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/parameter-validation/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/parameter-validation/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/parameter-validation/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/parameter-validation/
 description: 在 Dubbo 中进行参数校验
 linkTitle: 参数校验
 title: 参数校验
@@ -197,4 +197,4 @@ public class ValidationConsumer {
 }
 ```
 
-> **验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/validation)**
+> **验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](/en/overview/mannual/java-sdk/reference-manual/spi/description/validation)**

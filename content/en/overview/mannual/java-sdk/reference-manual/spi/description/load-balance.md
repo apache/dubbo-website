@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/load-balance/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/load-balance/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/load-balance/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/load-balance/
 description: 负载均衡扩展
 linkTitle: 负载均衡扩展
 title: 负载均衡扩展

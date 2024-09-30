@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/bookinfo-sidecar/security/
-    - /zh-cn/overview/tasks/mesh/bookinfo-sidecar/security/
+    - /en/overview/tasks/mesh/bookinfo-sidecar/security/
+    - /en/overview/tasks/mesh/bookinfo-sidecar/security/
 description: Envoy Security Bookinfo 示例。
 linkTitle: security
 no_list: true

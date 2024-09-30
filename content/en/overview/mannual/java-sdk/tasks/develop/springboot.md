@@ -11,10 +11,10 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
 ## 创建项目
 创建 Dubbo 应用最快捷的方式就是使用官方项目脚手架工具 - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务。它可以帮助开发者创建 Spring Boot 结构应用，自动管理 `dubbo-spring-boot-starter` 等依赖和必要配置。
 
-另外，Jetbrain 官方也提供了 Apache Dubbo 项目插件，可用于快速创建 Dubbo Spring Boot 项目，能力与 start.dubbo.apache.org 对等，具体安装使用请查看 [博客文章](/zh-cn/blog/2023/10/23/intellij-idea%EF%B8%8Fapache-dubboidea官方插件正式发布/)
+另外，Jetbrain 官方也提供了 Apache Dubbo 项目插件，可用于快速创建 Dubbo Spring Boot 项目，能力与 start.dubbo.apache.org 对等，具体安装使用请查看 [博客文章](/en/blog/2023/10/23/intellij-idea%EF%B8%8Fapache-dubboidea官方插件正式发布/)
 
 ## dubbo-spring-boot-starter
-在 [快速开始](/zh-cn/overview/mannual/java-sdk/quick-start/) 中，我们已经详细介绍了典型的 Dubbo Spring Boot 工程源码及其项目结构，不熟悉的开发者可以前往查看。
+在 [快速开始](/en/overview/mannual/java-sdk/quick-start/) 中，我们已经详细介绍了典型的 Dubbo Spring Boot 工程源码及其项目结构，不熟悉的开发者可以前往查看。
 
 `dubbo-spring-boot-starter` 可为项目引入 dubbo 核心依赖，自动扫描 dubbo 相关配置与注解。
 
@@ -67,7 +67,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-除 service、reference 之外的组件都可以在 application.yml 文件中设置，具体可参考 [配置列表](/zh-cn/overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml)。
+除 service、reference 之外的组件都可以在 application.yml 文件中设置，具体可参考 [配置列表](/en/overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml)。
 
 service、reference 组件也可以通过 `id` 与 application 中的全局组件做关联，以下面配置为例。如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
 
@@ -196,12 +196,12 @@ dubbo.reference.org.apache.dubbo.springboot.demo.DemoService.timeout=6000
 ## 更多微服务开发模式
 * [纯 API 开发模式](../api/)
 * 其他 Spring 开发模式
-    * [Spring XML](/zh-cn/overview/mannual/java-sdk/reference-manual/config/spring/xml/)
+    * [Spring XML](/en/overview/mannual/java-sdk/reference-manual/config/spring/xml/)
 
 ## Dubbo 与 Spring Cloud 的关系
-Dubbo 与 Spring Cloud 是两套平行的微服务开发与解决方案，两者都提供了微服务定义、发布、治理的相关能力，对于微服务开发者来说，我们建议在开发之初就确定好 Apache Dubbo 与 Spring Cloud 之间的选型，尽量避免两个不同体系在同一集群中出现，以降低集群维护复杂度。而对于一些确需两套体系共存的场景，为了解决相互之间的通信问题，我们提供了 [Dubbo 与 Spring Cloud 异构微服务体系互通最佳实践](/zh-cn/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/) 解决方案。
+Dubbo 与 Spring Cloud 是两套平行的微服务开发与解决方案，两者都提供了微服务定义、发布、治理的相关能力，对于微服务开发者来说，我们建议在开发之初就确定好 Apache Dubbo 与 Spring Cloud 之间的选型，尽量避免两个不同体系在同一集群中出现，以降低集群维护复杂度。而对于一些确需两套体系共存的场景，为了解决相互之间的通信问题，我们提供了 [Dubbo 与 Spring Cloud 异构微服务体系互通最佳实践](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/) 解决方案。
 
- Dubbo 与 Spring Boot 是互补的关系，Dubbo 在 Spring Boot 体系之上提供了完整的微服务开发、治理能力，关于这一点我们在另一篇文章中有更详尽的说明：[Dubbo、Spring Cloud 与 Istio](/zh-cn/overview/what/xyz-difference/)。
+ Dubbo 与 Spring Boot 是互补的关系，Dubbo 在 Spring Boot 体系之上提供了完整的微服务开发、治理能力，关于这一点我们在另一篇文章中有更详尽的说明：[Dubbo、Spring Cloud 与 Istio](/en/overview/what/xyz-difference/)。
 
 
 

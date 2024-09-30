@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/upgrades-and-compatibility/serialization-upgrade/
-    - /zh-cn/docs3-v2/java-sdk/upgrades-and-compatibility/serialization-upgrade/
-    - /zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/
+    - /en/docs3-v2/java-sdk/upgrades-and-compatibility/serialization-upgrade/
+    - /en/docs3-v2/java-sdk/upgrades-and-compatibility/serialization-upgrade/
+    - /en/overview/mannual/java-sdk/upgrades-and-compatibility/serialization-upgrade/
 description: 无损升级序列化协议指南
 linkTitle: 序列化协议升级
 title: 序列化协议升级

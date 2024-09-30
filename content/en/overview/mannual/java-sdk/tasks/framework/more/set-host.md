@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/set-host/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/others/set-host/
 description: 自定义 Dubbo 服务对外暴露的主机地址
 linkTitle: 主机配置
 title: 主机配置

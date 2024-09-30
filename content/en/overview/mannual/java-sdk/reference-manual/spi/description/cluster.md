@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/spi/description/cluster/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/spi/description/cluster/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/cluster/
+    - /en/docs3-v2/java-sdk/reference-manual/spi/description/cluster/
 description: 集群扩展
 linkTitle: 集群扩展
 title: 集群扩展

@@ -1,12 +1,11 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/listener/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/listener/
-    - /zh-cn/overview/reference/pixiu/user/listener/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/listener/
-description: Listener 介绍
-linkTitle: Listener 介绍
-title: Listener 介绍
+    - /en/docs3-v2/dubbo-go-pixiu/user/listener/
+    - /en/overview/reference/pixiu/user/listener/
+    - /en/overview/manual/dubbo-go-pixiu/user/listener/
+description: Introduction to Listener
+linkTitle: Introduction to Listener
+title: Introduction to Listener
 type: docs
 weight: 40
----
+###

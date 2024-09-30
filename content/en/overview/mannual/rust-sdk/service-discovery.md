@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/rust-sdk/service-discovery/
-    - /zh-cn/docs3-v2/rust-sdk/service-discovery/
+    - /en/docs3-v2/rust-sdk/service-discovery/
+    - /en/docs3-v2/rust-sdk/service-discovery/
 description: 服务发现
 linkTitle: 服务发现
 title: 服务发现

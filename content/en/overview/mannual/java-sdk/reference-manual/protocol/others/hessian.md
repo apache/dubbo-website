@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/protocol/hessian/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/hessian/
-    - /zh-cn/overview/mannual/java-sdk/reference-manual/protocol/hessian/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/hessian/
+    - /en/docs3-v2/java-sdk/reference-manual/protocol/hessian/
+    - /en/overview/mannual/java-sdk/reference-manual/protocol/hessian/
 description: Hessian协议
 linkTitle: Hessian协议
 title: Hessian协议
@@ -43,7 +43,7 @@ hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序
 
 ### 依赖
 
-从 Dubbo 3 开始，Hessian 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/zh-cn/download/spi-extensions/#dubbo-rpc)。
+从 Dubbo 3 开始，Hessian 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-rpc)。
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>

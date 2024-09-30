@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/reactive/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/service/reactive/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/reactive/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/reactive/
 description: 使用 Reactive API 操作 Triple 流式调用
 linkTitle: 响应式编程
 title: 响应式编程
@@ -34,7 +34,7 @@ Dubbo + Reactive Stream Stub 的组合模式可以给用户带来最方便的流
 
 ## 使用方式
 
-Triple 使用及配置可参考 [IDL 方式使用 Triple](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/triple/idl/)，并确保 Dubbo 版本 >= 3.1.0。
+Triple 使用及配置可参考 [IDL 方式使用 Triple](/en/overview/mannual/java-sdk/reference-manual/protocol/triple/idl/)，并确保 Dubbo 版本 >= 3.1.0。
 
 ### 添加必要的依赖
 

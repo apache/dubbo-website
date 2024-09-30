@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/proposals/heuristic-flow-control/
+    - /en/overview/reference/proposals/heuristic-flow-control/
 author: Quanlu Liu
 date: 2023-01-30T00:00:00Z
 description: 本文所说的柔性服务主要是指**consumer端的负载均衡**和**provider端的限流**两个功能。在之前的dubbo版本中，负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。而限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。我们针对这些存在的问题进行了改进。
@@ -37,7 +37,7 @@ working_in_progress: true
 ![image.png](/imgs/overview/reference/proposals/heuristic-flow-control/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png)
 
 #### 使用方法
-[Dubbo Java 实现的使用方法](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance) 与原本的负载均衡方法相同。只需要在consumer端将"loadbalance"设置为"p2c"或者"adaptive"即可。
+[Dubbo Java 实现的使用方法](/en/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance) 与原本的负载均衡方法相同。只需要在consumer端将"loadbalance"设置为"p2c"或者"adaptive"即可。
 
 #### 代码结构
 负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。
@@ -123,7 +123,7 @@ inflight为consumer端还未返回的请求的数量。
 #### 使用方法
 要确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。
 
-[Dubbo Java 实现的自适应限流开启方法](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance)  与静态的最大并发值设置类似，只需在provider端将"flowcontrol"设置为"autoConcurrencyLimier"或者"heuristicSmoothingFlowControl"即可。
+[Dubbo Java 实现的自适应限流开启方法](/en/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance)  与静态的最大并发值设置类似，只需在provider端将"flowcontrol"设置为"autoConcurrencyLimier"或者"heuristicSmoothingFlowControl"即可。
 
 #### 代码结构
 1. FlowControlFilter：在provider端的filter负责根据限流算法的结果来对provider端进行限流功能。

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/traffic-management/retry/
-    - /zh-cn/overview/tasks/traffic-management/retry/
+    - /en/overview/tasks/traffic-management/retry/
+    - /en/overview/tasks/traffic-management/retry/
 description: ""
 linkTitle: 服务重试
 title: 通过重试提高服务调用成功率

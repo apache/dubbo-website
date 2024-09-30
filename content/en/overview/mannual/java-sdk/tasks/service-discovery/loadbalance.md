@@ -1,10 +1,10 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/consistent-hash/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/loadbalance/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/others/graceful-shutdown/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/consistent-hash/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/
 description: "Dubbo 支持的消费端负载均衡策略及其使用方法"
 linkTitle: 负载均衡
 title: 负载均衡策略与配置细节
@@ -117,4 +117,4 @@ referenceConfig.get();
 
 ## 自适应负载均衡配置
 
-只需要在 consumer 或 provider 端将 `loadbalance` 设置为 `p2c` 或者 `adaptive` 即可，可在此查看 [工作原理](/zh-cn/overview/reference/proposals/heuristic-flow-control)
+只需要在 consumer 或 provider 端将 `loadbalance` 设置为 `p2c` 或者 `adaptive` 即可，可在此查看 [工作原理](/en/overview/reference/proposals/heuristic-flow-control)

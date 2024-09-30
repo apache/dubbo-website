@@ -1,8 +1,8 @@
 ---
 aliases:
-    - /zh/overview/tasks/protocols/
-    - /zh-cn/overview/tasks/protocols/
-    - /zh-cn/overview/mannual/java-sdk/tasks/protocol/
+    - /en/overview/tasks/protocols/
+    - /en/overview/tasks/protocols/
+    - /en/overview/mannual/java-sdk/tasks/protocol/
 description: 演示 Dubbo 多协议的应用场景
 hide: true
 linkTitle: 通信协议

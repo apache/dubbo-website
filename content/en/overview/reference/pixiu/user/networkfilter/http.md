@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/dubbo-go-pixiu/user/networkfilter/http/
-    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/networkfilter/http/
-    - /zh-cn/overview/reference/pixiu/user/networkfilter/http/
-    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/networkfilter/http/
+    - /en/docs3-v2/dubbo-go-pixiu/user/networkfilter/http/
+    - /en/docs3-v2/dubbo-go-pixiu/user/networkfilter/http/
+    - /en/overview/reference/pixiu/user/networkfilter/http/
+    - /en/overview/mannual/dubbo-go-pixiu/user/networkfilter/http/
 description: Http NetWorkFilter 介绍
 linkTitle: Http NetWorkFilter 介绍
 title: Http NetWorkFilter 介绍

@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
 description: 多注册中心
 title: 多注册中心
 type: docs
@@ -83,4 +83,4 @@ dubbo:
       token: ${北极星资源鉴权 token}   # 如果北极星服务端开启了针对客户端的鉴权，则需要配置该参数
 ```
 
-对于 Kubernetes 注册中心的使用方式，请参考 [控制面](/zh-cn/overview/mannual/control-plane/) 文档。
+对于 Kubernetes 注册中心的使用方式，请参考 [控制面](/en/overview/mannual/control-plane/) 文档。

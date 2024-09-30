@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
-    - /zh-cn/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/
 description: Dubbo 消费端线程池模型用法
 linkTitle: 线程模型
 title: 消费端线程模型，提供者端线程模型

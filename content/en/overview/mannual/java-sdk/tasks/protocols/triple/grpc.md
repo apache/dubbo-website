@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/tasks/protocols/grpc/
+    - /en/overview/tasks/protocols/grpc/
 description: "演示了如何使用 triple 协议实现 Dubbo 服务与标准 gRPC 服务的互相调用。"
 linkTitle: 发布/调用标准gRPC服务
 title: 使用 Dubbo 开发 gRPC 服务

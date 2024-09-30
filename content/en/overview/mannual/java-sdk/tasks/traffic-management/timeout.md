@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/traffic-management/timeout/
-    - /zh-cn/overview/tasks/traffic-management/timeout/
+    - /en/overview/tasks/traffic-management/timeout/
+    - /en/overview/tasks/traffic-management/timeout/
 description: 在 Dubbo-Admin 动态调整服务超时时间
 linkTitle: 调整超时时间
 title: 动态调整服务超时时间

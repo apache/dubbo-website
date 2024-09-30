@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/integrations/prometheus/
+    - /en/overview/reference/integrations/prometheus/
 description: 配置 Prometheus 与 Dubbo 一起工作
 linkTitle: Prometheus
 title: Prometheus

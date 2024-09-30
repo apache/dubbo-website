@@ -1,10 +1,10 @@
 ---
 aliases:
-    - /zh/overview/tasks/develop/async/
-    - /zh/docs3-v2/java-sdk/advanced-features-and-usage/service/async-call/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async-call/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
-    - /zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
+    - /en/overview/tasks/develop/async/
+    - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/async-call/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-call/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
+    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
 description: 某些情况下希望dubbo接口异步调用，避免不必要的等待。
 linkTitle: 异步调用
 title: 异步调用

@@ -33,7 +33,7 @@ Dubbo协议支持，以及Qos协议支持。这些协议的识别都是由一个
 ## 使用方式
 在同一主机上部署多个服务或需要通过负载均衡器访问多个服务。
 
-> 关于Dubbo支持的配置方式 [配置说明](/zh-cn/overview/mannual/java-sdk/reference-manual/config/)
+> 关于Dubbo支持的配置方式 [配置说明](/en/overview/mannual/java-sdk/reference-manual/config/)
 
 ### 服务多协议导出
 
@@ -88,7 +88,7 @@ dubbo.protocol.port=20880
 </dependency>
 ```
 
-完成Qos模块的导入之后，相关的配置项可参考[Qos操作手册](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/overview/)进行配置。
+完成Qos模块的导入之后，相关的配置项可参考[Qos操作手册](/en/overview/mannual/java-sdk/reference-manual/qos/overview/)进行配置。
 
 默认情况下，基于端口复用的Qos服务在模块导入后是启动的。
 

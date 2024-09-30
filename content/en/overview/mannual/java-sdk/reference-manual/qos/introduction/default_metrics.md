@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/java-sdk/reference-manual/qos/logger-management/
-    - /zh-cn/docs3-v2/java-sdk/reference-manual/qos/logger-management/
+    - /en/docs3-v2/java-sdk/reference-manual/qos/logger-management/
+    - /en/docs3-v2/java-sdk/reference-manual/qos/logger-management/
 description: 当用户未接入 prometheus 时可以使用默认的监控指标命令
 linkTitle: 默认监控指标命令
 title: 默认监控指标命令

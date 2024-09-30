@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /zh/overview/reference/integrations/grafana/
+    - /en/overview/reference/integrations/grafana/
 description: 配置 Grafana 与 Dubbo 一起工作
 linkTitle: Grafana
 title: Grafana

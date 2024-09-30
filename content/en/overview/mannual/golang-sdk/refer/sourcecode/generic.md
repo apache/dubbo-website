@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/develop/features/generic/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/generic/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/features/generic/
+    - /en/docs3-v2/golang-sdk/tutorial/develop/features/generic/
 description: 泛化调用
 title: 泛化调用
 type: docs

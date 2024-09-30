@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
+    - /en/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
 description: "采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统"
 title: metrics监控
 type: docs

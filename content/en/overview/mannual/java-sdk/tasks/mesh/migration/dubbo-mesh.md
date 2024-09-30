@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/overview/tasks/mesh/migration/dubbo-mesh/
-    - /zh-cn/overview/tasks/mesh/migration/dubbo-mesh/
+    - /en/overview/tasks/mesh/migration/dubbo-mesh/
+    - /en/overview/tasks/mesh/migration/dubbo-mesh/
 description: 本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署模式开发 Dubbo3 服务。Dubbo3 服务使用 Triple 作为通信协议，通信过程经过 Envoy 数据面拦截，同时使用标准 Istio 的流量治理能力治理 Dubbo。
 linkTitle: 地址同步
 title: 地址同步

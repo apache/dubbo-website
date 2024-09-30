@@ -1,6 +1,6 @@
 ---
 aliases:
-  - /zh-cn/overview/mannual/golang-sdk/tutorial/develop/protocol/exception_response/
+  - /en/overview/mannual/golang-sdk/tutorial/develop/protocol/exception_response/
 description: "当服务端请求处理失败时，dubbo 会支持返回 error 类型值，本示例演示如何处理异常类型返回值。"
 title: 异常类型返回值
 linkTitle: 异常类型返回值

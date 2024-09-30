@@ -1,7 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/refer/ecology/
-    - /zh-cn/docs3-v2/golang-sdk/refer/ecology/
+    - /en/docs3-v2/golang-sdk/refer/ecology/
+    - /en/docs3-v2/golang-sdk/refer/ecology/
 description: Dubbo-go 生态组件
 title: 生态组件
 type: docs
