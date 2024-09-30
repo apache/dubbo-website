@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Developer Guide on Apache Dubbo</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/</link><description>Recent content in Developer Guide on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Introduction to the Pixiu Filter System</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/filter-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/filter-extension/</guid><description>&lt;h2 id="how-to-write-a-filter">&lt;strong>How to Write a Filter&lt;/strong>&lt;/h2>
+&lt;p>&lt;code>For more detailed information, please refer to the Blog &amp;quot;Talking About Pixiu's Filter&amp;quot;&lt;/code>&lt;/p>
+&lt;p>Let&amp;rsquo;s try writing a simple Filter that will have a basic configuration, log the request Body during the Decode phase, and return the reversed string as a Mock response. Finally, in the Encode phase, it will log the return value based on the configuration.&lt;/p>
+&lt;ol>
+&lt;li>First, create a Filter&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> DemoFilter &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logPrefix &lt;span style="color:#dc322f">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Decode phase, occurs before calling Upstream
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilter) &lt;span style="color:#268bd2">Decode&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext) filter.FilterStatus {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> body, _ &lt;span style="color:#719e07">:=&lt;/span> ioutil.&lt;span style="color:#268bd2">ReadAll&lt;/span>(ctx.Request.Body)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;request body: %s&amp;#34;&lt;/span>, body)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//reverse res str
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> runes &lt;span style="color:#719e07">:=&lt;/span> []&lt;span style="color:#b58900">rune&lt;/span>(&lt;span style="color:#b58900">string&lt;/span>(body))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; &lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>; i &lt;span style="color:#719e07">+=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> runes[i], runes[&lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">-&lt;/span>i] = runes[&lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">-&lt;/span>i], runes[i]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reverse &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">string&lt;/span>(runes)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//mock response
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ctx.&lt;span style="color:#268bd2">SendLocalReply&lt;/span>(&lt;span style="color:#2aa198">200&lt;/span>, []&lt;span style="color:#b58900">byte&lt;/span>(reverse))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> filter.Stop
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Encode phase, at this point the Upstream Response can be accessed
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilter) &lt;span style="color:#268bd2">Encode&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext) filter.FilterStatus {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res &lt;span style="color:#719e07">:=&lt;/span> ctx.SourceResp.(&lt;span style="color:#dc322f">string&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;%s: %s&amp;#34;&lt;/span>, f.logPrefix, res)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> filter.Continue
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Create a Filter Factory&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	DemoFilterFactory &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		conf &lt;span style="color:#719e07">*&lt;/span>Config
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Config describe the config of Filter
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	Config &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		LogPrefix &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#2aa198">`yaml:&amp;#34;logPrefix,omitempty&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilterFactory) &lt;span style="color:#268bd2">PrepareFilterChain&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext, chain filter.FilterChain) &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demo &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>DemoFilter{logPrefix: f.conf.LogPrefix}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> chain.&lt;span style="color:#268bd2">AppendDecodeFilters&lt;/span>(demo)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> chain.&lt;span style="color:#268bd2">AppendEncodeFilters&lt;/span>(demo)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilterFactory) &lt;span style="color:#268bd2">Config&lt;/span>() &lt;span style="color:#268bd2">interface&lt;/span>{} {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> f.conf
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilterFactory) &lt;span style="color:#268bd2">Apply&lt;/span>() &lt;span style="color:#dc322f">error&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
+&lt;li>Create a Filter Plugin and register it&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//important
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filter.&lt;span style="color:#268bd2">RegisterHttpFilter&lt;/span>(&lt;span style="color:#719e07">&amp;amp;&lt;/span>Plugin{})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Plugin &lt;span style="color:#268bd2">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>Plugin) &lt;span style="color:#268bd2">Kind&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dgp.filters.demo&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (p &lt;span style="color:#719e07">*&lt;/span>Plugin) &lt;span style="color:#268bd2">CreateFilterFactory&lt;/span>() (filter.HttpFilterFactory, &lt;span style="color:#dc322f">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>DemoFilterFactory{conf: &lt;span style="color:#719e07">&amp;amp;&lt;/span>Config{}}, &lt;span style="color:#cb4b16">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="4">
+&lt;li>Configure this Filter in the configuration file and start Pixiu&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">static_resources&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">listeners&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;net/http&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol_type&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;HTTP&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">socket_address&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;0.0.0.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8888&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filter_chains&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filter.httpconnectionmanager
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">route_config&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">routes&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">match&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prefix&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">http_filters&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: dgp.filters.demo
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">config&lt;/span>:
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="5">
+&lt;li>Access and check the logs and results&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl localhost:8888/demo -d &lt;span style="color:#2aa198">&amp;#34;eiv al tse’c&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>c’est la vie% 
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Logs&lt;/p></description></item><item><title>dubbo-pilot Control Plane Deployment</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/</guid><description>&lt;ul>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#target">1. Overall Goals&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#basic">2. Basic Process&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#detail">3. Detailed Steps&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#env">3.1 Environment Requirements&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#native_deploy">3.2 Local Deployment of Istio&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#nbuild">3.2.1 Compilation&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#ndeploy">3.2.2 Deployment &amp;amp; Debugging&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#docker_deploy">3.3 Container Deployment of Istio&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#dbuild">3.3.1 Image Building&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/dubbo-pilot/#ddeploy">3.3.2 Deployment&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="target">1 Overall Goals&lt;/h2>
+&lt;ul>
+&lt;li>Compile the control plane and build images&lt;/li>
+&lt;li>Deploy using istioctl in a Kubernetes environment&lt;/li>
+&lt;li>How to debug the control plane program&lt;/li>
+&lt;/ul>
+&lt;h2 id="basic">2 Basic Process&lt;/h2>
+This example will demonstrate how to compile the dubbo-pilot control plane and how to deploy it using istioctl in a Kubernetes environment.
+&lt;ol>
+&lt;li>Start the control plane locally, and debug dubbo-pilot.&lt;/li>
+&lt;li>Use istioctl for starting and debugging in the k8s environment.&lt;/li>
+&lt;/ol>
+&lt;h2 id="detail">3 Detailed Steps&lt;/h2>
+&lt;h3 id="env">3.1 Environment Requirements&lt;/h3>
+&lt;ul>
+&lt;li>Golang&lt;/li>
+&lt;li>Docker&lt;/li>
+&lt;li>Minikube/Kind&lt;/li>
+&lt;li>Kubectl&lt;/li>
+&lt;li>Dlv&lt;/li>
+&lt;/ul>
+&lt;h3 id="native_deploy">3.2 Local Deployment&lt;/h3>
+&lt;h4 id="nbuild">3.2.1 Compilation&lt;/h4>
+&lt;ol>
+&lt;li>Compile the docker-builder&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>cd dubbo&lt;span style="color:#719e07">-&lt;/span>go&lt;span style="color:#719e07">-&lt;/span>pixiu&lt;span style="color:#719e07">/&lt;/span>tools&lt;span style="color:#719e07">/&lt;/span>docker&lt;span style="color:#719e07">-&lt;/span>builder &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> go install
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker&lt;span style="color:#719e07">-&lt;/span>builder &lt;span style="color:#719e07">-&lt;/span>h:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Builds Istio docker images
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Usage:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [flags]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Flags:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>architecures strings architectures to build (default [linux&lt;span style="color:#719e07">/&lt;/span>amd64])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>base&lt;span style="color:#719e07">-&lt;/span>version string base version to use (default &lt;span style="color:#2aa198">&amp;#34;latest&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>builder string type of builder to use&lt;span style="color:#719e07">.&lt;/span> options are crane &lt;span style="color:#719e07">or&lt;/span> docker (default &lt;span style="color:#2aa198">&amp;#34;docker&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">-&lt;/span>h, &lt;span style="color:#719e07">--&lt;/span>help help &lt;span style="color:#719e07">for&lt;/span> this command
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>hub strings docker hub(s) (default [localhost:&lt;span style="color:#2aa198">5000&lt;/span>])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>istio&lt;span style="color:#719e07">-&lt;/span>version string istio version to use (default &lt;span style="color:#2aa198">&amp;#34;1.14-dev&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>kind&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#b58900">load&lt;/span> kind cluster to &lt;span style="color:#b58900">load&lt;/span> into
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>no&lt;span style="color:#719e07">-&lt;/span>cache disable caching
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>no&lt;span style="color:#719e07">-&lt;/span>clobber &lt;span style="color:#719e07">do&lt;/span> &lt;span style="color:#719e07">not&lt;/span> allow pushing images that already exist
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>proxy&lt;span style="color:#719e07">-&lt;/span>version string proxy version to use (default &lt;span style="color:#2aa198">&amp;#34;7ae8e27f274b33dc2f4d83100aea5971ed6698d3&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>push push targets to registry
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>save save targets to tar&lt;span style="color:#719e07">.&lt;/span>gz
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>tag strings docker tag(s) (default [latest])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>targets strings targets to build (default [app,app_sidecar_centos_7,app_sidecar_debian_11,app_sidecar_ubuntu_jammy,app_sidecar_ubuntu_xenial,ext&lt;span style="color:#719e07">-&lt;/span>authz,install&lt;span style="color:#719e07">-&lt;/span>cni,istioctl,operator,pilot,proxyv2])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>variants strings variants to build (default [default])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>version show build version
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Use docker-builder to automatically compile and build the image&lt;/li>
+&lt;/ol>
+&lt;p>Compile istioctl&lt;/p></description></item><item><title>Introduction to Trie Prefix Tree</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/trie/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/dev/trie/</guid><description>&lt;h1 id="introduction">Introduction&lt;/h1>
+&lt;p>&lt;img alt="image.png" src="https://cn.dubbo.apache.org/imgs/pixiu/trie-1.png">&lt;br />One of the cores of the gateway is the routing logic, which determines how a request needs to be processed and which downstream service it should be forwarded to.&lt;br />About 80% of routing requirements are URL-based. It is necessary to clearly describe how URLs or sets of URLs with certain characteristics correspond to a series of downstream processing strategies.&lt;/p>
+&lt;p>For example, URLs starting with &amp;lsquo;/test/&lt;strong>&amp;rsquo; route to the testing environment cluster, while URLs starting with &amp;lsquo;/release/user/&lt;/strong>&amp;rsquo; route to the production environment&amp;rsquo;s user services cluster.&lt;/p></description></item></channel></rss>

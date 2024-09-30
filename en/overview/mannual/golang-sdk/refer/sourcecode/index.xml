@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Source Code Interpretation on Apache Dubbo</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/</link><description>Recent content in Source Code Interpretation on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/index.xml" rel="self" type="application/rss+xml"/><item><title>Network Protocol</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/protocol/</guid><description>&lt;p>For the Dubbogo microservice framework, the network protocol is the module responsible for network communication in remote procedure calls, handling functions such as data serialization, packaging, request initiation, and network port listening from the application layer to the network layer. Dubbogo abstracts a set of interfaces for protocols as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Protocol &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Export service for remote invocation
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Export&lt;/span>(invoker Invoker) Exporter
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Refer a remote service
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Refer&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) Invoker
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Destroy will destroy all invoker and exporter, so it only is called once.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Destroy&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This interface includes three methods. The Export method is responsible for the service exposure process. The input parameter invoker is a concept of dubbo, encapsulating a callable instance. In the specific Export method implementation for a protocol (e.g., Triple), the callable instance Invoker with certain logic is exposed to external services in the form of network port listening. Requests targeting that network port will be captured by the listening coroutine initiated by the Export method, which will then deconstruct and deserialize the data according to the network protocol to retrieve the parsed request data.&lt;/p></description></item><item><title>Registry</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/registry/</guid><description>&lt;p>Dubbogo abstracts a set of interfaces for the registry as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Registry Extension - Registry
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Registry &lt;span style="color:#268bd2">interface&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	common.Node
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Register is used for service provider calling, register services
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// to registry. And it is also used for service consumer calling, register
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// services cared about, for dubbo&amp;#39;s admin monitoring.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Register&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// UnRegister is required to support the contract:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 1. If it is the persistent stored data of dynamic=false, the
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// registration data can not be found, then the IllegalStateException
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// is thrown, otherwise it is ignored.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 2. Unregister according to the full url match.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// url Registration information, is not allowed to be empty, e.g:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// dubbo://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">UnRegister&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Subscribe is required to support the contract:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// When creating new registry extension, pls select one of the
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// following modes.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// Will remove in dubbogo version v1.1.0
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// mode1: return Listener with Next function which can return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// subscribe service event from registry
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// Deprecated!
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// subscribe(event.URL) (Listener, error)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// Will replace mode1 in dubbogo version v1.1.0
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// mode2: callback mode, subscribe with notify(notify listener).
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Subscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// UnSubscribe is required to support the contract:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 1. If don&amp;#39;t subscribe, ignore it directly.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 2. Unsubscribe by full URL match.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// url Subscription condition, not allowed to be empty, e.g.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// consumer://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// listener A listener of the change event, not allowed to be empty
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">UnSubscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This interface mainly includes four methods: register, unregister, subscribe, and unsubscribe. As the names suggest, it summarizes the actions for client and server interactions with the registry. For general interface-level service registration scenarios, when the Provider service starts, it abstracts its service interface information into a URL, which contains all the information needed for the client to initiate a call (IP, port, protocol, etc.). The server&amp;rsquo;s registry component writes this URL to the registry (e.g., Zookeeper). After the client starts, it will subscribe to the required service information through the registry component during the service reference step, and the obtained service information will be written to the client cache in the form of asynchronous event updates. Thus, upon successful service discovery, it can initiate calls to the corresponding service provider based on the retrieved service URL parameters.&lt;/p></description></item><item><title>New features</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/3.0_feature/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/3.0_feature/</guid><description>&lt;p>&lt;img alt="star" src="https://shields.io/github/stars/apache/dubbo-go?style=dark">&lt;/p>
+&lt;h2 id="1-triple-protocol">1. Triple Protocol&lt;/h2>
+&lt;h3 id="11-overview">1.1 Overview&lt;/h3>
+&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/tri.png">&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Communication level&lt;/p>
+&lt;p>The Triple protocol, also known as the Dubbo3 protocol, is an extended protocol based on HTTP2 + gRPC, which adds specific fields and logical enhancements, ensuring interoperability with the &lt;strong>native gRPC protocol&lt;/strong>. On this basis, the Triple new protocol will more natively support &lt;strong>Dubbo service governance capabilities&lt;/strong> and support &lt;strong>streaming RPC calls&lt;/strong>.&lt;/p>
+&lt;p>In simple terms, it can be understood as Triple = gRPC + Dubbo.&lt;/p></description></item><item><title>Generic Call</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/generic/</guid><description>&lt;h2 id="1-dubbo-go-generic-call-java-server">1. Dubbo-go Generic Call Java Server&lt;/h2>
+&lt;p>Using Triple protocol + hessian2 serialization scheme&lt;/p>
+&lt;h3 id="11-java-server-startup">1.1 Java Server Startup&lt;/h3>
+&lt;ol>
+&lt;li>Transport Structure Definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.io.Serializable;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Date;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">private&lt;/span> String id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Date time &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Date();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Interface Definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.ArrayList;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Map;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserProvider&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	User &lt;span style="color:#268bd2">GetUser1&lt;/span>(String userId);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-go-client-generic-call">1.2 Go Client Generic Call&lt;/h3>
+&lt;p>This section shows how to construct a generic interface reference in the form of an API&lt;/p></description></item><item><title>Generic Invocation</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/generic-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/generic-2/</guid><description>&lt;h2 id="1-dubbogo-generic-invocation-to-java-server">1. Dubbogo Generic Invocation to Java Server&lt;/h2>
+&lt;p>Using Triple protocol + hessian2 serialization scheme&lt;/p>
+&lt;p>Refer to Dubbogo 3.0 &lt;a href="https://www.yuque.com/docs/share/f4e72670-74ab-45b9-bc0c-4b42249ed953?">Generic Invocation Documentation&lt;/a>&lt;/p>
+&lt;h3 id="11-java-server-startup">1.1 Java Server Startup&lt;/h3>
+&lt;ol>
+&lt;li>Transmission structure definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.io.Serializable;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Date;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">private&lt;/span> String id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Date time &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Date();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Interface definition&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.ArrayList;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Map;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserProvider&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	User &lt;span style="color:#268bd2">GetUser1&lt;/span>(String userId);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-go-client-generic-invocation">1.2 Go-Client Generic Invocation&lt;/h3>
+&lt;p>Here is the construction of the generic interface reference in the form of API&lt;/p></description></item><item><title>AOP and Extension Mechanism</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/</guid><description>&lt;h2 id="1-extension-module-and-init-method">1. Extension Module and Init Method&lt;/h2>
+&lt;h3 id="11-interface-and-implementation">1.1 Interface and Implementation&lt;/h3>
+&lt;p>In Golang, an interface is often accompanied by multiple implementation classes. Dubbo-go provides a pluggable and extensible mechanism for interface implementation classes, reducing coupling between modules and facilitating developers in introducing and customizing components.&lt;/p>
+&lt;h3 id="12-init-method-in-golang">1.2 Init Method in Golang&lt;/h3>
+&lt;p>The init method, as a special method in Golang, executes first on program startup when a user imports a set of modules, performing loading logic. This method is an important way for dubbogo to register extension components.&lt;/p></description></item><item><title>Architecture</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/architecture/</guid><description>&lt;h3 id="architecture-description">Architecture Description&lt;/h3>
+&lt;p>&lt;img alt="architecture" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/architecture/architecture.png">&lt;/p>
+&lt;h3 id="node-description">Node Description&lt;/h3>
+&lt;ul>
+&lt;li>&lt;code>Registry&lt;/code> : The registry center responsible for service registration and discovery in dubbo-go&lt;/li>
+&lt;li>&lt;code>Consumer&lt;/code> : The service consumer that calls remote services&lt;/li>
+&lt;li>&lt;code>Provider&lt;/code> : The service provider that exposes services&lt;/li>
+&lt;/ul>
+&lt;h3 id="process-description">Process Description&lt;/h3>
+&lt;ul>
+&lt;li>&lt;code>0. register&lt;/code> : When the service provider starts, it will automatically register its services with the registry center&lt;/li>
+&lt;li>&lt;code>1. subscribe&lt;/code> : The service consumer will subscribe to the services it needs from the registry center upon starting&lt;/li>
+&lt;li>&lt;code>2. notify&lt;/code> : The registry center returns service registration information to the service consumer. When the subscribed service changes, the change data will be pushed to the consumer&lt;/li>
+&lt;li>&lt;code>3. invoke&lt;/code> : The service consumer selects a suitable service address based on the service addresses obtained from the registry center and initiates a request after applying the load balancing algorithm&lt;/li>
+&lt;/ul></description></item><item><title>The Application and Interface of Dubbo</title><link>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/</guid><description>&lt;h2 id="dubbogo-service-levels">Dubbogo Service Levels&lt;/h2>
+&lt;p>Dubbogo service levels consist of two levels: Application Level and Interface Level, which are closely related to the &lt;strong>framework configuration&lt;/strong> structure.&lt;/p>
+&lt;p>As shown in the diagram below, the components at the application level are marked in light red, while those at the interface level are marked in light blue:&lt;/p>
+&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png">&lt;/p>
+&lt;h2 id="1-application-level-components">1. Application Level Components&lt;/h2>
+&lt;p>Characteristics of application level components: shared by all interface level components of the current application.&lt;/p></description></item></channel></rss>

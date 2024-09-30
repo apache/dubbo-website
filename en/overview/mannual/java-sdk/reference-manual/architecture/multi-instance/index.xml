@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Multi-instance Deployment on Apache Dubbo</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/</link><description>Recent content in Multi-instance Deployment on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/index.xml" rel="self" type="application/rss+xml"/><item><title>Design Concept for Multi-instance Deployment</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/multi-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/multi-instance/</guid><description>&lt;h2 id="background">Background&lt;/h2>
+&lt;p>Java&amp;rsquo;s static variable capability allows binding behaviors holding object references to classes, providing significant convenience to developers. Implementation solutions for design patterns like Singleton and Factory rely on static variables. By using static variables, developers can easily access needed object information anytime, anywhere.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Test&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> Object obj;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Test.obj &lt;span style="color:#719e07">=&lt;/span> xxx;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the long-standing development of the Dubbo framework, static variables have been widely used, such as using a globally shared ConfigManager to store global configuration information, and ServiceRepository to store service information. This design is optimal from the perspective of centralized management of configuration or parameter acquisition. In all versions before Dubbo 2.7, runtime configuration information needed by Dubbo was accessed through global static variables, uniquely identified via the RPC service triplet (interface + version + group).&lt;/p></description></item><item><title>Definitions of Models and Concepts Related to Multi-Instances</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/model/</guid><description>&lt;h2 id="dubbo-architecture">Dubbo Architecture&lt;/h2>
+&lt;p>JVM — Virtual Machine Layer&lt;br>
+Purpose: Complete isolation between Dubbo frameworks (ports cannot be reused)&lt;/p>
+&lt;p>Dubbo Framework — Framework Layer&lt;br>
+Purpose: Reuse resources that need global caching (ports, serialization, etc.)&lt;/p>
+&lt;p>Application — Application Layer&lt;br>
+Purpose: Isolate information between applications, including registration center, configuration center, and metadata center&lt;/p>
+&lt;p>Services — Module Layer&lt;br>
+Purpose: Provide hot loading capability, allowing isolation contexts per ClassLoader or Spring Context&lt;/p>
+&lt;h2 id="dubbo-concept-alignment">Dubbo Concept Alignment&lt;/h2>
+&lt;ol>
+&lt;li>DubboBootstrap
+&lt;ol>
+&lt;li>Needs to separate export/refer services, ServiceInstance, Metadata/Config, etc. Client&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>ConfigManager
+&lt;ol>
+&lt;li>Needs to separate application-level configuration information from module-level configuration information&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>ApplicationModel
+&lt;ol>
+&lt;li>Actually stores application layer information, holding a reference to ConfigManager’s application-level configuration information&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>ConsumerModel
+&lt;ol>
+&lt;li>Actually stores interface information, held by ModuleModel&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>ProviderModel
+&lt;ol>
+&lt;li>Actually stores interface information, held by ModuleModel&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>ExtensionLoader
+&lt;ol>
+&lt;li>Needs to load different instance objects based on different levels&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Registry
+&lt;ol>
+&lt;li>Application level sharing, needs to ensure that multi-instance subscriptions work properly (considering unit scenarios)&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Router / Filter
+&lt;ol>
+&lt;li>Module level sharing&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Protocol / Remoting
+&lt;ol>
+&lt;li>Framework level sharing, reusing IO, contributing across multiple applications&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Metadata&lt;/li>
+&lt;li>Application level sharing, considering application-level service discovery&lt;/li>
+&lt;li>QoS&lt;/li>
+&lt;li>Framework level sharing, related to IO&lt;/li>
+&lt;li>Serialization&lt;/li>
+&lt;li>Framework level sharing, related to IO&lt;/li>
+&lt;li>ConfigCenter&lt;/li>
+&lt;li>Application level contribution&lt;/li>
+&lt;li>ModuleModel (new)&lt;/li>
+&lt;li>Actually stores module layer information, holding interface-level information&lt;/li>
+&lt;li>FrameworkModel (new)&lt;/li>
+&lt;li>Actually stores framework layer information&lt;/li>
+&lt;/ol>
+&lt;h2 id="configuration-storage-organization">Configuration Storage Organization&lt;/h2>
+&lt;h3 id="frameworkmodel">FrameworkModel&lt;/h3>
+&lt;p>Qos, Protocol, Remoting, Serialization, ExtensionLoader&lt;/p></description></item><item><title>Multiple Instances Make Source Code Development More Complex, Learn How to Correctly Extend SPI Implementations</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop/</guid><description>&lt;p>This article provides a simple summary of the coding-related changes after the multiple-instance transformation of Dubbo 3.&lt;/p>
+&lt;h3 id="hierarchical-model">Hierarchical Model&lt;/h3>
+&lt;p>From only ApplicationModel, new ScopeModel/FrameworkModel/ModuleModel are added to express the hierarchical model of multiple instances.
+&lt;img alt="image.png" src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630663265196-0c9e3746-3f62-406b-93d6-7d971ee3e96a.png#clientId=u53624b84-1e3c-4&amp;from=paste&amp;height=302&amp;id=udc7e6f69&amp;originHeight=604&amp;originWidth=1378&amp;originalType=binary&amp;ratio=1&amp;size=132247&amp;status=done&amp;style=none&amp;taskId=u06713196-e7be-483c-8762-6bbc756f336&amp;width=689">
+Each ScopeModel instance will create and bind its own important members:&lt;/p>
+&lt;ul>
+&lt;li>ExtensionDirector&lt;/li>
+&lt;li>BeanFactory&lt;/li>
+&lt;li>ServiceRepository&lt;/li>
+&lt;/ul>
+&lt;p>ScopeModel, as the most basic model, can hold and pass in SPI/Bean/URL, etc.&lt;/p>
+&lt;h3 id="spi-extension">SPI Extension&lt;/h3>
+&lt;h4 id="extensionscope">ExtensionScope&lt;/h4>
+&lt;p>The SPI annotation adds the scope attribute to indicate its belonging scope.
+&lt;img alt="image.png" src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630664482020-9d35e6de-17f7-4334-8506-3af362c03de0.png#clientId=u53624b84-1e3c-4&amp;from=paste&amp;height=249&amp;id=u6c288d3d&amp;originHeight=498&amp;originWidth=930&amp;originalType=binary&amp;ratio=1&amp;size=197493&amp;status=done&amp;style=none&amp;taskId=u56167d63-ab53-4cdb-bb10-723d0c97663&amp;width=465">
+The correspondence between ExtensionScope and the hierarchical model:&lt;/p></description></item><item><title>Startup Process and Module Dependency</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/workflow/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/workflow/</guid><description>&lt;ol>
+&lt;li>Application Startup Process&lt;br>
+Initialize application configuration, start internal modules, and start other modules.&lt;br>
+The application startup methods include: DubboBootstrap.start(), ApplicationModel.getDeployer().start()&lt;br>
+&lt;img alt="Dubbo start process.svg" src="https://cdn.nlark.com/yuque/0/2021/svg/2391732/1634895625292-99fdac6f-3371-4147-9ad5-9428296cb083.svg#clientId=u82d0d5c2-bff3-4&amp;from=drop&amp;id=u8db161d3&amp;originHeight=2594&amp;originWidth=1050&amp;originalType=binary&amp;ratio=1&amp;size=64242&amp;status=done&amp;style=none&amp;taskId=u8976fa81-5bc5-469a-ab4a-b4cda12cd6d">&lt;/li>
+&lt;li>Module Startup Process&lt;br>
+Starting from ModuleDeployer.start() in the diagram above, automatically initialize application configuration, start internal modules, and then start the current module.&lt;br>
+Module startup methods include:&lt;/li>
+&lt;/ol>
+&lt;ol>
+&lt;li>Spring context loads dubbo xml configuration or annotations&lt;/li>
+&lt;li>Manually start the module: ModuleModel.getDeployer().start()&lt;/li>
+&lt;/ol>
+&lt;ol start="3">
+&lt;li>Service Interface API Startup&lt;br>
+ServiceConfig.export() or ReferenceConfig.get() first automatically starts the module, and then executes export/refer service interfaces&lt;/li>
+&lt;/ol></description></item></channel></rss>

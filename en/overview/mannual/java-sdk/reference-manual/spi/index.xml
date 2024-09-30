@@ -1,0 +1,917 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>SPI Plugin Extension User Manual on Apache Dubbo</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/</link><description>Recent content in SPI Plugin Extension User Manual on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo SPI Overview</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/overview/</guid><description>&lt;p>Using IoC containers to help manage the lifecycle of components, dependency injection, etc., is a common design in many development frameworks. Dubbo has a lightweight version of an IoC container built in, used to manage plugins within the framework, achieving capabilities such as plugin instantiation, lifecycle management, and automatic dependency injection.&lt;/p>
+&lt;p>Readers interested may learn about:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/">How the Dubbo SPI Extension System Works&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/extensibility/spi/">Examples of Using Dubbo SPI Extensions&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>The Dubbo plugin system and IoC container have the following characteristics:&lt;/p></description></item><item><title>Dubbo SPI Plugins and Details</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/spi-list/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/spi/spi-list/</guid><description>&lt;p>Dubbo defines many extension points within the framework, so &lt;strong>when you find that the official library cannot meet business needs and wish to provide customization for the Dubbo framework, please first refer to the following extension point definitions to see if you can achieve non-intrusive customization of the Dubbo framework by providing extension implementations&lt;/strong>.&lt;/p>
+&lt;p>For specific information, please refer to the &lt;a href="https://cn.dubbo.apache.org/en/#extension-summary">Summary of Dubbo SPI Extension Definitions&lt;/a> below this article.&lt;/p>
+&lt;img src="https://cn.dubbo.apache.org/imgs/v3/concepts/extension-use.png" style="max-width:600px;height:auto;">
+&lt;h2 id="summary-of-extension-points">Summary of Extension Points&lt;/h2>
+&lt;h3 id="lifecycle-and-event-callbacks">Lifecycle and Event Callbacks&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;strong>SPI Extension Definition&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Function Description&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Example Implementation&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Activation Conditions&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.lang.ShutdownHookCallback&lt;/td>
+ &lt;td style="text-align: left">Elegant offline callback logic extension point, all ShutdownHookCallback implementations will be called before the Dubbo process is destroyed.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.event.ThreadPoolExhaustedListener&lt;/td>
+ &lt;td style="text-align: left">This extension point will trigger an event notification when the Dubbo business thread pool is full.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.collector.sample.MetricThreadPoolExhaustedListener&lt;/td>
+ &lt;td style="text-align: left">Activate implementations with dubbo.protocol.thread-pool-exhausted-listeners=spi-name1,spi-name2.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.ExporterListener&lt;/td>
+ &lt;td style="text-align: left">This extension point will be called back after each Exporter successfully exports/unexports.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.listener.InjvmExporterListener&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; activation conditions can be configured as needed. Implementations can be activated by configuring exporter.listener=spi-name1,spi-name2 in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.InvokerListener&lt;/td>
+ &lt;td style="text-align: left">This extension point will be called back after each service Invoker successfully refers/destroys.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.CountInvokerListener&lt;/td>
+ &lt;td style="text-align: left">Similar as above.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.status.StatusChecker&lt;/td>
+ &lt;td style="text-align: left">Extension point for exposing the internal status of components. Each component that needs to expose status can implement this extension point.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.dubbo.status.ThreadPoolStatusChecker&lt;/td>
+ &lt;td style="text-align: left">Activated by setting dubbo.protocol.status=spi-name1,spi-name2.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.config.ServiceListener&lt;/td>
+ &lt;td style="text-align: left">Callback extension point for ServiceConfig; every ServiceConfig will be called back after successfully exporting/unexporting. The interception point is slightly different from ExporterListener.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.RegistryServiceListener&lt;/td>
+ &lt;td style="text-align: left">Callback extension point after service URL registers/unregisters with the registry center; all extension implementations will be notified in sequence.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated, default activated. Supports controlling specific activated implementations through registry.listeners in the Registry URL such as dubbo.registry.parameters.registry.listeners=spi-name1,spi-name2.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.integration.RegistryProtocolListener&lt;/td>
+ &lt;td style="text-align: left">For interface-level service discovery.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.migration.MigrationRuleListener&lt;/td>
+ &lt;td style="text-align: left">RegistryProtocol listener is introduced to provide a chance to users to customize or change export and refer behavior of RegistryProtocol. For example: re-export or re-refer on the fly when certain conditions are met.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.qos.probe.LivenessProbe&lt;/td>
+ &lt;td style="text-align: left">Lifecycle detection extension point. It can be configured for k8s liveness checks via the qos live HTTP interface.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; default activated. Supports controlling which implementations are activated through dubbo.application.liveness-probe=spi-name1,spi-name2 in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.qos.probe.ReadinessProbe&lt;/td>
+ &lt;td style="text-align: left">Lifecycle detection extension point. It can be configured for k8s readiness checks via the qos ready HTTP interface.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Similar as above.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.qos.probe.StartupProbe&lt;/td>
+ &lt;td style="text-align: left">Lifecycle detection extension point. It can be configured for k8s startup checks via the qos startup HTTP interface.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Similar as above.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.deploy.ApplicationDeployListener&lt;/td>
+ &lt;td style="text-align: left">Callback extension during the Dubbo process lifecycle, supporting multiple callback points including initialization, startup success, and stop. For multi-application deployment scenarios, it is a single application granularity lifecycle callback.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.security.cert.CertDeployerListener&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.deploy.ModuleDeployListener&lt;/td>
+ &lt;td style="text-align: left">Callback extension during the Dubbo process lifecycle, supporting multiple callback points. For multi-module deployment scenarios, it is a single module granularity lifecycle callback.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.qos.api.BaseCommand&lt;/td>
+ &lt;td style="text-align: left">QoS command extension point; implementing this extension adds new QoS commands.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.qos.command.impl.Ls&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;del>org.apache.dubbo.remoting.telnet.TelnetHandler&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;del>org.apache.dubbo.config.bootstrap.DubboBootstrapStartStopListener&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="configuration-related">Configuration Related&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;strong>SPI Extension Definition&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Function Description&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Example Implementation&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Activation Conditions&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.extension.ExtensionInjector&lt;/td>
+ &lt;td style="text-align: left">IoC injector extension point; through extensions, various types of instances can be automatically injected, used for the integration of Dubbo framework SPI instances and different IoC containers, such as supporting Spring Bean injection SPI instances.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.config.spring.extension.SpringExtensionInjector&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no additional configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.infra.InfraAdapter&lt;/td>
+ &lt;td style="text-align: left">Custom loading environment variables extension implementation; allows batch retrieval of environment variables through coding, and the framework will automatically append these values to each service&amp;rsquo;s URL parameters.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.infra.support.EnvironmentAdapter&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no additional configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.logger.LoggerAdapter&lt;/td>
+ &lt;td style="text-align: left">Log framework adapter; if you want to provide support for a log framework not supported by Dubbo, you can use this extension point.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.logger.slf4j.Slf4jLoggerAdapter&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.application.logger=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.config.ConfigInitializer&lt;/td>
+ &lt;td style="text-align: left">Customize ServiceConfig and ReferenceConfig parameters before configuration initialization and service initialization.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated, activation conditions can be added as needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.config.CommonConfigPostProcessor&lt;/td>
+ &lt;td style="text-align: left">Customize ServiceConfig and ReferenceConfig parameters after configuration initialization, but before service initialization. Executes after ConfigInitializer.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.config.FeignClientAnnotationConfigPostProcessor&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; activation conditions can be added as needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.config.spring.context.DubboSpringInitCustomizer&lt;/td>
+ &lt;td style="text-align: left">Custom Dubbo spring initialization; customize Dubbo spring initialization during bean registry processing phase.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no additional configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="service-discovery">Service Discovery&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;strong>SPI Extension Definition&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Function Description&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Example Implementation&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Activation Conditions&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.AddressListener&lt;/td>
+ &lt;td style="text-align: left">Extension used for service discovery. This extension will be triggered when URL address notifications occur; address preprocessing operations can be performed.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; activation conditions can be configured as needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.ProviderFirstParams&lt;/td>
+ &lt;td style="text-align: left">Used for service discovery; specifies URL parameter priorities. The parameters list returned by this extension has provider priorities higher than consumer.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.support.DefaultProviderFirstParams&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.RegistryFactory&lt;/td>
+ &lt;td style="text-align: left">For interface-level service discovery. Extensions can implement different registration center adaptations through this SPI.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.nacos.NacosRegistryFactory&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.registry.address=spi-name://ip:port.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.RegistryClusterIdentifier&lt;/td>
+ &lt;td style="text-align: left">For application-level service discovery. The Dubbo framework supports specifying identification for the registry center cluster, allowing categorization of address URLs based on the cluster they come from.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.DefaultRegistryClusterIdentifier&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.provider.parameters.registry-cluster-type=spi-name to specify the extension implementation.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.ServiceDiscoveryFactory&lt;/td>
+ &lt;td style="text-align: left">For application-level service discovery. Extensions can implement different registration center adaptations through this SPI.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.nacos.NacosServiceDiscoveryFactory&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.registry.address=spi-name://ip:port, while specifying dubbo.registry.register-mode=instance to activate application-level service discovery.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.ServiceInstanceCustomizer&lt;/td>
+ &lt;td style="text-align: left">For application-level service discovery; customizations can be made before application-level instance URLs are registered to the registry center.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataCustomizer&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.migration.MigrationAddressComparator&lt;/td>
+ &lt;td style="text-align: left">Used for application-level service discovery; this extension serves as part of the interface-level to application-level address migration mechanism.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.migration.DefaultMigrationAddressComparator&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;del>org.apache.dubbo.registry.client.migration.PreMigratingConditionChecker&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;del>For application-level service discovery; this extension allows custom check logic before the framework decides to migrate addresses.&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;del>None&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;del>Automatically activated, no configuration needed.&lt;/del>&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.MetadataParamsFilter&lt;/td>
+ &lt;td style="text-align: left">For application-level service discovery; allows control over which parameters are registered to the registry and which are registered as service metadata.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.DefaultMetadataParamsFilter&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated. Supports URL configuration params-filter to control which implementation is activated, such as dubbo.provider.parameters.params-filter=-default,spi-name1 to disable all implementations and only enable spi-name1.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.ServiceInstanceNotificationCustomizer&lt;/td>
+ &lt;td style="text-align: left">For application-level service discovery; identifies special types of address URLs, e.g., an extension implementation to identify Spring Cloud Alibaba Dubbo type addresses.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.SpringCloudServiceInstanceNotificationCustomizer&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.integration.ServiceURLCustomizer&lt;/td>
+ &lt;td style="text-align: left">For interface-level service discovery; specifies which URLs to register to the registry and which URLs not to register when optimizing the interface-level address list.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.integration.DefaultServiceURLCustomizer&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.ProviderURLMergeProcessor&lt;/td>
+ &lt;td style="text-align: left">For interface-level service discovery; this extension is used to complete the merge of consumer URL and provider URL, allowing control over merge strategies to retain different keys and use different overlay relations.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.support.merger.DefaultProviderURLMergeProcessor&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.consumer.url-merge-processor=spi-name to enable the specified extension implementation.&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="rpc-and-traffic-control">RPC and Traffic Control&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;strong>SPI Extension Definition&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Function Description&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Example Implementation&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Activation Conditions&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.Protocol&lt;/td>
+ &lt;td style="text-align: left">RPC protocol implementation extension point; this extension can add more protocol implementations.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.protocol.name=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.ProxyFactory&lt;/td>
+ &lt;td style="text-align: left">RPC proxy implementation extension point; can provide various proxy implementations, such as bytecode enhancement, JDK, etc.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.proxy.javassist.JavassistProxyFactory&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.application.compiler=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.ZoneDetector&lt;/td>
+ &lt;td style="text-align: left">In multi-registration center scenarios, Dubbo provides an automatic same-region priority matching strategy. This extension allows easier customization of zone reading strategies.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Only one ZoneDetector implementation will be activated; the one with the key &amp;lsquo;default&amp;rsquo; will be prioritized.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.Cluster&lt;/td>
+ &lt;td style="text-align: left">RPC request disaster recovery strategy extension point, for instance, you can set actions to take when a request fails, like FailoverCluster, FailfastCluster, etc.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.support.FailoverCluster&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.consumer.cluster=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.LoadBalance&lt;/td>
+ &lt;td style="text-align: left">Load balancing strategy extension point; various load balancing strategies can be implemented through extensions.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.consumer.loadbalance=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.HeaderFilter&lt;/td>
+ &lt;td style="text-align: left">Various attachment/header validation strategies through different extension implementations before RPC requests.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.filter.TokenHeaderFilter&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; supports controlling implementations activated through header.filter=spi-name1,spi-name2 in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.Filter&lt;/td>
+ &lt;td style="text-align: left">RPC request filter; filters RPC calls before the request is initiated and after the response is returned.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.filter.GenericFilter&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; activation conditions can also be configured, e.g., @Activate(group=&amp;ldquo;consumer&amp;rdquo;). Supports controlling which implementations to activate in the provider side via service.filter=spi-name1,spi-name2, and in the consumer side via reference.filter=spi-name1,spi-name2.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.ClusterFilter&lt;/td>
+ &lt;td style="text-align: left">RPC request filter; functions the same as Filter but occurs before service locating. Most users can directly use org.apache.dubbo.rpc.Filter.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.support.ConsumerContextFilter&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; supports controlling which implementations to activate through filter=spi-name1,spi-name2 in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.RouterFactory&lt;/td>
+ &lt;td style="text-align: left">Router extension point; allows adding different routing rule strategies through extensions.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; supports controlling which implementations to activate through router=spi-name1,spi-name2 in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory&lt;/td>
+ &lt;td style="text-align: left">Router extension point; similar to RouterFactory but with higher performance. For most users, RouterFactory can be directly used for simplicity.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.ConditionStateRouterFactory&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; supports controlling which implementations to activate through router=spi-name1,spi-name2 in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.ConfiguratorFactory&lt;/td>
+ &lt;td style="text-align: left">Dynamic configuration rule extension point; allows adding different dynamic configuration rule strategies.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.configurator.override.OverrideConfiguratorFactory&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; supports controlling which implementations to activate through router=spi-name1,spi-name2 in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.pattern.ValuePattern&lt;/td>
+ &lt;td style="text-align: left">Routing rule processing extension point; internal rule processor for conditional routing rules; extends support for richer rules and matching conditions.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.pattern.range.RangeValuePattern&lt;/td>
+ &lt;td style="text-align: left">Automatically activated; activation of specific implementations can be controlled through rules.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcherFactory&lt;/td>
+ &lt;td style="text-align: left">Routing rule processing extension point; internal rule processor for conditional routing rules; extends support for richer rules and matching conditions.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.argument.ArgumentConditionMatcherFactory&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; activation conditions can be configured as needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.mesh.util.TracingContextProvider&lt;/td>
+ &lt;td style="text-align: left">MeshRule routing rule processing extension point; used to read context from different third-party tracing systems.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.mesh.route.MeshEnvListenerFactory&lt;/td>
+ &lt;td style="text-align: left">MeshRule routing rule processing extension point.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.cache.CacheFactory&lt;/td>
+ &lt;td style="text-align: left">Cache implementation extension point for caching RPC call results.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.cache.support.expiring.ExpiringCacheFactory&lt;/td>
+ &lt;td style="text-align: left">Activated by controlling which implementation to activate through cache=spi-name in the URL.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.serialize.Serialization&lt;/td>
+ &lt;td style="text-align: left">Serialization protocol extension point; use this extension if you want to add new serialization protocols.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.serialize.hessian2.Hessian2Serialization&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.provider.serialization=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.ThreadPool&lt;/td>
+ &lt;td style="text-align: left">Thread pool strategy extension point; currently only suitable for Dubbo protocol implementations, not applicable for Triple protocol.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.support.fixed.FixedThreadPool&lt;/td>
+ &lt;td style="text-align: left">Activated by configuring dubbo.provider.threadpool=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.executor.IsolationExecutorSupportFactory&lt;/td>
+ &lt;td style="text-align: left">Thread pool isolation strategy extension point; various isolation strategies can be defined for Dubbo and Triple protocols; each protocol can set one thread pool isolation strategy.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.transport.TripleIsolationExecutorSupportFactory&lt;/td>
+ &lt;td style="text-align: left">Must follow user-configured dubbo.protocol.name; config key must match RPC protocol name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.PenetrateAttachmentSelector&lt;/td>
+ &lt;td style="text-align: left">This extension allows custom parameters to be passed through the chain (Dubbo link); Dubbo only passes parameters from A-&amp;gt;B by default, but this extension can control parameters to pass from A-&amp;gt;B-&amp;gt;C.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;del>org.apache.dubbo.rpc.cluster.interceptor.ClusterInterceptor&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;del>Same as org.apache.dubbo.rpc.cluster.filter.ClusterFilter; deprecated.&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;del>Deprecated.&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="service-governance">Service Governance&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;strong>SPI Extension Definition&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Function Description&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Example Implementation&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Activation Conditions&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.config.configcenter.DynamicConfigurationFactory&lt;/td>
+ &lt;td style="text-align: left">Core extension point for configuration center; provides different configuration center adaptation implementations.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.configcenter.support.nacos.NacosDynamicConfigurationFactory&lt;/td>
+ &lt;td style="text-align: left">Activated by specifying dubbo.config-center.address=spi-name://.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.report.MetadataReportFactory&lt;/td>
+ &lt;td style="text-align: left">Extension point for metadata center to provide new storage implementations for metadata center.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.store.nacos.NacosMetadataReportFactory&lt;/td>
+ &lt;td style="text-align: left">Activated by specifying dubbo.metadata-report.address=spi-name://.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.report.MetricsReporterFactory&lt;/td>
+ &lt;td style="text-align: left">Metrics reporting extension point; can adapt to different Metrics backend services through extensions.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.prometheus.PrometheusMetricsReporterFactory&lt;/td>
+ &lt;td style="text-align: left">Activated by specifying dubbo.metrics.protocol=spi-name.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.collector.MetricsCollector&lt;/td>
+ &lt;td style="text-align: left">Internal metrics collection extension point; can support RPC, registry, and other components&amp;rsquo; metrics data collection through extensions.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.registry.collector.RegistryMetricsCollector&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated; activation conditions can be added as needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.auth.spi.AccessKeyStorage&lt;/td>
+ &lt;td style="text-align: left">Used for the dubbo-auth module; this extension point can read AK from different sources.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.auth.DefaultAccessKeyStorage&lt;/td>
+ &lt;td style="text-align: left">Activated by specifying accessKey.storage URL parameter.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.auth.spi.Authenticator&lt;/td>
+ &lt;td style="text-align: left">Used for the dubbo-auth module; this extension point implements specific authentication logic.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.auth.AccessKeyAuthenticator&lt;/td>
+ &lt;td style="text-align: left">Activated by specifying authenticator URL parameter.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.ssl.CertProvider&lt;/td>
+ &lt;td style="text-align: left">TLS certificate source extension used for adapting different certificate source implementations.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.ssl.impl.SSLConfigCertProvider&lt;/td>
+ &lt;td style="text-align: left">Extensions must add the @Activate annotation to be activated.&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="protocol-and-transport-layer-implementation">Protocol and Transport Layer Implementation&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;strong>SPI Extension Definition&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Function Description&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Example Implementation&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Activation Conditions&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.ChannelHandler&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.Codec&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.Codec2&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.Dispatcher&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.Transporter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.dubbo.ByteAccessor&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.api.pu.PortUnificationTransporter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.api.WireProtocol&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.api.connection.ConnectionManager&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.exchange.Exchanger&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.http.HttpBinder&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.message.HttpMessageEncoderFactory&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.message.HttpMessageDecoderFactory&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.h2.Http2ServerTransportListenerFactory&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.h1.Http1ServerTransportListenerFactory&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.message.HttpMessageAdapterFactory&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.annotation.processing.builder.TypeBuilder&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.annotation.processing.rest.AnnotatedMethodParameterProcessor&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.annotation.processing.rest.ServiceRestMetadataResolver&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.definition.builder.TypeBuilder&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.AnnotatedMethodParameterProcessor&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.ServiceRestMetadataReader&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.compressor.Compressor&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.compressor.DeCompressor&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.argument.ArgumentConverter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.argument.ArgumentResolver&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.filter.RestExtension&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.filter.RestExtensionAdapter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.mapping.RequestMappingResolver&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.route.RequestHandlerMapping&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.annotation.param.parse.provider.BaseProviderParamParser&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.ServiceRestMetadataResolver&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.filter.RestRequestFilter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.filter.RestResponseFilter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.NoAnnotatedParameterRequestTagProcessor&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.message.HttpMessageCodec&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.annotation.consumer.HttpConnectionPreBuildIntercept&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.annotation.param.parse.consumer.BaseConsumerParamParser&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.http.factory.RestClientFactory&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.filter.RestResponseInterceptor&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="framework-internal-implementation">Framework Internal Implementation&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">&lt;strong>SPI Extension Definition&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Function Description&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Example Implementation&lt;/strong>&lt;/th>
+ &lt;th style="text-align: left">&lt;strong>Activation Conditions&lt;/strong>&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.url.component.param.DynamicParamSource&lt;/td>
+ &lt;td style="text-align: left">Allows custom dynamic parameter lists extension, related to URL storage optimizations in Dubbo3.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.url.component.param.DefaultDynamicParamSource&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.compiler.Compiler&lt;/td>
+ &lt;td style="text-align: left">Sets adaptive extension implementations for the Dubbo IoC container dependent on bytecode tools. Default uses Javassist, can be set to use JDK or ByteBuddy, etc.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.compiler.support.JavassistCompiler&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.serialize.MultipleSerialization&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.convert.Converter&lt;/td>
+ &lt;td style="text-align: left">Implements conversion from source type to target type, mainly limited to internal framework integration.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.convert.StringToFloatConverter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.config.OrderedPropertiesProvider&lt;/td>
+ &lt;td style="text-align: left">Provides more properties sources for the framework through extension, mainly limited to internal framework integration.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.convert.multiple.MultiValueConverter&lt;/td>
+ &lt;td style="text-align: left">Implements conversion from source type to target type, mainly limited to internal framework integration.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.common.convert.multiple.StringToArrayConverter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.store.DataStore&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.manager.ExecutorRepository&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.spring.security.jackson.ObjectMapperCodecCustomer&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.validation.Validation&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.PathResolver&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.model.PackableMethodFactory&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.model.ApplicationInitListener&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.model.BuiltinServiceDetector&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.model.ScopeModelInitializer&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.aot.api.ReflectionTypeDescriberRegistrar&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.aot.api.ProxyDescriberRegistrar&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.json.JsonUtil&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.injvm.ParamDeepCopyUtil&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.aot.api.ResourceDescriberRegistrar&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.context.ApplicationExt&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.context.ModuleExt&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.service.MetricsService&lt;/td>
+ &lt;td style="text-align: left">Internal service definition for releasing/exposing Metrics indicators, published as a standard Dubbo service.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.service.DefaultMetricsService&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metrics.service.MetricsServiceExporter&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.FilterChainBuilder&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.InvocationInterceptorBuilder&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.Merger&lt;/td>
+ &lt;td style="text-align: left">Currently used for multi-group calling scenarios to merge request results.&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.governance.GovernanceRuleRepository&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.qos.permission.PermissionChecker&lt;/td>
+ &lt;td style="text-align: left">Checks extended QoS execution permission logic, in conjunction with the @CMD permission annotation for each QoS command, combining context for checks.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.qos.permission.DefaultAnonymousAccessPermissionChecker&lt;/td>
+ &lt;td style="text-align: left">Defaults to supporting only qosPermissionChecker.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.common.status.reporter.FrameworkStatusReporter&lt;/td>
+ &lt;td style="text-align: left">Extension point for reporting the internal running status of the Dubbo framework. Currently used for statistics in service discovery model automatic migration, all migration actions will be reported through this extension.&lt;/td>
+ &lt;td style="text-align: left">None&lt;/td>
+ &lt;td style="text-align: left">Automatically activated, no configuration needed.&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.MetadataServiceURLBuilder&lt;/td>
+ &lt;td style="text-align: left">For application-level service discovery; generates custom logic when creating MetadataService URL after receiving application-level address URL pushes (only for point-to-point application-level address discovery).&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.StandardMetadataServiceURLBuilder&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">org.apache.dubbo.metadata.ServiceNameMapping&lt;/td>
+ &lt;td style="text-align: left">Used for application-level service discovery.&lt;/td>
+ &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.MetadataServiceNameMapping&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">&lt;del>org.apache.dubbo.common.extension.ExtensionFactory&lt;/del>&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;td style="text-align: left">&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table></description></item></channel></rss>
