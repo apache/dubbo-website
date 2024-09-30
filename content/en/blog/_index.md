@@ -1,9 +1,9 @@
 ---
-title: "Apache Dubbo Blog"
-linkTitle: "BLOG"
+title: "Apache Dubbo 博客"
+linkTitle: "博客"
 menu:
   main:
-    weight: 30
+    weight: 3
 ---
 
 

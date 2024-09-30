@@ -1,56 +1,51 @@
 ---
-title: "Introduction to Apache Dubbo plugin for IntelliJ IDEA"
-linkTitle: "Introduction to Apache Dubbo plugin for IntelliJ IDEA"
+title: "IntelliJ IDEA❤️Apache Dubbo，IDEA官方插件正式发布！"
+linkTitle: "IntelliJ IDEA❤️Apache Dubbo，IDEA官方插件正式发布！"
 date: 2023-10-23
-tags: ["news"]
-authors: Dubbo Community
+tags: ["新闻动态"]
+authors: Dubbo 社区
 description: >
-   A brief introduction to Apache Dubbo plugin for IntelliJ IDEA
+   IntelliJ IDEA loves Apache Dubbo，IDEA 官方正式发布 Apache Dubbo in Spring Framework 插件，支持 Dubbo 脚手架与项目模板创建。
 ---
 
-The most popular Java IDE, IntelliJ IDEA, has collaborated with the open-source microservice framework Apache Dubbo community, bringing good news to microservice developers. Along with IntelliJ IDEA version 2023.2, Jetbras has officially released the new **Apache Dubbo in Spring Framework** plugin version.
+最受欢迎的 Java 集成开发环境 IntelliJ IDEA 与开源微服务框架 Apache Dubbo 社区强强合作，给广大微服务开发者带来了福音。与 IntelliJ IDEA 2023.2 版本一起，**Jetbrains 官方发布了一款全新插件 - Apache Dubbo in Spring Framework**。
 
-This plugin can help developers with Dubbo project initialization and facilitate the identification of Dubbo services and their dependencies during the project development process. Developing microservices based on Apache Dubbo will become very simple.
+![IntelliJ IDEA loves️ Apache Dubbo](/imgs/blog/2023/10/plugin/img_6.png)
 
+这款插件可以帮助开发者解决 Dubbo 项目初始化问题，同时方便识别项目开发过程中的 Dubbo 服务及其依赖关系，基于 Apache Dubbo 的微服务开发将变得非常简单。
 
-## How to install
-Before installing the Apache Dubbo plugin, please ensure that you are using IntelliJ IDEA version 2023.2 and above.
-
+## 安装插件
+在安装 Apache Dubbo 插件之前，请确保您使用的 IntelliJ IDEA 为 2023.2 及以上版本。
 ![image.png](/imgs/blog/2023/10/plugin/img.png)
 
-There are two ways to complete the installation of the Apache Dubbo plugin
+有两种方式可以完成 Apache Dubbo 插件的安装
 
-### Method 1
-Open [the Apache Dubbo in Spring Framework plugin page](https://plugins.jetbrains.com/plugin/20938-apache-dubbo-in-spring-framework) with browser, and in the upper right corner of the page, click the "Install to IntelliJ IDEA 2023.2" button to complete the plugin installation.
-
+### 方式一
+使用浏览器打开插件 [Apache Dubbo in Spring Framework](https://plugins.jetbrains.com/plugin/20938-apache-dubbo-in-spring-framework) 官方地址，在页面右上角，点击 “Install to IntelliJ IDEA 2023.2” 按钮即可完成插件安装。
 ![image.png](/imgs/blog/2023/10/plugin/img_1.png)
-### Method 2
-Open 'Preferences ->Plugins', enter 'Apache Dubbo' to search for plugins, and then install them.
 
+### 方式二
+打开 Preferences -> Plugins，输入 'Apache Dubbo' 搜索插件，安装即可。
 ![image.png](/imgs/blog/2023/10/plugin/img_2.png)
 
-## Create a new Dubbo application
-Next, let's take a look at how to use the plugin to create and develop an Apache Dubbo microservice application.
-### The 'New Project' pop-up window
-Open the 'New Project' window through 'File>New>Project'. In the pop-up window, you can see that the Apache Dubbo plugin has appeared in the generators list on the left. Click to select it.
+## 使用插件新建应用
+插件安装完成，接下来，我们看一下如何使用插件创建和开发 Apache Dubbo 微服务应用。
 
+### 打开弹窗
+通过 "File -> New -> Project" 打开新建项目对话框，在对话框中，可以看到 Apache Dubbo 插件已经出现在左侧模版列表中，点击选中即可。
 ![image.png](/imgs/blog/2023/10/plugin/img_3.png)
 
-According to the application needs, enter the project name, save path, coordinates, JDK version, and other information. Click "Next" to proceed to the next step.
-
-### Select Components
-
+根据应用需要，录入项目名称、保存路径、坐标、JDK版本等信息了，录入完毕之后，点击 "Next" 进入下一步。
+### 选择组件
 ![image.png](/imgs/blog/2023/10/plugin/img_4.png)
 
-The plugin will use dubbo spring boot starter to create a Spring Boot project, so we
+插件将使用 `dubbo-spring-boot-starter` 创建 Spring Boot 项目，因此我们
 
-- Firstly, you need to choose the versions of Dubbo and Spring Boot.
-- Secondly, select the corresponding Dubbo and business components according to the project needs
+- 首先，需要选择 Dubbo 与 Spring Boot 的版本。
+- 其次，根据项目需要，选择相应的 Dubbo 与业务组件
 
-Finally, click "Create" to complete the project creation.
-
+最后，点击 “Create”，完成项目创建。
 ![image.png](/imgs/blog/2023/10/plugin/img_5.png)
-
-## Summary
-The release of the official IntelliJ IDEA plugin greatly simplifies the cost of initializing the Dubbo project.
-In addition to the plugin format, you can also directly open the start.dubbo.apache.org online service to quickly create Dubbo projects through a browser.
+## 总结
+IntelliJ IDEA 官方插件的发布，极大的简化了 Dubbo 项目初始化的成本，接下来，Apache Dubbo 社区会继续与 IntelliJ 官方合作，将更多的 Dubbo 特性抽象为插件组件，以简化 Dubbo 使用中的依赖、配置管理等难题。
+除了插件形式外，您也可以直接打开 [start.dubbo.apache.org](https://start.dubbo.apache.org) 在线服务，通过浏览器快速创建 Dubbo 项目。

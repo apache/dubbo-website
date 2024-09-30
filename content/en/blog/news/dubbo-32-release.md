@@ -1,91 +1,93 @@
 ---
-title: "Advanced cloud native - Dubbo 3.2 officially released"
-linkTitle: "Advanced cloud native - Dubbo 3.2 officially released"
+title: "精进云原生 - Dubbo 3.2 正式发布"
+linkTitle: "精进云原生 - Dubbo 3.2 正式发布"
 date: 2023-04-15
+tags: ["新闻动态"]
 description: >
-  We are very happy to announce that Dubbo 3.2 has been officially released! This version brings many new features and improvements, which is also an important attempt of Dubbo in the face of cloud nativeization.
+  我们非常高兴地宣布，Dubbo 3.2 已经正式发布了！这个版本带来了许多新功能和改进，这也是 Dubbo 在面对云原生化的当下的一次重要的尝试。
 ---
 
-## Background introduction
+## 背景介绍
 
-Apache Dubbo is an RPC service development framework, which is used to solve service governance and communication problems under the microservice architecture. It officially provides multi-language SDK implementations such as Java and Golang. The microservices developed using Dubbo are natively capable of remote address discovery and communication with each other. Using the rich service governance features provided by Dubbo, service governance demands such as service discovery, load balancing, and traffic scheduling can be realized. Dubbo is designed to be highly scalable, and users can easily implement various custom logics for traffic interception and location selection.
+Apache Dubbo 是一款 RPC 服务开发框架，用于解决微服务架构下的服务治理与通信问题，官方提供了 Java、Golang 等多语言 SDK 实现。使用 Dubbo 开发的微服务原生具备相互之间的远程地址发现与通信能力， 利用 Dubbo 提供的丰富服务治理特性，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。Dubbo 被设计为高度可扩展，用户可以方便的实现流量拦截、选址的各种定制逻辑。
 
-## Rest protocol support
+## Rest 协议支持
 
-### 1. Why Rest?
+### 1. Why Rest？
 
-With the popularization of mobile Internet, more and more applications need to be integrated with different systems. And these systems may use different communication protocols, which requires the application program to be able to flexibly adapt to various protocols. The Rest protocol is a very flexible protocol that communicates using HTTP and can be integrated with almost any system.
+随着移动互联网的普及，越来越多的应用程序需要与不同的系统进行集成。而这些系统可能使用不同的通信协议，这就需要应用程序能够灵活地适应各种协议。Rest 协议正是一种非常灵活的协议，它使用 HTTP 进行通信，可以与几乎任何系统进行集成。
 
-In the past, RPC frameworks typically communicated using a binary protocol, which was very efficient but not flexible enough. In contrast, the Rest protocol uses HTTP for communication, which is more convenient to integrate with other systems, and also easier to integrate with modern web and mobile applications.
+在过去，RPC框架通常使用二进制协议进行通信，这种协议非常高效，但不够灵活。相比之下，Rest协议使用HTTP进行通信，更方便与其他系统集成，也更容易与现代化的Web和移动应用程序集成。
 
-Besides flexibility, the Rest protocol is also readable and easy to use. Using the Rest protocol, developers can test and debug services using common HTTP tools such as cURL or Postman, without the need for specific tools. Also, since the REST protocol uses standard HTTP methods such as GET, POST, PUT, and DELETE, it becomes easier for developers to understand and use the service.
+除了灵活性，Rest协议还具有易读性和易用性。使用Rest协议，开发人员可以使用通用的HTTP工具（例如cURL或Postman）测试和调试服务，而不需要特定的工具。此外，由于Rest协议使用标准的HTTP方法（例如GET、POST、PUT和DELETE），因此开发人员可以更容易地理解和使用服务。
 
-### 2. How To?
+### 2. How To？
 
-In previous Dubbo versions, Rest protocol support was also provided, but there were the following problems:
+在之前的 Dubbo 版本中，也提供了 Rest 协议的支持，但存在以下问题：
 
-- Only supports JAX-RS annotation fields, which is more complex than the more widely adopted Spring Web annotations
+- 仅支持 JAX-RS 注解域，相较于采用度更高的 Spring Web 注解，复杂度更高
 
-- It needs to rely on many external components, such as Resteasy, tomcat, jetty, etc., to work normally, which greatly increases the cost of use.
+- 需要依赖众多外部组件，如 Resteasy、tomcat、jetty 等，才能正常工作，极大地增加了使用成本。
 
-Therefore, in Dubbo version 3.2, we introduced the support of Spring Web annotation domain and the native support of Rest protocol without relying on any external components.
+因此，在 Dubbo 3.2 版本中，我们引入了 Spring Web 注解域的支持以及 Rest 协议的原生支持，无需依赖任何外部组件。
 
-The most intuitive difference is that if you upgrade to Dubbo 3.2, services published through Spring Web can also be published directly through Dubbo. All you need to do is change the @Controller annotation to @DubboService annotation.
+最直观的区别是，如果你升级到了 Dubbo 3.2，通过 Spring Web 发布的服务也可以直接通过 Dubbo 来发布。这一切只需要将 @Controller 注解改成 @DubboService 注解即可。
 
-In addition, for users who originally used Spring Boot or Spring Cloud as a service split, they can also migrate smoothly to Dubbo based on this function, and obtain the powerful capabilities of Dubbo at a very low cost.
+此外，对于原来使用 Spring Boot 或者 Spring Cloud 作为服务拆分的用户，也可以基于本功能平滑地迁移到 Dubbo 上来，以极低的成本获得 Dubbo 强大的能力。
 
-### 3. What's next?
+### 3. What's next？
 
-In the future, Dubbo will continue to improve. In addition to the existing features, we will also add the following new features to better meet the needs:
+接下来 Dubbo 还将继续完善。除了现有的特性，我们还将加入以下新的特性，以更好地满足需求：
 
-1. Native support for HTTP/2 and HTTP/3 protocols. This means that you can use Dubbo to communicate with other systems more easily without worrying about protocol compatibility.
+1. HTTP/2、HTTP/3 协议的原生支持。这意味着，你可以更加方便地使用 Dubbo 与其他系统进行通信，无需担心协议的兼容性问题。
 
-2. Referring to Spring Web annotations, Dubbo natively provides support for Web annotations, so that users can get the same experience as using Spring Web without relying on Spring Web.
+2. 参考 Spring Web 注解，Dubbo 原生提供 Web 注解的支持，使得用户无需依赖 Spring Web 也可以获得与使用 Spring Web 相同的体验。
 
-3. Support zero transformation of existing services and publish them with the Rest protocol. This feature allows you to manage your services more flexibly without making any changes to existing services. You can publish your services through the Rest protocol, so that your services can be used by other systems more easily.
+3. 支持现有服务零改造以 Rest 协议发布。这个特性可以让你更加灵活地管理你的服务，而无需对现有的服务进行任何改动。你可以通过 Rest 协议来发布你的服务，这样你的服务就可以更加方便地被其他系统所使用了。
 
-## Observable system
+## 可观测体系
 
-Under the microservice architecture, the business system is composed of more and more services, and the services call each other. The ensuing problem is how to quickly locate the fault and solve it in time. In order to solve this problem, we need more tools and techniques to ensure the reliability of the whole system. One of the solutions is to use logging and analytics so that you can better track how your application is doing, find potential problems and fix them in a timely manner. In addition, using visual monitoring tools can help us better understand the status of the entire system, so as to better predict and solve problems. Finally, we can also use automated testing to ensure the quality of each service, as well as the stability and reliability of the entire system, so as to better meet customer needs.
+在微服务架构下，业务系统由越来越多的服务组成，服务之间互相调用，随之而来的问题是如何快速地定位故障，并及时解决。为了解决这一问题，我们需要更多的工具和技术来确保整个系统的可靠性。其中一个解决方案是使用日志记录和分析，以便可以更好地跟踪应用程序的运行情况，找到潜在的问题并及时解决。另外，使用可视化的监控工具可以帮助我们更好地理解整个系统的状态，从而更好地预测和解决问题。最后，我们还可以使用自动化测试来确保每个服务的质量，以及整个系统的稳定性和可靠性，从而更好地满足客户的需求。
 
-A complete observable system should include the following functions:
+一套完整的可观测体系应该包括以下功能：
 
-- Metrics indicator monitoring, used to collect and analyze various indicator data, including system performance, resource consumption, etc. Through indicator monitoring, users can keep abreast of the operation of the system, find abnormalities and take corresponding measures.
+- Metrics 指标监控，用于收集和分析各种指标数据，包括系统的性能、资源消耗情况等等。通过指标监控，用户可以及时了解系统的运行情况，发现异常并做出相应的处理。
 
-- Tracing Distributed tracing, used to trace the call links between various services in the system, to help users discover and locate potential performance problems, bottlenecks, etc. Through distributed tracing, users can deeply understand the operation process of the system, identify possible problems and make effective optimization and adjustment.
+- Tracing 分布式追踪，用于跟踪系统中各个服务之间的调用链路，帮助用户发现和定位潜在的性能问题、瓶颈等等。通过分布式追踪，用户可以深入了解系统的运作过程，识别出可能存在的问题并进行有效的优化和调整。
 
-- Logging log management, used to record various events and operations in the system, including error logs, access logs, transaction logs, etc. Through log management, users can learn about the running status of the system, fault information, etc., and help users quickly locate problems and handle them accordingly.
+- Logging 日志管理，用于记录系统中发生的各种事件和操作，包括错误日志、访问日志、事务日志等等。通过日志管理，用户可以了解系统的运行情况、故障信息等等，帮助用户快速定位问题并进行相应的处理。
 
-To sum up, the above three functions can not only help users quickly locate faults, improve system reliability and stability, but also help users deeply understand the operation and performance of the system, and provide users with comprehensive monitoring and protection.
+综上所述，以上三个功能不仅可以帮助用户快速定位故障，提高系统的可靠性和稳定性，还可以帮助用户深入了解系统的运行情况和性能状况，为用户提供全方位的监控和保障。
 
-In Dubbo version 3.2, we mainly enhanced Metrics and Tracing.
+在 Dubbo 3.2 版本中，我们主要就 Metrics 和 Tracing 两个方面进行了增强。
 
 ### 1. Metrics
 
-In terms of metrics, we use Micrometer to greatly increase the buried points of indicators, including but not limited to core service indicators such as QPS, RT, total number of calls, number of successes, number of failures, and failure reason statistics. In order to better monitor the running status of services, Dubbo also provides monitoring of the status of core components, such as the number of thread pools, service health status, etc. In addition, Dubbo also supports the standard Prometheus Pull and Push modes, and provides several official native Grafana panels to achieve production-oriented Metrics all-weather observation.
+在 Metrics 方面，我们使用 Micrometer 大幅增加了指标的埋点，包括但不限于 QPS、RT、调用总数、成功数、失败数、失败原因统计等核心服务指标。为了更好地监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，例如线程池数量、服务健康状态等。此外，Dubbo 还支持标准 Prometheus 的 Pull 和 Push 模式，并提供了若干个官方原生的 Grafana 面板，实现面向生产的 Metrics 全天候观测。
 
 ![img](/imgs/blog/32-release/Untitled.png)
 
 
 ![Untitled](/imgs/blog/32-release/Untitled%201.png)
 
-For all users, only need to upgrade to Dubbo 3.2 version and add dubbo-spring-boot-observability-starter dependency to get Metrics capability. After the application starts, relevant indicators will be exposed under the metrics command of Dubbo QoS, which can be obtained locally through `http://127.0.0.1:22222/metrics`. In addition, for users who use Spring Actuator, Dubbo will also expose these data by default.
+对于所有的用户，只需要升级到 Dubbo 3.2 版本，并添加 dubbo-spring-boot-observability-starter 依赖即可获得 Metrics 能力。在应用启动后，将在 Dubbo QoS 的 metrics 命令下暴露相关的指标，本地可以通过 `http://127.0.0.1:22222/metrics` 获取。此外对于使用了 Spring Actuator 的用户，Dubbo 也将默认将这些数据暴露出来。
 
 ### Tracing
 
-In terms of Tracing, we also implemented tracking of buried points during request runtime based on Micrometer. We implement this function natively through the Filter interceptor. We support exporting trace data to some mainstream implementations, such as Zipkin, Skywalking, Jaeger, etc. In this way, the analysis and visual display of the full link tracking data can be realized.
+在 Tracing 方面，我们还基于 Micrometer 实现了请求运行时的埋点跟踪。我们通过 Filter 拦截器原生方式来实现这一功能。我们支持将跟踪数据导出到一些主流实现，例如 Zipkin、Skywalking、Jaeger 等。这样就可以实现全链路跟踪数据的分析和可视化展示。
 
 ![Untitled](/imgs/blog/32-release/Untitled%202.png)
 
 ### Logging
 
-In addition, for Logging, Dubbo has introduced an error code mechanism since version 3.1, realizing full coverage of WARN and ERROR level logs. In abnormal scenarios, it supports quick indexing of official website resolution documents.
+此外，对于 Logging 方面，Dubbo 从 3.1 版本开始引入了错误码机制，实现了 WARN、ERROR 级别日志的全覆盖。在异常场景下，支持快速索引官网解决文档。
 
-## Native Image native support
+## Native Image 原生支持
 
-In terms of Native Image, Dubbo will officially support Native Image based on GraalVM starting from 3.2. Starting from Dubbo3.0, Dubbo has already explored some Native Image support, but the ease of use and support are not ideal. From 3.2 Starting from version 1, Dubbo will simplify the way users access Native Image. It can be mainly divided into three aspects:
+在Native Image方面，Dubbo从3.2开始将正式基于GraalVM完成对Native Image 的支持，从Dubbo3.0开始，Dubbo已经有一些Native Image支持的探索，但是易用性和支持程度都不太理想，从3.2版本开始，Dubbo将会简化用户接入Native Image的使用方式。主要可以分为三个面：
 
-1. Compile plugin configuration upgrade: from the original native-image-maven-plugin to dubbo-maven-plugin +native-maven-plugin, which distinguishes the native image configuration officially provided by Graalvm from the native image configuration required by Dubbo, simplifying The native image configuration that users need to care about
+1. 编译插件配置升级：从最初的 native-image-maven-plugin 改为 dubbo-maven-plugin +native-maven-plugin，区分了Graalvm官方提供的native image配置与Dubbo所需的native image配置，简化了用户所需要关心的native image配置
+
 ```xml
 <plugin>
 	<groupId>org.graalvm.nativeimage</groupId>
@@ -139,7 +141,7 @@ In terms of Native Image, Dubbo will officially support Native Image based on Gr
 </plugin>
 ```
 
-becomes：
+变为：
 
 ```xml
 <plugin>
@@ -173,60 +175,60 @@ becomes：
 </plugin>
 ```
 
-1. In the old version, users were required to manually generate and complete the unique Adaptive code in Dubbo. Users of the new version do not need to care about these details.
-2. The configuration file under META-INF.native-image generated by the Dubbo framework in the old version will be directly generated in the user's project directory, and the new version 3.2 will be compiled into the target without affecting the user's project structure. In addition, the Dubbo framework will no longer use the method of manually completing the native image, but will automatically detect and generate the required configuration files, which simplifies the experience of Dubbo developers. This can also reduce the size of the final compiled binary package and improve compilation speed.
+1. 旧版本中需要用户手动生成和补全Dubbo内独有的Adaptive代码，新版本用户将不需要关心这些细节。
+2. 旧版本中Dubbo框架生成的META-INF.native-image下的配置文件会直接生成在用户的工程目录中，3.2新版本将会被编译到target下，不影响用户的工程结构。除此之外，Dubbo框架也将不再采用手动补全native image的方式，而且采用自动探测和生成所需的配置文件的方式，简化了Dubbo开发者的体验。这也能够降低最后编译后的二进制包的大小和提高编译速度。
 
-In addition to improving ease of use, Dubbo will support API, annotations, and XML configuration methods in native image scenarios in version 3.2, and support compatibility with native in SpringBoot3.
+除了易用性提升以外，Dubbo将在3.2版本将在native image场景下支持API、注解以及XML配置方式，并支持与SpringBoot3中的native兼容。
 
-## other
+## 其他
 
-### JDK 17 & Spring Boot 3 native support
+### JDK 17 & Spring Boot 3 原生支持
 
-JDK 17 is the latest LTS version of Java after JDK 11, including many new features and improvements, such as Sealed classes, garbage collector improvements, and more.
+JDK 17 是继 JDK 11 之后目前 Java 的最新 LTS 版本，包括许多新功能和改进，例如 Sealed 类、垃圾收集器的改进等等。
 
-Since JDK 16 began to restrict Java internal class reflection, Dubbo's serialization and dynamic proxy have been affected to a certain extent. In Dubbo 3.2, we solved the compatibility problem from the bottom through the optimization of Fastjson2 and Javassist. At present, Dubbo can run perfectly on JDK17, and all unit tests and most integration tests have also been tested on the JDK 17 platform.
+自从 JDK 16 开始限制 Java 内部类反射以后，Dubbo 的序列化以及动态代理都受到了一定的影响。在 Dubbo 3.2 中，我们通过 Fastjson2 以及 Javassist 的优化从底层解决了兼容性问题。目前 Dubbo 已经可以完美运行在 JDK17 之上，所有单元测试以及大多数集成测试也都在 JDK 17 平台上测试通过。
 
-For the upcoming JDK 21 LTS, Dubbo is intensively adapting it. We will add support for JDK 21 and Dubbo coroutines (Project Loom) in version 3.3.
+针对即将发布的 JDK 21 LTS，Dubbo 正在紧锣密鼓地进行适配。我们将在 3.3 版本中加入对 JDK 21 和 Dubbo 协程（Project Loom）的支持。
 
-### RPC performance greatly improved
+### RPC 性能大幅提升
 
-In version 3.2, we have optimized the performance of RPC calls, and the optimized content is as follows.
+在3.2版本中，我们对RPC调用性能做了调优，其中优化内容如下。
 
-- Eliminates synchronization lock contention and blocking code (`triple`)
-    1. When creating an HTTP/2 Stream Channel in version 3.1, the method of synchronously blocking user threads is used to wait for the Stream Channel to be created, and the remote call is initiated after the creation is completed. In 3.2, we will create the behavior of HTTP/2 Stream Channel `asynchronous` and ensure that the request is initiated after the creation is completed, so as to `reduce unnecessary waiting for user threads`.
-    2. In version 3.1, there is a synchronization lock competition between the user thread and the Netty I/O thread. The IO thread will check the Socket availability for each write request, and the Socket availability check method is also used in the user thread, but the Socket availability in the JDK The implementation of the check uses `synchronized` to ensure concurrency safety. In order to reduce this part of the time-consuming, we remove the user thread check and eliminate this part of the time-consuming.
-- Reduced request response delay with synchronous blocking calls (`dubbo`, `triple`)
+- 消除了同步锁竞争以及会出现阻塞的代码(`triple`)
+    1. 在3.1版本中创建HTTP/2 Stream Channel时采用了同步阻塞用户线程的方式等待Stream Channel创建完成，创建完成后才开始发起远程调用。而在3.2中我们将创建HTTP/2 Stream Channel的行为`异步化`并保证创建完毕后才发起请求，以此`减少了用户线程不必要的等待`。
+    2. 在3.1版本中用户线程与Netty的I/O线程出现了同步锁竞争，IO线程每次写请求都会检查Socket可用性，而用户线程中也使用了Socket可用性检查的方法，但JDK中Socket可用性检查的实现使用了 `synchronized` 来保证并发安全，为了减少这部分的耗时我们将用户线程的检查移除，消除了该部分的耗时。
+- 减少了用同步阻塞调用方式的请求响应延迟(`dubbo`、`triple`)
 
-  In the RPC call in SYNC mode in version 3.1, we use a blocking queue to wait for the response written back by the remote service. When the response is written back, it will be added to the queue and wake up the blocked user thread. In 3.2, we replaced the blocking queue with a concurrent queue, and used its CAS mechanism to greatly reduce the number of threads entering blocking, improve CPU utilization and reduce response processing delay
+  在3.1版本中SYNC模式下的RPC调用我们使用了阻塞队列的方式等待远程服务写回的响应，当响应写回后会添加到队列中并唤醒被阻塞的用户线程。而在3.2中我们将阻塞队列更换为并发队列，利用其CAS的机制大幅度减少线程进入阻塞的次数，提高CPU利用率并降低了响应处理延迟
 
-- Reduced the number of thread switches (`triple`)
+- 减少了线程切换的次数(`triple`)
 
-  In version 3.1, the RPC call in SYNC mode uses a consumer thread pool for processing when receiving the response, and wakes up the user thread to receive the response after the processing is completed. However, through the analysis of the consumer thread pool in SYNC mode is unnecessary, an additional layer of consumer thread pool processing not only wastes server resources but also reduces performance, so we removed the consumer thread pool in SYNC mode in version 3.2 , the interaction model changed from `NettyEventLoop → ConsumerThread → UserThread` to `NettyEventLoop → UserThread`, so as to reduce the waste of server resources and improve performance
+  在3.1版本中SYNC模式下的RPC调用在接收响应时使用了一个消费者线程池进行处理，处理完毕后才唤醒用户线程接收响应。但通过分析SYNC模式下的消费者线程池是不必要的，多了一层消费者线程池处理不仅浪费服务器资源还降低了性能，因此我们在3.2版本中将SYNC模式下消费者线程池移除，交互模型由 `NettyEventLoop → ConsumerThread → UserThread`变成了`NettyEventLoop → UserThread`，以此减少服务器资源的浪费同时提高了性能
 
-- Optimized I/O performance (`dubbo`, `triple`)
+- 优化了I/O性能(`dubbo`、`triple`)
 
-  In version 3.1, we used the Netty framework to achieve network communication, but every time we wrote a message to the peer, we directly flashed it to the peer, resulting in a very high number of system calls and reducing the communication performance. For this reason, we have optimized it in version 3.2. Every time a message is sent, the message is first submitted to a write queue, and multiple messages are written out at the right time, thereby improving I/O Utilization rate greatly improves RPC communication performance.
+  在3.1版本中我们利用了Netty框架实现了网络通讯，但每次往对端写消息时都直接刷写到对端导致系统调用次数极高，降低了通讯性能。为此我们在3.2版本中对该进行了优化，每次发消息时是先将消息提交到一个写队列中，并在合适的时机将多个消息一次性写出，以此提高了I/O利用率，大幅度提高RPC通讯性能。
 
-- Support serialization of messages on user threads (`dubbo`, `triple`)
+- 支持在用户线程上序列化报文(`dubbo`、`triple`)
 
-  In version 3.1, the deserialization of messages in RPC communication is performed in a single I/O thread, which makes it impossible to take advantage of the advantages of multi-core CPUs. For this reason, in version 3.2, we support time-consuming tasks such as deserialization on user threads, and evenly distribute the pressure of I/O threads to multiple CPU cores, thereby improving the performance of large packets. `Scenario RPC performance.
+  在3.1版本中RPC通讯中的报文反序列化均是在单一I/O线程中串行执行的，导致无法利用多核CPU的优势。为此我们在3.2版本中支持了在用户线程上执行反序列化这类较为耗时的任务，将I/O线程的压力均分到多个CPU核心上，以此提高了`较大报文`场景下的RPC性能。
 
 
-The performance improvement of 3.2 compared with 3.1 is as follows:
+3.2对比3.1的性能提升如下：
 
-Triple protocol: In the scenarios of createUser, existUser, and getUser with small packets, the improvement rate is about `40-45%`, and the improved performance is basically the same as that of gRPC in the same scenario. The increase of about `17%` in the large message scenario listUser, compared to `11%` lower than that of gRPC in the same scenario.
+Triple协议：较小报文场景createUser、existUser、getUser下，提升率约在`40-45%`，提升后的性能与gRPC同场景的性能基本持平。较大报文场景listUser下提升了约`17%`，相较于同场景下的gRPC还低`11%`。
 
-Dubbo protocol: The improvement rate is about `180%` in the case of createUser and getUser in small message scenarios. The improvement rate of the very small message existUser (only one boolean value) is about `24%`, while the improvement rate of the larger message listUser is the highest, reaching `1000%`!
+Dubbo协议：较小报文场景createUser、getUser下，提升率约`180%`。极小报文existUser(仅一个boolean值)下提升率约`24%`，而较大报文listUser提升率最高，达到了`1000%`！
 
 ![Untitled](/imgs/blog/32-release/Untitled%203.png)
 
 ![Untitled](/imgs/blog/32-release/Untitled%204.png)
 
-## How to upgrade to Dubbo 3.2
+## 如何升级到 Dubbo 3.2
 
-### Pom upgrade
+### Pom 升级
 
-The latest Dubbo Maven coordinates are:
+最新的 Dubbo Maven 坐标为：
 
 ```xml
 <dependency>
@@ -236,27 +238,27 @@ The latest Dubbo Maven coordinates are:
 </dependency>
 ```
 
-### Compatibility
+### 兼容性
 
-For the vast majority of users, upgrading to Dubbo 3.2.0 is completely smooth, and only needs to modify the version of the dependent package.
+对于绝大多数的用户，升级到 Dubbo 3.2.0 是完全平滑的，仅需要修改依赖包版本即可。
 
-1. Enhancement of serialization verification logic (**important**)
+1. 序列化校验逻辑的增强（**重要**）
 
-   As mentioned above, in Dubbo 3.2.0 version, Dubbo will enable the strong verification of the serialization whitelist by default to improve the security of Dubbo and avoid the problem of remote command execution. The current mechanism automatically trusts some classes through the package name recursive mechanism, but for some users who use generics and may have incomplete scanning, we recommend that you upgrade to Dubbo 3.1.9 or add `-Ddubbo.application.serialize- check-status=WARN` configuration. After observing for a period of time (via logs and QoS commands), if no security alarm is triggered, you can configure the strong check mode.
+   如前文所述，在 Dubbo 3.2.0 版本中，Dubbo 将默认开启序列化白名单的强校验，以提升 Dubbo 的安全性，避免远程命令执行的问题。目前的机制通过包名递归机制自动信任了部分类，但对于一些使用了泛型等可能存在扫描不全的用户，我们建议您先升级到 Dubbo 3.1.9 版本或添加 `-Ddubbo.application.serialize-check-status=WARN` 配置。观察一段时间后（通过日志、QoS 命令），如果没有触发安全告警，则可以配置强校验模式。
 
-   For the configuration of custom whitelist, please refer to `Documentation/SDK Manual/Java SDK/Advanced Features and Usage/Improve Security/Class Inspection Mechanism` on the official website for configuration.
+   关于自定义白名单的配置，可以参考官网的 `文档 / SDK 手册 / Java SDK / 高级特性和用法 / 提升安全性 / 类检查机制` 一文进行配置。
 
-2. Modification of default serialization
+2. 默认序列化的修改
 
-   Starting from version 3.2.0 of Dubbo, the default serialization method is switched from `hessian2` to `fastjson2`. For applications upgraded to 3.2.0, Dubbo will automatically try to use `fastjson2` for serialization. Please note that whether it is the client or the server, as long as one end has not been upgraded to 3.2.0, it will be downgraded to `hessian2` serialization to ensure compatibility.
+   Dubbo 3.2.0 版本开始默认序列化方式从 `hessian2` 切换为 `fastjson2`，对于升级到 3.2.0 的应用，Dubbo 会自动尝试采用 `fastjson2` 进行序列化。请注意，无论是客户端还是服务端，只要有一端还没有升级到 3.2.0，都将降级为 `hessian2` 序列化，保证兼容性。
 
-3. Push short protection is disabled by default
+3. 默认关闭推空保护
 
-   The purpose of push empty protection is that when the registration center fails and actively pushes empty addresses, Dubbo keeps the last batch of provider information to ensure service availability. However, in most cases, even if the registry fails, empty addresses will not be pushed, only in some special cases. If push short protection is turned on, it will have a greater impact on Dubbo's Fallback logic, heartbeat logic, etc., and bring troubles to developers when using Dubbo.
+   推空保护的目的是在注册中心出现故障并且主动推送空地址的时候，Dubbo 保留最后一批 provider 信息，以保证服务可用。但是，在大多数情况下，即使注册中心出现故障，也不会推送空地址，只有在一些特殊情况下才会出现。如果开启推空保护，则会对 Dubbo 的 Fallback 逻辑、心跳逻辑等造成较大的影响，给开发人员使用 Dubbo 带来困扰。
 
-   If you need to enable empty protection in the production environment to achieve high availability, you can configure `dubbo.application.enable-empty-protection` to `true`. However, please note that it is known that turning on the push protection will cause the server application to roll back to the original version after upgrading from `2.6.x` and `2.7.x` versions that only support interface-level service discovery to `3.x` An exception occurs, which may cause the service call to fail in extreme cases.
+   如果在生产环境中需要开启推空保护以实现高可用性，可以将 `dubbo.application.enable-empty-protection` 配置为 `true`。但是请注意，已知开启推空保护会导致服务端应用从仅支持接口级服务发现的 `2.6.x`、`2.7.x` 版本升级到 `3.x` 之后回滚到原来的版本时出现异常，极端情况下可能会导致服务调用失败。
 
 
-## Summarize
+## 总结
 
-Dubbo 3.2 is a very important version, it brings many new features and improvements, making Dubbo more powerful and easy to use. We are very grateful for the support and contributions of the community, and hope that everyone can experience Dubbo 3.2 as soon as possible and enjoy the convenience and advantages it brings.
+Dubbo 3.2 是一个非常重要的版本，它带来了众多新功能和改进，使得 Dubbo 更加强大和易用。我们非常感谢社区的支持和贡献，希望大家可以尽快体验 Dubbo 3.2，享受其中带来的便利和优势。
