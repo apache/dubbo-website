@@ -56,7 +56,7 @@ main_menu: true
 toc_hide: true
 menu:
     main:
-        name: Documentation
+        name: DOCUMENTATION
         weight: 1
 no_list: true
 noedit: true

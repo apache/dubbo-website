@@ -1,8 +1,8 @@
 ---
 aliases:
     - /en/overview/
-description: Dubbo 文档
-linkTitle: 文档
-title: Dubbo 文档
+description: Dubbo Documentation
+linkTitle: Documentation
+title: Dubbo Documentation
 type: docs
 ---
