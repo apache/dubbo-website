@@ -1,90 +1,86 @@
----
 aliases:
-    - /en/docs3-v2/java-sdk/reference-manual/config/properties/
-    - /en/docs3-v2/java-sdk/reference-manual/config/properties/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/dump/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/lazy-connect/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/stickiness/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/delay-publish/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/preflight-check/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/registry-only/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/
-description: 包含 Dubbo 支持的所有配置组件及每个配置组件支持的所有配置项
-linkTitle: 配置项手册
-title: 配置项参考手册
+- /en/docs3-v2/java-sdk/reference-manual/config/properties/
+- /en/docs3-v2/java-sdk/reference-manual/config/properties/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/dump/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/lazy-connect/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/simplify-registry-data/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/stickiness/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/service/delay-publish/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/service/preflight-check/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/service/registry-only/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/service/service-downgrade/
+- /en/overview/mannual/java-sdk/advanced-features-and-usage/service/subscribe-only/
+description: Contains all configuration components supported by Dubbo and all configuration items supported by each configuration component.
+linkTitle: Configuration Manual
+title: Configuration Reference Manual
 type: docs
 weight: 6
 ---
 
+## JVM (-D) Parameters
 
-## JVM(-D) 参数
-
-
-| JVM 参数 | 示例值 | 说明 |
+| JVM Parameter | Example Value | Description |
 | --- | --- | --- |
-| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo支持 [所有的配置项](aaa) 以JVM参数格式指定。其中`config` 是指如 application、registry、protocol 等配置项，而`property`则是指每个配置项中的具体属性。 |
-| dubbo.resolve.file | -Ddubbo.resolve.file=/home/ken/.../dubbo-resolve.properties | 在文件中指定每个接口的直连地址url，如：org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx |
-| org.graalvm.nativeimage.imagecode || [https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java](https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java) |
-| dubbo.properties.file | -Ddubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
-| dubbo.jstack-dump.max-line | -Ddubbo.jstack-dump.max-line=20 | Dubbo 支持自动打印调用堆栈，这个参数可以控制堆栈行数，如示例中只会打印前20行堆栈 |
-| dubbo.json-framework.prefer| -Ddubbo.json-framework.prefer=gson | 设置框架中 json 序列化的具体实现，目前可选实现有 `fastjson2`、`fastjson`、`gson`、`jackson`。默认情况，框架会自动查找可用实现，以上按顺序优先级依次降低 |
-| dubbo.network.interface.ignored | -Ddubbo.network.interface.ignored=eth1,eth2 | 在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于排除某些网卡 |
-| dubbo.network.interface.preferred | -Ddubbo.network.interface.ignored=eth0 | 在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于指定一个特定网卡 |
-| sun.rmi.transport.tcp.responseTimeout | -Dsun.rmi.transport.tcp.responseTimeout=5000 | 用于设置 RMI 协议下的超时时间，单位ms |
-| env |  | Apollo 配置中心特有参数 |
-| app.id |  | Apollo 配置中心特有参数 |
-| apollo.cluster |  | Apollo 配置中心特有参数 |
-| apollo.meta |  | Apollo 配置中心特有参数 |
-| dubbo.mapping.cache.filePath | -Ddubbo.mapping.cache.filePath=~/.dubbo/mapping/ | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件绝对路径地址 |
-| dubbo.mapping.cache.fileName | -Ddubbo.mapping.cache.fileName=dubbo-mapping | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-mapping.dubbo.cache |
-| dubbo.mapping.cache.entrySize | -Ddubbo.mapping.cache.maxFileSize=300 | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件名中内容最大条目数限制 |
-| dubbo.mapping.cache.maxFileSize | -Ddubbo.mapping.cache.maxFileSize=104857600 | 用于设置`接口-应用`映射关系缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte |
-| dubbo.meta.cache.filePath | -Ddubbo.meta.cache.filePath=~/.dubbo/meta/ | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件绝对路径地址 |
-| dubbo.meta.cache.fileName | -Ddubbo.meta.cache.fileName=dubbo-meta | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-meta.dubbo.cache |
-| dubbo.meta.cache.entrySize | -Ddubbo.meta.cache.maxFileSize=300 | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件名中内容最大条目数限制 |
-| dubbo.meta.cache.maxFileSize | -Ddubbo.meta.cache.maxFileSize=104857600 | 用于设置`metadata元数据`缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte |
-| dubbo.application.use-secure-random-request-id | -Ddubbo.application.use-secure-random-request-id=true | 设置每次 rpc 调用 request id 的生成规则，是不是用随机值。如不设置则使用递增值。 |
-| dubbo.protocol.default-close-timeout | -Ddubbo.protocol.default-close-timeout=10000 | 设置 tcp server 关闭等待时间，单位毫秒ms |
-| dubbo.protocol.default-heartbeat | -Ddubbo.protocol.default-heartbeat=10000 | 设置发起心跳 heartbeat 的间隔，单位毫秒ms |
-| dubbo.hessian.allowNonSerializable |  | 是否允许对没有实现 Serializable 接口的类进行序列化，对hessian序列化有效 |
-| dubbo.application.hessian2.whitelist | -Ddubbo.application.hessian2.whitelist=true | 设置是否启用白名单机制，对hessian序列化有效。如果设置 true，则继续配置下面的 allow 规则；否则，配置 deny 规则 |
-| dubbo.application.hessian2.allow | -Ddubbo.application.hessian2.allow=org.apache.dubbo.*;com.company.* | 如果设置 true，则继续配置配置 allow 规则，参见文档说明 |
-| dubbo.application.hessian2.deny | -Ddubbo.application.hessian2.deny=org.apache.dubbo.*;io.commons.* | 如果设置 false，则继续配置配置 deny 规则，参见文档说明 |
-| dubbo.application.manual-register | -Ddubbo.application.manual-register=true | 设置之后，所有服务都不会被自动注册到注册中心，直到用户调用 online 等命令手动完成注册 |
+| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo supports specifying [all configuration items](aaa) in the JVM parameter format. Here, `config` refers to items such as application, registry, protocol, and `property` refers to specific properties within each configuration item. |
+| dubbo.resolve.file | -Ddubbo.resolve.file=/home/ken/.../dubbo-resolve.properties | Specifies the direct connection URL for each interface in the file, e.g., org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx |
+| org.graalvm.nativeimage.imagecode | | [https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java](https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java) |
+| dubbo.properties.file | -Ddubbo.properties.file=foo.properties | Specifies the properties configuration file path, which can be an absolute path or a classpath-relative path. Default value is `dubbo.properties`. |
+| dubbo.jstack-dump.max-line | -Ddubbo.jstack-dump.max-line=20 | Dubbo supports automatic printing of the call stack. This parameter controls the number of stack lines, e.g., only the first 20 lines will be printed. |
+| dubbo.json-framework.prefer | -Ddubbo.json-framework.prefer=gson | Sets the specific implementation of JSON serialization in the framework. Currently available implementations are `fastjson2`, `fastjson`, `gson`, `jackson`. The framework automatically finds the available implementation in decreasing order of preference. |
+| dubbo.network.interface.ignored | -Ddubbo.network.interface.ignored=eth1,eth2 | In multi-network card environments, used when you need to manually control the network card address registered with the registry. It is used to exclude certain network cards. |
+| dubbo.network.interface.preferred | -Ddubbo.network.interface.ignored=eth0 | In multi-network card environments, used to specify a particular network card for registration with the registry. |
+| sun.rmi.transport.tcp.responseTimeout | -Dsun.rmi.transport.tcp.responseTimeout=5000 | Sets the timeout for RMI protocol, in milliseconds. |
+| env |  | Specific parameter for Apollo configuration center. |
+| app.id |  | Specific parameter for Apollo configuration center. |
+| apollo.cluster |  | Specific parameter for Apollo configuration center. |
+| apollo.meta |  | Specific parameter for Apollo configuration center. |
+| dubbo.mapping.cache.filePath | -Ddubbo.mapping.cache.filePath=~/.dubbo/mapping/ | Sets the cache file for `interface-application` mapping, usually for service discovery. The file's absolute path address. |
+| dubbo.mapping.cache.fileName | -Ddubbo.mapping.cache.fileName=dubbo-mapping | Sets the cache file for `interface-application` mapping, usually for service discovery. The file name; the final file will be stored as `dubbo-mapping.dubbo.cache`. |
+| dubbo.mapping.cache.entrySize | -Ddubbo.mapping.cache.maxFileSize=300 | Sets the maximum number of entries in the `interface-application` mapping cache file, usually for service discovery. |
+| dubbo.mapping.cache.maxFileSize | -Ddubbo.mapping.cache.maxFileSize=104857600 | Sets the maximum space for the `interface-application` mapping cache file, usually for service discovery, in bytes. |
+| dubbo.meta.cache.filePath | -Ddubbo.meta.cache.filePath=~/.dubbo/meta/ | Sets the cache file for `metadata` cache, usually for service discovery. The file's absolute path address. |
+| dubbo.meta.cache.fileName | -Ddubbo.meta.cache.fileName=dubbo-meta | Sets the cache file for `metadata` cache, usually for service discovery. The file name; the final file will be stored as `dubbo-meta.dubbo.cache`. |
+| dubbo.meta.cache.entrySize | -Ddubbo.meta.cache.maxFileSize=300 | Sets the maximum number of entries in the `metadata` cache file, usually for service discovery. |
+| dubbo.meta.cache.maxFileSize | -Ddubbo.meta.cache.maxFileSize=104857600 | Sets the maximum space for the `metadata` cache file, usually for service discovery, in bytes. |
+| dubbo.application.use-secure-random-request-id | -Ddubbo.application.use-secure-random-request-id=true | Sets the rule for generating the request ID for each RPC call. If not set, an incremental value will be used. |
+| dubbo.protocol.default-close-timeout | -Ddubbo.protocol.default-close-timeout=10000 | Sets the TCP server shutdown wait time, in milliseconds. |
+| dubbo.protocol.default-heartbeat | -Ddubbo.protocol.default-heartbeat=10000 | Sets the interval for initiating heartbeat, in milliseconds. |
+| dubbo.hessian.allowNonSerializable |  | Allows serialization of classes that do not implement the `Serializable` interface, effective for Hessian serialization. |
+| dubbo.application.hessian2.whitelist | -Ddubbo.application.hessian2.whitelist=true | Enables a whitelist mechanism for Hessian serialization. If set to true, it will continue to configure the following allow rules; otherwise, it will configure the deny rules. |
+| dubbo.application.hessian2.allow | -Ddubbo.application.hessian2.allow=org.apache.dubbo.*;com.company.* | If true, configures allow rules (refer to the documentation for more details). |
+| dubbo.application.hessian2.deny | -Ddubbo.application.hessian2.deny=org.apache.dubbo.*;io.commons.* | If false, configures deny rules (refer to the documentation for more details). |
+| dubbo.application.manual-register | -Ddubbo.application.manual-register=true | When set, all services will not be automatically registered to the registry until the user calls `online` or other commands to manually complete registration. |
 | dubbo.compact.enable |  |  |
-| dubbo.migration-file.enable | -Ddubbo.migration-file.enable=true | 在往应用级地址发现迁移时，是否启用规则文件读取 |
-| dubbo.migration.file | -Ddubbo.migration.file=dubbo-migration.yaml | 指定往应用级地址发现迁移的规则文件路径，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml |
-| dubbo.application.logger | -Ddubbo.application.logger=slf4j | 设置dubbo框架使用的日志组件，设置后，dubbo框架自身的日志将打印到这里（不影响应用自身）；目前支持的 slf4j、log4j、log4j2 等，设置之后须确保相应的组件依赖已经加入应用。 |
-| dubbo.properties.file | -Ddubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
+| dubbo.migration-file.enable | -Ddubbo.migration-file.enable=true | Whether to enable rule file reading during migration to application-level address discovery. |
+| dubbo.migration.file | -Ddubbo.migration.file=dubbo-migration.yaml | Specifies the path to the rule file for migrating to application-level address discovery, which can be an absolute or classpath-relative path. Default value is `dubbo-migration.yaml`. |
+| dubbo.application.logger | -Ddubbo.application.logger=slf4j | Sets the logging component used by the Dubbo framework. After setting, Dubbo's own logs will be printed here (does not affect application logs). Currently supported components are `slf4j`, `log4j`, `log4j2`, etc. Ensure that the corresponding component dependency is added to the application. |
+| dubbo.properties.file | -Ddubbo.properties.file=foo.properties | Specifies the properties configuration file path, which can be an absolute or classpath-relative path. Default value is `dubbo.properties`. |
 
+## Environment Variables
 
-## 环境变量
-
-| 环境变量 | 示例值 | 说明 |
+| Environment Variable | Example Value | Description |
 | --- | --- | --- |
-| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo支持[所有的配置项](aaa)以环境变量格式指定。其中`CONFIG-NAME` 是指如 application、registry、protocol 等配置项，而 `PROPERTY`则是指每个配置项中的具体属性。 |
-| DUBBO_DEFAULT_SERIALIZATION | DUBBO_DEFAULT_SERIALIZATION="hessan2" | 设置框架的默认序列化方式，如hessian2、fastjson2、msgpack等 |
+| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo supports specifying [all configuration items](aaa) as environment variables. `CONFIG-NAME` refers to items such as application, registry, protocol, and `PROPERTY` refers to specific properties within each item. |
+| DUBBO_DEFAULT_SERIALIZATION | DUBBO_DEFAULT_SERIALIZATION="hessian2" | Sets the default serialization method for the framework, e.g., `hessian2`, `fastjson2`, `msgpack`. |
 | DUBBO2_COMPACT_ENABLE | DUBBO2_COMPAT_ENABLE="true" |  |
-| DUBBO_ENV_KEYS| DUBBO_LABELS="tag1=value1; tag2=value2" | `tag1=value1`会作为附加参数上报到地址 URL，作为系统环境变量可用于为实例打标等。 |
-| DUBBO_LABELS | DUBBO_ENV_KEYS="DUBBO_TAG1, DUBBO_TAG2" | Dubbo 会读取 `DUBBO_TAG1`、`DUBBO_TAG2`两个环境变量，并将读取的值 value `DUBBO_TAG1=value` 作为附加参数上报到地址 URL。 |
-| POD_NAMESPACE |  | 用于 Kubernetes Service 场景，指定命名空间 |
-| CLUSTER_DOMAIN |  | 用于 Kubernetes Service 场景，指定集群名称，默认 default |
-| DUBBO_IP_TO_REGISTRY | DUBBO_IP_TO_REGISTRY=30.123.45.187 | 指定注册到注册中心 URL 中的 ip 地址 |
-| DUBBO_PORT_TO_REGISTRY | DUBBO_PORT_TO_REGISTRY=20880 | 指定注册到注册中心 URL 中的 port 端口号 |
-| DUBBO_{PROTOCOL}_PORT_TO_REGISTRY | DUBBO_DUBBO_IP_TO_REGISTRY=30.123.45.187<br/><br/>DUBBO_TRI_IP_TO_REGISTRY=30.123.45.187 | 指定注册到注册中心 URL 中的 ip 地址，可以为不同协议指定不同 ip |
-| DUBBO_{PROTOCOL}_PORT_TO_REGISTRY | DUBBO_DUBBO_PORT_TO_REGISTRY=20880<br/><br/>DUBBO_TRI_PORT_TO_REGISTRY=50051 | 指定注册到注册中心 URL 中的 port 端口，可以为不同协议指定不同 port |
-| DUBBO_IP_TO_BIND | DUBBO_IP_TO_BIND=30.123.45.187 | 指定 tcp 监听绑定的 ip 地址 |
-| DUBBO_PORT_TO_BIND | DUBBO_PORT_TO_BIND=20880 | 指定 tcp 监听绑定的 port 端口 |
-| DUBBO_{PROTOCOL}_IP_TO_BIND | DUBBO_DUBBO_IP_TO_BIND=30.123.45.187<br/><br/>DUBBO_TRI_IP_TO_BIND=30.123.45.187 | 指定 tcp 监听绑定的 ip 地址，可以为不同协议指定不同 ip |
-| DUBBO_{PROTOCOL}_PORT_TO_BIND | DUBBO_DUBBO_PORT_TO_BIND=20880<br/><br/>DUBBO_TRI_PORT_TO_BIND=50051 | 指定 tcp 监听绑定的 port 端口，可以为不同协议指定不同 port |
-| dubbo.properties.file | dubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
-| dubbo.migration.file | dubbo.migration.file=dubbo-migration.yaml | 指定应用级地址发现的迁移规则的文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml |
+| DUBBO_ENV_KEYS | DUBBO_LABELS="tag1=value1; tag2=value2" | `tag1=value1` will be reported as an additional parameter to the URL, serving as a system environment variable for instance tagging, etc. |
+| DUBBO_LABELS | DUBBO_ENV_KEYS="DUBBO_TAG1, DUBBO_TAG2" | Dubbo will read `DUBBO_TAG1`, `DUBBO_TAG2` environment variables, and report values such as `DUBBO_TAG1=value` as additional parameters to the URL. |
+| POD_NAMESPACE |  | Specifies the namespace for Kubernetes Service scenarios. |
+| CLUSTER_DOMAIN |  | Specifies the cluster name for Kubernetes Service scenarios, default is `default`. |
+| DUBBO_IP_TO_REGISTRY | DUBBO_IP_TO_REGISTRY=30.123.45.187 | Specifies the IP address to register in the registry URL. |
+| DUBBO_PORT_TO_REGISTRY | DUBBO_PORT_TO_REGISTRY=20880 | Specifies the port number to register in the registry URL. |
+| DUBBO_{PROTOCOL}_PORT_TO_REGISTRY | DUBBO_DUBBO_IP_TO_REGISTRY=30.123.45.187<br/><br/>DUBBO_TRI_IP_TO_REGISTRY=30.123.45.187 | Specifies the IP address to register in the registry URL, and can specify different IPs for different protocols. |
+| DUBBO_{PROTOCOL}_PORT_TO_REGISTRY | DUBBO_DUBBO_PORT_TO_REGISTRY=20880<br/><br/>DUBBO_TRI_PORT_TO_REGISTRY=50051 | Specifies the port number to register in the registry URL, and can specify different ports for different protocols. |
+| DUBBO_IP_TO_BIND | DUBBO_IP_TO_BIND=30.123.45.187 | Specifies the IP address for TCP binding. |
+| DUBBO_PORT_TO_BIND | DUBBO_PORT_TO_BIND=20880 | Specifies the port for TCP binding. |
+| DUBBO_{PROTOCOL}_IP_TO_BIND | DUBBO_DUBBO_IP_TO_BIND=30.123.45.187<br/><br/>DUBBO_TRI_IP_TO_BIND=30.123.45.187 | Specifies the IP address for TCP binding, and can specify different IPs for different protocols. |
+| DUBBO_{PROTOCOL}_PORT_TO_BIND | DUBBO_DUBBO_PORT_TO_BIND=20880<br/><br/>DUBBO_TRI_PORT_TO_BIND=50051 | Specifies the port for TCP binding, and can specify different ports for different protocols. |
+| dubbo.properties.file | dubbo.properties.file=foo.properties | Specifies the properties configuration file path, which can be an absolute or classpath-relative path. Default value is `dubbo.properties`. |
+| dubbo.migration.file | dubbo.migration.file=dubbo-migration.yaml | Specifies the migration rule file path for application-level address discovery, which can be an absolute or classpath-relative path. Default value is `dubbo-migration.yaml`. |
 
+## Configuration Manual
 
-## 配置项手册
-不论您是使用 Spring Boot、XML、注解还是 API 编写 Dubbo 应用，都可以通过以下表格参考每一项的具体含义。
+Regardless of whether you are using Spring Boot, XML, annotations, or APIs to write Dubbo applications, you can refer to the table below to understand the specific meaning of each configuration item.
 
 ### dubbo.tracing.baggage.correlation
 **Class:** `org.apache.dubbo.config.nested.BaggageConfig$Correlation`
@@ -751,11 +747,11 @@ weight: 6
 
 ### method
 
-方法级配置。
+Method-level configuration.
 
-> 对应的配置类： `org.apache.dubbo.config.MethodConfig`。同时该标签为 `service` 或 `reference` 的子标签，用于控制到方法级。
+> Corresponding configuration class: `org.apache.dubbo.config.MethodConfig`. This tag is a child tag of `service` or `reference`, used to control at the method level.
 
-比如:
+For example:
 
 ```xml
 <dubbo:reference interface="com.xxx.XxxService">
@@ -763,33 +759,33 @@ weight: 6
 </dubbo:reference>
 ```
 
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
+| Property | Corresponding URL parameter | Type | Required | Default value | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
-| name | | string | <b>必填</b> | | 标识 | 方法名 | 1.0.8以上版本 |
-| timeout | &lt;methodName&gt;.timeout | int | 可选 | 缺省为的timeout | 性能调优 | 方法调用超时时间(毫秒) | 1.0.8以上版本 |
-| retries | &lt;methodName&gt;.retries | int | 可选 | 缺省为&lt;dubbo:reference&gt;的retries | 性能调优 | 远程服务调用重试次数，不包括第一次调用，不需要重试请设为0 | 2.0.0以上版本 |
-| loadbalance | &lt;methodName&gt;.loadbalance | string | 可选 | 缺省为的loadbalance | 性能调优 | 负载均衡策略，可选值：<br/><br/>* random - 随机; <br/><br/>* roundrobin - 轮询; <br/><br/>* leastactive - 最少活跃调用; <br/><br/>* consistenthash - 哈希一致 (2.1.0以上版本); <br/><br/>* shortestresponse - 最短响应 (2.7.7以上版本); | 2.0.0以上版本 |
-| async | &lt;methodName&gt;.async | boolean | 可选 | 缺省为&lt;dubbo:reference&gt;的async | 性能调优 | 是否异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程 | 1.0.9以上版本 |
-| sent | &lt;methodName&gt;.sent | boolean | 可选 | true | 性能调优 | 异步调用时，标记sent=true时，表示网络已发出数据 | 2.0.6以上版本 |
-| actives | &lt;methodName&gt;.actives | int | 可选 | 0 | 性能调优 | 每服务消费者最大并发调用限制 | 2.0.5以上版本 |
-| executes | &lt;methodName&gt;.executes | int | 可选 | 0 | 性能调优 | 每服务每方法最大使用线程数限制&#45; &#45;，此属性只在&lt;dubbo:method&gt;作为&lt;dubbo:service&gt;子标签时有效 | 2.0.5以上版本 |
-| deprecated | &lt;methodName&gt;.deprecated | boolean | 可选 | false | 服务治理 | 服务方法是否过时，此属性只在&lt;dubbo:method&gt;作为&lt;dubbo:service&gt;子标签时有效 | 2.0.5以上版本 |
-| sticky | &lt;methodName&gt;.sticky | boolean | 可选 | false | 服务治理 | 设置true 该接口上的所有方法使用同一个provider.如果需要更复杂的规则，请使用路由 | 2.0.6以上版本 |
-| return | &lt;methodName&gt;.return | boolean | 可选 | true | 性能调优 | 方法调用是否需要返回值,async设置为true时才生效，如果设置为true，则返回future，或回调onreturn等方法，如果设置为false，则请求发送成功后直接返回Null | 2.0.6以上版本 |
-| oninvoke | attribute属性，不在URL中体现 | String | 可选 | | 性能调优 | 实例执行前拦截 | 2.0.6以上版本 |
-| onreturn | attribute属性，不在URL中体现 | String | 可选 | | 性能调优 | 实例执行返回后拦截 | 2.0.6以上版本 |
-| onthrow | attribute属性，不在URL中体现 | String | 可选 | | 性能调优 | 实例执行有异常拦截 | 2.0.6以上版本 |
-| oninvokeMethod | attribute属性，不在URL中体现 | String | 可选 | | 性能调优 | 方法执行前拦截 | 2.0.6以上版本 |
-| onreturnMethod | attribute属性，不在URL中体现 | String | 可选 | | 性能调优 | 方法执行返回后拦截 | 2.0.6以上版本 |
-| onthrowMethod | attribute属性，不在URL中体现 | String | 可选 | | 性能调优 | 方法执行有异常拦截 | 2.0.6以上版本 |
-| cache | &lt;methodName&gt;.cache | string/boolean | 可选 | | 服务治理 | 以调用参数为key，缓存返回结果，可选：lru, threadlocal, jcache等 | 2.1.0以上版本 |
-| validation | &lt;methodName&gt;.validation | boolean | 可选 | | 服务治理 | 是否启用JSR303标准注解验证，如果启用，将对方法参数上的注解进行校验 | 2.1.0以上版本 |
+| name | | string | <b>Required</b> | | Identifier | Method name | Version 1.0.8 and above |
+| timeout | &lt;methodName&gt;.timeout | int | Optional | Default timeout | Performance tuning | Timeout for method call (milliseconds) | Version 1.0.8 and above |
+| retries | &lt;methodName&gt;.retries | int | Optional | Default retries of &lt;dubbo:reference&gt; | Performance tuning | Number of retries for remote service calls, excluding the first call; set to 0 if no retries are needed | Version 2.0.0 and above |
+| loadbalance | &lt;methodName&gt;.loadbalance | string | Optional | Default loadbalance | Performance tuning | Load balancing strategy, optional values:<br/><br/>* random - Random; <br/><br/>* roundrobin - Round Robin; <br/><br/>* leastactive - Least Active Calls; <br/><br/>* consistenthash - Consistent Hashing (Version 2.1.0 and above); <br/><br/>* shortestresponse - Shortest Response (Version 2.7.7 and above); | Version 2.0.0 and above |
+| async | &lt;methodName&gt;.async | boolean | Optional | Default async of &lt;dubbo:reference&gt; | Performance tuning | Whether to execute asynchronously, unreliable asynchronous, just ignore the return value, does not block the execution thread | Version 1.0.9 and above |
+| sent | &lt;methodName&gt;.sent | boolean | Optional | true | Performance tuning | During asynchronous calls, if sent=true, indicates that the data has been sent over the network | Version 2.0.6 and above |
+| actives | &lt;methodName&gt;.actives | int | Optional | 0 | Performance tuning | Maximum concurrent call limit per service consumer | Version 2.0.5 and above |
+| executes | &lt;methodName&gt;.executes | int | Optional | 0 | Performance tuning | Maximum number of threads used per service and method limit; this property is only effective when &lt;dubbo:method&gt; is a child tag of &lt;dubbo:service&gt; | Version 2.0.5 and above |
+| deprecated | &lt;methodName&gt;.deprecated | boolean | Optional | false | Service governance | Whether the service method is deprecated; this property is only effective when &lt;dubbo:method&gt; is a child tag of &lt;dubbo:service&gt; | Version 2.0.5 and above |
+| sticky | &lt;methodName&gt;.sticky | boolean | Optional | false | Service governance | Set to true for all methods on this interface to use the same provider. For more complex rules, use routing | Version 2.0.6 and above |
+| return | &lt;methodName&gt;.return | boolean | Optional | true | Performance tuning | Whether the method call requires a return value; takes effect only when async is set to true. If set to true, returns future or callbacks like onreturn, etc. If set to false, returns null directly after the request is successfully sent | Version 2.0.6 and above |
+| oninvoke | attribute, not reflected in URL | String | Optional | | Performance tuning | Intercept before instance execution | Version 2.0.6 and above |
+| onreturn | attribute, not reflected in URL | String | Optional | | Performance tuning | Intercept after instance execution returns | Version 2.0.6 and above |
+| onthrow | attribute, not reflected in URL | String | Optional | | Performance tuning | Intercept when an exception occurs during instance execution | Version 2.0.6 and above |
+| oninvokeMethod | attribute, not reflected in URL | String | Optional | | Performance tuning | Intercept before method execution | Version 2.0.6 and above |
+| onreturnMethod | attribute, not reflected in URL | String | Optional | | Performance tuning | Intercept after method execution returns | Version 2.0.6 and above |
+| onthrowMethod | attribute, not reflected in URL | String | Optional | | Performance tuning | Intercept when an exception occurs during method execution | Version 2.0.6 and above |
+| cache | &lt;methodName&gt;.cache | string/boolean | Optional | | Service governance | Cache return results using call parameters as keys, optional values: lru, threadlocal, jcache, etc. | Version 2.1.0 and above |
+| validation | &lt;methodName&gt;.validation | boolean | Optional | | Service governance | Whether to enable JSR303 standard annotation validation; if enabled, the annotations on the method parameters will be validated | Version 2.1.0 and above |
 
 ### argument
 
-方法参数配置。
+Method parameter configuration.
 
-> 对应的配置类： `org.apache.dubbo.config.ArgumentConfig`。该标签为 `method` 的子标签，用于方法参数的特征描述，比如 XML 格式：
+> Corresponding configuration class: `org.apache.dubbo.config.ArgumentConfig`. This tag is a child tag of `method`, used for feature description of method parameters, for example in XML format:
 
 ```xml
 <dubbo:method name="findXxx" timeout="3000" retries="2">
@@ -797,19 +793,19 @@ weight: 6
 </dubbo:method>
 ```
 
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
+| Property | Corresponding URL parameter | Type | Required | Default value | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
-| index | | int | <b>必填</b> | | 标识 | 参数索引 | 2.0.6以上版本 |
-| type | | String | 与index二选一 | | 标识 | 通过参数类型查找参数的index | 2.0.6以上版本 |
-| callback | &lt;metodName&gt;&lt;index&gt;.callback | boolean | 可选 | | 服务治理 | 参数是否为callback接口，如果为callback，服务提供方将生成反向代理，可以从服务提供方反向调用消费方，通常用于事件推送. | 2.0.6以上版本 |
+| index | | int | <b>Required</b> | | Identifier | Parameter index | Version 2.0.6 and above |
+| type | | String | Either index or type | | Identifier | Lookup parameter's index by type | Version 2.0.6 and above |
+| callback | &lt;metodName&gt;&lt;index&gt;.callback | boolean | Optional | | Service governance | Whether the parameter is a callback interface; if it is a callback, the service provider will generate a reverse proxy that can call back to the consumer from the provider, usually used for event pushing. | Version 2.0.6 and above |
 
 ### parameter
 
-选项参数配置。
+Custom parameter configuration.
 
-> 对应的配置类：`java.util.Map`。同时该标签为 `protocol` 或 `service` 或 `provider` 或 `reference` 或 `consumer` 或 `monitor` 或 `registry` 或 `metadata-config` 或 `config-center` 的子标签，用于配置自定义参数，该配置项将作为扩展点设置自定义参数使用。
+> Corresponding configuration class: `java.util.Map`. This tag is a child of `protocol`, `service`, `provider`, `reference`, `consumer`, `monitor`, `registry`, `metadata-config`, or `config-center`, used to set custom parameters that will be used as extension points.
 
-比如：
+For example:
 
 ```xml
 <dubbo:protocol name="napoli">
@@ -817,15 +813,14 @@ weight: 6
 </dubbo:protocol>
 ```
 
-或：
+or:
 
 ```xml
 <dubbo:protocol name="jms" p:queue="xxx" />
 ```
 
-| 属性 | 对应URL参数 | 类型 | 是否必填 | 缺省值 | 作用 | 描述 | 兼容性 |
+| Property | Corresponding URL parameter | Type | Required | Default value | Effect | Description | Compatibility |
 | --- | --- | ---- | --- | --- | --- | --- | --- |
-| key | key | string | <b>必填</b> | | 服务治理 | 路由参数键 | 2.0.0以上版本 |
-| value | value | string | <b>必填</b> | | 服务治理 | 路由参数值 | 2.0.0以上版本 |
-
+| key | key | string | <b>Required</b> | | Service governance | Routing parameter key | Version 2.0.0 and above |
+| value | value | string | <b>Required</b> | | Service governance | Routing parameter value | Version 2.0.0 and above |
 
