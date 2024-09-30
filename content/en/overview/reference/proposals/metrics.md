@@ -3,36 +3,36 @@ aliases:
     - /en/overview/reference/proposals/metrics/
 author: Song Xiaosheng
 date: 2023-02-20T00:00:00Z
-description: 指标埋点
-linkTitle: 指标埋点
-title: 指标埋点
+description: Metrics tracking
+linkTitle: Metrics tracking
+title: Metrics tracking
 type: docs
 weight: 4
 ---
 
 
 
-# 概述
+# Overview
 
-## 1. 指标接入说明
+## 1. Metrics Access Instructions
 
-## 2. 指标体系设计
+## 2. Metrics System Design
 
-Dubbo的指标体系，总共涉及三块，指标收集、本地聚合、指标推送
-* 指标收集：将Dubbo内部需要监控的指标推送至统一的Collector中进行存储
-* 本地聚合：指标收集获取的均为基础指标，而一些分位数指标则需通过本地聚合计算得出
-* 指标推送：收集和聚合后的指标通过一定的方式推送至第三方服务器，目前只涉及Prometheus
+The metrics system of Dubbo involves three aspects: metrics collection, local aggregation, and metrics pushing.
+* Metrics Collection: Push metrics that need to be monitored internally in Dubbo to a unified Collector for storage.
+* Local Aggregation: Basic metrics are obtained from metrics collection, while some quantile metrics need to be calculated through local aggregation.
+* Metrics Pushing: Collected and aggregated metrics are pushed to a third-party server in a specific manner, currently only involving Prometheus.
 
-## 3. 结构设计
-- 移除原来与 Metrics 相关的类
-- 创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类
-- 使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换
-## 4. 数据流转
+## 3. Structural Design
+- Remove the original classes related to Metrics
+- Create new modules dubbo-metrics/dubbo-metrics-api, dubbo-metrics/dubbo-metrics-prometheus, with MetricsConfig as the configuration class for these modules
+- Use micrometer, and in the Collector, use basic types to represent metrics, such as Long, Double, etc., and introduce micrometer in dubbo-metrics-api to convert internal metrics.
+## 4. Data Flow
   ![img.png](/imgs/docs3-v2/java-sdk/observability/dataflow.png)
 
 
-## 5. 目标
-   指标接口将提供一个 MetricsService，该 Service 不仅提供柔性服务所的接口级数据，也提供所有指标的查询方式，其中方法级指标的查询的接口可按如下方式声明
+## 5. Objectives
+   The metrics interface will provide a MetricsService, which not only provides interface-level data for flexible services but also offers ways to query all metrics. The method-level metrics query interface can be declared as follows:
 
 ```java
 public interface MetricsService {
@@ -43,7 +43,8 @@ public interface MetricsService {
     String DEFAULT_EXTENSION_NAME = "default";
 
     /**
-     * The contract version of {@link MetricsService}, the future update must make sure compatible.
+     * The contract version of {@link MetricsService}, future updates
+must ensure compatibility.
      */
     String VERSION = "1.0.0";
 
@@ -65,7 +66,7 @@ public interface MetricsService {
     Map<MetricsCategory, List<MetricsEntity>> getMetricsByCategories(String serviceUniqueName, List<MetricsCategory> categories);
 
     /**
-     * Get metrics by interface、method and prefixes
+     * Get metrics by interface, method, and prefixes
      *
      * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
      * @param methodName methodName
@@ -77,7 +78,7 @@ public interface MetricsService {
 }
 ```
 
-其中 MetricsCategory 设计如下:
+Where MetricsCategory is designed as follows:
 ```java
 public enum MetricsCategory {
     RT,
@@ -86,7 +87,7 @@ public enum MetricsCategory {
 }
 ```
 
-MetricsEntity 设计如下
+MetricsEntity is designed as follows:
 ```java
 public class MetricsEntity {
     private String name;
@@ -96,12 +97,12 @@ public class MetricsEntity {
 }
 ```
 
-# 指标收集
-## 1. 嵌入位置
-   Dubbo 架构图如下
+# Metrics Collection
+## 1. Insertion Location
+   The architecture diagram of Dubbo is as follows:
    ![img.png](/imgs/docs3-v2/java-sdk/observability/dubbo.png)
 
-在 provider 中添加一层 MetricsFilter 重写 invoke 方法嵌入调用链路用于收集指标，用 try-catch-finally 处理，核心代码如下
+Add a layer of MetricsFilter in the provider to overwrite the invoke method and embed the call chain for metrics collection, handled using try-catch-finally. The core code is as follows:
 
 ```java
 @Activate(group = PROVIDER, order = -1)
@@ -129,9 +130,8 @@ public class MetricsFilter implements Filter, ScopeModelAware {
 
 ```
 
-
-## 2. 指标标识
-   用以下五个属性作为隔离级别区分标识不同方法，也是各个 ConcurrentHashMap 的 key
+## 2. Metric Identification
+   Use the following five attributes as isolation levels to distinguish different methods, which are also the keys of various ConcurrentHashMap.
 ```java
 public class MethodMetric {
     private String applicationName;
@@ -142,8 +142,8 @@ public class MethodMetric {
 }
 ```
 
-## 3. 基础指标
-   指标通过 common 模块下的 MetricsCollector 存储所有指标数据
+## 3. Basic Metrics
+   Metrics are stored in the MetricsCollector under the common module.
 
 ```java
 public class DefaultMetricsCollector implements MetricsCollector {
@@ -166,48 +166,48 @@ public class DefaultMetricsCollector implements MetricsCollector {
  }
 ```
 
-# 本地聚合
-本地聚合指将一些简单的指标通过计算获取各分位数指标的过程
-## 1. 参数设计
-   收集指标时，默认只收集基础指标，而一些单机聚合指标则需要开启服务柔性或者本地聚合后另起线程计算。此处若开启服务柔性，则本地聚合默认开启
+# Local Aggregation
+Local aggregation refers to the process of obtaining quantile metrics through calculations based on some simple metrics.
+## 1. Parameter Design
+   When collecting metrics, only basic metrics are collected by default, while some single-machine aggregation metrics need to enable service flexibility or local aggregation to compute in a separate thread. If service flexibility is enabled here, local aggregation is enabled by default.
 
-### 1.1 本地聚合开启方式
+### 1.1 Local Aggregation Enablement
 ```xml
 <dubbo:metrics>
   <dubbo:aggregation enable="true" />
 </dubbo:metrics>
 ```
 
-### 1.2 指标聚合参数
+### 1.2 Metrics Aggregation Parameters
 ```xml
 <dubbo:metrics>
   <dubbo:aggregation enable="true" bucket-num="5" time-window-seconds="10"/>
 </dubbo:metrics>
 ```
 
-## 2. 具体指标
+## 2. Specific Metrics
 
-Dubbo的指标模块帮助用户从外部观察正在运行的系统的内部服务状况 ，Dubbo参考 ["四大黄金信号"](https://sre.google/sre-book/monitoring-distributed-systems/)、*RED方法*、*USE方法*等理论并结合实际企业应用场景从不同维度统计了丰富的关键指标，关注这些核心指标对于提供可用性的服务是至关重要的。
+The metrics module of Dubbo helps users observe the internal service status of the running system from the outside. Dubbo refers to the "Four Golden Signals", *RED Method*, *USE Method*, and other theories combined with practical enterprise application scenarios to provide a rich set of key metrics from different dimensions. Focusing on these core metrics is crucial for providing usable services.
 
-Dubbo的关键指标包含：**延迟（Latency）**、**流量（Traffic）**、 **错误（Errors）** 和 **饱和度（Saturation）** 等内容 。同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如Dubbo应用信息、线程池信息、三大中心交互的指标数据等。
+Key metrics of Dubbo include: **Latency**, **Traffic**, **Errors**, and **Saturation**. To better monitor service operation status, Dubbo also provides monitoring for core component states, such as Dubbo application information, thread pool information, and metrics data for interaction with the three major centers.
 
-在Dubbo中主要包含如下监控指标：
+Key monitoring metrics in Dubbo mainly include:
 
-|          | 基础设施                                                     | 业务监控                         |
-| :------- | :----------------------------------------------------------- |:-----------------------------|
-| 延迟类   | IO 等待； 网络延迟；                                         | 接口、服务的平均耗时、TP90、TP99、TP999 等 |
-| 流量类   | 网络和磁盘 IO；                                              | 服务层面的 QPS、                   |
-| 错误类   | 宕机； 磁盘（坏盘或文件系统错误）； 进程或端口挂掉； 网络丢包； | 错误日志;业务状态码、错误码走势;            |
-| 饱和度类 | 系统资源利用率： CPU、内存、磁盘、网络等； 饱和度：等待线程数，队列积压长度； | 这里主要包含JVM、线程池等|
+|          | Infrastructure                                               | Business Monitoring                   |
+| :------- | :----------------------------------------------------------- |:------------------------------------- |
+| Latency   | IO wait; Network latency;                                   | Average time consumed by interfaces and services, TP90, TP99, TP999, etc. |
+| Traffic   | Network and disk IO;                                      | QPS at the service level,            |
+| Errors    | Downtime; Disk (bad disk or file system error); Process or port crash; Network packet loss; | Error logs; Business status codes, trends of error codes; |
+| Saturation| System resource utilization: CPU, memory, disk, network; Saturation: number of waiting threads, queue backlog length; | This mainly includes JVM, thread pools, etc.|
 
-- qps: 基于滑动窗口获取动态qps
-- rt: 基于滑动窗口获取动态rt
-- 失败请求数: 基于滑动窗口获取最近时间内的失败请求数
-- 成功请求数: 基于滑动窗口获取最近时间内的成功请求数
-- 处理中请求数: 前后增加Filter简单统计
-- 具体指标依赖滑动窗口，额外使用 AggregateMetricsCollector 收集
+- qps: dynamically obtained qps based on a sliding window
+- rt: dynamically obtained rt based on a sliding window
+- Number of failed requests: dynamically obtained number of failed requests in recent time based on a sliding window
+- Number of successful requests: dynamically obtained number of successful requests in recent time based on a sliding window
+- Number of requests being processed: simple statistics using pre-and post-Filters
+- Specific metrics rely on a sliding window, with additional use of AggregateMetricsCollector for collection
 
-输出到普罗米修斯的相关指标可以参考的内容如下：
+Metrics output to Prometheus can be referenced as follows:
 ```
 # HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation
 # TYPE jvm_gc_live_data_size_bytes gauge
@@ -349,7 +349,7 @@ requests_succeed{application_name="metrics-provider",group="",hostname="iZ8lgm9i
 rt_avg{application_name="metrics-provider",group="",hostname="iZ8lgm9icspkthZ",interface="org.apache.dubbo.samples.metrics.prometheus.api.DemoService",ip="172.28.236.104",method="sayHello",version="",} 0.0
 ```
 
-## 聚合收集器
+## Aggregation Collector
 ```java
 public class AggregateMetricsCollector implements MetricsCollector, MetricsListener {
     private int bucketNum;
@@ -367,7 +367,7 @@ public class AggregateMetricsCollector implements MetricsCollector, MetricsListe
     private static final Integer DEFAULT_BUCKET_NUM = 10;
     private static final Integer DEFAULT_TIME_WINDOW_SECONDS = 120;
 
-//在构造函数中解析配置信息
+// In the constructor, parse the configuration information
 
     public AggregateMetricsCollector(ApplicationModel applicationModel) {
         this.applicationModel = applicationModel;
@@ -385,7 +385,7 @@ public class AggregateMetricsCollector implements MetricsCollector, MetricsListe
 }
 ```
 
-如果开启了本地聚合，则通过 spring 的 BeanFactory 添加监听，将 AggregateMetricsCollector 与 DefaultMetricsCollector 绑定，实现一种生存者消费者的模式，DefaultMetricsCollector 中使用监听器列表，方便扩展
+If local aggregation is enabled, listeners are added through the Spring BeanFactory, binding AggregateMetricsCollector with DefaultMetricsCollector, implementing a producer-consumer model. The DefaultMetricsCollector uses a list of listeners for easy expansion.
 
 ```java
 private void registerListener() {
@@ -393,23 +393,23 @@ private void registerListener() {
 }
 ```
 
-## 3. 指标聚合
-滑动窗口
-假设我们初始有6个bucket，每个窗口时间设置为2分钟
-每次写入指标数据时，会将数据分别写入6个bucket内，每隔两分钟移动一个bucket并且清除原来bucket内的数据
-读取指标时，读取当前current指向的bucket，以达到滑动窗口的效果
-具体如下图所示，实现了当前 bucket 内存储了配置中设置的 bucket 生命周期内的数据，即近期数据
+## 3. Metrics Aggregation
+Sliding Window
+Assuming we initially have 6 buckets, each with a window time set to 2 minutes.
+Each time metrics data is written, it will be written into 6 buckets. Every two minutes, a bucket will be moved, and the data in the original bucket will be cleared.
+When reading metrics, the current bucket pointed to by current will be read to achieve the sliding window effect.
+As shown in the figure below, it implements that the current bucket stores data within the lifecycle of the bucket as configured, i.e., recent data.
 ![img_1.png](/imgs/docs3-v2/java-sdk/observability/aggre.png)
 
-在每个bucket内，使用**TDigest 算法**计算分位数指标
+In each bucket, the **TDigest algorithm** is used to calculate quantile metrics.
 
-> **TDigest 算法**（极端分位精确度高，如p1 p99，中间分位精确度低，如p50），相关资料如下
+> **TDigest Algorithm** (high accuracy for extreme quantiles, such as p1 p99, low accuracy for central quantiles, such as p50). Related materials are as follows:
 >
 > - https://op8867555.github.io/posts/2018-04-09-tdigest.html
 > - https://blog.csdn.net/csdnnews/article/details/116246540
-> - 开源实现：https://github.com/tdunning/t-digest
+> - Open Source Implementation: https://github.com/tdunning/t-digest
 
-代码实现如下，除了 TimeWindowQuantile 用来计算分位数指标外，另外提供了 TimeWindowCounter 来收集时间区间内的指标数量
+The code implementation is as follows. In addition to TimeWindowQuantile for calculating quantile metrics, TimeWindowCounter is provided to collect the count of metrics within the time interval.
 ```java
 public class TimeWindowQuantile {
     private final double compression;
@@ -457,10 +457,10 @@ public class TimeWindowQuantile {
 }
 ```
 
-# 指标推送
-指标推送只有用户在设置了<dubbo:metrics />配置且配置protocol参数后才开启，若只开启指标聚合，则默认不推送指标。
-## 1. Promehteus Pull ServiceDiscovery
-   使用dubbo-admin等类似的中间层，启动时根据配置将本机 IP、Port、MetricsURL 推送地址信息至dubbo-admin（或任意中间层）的方式，暴露HTTP ServiceDiscovery供prometheus读取，配置方式如<dubbo:metrics protocol="prometheus" mode="pull" address="${dubbo-admin.address}" port="20888" url="/metrics"/>，其中在pull模式下address为可选参数，若不填则需用户手动在Prometheus配置文件中配置地址
+# Metrics Push
+Metrics pushing is only enabled when the user has set the <dubbo:metrics /> configuration and set the protocol parameter. If only metrics aggregation is enabled, no metrics will be pushed by default.
+## 1. Prometheus Pull ServiceDiscovery
+   Using intermediate layers such as dubbo-admin, at startup, the local IP, Port, and MetricsURL push address information are pushed to dubbo-admin (or any intermediate layer) based on the configuration, exposing HTTP ServiceDiscovery for Prometheus to read, with the configuration like <dubbo:metrics protocol="prometheus" mode="pull" address="${dubbo-admin.address}" port="20888" url="/metrics"/>. In pull mode, address is an optional parameter; if not filled, the user must manually configure the address in the Prometheus configuration file.
 
 ```java
 private void exportHttpServer() {
@@ -492,7 +492,7 @@ private void exportHttpServer() {
 ```
 
 ## 2. Prometheus Push Pushgateway
-用户直接在Dubbo配置文件中配置Prometheus Pushgateway的地址即可，如<dubbo:metrics protocol="prometheus" mode="push" address="${prometheus.pushgateway-url}" interval="5" />，其中interval代表推送间隔
+Users can directly configure the address of the Prometheus Pushgateway in the Dubbo configuration file, e.g. <dubbo:metrics protocol="prometheus" mode="push" address="${prometheus.pushgateway-url}" interval="5" />, where the interval represents the push interval.
 
 ```java
 
@@ -525,5 +525,6 @@ protected void push(PushGateway pushGateway, String job) {
 }
 ```
 
-## 可视化展示
-目前推荐使用 Prometheus 来进行服务监控，Grafana 来展示指标数据。可以通过案例来快速入门 [Dubbo 可视化监控](../../../tasks/observability/grafana/)。
+## Visualization
+Currently, it is recommended to use Prometheus for service monitoring and Grafana to display metrics data. You can quickly get started with a case of [Dubbo Visualization Monitoring](../../../tasks/observability/grafana/) .
+

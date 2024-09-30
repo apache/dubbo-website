@@ -1,26 +1,26 @@
 ---
-description: "Triple 协议规范"
-linkTitle: Triple 协议规范
-title: Triple 协议设计理念与规范
+description: "Triple Protocol Specification"
+linkTitle: Triple Protocol Specification
+title: Triple Protocol Design Philosophy and Specification
 type: docs
 weight: 1
 working_in_progress: true
 ---
 
-## 1 协议设计理念
-Triple 协议的设计参考了 gRPC、gRPC-Web、通用 HTTP 等多种协议模式，吸取每个协议各自的特性和优点，最终设计成为一个易于浏览器访问、完全兼容 gRPC 且支持 Streaming 通信的协议，Triple 支持同时运行在 HTTP/1、HTTP/2 协议之上。
+## 1 Protocol Design Philosophy
+The design of the Triple protocol references various protocol patterns such as gRPC, gRPC-Web, and general HTTP, absorbing the characteristics and advantages of each, ultimately designing a protocol that is easy to access via browsers, fully compatible with gRPC, and supports Streaming communication. Triple can run simultaneously over HTTP/1 and HTTP/2 protocols.
 
-Triple 协议的设计目标如下：
-* Triple 设计为对人类、开发调试友好的一款基于 HTTP 的协议，尤其是对 unary 类型的 RPC 请求。
-* 完全兼容基于 HTTP/2 的 gRPC 协议，因此 Dubbo Triple 协议实现可以 100% 与 gRPC 体系互调互通。
-* 仅依赖标准的、被广泛使用的 HTTP 特性，以便在实现层面可以直接依赖官方的标准 HTTP 网络库。
+The design goals of the Triple protocol are as follows:
+* Triple is designed to be a human and development-friendly HTTP-based protocol, especially for unary RPC requests.
+* Fully compatible with HTTP/2-based gRPC protocol, so the Dubbo Triple protocol implementation can 100% interact with the gRPC ecosystem.
+* Only relies on standard, widely used HTTP features, enabling direct reliance on official standard HTTP network libraries in the implementation layer.
 
-当与 Protocol Buffers 一起使用时（即使用 IDL 定义服务），Triple 协议可支持 unary、client-streaming、server-streaming 和 bi-streaming RPC 通信模式，支持二进制 Protobuf、JSON 两种数据格式 payload。 Triple 实现并不绑定 Protocol Buffers，比如你可以使用 Java 接口定义服务，Triple 协议有对这种模式的扩展 Content-type 支持。
+When used with Protocol Buffers (i.e., using IDL to define services), the Triple protocol supports unary, client-streaming, server-streaming, and bi-streaming RPC communication modes, supporting both binary Protobuf and JSON data format payloads. The Triple implementation does not bind to Protocol Buffers; for instance, you can use Java interface to define services, and the Triple protocol has extended Content-Type support for this model.
 
-## 2 示例
-### 2.1 Unary 请求
+## 2 Examples
+### 2.1 Unary Request
 
-以 HTTP/1 请求为例，目前 HTTP/1 协议仅支持 Unary RPC，支持使用 application/proto 和 application/json 编码类型，使用方式与 REST 风格请求保持一致，同时响应也包含常规的 HTTP 响应编码（如 200 OK）。
+Taking HTTP/1 request as an example, the current HTTP/1 protocol only supports Unary RPC, supporting application/proto and application/json encoding types, maintaining a usage style consistent with REST-style requests, while the response also includes standard HTTP response encoding (such as 200 OK).
 
 ```text
 > POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
@@ -35,7 +35,7 @@ Triple 协议的设计目标如下：
 < {"greeting": "Hello, Dubbo!"}
 ```
 
-一个包含指定超时时间的调用请求。
+A call request with a specified timeout.
 
 ```text
 > POST /org.apache.dubbo.demo.GreetService/Greet HTTP/1.1
@@ -51,11 +51,11 @@ Triple 协议的设计目标如下：
 < {"greeting": "Hello, Buf!"}
 ```
 
-> 目前仅支持 POST 请求类型，我们将考虑在未来支持 GET 请求类型，GET 请求可能适用于具有幂等属性的一些服务调用。
+> Currently only POST request type is supported; we will consider supporting GET request types in the future, which may apply to certain service calls with idempotent properties.
 
-### 2.2 Streaming 调用请求
+### 2.2 Streaming Call Request
 
-Triple 仅支持在 HTTP/2 上支持 Streaming RPC。并且为了与 gRPC 协议保持兼容，Triple 在 HTTP/2 协议实现上（包含 Streaming RPC）保持与标准 gRPC 协议完全一致。
+Triple only supports Streaming RPC on HTTP/2. To maintain compatibility with gRPC, the Triple implementation on HTTP/2 (including Streaming RPC) is entirely consistent with the standard gRPC protocol.
 
 Request
 
@@ -90,19 +90,19 @@ grpc-status = 0 # OK
 trace-proto-bin = jher831yy13JHy3hc
 ```
 
-## 3 规范详情
+## 3 Specification Details
 
-Triple 协议支持同时运行在 HTTP/1 和 HTTP/2 协议之上，其包含以下两部分内容：
-1. 一套自定义的精简 HTTP RPC 子协议，支持 HTTP/1 和 HTTP/2 作为传输层实现，仅支持 Request-Response 类型的 Unary RPC。
-2. 一套基于 gRPC 协议的扩展子协议（仍保持和 gRPC 的 100% 兼容），仅支持 HTTP/2 实现，支持 Unary RPC 和 Streaming RPC。
+The Triple protocol supports running simultaneously over both HTTP/1 and HTTP/2, comprising the following two parts:
+1. A custom, streamlined HTTP RPC sub-protocol that supports HTTP/1 and HTTP/2 as transport layers and supports only Request-Response type Unary RPC.
+2. An extended sub-protocol based on the gRPC protocol (still 100% compatible with gRPC), supporting only HTTP/2 implementation, and supports Unary RPC and Streaming RPC.
 
-### 3.1 Triple 之 HTTP RPC 协议
+### 3.1 HTTP RPC Protocol of Triple
 
-大部分的 RPC 调用都是 unary (request-response) 模式的，Triple HTTP RPC 协议 unary 模式能很好的满足后端服务间的数据传输需求。同时解决了gRPC协议的痛点，让浏览器、cURL 以及其他一些 HTTP 工具更容易的访问后端服务，即不需要借助代理和gRPC-web，使用标准的 HTTP 协议直接发起调用。
+Most RPC calls are unary (request-response), and the Triple HTTP RPC protocol's unary mode meets the data transmission needs among backend services well. It also addresses the pain points of the gRPC protocol, making it easier for browsers, cURL, and other HTTP tools to access backend services without relying on proxies and gRPC-web, using standard HTTP protocol to initiate calls directly.
 
-Triple HTTP RPC 同时支持 HTTP/1、HTTP/2 作为底层传输层协议，在实现上对应支持的 content-type 类型为 application/json、application/proto
+Triple HTTP RPC supports both HTTP/1 and HTTP/2 as underlying transport layer protocols, corresponding to supported content-type types as application/json, application/proto.
 
-#### 3.1.1 请求 Request
+#### 3.1.1 Request
 
 - Request → Request-Headers Bare-Message
 - Request-Headers → Call-Specification *Leading-Metadata
@@ -113,7 +113,7 @@ Content-Encoding Accept-Encoding Accept Content-Length
 - Http-Method → POST
 - Path → /Service-Name/Method-Name; case-sensitive
 - Service-Name → service interface full classname
-- Method-Name → service interface declared method`s name
+- Method-Name → service interface declared method's name
 - Http-Host → Target-IP:Target-Port
 - Target-IP → target server ip or domain
 - Target-Port → target server process port
@@ -138,28 +138,28 @@ Content-Encoding Accept-Encoding Accept Content-Length
 - ASCII-Value → 1*( %x20-%x7E ) ; space & printable ASCII
 - Bare-Message → data that encoded by json or custom and Content-Encoding
 
-Triple 协议请求的仅支持 POST 请求，请求 path 为 interfaceName/methodName，为了实现调用超时机制，需要添加 tri-service-timeout (单位 ms)，
+The Triple protocol request only supports POST requests, with the request path being interfaceName/methodName. To implement a call timeout mechanism, tri-service-timeout (in ms) needs to be added,
 
-Dubbo 框架支持基于 **分组（group）** 和 **版本（version）** 的服务隔离机制，因此 Triple 协议中引入了 tri-service-group、tri-service-version 支持。
+The Dubbo framework supports service isolation mechanisms based on **group** and **version**, thus the Triple protocol introduces tri-service-group and tri-service-version support.
 
-**Request-Headers** 以标准的 HTTP header 的形式发送，如果收到的 headers 数量过多，server 可返回相应错误信息。
+**Request-Headers** are sent in the form of standard HTTP headers. If too many headers are received, the server can return the corresponding error message.
 
-**TRI-Protocol-Version** 头用来区分具有相同 Content-Type 的 triple 协议请求和其他协议请求，因为 application/json 格式的 Content-Type 非常普遍。所有的 Dubbo 原生客户端实现都应该在请求中携带 TRI-Protocol-Version，Dubbo 服务端或代理可以选择拒绝没有 TRI-Protocol-Version 的请求并返回 Http-Status 400 错误。
+**TRI-Protocol-Version** header is used to distinguish between Triple protocol requests with the same Content-Type and other protocol requests because the application/json format Content-Type is very common. All Dubbo native client implementations should carry TRI-Protocol-Version in the request, and the Dubbo server or proxy can choose to reject requests without TRI-Protocol-Version and return Http-Status 400 error.
 
-如果 Server 不支持 **Message-Codec** 指定的编码格式，则必须返回标准 HTTP 415 编码表明 Unsupported Media Type 异常。
+If the Server does not support the specified encoding format of **Message-Codec**, it must return standard HTTP 415 encoding to indicate Unsupported Media Type exception.
 
-**Bare-Message** 即请求 payload 的编码格式取决于 Message-Codec 设置：
-* Message-Codec: json 的场景下，payload 采用有序的数组编码形式，即将 rpc 方法的参数按顺序组装进 Array 后进行 json 序列化，方法参数的位置与数组下标保持一致，当 Triple server 接收到请求体时，根据每个参数的类型进行反序列化成对应的参数数组。对于使用 Protocol Buffer 的情形，payload 则是只有一个 json 对象的数组。
-* Message-Codec: proto 的场景下，Protobuf 生成的 Request 类包含了编码格式，因此将直接使用 Request 对象中的内置编码方式。
-* Message-Codec 支持更多自定义扩展值，请确保框架实现遵循相应的编码与解码约定。
+**Bare-Message** is the encoding format of the request payload that depends on the Message-Codec setting:
+* When Message-Codec: json, the payload adopts an ordered array encoding format, i.e., the rpc method parameters are assembled into an Array in order for json serialization; the position of method parameters corresponds to the array index. When the Triple server receives the request body, it deserializes according to the type of each parameter into the corresponding parameter array. For situations using Protocol Buffer, the payload is an array of a single json object.
+* When Message-Codec: proto, the Protobuf generated Request class contains the encoding format, so it directly uses the built-in encoding method in the Request object.
+* Message-Codec supports more customized extension values; ensure the framework implementation follows the corresponding encoding and decoding conventions.
 
-如果 Content-Encoding 指定了相应值，则 payload 是被压缩过的，应该首先进行解压缩后再解析编码数据，Bare-Message 将作为 HTTP Body 在链路上传输。
+If Content-Encoding specifies the corresponding value, the payload is compressed and should be decompressed before parsing the encoded data. Bare-Message will be transmitted as the HTTP Body in the link.
 
-##### Request 报文示例
+##### Request Message Example
 
-- 请求行
+- Request line
    - POST /org.apache.dubbo.demo.GreetService/greeting HTTP/1.1
-- 请求头
+- Request headers
    - Host: 127.0.0.1:30551
    - Content-Type: application/json
    - Accept: application/json
@@ -169,7 +169,7 @@ Dubbo 框架支持基于 **分组（group）** 和 **版本（version）** 的�
    - tri-service-version: 1.0.0
    - tri-service-group: dubbo
    - tri-service-timeout: 3000
-- 请求体
+- Request body
    - [{"world"}]
 
 ```latex
@@ -188,19 +188,19 @@ tri-service-timeout: 3000
 ```
 
 
-#### 3.1.2 响应 Response
+#### 3.1.2 Response
 
 - Response → Response-Headers *Bare-Message
 - Response-Headers → HTTP-Status Content-Type [Content-Encoding] [Accept-Encoding] *Leading-Metadata *Prefixed-Trailing-Metadata
 - HTTP-Status → 200 /{error code translated to HTTP}
 - Bare-Message → data that encoded by Content-Type and Content-Encoding
 
-对于成功 Response 响应 **HTTP-Status** 是 200，在这种场景下，响应体的 Content-Type 将保持和请求体的 Content-Type 保持一致。**Bare-Message** 就是 RPC 响应的 Payload，以 Content-Type 指定的方式进行编码并且以 Content-Encoding 来压缩（如果指定了 Content-Encoding 的话）。Bare-Message 作为 HTTP response body 发送。
+For a successful Response, the **HTTP-Status** is 200. In this case, the Content-Type of the response body will match the Content-Type of the request body. **Bare-Message** is the Payload of the RPC response encoded by the method specified by Content-Type and compressed by Content-Encoding (if specified). Bare-Message is sent as the HTTP response body.
 
-异常 Response 响应的 HTTP-Status 是 non-200，并且都是标准的 HTTP status code，在这个场景下，**Content-Type** 必须是 "application/json"。**Bare-Message** 可以是空的，如果 Bare-Message 有值的话则是一个标准 JSON 格式数据，如果 **Content-Encoding** 有指定的话则是一个压缩过的数据，Bare-Message 作为标准的 HTTP response body 发送回调用方。客户端可以根据以下表格，查询 HTTP-Status 与 RPC status 之间的映射关系，以了解具体的 RPC 错误情况。
+For an exception Response, the HTTP-Status is non-200, and they are all standard HTTP status codes. In this case, **Content-Type** must be "application/json". **Bare-Message** can be empty, and if Bare-Message has a value, it must be in standard JSON format data, and if **Content-Encoding** is specified, it is compressed data, sent back to the caller as the standard HTTP response body. The client can refer to the following table to query the mapping relationship between HTTP-Status and RPC status to understand the specific RPC error situation.
 
-##### Response 报文格式
-** 成功响应 **
+##### Response Message Format
+** Successful Response **
 
 ```latex
 HTTP/1.1 200 OK
@@ -210,7 +210,7 @@ Content-Length: 11
 hello world
 ```
 
-** 失败响应 **
+** Failed Response **
 
 ```latex
 HTTP/1.1 400 Bad Request
@@ -221,7 +221,7 @@ Content-Length: 46
 
 #### 3.1.3 Error Codes
 
-Dubbo 的错误码参考
+Dubbo Error Codes Reference
 
 ```
  status http-status  	  message
@@ -238,7 +238,7 @@ Dubbo 的错误码参考
  90     500 						internal client error
 ```
 
-> Connect 的 HTTP to Error Code 参考
+> Connect's HTTP to Error Code Reference
 >
 > | HTTP Status | Inferred Code |
 > | --- | --- |
@@ -259,27 +259,27 @@ Dubbo 的错误码参考
 > | _all others_ | unknown |
 
 
-### 3.2 Triple 之扩展版 gRPC 协议
+### 3.2 Extended gRPC Protocol of Triple
 
-Triple 协议的 Streaming 请求处理完全遵循 gRPC 协议规范，且仅支持 HTTP/2 作为传输层协议。并且后端服务间的 Unary 请求默认采用扩展版 gPRC 协议。
+The Streaming request processing of the Triple protocol fully follows the gRPC protocol specification and only supports HTTP/2 as the transport protocol. Additionally, Unary requests between backend services default to use the extended gRPC protocol.
 
-Triple 支持的 content-type 类型为标准的 gRPC 类型，包括 application/grpc、application/grpc+proto、application/grpc+json，除此之外，Triple 在实现上还扩展了 application/triple+wrapper 编码格式。
+The content-type types supported by Triple are standard gRPC types, including application/grpc, application/grpc+proto, application/grpc+json. Furthermore, the implementation of Triple has also extended the application/triple+wrapper encoding format.
 
 #### 3.2.1 Outline
 
-The following is the general sequence of message atoms in a GRPC request & response message stream
+The following is the general sequence of message atoms in a gRPC request & response message stream
 
-* Request → Request-Headers \*Length-Prefixed-Message EOS
-* Response → (Response-Headers \*Length-Prefixed-Message Trailers) / Trailers-Only
+* Request → Request-Headers *Length-Prefixed-Message EOS
+* Response → (Response-Headers *Length-Prefixed-Message Trailers) / Trailers-Only
 
 
 #### 3.2.2 Requests
 
-* Request → Request-Headers \*Length-Prefixed-Message EOS
+* Request → Request-Headers *Length-Prefixed-Message EOS
 
 Request-Headers are delivered as HTTP2 headers in HEADERS + CONTINUATION frames.
 
-* **Request-Headers** → Call-Definition \*Custom-Metadata
+* **Request-Headers** → Call-Definition *Custom-Metadata
 * **Call-Definition** → Method Scheme Path TE [Authority] [Timeout] Content-Type [Message-Type] [Message-Encoding] [Message-Accept-Encoding] [User-Agent] Service-Version Service-Group Tracing-ID Tracing-Span-ID Cluster-Info
 * **Method** →  ":method POST"
 * **Scheme** → ":scheme "  ("http" / "https")
@@ -299,31 +299,31 @@ Request-Headers are delivered as HTTP2 headers in HEADERS + CONTINUATION frames.
 * **Content-Type** → "content-type" "application/grpc" [("+proto" / "+json" / {_custom_})]
 * **Content-Coding** → "identity" / "gzip" / "deflate" / "snappy" / {_custom_}
 * <a name="message-encoding"></a>**Message-Encoding** → "grpc-encoding" Content-Coding
-* **Message-Accept-Encoding** → "grpc-accept-encoding" Content-Coding \*("," Content-Coding)
+* **Message-Accept-Encoding** → "grpc-accept-encoding" Content-Coding *("," Content-Coding)
 * **User-Agent** → "user-agent" {_structured user-agent string_}
 * **Message-Type** → "grpc-message-type" {_type name for message schema_}
 * **Custom-Metadata** → Binary-Header / ASCII-Header
 * **Binary-Header** → {Header-Name "-bin" } {_base64 encoded value_}
 * **ASCII-Header** → Header-Name ASCII-Value
-* **Header-Name** → 1\*( %x30-39 / %x61-7A / "\_" / "-" / ".") ; 0-9 a-z \_ - .
-* **ASCII-Value** → 1\*( %x20-%x7E ) ; space and printable ASCII
+* **Header-Name** → 1*( %x30-39 / %x61-7A / "\_" / "-" / ".") ; 0-9 a-z \_ - .
+* **ASCII-Value** → 1*( %x20-%x7E ) ; space and printable ASCII
 * Service-Version → "tri-service-version" {Dubbo service version}
 * Service-Group → "tri-service-group" {Dubbo service group}
 * Tracing-ID → "tri-trace-traceid" {tracing id}
 * Tracing-RPC-ID → "tri-trace-rpcid" {_span id _}
-* Cluster-Info → "tri-unit-info" {cluster infomation}
+* Cluster-Info → "tri-unit-info" {cluster information}
 
 #### 3.2.3 Responses
 
-* **Response** → (Response-Headers \*Length-Prefixed-Message Trailers) / Trailers-Only
-* **Response-Headers** → HTTP-Status [Message-Encoding] [Message-Accept-Encoding] Content-Type \*Custom-Metadata
+* **Response** → (Response-Headers *Length-Prefixed-Message Trailers) / Trailers-Only
+* **Response-Headers** → HTTP-Status [Message-Encoding] [Message-Accept-Encoding] Content-Type *Custom-Metadata
 * **Trailers-Only** → HTTP-Status Content-Type Trailers
-* **Trailers** → Status [Status-Message] \*Custom-Metadata
+* **Trailers** → Status [Status-Message] *Custom-Metadata
 * **HTTP-Status** → ":status 200"
-* **Status** → "grpc-status" 1\*DIGIT ; 0-9
+* **Status** → "grpc-status" 1*DIGIT ; 0-9
 * **Status-Message** → "grpc-message" Percent-Encoded
-* **Percent-Encoded** → 1\*(Percent-Byte-Unencoded / Percent-Byte-Encoded)
-* **Percent-Byte-Unencoded** → 1\*( %x20-%x24 / %x26-%x7E ) ; space and VCHAR, except %
+* **Percent-Encoded** → 1*(Percent-Byte-Unencoded / Percent-Byte-Encoded)
+* **Percent-Byte-Unencoded** → 1*( %x20-%x24 / %x26-%x7E ) ; space and VCHAR, except %
 * **Percent-Byte-Encoded** → "%" 2HEXDIGIT ; 0-9 A-F
 
-以上即为 Triple 扩展版本的 gRPC 协议，更多详细规范说明请参照 <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC 协议规范</a>。
+This is the extended version of the gRPC protocol for Triple. For more detailed specifications, please refer to <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md" target="_blank">gRPC Protocol Specification</a>.
