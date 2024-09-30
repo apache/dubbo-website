@@ -8,5 +8,4 @@ linkTitle: Erlang SDK
 title: Erlang SDK Manual
 type: docs
 weight: 8
-###
-
+---
