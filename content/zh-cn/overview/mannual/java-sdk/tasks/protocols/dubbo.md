@@ -107,9 +107,9 @@ dubbo:
 ```
 
 {{% alert title="注意" color="info" %}}
-自 3.2.0 版本开始，Dubbo 增加了序列化协议的自动协商机制，如果满足条件 `两端都为 Dubbo3 特定版本 + 存在 Fastjson2 相关依赖`，则会自动使用 fastjson2 序列化协议，否则使用 hessian2 协议，协商对用户透明无感。
+自 3.2.0 版本开始，Dubbo 增加了 [序列化协议的自动协商机制](overview/mannual/java-sdk/reference-manual/serialization/serialization/#切换序列化协议)，如果满足条件 `两端都为 Dubbo3 特定版本 + 存在 fastjson2 相关依赖 + 配置了 prefer-serialization=fastjson2`，则框架会自动优先尝试使用 fastjson2 序列化协议，如有任一一端由于各种原因不支持，则继续使用默认的 hessian2 序列化。
 
-由于 Dubbo2 默认序列化协议是 hessian2，对于部分有拦截rpc调用payload的场景，比如sidecar等对链路payload有拦截与解析，在升级过程中需留意兼容性问题，其他用户不用担心。
+由于 Dubbo2 默认序列化协议是 hessian2，对于部分有拦截rpc调用payload的场景，比如sidecar等对链路payload有拦截与解析，在升级过程中需留意兼容性问题。
 {{% /alert %}}
 
 ### 共享连接

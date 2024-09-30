@@ -3,92 +3,42 @@ description: 快速部署Dubbo应用
 linkTitle: 部署Dubbo应用
 title: 快速部署Dubbo应用
 type: docs
-toc_hide: true
-hide_summary: true
 weight: 3
 ---
 
-在上一篇文章中，我们从头创建了一个 Dubbo 应用并详细介绍了它的代码结构，接下来，我们将学习部署这个 Dubbo 应用。
+在上一篇文章中，我们学习了如何开发基于 Spring Boot 的 Dubbo 应用。接下来，我们将学习部署这个 Dubbo 应用。
 
-本文将以 Kubernetes 集群作为基础环境来讲解 Dubbo 应用的部署，部署架构如下图所示。
-![Dubbo+Kubernetes+Nacos 部署架构图]()
+本文将以 Kubernetes 集群作为基础环境来讲解 Dubbo 应用的部署，部署架构如下图所示：
+
+<img alt="Dubbo+Kubernetes+Nacos 部署架构图" src="/imgs/v3/quickstart/nacos-kubernetes-deployment.png" style="max-width:700px;">
 
 {{% alert title="注意" color="info" %}}
-在实际使用中，部署环境可能变化多样，包括 Kubernetes Service、服务网格(Service Mesh)、虚拟机等多种部署模式，请参考 [部署文档]() 了解更多详细内容。
+在实际使用中可能会选择不同的部署环境与架构，如使用服务网格(Service Mesh)、虚拟机等多种部署模式，请参考 [部署文档](../../tasks/deploy/) 了解更多详细内容。
 {{% /alert %}}
-
-## 前置条件
-Dubbo 社区提供了工具和解决方案来简化整个 Kubernetes 环境的打包与部署过程，所以开始前我们需要先安装相关工具。
-
-1. 安装 dubboctl（如尚未安装）
-    ```sh
-    curl -L https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/release/downloadDubbo.sh | sh -
-
-    cd dubbo-$version
-    export PATH=$PWD/bin:$PATH
-    ```
-
 
 ## 部署应用
-
-### 初始化微服务集群
-
-1. dubboctl 安装完成之后，接下来通过以下命令初始化微服务部署环境
-
-    ```sh
-    dubboctl manifest install --profile=demo
-    ```
-
-    作为演示目的，以上命令会一键安装 Zookeeper、Dubbo Control Plane、Prometheus、Grafana、Zipkin、Ingress 等组件，关于 `--profile=demo` 更多解释及配置请参见文档说明。
-
-2. 检查环境准备就绪
-
-    ```sh
-    kubectl get services -n dubbo-system
-    ```
-
-3. 最后，为目标 kubernetes namespace 开启自动注入模式，以便应用部署后能够自动连接到刚刚安装的 Zookeeper 注册中心等组件。
-
-    ```shell
-    kubectl label namespace dubbo-demo dubbo-injection=enabled --overwrite
-    ```
-
-### 部署 Dubbo 应用
-
-接下来我们为之前创建的应用打包镜像（请确保本地安装有 Docker 环境并且已经启动 Docker 进程），在应用根目录分别运行以下命令：
+我们为您提前准备好了示例项目的镜像与部署文件，您可以使用如下命令将示例快速部署到 Kubernetes 集群（请确保在示例源码根目录执行如下命令）：
 
 ```shell
-dubboctl build --dockerfile=./Dockerfile
+kubectl apply -f ./Kubernetes-manifests.yaml
 ```
 
-`build` 命令会将源码打包为镜像，并推送到远端仓库，取决于网络情况，可能需要一定时间等待命令执行完成。
+以上命令将自动部署如下资源：
+* dubbo-system 命名空间
+	* Nacos Deployment
+	* Nacos Service
+* dubbo-quickstart 命名空间
+	* Quickstart Deployment
+	* Quickstart Service
 
-接下来，我们需要生成部署应用的 Kubernetes 资源文件，运行以下命令：
-```shell
-dubboctl deploy
-```
-
-`deploy` 命令会使用刚刚 `build` 打包的镜像生成 Kubernetes 资源清单。命令执行成功后，在当前目录看到生成的 `kube.yaml` 文件，其中包括 deployment、service 等 kubernetes 资源定义。
-
-
-{{% alert title="注意" color="warning" %}}
-本地构建可能会花费比较长时间，如您本地构建遇到问题，也可以使用以下命令跳过 `build` 过程。
+运行以下命令，确认资源已经部署成功：
 
 ```sh
-dubboctl deploy --image=apache/dubbo-demo:quickstart_0.1
-# `--image` 指定使用官方预先准备好的示例镜像
-```
-{{% /alert %}}
-
-接下来，将应用部署到 Kubernetes 环境。
-
-```shell
-kubectl apply -f ./kube.yaml
+kubectl get services -n dubbo-system
 ```
 
-检查部署状态
-```shell
-kubectl get services -n dubbo-demo
+```sh
+kubectl get services -n dubbo-quickstart
 ```
 
 ## 访问应用
@@ -99,41 +49,164 @@ kubectl get services -n dubbo-demo
 {{% tab header="本地 Kubernetes 集群" lang="en" %}}
 <br/>
 
-1. 如果使用的本地 Kubernetes 集群，请使用以下方式访问应用验证部署状态：
+执行以下命令进行本地端口映射：
 
-    ```shell
-    dubboctl dashboard admin
-    ```
+```shell
+kubectl port-forward <pod-name> 50051:50051 -n dubbo-quickstart
+```
 
-2. 以上命令会自动打开 admin 控制台，如果在您的环境下没有打开，请使用浏览器访问以下地址：
+通过 curl 访问服务：
 
-    http://localhost:38080/admin
-
-3. 通过 triple 协议，可以继续测试 Dubbo 服务，执行以下命令进行端口映射：
-
-    ```shell
-    kubectl port-forward <pod-name> 50051:50051
-    ```
-
-4. 通过 curl 访问服务：
-
-    ```shell
-    curl \
-        --header "Content-Type: application/json" \
-        --data '["Dubbo"]' \
-        http://localhost:50051/com.example.demo.dubbo.api.DemoService/sayHello/
-    ```
+```shell
+curl \
+	--header "Content-Type: application/json" \
+	--data '["Dubbo"]' \
+	http://localhost:50051/org.apache.dubbo.samples.quickstart.dubbo.api.DemoService/sayHello/
+```
 
 {{% /tab %}}
 
-{{% tab header="阿里云ACK" lang="zh-cn" %}}
+{{% tab header="阿里云 ACK 集群" lang="zh-cn" %}}
 <br/>
 
-对于云上托管的哦 Kubernetes 集群，可以使用以下方式验证，这里以阿里云 ACK 集群为例：
+对于云上托管的 Kubernetes 集群，您同样可以使用 port-forward 的方式进行本地访问。除此之外，您也可以通过配置负载均衡（Load Balancer）开放公网访问方式，如下图所示：
 
-ACK ingerss-controller 的访问方式......
+<img alt="阿里云托管部署架构图" src="/imgs/v3/quickstart/nacos-kubernetes-deployment.png" style="max-width:500px;">
 
 {{% /tab %}}
 {{< /tabpane >}}
+
+## 附录
+
+如果你有修改示例源码并需要重新打包 docker 镜像，请在示例根目录运行如下命令，随后将镜像推送到远端镜像仓库并修改 `kubernetes-manifests.yaml` 中的镜像地址后重新部署。
+
+```shell
+docker build -f ./Dockerfile --build-arg APP_FILE=quickstart-service-0.0.1-SNAPSHOT.jar -t demo:latest .
+```
+
+本示例 Kubernetes 部署资源文件也可在 Github 访问：[https://raw.githubusercontent.com/apache/dubbo-samples/master/11-quickstart/Kubernetes-manifests.yaml](https://raw.githubusercontent.com/apache/dubbo-samples/master/11-quickstart/Kubernetes-manifests.yaml)。
+
+```yaml
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dubbo-quickstart
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dubbo-system
+---
+
+# Nacos
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nacos
+  namespace: dubbo-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nacos
+  template:
+    metadata:
+      labels:
+        app: nacos
+    spec:
+      containers:
+        - name: consumer
+          image: nacos-registry.cn-hangzhou.cr.aliyuncs.com/nacos/nacos-server:v2.1.2
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8848
+              name: client
+            - containerPort: 9848
+              name: client-rpc
+          env:
+            - name: NACOS_SERVER_PORT
+              value: "8848"
+            - name: NACOS_APPLICATION_PORT
+              value: "8848"
+            - name: PREFER_HOST_MODE
+              value: "hostname"
+            - name: MODE
+              value: "standalone"
+            - name: NACOS_AUTH_ENABLE
+              value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nacos
+  namespace: dubbo-system
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  selector:
+    app: nacos
+  ports:
+    - port: 8848
+      name: server
+      targetPort: 8848
+    - port: 9848
+      name: client-rpc
+      targetPort: 9848
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quickstart
+  namespace: dubbo-quickstart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quickstart
+  template:
+    metadata:
+      labels:
+        app: quickstart
+    spec:
+      containers:
+        - name: quickstart
+          image: sca-registry.cn-hangzhou.cr.aliyuncs.com/dubbo/dubbo-quickstart:1.0
+          imagePullPolicy: Always
+          ports:
+            - name: dubbo
+              containerPort: 50051
+              protocol: TCP
+            - name: dubbo-qos
+              containerPort: 22222
+              protocol: TCP
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Dnacos.address=nacos.dubbo-system.svc"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: quickstart
+  namespace: dubbo-quickstart
+spec:
+  selector:
+    app: quickstart
+  ports:
+    - name: tcp
+      port: 50051
+      targetPort: 50051
+    - name: http
+      port: 22222
+      targetPort: 22222
+---
+```
+
 
 
