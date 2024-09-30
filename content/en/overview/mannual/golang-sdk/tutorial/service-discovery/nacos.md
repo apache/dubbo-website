@@ -2,18 +2,18 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos-2/
-description: 使用 Nacos 作为注册中心
-title: 使用 Nacos 作为注册中心
+description: Using Nacos as the Registry
+title: Using Nacos as the Registry
 type: docs
 weight: 10
 ---
 
 
-This example shows dubbo-go's service discovery feature with Nacos as registry.
+This example shows dubbo-go's service discovery feature with Nacos as the registry.
 
-## 使用方式
+## Usage
 
-通过以下方式指定注册中心地址：
+Specify the registry address in the following way:
 
 ```go
 ins, _ := dubbo.NewInstance(
@@ -41,7 +41,7 @@ Follow this instruction to [install and start Nacos server](/en/overview/referen
 $ go run ./go-server/cmd/server.go
 ```
 
-test rpc server work as expected:
+Test if the RPC server works as expected:
 ```shell
 $ curl \
     --header "Content-Type: application/json" \
@@ -49,7 +49,7 @@ $ curl \
     http://localhost:20000/greet.GreetService/Greet
 ```
 
-Open `https://localhost:8848/nacos/` with browser, check url address successfully registered into Nacos.
+Open `https://localhost:8848/nacos/` with a browser, check if the URL address is successfully registered into Nacos.
 
 ### Run client
 ```shell

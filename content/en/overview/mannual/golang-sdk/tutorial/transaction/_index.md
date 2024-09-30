@@ -1,6 +1,6 @@
 ---
-description: "Dubbo 分布式事务解决方案。"
-title: 分布式事务
+description: "Dubbo distributed transaction solution."
+title: Distributed Transactions
 type: docs
 weight: 62
 ---

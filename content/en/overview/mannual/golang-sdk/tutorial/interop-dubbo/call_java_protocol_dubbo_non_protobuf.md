@@ -2,27 +2,25 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
     - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
-description: "如果您是 dubbo java 的老用户，可能您的 dubbo java 应用并没有使用 protobuf（直接使用 java interface 定义服务），这个时候您需要使用以下方式开发 dubbo go-client，来调用老版本的 dubbo 服务。"
-title: 非protoubf模式协议互通（适用于老版本 dubbo java 应用）
-linkTitle: 非protoubf模式协议互通
+description: "If you are an old user of Dubbo Java, your Dubbo Java application may not be using Protobuf (defining services directly using Java interfaces). In this case, you need to develop the Dubbo Go-client as follows to call the older version of Dubbo services."
+title: Non-Protobuf Mode Protocol Interoperability (Applicable to Old Version Dubbo Java Applications)
+linkTitle: Non-Protobuf Mode Protocol Interoperability
 type: docs
 weight: 4
 ---
 
-{{% alert title="注意" color="warning" %}}
-在阅读本文档之前，请记住我们推荐使用 protobuf+triple 的模式编写 java 和 go 语言互通的服务。本文仅当您已经有老版本 dubbo java 应用的情况下适用，否则的话请参考上一篇文档，使用 protobuf+triple 开发服务。
+{{% alert title="Note" color="warning" %}}
+Before reading this document, please remember that we recommend using the protobuf+triple model to write services that are interoperable between Java and Go. This article only applies if you already have an old version of a Dubbo Java application; otherwise, please refer to the previous documentation for developing services using protobuf+triple.
 {{% /alert %}}
 
+You can view the [complete example source code](https://github.com/apache/dubbo-go-samples/tree/main/java_interop/non-protobuf-dubbo) here.
 
-可在此查看本文档 [完整示例源码](https://github.com/apache/dubbo-go-samples/tree/main/java_interop/non-protobuf-dubbo)。
+## Go-client Calling Java-server
+If you are an old user of Dubbo Java, your Dubbo Java application may not be using Protobuf (defining services directly using Java interfaces). In this case, you need to develop the Dubbo Go-client as follows to call the older version of Dubbo services.
 
+> The following solutions support both triple (non-Protobuf) and Dubbo protocols; you only need to adjust the protocol configuration `client.WithClientProtocolTriple()`.
 
-## go-client 调用 java-server
-但如果您是 dubbo java 的老用户，可能您的 dubbo java 应用并没有使用 protobuf（直接使用 java interface 定义服务），这个时候您需要使用以下方式开发 dubbo go-client，来调用老版本的 dubbo 服务。
-
-> 以下方案同时支持 triple(non-protobuf) 和 dubbo 协议，你只需要调整协议配置 `client.WithClientProtocolTriple()` 即可。
-
-假设我们当前的 java 服务定义如下：
+Assuming our current Java service is defined as follows:
 
 ```java
 package org.apache.dubbo.samples.api;
@@ -32,32 +30,32 @@ public interface GreetingsService {
 }
 ```
 
-我们需要这么编写 go-client，以实现服务调用：
+We need to write the Go-client as follows to achieve service invocation:
 
 ```go
-// 生成共享 client，指定
+// Generate shared client, specify
 cliDubbo, _ := client.NewClient(
 	client.WithClientProtocolDubbo(),
 	client.WithClientSerialization(constant.Hessian2Serialization),
 )
 
-// 生成服务代理，这里指定 java 服务全路径名
+// Generate service proxy, specifying the full path name of the Java service
 connDubbo, _ := cliDubbo.Dial("org.apache.dubbo.samples.api.GreetingsService", client.WithURL("tri://localhost:50052"))
 
 var respDubbo string
-// 发起调用，参数以数组形式指定（标准 json 格式，可参考 java 泛化调用）
+// Initiate call, parameters specified as an array (standard JSON format, refer to Java generic calls)
 connDubbo.CallUnary(context.Background(), []interface{}{"hello"}, &respDubbo, "SayHello")
 ```
 
-接下来我们尝试运行示例：
+Next, let’s try running the example:
 
-1. 运行 java server
+1. Run the Java server
 
 ```java
 ./java/java-server/run.sh
 ```
 
-检查服务运行正常：
+Check if the service is running properly:
 
 ```shell
 curl \
@@ -66,12 +64,12 @@ curl \
     http://localhost:50052/org.apache.dubbo.sample.Greeter/sayHello
 ```
 
-2. 运行 go client
+2. Run the Go client
 
 ```go
 go run go/go-server/cmd/client.go
 ```
 
-## java-client 调用 go-server
+## Java-client Calling Go-server
 
-这种场景，意味着您要完全从头开发 go server 服务，这时我们建议是直接使用 protbuf 来开发 go server 服务，java client 侧也使用 protobuf 对新增服务发起调用。具体使用示例请参考上一篇文档。
+In this scenario, it means you need to develop the Go server service entirely from scratch. We recommend directly using Protobuf to develop the Go server service, and the Java client side should also use Protobuf to invoke the new service. For specific usage examples, please refer to the previous documentation.

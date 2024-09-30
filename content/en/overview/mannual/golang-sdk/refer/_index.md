@@ -2,10 +2,11 @@
 aliases:
     - /en/docs3-v2/golang-sdk/refer/
     - /en/docs3-v2/golang-sdk/refer/
-    - /en/overview/mannual/golang-sdk/tutorial/develop/config-center/
-    - /en/overview/mannual/golang-sdk/tutorial/develop/features/
-description: Dubbo-go 更多参考资料
-title: 参考手册
+    - /en/overview/manual/golang-sdk/tutorial/develop/config-center/
+    - /en/overview/manual/golang-sdk/tutorial/develop/features/
+description: More reference materials for Dubbo-go
+title: Reference Manual
 type: docs
 weight: 5
 ---
+

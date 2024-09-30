@@ -1,23 +1,22 @@
 ---
 aliases:
   - /en/overview/mannual/golang-sdk/tutorial/governance/features/custom-filter/
-description: filter拦截器
-title: filter拦截器
+description: Filter Interceptor
+title: Filter Interceptor
 type: docs
 weight: 7
 ---
 
-Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。
+Filters dynamically intercept requests or responses to transform or utilize the information contained in the requests or responses. Filters do not typically create responses themselves but provide generic functions that can be "attached" to any RPC request. Dubbo Filters are pluggable, allowing us to insert any type and number of filters into a single RPC request.
 
-Filter 工作原理如下图所示：
+The working principle of filters is illustrated in the diagram below:
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/framework/filter.png"/>
 
+## Usage
+### 1. Concept of Filter Interceptor
 
-## 使用方式
-### 1. Filter 拦截器概念
-
-Filter 定义如下：
+Filter is defined as follows:
 
 ```go
 // Filter interface defines the functions of a filter
@@ -30,13 +29,13 @@ type Filter interface {
 }
 ```
 
-Filter 可以加载在 Consumer 端或者 Provider端。当加载在 Consumer 端，其Invoke函数调用的下游为网络层，OnResponse 为请求结束从网络层获取到返回结果后被调用。当加载在 Provider 端，其 Invoke 函数调用的下游为用户代码，OnResponse 为用户代码执行结束后向下传递至网络层前被调用。
+Filters can be loaded on either the Consumer or Provider side. When loaded on the Consumer side, the downstream of its Invoke function call is the network layer, and OnResponse is called after getting the return result from the network layer when the request ends. When loaded on the Provider side, the downstream of its Invoke function call is user code, and OnResponse is called before passing down to the network layer after user code execution ends.
 
-Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，可以记录日志、设置数据打点，记录 invoker 所对应服务端性能，限流等等工作。
+Filters adopt an aspect-oriented design approach, allowing for reasonable extensions to record logs, set data points, record service performance corresponding to the invoker, limit traffic, and more.
 
-### 2. 框架预定义 Filter
+### 2. Predefined Filters by the Framework
 
-框架预定义了一系列filter，可以在配置中直接使用，其代码实现位于 [filter](https://github.com/apache/dubbo-go/tree/main/filter)
+A series of predefined filters are available in the framework for direct use in the configuration, with their code implementation located at [filter](https://github.com/apache/dubbo-go/tree/main/filter).
 
 - accesslog
 - active
@@ -58,16 +57,16 @@ Filter 采用面向切面设计的思路，通过对 Filter 的合理扩展，�
 - tps
 - tracing
 
-### 3. 默认加载Filter
+### 3. Default Loaded Filters
 
-用户在配置文件中配置了自定义 Filter 加载策略时，框架将同时加载用户配置的 filters 和默认 filters，否则仅加载默认 filters。当前版本默认激活的 filter 列表如下：
+When users configure custom filter loading strategies in their configuration files, the framework will load both the user-configured filters and default filters together; otherwise, it will only load the default filters. The list of currently activated default filters is as follows:
 
 - Consumer: cshutdown
 - Provider: echo, metrics, token, accesslog, tps, generic_service, executivete, pshutdown
 
-### 4. 自定义Filter
+### 4. Custom Filters
 
-用户可在代码中自定义 Filter，注册到框架上，并在配置中选择使用。
+Users can create custom filters in their code, register them with the framework, and select them for use in the configuration.
 
 ```go
 func init() {
@@ -91,7 +90,6 @@ func (f *MyClientFilter) OnResponse(ctx context.Context, result protocol.Result,
 }
 ```
 
-## 完整示例
-可通过以下链接学习如何使用 API 配置和启用 Filter 的 <a href="https://github.com/apache/dubbo-go-samples/tree/main/filter" target="_blank">完整示例源码地址</a>
-
+## Complete Example
+You can learn how to use the API to configure and enable filters through the following link: <a href="https://github.com/apache/dubbo-go-samples/tree/main/filter" target="_blank">Complete example source code address</a>
 

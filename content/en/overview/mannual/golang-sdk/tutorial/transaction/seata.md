@@ -1,18 +1,18 @@
 ---
-description: "使用 Seata 分布式事务解决方案解决 Dubbo 数据一致性问题。"
-title: Seata分布式事务
+description: "Use Seata distributed transaction solution to solve Dubbo data consistency issues."
+title: Seata Distributed Transactions
 type: docs
 weight: 1
 ---
 
-1. 先执行以下命令，启动 seata-server。
+1. First, execute the following command to start the seata-server.
 
    ```shell
    cd ../dockercompose
    docker-compose -f docker-compose.yml up -d seata-server
    ```
 
-2. 再执行 triple/client/cmd 和 triple/server/cmd 目录下的 main()方法。
+2. Then, execute the main() method in the triple/client/cmd and triple/server/cmd directories.
 
 
-<a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">完整示例源码地址</a>
+<a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">Complete example source code address</a>

@@ -1,22 +1,22 @@
 ---
-description: 健康检查
-title: 健康检查
+description: Health Check
+title: Health Check
 type: docs
 weight: 3
 ---
 
-## 背景
+## Background
 
-Dubbo-go 内置了基于 triple 协议的健康检查服务，帮助用户管理和监测服务健康状态，可在此查看 <a href="https://github.com/apache/dubbo-go-samples/tree/main/healthcheck" target="_blank">完整示例源码</a>。
+Dubbo-go has a built-in health check service based on the triple protocol to help users manage and monitor the health status of services. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/healthcheck" target="_blank">complete example source code</a> here.
 
-## 使用方法
+## Usage
 
-- 框架在通过 `instance` 启动后会自动向框架中注册健康检查服务 `grpc.health.v1.Health`，用于记录并对外暴露每个triple服务的健康状态。
-- 健康检查服务可以通过发起 http 请求检查框架中服务的状态，也可以通过客户端调用该健康检查服务，调用的接口为`grpc.health.v1.Health`，方法为 `check`。
+- The framework automatically registers the health check service `grpc.health.v1.Health` into the framework after starting via `instance`, which records and exposes the health status of each triple service.
+- The health check service can check the status of services in the framework by making an HTTP request or through client calls to the health check service. The interface called is `grpc.health.v1.Health`, and the method is `check`.
 
-## 1、通过客户端调用健康检查服务
+## 1. Call the health check service through the client
 
-启动 dubbo-go-samples/healthcheck/go-server 中的服务，通过下方客户端即可查看 `greet.GreetService` 的状态。
+Start the service in dubbo-go-samples/healthcheck/go-server, and the status of `greet.GreetService` can be viewed through the client below.
 
 ```go
 package main
@@ -57,16 +57,16 @@ func main() {
 }
 ```
 
-启动后会有以下输出
+Once started, the following output will appear
 
 ```sh
 [greet.GreetService's health status:SERVING]
 [greet.GreetService's health status:SERVING]
 ```
 
-## 2.通过发起http请求检查服务健康状态
+## 2. Check the health status of the service by making an HTTP request
 
-启动 dubbo-go-samples/healthcheck/go-server 中的服务，发起下方http请求即可查看 `greet.GreetService` 的状态：
+Start the service in dubbo-go-samples/healthcheck/go-server, and make the HTTP request below to view the status of `greet.GreetService`:
 
 ```http
 POST /grpc.health.v1.Health/Check
@@ -76,7 +76,7 @@ Content-Type: application/json
 {"service":"greet.GreetService"}
 ```
 
-将会有以下输出
+The following output will appear
 
 ```http
 {
@@ -84,12 +84,12 @@ Content-Type: application/json
 }
 ```
 
+## More Content
+It is worth noting that the current framework does not yet establish a complete service status management mechanism. The dubbo-go framework will set all loaded services to `SERVING` status, but there is currently no `NOT SERVING` setting mechanism (to set the service status to NOT SERVING under a specific condition).
 
-## 更多内容
-值得注意的是，当前框架中尚未建立完整的服务状态管理机制，dubbo-go 框架会将所有加载的服务设置为 `SERVING` 状态，但尚没有 `NOT SERVING` 设置机制（在满足某个特定条件的情况下将服务状态设置为 NOT SERVING）。
+If necessary, users can extend the dubbo-go framework to provide complete service status management capabilities, allowing for real-time updated service status queries and traffic forwarding based on service status.
 
-如果有需要，用户可通过扩展 dubbo-go 框架的方式，提供完整的服务状态管理能力，这样就可以查询到实时更新的服务状态，并根据服务状态进行流量转发。
-
-部分参考资料：
+Reference materials:
 + https://github.com/grpc/grpc/blob/master/doc/health-checking.md
 + https://github.com/grpc/grpc-go/tree/master/health
+

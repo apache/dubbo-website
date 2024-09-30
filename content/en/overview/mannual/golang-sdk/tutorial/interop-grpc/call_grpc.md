@@ -2,20 +2,19 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_grpc/
     - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_grpc/
-description: 与 gRPC 应用互通
-title: 与 gRPC 应用互通
+description: Intercommunication with gRPC applications
+title: Intercommunication with gRPC applications
 type: docs
 weight: 5
 ---
 
-## 1.介绍
+## 1. Introduction
 
-triple 协议 100% 兼容 gRPC，本示例演示使用 dubbo-go 开发与 grpc 互调的应用，可在此查看  <a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/grpc" target="_blank">完整示例源码地址</a>
+The triple protocol is 100% compatible with gRPC. This example demonstrates using dubbo-go to develop applications that interoperate with gRPC. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/grpc" target="_blank">complete example source code</a> here.
 
-## 2.如何互通
+## 2. How to Intercommunicate
 
-Dubbo-go的Triple协议能够兼容grpc协议
-在创建服务端时，可以设置`protocol.WithTriple()`使用Triple协议
+The Triple protocol of Dubbo-go is compatible with the gRPC protocol. When creating the server, you can set `protocol.WithTriple()` to use the Triple protocol.
 
 ```go
 	srv, err := server.NewServer(
@@ -26,13 +25,13 @@ Dubbo-go的Triple协议能够兼容grpc协议
     )
 ```
 
-## 3.案例
+## 3. Example
 
-### 3.1服务端介绍
+### 3.1 Server Introduction
 
-#### 服务端proto文件
+#### Server proto File
 
-源文件路径：dubbo-go-sample/rpc/grpc/proto/greet.proto
+Source file path: dubbo-go-sample/rpc/grpc/proto/greet.proto
 
 ```protobuf
 syntax = "proto3";
@@ -54,9 +53,9 @@ service GreetService {
 }
 ```
 
-#### dubbo-go服务端
+#### dubbo-go Server
 
-源文件路径：dubbo-go-sample/rpc/grpc/go-server/cmd/main.go
+Source file path: dubbo-go-sample/rpc/grpc/go-server/cmd/main.go
 
 ```go
 type GreetTripleServer struct {
@@ -88,9 +87,9 @@ func main() {
 }
 ```
 
-#### grpc服务端
+#### gRPC Server
 
-源文件路径: dubbo-go-sample/rpc/grpc/grpc-server/cmd/main.go
+Source file path: dubbo-go-sample/rpc/grpc/grpc-server/cmd/main.go
 
 ```go
 type server struct {
@@ -117,11 +116,11 @@ func main() {
 
 ```
 
-### 3.2客户端介绍
+### 3.2 Client Introduction
 
-#### dubbo-go客户端
+#### dubbo-go Client
 
-源文件路径：dubbo-go-sample/rpc/grpc/go-client/cmd/main.go
+Source file path: dubbo-go-sample/rpc/grpc/go-client/cmd/main.go
 
 ```go
 package main
@@ -174,9 +173,9 @@ func main() {
 }
 ```
 
-#### grpc客户端
+#### gRPC Client
 
-源文件路径：dubbo-go-sample/rpc/grpc/grpc-client/cmd/main.go
+Source file path: dubbo-go-sample/rpc/grpc/grpc-client/cmd/main.go
 
 ```go
 package main
@@ -225,18 +224,18 @@ func main() {
 }
 ```
 
-### 3.3案例效果
+### 3.3 Example Results
 
-先启动dubbo-go服务端和grpc服务端，然后启动dubbo-go客户端和grpc客户端，观察控制台输出
+Start the dubbo-go server and gRPC server first, then start the dubbo-go client and gRPC client, and observe the console output.
 
-Dubbo-go客户端输出：
+Dubbo-go client output:
 
 ```shell
 Greet response: dubbo:hello world
 Greet response: grpc:hello world
 ```
 
-grpc客户端输出：
+gRPC client output:
 
 ```shell
 Greet response: grpc:hello world

@@ -3,8 +3,9 @@ aliases:
     - /en/docs3-v2/golang-sdk/tutorial/debugging/
     - /en/docs3-v2/golang-sdk/tutorial/debugging/
     - /en/overview/mannual/golang-sdk/tutorial/develop/interflow/call_java/
-description: "实现 dubbo go 和 dubbo java 应用互通，包括服务发现、协议通信等。"
-title: 与dubbo-java互通
+description: "Implementing interoperability between Dubbo Go and Dubbo Java applications, including service discovery, protocol communication, etc."
+title: Interoperability with Dubbo Java
 type: docs
 weight: 90
 ---
+

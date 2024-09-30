@@ -2,15 +2,15 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/multi_registry/
-description: 多注册中心
-title: 多注册中心
+description: Multiple Registration Centers
+title: Multiple Registration Centers
 type: docs
 weight: 100
 ---
 
-一个 Dubbo 应用可以配置的多个接口维度的注册中心，多注册中心可用于集群隔离、迁移等多种场景，关于这部分更详细的说明可参考 <a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/multiple-registry/" target="_blank">Dubbo Java 多注册中心说明</a>。
+A Dubbo application can configure multiple registration centers at different interface dimensions. Multiple registration centers can be used for cluster isolation, migration, and various other scenarios. For a more detailed explanation, refer to the <a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/multiple-registry/" target="_blank">Dubbo Java Multiple Registration Center Documentation</a>.
 
-## API配置方式
+## API Configuration Method
 
 ```go
 ins, _ := dubbo.NewInstance(
@@ -28,35 +28,35 @@ ins, _ := dubbo.NewInstance(
 
 ```
 
-指定某个 server 下的服务注册到哪个注册中心：
+Specify which registration center a service under a specific server should register to:
 ```go
-// 指定 server 下的服务注册到 zookeeper 注册中心
+// Specify that the service under the server registers to the zookeeper registration center
 srv, _ := ins.NewServer(server.WithServerRegistryIDs([]string{"zookeeper"}))
 
-// 指定 server 下的服务注册到 nacos 注册中心
+// Specify that the service under the server registers to the nacos registration center
 srv2, _ := ins.NewServer(server.WithServerRegistryIDs([]string{"nacos"}))
 ```
 
-指定某个特定服务注册到哪个注册中心：
+Specify which registration center a particular service should register to:
 ```go
 srv, _ := ins.NewServer()
 
 greet.RegisterGreetServiceHandler(srv, &GreetTripleServer{}, server.WithRegistryIDs([]string{"zookeeper"}))
 ```
 
-以上使用方式对 client 侧类似。
+The usage on the client side is similar.
 
-## YAML配置方式
+## YAML Configuration Method
 
-修改服务端配置 go-server/conf/dubbogo.yaml， 同时将服务注册在两个注册中心上。
+Modify the server configuration at go-server/conf/dubbogo.yaml to register the service in both registration centers.
 
 ```yaml
 dubbo:
   registries:
-    zookeeper: # 指定 zookeeper 注册中心
+    zookeeper: # Specify the zookeeper registration center
       protocol: zookeeper
       address: 127.0.0.1:2181
-    nacos: # 指定 nacos 注册中心
+    nacos: # Specify the nacos registration center
       protocol: nacos
       address: 127.0.0.1:8848
   protocols:
@@ -65,22 +65,23 @@ dubbo:
       port: 20000
 ```
 
-## 支持的注册中心
+## Supported Registration Centers
 * Nacos
 * Zookeeper
 * Polaris
 * Kubernetes
 
-比如使用 Polaris 作为注册中心时，你需要指定以下内容，使用 API 或 YAML 配置文件均可以：
+For example, when using Polaris as a registration center, you need to specify the following content, both via API or YAML configuration file:
 
 ```yaml
 dubbo:
   registries:
     polarisMesh:
       protocol: polaris
-      address: ${北极星服务端IP}:8091
-      namespace: ${北极星命名空间信息}
-      token: ${北极星资源鉴权 token}   # 如果北极星服务端开启了针对客户端的鉴权，则需要配置该参数
+      address: ${Polaris Server IP}:8091
+      namespace: ${Polaris Namespace Info}
+      token: ${Polaris Resource Authorization Token}   # If Polaris server enables client authorization, this parameter needs to be configured
 ```
 
-对于 Kubernetes 注册中心的使用方式，请参考 [控制面](/en/overview/mannual/control-plane/) 文档。
+For usage with Kubernetes registration centers, please refer to the [Control Plane](/en/overview/mannual/control-plane/) documentation.
+

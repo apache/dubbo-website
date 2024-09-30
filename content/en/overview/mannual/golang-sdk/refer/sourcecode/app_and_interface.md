@@ -3,9 +3,9 @@ aliases:
     - /en/docs3-v2/golang-sdk/preface/design/app_and_interface/
     - /en/docs3-v2/golang-sdk/preface/design/app_and_interface/
     - /en/overview/mannual/golang-sdk/preface/design/app_and_interface/
-description: Dubbo的应用和接口
-keywords: 基本概念
-title: Dubbo的应用和接口
+description: The Application and Interface of Dubbo
+keywords: Basic Concepts
+title: The Application and Interface of Dubbo
 type: docs
 ---
 
@@ -14,61 +14,62 @@ type: docs
 
 
 
-## Dubbogo 服务层级
+## Dubbogo Service Levels
 
-Dubbogo 服务层级为两个级别：分别是应用级别(App Level)和接口级别(Interface Level)，该服务分层与**框架配置**结构息息相关。
+Dubbogo service levels consist of two levels: Application Level and Interface Level, which are closely related to the **framework configuration** structure.
 
-如下图所示，可以看到，应用级别的组件以浅红色标注，接口级别的组件以浅蓝色标注：
+As shown in the diagram below, the components at the application level are marked in light red, while those at the interface level are marked in light blue:
 
 ![img](/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png)
 
-## 1. 应用级别组件
+## 1. Application Level Components
 
-应用级别组件的特点：被当前应用的所有接口级别组件共用。
+Characteristics of application level components: shared by all interface level components of the current application.
 
-应用级别的主要组件如下：
+The main components at the application level are as follows:
 
-- 应用信息模块
+- Application Information Module
 
-  包含应用维度相关信息，包括应用名、版本号、数据上报方式等
+  Contains information related to the application dimension, including application name, version number, data reporting method, etc.
 
-- Consumer 模块
+- Consumer Module
 
-  Consumer 模块负责客户端相关信息，包括一个或多个引用（Reference）结构，以及超时、客户端过滤器（consumer filter）等相关信息。
+  The Consumer module is responsible for client-related information, including one or more Reference structures, as well as timeout, client filters, and other related information.
 
-- Provider 模块
+- Provider Module
 
-  Provider 模块负责服务端相关信息，包括一个或多个服务（Service）结构、服务端过滤器（provider filter）等相关信息。
+  The Provider module is responsible for server-related information, including one or more Service structures, server filters, and other related information.
 
-- 注册中心（Registry）模块
+- Registry Module
 
-  注册中心模块负责定义好所要使用的一系列注册中心，例如框架支持的ZK、Nacos、ETCD等中间件。应用级别的注册模块只负责声明，由接口级别的组件进行引用，引用时以用户自定义的注册中心ID（registryID) 作为索引。
+  The registry module is responsible for defining a series of registries to be used, such as ZK, Nacos, ETCD, etc. The application-level registry module only declares, referenced by interface-level components, using a user-defined registry ID as an index.
 
-- 协议（Protocol）模块
+- Protocol Module
 
-  协议模块只存在于服务端。
+  The protocol module only exists on the server.
 
-  协议模块关心服务的暴露信息，例如协议名、服务监听IP、端口号等信息。协议模块属于应用级别，只负责声明，由接口级别的组件进行引用，引用时以用户自定义的协议ID（protocolID) 作为索引。
+  It concerns service exposure information, such as protocol name, service listening IP, port number, etc. It belongs to the application level, only declaring and referenced by interface-level components, using a user-defined protocol ID as an index.
 
-- 元数据中心模块
+- Metadata Center Module
 
-  元数据中心类似于注册中心模块，负责声明框架需要使用的元数据中心，从而将元数据成功上报。
+  Similar to the registry module, it is responsible for declaring the metadata center needed by the framework to successfully report metadata.
 
-- 配置中心模块
-- 路由模块
-- 日志模块
-- 监控模块
+- Configuration Center Module
+- Routing Module
+- Logging Module
+- Monitoring Module
 
-## 2. 接口级别组件
+## 2. Interface Level Components
 
-- 服务（Service）模块
+- Service Module
 
-  服务模块被使用于任何暴露的服务，声明接口暴露所需的信息，包括例如接口名、协议、序列化方式等，负责单个服务接口的暴露。
+  Used for any exposed service, declaring the information required for interface exposure, including interface name, protocol, serialization method, etc., responsible for exposing a single service interface.
 
-- 引用（Reference）模块
+- Reference Module
 
-  引用模块被使用于需要调用的远程服务的客户端，其声明了需要请求接口所需的信息，包括例如接口名、协议、序列化方式等、负责特定协议的抽象，参与客户端的生成。
+  Used for clients that need to call remote services, declaring the information required for requesting interfaces, including interface name, protocol, serialization method, etc., and abstracting specific protocols involved in client generation.
 
-## 3. 说明
+## 3. Explanation
 
-暴露的服务是接口级别的，一个用户定义的 Provider Struct/一个用户定义的Consumer Struct，对应一个Service/Reference 模块，一个应用可以同时存在Consumer 模块和 Provider 模块，因此可以同时存在多个Service/Reference 模块。
+Exposed services are at the interface level. A user-defined Provider Struct / a user-defined Consumer Struct corresponds to a Service / Reference module. An application can have both Consumer and Provider modules simultaneously, allowing multiple Service / Reference modules to exist at the same time.
+

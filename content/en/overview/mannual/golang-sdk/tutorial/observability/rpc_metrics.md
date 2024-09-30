@@ -2,13 +2,13 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
     - /en/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
-description: "采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统"
-title: metrics监控
+description: "Collect runtime Metrics indicators and integrate with Prometheus and Grafana systems"
+title: Metrics Monitoring
 type: docs
 weight: 2
 ---
 
-Dubbo 支持采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统，实现对微服务集群的可视化监控，以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/metrics)。
+Dubbo supports the collection of runtime Metrics indicators and their integration with Prometheus and Grafana systems to achieve visual monitoring of microservice clusters. Below is a specific usage example. You can view the [complete source code of the example](https://github.com/apache/dubbo-go-samples/tree/main/metrics).
 
 ## Contents
 
@@ -82,7 +82,7 @@ paste the JSON
 
 ![datasource.png](/imgs/golang/metrics/import-datasource.png)
 
-click 【Import】button and you will see the Dubbo Observability dashboard,enjoy it
+click 【Import】button and you will see the Dubbo Observability dashboard, enjoy it
 
 ![databoard](/imgs/golang/metrics/dashboard.png)
 
@@ -94,7 +94,7 @@ install prometheus in k8s [kube-prometheus](https://github.com/prometheus-operat
 
 Set `prometheus-service.yaml` type to NodePort
 
-1. add `dubboPodMoitor.yaml` to  `kube-prometheus` `manifests` dir, The content is as follows
+1. add `dubboPodMoitor.yaml` to `kube-prometheus` `manifests` dir, The content is as follows
  ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor

@@ -2,8 +2,8 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/http_triple/
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/pixiu/http_triple/
-description: 接入 Ingress 流量
-title: 接入 Ingress 流量
+description: Access Ingress Traffic
+title: Access Ingress Traffic
 type: docs
 weight: 1
 ---
@@ -13,20 +13,20 @@ weight: 1
 
 
 
-## 1. 准备工作
+## 1. Preparation
 
 - kubectl
-- 一个 k8s 集群，配置好 kubeconfig 
+- A k8s cluster, with kubeconfig configured 
 
-## 2. 使用 HTTP 协议通过网关调用 Triple 应用
+## 2. Calling Triple Application via Gateway using HTTP Protocol
 
-Dubbo-go-pixiu 网关支持调用 GO/Java 的 Dubbo 集群。在 Dubbo-go 3.0 的场景下，我们可以通过 Pixiu 网关，在集群外以 HTTP 协议请求 pixiu 网关，在网关层进行协议转换，进一步调用集群内的Dubbo-go 服务。
+The Dubbo-go-pixiu gateway supports calling Dubbo clusters in GO/Java. In the Dubbo-go 3.0 scenario, we can request the pixiu gateway via HTTP protocol from outside the cluster, allowing protocol conversion at the gateway layer to further call Dubbo-go services inside the cluster.
 
 ![image.png](/imgs/docs3-v2/golang-sdk/tasks/pixiu/http_triple/triple-pixiu.png)
 
-用户调用 Dubbo-go 服务的 path 为http://$(app_name)/$(service_name)/$(method)。
+The path for users to call Dubbo-go services is http://$(app_name)/$(service_name)/$(method).
 
-例如一个proto文件内有如下定义：
+For example, if a proto file has the following definition:
 
 ```protobuf
 package org.apache.dubbo.quickstart.samples;
@@ -40,7 +40,7 @@ message HelloRequest {
 }
 ```
 
-并在dubbo-go 服务启动时在dubbogo.yml 内配置应用名为my-dubbogo-app:
+And during the startup of the dubbo-go service, the application name is configured in dubbogo.yml as my-dubbogo-app:
 
 ```yaml
 dubbo:
@@ -48,19 +48,19 @@ dubbo:
     name: my-dubbogo-app
 ```
 
-pixiu 网关即可解析 path 为 my-dubbogo-app/org.apache.dubbo.quickstart.samples.UserProvider/SayHello 的路由，并转发至对应服务。来自外部HTTP 请求的 body 为 json 序列化的请求参数，例如 {"name":"test"}。
+The pixiu gateway can then resolve the path my-dubbogo-app/org.apache.dubbo.quickstart.samples.UserProvider/SayHello and forward it to the corresponding service. The body of HTTP requests from external sources will be JSON serialized request parameters, e.g., {"name":"test"}.
 
-我们目前推荐使用 Nacos 作为注册中心。
+Currently, we recommend using Nacos as the registry.
 
-用户可以在自己的集群里部署我们的demo，集群最好拥有暴露 lb 类型 service 的能力，从而可以在公网访问至集群内的服务，您也可以直接集群内进行请求。
+Users can deploy our demo in their own cluster, preferably with the ability to expose a service of lb type, to allow public access to services within the cluster, or requests can be made directly within the cluster.
 
-针对您的集群，执行：
+For your cluster, execute:
 
 ```bash
 $ kubectl apply -f https://raw.githubusercontent.com/dubbogo/triple-pixiu-demo/master/deploy/pixiu-triple-demo.yml
 ```
 
-会在 dubbogo-triple-nacos 命名空间下创建如下资源，包含三个 triple-server，一个pixiu网关，一个 nacos server。并通过 Servcie 将服务暴露至公网。
+This will create the following resources in the dubbogo-triple-nacos namespace, including three triple-servers, one pixiu gateway, and one nacos server, exposing the service to the public through Service.
 
 ```bash
 namespace/dubbogo-triple-nacos created
@@ -71,7 +71,7 @@ deployment.apps/server created
 service/pixiu created
 ```
 
-获取 pixiu 公网 ip 并进行调用
+Get the external IP of the pixiu and make a call:
 
 ```pgsql
 $ kubectl get svc -n dubbogo-triple-nacos
@@ -80,9 +80,10 @@ dubbo-go-nacos   ClusterIP      192.168.123.204   <none>          8848/TCP      
 pixiu            LoadBalancer   192.168.156.175   30.XXX.XXX.XX   8881:30173/TCP   32s
 ```
 
-通过curl 调用 demo 服务，并获得响应结果。
+Call the demo service using curl and obtain the response.
 
 ```bash
 $ curl -X POST -d '{"name":"laurence"}' http://30.XXX.XXX.XX:8881/dubbogoDemoServer/org.apache.dubbo.laurence.samples.UserProvider/SayHello
 {"name":"Hello laurence","id":"12345","age":21}
 ```
+

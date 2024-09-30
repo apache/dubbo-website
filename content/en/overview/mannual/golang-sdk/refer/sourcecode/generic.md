@@ -2,8 +2,8 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/features/generic/
     - /en/docs3-v2/golang-sdk/tutorial/develop/features/generic/
-description: 泛化调用
-title: 泛化调用
+description: Generic Call
+title: Generic Call
 type: docs
 weight: 7
 ---
@@ -13,13 +13,13 @@ weight: 7
 
 
 
-## 1. Dubbo-go 泛化调用 Java Server
+## 1. Dubbo-go Generic Call Java Server
 
-使用 Triple 协议 + hessian2 序列化方案
+Using Triple protocol + hessian2 serialization scheme
 
-### 1.1 Java-Server启动
+### 1.1 Java Server Startup
 
-1. 传输结构定义
+1. Transport Structure Definition
 
 ```java
 package org.apache.dubbo;
@@ -38,7 +38,7 @@ public class User implements Serializable {
 }
 ```
 
-2. 接口定义
+2. Interface Definition
 
 ```java
 package org.apache.dubbo;
@@ -53,12 +53,12 @@ public interface UserProvider {
 }
 ```
 
-### 1.2 Go-Client 泛化调用
+### 1.2 Go Client Generic Call
 
-此处展示以 API 的形式构造泛化接口引用
+This section shows how to construct a generic interface reference in the form of an API
 
 ```go
-// 初始化 Reference 配置
+// Initialize Reference Configuration
 refConf := config.NewReferenceConfigBuilder().
   SetInterface("org.apache.dubbo.UserProvider").
   SetRegistryIDs("zk").
@@ -67,22 +67,22 @@ refConf := config.NewReferenceConfigBuilder().
   SetSerialization("hessian2").
   Build()
 
-// 构造 Root 配置，引入注册中心模块
+// Construct Root Configuration, importing registry module
 rootConfig := config.NewRootConfigBuilder().
   AddRegistry("zk", config.NewRegistryConfigWithProtocolDefaultPort("zookeeper")).
   Build()
 
-// Reference 配置初始化，因为需要使用注册中心进行服务发现，需要传入经过配置的 rootConfig
+// Reference Configuration initialization, as service discovery needs to pass in the configured rootConfig
 if err := refConf.Init(rootConfig); err != nil{
   panic(err)
 }
 
-// 泛化调用加载、服务发现
+// Generic call loading, service discovery
 refConf.GenericLoad(appName)
 
 time.Sleep(time.Second)
 
-// 发起泛化调用
+// Initiating a generic call
 resp, err := refConf.GetRPCService().(*generic.GenericService).Invoke(
   context.TODO(),
   "getUser1",
@@ -96,12 +96,13 @@ if err != nil {
 logger.Infof("GetUser1(userId string) res: %+v", resp)
 ```
 
-GenericService 的 Invoke 方法包括三个参数：context.Context, []string, []hessian.Object, 
+The Invoke method of GenericService includes three parameters: context.Context, []string, []hessian.Object, 
 
-其中第二个参数为对应参数的 Java 类名，例如java.lang.String、org.apache.dubbo.User，第三个参数为参数列表，hessian.Object 即为 interface。第二、第三个参数应与方法签名一致，按顺序对应。
+where the second parameter is the corresponding Java class name, such as java.lang.String, org.apache.dubbo.User, and the third parameter is the parameter list, where hessian.Object is the interface. The second and third parameters should match the method signature and correspond in order.
 
-获得map结构的返回结果
+Obtain a map structure return result
 
 ```
 INFO    cmd/client.go:89        GetUser1(userId string) res: map[age:48 class:org.apache.dubbo.User id:A003 name:Joe sex:MAN time:2021-10-04 14:03:03.37 +0800 CST]
 ```
+

@@ -2,8 +2,9 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/debugging/
     - /en/docs3-v2/golang-sdk/tutorial/debugging/
-description: "rpc 框架通信常用的一些功能与配置方式，包括流式通信、超时时间、Filter拦截器、附加参数、健康检查等。"
-title: RPC框架
+description: "Common features and configuration methods for RPC framework communication, including streaming communication, timeout settings, filter interceptors, additional parameters, health checks, etc."
+title: RPC Framework
 type: docs
 weight: 10
 ---
+

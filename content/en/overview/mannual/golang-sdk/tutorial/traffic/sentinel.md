@@ -1,35 +1,34 @@
 ---
-description: "基于 Sentinel 的流量"
-title: Sentinel限流降级
+description: "Traffic Based on Sentinel"
+title: Sentinel Rate Limiting and Downgrade
 type: docs
 weight: 3
 ---
 
-Dubbo-go 中提供了内置的限流组件，用户可根据自己的业务场景调整限流值、限流后的行为等，具体可 [TpsLimiter](https://github.com/apache/dubbo-go/blob/main/filter/tps_limiter.go#L52) 定义与具体实现。用户可通过类似以下方式在服务端设置简单的限流策略：
+Dubbo-go provides a built-in rate limiting component, allowing users to adjust rate limiting values and post-limiting behaviors according to their business scenarios. The specifics can be defined and implemented in [TpsLimiter](https://github.com/apache/dubbo-go/blob/main/filter/tps_limiter.go#L52). Users can set a simple rate limiting strategy on the server side in a manner similar to the following: 
 
 ```go
-server.WithTpsLimiter("method-service") // 目前支持 method-service、polaris 等几个实现
-server.WithTpsLimiterXxx() // 设置限流相关阈值，请根据具体方法填写
+server.WithTpsLimiter("method-service") // Currently supports implementations like method-service, polaris, etc.
+server.WithTpsLimiterXxx() // Set rate limiting related thresholds, please fill in according to the specific method
 //tps.limit.strategy: "slidingWindow"
 //tps.limit.rejected.handler: "default"
 //tps.limit.interval: 1000
 //tps.limit.rate: 3
 ```
 
-Dubbo-go 内置限流策略相对简单，对于一些更复杂的场景，我们建议通过使用 Sentinel 等专业的第三方框架可以实现更丰富、更灵活的限流策略。
+The built-in rate limiting strategy in Dubbo-go is relatively simple. For more complex scenarios, we recommend using professional third-party frameworks like Sentinel to achieve richer and more flexible rate limiting strategies.
 
-可在此查看 [本示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/filter/sentinel)，也可以参考 [Dubbo+Sentinel 的 Java 示例](/en/overview/mannual/java-sdk/tasks/rate-limit/sentinel/) 获得更多灵感。
+You can view the [complete source code for this example](https://github.com/apache/dubbo-go-samples/tree/main/filter/sentinel), and also refer to the [Java example of Dubbo+Sentinel](/en/overview/mannual/java-sdk/tasks/rate-limit/sentinel/) for more inspiration.
 
-## Provider 限流
+## Provider Rate Limiting
 
-### 基于 QpS 限流
+### QpS Based Rate Limiting
 
-### 基于并发任务数限流(当前在运行任务数)
+### Rate Limiting Based on Concurrent Task Count (Current Running Task Count)
 
-## Consumer 限流
+## Consumer Rate Limiting
 
-### 熔断策略
+### Circuit Breaker Strategy
 
+### Rate Limiting Based on Concurrent Request Count (Requests Awaiting Response)
 
-
-### 基于并发请求数限流(未收到响应的请求数)

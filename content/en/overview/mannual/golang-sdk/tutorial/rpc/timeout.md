@@ -1,17 +1,17 @@
 ---
-description: 配置超时时间
-title: 超时时间
+description: Configure Timeout Duration
+title: Timeout Duration
 type: docs
 weight: 2
 ---
 
-## 1.介绍
+## 1. Introduction
 
-本示例演示如何在 Dubbo-go 客户端发起调用时设置请求超时时间。可在此查看 <a href="https://github.com/apache/dubbo-go-samples/tree/main/timeout" target="_blank">完整示例源码地址</a>
+This example demonstrates how to set the request timeout duration when initiating a call from the Dubbo-go client. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/timeout" target="_blank">complete example source code</a> here.
 
-## 2.如何设置请求超时时间
+## 2. How to Set the Request Timeout Duration
 
-在创建客户端时，可以使用 `client.WithRequestTimeout()` 方法设置全局超时时间（所有使用改 client 的服务代理共享）。
+When creating a client, you can set a global timeout using the `client.WithRequestTimeout()` method (shared by all service proxies using this client).
 
 ```go
     cli, err := client.NewClient(
@@ -20,27 +20,27 @@ weight: 2
     )
 ```
 
-可以使用 `client.WithRequestTimeout()` 创建服务粒度的超时时间（以下服务代理 `svc` 发起的方法调用都使用这个时间）。
+You can also create service-level timeout using `client.WithRequestTimeout()` (all method calls initiated from the following service proxy `svc` will use this timeout).
 
 ```go
    svc, err := greet.NewGreetService(cli, client.WithRequestTimeout(5 * time.Second))
 ```
 
-也可以在调用发起时，使用 `client.WithCallRequestTimeout()` 指定一个超时时间
+Additionally, you can specify a timeout when making the call using `client.WithCallRequestTimeout()`.
 
 ```go
 resp, err := svc.GreetTimeout(context.Background(), &greet.GreetRequest{Name: "hello world"}, client.WithCallRequestTimeout(10 * time.Second))
 ```
 
-从上往下，以上三种方式的优先级逐步提高，`client.WithCallRequestTimeout()` 指定的超时时间优先级最高。
+From top to bottom, the priority of the above three methods increases, with `client.WithCallRequestTimeout()` having the highest priority.
 
-## 3.示例详解
+## 3. Example Details
 
-### 3.1服务端介绍
+### 3.1 Introduction to the Server
 
-#### 服务端proto文件
+#### Server Proto File
 
-源文件路径：dubbo-go-sample/timeout/proto/greet.proto
+Source file path: dubbo-go-sample/timeout/proto/greet.proto
 
 ```protobuf
 syntax = "proto3";
@@ -63,11 +63,11 @@ service GreetService {
 }
 ```
 
-#### 服务端handler文件
+#### Server Handler File
 
-`Greet`方法直接响应，`GreetTimeout`方法等待五秒后响应（模拟超时）。
+The `Greet` method responds directly, while the `GreetTimeout` method waits for five seconds before responding (simulating a timeout).
 
-源文件路径：dubbo-go-sample/timeout/go-server/handler.go
+Source file path: dubbo-go-sample/timeout/go-server/handler.go
 
 ```go
 package main
@@ -94,11 +94,11 @@ func (srv *GreetTripleServer) GreetTimeout(ctx context.Context, req *greet.Greet
 }
 ```
 
-### 3.2客户端介绍
+### 3.2 Introduction to the Client
 
-客户端client文件，创建客户端，设置超时时间为3s，分别请求`Greet`和`GreetTimeout`，输出响应结果。
+Client file, creating a client, setting the timeout to 3s, requesting `Greet` and `GreetTimeout`, and outputting the response results.
 
-源文件路径：dubbo-go-sample/timeout/go-client/client.go
+Source file path: dubbo-go-sample/timeout/go-client/client.go
 
 ```go
 package main
@@ -145,9 +145,9 @@ func main() {
 }
 ```
 
-### 3.3案例效果
+### 3.3 Example Effect
 
-先启动服务端，再启动客户端，可以观察到`GreetTimeout`请求响应超时，`Greet`请求响应正常
+Start the server first, then start the client. You will observe that the `GreetTimeout` request times out while the `Greet` request responds normally.
 
 ```
 [call [greet.GreetService.GreetTimeout] service timeout]

@@ -2,23 +2,23 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/deploy/
-description: Istio 环境部署 Dubbo-go 应用
-title: Istio 环境部署 Dubbo-go 应用
+description: Deploying Dubbo-go application in Istio environment
+title: Deploying Dubbo-go application in Istio environment
 type: docs
 weight: 2
 ---
 
-在本章节中，我们将使用应用模板快速创建一组 Dubbo-go Server和 Client 端应用，部署在 Istio 集群中；观察、调试和验证服务发现和调用成功。
+In this chapter, we will quickly create a set of Dubbo-go Server and Client applications using the application template and deploy them in an Istio cluster; observe, debug, and verify service discovery and successful calls.
 
-## 1. 准备工作
+## 1. Preparation
 
-- dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。
-- docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）
-- [任务【istio 环境部署】](../istio/) 已完成
+- The dubbo-go CLI tool and dependency tools are installed, grpc_cli (for local debugging if needed).
+- The docker, helm, and kubectl environments are installed. (Arm machines must support docker buildx)
+- The task [Deployment of Istio Environment](../istio/) is complete.
 
-## 2. 开发 server 端 Dubbo-go 应用
+## 2. Developing the Server-side Dubbo-go Application
 
-### 2.1 使用 dubbogo-cli 创建项目模板
+### 2.1 Create Project Template with dubbogo-cli
 
 ```plain
 $ mkdir mesh-app-server
@@ -58,17 +58,17 @@ $  tree .
         └── service.go
 ```
 
-生成项目包括几个目录：
+The generated project includes several directories:
 
-- api：放置接口文件：proto文件和生成的pb.go文件
-- build：放置构建相关文件
-- chart：放置发布用 chart 仓库、基础环境chart 仓库：nacos、mesh（开发中）
-- cmd：程序入口
-- conf：框架配置
-- pkg/service：RPC 服务实现
-- Makefile：
+- api: stores interface files: proto files and generated pb.go files
+- build: stores build-related files
+- chart: stores chart repository for release and base environment chart repository: nacos, mesh (in development)
+- cmd: program entry point
+- conf: framework configuration
+- pkg/service: RPC service implementation
+- Makefile:
 
-- - 镜像、Helm 安装名称：
+- - Image, Helm install name:
 
 - - ```
     IMAGE = $(your_repo)/$(namespace)/$(image_name)
@@ -76,29 +76,29 @@ $  tree .
     HELM_INSTALL_NAME = dubbo-go-app 
     ```
 
-- - 提供脚本，例如：
+- - Provides scripts, e.g.:
 
-- - - make build # 打包镜像并推送
-    - make buildx-publish # arm架构本地打包amd64镜像并推送，依赖buildx
-    - make deploy  # 通过 helm 发布应用
-    - make remove  # 删除已经发布的 helm 应用
-    - make proto-gen # api下生成 pb.go 文件
+- - - make build # Package the image and push
+    - make buildx-publish # Packages amd64 image for arm architecture locally and pushes, depends on buildx
+    - make deploy  # Deploys the application via helm
+    - make remove  # Removes the already deployed helm application
+    - make proto-gen # Generates pb.go files under api
     - ...
 
-### 2.2 开发和部署 Dubbo-go 应用：
+### 2.2 Develop and Deploy the Dubbo-go Application:
 
-#### 开发应用
+#### Developing the Application
 
-- 编译接口
+- Compile the interface
 
-  开发人员需要修改 proto 文件，本任务中直接使用默认接口即可。
+  Developers need to modify the proto file, in this task, we can use the default interface directly.
 
   ```bash
   $ make proto-gen
   protoc --go_out=./api --go-triple_out=./api ./api/api.proto
   ```
 
-- 拉取依赖
+- Pull dependencies
 
   ```bash
   $ go get dubbo.apache.org/dubbo-go/v3@3.0
@@ -106,9 +106,9 @@ $  tree .
   go mod tidy
   ```
 
-- 编写业务逻辑
+- Write business logic
 
-  修改 pkg/service/service.go 实现函数, 返回字符串中显示版本为 v1.0.0
+  Modify pkg/service/service.go implementation function, return version "v1.0.0" in the string.
 
   ```go
   func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) (*api.User, error) {
@@ -116,7 +116,7 @@ $  tree .
   }
   ```
 
-- 修改配置如下字段，从而使用xds协议作为注册中心
+- Modify the configuration as follows to use xds protocol as the registry
 
   conf/dubbogo.yaml
 
@@ -134,18 +134,17 @@ $  tree .
       services:
         GreeterServerImpl:
           interface: "" # read from stub
-  
   ```
 
-  至此，应用开发完成。
+  Thus, the application development is complete.
 
-#### 配置构建和部署参数
+#### Configure Build and Deploy Parameters
 
-- 指定需要构建的镜像：
+- Specify the image to be built:
 
-  修改 Makefile 如下字段，指定好需要构建的镜像地址和版本。
+  Modify the Makefile as follows to specify the image address and version to be built.
 
-  指定好需要通过 helm 安装的名称。
+  Specify the name for installation via helm.
 
   ```
   IMAGE = xxx/dubbo-go-server
@@ -153,9 +152,9 @@ $  tree .
   HELM_INSTALL_NAME = dubbo-go-server-v1
   ```
 
-- 指定需要部署的应用和镜像：
+- Specify the application and image to be deployed:
 
-  修改 chart/app/Chart.yaml 如下字段，指定当前应用名为 `dubbo-go-server`，部署时会创建一个名为 dubbo-go-server 的 service ，关联当前应用的所有版本。
+  Modify chart/app/Chart.yaml as follows to specify the current application name as `dubbo-go-server`, during deployment a service named dubbo-go-server will be created, associating all versions of the current application.
 
   ```yaml
   apiVersion: v1
@@ -163,9 +162,9 @@ $  tree .
   description: dubbo-go-server
   ```
 
-  修改 chart/app/values.yaml 如下字段，指定需要部署的镜像以及当前开发的应用版本 dubbogoAppVersion 为 v1。
+  Modify chart/app/values.yaml as follows to specify the image to be deployed and the current application version dubbogoAppVersion as v1.
 
-  部署的镜像需要和上述构建的镜像一致。当前应用版本用于 mesh 流量规则控制。
+  The deployed image must match the built image above. The current application version is used for mesh traffic rule control.
 
   ```yaml
   image:
@@ -179,19 +178,19 @@ $  tree .
       dubbogoAppVersion: v1
   ```
 
-  至此，构建参数和发布参数都已指定好，可以进行构建和部署了。
+  Thus, the build and release parameters are ready for building and deploying.
 
-#### 使用模板构建和部署 Dubbo-go 应用
+#### Use the Template to Build and Deploy the Dubbo-go Application
 
-- 构建、推送镜像
+- Build and Push the Image
 
-  `$ make build  `   (本地为 amd64机器) 
+  `$ make build  `   (Local is amd64 machine) 
 
-  或者  
+  or  
 
-  `$ make buildx-publish`     (本地为 arm64机器，依赖 docker buildx 命令)
+  `$ make buildx-publish`     (Local is arm64 machine, relies on docker buildx command)
 
-- 发布 Dubbo-go 应用至集群
+- Deploy the Dubbo-go Application to the Cluster
 
   ```bash
   $ make deploy 
@@ -207,15 +206,13 @@ $  tree .
   dubbo-go-server-v1      default         1               2022-04-07 11:19:42.350553 +0800 CST    deployed        dubbo-go-server-0.0.1   1.16.0  
   ```
 
-  可看到通过 helm 部署成功
+  The deployment via helm was successful.
 
-  
+### 2.3 Verify the Application
 
-### 2.3 验证应用
+#### Check Resource Deployment Status
 
-#### 查看资源部署情况
-
-查看部署好的 deployment ，版本为 v1。
+Check the deployed deployment with version v1.
 
 ```bash
 $ kubectl get deployment 
@@ -223,7 +220,7 @@ NAME                 READY   UP-TO-DATE   AVAILABLE   AGE
 dubbo-go-server-v1   1/1     1            1           26s
 ```
 
-查看部署好的 service。
+Check the deployed service.
 
 ```bash
 $ kubectl get svc 
@@ -231,9 +228,9 @@ NAME              TYPE        CLUSTER-IP        EXTERNAL-IP   PORT(S)     AGE
 dubbo-go-server   ClusterIP   192.168.216.253   <none>        20000/TCP   70s
 ```
 
-#### （*可选）本地调试部署好的 Dubbo-go 应用
+#### (Optional) Local Debugging of the Deployed Dubbo-go Application
 
-使用 kubectl port-forward Dubbo-go 应用到本地
+Use kubectl port-forward to forward Dubbo-go application to local
 
 ```bash
 $ kubectl port-forward svc/dubbo-go-server 20000
@@ -241,7 +238,7 @@ Forwarding from 127.0.0.1:20000 -> 20000
 Forwarding from [::1]:20000 -> 20000
 ```
 
-使用 grpc_cli 调试集群内的应用，参考任务[【使用 grpc_cli 调试 Dubbo-go 应用】](/en/overview/mannual/golang-sdk/tutorial/debugging/grpc_cli/)
+Use grpc_cli to debug applications inside the cluster, refer to the task [Debugging Dubbo-go Application using grpc_cli](/en/overview/mannual/golang-sdk/tutorial/debugging/grpc_cli/)
 
 ```bash
 $ grpc_cli ls localhost:20000 -l
@@ -253,7 +250,7 @@ service Greeter {
 }
 ```
 
-使用 grpc_cli 发起调用，测试接口
+Use grpc_cli to initiate a call and test the interface
 
 ```bash
 $ grpc_cli call localhost:20000 SayHello "name: 'laurence'"
@@ -266,21 +263,21 @@ grpc-accept-encoding : identity,deflate,gzip
 Rpc succeeded with OK status
 ```
 
-至此，我们成功开发了一个应用，把它部署在了 istio 集群内。
+Thus, we have successfully developed an application and deployed it in the Istio cluster.
 
-## 3. 开发 Client 端 Dubbo-go 应用
+## 3. Develop the Client-side Dubbo-go Application
 
-### 3.1 使用 dubbogo-cli 创建另一个项目模板
+### 3.1 Create Another Project Template Using dubbogo-cli
 
 ```bash
 $ dubbogo-cli newApp . 
 ```
 
-### 3.2 开发和部署客户端 Dubbo-go 应用：
+### 3.2 Develop and Deploy the Client-side Dubbo-go Application:
 
-#### 编写业务逻辑
+#### Write Business Logic
 
-- 修改 cmd/app.go 的 main 方法，针对下游接口每秒钟发起一次调用
+- Modify the main method in cmd/app.go to make a call to the downstream interface once per second.
 
 ```go
 func main() {
@@ -304,7 +301,7 @@ func main() {
 }
 ```
 
-- 修改如下配置文件，使用xds协议作为注册中心，加载名为 GreeterClientImpl 的客户端服务。
+- Modify the configuration file to use xds protocol as the registry, loading client service named GreeterClientImpl.
 
   conf/dubbogo.yaml
 
@@ -321,15 +318,15 @@ func main() {
           interface: "" # read from stub
   ```
 
-  至此，应用开发完成。
+  Thus, the application development is complete.
 
-#### 配置构建和部署参数
+#### Configure Build and Deploy Parameters
 
-- 指定需要构建的镜像：
+- Specify the image to be built:
 
-  修改 Makefile 如下字段，指定好需要构建的镜像地址和版本。
+  Modify the Makefile as follows to specify the image address and version to be built.
 
-  指定好需要通过 helm 安装的名称。
+  Specify the name for installation via helm.
 
   ```
   IMAGE = xxx/dubbo-go-client
@@ -337,9 +334,9 @@ func main() {
   HELM_INSTALL_NAME = dubbo-go-client
   ```
 
-- 指定需要部署的应用和镜像：
+- Specify the application and image to be deployed:
 
-  修改 chart/app/Chart.yaml 如下字段，指定当前应用名为 `dubbo-go-client`，部署时会创建一个名为 dubbo-go-client 的 service ，关联当前应用的所有版本。对于一个只有客户端的应用，可以不创建sevice，可以由开发者在模板中修改，本教程中我们默认创建。
+  Modify chart/app/Chart.yaml as follows to specify the current application name as `dubbo-go-client`, during deployment a service named dubbo-go-client will be created, associating all versions of the current application. For an application that is only a client, a service can be omitted, it can be modified by developers in the template; we will create it by default in this tutorial.
 
   ```yaml
   apiVersion: v1
@@ -347,9 +344,9 @@ func main() {
   description: dubbo-go-client
   ```
 
-  修改 chart/app/values.yaml 如下字段，指定需要部署的镜像以及当前开发的应用版本 dubbogoAppVersion 为 v1。
+  Modify chart/app/values.yaml as follows to specify the image to be deployed and the current application version dubbogoAppVersion as v1.
 
-  部署的镜像需要和上述构建的镜像一致。当前应用版本用于 mesh 流量规则控制。
+  The deployed image must match the built image above. The current application version is used for mesh traffic rule control.
 
   ```yaml
   image:
@@ -363,19 +360,19 @@ func main() {
       dubbogoAppVersion: v1
   ```
 
-  至此，构建参数和发布参数都已指定好，可以进行构建和部署了。
+  Thus, the build and release parameters are ready for building and deploying.
 
-#### 使用模板构建和部署 Dubbo-go 应用
+#### Use the Template to Build and Deploy the Dubbo-go Application
 
-- 构建、推送镜像
+- Build and Push the Image
 
-  `$ make build  `   (本地为 amd64机器) 
+  `$ make build  `   (Local is amd64 machine) 
 
-  或者  
+  or  
 
-  `$ make buildx-publish`     (本地为 arm64机器，依赖 docker buildx 命令)
+  `$ make buildx-publish`     (Local is arm64 machine, relies on docker buildx command)
 
-- 发布 Dubbo-go Client 应用至集群
+- Deploy the Dubbo-go Client Application to the Cluster
 
   ```bash
   $ make deploy 
@@ -392,13 +389,13 @@ func main() {
   dubbo-go-server-v1      default         1               2022-04-07 11:23:18.397658 +0800 CST    deployed        dubbo-go-server-0.0.1   1.16.0
   ```
 
-  可看到通过 helm 部署成功, 目前已经在集群中存在 Client 和 Server 两个应用。
+  It can be seen that the deployment via helm was successful, and both Client and Server applications now exist in the cluster.
 
-### 3.3 验证应用
+### 3.3 Verify the Application
 
-#### 查看资源部署情况
+#### Check Resource Deployment Status
 
-查看部署好的 client 和 server 两个 deployment。
+Check the deployed client and server deployments.
 
 ```bash
 $ kubectl get deployment       
@@ -407,7 +404,7 @@ dubbo-go-client-v1   1/1     1            1           22m
 dubbo-go-server-v1   1/1     1            1           49m
 ```
 
-查看客户端调用日志
+Check client call logs
 
 ```bash
 $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs 
@@ -421,10 +418,11 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 2022-04-07T04:14:01.785Z        INFO    cmd/app.go:29   call server response = name:"Hello laurence" id:"v1.0.0"
 ```
 
-验证调用成功
+Verify the call was successful.
 
-## 4. 小结
+## 4. Summary
 
-dubbogo-cli 提供的应用模板可以方便地支持开发者进行镜像的构建、推送、部署。
+The application templates provided by dubbogo-cli conveniently support developers in image building, pushing, and deployment.
 
-在 Istio 环境中，server 应用将自身服务信息注册在 Isito 上，由客户端监听 xds 资源，查询 istio debug 端口进行接口级别的服务发现。开发人员无需关心 service名、主机名、集群名等概念，只需要引入接口，发起调用即可。
+In the Istio environment, server applications register their service information on Istio, while clients listen to xds resources, querying the Istio debug port for interface-level service discovery. Developers do not need to worry about concepts like service names, hostnames, and cluster names; they only need to import interfaces and initiate calls.
+

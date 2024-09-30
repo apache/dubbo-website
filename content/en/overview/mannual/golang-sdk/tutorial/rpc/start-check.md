@@ -3,31 +3,31 @@ aliases:
     - /en/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
     - /en/docs3-v2/golang-sdk/tutorial/governance/health/start-check/
     - /en/overview/mannual/golang-sdk/tutorial/governance/health/start-check/
-description: "缺省会在启动时检查依赖的服务是否可用（注册中心是否有可用地址），不可用时会抛出异常，阻止应用初始化完成。"
-keywords: 启动时检查
-title: 启动时检查
+description: "By default, the framework checks the availability of dependent services (whether the registry has available addresses) at startup. If not available, it throws an exception to prevent the application from finishing initialization, allowing issues to be discovered early during deployment. The default is check=\"true\" and waits for 3 seconds."
+keywords: Startup check
+title: Startup check
 type: docs
 weight: 4
 ---
 
-Dubbo 框架缺省会在启动时检查依赖的服务是否可用（注册中心是否有可用地址），不可用时会抛出异常，阻止应用初始化完成，以便上线时，能及早发现问题，默认 check="true"，并等待3s。
+The Dubbo framework, by default, checks the availability of dependent services at startup (whether the registry has available addresses). If not available, it throws an exception to prevent the application from completing initialization, allowing early detection of problems during deployment. The default is check="true" and waits for 3 seconds.
 
-可以通过 check="false" 关闭检查，比如，测试时，有些服务不关心，或者出现了循环依赖，必须有一方先启动。
+You can disable the check with check="false". For example, during testing, some services may not be of concern, or there may be circular dependencies, requiring one party to start first.
 
-关闭 check 后，请注意 provider数量比较多时， consumer 订阅 provider 生成服务地址可能会有一定延迟，如果 consumer 一启动就对外提供服务，可能会造成"冷启动"。所以在这个时候，请对服务进行预热。
+After disabling check, please note that when there are many providers, the consumer subscribing to the provider and generating service addresses may have some delay. If the consumer starts providing services immediately, it may cause a "cold start". Therefore, at this time, please preheat the services.
 
-示例：
+Example:
 
 ```yaml
 dubbo:
   consumer:
     check : false
     reference: 
-      myserivce:
+      myservice:
        check: true 
 ```
 
-或者
+Or
 
 ```go
 cli, err := client.NewClient(
@@ -35,9 +35,10 @@ cli, err := client.NewClient(
 )
 ```
 
-或者
+Or
 
 ```go
 svc, err := health.NewHealth(cli)
 svc.Check(context.Background(), &health.HealthCheckRequest{Service: "greet.GreetService"}, client.WithCheck(false))
 ```
+

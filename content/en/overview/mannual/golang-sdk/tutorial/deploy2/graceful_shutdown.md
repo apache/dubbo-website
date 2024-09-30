@@ -2,46 +2,45 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/
     - /en/docs3-v2/golang-sdk/tutorial/governance/traffic/graceful_shutdown/
-description: 本文主要介绍优雅下线的基本步骤和使用说明
-keywords: 优雅下线
-title: 优雅下线
+description: This article primarily introduces the basic steps and usage instructions for graceful shutdown.
+keywords: Graceful Shutdown
+title: Graceful Shutdown
 type: docs
 ---
 
-# 优雅下线
+# Graceful Shutdown
 
-## 背景
+## Background
 
-在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者扩缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。
-因此，优雅下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力、传统服务治理能力的基础之上，应当提供服务下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。
+In a stable production environment, container scheduling is fully managed by k8s, and microservice governance is maintained and managed by the service framework or operations personnel. In scenarios like releasing a new version or scaling up/down, old container instances will be terminated and replaced with new ones. If this replacement process is not handled properly in high-traffic online production environments, it can lead to a large number of erroneous requests in a short time, triggering alarms and even affecting normal business operations. For larger organizations, the losses from issues during the release process can be enormous. Hence, the need for graceful shutdown has arisen. This requires the service framework to provide stable guarantees during the service offline process on top of stable service invocation and traditional service governance capabilities, thus reducing operational costs and improving application stability.
 
-## 特性说明
+## Feature Description
 
-在一次完整的RPC调用过程中，中间服务往往充当服务提供者和服务消费者两个角色。中间服务在接收到来自上游服务的请求之后，处理请求得到结果返回给上游服务，然后根据需要调用下游服务提供的接口使用下游服务。因此优雅下线功能需要兼顾服务作为服务提供者和服务消费者两侧的稳定性，具体可以分为以下几步：
+In a complete RPC call process, intermediate services often act as both service providers and consumers. After receiving a request from the upstream service, the intermediate service processes the request and returns the result to the upstream service, and then calls the downstream service's interface as needed. Therefore, the graceful shutdown function needs to ensure stability on both the service provider and consumer sides, which can be broken down into the following steps:
 
-1. 向注册中心进行反注册，销毁在注册中心注册的服务信息
-2. 作为服务提供者，要等待一段时间，保证客户端成功更新服务信息以及上游任务请求处理完毕，然后拒绝接收新的请求
-3. 作为服务消费者，要等待一段时间，保证使用下游服务的请求得到响应，然后取消对注册中心的订阅
-4. 销毁对下游任务的引用，销毁对外提供服务暴露的端口
-5. 执行用户的自定义回调操作
+1. Unregister from the registry, destroying the service information registered in the registry.
+2. As a service provider, wait for a period to ensure that the client successfully updates service information and completes upstream task processing, then refuse to accept new requests.
+3. As a service consumer, wait for a period to ensure that requests to the downstream service receive a response, then cancel the subscription to the registry.
+4. Destroy references to downstream tasks and ports exposed for service provision.
+5. Execute the user's custom callback operations.
 
-通过以上步骤，可以保证dubbo-go服务实例安全平稳停止，不对进行中的业务产生影响。
+By following these steps, it ensures that the dubbo-go service instance stops safely and smoothly, without impacting ongoing business.
 
-> 注意：取消对注册中心的订阅不能在步骤1中执行，这是因为中间服务对下游服务发送请求的时候可能存在下游服务信息的变动
+> Note: Canceling the subscription to the registry cannot be performed in step 1, as changes to downstream service information may occur when the intermediate service sends requests to the downstream service.
 
-## 使用场景
+## Usage Scenarios
 
-对dubbo-go实例使用` kill pid `命令停止实例
+Stop the dubbo-go instance using the ` kill pid ` command.
 
-## 使用方式
+## Usage
 
-以下是在yaml配置文件中，用户可以自定义的配置
+The following are configurable settings that users can customize in the yaml configuration file:
 
-- 作为服务提供者，dubbo-go实例下线时需要等待客户端成功更新服务信息，这段时间在配置中对应的字段为consumer-update-wait-time，默认3s
-- 作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求暂未处理完毕，需要等待上游任务请求处理完毕。作为服务消费者，dubbo-go实例需要等待对下游的请求收到回复。这段时间在配置中对应的字段为step-timeout，默认3s
-- 作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求已经处理完毕，需要等待一段窗口时间，如果在窗口时间内没有接收到新的请求，再执行后续步骤。这段时间在配置中对应的字段为offline-request-window-timeout，默认0s
-- 用户可以自定义是否开启优雅下线功能，在配置中对应的字段为internal-signal，默认开启。
-- dubbo-go实例在优雅下线过程中可能因为异常导致卡死，在配置中可以配置超时时间，实例在超时之后强制关闭。这在配置中对应的字段为timeout，默认60s
+- As a service provider, the dubbo-go instance needs to wait for the client to successfully update service information during the offline period. This time corresponds to the `consumer-update-wait-time` field in the configuration, defaulting to 3s.
+- As a service provider, if requests from upstream tasks are not yet processed, it needs to wait for them to complete. As a service consumer, it must wait for responses to downstream requests. This time corresponds to the `step-timeout` field, defaulting to 3s.
+- As a service provider, if requests from upstream tasks are already processed, it needs to wait for a window time. If no new requests are received during this time, proceed with subsequent steps. This corresponds to the `offline-request-window-timeout` field, defaulting to 0s.
+- Users can customize whether to enable graceful shutdown functionality; this corresponds to the `internal-signal` field in the configuration, which is enabled by default.
+- The dubbo-go instance may freeze during graceful shutdown due to exceptions. A timeout can be configured in the settings to forcibly close the instance after this time. This corresponds to the `timeout` field, defaulting to 60s.
 
 ```yaml
 dubbo:
@@ -53,14 +52,15 @@ dubbo:
     offline-request-window-timeout:0
 ```
 
-此外，如果用户希望在下线逻辑彻底结束后，执行一些自定义的回调操作，可以使用如下代码
+Additionally, if users wish to execute custom callback operations after the offline logic is completely finished, they can use the following code:
 
 ```go
 extension.AddCustomShutdownCallback(func() {
-	// 用户自定义操作
+	// User defined operations
 })
 ```
 
-## 参考资料
+## References
 
-[【Dubbo-go 优雅上下线的设计与实践】](https://developer.aliyun.com/article/860775)
+[【Dubbo-go Elegant Up and Down Design and Practice】](https://developer.aliyun.com/article/860775)
+

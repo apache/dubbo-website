@@ -3,35 +3,35 @@ aliases:
     - /en/docs3-v2/golang-sdk/preface/concept/generic/
     - /en/docs3-v2/golang-sdk/preface/concept/generic/
     - /en/overview/mannual/golang-sdk/preface/concept/generic/
-description: 泛化调用
-keywords: 泛化调用
-title: 泛化调用
+description: Generic Invocation
+keywords: Generic Invocation
+title: Generic Invocation
 type: docs
 weight: 2
 ---
-{{% alert title="废弃警告" color="warning" %}}
-dubbo-go 泛化调用仅适用于 dubbo2 协议，不适用 triple 协议
+{{% alert title="Deprecation Warning" color="warning" %}}
+dubbo-go generic invocation is only applicable to the dubbo2 protocol, not the triple protocol
 {{% /alert %}}
 
-泛化调用是一种 Dubbo-Go 的特殊调用方式，它允许中间节点在没有接口信息的情况下传递调用信息，常被用于测试、网关的场景下。泛化调用支持 Dubbo 和 Triple 协议，但是目前序列化方案只支持 Hessian。
+Generic invocation is a special way of calling in Dubbo-Go that allows intermediary nodes to pass call information without interface information, commonly used in testing and gateway scenarios. Generic invocation supports both Dubbo and Triple protocols, but currently, the serialization scheme only supports Hessian.
 
-## 背景
+## Background
 
-为了便于理解，这篇文档中以网关使用场景介绍泛化调用。我们先来考虑普通调用（非泛化调用）。下图包含了 consumer 和 provider 两个关键角色（后文中用 endpoint 代表一个 consumer 或一个 provider），各自都有一份关于 org.apache.dubbo.sample.User 接口的定义。假定在调用行为中需要使用 org.apache.dubbo.sample.User 接口。
+For better understanding, this document introduces generic invocation with a gateway usage scenario. Let's first consider a normal invocation (non-generic invocation). The diagram below includes two key roles: consumer and provider (hereinafter referred to as endpoint, representing either a consumer or a provider), each having a definition of the org.apache.dubbo.sample.User interface. Suppose the org.apache.dubbo.sample.User interface needs to be used in the calling behavior.
 
 ![img](/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1631941941270-86ce9845-5a88-4cb5-8c8a-da8ae7eeb4d5.png)
 
-RPC 需要借助网络介质传输，因此数据不能以 go struct 形式传输，而必须以二进制形式传输。这就要求 consumer 端在传输前，需要将实现 org.apache.dubbo.sample.User 接口的结构体序列化为二进制格式。同样的，对于 provider 端，需要将二进制数据反序列化为结构体信息。**总之，普通调用要求接口信息在每一个 endpoint 必须有相同的定义，这样才能保证数据序列化和反序列化的结果与预期一致**。
+RPC requires transmission over a network medium; therefore, data cannot be transmitted as go struct and must be transmitted in binary form. This requires that the consumer side serialize the struct implementing the org.apache.dubbo.sample.User interface into binary format before transmission. Likewise, for the provider side, the binary data needs to be deserialized into struct information. **In summary, normal invocation requires that interface information must have the same definition at each endpoint to ensure that the results of serialization and deserialization meet expectations.**
 
-在网关场景下，网关不可能存储全部接口定义。比如一个网关需要转发 100 个服务调用，每个服务需要的接口数量为 10 个，普通调用要求把 1000 个（100 * 10）接口定义提前全部存储在网关内，这显然是难以做到的。所以有没有一种方式可以既不需要提前存储接口定义，又能正确转发调用呢？答案是肯定的，这就是使用泛化调用的原因。
+In gateway scenarios, it is impractical for the gateway to store all interface definitions. For example, if a gateway needs to forward 100 service calls, each requiring 10 interfaces, normal invocation would necessitate storing 1000 (100 * 10) interface definitions in advance, which is clearly difficult. So is there a way that does not require prior storage of interface definitions while still forwarding calls correctly? The answer is yes, which is the reason for using generic invocation.
 
-## 原理
+## Principle
 
-泛化调用本质上就是把复杂结构转化为通用结构，这里说的通用结构是指 map、string 等，网关是可以顺利解析并传递这些通用结构的。
+Generic invocation essentially transforms a complex structure into a generic structure, where the generic structure refers to maps, strings, etc., which the gateway can smoothly parse and pass.
 
 ![img](/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1632207075184-25939db4-f384-452e-a0b8-e1deff7971de.png)
 
-目前，Dubbo-go v3 只支持 Map 泛化方式（default）。我们以 User 接口为例，其定义如下所示。
+Currently, Dubbo-go v3 only supports Map generic invocation (default). Taking the User interface as an example, its definition is as follows:
 
 ```go
 // definition
@@ -46,7 +46,7 @@ func (u *User) JavaClassName() string {
 }
 ```
 
-假定调用一个服务需要一个 user 作为入参，其定义如下所示。
+Suppose a service call requires a user as an input parameter, which is defined as follows:
 
 ```go
 // an instance of the User
@@ -57,7 +57,7 @@ user := &User{
 }
 ```
 
-那么在使用 Map 泛化方式下，user 会被自动转换为 Map 格式，如下所示。
+Then under the Map generic invocation, the user will be automatically converted to Map format as follows:
 
 ```go
 usermap := map[interface{}]interface{} {
@@ -68,36 +68,36 @@ usermap := map[interface{}]interface{} {
 }
 ```
 
-需要注意的是：
+Note that:
 
-- Map 泛化方式会自动将首字母小写，即 ID 会被转换为 iD，如果需要对齐 Dubbo-Java 请考虑将 ID 改为 Id；
-- 在 Map 中会自动插入 class 字段，用于标识原有接口类。
+- The Map generic invocation will automatically convert the first letter to lowercase, so ID will become iD. If you need to align with Dubbo-Java, consider changing ID to Id;
+- A class field will be automatically inserted into the Map to identify the original interface class.
 
-## 使用
+## Usage
 
-泛化调用对 provider 端是透明的，即 provider 端不需要任何显式配置就可以正确处理泛化请求。
+Generic invocation is transparent to the provider side, meaning the provider does not need any explicit configuration to handle generic requests correctly.
 
-### 基于 Dubbo URL 泛化调用
+### Based on Dubbo URL Generic Invocation
 
-基于 Filter 泛化调用对 consumer 是透明的，典型应用场景是网关。这种方式需要要求 Dubbo URL 中包含泛化调用标识，如下所示。
+The generic invocation based on Filter is transparent to the consumer, and a typical application scenario is a gateway. This method requires that the Dubbo URL contains a generic invocation identifier, as follows.
 
 ```plain
 dubbo://127.0.0.1:20000/org.apache.dubbo.sample.UserProvider?generic=true&...
 ```
 
-这个 Dubbo URL 表达的语意是：
+The semantics expressed by this Dubbo URL are:
 
-- RPC 协议为 dubbo；
-- org.apache.dubbo.sample.UserProvider 接口位于 127.0.0.1:20000；
-- 使用泛化调用（generic=true）。
+- The RPC protocol is dubbo;
+- The org.apache.dubbo.sample.UserProvider interface is located at 127.0.0.1:20000;
+- Using generic invocation (generic=true).
 
-Consumer 端的 Filter 会自动根据 Dubbo URL 携带的配置自动将普通调用转化为泛化调用，但是需要注意的是，在这种方式下响应结果是以泛化格式返回，不会自动转化为相应的对象。举个例子，在 map 泛化方式下，如果需要返回 User 类，那么 consumer 获得的相应是一个 User 类对应的 map。
+The consumer's Filter will automatically convert normal calls to generic calls based on the configuration carried by the Dubbo URL, but note that in this method, response results will return in generic format and will not automatically convert to the corresponding object. For example, in map generic invocation, if a User class needs to be returned, the consumer will receive a map corresponding to the User class.
 
-### 手动泛化调用
+### Manual Generic Invocation
 
-手动泛化调用发起的请求不经过 filter，所以需要 consumer 端显式地发起泛化调用，典型应用场景是测试。在 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/generic) 中，为了便于测试都是采用手动调用的方式。
+Manual generic invocation requests are not processed through a filter; thus, the consumer must explicitly initiate a generic invocation, a typical application scenario for testing. In [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/generic), manual invocation is used for ease of testing.
 
-泛化调用不需要创建配置文件（dubbogo.yaml），但是需要在代码中手动配置注册中心、reference 等信息，初始化方法被封装到 newRefConf 方法中，如下所示。
+Generic invocation does not require creating a configuration file (dubbogo.yaml), but requires manual configuration of the registry, reference, and other information in the code. The initialization method is encapsulated in the newRefConf method, as follows.
 
 ```go
 func newRefConf(appName, iface, protocol string) config.ReferenceConfig {
@@ -123,21 +123,21 @@ func newRefConf(appName, iface, protocol string) config.ReferenceConfig {
 }
 ```
 
-newRefConf 方法接收三个参数，分别是：
+The newRefConf method takes three parameters:
 
-- appName: 应用名；
-- iface: 服务接口名；
-- protocol: RPC 协议，目前只支持 dubbo 和 tri（triple 协议）。
+- appName: application name;
+- iface: service interface name;
+- protocol: RPC protocol, currently only supporting dubbo and tri (triple protocol).
 
-在上述方法中，为了保持函数简单性，把注册中心设置为一个固定值，即使用在 127.0.0.1:2181 的 ZooKeeper 作为注册中心，在实践中可以根据实际情况自由定制。
+In the above method, for simplicity, the registry is set as a fixed value, using ZooKeeper at 127.0.0.1:2181 as the registry, which can be customized according to actual conditions in practice.
 
-我们可以很容易的获取一个 ReferenceConfig 实例，暂时命名为 refConf。
+We can easily obtain a ReferenceConfig instance, temporarily named refConf.
 
 ```go
 refConf := newRefConf("example.dubbo.io", "org.apache.dubbo.sample.UserProvider", "tri")
 ```
 
-接着我们可以对 org.apache.dubbo.sample.UserProvider 服务的 GetUser 方法发起泛化调用。
+Next, we can invoke the GetUser method of the org.apache.dubbo.sample.UserProvider service using generic invocation.
 
 ```go
 resp, err := refConf.
@@ -150,13 +150,14 @@ resp, err := refConf.
     )
 ```
 
-GenericService 的 Invoke 方法接收四个参数，分别是：
+The Invoke method of GenericService takes four parameters:
 
-- context；
-- 方法名: 在这个例子中表示调用 GetUser 方法；
-- 参数类型: GetUser 方法接收一个 string 类型的参数，如果目标方法接收多个参数，可以写为 `[]string{"type1", "type2", ...}`，如果目前方法是无参的，则需要填入一个空数组 `[]string{}`；
-- 实参: 写法同参数类型，如果是无参函数，依然要填入一个空数组 `[]hessian.Object{}` 占位。
+- context;
+- method name: in this example, it refers to calling the GetUser method;
+- parameter types: GetUser method accepts a string type parameter. If the target method accepts multiple parameters, you can write it as `[]string{"type1", "type2", ...}`. If the method is parameterless, you need to fill in an empty array `[]string{}`;
+- actual parameters: written the same way as parameter types. If it is a parameterless function, you still need to fill in an empty array `[]hessian.Object{}` as a placeholder.
 
-注意：在目前版本中，无参调用会出现崩溃问题。
+Note: In the current version, parameterless calls may cause crashing issues.
 
-相关阅读：[【Dubbo-go 服务代理模型】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
+Related reading: [【Dubbo-go Service Proxy Model】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
+

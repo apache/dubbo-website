@@ -2,8 +2,8 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/istio/
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/istio/
-description: 部署 Istio 环境
-title: 部署 Istio 环境
+description: Deploying Istio Environment
+title: Deploying Istio Environment
 type: docs
 weight: 1
 ---
@@ -13,14 +13,14 @@ weight: 1
 
 
 
-## 1. 准备工作
+## 1. Preparation
 
-- docker、helm、kubectl 环境已安装。
-- dubbo-go cli 工具和依赖工具已安装
+- Docker, Helm, and kubectl environments are installed.
+- Dubbo-go CLI tools and dependencies are installed.
 
-## 2. 部署 Istio 环境
+## 2. Deploy Istio Environment
 
-1. 使用helm 安装 istio 基础 CRD 和 istiod 组件。也可以参考 [Istio 文档](https://istio.io/) 使用 istioctl 安装。
+1. Install the Istio base CRD and istiod components using Helm. You can also refer to the [Istio Documentation](https://istio.io/) for installation using istioctl.
 
 ```bash
 $ helm repo add istio https://istio-release.storage.googleapis.com/charts
@@ -29,12 +29,13 @@ $ helm install istio-base istio/base -n istio-system
 $ helm install istiod istio/istiod --namespace istio-system
 ```
 
-2. 删除istio 水平扩展资源
+2. Delete the Istio horizontal pod autoscaler resources
 
-   *目前 dubbo-go 依赖单个 istiod 实例进行服务发现。
+   *Currently, Dubbo-go relies on a single istiod instance for service discovery.
 
 ```bash
 $ kubectl delete hpa istiod -n istio-system
 ```
 
-安装完成后，可以在 istio-system 命名空间下看到一个 istiod pod 在正常运行。
+After installation, you can see an istiod pod running normally in the istio-system namespace.
+

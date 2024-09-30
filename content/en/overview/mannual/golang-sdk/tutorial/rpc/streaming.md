@@ -1,27 +1,27 @@
 ---
-description: 流式通信 streaming
-title: 流式通信
+description: Streaming communication
+title: Streaming Communication
 type: docs
 weight: 1
 ---
-Streaming 流式通信是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:
+Streaming communication is a new RPC data transfer mode offered by Dubbo3, suitable for the following scenarios:
 
-- 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
-- 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的
-- 推送类场景，多个消息在同一个调用的上下文中被发送和处理
+- Interfaces that need to send large amounts of data that cannot be placed in a single RPC request or response, requiring batch sending. However, traditional multiple RPC calls cannot resolve issues of order and performance, and if order is to be guaranteed, they must be sent serially.
+- Streaming scenarios where data needs to be processed in the order sent, and the data itself has no definite boundaries.
+- Push scenarios where multiple messages are sent and processed within the same call context.
 
-Streaming 流式通信类型分为以下三种:
-- SERVER_STREAM(服务端流)
-- CLIENT_STREAM(客户端流)
-- BIDIRECTIONAL_STREAM(双向流)
+There are three types of Streaming communication:
+- SERVER_STREAM (Server Stream)
+- CLIENT_STREAM (Client Stream)
+- BIDIRECTIONAL_STREAM (Bidirectional Stream)
 
-## 1.介绍
+## 1. Introduction
 
-本文档演示如何在 Dubbo-go 中使用流式通信，可在此查看 <a href="https://github.com/apache/dubbo-go-samples/tree/main/streaming" target="_blank">完整示例源码地址</a>。
+This document demonstrates how to use streaming communication in Dubbo-go. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/streaming" target="_blank">complete example source code here</a>.
 
-## 2.如何使用Dubbo-go流式通信
+## 2. How to use Dubbo-go streaming communication
 
-在proto文件中需要流式通信的方法的参数前面添加stream，使用proto-gen-triple生成相应文件
+In the proto file, add `stream` before the parameters of the methods that require streaming communication and generate the corresponding files using `proto-gen-triple`.
 
 ```protobuf
 service GreetService {
@@ -32,9 +32,9 @@ service GreetService {
 }
 ```
 
-编写服务端handler文件
+Write the server handler file.
 
-源文件路径: dubbo-go-sample/streaming/go-server/cmd/server.go
+Source file path: dubbo-go-sample/streaming/go-server/cmd/server.go
 
 ```go
 type GreetTripleServer struct {
@@ -86,9 +86,9 @@ func (srv *GreetTripleServer) GreetServerStream(ctx context.Context, req *greet.
 }
 ```
 
-编写客户端client文件
+Write the client file.
 
-源文件路径: dubbo-go-sample/streaming/go-client/cmd/client.go
+Source file path: dubbo-go-sample/streaming/go-client/cmd/client.go
 
 ```go
 func main() {
@@ -195,9 +195,9 @@ func testServerStream(cli greet.GreetService) error {
 }
 ```
 
-## 3.运行效果
+## 3. Running Effect
 
-运行服务端和客户端，可以看到请求正常返回
+Run the server and client, and you will see the requests return normally.
 
 ```
 [start to test TRIPLE unary call]

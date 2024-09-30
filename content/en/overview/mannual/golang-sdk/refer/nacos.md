@@ -2,23 +2,23 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/
-description: 使用 Nacos 作为注册中心
-title: 使用 Nacos 作为注册中心
+description: Using Nacos as a Registry
+title: Using Nacos as a Registry
 type: docs
 weight: 10
 ---
 
 
 
-## 1. 准备工作
+## 1. Preparation
 
-- dubbo-go cli 工具和依赖工具已安装
-- 创建一个新的 demo 应用
+- The dubbo-go CLI tool and dependencies are installed
+- Create a new demo application
 
-## 2. 使用 grpc_cli 工具进行 Dubbo 服务调试
+## 2. Using grpc_cli Tool for Dubbo Service Debugging
 
-### 2.1 开启服务端
-示例：user.go:
+### 2.1 Start the Server
+Example: user.go:
 ```go
 func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) (*User, error) {
 	fmt.Printf("=======================\nreq:%#v\n", userStruct)
@@ -28,13 +28,13 @@ func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) 
 }
 
 ```
-服务端开启一个服务，名为GetUser，传入一个CallUserStruct的参数，返回一个User参数\
-CallUserStruct参数定义：
+The server exposes a service named GetUser, taking a CallUserStruct parameter and returning a User parameter.\
+Definition of CallUserStruct parameter:
 ```go
 type CallUserStruct struct {
 	ID      string
 	Male    bool
-	SubInfo SubInfo // 嵌套子结构
+	SubInfo SubInfo // Nested substructure
 }
 func (cs CallUserStruct) JavaClassName() string {
 	return "com.ikurento.user.CallUserStruct"
@@ -51,13 +51,13 @@ func (s SubInfo) JavaClassName() string {
 }
 
 ```
-User结构定义：
+Definition of User structure:
 ```go
 type User struct {
 	Id      string
 	Name    string
 	Age     int32
-	SubInfo SubInfo // 嵌套上述子结构SubInfo
+	SubInfo SubInfo // Nesting the above substructure SubInfo
 }
 
 func (u *User) JavaClassName() string {
@@ -65,20 +65,20 @@ func (u *User) JavaClassName() string {
 }
 ```
 
-开启服务：
+Start the service:
 
 `cd server `\
 `source builddev.sh`\
 `go run .`
 
-### 2.2 定义请求体(打解包协议)
+### 2.2 Define the Request Body (Packing/Unpacking Protocol)
 
-请求体定义为json文件，约定键值均为string\
-键对应go语言struct字段名例如"ID"、"Name" ，值对应"type@val"\
-其中type支持string int bool time，val使用string 来初始化，如果只填写type则初始化为零值。
-约定每个struct必须有JavaClassName字段，务必与server端严格对应
+The request body is defined as a JSON file, with the convention that all keys are strings.\
+Keys correspond to Go struct field names such as "ID", "Name", and values correspond to "type@val".\
+The types supported are string, int, bool, time, with val initialized as a string. If only the type is provided, it is initialized to zero value.\
+It is required for each struct to have a JavaClassName field, which must strictly correspond with the server side.
 
-见userCall.json:
+See userCall.json:
 ```json
 {
   "ID": "string@A000",
@@ -92,9 +92,9 @@ func (u *User) JavaClassName() string {
   "JavaClassName": "string@com.ikurento.user.CallUserStruct"
 }
 ```
-userCall.json将参数CallUserStruct的结构及子结构SubInfo都定义了出来，并且给请求参数赋值。
+userCall.json defines the structure of CallUserStruct and its substructure SubInfo, and assigns values to the request parameters.
 
-user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段一定与server端严格对应
+Similarly for user.json, no initial values are needed for return values, but the JavaClassName field must strictly correspond to the server side.
 ```go
 {
   "ID": "string",
@@ -110,10 +110,10 @@ user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段
 }
 ```
 
-### 2.3 执行请求
+### 2.3 Execute Request
 `dubbogo-cli call --h=localhost --p 20001 --proto=dubbo --i=com.ikurento.user.UserProvider --method=GetUser --sendObj="./userCall.json" --recvObj="./user.json"`
 
-cli端打印结果：
+CLI prints the result:
 ```log
 2020/10/26 20:47:45 Created pkg:
 2020/10/26 20:47:45 &{ID:A000 Male:true SubInfo:0xc00006ea20 JavaClassName:com.ikurento.user.CallUserStruct}
@@ -136,12 +136,13 @@ cli端打印结果：
 2020/10/26 20:47:45 SubInfo:
 2020/10/26 20:47:45 &{SubID:A001 SubMale:false SubAge:18 JavaClassName:}```
 ```
-可看到详细的请求体赋值情况，以及返回结果和耗时。支持嵌套结构
+You can see detailed request body assignment, return results, and elapsed time. Nested structures are supported.
 
-server端打印结果
+Server logs:
 ```
 =======================
 req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001", SubMale:false, SubAge:18}}
 =======================
 ```
-可见接收到了来自cli的数据
+It shows that data from CLI has been received.
+

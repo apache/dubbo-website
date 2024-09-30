@@ -2,68 +2,66 @@
 aliases:
     - /en/docs3-v2/golang-sdk/refer/use_dubbogo_cli/
     - /en/docs3-v2/golang-sdk/refer/use_dubbogo_cli/
-description: 使用 dubbogo-cli 工具
-title: 使用 dubbogo-cli 工具
+description: Using the dubbogo-cli Tool
+title: Using the dubbogo-cli Tool
 type: docs
 weight: 3
 ---
-{{% alert title="废弃警告" color="warning" %}}
-自 dubbo-go 3.1.0 版本开始，本工具不再适用。本工具已经停止维护，未来将由 dubboctl 代替，请关注社区动态了解 dubboctl 最新进展。
+{{% alert title="Deprecation Warning" color="warning" %}}
+Starting from version 3.1.0 of dubbo-go, this tool is no longer applicable. This tool has been discontinued and will be replaced by dubboctl in the future. Please stay updated with community news to learn about the latest developments of dubboctl.
 {{% /alert %}}
 
-## 1. 安装
+## 1. Installation
 
-dubbogo-cli 是 Apach/dubbo-go 生态的子项目，为开发者提供便利的应用模板创建、工具安装、接口调试等功能，以提高用户的研发效率。
+dubbogo-cli is a subproject of the Apache/dubbo-go ecosystem, providing convenient application template creation, tool installation, interface debugging, and other functions to improve developer efficiency.
 
-执行以下指令安装dubbogo-cli 至 $GOPATH/bin
+To install dubbogo-cli to $GOPATH/bin, run the following command:
 
 ```
 go install github.com/dubbogo/dubbogo-cli@latest
 ```
 
-## 2. 功能概览
+## 2. Feature Overview
 
-dubbogo-cli 支持以下能力
+dubbogo-cli supports the following capabilities:
 
-- 应用模板创建
+- Application Template Creation
 
   ```
   dubbogo-cli newApp .
   ```
 
-  在当前目录下创建应用模板
+  Creates an application template in the current directory.
 
-- Demo 创建
+- Demo Creation
 
   ```
   dubbogo-cli newDemo .
   ```
 
-  在当前目录下创建 RPC 示例，包含一个客户端和一个服务端
+  Creates an RPC example in the current directory, including a client and a server.
 
-- 编译、调试工具安装
+- Compilation and Debug Tool Installation
 
   ```
   dubbogo-cli install all
   ```
 
-  一键安装以下等工具至 $GOPATH/bin
+  Installs the following tools to $GOPATH/bin with one click:
 
     - protoc-gen-go-triple
 
-      用于 triple 协议接口编译
+      For compiling triple protocol interfaces.
 
     - imports-formatter
 
-      用于整理代码 import 块。
+      For organizing code import blocks.
 
-      [import-formatte README](https://github.com/dubbogo/tools#imports-formatter)
+      [import-formatter README](https://github.com/dubbogo/tools#imports-formatter)
 
+- View dubbo-go application registration information
 
-
-- 查看 dubbo-go 应用注册信息
-
-    - 查看 Zookeeper 上面的注册信息, 获取接口及方法列表
+    - View registration information on Zookeeper to get the list of interfaces and methods.
 
       ```bash
       $ dubbogo-cli show --r zookeeper --h 127.0.0.1:2181
@@ -71,32 +69,32 @@ dubbogo-cli 支持以下能力
       methods: [CreateUser,GetUserByCode,GetUserByName,GetUserByNameAndAge,GetUserTimeout,UpdateUser,UpdateUserByName]
       ```
 
-    - 查看 Nacos 上面的注册信息 【功能开发中】
+    - View registration information on Nacos 【Feature in development】
 
-    - 查看 Istio 的注册信息【功能开发中】
+    - View registration information on Istio【Feature in development】
 
-- 调试 Dubbo 协议接口
+- Debug Dubbo protocol interfaces
 
-- 调试 Triple 协议接口
+- Debug Triple protocol interfaces
 
-## 3. 功能详解
+## 3. Feature Details
 
-### 3.1 Demo 应用介绍
+### 3.1 Demo Application Introduction
 
-#### 3.1.1 Demo 创建
+#### 3.1.1 Demo Creation
 
 ```
 dubbogo-cli newDemo .
 ```
 
-在当前目录下创建Demo, 包含客户端和服务端，该 Demo 展示了基于一套接口，完成一次 RPC 调用。
+Creates a Demo in the current directory, which includes a client and a server, demonstrating an RPC call based on a set of interfaces.
 
-该Demo 使用直连模式，无需依赖注册中心，server端暴露服务到本地20000端口，客户端发起调用。
+This Demo uses a direct connection mode and does not require a dependency on a registration center. The server exposes the service on the local port 20000, and the client initiates the call.
 
 ```shell
 .
 ├── api
-│   ├── samples_api.pb.go 
+│   ├── samples_api.pb.go
 │   ├── samples_api.proto
 │   └── samples_api_triple.pb.go
 ├── go-client
@@ -112,39 +110,38 @@ dubbogo-cli newDemo .
 └── go.mod
 ```
 
-#### 3.1.2 运行Demo
+#### 3.1.2 Running the Demo
 
-开启服务端
+Start the server:
 
 ```
 $ cd go-server/cmd
 $ go run .
 ```
 
-另一个终端开启客户端
+In another terminal, start the client:
 
 ```
 $ go mod tidy
 $ cd go-client/cmd
 $ go run .
-
 ```
 
-可看到打印日志
+You should see the following log output:
 
 ```
 INFO    cmd/client.go:49        client response result: name:"Hello laurence" id:"12345" age:21
 ```
 
-### 3.2 应用模板介绍
+### 3.2 Application Template Introduction
 
-#### 3.2.1 应用模板创建
+#### 3.2.1 Creating an Application Template
 
 ```
 dubbogo-cli newApp .
 ```
 
-在当前目录下创建应用模板:
+Creates an application template in the current directory:
 
 ```
 .
@@ -183,45 +180,45 @@ dubbogo-cli newApp .
 
 ```
 
-#### 3.2.2 应用模板介绍
+#### 3.2.2 Application Template Explanation
 
-生成项目包括几个目录：
+The generated project includes several directories:
 
-- api：放置接口文件：proto文件和生成的.pb.go文件
-- build：放置镜像构建相关文件
-- chart：放置发布用 chart 仓库、基础环境chart 仓库：nacos、mesh（开发中）
-- cmd：程序入口
-- conf：框架配置
-- pkg/service：RPC 服务实现
-- Makefile：
+- api: Contains interface files, proto files, and the generated .pb.go files.
+- build: Contains files related to image building.
+- chart: Contains release chart repositories and basic environment chart repositories (nacos, mesh in development).
+- cmd: Program entry point.
+- conf: Framework configuration.
+- pkg/service: RPC service implementation.
+- Makefile:
 
-- - 镜像、helm部署名：
+- - Image and Helm deployment names:
 
 - - - IMAGE = $(your_repo)/$(namespace)/$(image_name)
       TAG = 1.0.0
-- HELM_INSTALL_NAME = dubbo-go-app，helm 安装名，用于 helm install/uninstall 命令。
+- HELM_INSTALL_NAME = dubbo-go-app, the Helm installation name, used for Helm install/uninstall commands.
 
-- - 提供脚本，例如：
+- - Provides scripts, for example:
 
-- - - make build # 打包镜像并推送
-- make buildx-publish # arm架构本地打包amd64镜像并推送，依赖 docker buildx
-- make deploy  # 通过 helm 发布应用
-- make remove  # 删除已经发布的 helm 应用
-- make proto-gen # api下生成 pb.go 文件
+- - - make build # Package the image and push it
+- make buildx-publish # Local packaging of amd64 images for arm architecture and push, depends on docker buildx
+- make deploy  # Release the application using Helm
+- make remove  # Remove already released Helm applications
+- make proto-gen # Generate pb.go files under api
 
 -
 
-使用应用模板的开发流程
+Development process using application templates
 
-> 依赖环境：make、go、helm、kubectl、docker
+> Required environment: make, go, helm, kubectl, docker
 
-1. 通过 dubbogo-cli 生成模板
-2. 修改api/api.proto
-3. make proto-gen
-4. 开发接口
-5. 修改 makefile 内 IMAGE 镜像名和 HELM_INSTALL_NAME 发布名
-6. 打镜像并推送
-7. 修改chart/app/values 内与部署相关的value配置, 重点关注镜像部分。
+1. Generate the template using dubbogo-cli.
+2. Modify api/api.proto.
+3. make proto-gen.
+4. Develop the interface.
+5. Modify IMAGE name and HELM_INSTALL_NAME in the Makefile.
+6. Build the image and push.
+7. Modify deployment-related value configurations in chart/app/values, with a focus on the image part.
 
 ```
 image:
@@ -230,25 +227,25 @@ image:
   tag: "1.0.0"
 ```
 
-8. make deploy, 使用 helm 发布应用。
+8. make deploy to release the application using Helm.
 
-### 3.3 以 gRPC 协议调试 dubbo-go 应用
+### 3.3 Debugging dubbo-go Applications with gRPC Protocol
 
-#### 3.3.1 简介
+#### 3.3.1 Introduction
 
-grpc_cli 工具是 gRPC 生态用于调试服务的工具，在 server 开启[反射服务](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md)的前提下，可以获取到服务的 proto 文件、服务名、方法名、参数列表，以及发起 gRPC 调用。
+The grpc_cli tool is used in the gRPC ecosystem for debugging services. When the server enables [reflection service](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md), you can obtain the service's proto file, service name, method name, parameter list, and initiate gRPC calls.
 
-Triple 协议兼容 gRPC 生态，并默认开启 gRPC 反射服务，因此可以直接使用 grpc_cli 调试 triple 服务。
+The Triple protocol is compatible with the gRPC ecosystem, and gRPC reflection service is enabled by default, so you can directly use grpc_cli to debug triple services.
 
-#### 3.3.2 安装grpc_cli
+#### 3.3.2 Installing grpc_cli
 
-> 后续将由 dubbogo-cli 安装，目前需要用户手动安装
+> It will be installed by dubbogo-cli in the future, but currently, users need to install it manually.
 
-参考[grpc_cli 文档](https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md)
+Refer to the [grpc_cli documentation](https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md).
 
-#### 3.3.3 使用 grpc_cli 对 Triple 服务进行调试
+#### 3.3.3 Using grpc_cli to Debug Triple Services
 
-1. 查看 triple 服务的接口定义
+1. View the interface definitions of the triple service.
 
 ```shell
 $ grpc_cli ls localhost:20001 -l
@@ -260,9 +257,9 @@ service UserProvider {
 }
 ```
 
-2. 查看请求参数类型
+2. Check the request parameter types.
 
-例如开发者期望测试上述端口的 SayHello 方法，尝试获取HelloRequest的具体定义，需要执行r如下指令，可查看到对应参数的定义。
+For example, if the developer wants to test the SayHello method on the above port, they can try to obtain the specific definition of HelloRequest with the following command:
 
 ```shell
 $ grpc_cli type localhost:20001 org.apache.dubbo.quickstart.samples.HelloRequest
@@ -271,9 +268,9 @@ message HelloRequest {
 }
 ```
 
-3. 请求接口
+3. Request the interface.
 
-已经知道了请求参数的具体类型，可以发起调用来测试对应服务。查看返回值是否符合预期。
+Having known the specific types of request parameters, you can initiate a call to test the corresponding service and check if the return value meets expectations.
 
 ```shell
 $ grpc_cli call localhost:20001 SayHello "name: 'laurence'"
@@ -289,11 +286,11 @@ grpc-accept-encoding : identity,deflate,gzip
 Rpc succeeded with OK status
 ```
 
-### 3.4 以 Dubbo 协议调试dubbo-go 应用
+### 3.4 Debugging dubbo-go Applications with Dubbo Protocol
 
-#### 3.4.1 开启 Dubbo 服务端
+#### 3.4.1 Starting the Dubbo Server
 
-示例：user.go:
+Example: user.go:
 
 ```
 func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) (*User, error) {
@@ -304,14 +301,14 @@ func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) 
 }
 ```
 
-服务端开启一个服务，名为GetUser，传入一个CallUserStruct的参数，返回一个User参数
-CallUserStruct参数定义：
+The server starts a service named GetUser, passing in a parameter of type CallUserStruct, and returns a parameter of type User.
+Definition of CallUserStruct parameter:
 
 ```
 type CallUserStruct struct {
 	ID      string
 	Male    bool
-	SubInfo SubInfo // 嵌套子结构
+	SubInfo SubInfo // Nested structure
 }
 func (cs CallUserStruct) JavaClassName() string {
 	return "com.ikurento.user.CallUserStruct"
@@ -328,14 +325,14 @@ func (s SubInfo) JavaClassName() string {
 }
 ```
 
-User结构定义：
+Definition of User structure:
 
 ```
 type User struct {
 	Id      string
 	Name    string
 	Age     int32
-	SubInfo SubInfo // 嵌套上述子结构SubInfo
+	SubInfo SubInfo // Nested substructure
 }
 
 func (u *User) JavaClassName() string {
@@ -343,21 +340,19 @@ func (u *User) JavaClassName() string {
 }
 ```
 
-开启服务：
+Start the service:
 
 ```
-cd server`
-`source builddev.sh`
-`go run .
+cd server
+source builddev.sh
+go run .
 ```
 
-#### 3.4.2 定义请求体 (适配于序列化协议)
+#### 3.4.2 Defining Request Body (for Serialization Protocol)
 
-请求体定义为json文件，约定键值均为string
-键对应go语言struct字段名例如"ID"、"Name" ，值对应"type@val"
-其中type支持string int bool time，val使用string 来初始化，如果只填写type则初始化为零值。 约定每个struct必须有JavaClassName字段，务必与server端严格对应
+The request body is defined as a JSON file, with key-value pairs all in string format. The keys correspond to Go struct field names such as "ID" and "Name", while values correspond to "type@val". The type can be string, int, bool, or time, and val is a string used for initialization; if only type is provided, it initializes to the zero value. Every struct must have a JavaClassName field that must correspond strictly to the server side.
 
-见userCall.json:
+See userCall.json:
 
 ```
 {
@@ -373,9 +368,9 @@ cd server`
 }
 ```
 
-userCall.json将参数CallUserStruct的结构及子结构SubInfo都定义了出来，并且给请求参数赋值。
+userCall.json defines the structure of the parameter CallUserStruct and its nested structure SubInfo, and assigns values to the request parameters.
 
-user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段一定与server端严格对应
+user.json, similarly, is used as the return value and does not need initial values, but the JavaClassName field must correspond strictly to the server side.
 
 ```
 {
@@ -392,13 +387,13 @@ user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段
 }
 ```
 
-#### 3.4.3 调试端口
+#### 3.4.3 Debugging Port
 
 ```
 ./dubbo-go-cli -h=localhost -p=20001 -proto=dubbo -i=com.ikurento.user.UserProvider -method=GetUser -sendObj="./userCall.json" -recvObj="./user.json"
 ```
 
-打印结果：
+Printed results:
 
 ```
 2020/10/26 20:47:45 Created pkg:
@@ -420,12 +415,12 @@ user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段
 2020/10/26 20:47:45 After 3ms , Got Rsp:
 2020/10/26 20:47:45 &{ID:A002 Name:Alex Stocks Age:18 JavaClassName: SubInfo:0xc0001241b0}
 2020/10/26 20:47:45 SubInfo:
-2020/10/26 20:47:45 &{SubID:A001 SubMale:false SubAge:18 JavaClassName:}```
+2020/10/26 20:47:45 &{SubID:A001 SubMale:false SubAge:18 JavaClassName:}
 ```
 
-可看到详细的请求体赋值情况，以及返回结果和耗时。支持嵌套结构
+You can see detailed assignment of the request body, as well as the return result and time taken. It supports nested structures.
 
-server端打印结果
+Server-side print output:
 
 ```
 =======================
@@ -433,4 +428,5 @@ req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001"
 =======================
 ```
 
-可见接收到了来自cli的数据
+You can see that the CLI data was received.
+

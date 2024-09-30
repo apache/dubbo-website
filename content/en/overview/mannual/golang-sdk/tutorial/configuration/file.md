@@ -1,26 +1,26 @@
 ---
-description: 使用 dubbogo.yml 配置文件开发应用
-title: 使用 dubbogo.yml 配置文件开发应用
-linkTitle: 本地配置文件
+description: Use the dubbogo.yml configuration file to develop applications
+title: Use the dubbogo.yml Configuration File to Develop Applications
+linkTitle: Local Configuration File
 type: docs
 weight: 1
 ---
 
-## 1.介绍
+## 1. Introduction
 
-本文档演示如何在框架中使用 `yaml` 配置文件进行微服务开发，是相比于 `API` 的另一种微服务开发模式。你可以完全使用 `yml` 配置文件进行开发，也可以将部分全局配置放到配置文件，而只在 API 中完成服务定义。
+This document demonstrates how to use a `yaml` configuration file in the framework for microservice development, which is an alternative development model compared to `API`. You can fully develop using a `yml` configuration file or put some global configurations in the configuration file, while defining services only in the API.
 
-这种模式下，一定要通过 `DUBBO_GO_CONFIG_PATH` 指定配置文件路径：
+In this mode, you must specify the configuration file path through `DUBBO_GO_CONFIG_PATH`:
 
 ```shell
 export DUBBO_GO_CONFIG_PATH="../conf/dubbogo.yml"
 ```
 
-## 2. 使用说明
+## 2. Usage Instructions
 
-可在此查看 <a href="https://github.com/apache/dubbo-go-samples/tree/main/config_yaml" target="_blank">完整示例源码</a>。
+You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/config_yaml" target="_blank">complete example source code</a> here.
 
-### 2.1 运行示例
+### 2.1 Run Example
 ```txt
 .
 ├── go-client
@@ -39,10 +39,9 @@ export DUBBO_GO_CONFIG_PATH="../conf/dubbogo.yml"
     └── greet.triple.go
 
 ```
-通过 IDL`./proto/greet.proto` 定义服务 使用triple协议
+Define services using IDL `./proto/greet.proto` with the triple protocol.
 
-
-#### build Proto
+#### Build Proto
 ```bash
 cd path_to_dubbogo-sample/config_yaml/proto
 protoc --go_out=. --go-triple_out=. ./greet.proto
@@ -60,9 +59,9 @@ cd path_to_dubbogo-sample/config_yaml/go-client/cmd
 go run .
 ```
 
-### 2.2 客户端使用说明
+### 2.2 Client Instructions
 
-客户端定义的 `yaml` 文件：
+The `yaml` file defined by the client:
 
 ```yaml
 # dubbo client yaml configure file
@@ -81,7 +80,7 @@ dubbo:
         retries: 3
         timeout: 3000
 ```
-通过 `dubbo.Load()` 调用进行文件的读取以及加载
+Call `dubbo.Load()` to read and load the file.
 
 ```go
 //...
@@ -94,9 +93,9 @@ func main() {
 }
 ```
 
-### 2.3 服务端使用说明
+### 2.3 Server Instructions
 
-服务端定义的 `yaml` 文件
+The `yaml` file defined by the server:
 ```yaml
 # dubbo server yaml configure file
 dubbo:
@@ -115,7 +114,7 @@ dubbo:
         interface: com.apache.dubbo.sample.Greeter
 ```
 
-通过 `dubbo.Load()` 调用进行文件的读取以及加载
+Call `dubbo.Load()` to read and load the file.
 
 ```go
 //...
@@ -126,15 +125,14 @@ func main() {
 	}
 	//...
 }
-
 ```
-## 3.示例详解
+## 3. Example Details
 
-### 3.1服务端介绍
+### 3.1 Server Introduction
 
-#### 服务端proto文件
+#### Server Proto File
 
-源文件路径：dubbo-go-sample/context/proto/greet.proto
+Source file path: dubbo-go-sample/context/proto/greet.proto
 
 ```protobuf
 syntax = "proto3";
@@ -156,9 +154,9 @@ service GreetService {
 }
 ```
 
-#### 服务端handler文件
+#### Server Handler File
 
-在服务端中，定义 GreetTripleServer:
+In the server, define GreetTripleServer:
 
 ```go
 type GreetServiceHandler interface {
@@ -166,11 +164,9 @@ type GreetServiceHandler interface {
 }
 ```
 
-实现 GreetServiceHandler 接口，通过 `greet.SetProviderService(&GreetTripleServer{})` 进行注册
-，同样使用 `dubbo.Load()` 进行加载配置文件
+Implement the GreetServiceHandler interface and register it via `greet.SetProviderService(&GreetTripleServer{})`, also load the configuration file with `dubbo.Load()`.
 
-
-源文件路径：dubbo-go-sample/config_yaml/go-server/cmd/main.go
+Source file path: dubbo-go-sample/config_yaml/go-server/cmd/main.go
 
 ```go
 
@@ -209,12 +205,11 @@ func main() {
 }
 ```
 
-### 3.2 客户端介绍
+### 3.2 Client Introduction
 
-在客户端中，定义greet.GreetServiceImpl实例，greet.SetConsumerService(svc)进行注册:
-通过 `dubbo.Load()` 进行配置文件的加载
+In the client, define`greet.GreetServiceImpl` instance and register with `greet.SetConsumerService(svc)`; load the configuration file with `dubbo.Load()`.
 
-源文件路径：dubbo-go-sample/config_yaml/go-client/cmd/main.go
+Source file path: dubbo-go-sample/config_yaml/go-client/cmd/main.go
 
 ```go
 package main
@@ -243,31 +238,30 @@ func main() {
 
 ```
 
-### 3.3 案例效果
+### 3.3 Case Effect
 
-先启动服务端，再启动客户端，可以观察到客户端打印了`ConfigTest successfully`配置加载以及调用成功
+Start the server first, then start the client, and you can observe the client printing `ConfigTest successfully` configuration loading and calling success.
 
 ```
 2024-03-11 15:47:29     INFO    cmd/main.go:39  ConfigTest successfully
 
 ```
 
-## 4 更多配置
+## 4 More Configurations
 
-### 指定 Filter
+### Specify Filters
 
-如果要指定多个 filter 时，可用 ',' 分隔
+If you want to specify multiple filters, you can separate them with ','.
 
-- Consumer 端
+- Consumer Side
 
   ```yaml
   dubbo:
     consumer:
-      filter: echo,token,tps,myCustomFilter # 可指定自定义filter
+      filter: echo,token,tps,myCustomFilter # Custom filters can be specified
   ```
 
-
-- Provider 端
+- Provider Side
 
   ```yaml
   dubbo:
@@ -276,5 +270,4 @@ func main() {
         GreeterProvider:
           filter: myCustomFilter,echo,tps
   ```
-
 

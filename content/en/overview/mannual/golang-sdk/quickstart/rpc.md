@@ -3,67 +3,67 @@ aliases:
    - /en/docs3-v2/golang-sdk/quickstart/
    - /en/docs3-v2/golang-sdk/quickstart/
    - /en/overview/mannual/golang-sdk/quickstart/quickstart_triple/
-description: Dubbo-go 快速开始
-linkTitle: 开发RPC服务
-title: 开发 RPC Server & RPC Client
+description: Dubbo-go Quick Start
+linkTitle: Develop RPC Services
+title: Develop RPC Server & RPC Client
 type: docs
 weight: 1
 ---
 
-基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Go SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
+Based on the Triple protocol defined by Dubbo, you can easily write browser and gRPC compatible RPC services that run on both HTTP/1 and HTTP/2 simultaneously. The Dubbo Go SDK supports defining services using IDL or programming language-specific methods and provides a lightweight API for publishing or invoking these services.
 
-本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。
+This example demonstrates the RPC communication pattern based on the Triple protocol. The example uses Protocol Buffer to define the RPC service and demonstrates the processes of code generation, service publishing, and service access.
 
-## 前置条件
+## Prerequisites
 
-因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `protoc`、`protoc-gen-go`、`protoc-gen-go-triple`。
+Since we are using Protocol Buffer, we first need to install the relevant code generation tools, including `protoc`, `protoc-gen-go`, and `protoc-gen-go-triple`.
 
-1. 安装 `protoc`
+1. Install `protoc`
 
-    查看 <a href="/zh-cn/overview/reference/protoc-installation/" target="_blank">Protocol Buffer Compiler 安装指南</a>
+    Check the <a href="/zh-cn/overview/reference/protoc-installation/" target="_blank">Protocol Buffer Compiler Installation Guide</a>
 
-2. 安装 `protoc` 插件
+2. Install `protoc` plugins
 
-    接下来，我们安装插件 `protoc-gen-go`、`protoc-gen-go-triple`。
+    Next, we install the plugins `protoc-gen-go` and `protoc-gen-go-triple`.
 
     ```shell
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
     go install dubbo.apache.org/dubbo-go/v3/cmd/protoc-gen-go-triple@v3.0.1
     ```
 
-    确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 验证，如果该命令不能正常工作的话，请执行以下命令：
+    Make sure `protoc-gen-go` and `protoc-gen-go-triple` are in your `PATH`. You can verify this with `which protoc-gen-go`. If that command does not work, please execute the following commands:
 
     ```shell
     [ -n "$(go env GOBIN)" ] && export PATH="$(go env GOBIN):${PATH}"
     [ -n "$(go env GOPATH)" ] && export PATH="$(go env GOPATH)/bin:${PATH}"
     ```
 
-## 快速运行示例
-### 下载示例源码
-我们在 <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
+## Quick Run Example
+### Download Example Source Code
+We maintain a series of dubbo-go usage examples in the <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> repository to help users quickly learn how to use dubbo-go.
 
-你可以 <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">下载示例zip包并解压</a>，或者克隆仓库：
+You can <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">download the example zip file and unzip it</a>, or clone the repository:
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples
 ```
 
-切换到快速开始示例目录：
+Switch to the quick start example directory:
 
 ```shell
 $ cd dubbo-go-samples/helloworld
 ```
 
-### 运行 server
-在 `go-server/cmd` 目录：
+### Run Server
+In the `go-server/cmd` directory:
 
-运行以下命令，启动 server：
+Run the following command to start the server:
 
 ```shell
 $ go run server.go
 ```
 
-使用 `cURL` 验证 server 已经正常启动：
+Use `cURL` to verify that the server has been started correctly:
 
 ```shell
 $ curl \
@@ -74,9 +74,9 @@ $ curl \
 Greeting: Hello world
 ```
 
-### 运行 client
+### Run Client
 
-打开一个新的 terminal，运行以下命令，在 `go-client/cmd` 目录运行以下命令，启动 client
+Open a new terminal and run the following command in the `go-client/cmd` directory to start the client:
 
 ```shell
 $ go run client.go
@@ -84,13 +84,13 @@ $ go run client.go
 Greeting: Hello world
 ```
 
-以上就是一个完整的 dubbo-go RPC 通信服务开发过程。
+This is a complete development process of a dubbo-go RPC communication service.
 
-## 源码讲解
-接下来，我们将对 `dubbo-go-samples/helloworld` 示例进行源码层面的讲解。
+## Source Code Explanation
+Next, we will explain the source code of the `dubbo-go-samples/helloworld` example.
 
-### 定义服务
-示例使用 Protocol Buffer (IDL) 来定义 Dubbo 服务。
+### Define Service
+The example uses Protocol Buffer (IDL) to define the Dubbo service.
 
 ```protobuf
 syntax = "proto3";
@@ -111,11 +111,11 @@ service GreetService {
 }
 ```
 
-这个文件声明了一个叫做 `GreetService` 的服务，为这个服务定义了 Greet 方法以及它的请求参数 GreetRequest 和返回值 GreetResponse。
+This file declares a service called `GreetService`, defining the Greet method along with its request parameter GreetRequest and return value GreetResponse.
 
-### 生成代码
+### Generate Code
 
-在运行 server 或者 client 之前，我们需要使用 `protoc-gen-go`、`protoc-gen-go-triple` 生成相关的代码
+Before running the server or client, we need to generate the relevant code using `protoc-gen-go` and `protoc-gen-go-triple`.
 
 ```bash
 protoc --go_out=. --go_opt=paths=source_relative \
@@ -123,7 +123,7 @@ protoc --go_out=. --go_opt=paths=source_relative \
     ./greet.proto
 ```
 
-运行以上命令后，在目标目录中看到以下生成的文件：
+After running the above command, you will see the following generated files in the target directory:
 
 ```
  proto
@@ -132,14 +132,14 @@ protoc --go_out=. --go_opt=paths=source_relative \
     └── greet.triple.go
 ```
 
-在 proto/greet/v1 包下有两部分内容：
+In the proto/greet/v1 package, there are two parts:
 
-- `greet.pb.go` 是由谷歌标准的 `protoc-gen-go`生成，它包含 `GreetRequest`、`GreetResponse` 结构体和响应的编解码规则。
-- `greet.triple.go` 是由 Dubbo 自定义的插件`protoc-gen-go-triple`成，其中关键的信息包括生成的接口 `GreetService`、构造器等。
+- `greet.pb.go` is generated by Google's standard `protoc-gen-go`, which contains the structures of `GreetRequest`, `GreetResponse`, and the encoding/decoding rules.
+- `greet.triple.go` is produced by the custom Dubbo plugin `protoc-gen-go-triple` and includes key information, including the generated interface `GreetService`, constructors, and more.
 
-### 实现服务
+### Implement Service
 
-接下来我们就需要添加业务逻辑了，实现 `greet.GreetService` 接口即可。
+Next, we need to add business logic by implementing the `greet.GreetService` interface.
 
 ```go
 type GreetTripleServer struct {
@@ -151,9 +151,9 @@ func (srv *GreetTripleServer) Greet(ctx context.Context, req *greet.GreetRequest
 }
 ```
 
-### 启动 Server
+### Start Server
 
-创建一个新的 Server，把我们上一步中实现的 `GreeterServer`注册给它，接下来就可以直接初始化和启动 Server 了，它将在指定的端口接收请求。
+Create a new Server, register the `GreetTripleServer` we implemented earlier, and then initialize and start the Server, which will listen for requests on the specified port.
 
 ```go
 func main() {
@@ -177,9 +177,10 @@ func main() {
 }
 ```
 
-### 访问服务
+### Access Service
 
-最简单方式是使用 HTTP/1.1 POST 请求访问服务，参数则作以标准 JSON 格式作为 HTTP 负载传递。如下是使用 cURL 命令的访问示例：
+The simplest way is to use an HTTP/1.1 POST request to access the service, passing the parameters as standard JSON format in the HTTP payload. Here is an example using a cURL command:
+
 ```shell
 curl \
     --header "Content-Type: application/json" \
@@ -187,7 +188,7 @@ curl \
     http://localhost:20000/greet.GreetService/Greet
 ```
 
-也可以使用 Dubbo client 请求服务，我们首先需要从生成代码即 `greet` 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起 RPC 调用了。
+You can also use a Dubbo client to request the service. First, obtain the service proxy from the generated code in the `greet` package, specify the server address, and initialize it. Then you can initiate an RPC call.
 
 ```go
 func main() {
@@ -211,9 +212,9 @@ func main() {
 }
 ```
 
-以上即是 dubbo-go rpc 的基本工作原理！
+This is the basic working principle of dubbo-go RPC!
 
-## 更多内容
+## More Content
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
     <div class="lead"></div><header class="article-meta">
@@ -222,9 +223,9 @@ func main() {
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/rpc" >}}'>RPC 框架更多特性</a>
+                     <a href='{{< relref "../tutorial/rpc" >}}'>More Features of RPC Framework</a>
                 </h4>
-                <p>学习 Streaming 通信模型、配置超时时间、传递headers等更多框架配置。</p>
+                <p>Learn about Streaming communication models, configuring timeout durations, passing headers, and more framework configurations.</p>
             </div>
         </div>
     </div>
@@ -232,9 +233,9 @@ func main() {
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial" >}}'>服务发现等治理能力</a>
+                     <a href='{{< relref "../tutorial" >}}'>Governance capabilities such as service discovery</a>
                 </h4>
-                <p>学习如何使用 dubbo-go 开发微服务，引入服务发现、可观测性、流量管控等服务治理能力。</p>
+                <p>Learn how to use dubbo-go to develop microservices, incorporating service discovery, observability, traffic control, and more service governance capabilities.</p>
             </div>
         </div>
     </div>
@@ -242,7 +243,4 @@ func main() {
 <hr>
 </div>
 {{< /blocks/section >}}
-
-
-
 

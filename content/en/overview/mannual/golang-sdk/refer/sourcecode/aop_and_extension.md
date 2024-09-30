@@ -3,27 +3,27 @@ aliases:
     - /en/docs3-v2/golang-sdk/preface/design/aop_and_extension/
     - /en/docs3-v2/golang-sdk/preface/design/aop_and_extension/
     - /en/overview/mannual/golang-sdk/preface/design/aop_and_extension/
-description: AOP 与可扩展机制
-keywords: AOP 与可扩展机制
-title: AOP 与可扩展机制
+description: AOP and Extension Mechanism
+keywords: AOP and Extension Mechanism
+title: AOP and Extension Mechanism
 type: docs
 ---
 
-## 1. extension 模块与 init 方法
+## 1. Extension Module and Init Method
 
-### 1.1 接口与实现
+### 1.1 Interface and Implementation
 
-golang 中的一个接口往往伴随多个实现类，dubbo-go 提供了针对接口实现类的可插拔可扩展机制。降低模块之间的耦合性，方便开发者引入、自定义组件。
+In Golang, an interface is often accompanied by multiple implementation classes. Dubbo-go provides a pluggable and extensible mechanism for interface implementation classes, reducing coupling between modules and facilitating developers in introducing and customizing components.
 
-### 1.2 golang 中的 init 方法
+### 1.2 Init Method in Golang
 
-init 方法作为 golang 中特殊的方法，用户引入一组模块后，会在程序启动时率先执行这些模块内的init 方法，进行加载逻辑，该方法是dubbogo注册扩展组件的重要方式。
+The init method, as a special method in Golang, executes first on program startup when a user imports a set of modules, performing loading logic. This method is an important way for dubbogo to register extension components.
 
-### 1.3 extension 模块
+### 1.3 Extension Module
 
-在框架源码中，有一个特殊的模块: common/extension ，这一模块负责缓存所有可扩展组件的实现。
+In the framework source code, there is a special module: common/extension, which is responsible for caching all the implementations of the extensible components.
 
-以负载均衡模块为例：common/extension/loadbalance.go 
+Taking the load balancing module as an example: common/extension/loadbalance.go 
 
 ```go
 package extension
@@ -50,9 +50,9 @@ func GetLoadbalance(name string) loadbalance.LoadBalance {
 }
 ```
 
-该模块包含Get 方法和Set方法。Get 返回实例化的 LoadBalance 接口，Set 方法用于注册工厂函数，map 用于缓存工厂函数。
+This module contains Get and Set methods. Get returns the instantiated LoadBalance interface, while Set is used to register factory functions, with a map used for caching these functions.
 
-当用户引入 _ "dubbo.apache.org/dubbo-go/v3/cluster/loadbalance/random" 时，将会加载对应模块的init函数，调用 Set 方法注册唯一key和工厂函数和到上述map中。
+When the user imports _ "dubbo.apache.org/dubbo-go/v3/cluster/loadbalance/random", the corresponding module's init function will be loaded, calling the Set method to register the unique key and factory function into the above map.
 
 cluster/loadbalance/random/loadbalance.go
 
@@ -75,11 +75,11 @@ func init() {
 }
 ```
 
-至此，当所有init方法执行完毕，可以通过 extension 模块 Get 方法来获取实例化对象。
+Thus, once all init methods have been executed, the instantiated object can be obtained through the extension module's Get method.
 
-### 1.4 imports 模块
+### 1.4 Imports Module
 
-dubbogo 将所有内置的模块全部放置在 imports/imports.go 内，用户在使用框架时，需要引入该模块，从而使用框架提供的基础能力。
+Dubbogo places all built-in modules in imports/imports.go; users need to import this module to use the basic capabilities provided by the framework.
 
 ```go
 import (
@@ -87,25 +87,25 @@ import (
 )
 ```
 
-## 2. 组件加载流程
+## 2. Component Loading Process
 
-1. 用户在代码中引入 _ "dubbo.apache.org/dubbo-go/v3/imports"
+1. The user imports _ "dubbo.apache.org/dubbo-go/v3/imports"
 
-2. 程序启动，init 函数被依次执行，注册工厂函数/实例化对象到 extension 模块。
+2. The program starts, executing the init functions sequentially, registering factory functions/instantiated objects to the extension module.
 
-3. 框架启动，加载配置，配置中获取需要加载的模块key，根据key获取实例化对象。
+3. The framework starts, loading configuration, retrieving module keys from the configuration and obtaining instantiated objects based on these keys.
 
-4. 用户也可以手动调用 extension 的 Get 方法，获取实例化对象并直接使用。
+4. Users can also manually call the extension's Get method to obtain instantiated objects and use them directly.
 
-## 3. 自定义组件
+## 3. Custom Components
 
-在上述介绍的基础之上，开发人员可以效仿内置模块，编写自定义扩展组件。
+Based on the above introduction, developers can emulate built-in modules and write custom extension components.
 
+## 4. Aspect-Oriented Programming Design (AOP)
 
-## 4. 面向切面编程的设计（AOP）
+In the Dubbo-go service framework, many interfaces are designed based on AOP concepts. For example, Invoker, Filter, LoadBalance, and Router.
 
-在 Dubbo-go 服务框架中，许多接口是基于 AOP 的思路进行设计的。例如 Invoker、Filter、LoadBalance、Router。
+These multiple implementations often form a chain of calls, with a single implementation class only handling its relevant logic.
 
-这些接口的多种实现往往组成一组调用链，单个实现类只处理自己所关注的逻辑。
+Related Reading: [【AOP wikipedia】](https://en.wikipedia.org/wiki/Aspect-oriented_programming)
 
-相关阅读：[【AOP wikipedia】](https://en.wikipedia.org/wiki/Aspect-oriented_programming)

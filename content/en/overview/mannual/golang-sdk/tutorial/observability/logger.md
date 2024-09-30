@@ -2,20 +2,20 @@
 aliases:
   - /en/overview/mannual/golang-sdk/tutorial/develop/features/custom-logger/
 description: logger
-title: 配置和管理框架日志
-linkTitle: 框架日志
+title: Configure and Manage Framework Logs
+linkTitle: Framework Logs
 type: docs
 weight: 1
 ---
 
-本示例演示如何配置 dubbo-go 框架日志组件，将框架运行态日志保存到指定的位置。可在此查看  <a href="https://github.com/apache/dubbo-go-samples/tree/main/logger/level" target="_blank">完整示例源码地址</a>。
+This example demonstrates how to configure the dubbo-go framework log component to save the framework's runtime logs to a specified location. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/logger/level" target="_blank">complete example source code here</a>.
 
-{{% alert title="注意" color="info" %}}
-这里配置的只是 dubbo-go 框架自身的日志组件行为，即框架内部使用的日志，不影响业务日志框架的使用！
+{{% alert title="Note" color="info" %}}
+The configuration here only affects the log component behavior of the dubbo-go framework itself, which is the internal logging used by the framework and does not affect the use of business logging frameworks!
 {{% /alert %}}
 
-## 1. 日志配置
-如下所示，可以通过 `log.WithZap()`、`log.WithLevel("warn")` 设置 dubbo 框架日志行为：
+## 1. Log Configuration
+As shown below, you can set the dubbo framework log behavior using `log.WithZap()` and `log.WithLevel("warn")`:
 
 ```go
 ins, err := dubbo.NewInstance(
@@ -26,10 +26,10 @@ ins, err := dubbo.NewInstance(
 )
 ```
 
-## 2. 应用共享日志组件
-注意，这里配置的只是 dubbo-go 框架自身的日志组件行为（即框架内部使用的日志），不影响业务日志框架的使用！
+## 2. Application Shared Log Component
+Note that the configuration here only affects the log component behavior of the dubbo-go framework itself (i.e., the logs used internally by the framework) and does not affect the use of business logging frameworks!
 
-**通过以下方式，业务应用也可以选择复用这个日志组件：**
+**Business applications can also choose to reuse this log component in the following way:**
 
 ```go
 import app_logger "github.com/dubbogo/gost/log/logger"
@@ -37,7 +37,7 @@ import app_logger "github.com/dubbogo/gost/log/logger"
 app_logger.Info("hello")
 ```
 
-日志 Interface
+Log Interface
 
 ```go
 type Logger interface {
@@ -55,16 +55,16 @@ type Logger interface {
 }
 ```
 
-{{% alert title="注意" color="info" %}}
-日志API不可以在Init 阶段使用，否则可能会发生意料之外的问题。
+{{% alert title="Note" color="info" %}}
+The logging API cannot be used during the Init phase; otherwise, unexpected issues may occur.
 {{% /alert %}}
 
-## 2. 完全自定义日志
-当前 dubbo-go 框架支持 zap、logrus 两个日志框架，如果您想让 dubbo 框架内核使用其他日志框架打印日志，推荐以标准扩展形式增加支持，具体可参考核心库中内置的 [源码实现](https://github.com/apache/dubbo-go/tree/main/logger)。
+## 2. Fully Custom Logs
+Currently, the dubbo-go framework supports the zap and logrus log frameworks. If you want the dubbo framework kernel to use other log frameworks for logging, it is recommended to add support in a standard extension form. For specifics, refer to the built-in [source implementation](https://github.com/apache/dubbo-go/tree/main/logger) in the core library.
 
-## 3. 访问日志
+## 3. Access Logs
 
-可以通过以下方式配置开启访问日志：
+You can configure access logging in the following way:
 
 ```go
 srv, err := server.NewServer(
@@ -74,4 +74,5 @@ srv, err := server.NewServer(
 )
 ```
 
-对于 `true` 和 `default` 而言，访问日志会使用 Dubbo 中的 logger 组件打印出来。如果指定了具体的日志文件路径，则直接写入到该文件。
+For `true` and `default`, the access log will be printed using the logger component in Dubbo. If a specific log file path is specified, it will be written directly to that file.
+

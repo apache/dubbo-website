@@ -1,29 +1,29 @@
 ---
-description: 传递附加参数 attachment
-title: 传递附加参数
+description: Passing Additional Parameters Attachment
+title: Passing Additional Parameters
 type: docs
 weight: 4
 ---
 
-**理解隐式参数传递的最直接方式 http header，它的工作方式与 http header 完全一致，在 GET 或 POST 请求体之外可以传递任意多个 header 参数**。而对于 RPC 调用而言，context就是在方法签名的参数之外提供附加参数传递能力，在实现原理上，对于不同的协议，attachment 的实现方式略有不同：
-* 对于 triple 协议，attachment 会转换为标准的 http header 进行传输。
-* 对于 dubbo 协议，attachment 是编码在协议体的固定位置进行传输，具体请参见 dubbo 协议规范。、
+**The most straightforward way to understand implicit parameter passing is through the HTTP header, which works exactly like an HTTP header, allowing any number of header parameters to be passed outside of the GET or POST request body.** For RPC calls, the context provides the ability to pass additional parameters outside of the method signature's parameters. The implementation varies slightly between different protocols:
+* For the triple protocol, the attachment is converted into standard HTTP headers for transmission.
+* For the Dubbo protocol, the attachment is encoded in a fixed location within the protocol body; please refer to the Dubbo protocol specification.
 
 ![/user-guide/images/context.png](/imgs/user/context.png)
 
-{{% alert title="注意" color="primary" %}}
-* 在使用 triple 协议时，由于 http header 的限制，仅支持小写的 ascii 字符
-* path, group, version, dubbo, token, timeout 等一些 key 是保留字段，传递 attachment 时应避免使用，尽量通过业务前缀等确保 key 的唯一性。
+{{% alert title="Note" color="primary" %}}
+* When using the triple protocol, only lowercase ASCII characters are supported due to the limitations of HTTP headers.
+* Keys such as path, group, version, dubbo, token, timeout, etc., are reserved fields and should be avoided when passing attachments. It is advisable to ensure key uniqueness through business prefixes.
 {{% /alert %}}
 
-## 1.介绍
+## 1. Introduction
 
-本文档演示如何在 Dubbo-go 框架中使用 context 上下文传递和读取附加参数，来实现上下文信息传递，可在此查看  <a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">完整示例源码地址</a>
+This document demonstrates how to use the context in the Dubbo-go framework to pass and read additional parameters, enabling context information transmission. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">complete sample source code here</a>.
 
-## 2.使用说明
-### 2.1客户端使用说明
+## 2. Usage Instructions
+### 2.1 Client Usage Instructions
 
-在客户端中，使用下述方式传递字段, 示例中 key 为 `constant.AttachmentKey` 即 "attachment":
+In the client, fields can be passed using the following method, where the key is `constant.AttachmentKey`, i.e., "attachment":
 
 ```go
 	ctx := context.Background()
@@ -33,22 +33,22 @@ weight: 4
 	})
 ```
 
-### 2.2服务端使用说明
+### 2.2 Server Usage Instructions
 
-在服务端中，使用下述方式获取字段, value的类型为 map[string]interface{}：
+In the server, fields can be retrieved using the following method, where the value type is map[string]interface{}:
 ```go
     attachments := ctx.Value(constant.AttachmentKey).(map[string]interface{})
     logger.Infof("Dubbo attachment key1 = %s", value1.([]string)[0])
     logger.Infof("Dubbo attachment key2 = %s", value2.([]string)[0])
 ```
 
-## 3.示例详解
+## 3. Example Analysis
 
-### 3.1服务端介绍
+### 3.1 Server Introduction
 
-#### 服务端proto文件
+#### Server Proto File
 
-源文件路径：dubbo-go-sample/context/proto/greet.proto
+Source file path: dubbo-go-sample/context/proto/greet.proto
 
 ```protobuf
 syntax = "proto3";
@@ -70,9 +70,9 @@ service GreetService {
 }
 ```
 
-#### 服务端handler文件
+#### Server Handler File
 
-源文件路径：dubbo-go-sample/context/go-server/main.go
+Source file path: dubbo-go-sample/context/go-server/main.go
 
 ```go
 package main
@@ -124,11 +124,11 @@ func main() {
 }
 ```
 
-### 3.2客户端介绍
+### 3.2 Client Introduction
 
-客户端client文件，创建客户端，在context写入变量，发起调用并打印结果
+Client file, creating a client, writing variables in context, initiating a call, and printing results.
 
-源文件路径：dubbo-go-sample/context/go-client/main.go
+Source file path: dubbo-go-sample/context/go-client/main.go
 
 ```go
 package main
@@ -171,9 +171,9 @@ func main() {
 
 ```
 
-### 3.3 案例效果
+### 3.3 Case Effect
 
-先启动服务端，再启动客户端，可以观察到服务端打印了客户端通过context传递的参数值，说明参数被成功传递并获取
+Start the server first, then start the client, and you can observe that the server prints the parameter values transmitted by the client through the context, indicating that the parameters were successfully passed and retrieved.
 
 ```
 2024-02-26 11:13:14     INFO    logger/logging.go:42    Dubbo attachment key1 = [user defined value 1]

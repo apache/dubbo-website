@@ -2,48 +2,48 @@
 aliases:
    - /en/docs3-v2/golang-sdk/quickstart/
    - /en/docs3-v2/golang-sdk/quickstart/
-description: Dubbo-go 快速开始
-linkTitle: 开发微服务应用
-title: 开发微服务
+description: Dubbo-go Quick Start
+linkTitle: Developing Microservice Applications
+title: Developing Microservices
 type: docs
 weight: 2
 ---
 
-本示例演示了使用 dubbo-go 开发微服务应用，为应用增加包括服务发现、负载均衡、流量管控等微服务核心能力。
+This example demonstrates how to develop microservice applications using dubbo-go, adding core microservice capabilities such as service discovery, load balancing, and traffic control to the application.
 
-## 前置条件
-本示例我们继续使用 Protobuf 开发微服务应用，请参考 [开发 rpc server 和 rpc client](../rpc) 了解如何安装 protoc、protoc-gen-go-triple 等必须插件。
+## Prerequisites
+In this example, we will continue to use Protobuf to develop the microservice application. Please refer to [Develop RPC Server and RPC Client](../rpc) to learn how to install necessary plugins like protoc and protoc-gen-go-triple.
 
-## 快速运行示例
-### 下载示例源码
-我们在 <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
+## Quick Run Example
+### Download Example Source Code
+We maintain a series of dubbo-go usage examples in the <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> repository to help users quickly learn how to use dubbo-go.
 
-你可以 <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">下载示例zip包并解压</a>，或者克隆仓库：
+You can <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">download the example zip package and extract it</a>, or clone the repository:
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples
 ```
 
-切换到快速开始示例目录：
+Switch to the quick start example directory:
 
 ```shell
 $ cd dubbo-go-samples/registry/nacos
 ```
 
-### 启动 Nacos
+### Start Nacos
 
-由于示例应用中启用了服务发现能力且使用 Nacos 作为注册中心，在运行示例之前需要先启动注册中心。请参考 [Nacos 本地安装](/en/overview/reference/integrations/nacos/) 了解如何快速安装和启动 Nacos。
+Since the example application enables service discovery and uses Nacos as the registry, you need to start the registry before running the example. Please refer to [Nacos Local Installation](/en/overview/reference/integrations/nacos/) for quick installation and startup instructions for Nacos.
 
-### 运行 server
-在 `go-server/cmd` 示例目录：
+### Run Server
+In the `go-server/cmd` example directory:
 
-运行以下命令，启动 server：
+Run the following command to start the server:
 
 ```shell
 $ go run server.go
 ```
 
-使用 `cURL` 验证 server 正常启动：
+Verify that the server has started normally using `cURL`:
 
 ```shell
 $ curl \
@@ -54,9 +54,9 @@ $ curl \
 Greeting: Hello world
 ```
 
-### 运行 client
+### Run Client
 
-打开一个新的 terminal，运行以下命令，启动 client
+Open a new terminal and run the following command to start the client:
 
 ```shell
 $ go run client.go
@@ -64,12 +64,12 @@ $ go run client.go
 Greeting: Hello world
 ```
 
-以上就是一个完整的 dubbo-go 微服务应用工作流程。
+This is a complete flow of a dubbo-go microservice application.
 
-## 源码讲解
-关于 `dubbo-go-samples/registry/nacos` 示例源码，包括服务定义、代码生成、server/client 启动等均与上一篇 [rpc server & rpc client]() 类似，请点击以上链接查看具体解读。
+## Source Code Explanation
+Regarding the source code of the `dubbo-go-samples/registry/nacos` example, including service definitions, code generation, and server/client startup, it is similar to the previous [rpc server & rpc client]() discussion. Please click the link above for specific interpretations.
 
-**开发微服务最大的不同点在于：应用中增加了关于注册中心的配置，如下所示（以 server.go 为例）：**
+**The biggest difference in developing microservices is that the application includes configuration for the registry, as shown below (taking server.go as an example):**
 
 ```go
 func main() {
@@ -95,7 +95,7 @@ func main() {
 }
 ```
 
-相比于开发 rpc 服务时我们直接声明 `server.NewServer(...)`，这里我们使用 `dubbo.newInstance(...)` 初始化了一些全局共享的微服务核心组件，包括应用名、注册中心、协议等：
+Compared to when developing RPC services where we directly declare `server.NewServer(...)`, here we use `dubbo.NewInstance(...)` to initialize several globally shared microservice components, including application name, registry, protocol, etc.:
 
 ```go
 ins, err := dubbo.NewInstance(
@@ -111,16 +111,16 @@ ins, err := dubbo.NewInstance(
 )
 ```
 
-然后，才是创建 `ins.NewServer()` 并为 server 实例注册服务 `greet.RegisterGreetServiceHandler(srv, &GreetTripleServer{})`，最后通过 `srv.Serve()` 启动进程。
+Then, we create `ins.NewServer()` and register services for the server instance `greet.RegisterGreetServiceHandler(srv, &GreetTripleServer{})`, and finally start the process with `srv.Serve()`.
 
-{{% alert title="关于 dubbo.Insance 说明" color="info" %}}
-* 在开发 dubbo 微服务应用时，我们推荐使用 `dubbo.Instance` 来设置一些全局性的服务治理能力，如注册中心、协议、应用名、tracing、配置中心等。
-* `ins.NewServer()` 可以创建多个，通常当你需要在多个端口 [发布多个协议]() 时才需要这么做。
+{{% alert title="About dubbo.Instance" color="info" %}}
+* When developing dubbo microservice applications, we recommend using `dubbo.Instance` to set up some global service governance capabilities, such as registry, protocol, application name, tracing, configuration center, etc.
+* `ins.NewServer()` can create multiple instances, typically needed when you want to [publish multiple protocols]() on different ports.
 {{% /alert %}}
 
-如果你要为应用添加更多服务治理能力，请参考以下内容：
+If you want to add more service governance capabilities to the application, please refer to the following content:
 
-## 更多内容
+## More Content
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
     <div class="lead"></div><header class="article-meta">
@@ -129,9 +129,9 @@ ins, err := dubbo.NewInstance(
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/rpc/streaming" >}}'>服务发现与负载均衡</a>
+                     <a href='{{< relref "../tutorial/rpc/streaming" >}}'>Service Discovery and Load Balancing</a>
                 </h4>
-                <p>更多关于 Nacos、Zookeeper 等服务发现的使用方式，负载均衡策略配置等。</p>
+                <p>More about using service discovery with Nacos, Zookeeper, etc., and configuring load balancing strategies.</p>
             </div>
         </div>
     </div>
@@ -139,9 +139,9 @@ ins, err := dubbo.NewInstance(
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/service-discovery" >}}'>流量管控</a>
+                     <a href='{{< relref "../tutorial/service-discovery" >}}'>Traffic Control</a>
                 </h4>
-                <p>学习如何实现按比例流量分配、金丝雀发布、调整超时时间、流量灰度、服务降级等流量管控。</p>
+                <p>Learn how to achieve proportional traffic distribution, canary releases, adjust timeout settings, traffic grayscale, and service degradation.</p>
             </div>
         </div>
     </div>
@@ -149,9 +149,9 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>监控服务状态</a>
+					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Monitoring Service Status</a>
 				</h4>
-				<p>开启 Metrics 采集，通过 Prometheus、Grafana 可视化查看应用、服务、示例状态。</p>
+				<p>Enable metrics collection and visualize application, service, and example statuses via Prometheus and Grafana.</p>
 			</div>
 		</div>
 	</div>
@@ -159,9 +159,9 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>全链路追踪</a>
+					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Full Link Tracing</a>
 				</h4>
-				<p>开启 OpenTelemetry 全链路追踪。</p>
+				<p>Enable OpenTelemetry full link tracing.</p>
 			</div>
 		</div>
 	</div>
@@ -169,9 +169,9 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>网关 HTTP 接入</a>
+					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Gateway HTTP Access</a>
 				</h4>
-				<p>如何使用 Higress、Nginx 等网关产品，将前端 http 流量（北向流量）接入后端 dubbo-go 微服务集群。</p>
+				<p>How to use gateway products like Higress, Nginx, etc., to connect front-end HTTP traffic (northbound traffic) to the back-end dubbo-go microservices cluster.</p>
 			</div>
 		</div>
 	</div>
@@ -179,9 +179,9 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>分布式事务</a>
+					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Distributed Transactions</a>
 				</h4>
-				<p>使用 Apache Seata 作为分布式事务解决方案，解决分布式数据一致性问题。</p>
+				<p>Use Apache Seata as a distributed transaction solution to address distributed data consistency issues.</p>
 			</div>
 		</div>
 	</div>
@@ -189,7 +189,4 @@ ins, err := dubbo.NewInstance(
 <hr>
 </div>
 {{< /blocks/section >}}
-
-
-
 

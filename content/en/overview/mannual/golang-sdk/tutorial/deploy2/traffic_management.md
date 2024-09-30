@@ -2,8 +2,8 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/traffic_management/
     - /en/docs3-v2/golang-sdk/tutorial/governance/service-mesh/traffic_management/
-description: 流量管理
-title: 流量管理
+description: Traffic Management
+title: Traffic Management
 type: docs
 weight: 3
 ---
@@ -13,29 +13,29 @@ weight: 3
 
 
 
-在本节中，我们将延续上一个任务[【在 Istio 环境部署 Dubbo-go 应用】](../deploy/)。
+In this section, we will continue from the previous task [【Deploying Dubbo-go Applications in Istio Environment】](../deploy/).
 
-在之前的任务中，我们在集群中部署了一组 Dubbo-go Server和 Client 端应用，验证了服务发现和调用成功。在本节中，我们将创建新版本的 Server 端应用。通过配置 VirtualService 和 DestinationRule ，实现路由管理，和流量转移能力
+In the previous task, we deployed a set of Dubbo-go Server and Client applications in the cluster and verified that service discovery and invocation were successful. In this section, we will create a new version of the server application. By configuring VirtualService and DestinationRule, we will achieve routing management and traffic shifting capabilities.
 
-## 1. 准备工作
+## 1. Preparation
 
-- dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。
-- docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）
-- 任务[【在 Istio 环境部署 Dubbo-go 应用】](../deploy/)已完成
+- The dubbo-go CLI tool and dependencies have been installed, as well as grpc_cli (for local debugging if needed).
+- Docker, Helm, and kubectl environments have been installed. (Arm machines need to support docker buildx)
+- The task [【Deploying Dubbo-go Applications in Istio Environment】](../deploy/) has been completed.
 
-## 2. 开发多版本Dubbo-go 应用。
+## 2. Develop Multi-Version Dubbo-go Applications.
 
-### 2.1 使用 dubbogo-cli 创建另一个项目模板
+### 2.1 Create Another Project Template Using dubbogo-cli
 
 ```bash
 $ dubbogo-cli newApp . 
 ```
 
-### 2.2 开发和部署客户端 Dubbo-go 应用 v2：
+### 2.2 Develop and Deploy Client Dubbo-go Application v2:
 
-#### 编写业务逻辑
+#### Write Business Logic
 
-- 修改 package/service/service.go 的实现方法，返回版本号为 v2.0.0
+- Modify the implementation method of package/service/service.go to return version number v2.0.0
 
 ```go
 func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) (*api.User, error) {
@@ -43,7 +43,7 @@ func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) 
 }
 ```
 
-- 修改如下配置文件，使用xds协议作为注册中心，加载名为 GreeterServerImpl 的服务结构。
+- Modify the following configuration file to use the xds protocol as the registration center, loading the service structure named GreeterServerImpl.
 
   conf/dubbogo.yaml
 
@@ -61,18 +61,17 @@ func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) 
       services:
         GreeterServerImpl:
           interface: "" # read from stub
-  
   ```
 
-  至此，应用开发完成。
+  So far, the application development is complete.
 
-#### 配置构建和部署参数
+#### Configure Build and Deployment Parameters
 
-- 指定需要构建的镜像：
+- Specify the image to be built:
 
-  修改 Makefile 如下字段，指定好需要构建的镜像地址和版本，我们把镜像 tag 改为 2.0.0。
+  Modify the Makefile as follows to specify the image address and version to be built. We change the image tag to 2.0.0.
 
-  指定好需要通过 helm 安装的名称。
+  Specify the name for Helm installation.
 
   ```
   IMAGE = xxx/dubbo-go-server
@@ -80,9 +79,9 @@ func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) 
   HELM_INSTALL_NAME = dubbo-go-server
   ```
 
-- 指定需要部署的应用和镜像：
+- Specify the application and image to be deployed:
 
-  修改 chart/app/Chart.yaml 如下字段，指定当前应用名为 `dubbo-go-server`，我们在创建v1版本服务的时候，已经有了该应用的 service，这次部署时模板将不会创建 service。
+  Modify chart/app/Chart.yaml as follows to specify the current application name as `dubbo-go-server`. When we created the v1 version service, this application's service already exists, so the template will not create the service during this deployment.
 
   ```yaml
   apiVersion: v1
@@ -90,9 +89,9 @@ func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) 
   description: dubbo-go-server
   ```
 
-  修改 chart/app/values.yaml 如下字段，指定需要部署的镜像为2.0.0，以及当前开发的应用版本 dubbogoAppVersion 为 v2。
+  Modify chart/app/values.yaml as follows to specify the image to be deployed as 2.0.0 and the current application version dubbogoAppVersion as v2.
 
-  部署的镜像需要和上述构建的镜像一致。当前应用版本用于 mesh 流量规则控制。
+  The deployed image must match the image built above. The current application version is used for mesh traffic rule control.
 
   ```yaml
   image:
@@ -106,19 +105,19 @@ func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) 
       dubbogoAppVersion: v2
   ```
 
-  至此，构建参数和发布参数都已指定好，可以进行构建和部署了。
+  With this, the build and release parameters are specified, and we can proceed to build and deploy.
 
-#### 使用模板构建和部署 Dubbo-go 应用
+#### Build and Deploy Dubbo-go Application Using Template
 
-- 构建、推送镜像
+- Build and push the image
 
-  `$ make build  `   (本地为 amd64机器) 
+  `$ make build  `   (for local amd64 machines) 
 
-  或者  
+  or  
 
-  `$ make buildx-publish`     (本地为 arm64机器，依赖 docker buildx 命令)
+  `$ make buildx-publish`     (for local arm64 machines, relies on docker buildx command)
 
-- 发布 Dubbo-go Server  v2 至集群
+- Release Dubbo-go Server v2 to the cluster
 
   ```bash
   $ make deploy
@@ -134,13 +133,13 @@ func (s *GreeterServerImpl) SayHello(ctx context.Context, in *api.HelloRequest) 
   dubbo-go-server-v2      default         1               2022-04-07 12:29:28.497476 +0800 CST    deployed        dubbo-go-client-0.0.1   1.16.0
   ```
 
-  可看到通过 helm 部署成功, 目前已经在集群中存在一个 Client 应用，和 Server 的两个版本。
+  It can be seen that the deployment via Helm was successful, and there is currently one Client application and two versions of the Server in the cluster.
 
-### 2.3 验证应用
+### 2.3 Verify Application
 
-#### 查看资源部署情况
+#### Check Resource Deployment Status
 
-查看部署好的 deployment ，server 包含了两个版本。
+Check the deployed deployment; the server includes two versions.
 
 ```bash
 $  kubectl get deployment 
@@ -150,7 +149,7 @@ dubbo-go-server-v2   1/1     1            1           77s
 dubbo-go-server-v1   1/1     1            1           67m
 ```
 
-查看部署好的 service。两个版本的deployment 共用同一个 service。
+Check the deployed service. Both versions of the deployment share the same service.
 
 ```bash
 $ kubectl get svc        
@@ -159,7 +158,7 @@ dubbo-go-client   ClusterIP   192.168.8.176     <none>        20000/TCP   41m
 dubbo-go-server   ClusterIP   192.168.216.253   <none>        20000/TCP   67m
 ```
 
-查看 Client 应用日志，验证请求调用到了两个版本的应用上。
+Check Client application logs to verify that requests were successfully called to both versions of the application.
 
 ```bash
 $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs 
@@ -176,19 +175,19 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 2022-04-07T05:06:49.397Z        INFO    cmd/app.go:29   call server response = name:"Hello laurence" id:"v1.0.0"
 ```
 
-至此，我们开发并且部署成功了多版本应用。
+Thus, we have successfully developed and deployed multi-version applications.
 
-## 3. 配置请求路由
+## 3. Configure Request Routing
 
-### 3.1 配置目标规则
+### 3.1 Configure Destination Rule
 
-执行以下命令以创建目标规则，该目标规则将 dubbo-go-server 细分为两个子集。v1和 v2
+Execute the following command to create a destination rule that subdivides dubbo-go-server into two subsets, v1 and v2.
 
 ```bash
 $ kubectl apply -f destinationrule.yaml
 ```
 
-destinationrule.yaml 内容：
+destinationrule.yaml content:
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -200,21 +199,21 @@ spec:
   subsets:
     - name: v1
       labels:
-        dubbogoAppVersion: v1 # 对应应用模板中 chart/app/values.yaml 中指定的版本标签
+        dubbogoAppVersion: v1 # Corresponding to version label specified in chart/app/values.yaml in application template
     - name: v2
       labels:
         dubbogoAppVersion: v2
 ```
 
-### 3.2 应用 Virtual Service
+### 3.2 Apply Virtual Service
 
-执行以下命令以创建路由，该路由将所有流量都路由至v1 版本应用。
+Execute the following command to create a route that routes all traffic to the v1 version application.
 
 ```bash
 $ kubectl apply -f virtualservice.yaml
 ```
 
-virtualservice.yaml 内容
+virtualservice.yaml content
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -231,11 +230,9 @@ spec:
         subset: v1
 ```
 
+### 3.3 Verify Route Effectiveness
 
-
-### 3.3 验证路由生效
-
-所有流量将流向 v1 版本应用。
+All traffic will be directed to the v1 version application.
 
 ```bash
 $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs 
@@ -248,17 +245,15 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 2022-04-07T05:40:49.361Z        INFO    cmd/app.go:29   call server response = name:"Hello laurence" id:"v1.0.0"
 ```
 
+## 4. User Identity-Based Routing
 
+With the above multi-version application route foundation, we can manage traffic flexibly through some strategies.
 
-## 4. 基于用户身份的路由
+### 4.1 Add User Identity to Client Application
 
-有了上述多版本应用路由的基础，我们可以通过一些策略，来进行灵活的流量管理。
+We want traffic tagged with user: admin to experience the new version v2 application.
 
-### 4.1 为客户端应用增加用户身份标识
-
-我们希望拥有 user: admin 标识的流量都可以体验 v2 新版本应用。
-
-回到之前创建的 dubbo-go-client 项目，修改 cmd/app.go 的 main 函数，增加调用标识：`user: admin`。
+Returning to the previously created dubbo-go-client project, modify the main function in cmd/app.go to add the invocation identifier: `user: admin`.
 
 ```go
 func main() {
@@ -274,7 +269,7 @@ func main() {
 	for{
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, constant.AttachmentKey, map[string]string{ 
-			"user":"admin", // 使用上下文 context 为调用增加标识
+			"user":"admin", // Use context to add identifiers for invocation
 		})
 
 		if rsp, err := client.SayHello(ctx, request); err != nil{
@@ -287,15 +282,15 @@ func main() {
 }
 ```
 
-- 构建、推送镜像，覆盖之前的提交。您也可以升级一下发布的镜像版本。
+- Build and push the image, overriding the previous commit. You may also upgrade the released image version.
 
-  `$ make build  `   (本地为 amd64机器) 
+  `$ make build  `   (for local amd64 machines) 
 
-  或者  
+  or  
 
-  `$ make buildx-publish`     (本地为 arm64机器，依赖 docker buildx 命令)
+  `$ make buildx-publish`     (for local arm64 machines, relies on docker buildx command)
 
-- 删除 dubbo-go-client  应用
+- Remove the dubbo-go-client application
 
   ```
   $ make remove
@@ -303,11 +298,11 @@ func main() {
   release "dubbo-go-client" uninstalled
   ```
 
-- 重新发布应用。
+- Reissue the application.
 
   `$ make deploy`
 
-  发布后，验证调用成功，由于前面进行了路由配置。所有流量都流向 v1 版本。
+  After the release, verify that the invocation was successful. Due to the previous routing configuration, all traffic is directed to the v1 version.
 
   ```bash
   $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs 
@@ -320,15 +315,15 @@ func main() {
   2022-04-07T05:40:49.361Z        INFO    cmd/app.go:29   call server response = name:"Hello laurence" id:"v1.0.0"
   ```
 
-### 4.2 创建基于用户身份的路由
+### 4.2 Create User Identity-Based Routing
 
-执行以下命令以修改/创建路由，该路由将所有请求头存在 user: admin 标识的流量都路由至 v2 版本。
+Execute the following command to modify/create the routing that routes all traffic with the user: admin identifier to the v2 version.
 
 ```bash
 $ kubectl apply -f virtualservice.yaml
 ```
 
-virtualservice.yaml 内容
+virtualservice.yaml content
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -353,9 +348,9 @@ spec:
         subset: v1
 ```
 
-### 4.3 验证路由生效
+### 4.3 Verify Route Effectiveness
 
-所有流量将流向 v2 版本应用。
+All traffic will be directed to the v2 version application.
 
 ```bash
 $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs 
@@ -371,17 +366,17 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 
 
 
-## 5. 基于权重的路由
+## 5. Weight-Based Routing
 
-### 5.1 创建基于权重的路由
+### 5.1 Create Weight-Based Routing
 
-延续上述任务，我们执行以下命令以修改/创建路由，该路由将流量的 10% 导入新版本应用，进行灰度测试。
+Continuing from the previous task, we execute the following command to modify/create the routing that directs 10% of the traffic to the new version application for gray testing.
 
 ```bash
 $ kubectl apply -f virtualservice.yaml
 ```
 
-virtualservice.yaml 内容
+virtualservice.yaml content
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -403,9 +398,9 @@ spec:
         weight: 10
 ```
 
-### 5.2 验证路由生效
+### 5.2 Verify Route Effectiveness
 
-少数流量将流向 v2 版本。
+A small amount of traffic will be directed to the v2 version.
 
 ```bash
 $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs 
@@ -423,3 +418,4 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 2022-04-07T05:56:02.053Z        INFO    cmd/app.go:35   call server response = name:"Hello laurence"  id:"v1.0.0"
 2022-04-07T05:56:03.055Z        INFO    cmd/app.go:35   call server response = name:"Hello laurence"  id:"v1.0.0"
 ```
+

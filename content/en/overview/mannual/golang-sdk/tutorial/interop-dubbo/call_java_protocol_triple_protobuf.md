@@ -2,23 +2,23 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
     - /en/docs3-v2/golang-sdk/tutorial/develop/interflow/call_java/
-description: “基于 protobuf 实现 dubbo-java 与 dubbo-go 的 triple 协议互通。”
-title: 基于 protobuf 实现 triple 协议互通（适用于两边都用 protobuf 开发的场景）
-linkTitle: protobuf+triple 协议互通
+description: “Realization of intercommunication between dubbo-java and dubbo-go using the triple protocol based on protobuf.”
+title: Intercommunication of the triple protocol based on protobuf (suitable for scenarios developed with protobuf on both sides)
+linkTitle: protobuf+triple protocol intercommunication
 type: docs
 weight: 4
 ---
 
 
-我们这里提供一个示例，演示如何使用 triple 协议实现 dubbo-java 和 dubbo-go 互通，可在此查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/java_interop/protobuf-triple)。
+Here we provide an example demonstrating how to implement intercommunication between dubbo-java and dubbo-go using the triple protocol. The complete source code can be viewed [here](https://github.com/apache/dubbo-go-samples/tree/main/java_interop/protobuf-triple).
 
-示例主要内容如下：
-- go，go 语言实现的 rpc server 与 client
-- java，java 语言实现的 rpc server 与 client
+The main content of the example is as follows:
+- Go: RPC server and client implemented in Go
+- Java: RPC server and client implemented in Java
 
-## 共享 protobuf 服务定义
+## Shared protobuf service definition
 
-共享服务定义如下，请注意以下 `package`、`go_package `、`java_package` 的具体定义：
+The shared service definition is as follows. Please pay attention to the specific definitions of `package`, `go_package`, and `java_package`:
 
 ```protobuf
 //protoc --go_out=. --go_opt=paths=source_relative --go-triple_out=. greet.proto
@@ -51,15 +51,15 @@ message HelloReply {
 }
 ```
 
-## java-client调用go-server
+## java-client calls go-server
 
-1. 首先启动 go server：
+1. First, start the go server:
 
 ```shell
 go run go/go-server/cmd/server.go
 ```
 
-运行以上命令后，go server 运行在 50052 端口，可通过以下命令测试服务运行正常：
+After running the above command, the go server runs on port 50052. You can test if the service runs normally with the following command:
 
 ```shell
 curl \
@@ -68,27 +68,27 @@ curl \
     http://localhost:50052/org.apache.dubbo.sample.Greeter/sayHello
 ```
 
-2. 启动 java client 
+2. Start the java client 
 
-运行以下命令，启动 java 客户端，可以看到服务调用 go server 正常输出结果：
+Run the following command to start the java client and see the service call output from the go server:
 
 ```shell
 ./java/java-client/run.sh
 ```
 
-## go-client调用java-server
+## go-client calls java-server
 
-1. 启动 java server
+1. Start the java server
 
-运行以下命令，启动 java 服务端：
+Run the following command to start the java server:
 
-> 注意，请关闭之前启动的 go server，避免出现端口占用冲突。
+> Note: Please close the previously started go server to avoid port conflict.
 
 ```shell
 ./java/java-server/run.sh
 ```
 
-可通过以下命令测试服务运行正常：
+You can test if the service runs normally with the following command:
 
 ```shell
 curl \
@@ -97,10 +97,11 @@ curl \
     http://localhost:50052/org.apache.dubbo.sample.Greeter/sayHello
 ```
 
-2. 运行 go client
+2. Run the go client
 
-运行以下命令启动 go 客户端，可以看到服务调用 java server 正常输出结果：
+Run the following command to start the go client and see the service call output from the java server:
 
 ```shell
 go run go/go-client/cmd/client.go
 ```
+

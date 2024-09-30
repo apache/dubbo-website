@@ -2,22 +2,22 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
     - /en/docs3-v2/golang-sdk/tutorial/develop/config-center/remote_config/
-description: 远程加载 dubbogo.yaml 配置文件
-title: 远程配置文件
+description: Load the dubbogo.yaml configuration file remotely
+title: Remote Configuration File
 type: docs
 weight: 3
 ---
 
-Dubbo 框架支持将配置文件 'dubbogo.yaml' 的内容预先放入配置中心，再通过远程加载的方式与本地配置合并，以此实现一些配置的动态和集中式管理。
+The Dubbo framework supports preloading the contents of the configuration file 'dubbogo.yaml' into the configuration center, and then merging it with local configurations through remote loading, thus achieving some dynamic and centralized management of configurations.
 
-{{% alert title="注意" color="primary" %}}
-凡是正确配置了config-center 地址的应用，都会优先从配置中心加载整个配置文件。
+{{% alert title="Notice" color="primary" %}}
+Applications that have correctly configured the config-center address will prioritize loading the entire configuration file from the configuration center.
 {{% /alert %}}
 
-可在此查看  <a href="https://github.com/apache/dubbo-go-samples/tree/main/config_center" target="_blank">完整示例源码地址</a>，本文使用 zookeeper 演示，nacos 使用方法类似，并且在以上地址中有具体源码示例。
+You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/config_center" target="_blank">full example source code here</a>. This article demonstrates using Zookeeper, and the usage of Nacos is similar, with specific source code examples available at the above address.
 
-### 启用配置中心
-在 dubbo-go 应用通过 `dubbo.WithConfigCenter()` 启用配置中心：
+### Enable Configuration Center
+In the dubbo-go application, enable the configuration center with `dubbo.WithConfigCenter()`:
 
 ```go
 ins, err := dubbo.NewInstance(
@@ -33,7 +33,7 @@ if err != nil {
 }
 ```
 
-在运行应用之前，提前将以下配置写入 zookeeper 集群，写入路径为 `/dubbo/config/dubbogo/dubbo-go-samples-configcenter-zookeeper-server`：
+Before running the application, pre-write the following configuration into the Zookeeper cluster at the path `/dubbo/config/dubbogo/dubbo-go-samples-configcenter-zookeeper-server`:
 
 ```yaml
 dubbo:
@@ -48,7 +48,7 @@ dubbo:
       port: 20000
 ```
 
-### 启动服务端并注册服务
+### Start the Server and Register the Service
 
 ```go
 srv, err := ins.NewServer()
@@ -65,15 +65,15 @@ if err := srv.Serve(); err != nil {
 }
 ```
 
-可以发现，应用已经读取了远端的 dubbogo.yml 文件，并连接到文件中配置的注册中心地址、协议及端口配置。
+You will find that the application has read the remote dubbogo.yml file and connected to the registered center address, protocol, and port configured in the file.
 
-### 启动客户端
+### Start the Client
 
 ```shell
 $ go run ./go-client/cmd/main.go
 ```
 
-### 预期的输出
+### Expected Output
 
 ```
 Greet response: greeting:"hello world"
