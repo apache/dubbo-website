@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/what/ecosystem/serialization/gson/
     - /en/overview/what/ecosystem/serialization/gson/
-description: "本文介绍 Gson 序列化"
+description: "This article introduces Gson serialization"
 linkTitle: Gson
 title: Gson
 type: docs
@@ -11,13 +11,13 @@ weight: 7
 
 
 
-## 1 介绍
+## 1 Introduction
 
-Gson是Google公司发布的一个开放源代码的Java库，主要用途为序列化Java对象为JSON字符串，或反序列化JSON字符串成Java对象。
+Gson is an open-source Java library released by Google, primarily used for serializing Java objects to JSON strings or deserializing JSON strings into Java objects.
 
-## 2 使用方式
+## 2 Usage
 
-### 2.1 添加依赖
+### 2.1 Add Dependency
 
 ```xml
 <dependencies>
@@ -34,7 +34,7 @@ Gson是Google公司发布的一个开放源代码的Java库，主要用途为序
 </dependencies>
 ```
 
-### 2.2 配置启用
+### 2.2 Configuration Enable
 
 
 ```yaml
@@ -43,7 +43,7 @@ dubbo:
  protocol:
    serialization: gson
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.serialization=gson
@@ -54,7 +54,7 @@ dubbo.consumer.serialization=gson
 # or
 dubbo.reference.com.demo.DemoService.serialization=gson
 ```
-或
+or
 ```xml
 <dubbo:protocol serialization="gson" />
 
@@ -64,4 +64,5 @@ dubbo.reference.com.demo.DemoService.serialization=gson
         <!-- or -->
 <dubbo:reference interface="xxx" serialization="gson" />
 ```
+
 

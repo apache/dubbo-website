@@ -1,37 +1,37 @@
 ---
-description: "Triple 协议支持使用 Protocol Buffers (Protobuf) 定义服务，对于因为多语言、gRPC、安全性等场景选型protobuf 的用户更友好。"
-linkTitle: Protobuf(IDL)方式
-title: 使用 Protobuf(IDL) 开发 triple 通信服务
+description: "The Triple protocol supports defining services using Protocol Buffers (Protobuf), making it more user-friendly for those who choose Protobuf for various scenarios such as multi-language, gRPC, and security."
+linkTitle: Protobuf (IDL) Method
+title: Developing Triple Communication Services Using Protobuf (IDL)
 type: docs
 weight: 2
 ---
 
-本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑上一篇基于Java接口的 triple 开发模式。
+This example demonstrates how to define a service using Protocol Buffers and publish it as an externally callable Triple protocol service. If you have multi-language interoperability, gRPC interaction, or are familiar with and prefer Protobuf development, you can use this approach; otherwise, consider the previous Java interface-based triple development model.
 
-可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl)。
+You can view the [full code for this example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl).
 
-{{% alert title="注意" color="info" %}}
-本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl) 供参考，同样是 `protobuf+triple` 的模式，但额外加入了服务发现配置。
+{{% alert title="Note" color="info" %}}
+The example used in this article is based on native API coding; here is a [Spring Boot version of the example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl) for reference, which also follows the `protobuf+triple` model but includes service discovery configuration.
 {{% /alert %}}
 
-## 运行示例
+## Run the Example
 
-首先，可通过以下命令下载示例源码：
+First, download the example source code with the following command:
 ```shell
 git clone --depth=1 https://github.com/apache/dubbo-samples.git
 ```
 
-进入示例源码目录：
+Change to the example source code directory:
 ```shell
 cd dubbo-samples/1-basic/dubbo-samples-api-idl
 ```
 
-编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：
+Compile the project to generate code from the IDL, which calls the protoc plugin provided by Dubbo to generate the corresponding service definition code:
 ```shell
 mvn clean compile
 ```
 
-生成代码如下
+The generated code is as follows:
 
 ```text
 ├── build
@@ -55,18 +55,18 @@ mvn clean compile
 │                                               └── GreeterRequestOrBuilder.java
 ```
 
-### 启动Server
-运行以下命令启动 server。
+### Start Server
+Run the following command to start the server.
 ```shell
 mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryServer"
 ```
 
-### 访问服务
-有两种方式可以访问 Triple 服务：
-* 以标准 HTTP 工具访问
-* 以 Dubbo client sdk 访问
+### Access the Service
+There are two ways to access the Triple service:
+* Using standard HTTP tools
+* Using Dubbo client SDK
 
-#### cURL 访问
+#### cURL Access
 
 ```shell
 curl \
@@ -75,16 +75,16 @@ curl \
     http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
 ```
 
-#### Dubbo client 访问
-运行以下命令，启动 Dubbo client 并完成服务调用
+#### Dubbo Client Access
+Run the following command to start the Dubbo client and complete the service call.
 ```shell
 mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryClient"
 ```
 
-## 源码讲解
+### Source Code Explanation
 
-### 项目依赖
-由于使用 IDL 开发模式，因此要添加 dubbo、protobuf-java 等依赖，同时还要配置 protobuf-maven-plugin 等插件，用于生成桩代码。
+### Project Dependencies
+Due to the use of the IDL development model, the dependencies such as dubbo, protobuf-java must be added. Additionally, plugins like protobuf-maven-plugin must be configured to generate the stub code.
 
 ```xml
 <dependency>
@@ -132,12 +132,12 @@ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUn
 </plugin>
 ```
 
-{{% alert title="protoc 插件版本说明" color="warning" %}}
+{{% alert title="protoc Plugin Version Note" color="warning" %}}
 
 {{% /alert %}}
 
-### 服务定义
-使用 Protocol Buffers 定义 Greeter 服务
+### Service Definition
+Define the Greeter service using Protocol Buffers.
 
 ```protobuf
 syntax = "proto3";
@@ -156,11 +156,11 @@ service Greeter{
 }
 ```
 
-请注意以上 package 定义 `package org.apache.dubbo.samples.tri.unary;`，在此示例中 package 定义的路径将同时作为 java 包名和服务名前缀。这意味着 rpc 服务的完整定义是：`org.apache.dubbo.samples.tri.unary.Greeter`，与生成代码的路径完全一致。
+Please note the package definition `package org.apache.dubbo.samples.tri.unary;`. In this example, the path defined in the package will also serve as the Java package name and service prefix. This means the complete definition of the rpc service is: `org.apache.dubbo.samples.tri.unary.Greeter`, which matches the path of the generated code exactly.
 
-但保持一致并不是必须的，你也可以将 java 包名与服务名前缀定义分开定义，对于一些跨语言调用的场景比较有用处。如以下 IDL 定义中：
-* 完整服务名是 `greet.Greeter`，rpc 调用及服务发现过程中会使用这个值
-* java 包名则是 java_package 定义的 `org.apache.dubbo.samples.tri.unary`，生成的 java 代码会放在这个目录。
+However, keeping consistency is not mandatory; you can define the Java package name separately from the service prefix, which is useful in some cross-language calling scenarios. For instance, in the following IDL definition:
+* The complete service name is `greet.Greeter`, which will be used during rpc calls and service discovery.
+* The Java package name is defined as `org.apache.dubbo.samples.tri.unary`, where the generated Java code will be placed.
 
 ```protobuf
 package greet;
@@ -168,8 +168,8 @@ option java_package = "org.apache.dubbo.samples.tri.unary;"
 option go_package = "github.com/apache/dubbo-go-samples/helloworld/proto;greet";
 ```
 
-### 服务实现
-在运行 `mvn clean compile` 后可生成 Dubbo 桩代码。接下来继承生成的基础类 `DubboGreeterTriple.GreeterImplBase`，添加具体的业务逻辑实现：
+### Service Implementation
+Running `mvn clean compile` will generate the Dubbo stub code. Next, extend the generated base class `DubboGreeterTriple.GreeterImplBase` and add specific business logic implementation:
 
 ```java
 public class GreeterImpl extends DubboGreeterTriple.GreeterImplBase {
@@ -183,7 +183,7 @@ public class GreeterImpl extends DubboGreeterTriple.GreeterImplBase {
 }
 ```
 
-注册服务到 server，其中 protocol 设置为 tri 代表开启 triple 协议。
+Register the service to the server, where the protocol is set to tri to indicate that the Triple protocol is to be enabled.
 
 ```java
 public class TriUnaryServer {
@@ -200,7 +200,7 @@ public class TriUnaryServer {
 }
 ```
 
-### 编写 client 逻辑
+### Write Client Logic
 ```java
 public class TriUnaryClient {
     public static void main(String[] args) throws IOException {
@@ -216,11 +216,11 @@ public class TriUnaryClient {
 }
 ```
 
-## 常见问题
+## Frequently Asked Questions
 
-### protobuf 类找不到
+### Protobuf Class Not Found
 
-由于 Triple 协议底层需要依赖 protobuf 协议进行传输，即使定义的服务接口不使用 protobuf 也需要在环境中引入 protobuf 的依赖。
+Since the underlying Triple protocol depends on the protobuf protocol for transmission, even if the defined service interface does not use protobuf, the protobuf dependency must still be included in the environment.
 
 ```xml
 <dependency>
@@ -230,7 +230,7 @@ public class TriUnaryClient {
 </dependency>
 ```
 
-同时，为了支持 `application/json` 格式请求直接访问，还需要增加如下依赖。
+Additionally, to support direct access to `application/json` format requests, the following dependency needs to be added.
 ```xml
 <dependency>
 	<groupId>com.google.protobuf</groupId>
@@ -239,12 +239,12 @@ public class TriUnaryClient {
 </dependency>
 ```
 
-### 生成的代码无法编译
-在使用 Protobuf 时，请尽量保持 dubbo 核心库版本与 protoc 插件版本一致，并运行 `mvn clean compile` 重新生成代码。
+### Generated Code Cannot Compile
+When using Protobuf, ensure that the core Dubbo library version matches the protoc plugin version and run `mvn clean compile` to regenerate the code.
 
-**1. 3.3.0 版本之后**
+**1. After version 3.3.0**
 
-3.3.0+ 版本开始使用 `dubbo-maven-plugin` 配置 protoc 插件，`dubbo-maven-plugin` 的版本必须保持和使用的内核 dubbo 版本一致：
+Starting from version 3.3.0+, configure the protoc plugin using `dubbo-maven-plugin`. The version of `dubbo-maven-plugin` must match the core dubbo version used:
 
 ```xml
 <plugin>
@@ -257,9 +257,9 @@ public class TriUnaryClient {
 </plugin>
 ```
 
-**2. 3.3.0 版本之前**
+**2. Before version 3.3.0**
 
-3.3.0 之前的版本使用 `protobuf-maven-plugin` 配置 protoc 插件，其中 `dubbo-compiler` 必须保持和使用的内核 dubbo 版本一致：
+Versions before 3.3.0 use `protobuf-maven-plugin` to configure the protoc plugin, and the `dubbo-compiler` must match the core dubbo version used:
 
 ```xml
 <plugin>

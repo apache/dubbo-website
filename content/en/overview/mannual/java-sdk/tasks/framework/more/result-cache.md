@@ -3,56 +3,57 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/result-cache/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/result-cache/
-description: 通过缓存结果加速访问速度
-linkTitle: 调用结果缓存
-title: 调用结果缓存
+description: Accelerate access speed through result caching
+linkTitle: Result Cache Invocation
+title: Result Cache Invocation
 type: docs
 weight: 50
 ---
 
-## 功能说明
+## Function Description
 
-Dubbo支持了服务端结果缓存和客户端结果缓存。
+Dubbo supports server-side and client-side result caching.
 
-#### 缓存类型
+#### Cache Types
 
-目前Dubbo3.0版本及高于其的版本都支持以下几种内置的缓存策略：
+Currently, versions 3.0 and above of Dubbo support the following built-in caching strategies:
 
-* `lru` 基于最近最少使用原则删除多余缓存，保持最热的数据被缓存。
-* `lfu`基于淘汰使用频次最低的原则来实现缓存策略。
-* `expiring`基于过期时间原则来实现缓存策略。
-* `threadlocal` 当前线程缓存，比如一个页面渲染，用到很多 portal，每个 portal 都要去查用户信息，通过线程缓存，可以减少这种多余访问。
-* `jcache` 与 [JSR107](http://jcp.org/en/jsr/detail?id=107%27) 集成，可以桥接各种缓存实现。
+* `lru` removes excess cache based on the least recently used principle, keeping the hottest data cached.
+* `lfu` implements cache strategy based on the principle of evicting the least frequently used.
+* `expiring` implements cache strategy based on expiration time.
+* `threadlocal` caches in the current thread, for example in a page render when many portals are needed to query user information, using thread cache can reduce such unnecessary accesses.
+* `jcache` integrates with [JSR107](http://jcp.org/en/jsr/detail?id=107%27), bridging various cache implementations.
 
-缓存类型可扩展 [缓存扩展](/en/overview/mannual/java-sdk/reference-manual/spi/description/cache)
+Cache types are extensible [Cache Extension](/en/overview/mannual/java-sdk/reference-manual/spi/description/cache)
 
-关于 [示例代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
+About [Example Code](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-cache)
 
-## 使用场景
+## Usage Scenarios
 
-结果缓存，用于加速热门数据的访问速度，Dubbo 提供声明式缓存，以减少用户加缓存的工作量。
+Result caching is used to accelerate access speed to hot data. Dubbo provides declarative caching to reduce users' workload in adding caching.
 
-## 使用方式
-### 客户端缓存
+## Usage
 
-Dubbo中对RPC调用结果缓存支持接口粒度和方法粒度的配置控制。
+### Client-Side Caching
 
-**接口粒度**
+In Dubbo, RPC call result caching supports configuration control at both the interface and method granularity.
 
-xml配置方式：
+**Interface Granularity**
+
+XML Configuration:
 
 ```xml
 <dubbo:reference interface="com.foo.DemoService" cache="lru" />
 ```
 
-注解配置方式：
+Annotation Configuration:
 
 ```java
 @DubboReference(cache = "lru")
 private DemoService demoService;
 ```
 
-**方法粒度**
+**Method Granularity**
 
 ```xml
 <dubbo:reference interface="com.foo.DemoService">
@@ -60,25 +61,25 @@ private DemoService demoService;
 </dubbo:reference>
 ```
 
-注解配置方式：
+Annotation Configuration:
 
 ```java
 @DubboReference(methods = {@Method(name="sayHello",cache = "lru")})
 private DemoService demoService;
 ```
 
-### 服务端缓存
+### Server-Side Caching
 
-**接口粒度**
+**Interface Granularity**
 
-xml配置方式：
+XML Configuration:
 
 ```xml
 <bean id="demoService" class="org.apache.dubbo.demo.provider.DemoServiceImpl"/>
 <dubbo:service interface="com.foo.DemoService" ref="demoService" cache="lru" />
 ```
 
-注解配置方式：
+Annotation Configuration:
 
 ```java
 @DubboService(cache = "lru")
@@ -95,7 +96,7 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-**方法粒度**
+**Method Granularity**
 
 ```xml
 <bean id="demoService" class="org.apache.dubbo.demo.provider.DemoServiceImpl"/>
@@ -104,7 +105,7 @@ public class DemoServiceImpl implements DemoService {
 </dubbo:service>
 ```
 
-注解配置方式：
+Annotation Configuration:
 
 ```java
 @DubboService(methods = {@Method(name="sayHello",cache = "lru")})
@@ -120,3 +121,4 @@ public class DemoServiceImpl implements DemoService {
 
 }
 ```
+

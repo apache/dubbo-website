@@ -1,7 +1,8 @@
 ---
-description: "Dubbo 路由规则详解，包括条件路由、动态配置、标签路由等，可以使用这些路由规则实现流量按比例转发、金丝雀发布、流量灰度、权重调整等能力。"
-linkTitle: 路由规则
-title: 路由规则
+description: "Detailed explanation of Dubbo routing rules, including conditional routing, dynamic configuration, tag routing, etc. These routing rules can be used to achieve capabilities such as traffic percentage forwarding, canary release, traffic grayscale, and weight adjustment."
+linkTitle: Routing Rules
+title: Routing Rules
 type: docs
 weight: 99
 ---
+

@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/liveness/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/liveness/
-description: Liveness 存活探针
-linkTitle: 存活探针
-title: Liveness 存活探针
+description: Liveness Probe
+linkTitle: Liveness Probe
+title: Liveness Probe
 type: docs
 weight: 12
 ---
@@ -14,34 +14,34 @@ weight: 12
 
 
 
-## 扩展说明
+## Extended Description
 
 
-拓展应用存活的检测点。
+Expands the detection points for application liveness.
 
 
-## 扩展接口
+## Extended Interface
 
 
 `org.apache.dubbo.qos.probe.LivenessProbe`
 
 
-## 扩展配置
+## Extended Configuration
 
 
-Dubbo QOS `live` 命令自动发现
+Dubbo QOS `live` command auto-discovery
 
 
-## 已知扩展
+## Known Extensions
 
 
-暂无默认实现
+No default implementation available
 
 
-## 扩展示例
+## Extension Example
 
 
-Maven 项目结构：
+Maven project structure:
 
 
 ```
@@ -50,15 +50,15 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxLivenessProbe.java (实现LivenessProbe接口)
+                |-XxxLivenessProbe.java (Implements LivenessProbe interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.qos.probe.LivenessProbe (纯文本文件，内容为：xxx=com.xxx.XxxLivenessProbe)
+                |-org.apache.dubbo.qos.probe.LivenessProbe (Plain text file, content: xxx=com.xxx.XxxLivenessProbe)
 ```
 
 
-XxxLivenessProbe.java：
+XxxLivenessProbe.java:
 
 
 ```java
@@ -73,7 +73,7 @@ public class XxxLivenessProbe implements LivenessProbe {
 ```
 
 
-META-INF/dubbo/org.apache.dubbo.qos.probe.LivenessProbe：
+META-INF/dubbo/org.apache.dubbo.qos.probe.LivenessProbe:
 
 
 ```

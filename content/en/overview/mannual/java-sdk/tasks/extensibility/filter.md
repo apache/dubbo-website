@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/tasks/extensibility/filter/
     - /en/overview/tasks/extensibility/filter/
-description: 在本文中，我们来了解如何扩展自定义的过滤器实现：一个可以对返回的结果进行统一的处理、验证等统一 Filter 处理器，减少对开发人员的打扰。
+description: In this article, we will learn how to extend custom filter implementations: a unified Filter processor that can handle and validate returned results, reducing disruptions to developers.
 linkTitle: Filter
 no_list: true
 title: Filter
@@ -10,19 +10,19 @@ type: docs
 weight: 2
 ---
 
-在 [RPC框架 - Filter请求拦截](../../framework/filter/) 一节中，我们了解了 Filter 的工作机制，以及 Dubbo 框架提供的一些内置 Filter 实现。在本文中，我们来了解如何扩展自定义的过滤器实现：一个可以对返回的结果进行统一的处理、验证等统一 Filter 处理器，减少对开发人员的打扰。
+In the section [RPC Framework - Filter Request Interception](../../framework/filter/), we learned about the working mechanism of Filters and some built-in Filter implementations provided by the Dubbo framework. In this article, we will learn how to extend custom filter implementations: a unified Filter processor that can handle and validate returned results, reducing disruptions to developers.
 
-本示例的完整源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/)。除了本示例之外，Dubbo 核心仓库 apache/dubbo 以及扩展库 [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-filter-extensions/) 中的众多 Filter 实现，都可以作为扩展参考实现。
+The complete source code for this example can be found at [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/). In addition to this example, many Filter implementations in the Dubbo core repository apache/dubbo and the extension library [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-filter-extensions/) can serve as reference implementations.
 
-## 任务详情
+## Task Details
 
-对所有调用Provider服务的请求在返回的结果的后面统一添加`'s customized AppendedFilter`。
+Uniformly append `'s customized AppendedFilter` to the returned results of all requests calling Provider services.
 
-## 实现方式
+## Implementation Method
 
-在Provider中自定义一个Filter，在Filter中修改返回结果。
+Customize a Filter in the Provider to modify the return results.
 
-#### 代码结构
+#### Code Structure
 ```properties
 src
  |-main
@@ -34,14 +34,14 @@ src
                         |-extensibility
                             |-filter
                                 |-provider
-                                    |-AppendedFilter.java (实现Filter接口)
+                                    |-AppendedFilter.java (Implements Filter interface)
     |-resources
         |-META-INF
-            |-application.properties (Dubbo Provider配置文件)
+            |-application.properties (Dubbo Provider configuration file)
             |-dubbo
-                |-org.apache.dubbo.rpc.Filter (纯文本文件)
+                |-org.apache.dubbo.rpc.Filter (Plain text file)
 ```
-#### 代码详情
+#### Code Details
 ```java
 package org.apache.dubbo.samples.extensibility.filter.provider;
 
@@ -66,29 +66,30 @@ public class AppendedFilter implements Filter {
 }
 ```
 
-#### SPI配置
-在`resources/META-INF/dubbo/org.apache.dubbo.rpc.Filter`文件中添加如下配置：
+#### SPI Configuration
+Add the following configuration to the `resources/META-INF/dubbo/org.apache.dubbo.rpc.Filter` file:
 ```properties
 appended=org.apache.dubbo.samples.extensibility.filter.provider.AppendedFilter
 ```
 
-#### 配置文件
-在`resources/application.properties`文件中添加如下配置，激活刚才的自定义 Filter 实现：
+#### Configuration File
+Add the following configuration to the `resources/application.properties` file to activate the custom Filter implementation:
 ```properties
 # Apply AppendedFilter
 dubbo.provider.filter=appended
 ```
 
-{{% alert title="注意" color="warning" %}}
-除了通过配置激活 Filter 实现之外，还可以通过为实现类增加 @Activate 注解，以在满足某些条件时自动激活 Filter 实现，如：
+{{% alert title="Note" color="warning" %}}
+In addition to activating the Filter implementation via configuration, you can also add the @Activate annotation to the implementation class to automatically activate it under certain conditions, such as:
 ```java
 @Activate(group="provider")
 public class AppendedFilter implements Filter {}
 ```
-这个 Filter 实现将在 Provider 提供者端自动被激活。
+This Filter implementation will be automatically activated on the Provider side.
 {{% /alert %}}
 
-## 运行结果
-以**使用本地IDE**的方式来运行任务，结果如下：
+## Running Results
+Running the task **using a local IDE**, the result is as follows:
 
 ![dubbo-samples-extensibility-filter-output.jpg](/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-filter-output.jpg)
+

@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/monitor/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/monitor/
-description: 监控中心扩展
-linkTitle: 监控中心扩展
-title: 监控中心扩展
+description: Monitoring Center Extension
+linkTitle: Monitoring Center Extension
+title: Monitoring Center Extension
 type: docs
 weight: 10
 ---
@@ -14,29 +14,29 @@ weight: 10
 
 
 
-## 扩展说明
+## Extension Description
 
-负责服务调用次和调用时间的监控。
+Responsible for monitoring service call counts and call times.
 
-## 扩展接口
+## Extension Interfaces
 
 * `org.apache.dubbo.monitor.MonitorFactory`
 * `org.apache.dubbo.monitor.Monitor`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
-<!-- 定义监控中心 -->
+<!-- Define the monitoring center -->
 <dubbo:monitor address="xxx://ip:port" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 org.apache.dubbo.monitor.support.dubbo.DubboMonitorFactory
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -44,12 +44,12 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxMonitorFactoryjava (实现MonitorFactory接口)
-                |-XxxMonitor.java (实现Monitor接口)
+                |-XxxMonitorFactory.java (implements the MonitorFactory interface)
+                |-XxxMonitor.java (implements the Monitor interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.monitor.MonitorFactory (纯文本文件，内容为：xxx=com.xxx.XxxMonitorFactory)
+                |-org.apache.dubbo.monitor.MonitorFactory (text file, content: xxx=com.xxx.XxxMonitorFactory)
 ```
 
 XxxMonitorFactory.java：
@@ -87,3 +87,4 @@ META-INF/dubbo/org.apache.dubbo.monitor.MonitorFactory：
 ```properties
 xxx=com.xxx.XxxMonitorFactory
 ```
+

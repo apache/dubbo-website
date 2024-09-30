@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/validation/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/validation/
-description: 验证扩展
-linkTitle: 验证扩展
-title: 验证扩展
+description: Validation Extension
+linkTitle: Validation Extension
+title: Validation Extension
 type: docs
 weight: 25
 ---
@@ -14,29 +14,29 @@ weight: 25
 
 
 
-## 扩展说明
+## Extension Description
 
-参数验证扩展点。
+Parameter validation extension point.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.validation.Validation`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:service validation="xxx,yyy" />
-<!-- 缺省值设置，当<dubbo:service>没有配置validation属性时，使用此配置 -->
+<!-- Default value setting, when <dubbo:service> does not configure the validation attribute, use this configuration -->
 <dubbo:provider validation="xxx,yyy" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 `org.apache.dubbo.validation.support.jvalidation.JValidation`
 
-## 扩展示例
+## Extension Examples
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -44,11 +44,11 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxValidation.java (实现Validation接口)
+                |-XxxValidation.java (implements Validation interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.validation.Validation (纯文本文件，内容为：xxx=com.xxx.XxxValidation)
+                |-org.apache.dubbo.validation.Validation (plain text file, content: xxx=com.xxx.XxxValidation)
 ```
 
 XxxValidation.java：
@@ -87,3 +87,4 @@ META-INF/dubbo/org.apache.dubbo.validation.Validation：
 ```properties
 xxx=com.xxx.XxxValidation
 ```
+

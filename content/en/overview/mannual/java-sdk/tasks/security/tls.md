@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/tls/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/security/tls/
     - /en/overview/mannual/java-sdk/reference-manual/protocol/tls/
-description: ' 了解在 Dubbo 的 TLS 保证传输安全'
-linkTitle: TLS支持
-title: TLS支持
+description: 'Understand how TLS ensures transmission security in Dubbo'
+linkTitle: TLS Support
+title: TLS Support
 type: docs
 weight: 10
 ---
@@ -15,27 +15,27 @@ weight: 10
 
 
 
-## 特性说明
+## Feature Description
 
-内置的 Dubbo Netty Server 和新引入的 gRPC 协议都提供了基于 TLS 的安全链路传输机制。
+The built-in Dubbo Netty Server and the newly introduced gRPC protocol provide TLS-based secure link transmission mechanisms.
 
-TLS 的配置都有统一的入口。
+TLS configuration has a unified entry point.
 
-## 使用场景
+## Use Cases
 
-对全链路有加密需求的用户可以使用 TLS。
+Users with encryption requirements for end-to-end links can use TLS.
 
-> 参考用例
+> Reference Use Case
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
 
-## 使用方式
+## Usage
 
-### Provider 端
+### Provider Side
 ```java
 SslConfig sslConfig = new SslConfig();
 sslConfig.setServerKeyCertChainPath("path to cert");
 sslConfig.setServerPrivateKeyPath(args[1]);
-// 如果开启双向 cert 认证
+// If mutual cert authentication is enabled
 if (mutualTls) {
   sslConfig.setServerTrustCertCollectionPath(args[2]);
 }
@@ -43,10 +43,9 @@ if (mutualTls) {
 ProtocolConfig protocolConfig = new ProtocolConfig("dubbo/grpc");
 protocolConfig.setSslEnabled(true);
 ```
-如果要使用的是 gRPC 协议，在开启 TLS 时会使用到协议协商机制，因此必须使用支持 ALPN 机制的 Provider，推荐使用的是 netty-tcnative，具体可参见 gRPC Java 社区的 [总结]( https://github.com/grpc/grpc-java/blob/master/SECURITY.md)
+If using the gRPC protocol, protocol negotiation will be used when enabling TLS, so a Provider supporting the ALPN mechanism must be used, with netty-tcnative recommended. See the gRPC Java community's [summary]( https://github.com/grpc/grpc-java/blob/master/SECURITY.md).
 
-
-### Consumer 端
+### Consumer Side
 
 ```java
 if (!mutualTls) {}
@@ -58,7 +57,7 @@ if (!mutualTls) {}
 }
 ```
 
-为尽可能保证应用启动的灵活性，TLS Cert 的指定还能通过 -D 参数或环境变量等方式来在启动阶段根据部署环境动态指定，参考 Dubbo [配置读取规则](/en/docs/advanced/config-rule)
+To ensure flexibility in application startup, the TLS Cert specification can also be dynamically set during startup based on the deployment environment using -D parameters or environment variables. Refer to Dubbo's [configuration reading rules](/en/docs/advanced/config-rule).
 
+> Regarding the security of service calls, Dubbo will continue to invest in this area in future versions, with authentication mechanisms for service discovery/calls expected to be available in upcoming releases.
 
-> 在服务调用的安全性上，Dubbo 在后续的版本中会持续投入，其中服务发现/调用的鉴权机制预计在接下来的版本中就会和大家见面。

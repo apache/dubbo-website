@@ -1,56 +1,49 @@
 ---
 description: Spring Boot
-linkTitle: 基于条件的流量路由
-title: 基于条件的流量路由
+linkTitle: Conditional Traffic Routing
+title: Conditional Traffic Routing
 type: docs
 weight: 5
 ---
 
-路由是 Dubbo 中的核心流量管控机制， 我们可以基于它实现金丝雀发布、按比例流量转发、同区域优先、全链路灰度等流量策略。Dubbo 中路由（Router）机制的设计与基本原理，内置的几种路由规则
+Routing is the core traffic control mechanism in Dubbo. Based on it, we can implement canary releases, proportional traffic forwarding, same-region prioritization, full-link grayscale, and other traffic strategies. The design and basic principles of the routing (Router) mechanism in Dubbo, along with several built-in routing rules.
 
+## Common Traffic Control Scenarios
+The built-in traffic strategies in Dubbo are very flexible, but there is also a certain understanding and usage cost. Therefore, we summarize some common usage scenarios and provide configuration methods:
 
-## 常用流量管控场景
-Dubbo 内置的流量策略非常的灵活，但同时也有一定的理解与使用成本，因此，我们根据总结了一些常用的使用场景，并给出了配置方法：
-
-| **场景** | **效果** | **作用对象** | **说明** |
+| **Scenario** | **Effect** | **Target** | **Description** |
 | --- | --- | --- | --- |
-| 超时时间 |  |  |  |
-| 访问日志 |  |  |  |
-| 调用重试 |  |  |  |
-|
- |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| Timeout |  |  |  |
+| Access Log |  |  |  |
+| Call Retry |  |  |  |
 
+Next, let's take a conditional routing example to see how to use the Dubbo traffic control mechanism.
+## A Conditional Routing Example
+The requirements are very straightforward.
 
-接下来，我们就以一个条件路由为例，来看一下如何使用 Dubbo 流量管控机制。
-## 一个条件路由示例
-需求非常的直观明了。
+- Forward traffic matching this condition to this batch of machines
+- Forward traffic matching another condition to another batch of machines
 
-- 匹配这个条件的流量，转发到这一批机器
-- 匹配另一个条件的流量，转发到另一批机器
+![Draw a diagram of traffic matching and forwarding]()
 
-![画一张流量匹配和转发的图]()
+This is implemented in Dubbo through conditional routing, and its detailed working principle is explained in our introduction. In the above example, xxx represents; yyy represents.
 
-这在 Dubbo 中就是用 条件路由 来实现的，关于其详细工作原理我们在介绍中有详细讲解。
-在以上示例中，xxx 代表；yyy 代表
+We need to deploy the rules to the running Dubbo SDK. In the Dubbo system, this is done as follows.
 
-我们需要把规则下发到运行中的dubbo sdk，在 dubbo 体系中这是如下如下工作的。
+![Routing Rule Distribution and Effect Principle Diagram]()
 
-![路由规则的分发与生效原理图]()
+A zk/nacos distributes a rule, and the Dubbo instance receives the rule push. During the RPC call, rules are applied to filter, selecting a subset of addresses to call.
 
-一个 zk/nacos、下发一条规则，dubbo实例接收到规则推送，rpc调用过程中应用规则筛选，选出地址子集调用
-
-{{% alert title="注意" color="info" %}}
-传统 Nacos/Zookeeper 的微服务部署方案中，Dubbo 的路由规则配置中心存储并转发到 Dubbo SDK，而在 Kubernetes Service 或服务网格场景下，路由规则的存储与推送机制会有一些变化，具体请参考 [Kubernetes 最佳实践]()。
+{{% alert title="Note" color="info" %}}
+In the traditional Nacos/Zookeeper microservice deployment scheme, the routing rule configuration center stores and forwards to the Dubbo SDK. However, in Kubernetes Service or service mesh scenarios, the storage and push mechanisms for routing rules may change. For specifics, please refer to [Kubernetes Best Practices]().
 {{% /alert %}}
 
-这时，如果我们对 xxx 服务发送一个请求，
+At this point, if we send a request to the xxx service,
 
-有一点非常
+There is one very important point.
 
-## 更多内容
-- 配置了路由规则不生效？[Dubbo 路由规则排查方法]()
-- 当前的路由规则不够灵活，无法达到效果？来看看 [脚本路由]() 吧
-- 您还可以通过 [扩展 Dubbo 的路由实现]() 定制自己的流量策略
+## More Content
+- Routing rules not taking effect? [Dubbo Routing Rule Troubleshooting Methods]()
+- Current routing rules not flexible enough to achieve the desired effect? Check out [Script Routing]() 
+- You can also customize your traffic strategy by [Extending Dubbo's Routing Implementation]()
+

@@ -3,38 +3,38 @@ aliases:
     - /en/overview/tasks/traffic-management/arguments/
     - /en/overview/tasks/traffic-management/arguments/
 description: ""
-linkTitle: 参数路由
-title: 根据请求参数引导流量分布
+linkTitle: Parameter Routing
+title: Guiding Traffic Distribution Based on Request Parameters
 type: docs
 weight: 6
 ---
 
 
 
-根据请求参数值转发流量，是一种非常灵活且实用的流量管控策略。比如微服务实践中，根据参数（如用户 ID）路由流量，将一小部分用户请求转发到最新发布的产品版本，以验证新版本的稳定性、获取用户的产品体验反馈等，是生产实践中常用的一种有效的灰度机制。
+Forwarding traffic based on request parameter values is a very flexible and practical traffic control strategy. For instance, in microservice practices, routing traffic based on parameters (such as user ID) allows a portion of user requests to be directed to the latest product version to validate the stability of the new version and gather user feedback on the product experience, which is a commonly used effective gray mechanism in production practices.
 
-或者，有些产品提供差异化的付费服务，需要根据请求参数中的用户 ID 将请求路由到具有不同服务等级保障的集群，就像接下来我们在示例任务中所做的那样。
+Alternatively, some products offer differentiated paid services that require routing requests to clusters with different service level guarantees based on user IDs in the request parameters, just as we will do in the example tasks below.
 
-## 开始之前
+## Before You Begin
 
-* [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
+* [Deploy Shop Mall Project](../#Deploy-Mall-System)
+* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
 
-## 任务详情
+## Task Details
 
-为了增加用户粘性，我们为商城示例系统新增了 VIP 用户服务，现在商城有两类用户：普通用户和 VIP 用户，其中 VIP 用户可以看到比普通用户更低的商品价格。
+To increase user engagement, we have added a VIP user service to the mall example system. Now the mall has two types of users: regular users and VIP users, where VIP users can see lower product prices than regular users.
 
-回到商城登录页面，我们以 VIP 用户 `dubbo` 登录系统，是否看到如下图所示的 VIP 专属商品价格，多刷新几次商品页面那？
+Returning to the mall login page, we log in to the system as VIP user `dubbo`. Do we see the VIP exclusive product prices as shown in the following image? Refresh the product page a few times.
 
 ![arguments1](/imgs/v3/tasks/arguments/arguments1.png)
 
-哦，是不是价格忽高忽低？！这是因为在当前部署的示例系统中，只有 detail v2 版本才能识别 VIP 用户并提供特价服务，因此，我们要确保 `dubbo` 用户始终访问 detail v2 实例，以便享受稳定的 VIP 服务。
+Oh, is the price fluctuating?! This is because in the currently deployed example system, only the detail v2 version can recognize VIP users and provide special pricing services. Therefore, we need to ensure that the `dubbo` user always accesses the detail v2 instance to enjoy stable VIP services.
 
 ![arguments2](/imgs/v3/tasks/arguments/arguments2.png)
 
-### 为 VIP 用户提供稳定的特价商品服务
+### Providing Stable Special Price Product Services for VIP Users
 
-Detail v2 版本能够识别 VIP 用户并在商品详情中展示特价。商品详情服务由 Detail 应用中的 `org.apache.dubbo.samples.DetailService` 服务提供，`DetailService` 显示商品详情的 `getItem` 方法定义如下，第二个参数为用户名。
+The detail v2 version can identify VIP users and display special prices in the product details. The product detail service is provided by the `org.apache.dubbo.samples.DetailService` service in the Detail application, and the `getItem` method of `DetailService` is defined as follows, with the second parameter being the username.
 
 ```java
 public interface DetailService {
@@ -42,22 +42,22 @@ public interface DetailService {
 }
 ```
 
-因此，接下来我们就为 `DetailService` 服务的 `getItem` 方法增加参数路由规则，如果用户参数是 `dubbo` 就转发到 v2 版本的服务。
+Thus, we will add parameter routing rules to the `getItem` method of `DetailService` so that if the user parameter is `dubbo`, requests will be forwarded to the v2 version of the service.
 
-#### 操作步骤
-1. 打开 Dubbo Admin 控制台
-2. 在左侧导航栏选择【服务治理】 > 【参数路由】
-3. 点击 "创建" 按钮，输入。
+#### Operation Steps
+1. Open the Dubbo Admin console.
+2. In the left navigation bar, select 【Service Governance】 > 【Parameter Routing】.
+3. Click the "Create" button and enter.
 
-![Admin 参数路由设置截图](/imgs/v3/tasks/arguments/arguments_admin.png)
+![Admin Parameter Routing Setup Screenshot](/imgs/v3/tasks/arguments/arguments_admin.png)
 
-方法参数的索引从 `0` 开始，我们上面填入 `1` 表示根据第二个参数进行流量转发。
+The index of the method parameters starts from `0`. Filling in `1` indicates that traffic forwarding is based on the second parameter.
 
-#### 规则详解
+#### Rule Details
 
-**规则 key** ：`org.apache.dubbo.samples.DetailService`
+**Rule Key**: `org.apache.dubbo.samples.DetailService`
 
-**规则体**
+**Rule Body**
 ```yaml
 configVersion: v3.0
 key: org.apache.dubbo.samples.DetailService
@@ -69,20 +69,21 @@ conditions:
   - method=getItem & arguments[1]=dubbo => detailVersion=v2
 ```
 
-* `method=getItem & arguments[1]=dubbo` 表示流量规则匹配 `getItem` 方法调用的第二个参数，当参数值为 `dubbo` 时做进一步的地址子集筛选。
-* `detailVersion=v2` 将过滤出所有带有 `detailVersion=v2` 标识的 URL 地址子集（在示例部署中，我们所有 detail v2 的实例都已经打上了 `detailVersion=v2` 标签）。
+* `method=getItem & arguments[1]=dubbo` indicates that the traffic rule matches the second parameter of the `getItem` method call, performing further address subset filtering when the parameter value is `dubbo`.
+* `detailVersion=v2` filters out all URL address subsets marked with `detailVersion=v2` (in the example deployment, all our detail v2 instances have been labeled with `detailVersion=v2`).
 
 ```yaml
 conditions:
   - method=getItem & arguments[1]=dubbo => detailVersion=v2
 ```
 
-`force: false` 表示如果没有 `detailVersion=v2` 的地址，则随机访问所有可用地址。
+`force: false` means that if there are no addresses with `detailVersion=v2`, it will randomly access all available addresses.
 
-## 其他事项
-本示例只是 Dubbo 条件路由的一种使用场景，除了根据方法名、参数匹配进行流量转发，条件路由还可以根据附加参数 Attachments、URL 中的数据等进行流量转发，同时匹配条件也支持范围、通配符等，比如：
+## Other Considerations
+This example is just one use case of Dubbo conditional routing. In addition to forwarding traffic based on method names and parameter matches, conditional routing can also route traffic based on additional parameters Attachments, data in the URL, etc., and the matching conditions support ranges and wildcards, such as:
 * attachments[key]=hello*
 * arguments[0]=1~100
 * url_key=value
 
-更为灵活的是，条件路由的匹配条件支持扩展，用户可以自定义匹配条件的来源和格式，具体可参见 [条件路由规则说明](/en/overview/core-features/traffic/condition-rule/)。
+More flexibly, the matching conditions for conditional routing support extension, allowing users to customize the source and format of matching conditions. For details, refer to [Conditional Routing Rule Description](/en/overview/core-features/traffic/condition-rule/)。
+

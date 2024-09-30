@@ -4,9 +4,9 @@ aliases:
 - /en/docs3-v2/java-sdk/faq/intro/
 - /en/overview/mannual/java-sdk/faq/intro/
 - /en/overview/java-sdk/reference-manual/faq/intro/
-description: 错误码机制的介绍
-linkTitle: 错误码机制的介绍
-title: 错误码机制的介绍
+description: Introduction to the error code mechanism
+linkTitle: Introduction to the error code mechanism
+title: Introduction to the error code mechanism
 type: docs
 weight: 0
 ---
@@ -14,40 +14,39 @@ weight: 0
 
 
 
+### Background
+The Logger abstraction layer relied on by Dubbo provides logging capabilities, but most exception logs do not include troubleshooting explanations, making it difficult for users to handle issues when they see exceptions.
 
+To address this problem, starting from version 3.1 of Dubbo, an error code mechanism has been introduced. It links the error code FAQ in the official documentation with the logging framework. When exceptions are output in the log abstraction, the corresponding official documentation link is also provided to guide users in self-troubleshooting.
 
-### 背景
-Dubbo 内部依赖的 Logger 抽象层提供了日志输出能力，但是大部分的异常日志都没有附带排查说明，导致用户看到异常后无法进行处理。
-
-为了解决这个问题，自 Dubbo 3.1 版本开始，引入了错误码机制。其将官方文档中的错误码 FAQ 与日志框架连接起来。在日志抽象输出异常的同时附带输出对应的官网文档链接，引导用户进行自主排查。
-
-### 错误码格式
+### Error Code Format
 `[Cat]-[X]`
 
-> 两个空格均为数字。其中第一个数字为类别，第二个数字为具体错误码。
+> Both spaces are numbers. The first number represents the category, and the second number represents the specific error code.
 
-### 提示显示的格式
+### Format of Hint Display
 ```
 This may be caused by ..., go to https://dubbo.apache.org/faq/[Cat]/[X] to find instructions.
 ```
-> 另外在这句话后可以指定补充的信息（即 extendedInformation）。
+> Additionally, supplementary information (i.e., extendedInformation) can be specified after this sentence.
 
-### 显示的实例
+### Display Example
 ```
 [31/07/22 02:43:07:796 CST] main  WARN support.AbortPolicyWithReport:  [DUBBO] Thread pool is EXHAUSTED! Thread Name: Test, Pool Size: 0 (active: 0, core: 1, max: 1, largest: 0), Task: 0 (completed: 0), Executor status:(isShutdown:false, isTerminated:false, isTerminating:false), in dubbo://10.20.130.230:20880!, dubbo version: , current host: 10.20.130.230, error code: 0-1. This may be caused by too much client requesting provider, go to https://dubbo.apache.org/faq/0/1 to find instructions.
 ```
 
-> 用户只需点击链接即可根据错误码查找到原因。
+> Users only need to click the link to find out the cause based on the error code.
 
-### Logger 接口支持
-为确保兼容性，Dubbo 3.1 基于原本的 Logger 抽象，构建了一个新的接口 `ErrorTypeAwareLogger`。
+### Logger Interface Support
+To ensure compatibility, Dubbo 3.1 built a new interface `ErrorTypeAwareLogger` based on the original Logger abstraction.
 
-warn 等级的方法进行了扩展如下
+The methods at the warn level have been extended as follows
 ```
 void warn(String code, String cause, String extendedInformation, String msg);
 void warn(String code, String cause, String extendedInformation, String msg, Throwable e);
 ```
 
-其中 code 指错误码，cause 指可能的原因（即 caused by... 后面所接的文字），extendedInformation 作为补充信息，直接附加在 caused by 这句话的后面。
+Where `code` refers to the error code, `cause` refers to the possible reason (i.e., the text following caused by...), and `extendedInformation` serves as supplementary information, directly appended to the phrase caused by.
 
-> 对于 error 级别也做了相同的扩展。
+> The same extension has been made for the error level.
+

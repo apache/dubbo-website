@@ -1,17 +1,17 @@
 ---
-description: 使用轻量的 Java SDK 开发 RPC Server 和 Client
-linkTitle: Server与Client
-title: 使用轻量的 Java SDK 开发 RPC Server 和 Client
+description: Develop RPC Server and Client with Lightweight Java SDK
+linkTitle: Server and Client
+title: Develop RPC Server and Client with Lightweight Java SDK
 type: docs
 weight: 1
 ---
-本示例演示如何使用轻量 Dubbo SDK 开发 RPC Server 与 Client，示例使用 Java Interface 方式定义、发布和访问 RPC 服务，底层使用 Triple 协议通信。本示例完整代码请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>。
+This example demonstrates how to use the lightweight Dubbo SDK to develop RPC Server and Client. The example uses Java Interface to define, publish, and access RPC services, with Triple protocol communication at the core. For the complete code of this example, please refer to <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>.
 
-基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Java SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
+Based on the Triple protocol defined by Dubbo, you can easily write browser and gRPC-compatible RPC services that can run on both HTTP/1 and HTTP/2. The Dubbo Java SDK supports defining services using IDL or language-specific methods and provides a lightweight API for publishing or invoking these services.
 
-## Maven 依赖
+## Maven Dependency
 
-在基于 Dubbo RPC 编码之前，您只需要在项目添加一个非常轻量的 `dubbo`依赖包即可，以 Maven 为例：
+Before coding based on Dubbo RPC, you only need to add a very lightweight `dubbo` dependency to your project. Here’s an example in Maven:
 ```xml
 <dependency>
     <groupId>org.apache.dubbo</groupId>
@@ -19,7 +19,7 @@ weight: 1
     <version>3.3.0</version>
 </dependency>
 
-<!-- 为了避免 Netty 依赖冲突，您也可以是选择使用 dubbo-shaded 版本！-->
+<!-- To avoid Netty dependency conflicts, you can also choose to use the dubbo-shaded version! -->
 <!--
 <dependency>
     <groupId>org.apache.dubbo</groupId>
@@ -29,9 +29,9 @@ weight: 1
 -->
 ```
 
-## 定义服务
+## Define Service
 
-定义一个名为 `DemoService`的标准 Java 接口作为 Dubbo 服务（Dubbo 还支持[基于 IDL 的服务定义模式](/en/overview/mannual/java-sdk/quick-start/)）。
+Define a standard Java interface named `DemoService` as the Dubbo service (Dubbo also supports [IDL-based service definition](/en/overview/mannual/java-sdk/quick-start/)).
 
 ```java
 public interface DemoService {
@@ -39,7 +39,7 @@ public interface DemoService {
 }
 ```
 
-实现 `DemoService` 接口并编写业务逻辑代码。
+Implement the `DemoService` interface and write the business logic code.
 
 ```java
 public class DemoServiceImpl implements DemoService {
@@ -50,12 +50,12 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-## 注册服务并启动 Server
+## Register Service and Start Server
 
-启动 server 并在指定端口监听 RPC 请求，在此之前，我们向 server 注册了以下信息：
+Start the server and listen for RPC requests on the specified port. Before that, we registered the following information with the server:
 
-- 使用 `Triple` 作为通信 RPC 协议与并监听端口 `50051`
-- 注册 Dubbo 服务到 `DemoService` server
+- Use `Triple` as the communication RPC protocol and listen on port `50051`
+- Register Dubbo service to `DemoService` server
 
 ```java
 public class Application {
@@ -69,9 +69,9 @@ public class Application {
 }
 ```
 
-## 访问服务
+## Access Service
 
-最简单方式是使用 HTTP/1.1 POST 请求访问服务，参数则以标准 JSON 格式作为 HTTP 负载传递。如下是使用 cURL 命令的访问示例：
+The simplest way is to use HTTP/1.1 POST requests to access the service, with parameters passed in standard JSON format as HTTP payload. Here’s an example of accessing using cURL:
 
 ```shell
 curl \
@@ -80,9 +80,9 @@ curl \
     http://localhost:50051/org.apache.dubbo.demo.DemoService/sayHello
 ```
 
-> 参数必须以数组格式进行传递，如果有多个参数，则格式类似 `["param1", {"param2-field": "param2-value"}, ...]`，具体请参见 triple 协议规范。
+> Parameters must be passed in array format; if there are multiple parameters, the format looks like `["param1", {"param2-field": "param2-value"}, ...]`. Please refer to the triple protocol specification for details.
 
-接下来，您也可以使用标准的 Dubbo client 请求服务，指定 server 地址即可发起 RPC 调用，其格式为 `protocol://ip:host`
+Next, you can also use a standard Dubbo client to request services by specifying the server address to initiate an RPC call in the format `protocol://ip:host`.
 
 ```java
 public class Application {
@@ -100,10 +100,11 @@ public class Application {
 }
 ```
 
-恭喜您， 以上即是 Dubbo Java RPC 通信的基本使用方式！  🎉
+Congratulations! You have now learned the basic usage of Dubbo Java RPC communication! 🎉
 
-## 更多内容
+## More Content
 
-- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/en/overview/mannual/java-sdk/quick-start/)，或者 [使用其他通信协议]()
-- 作为 RPC 框架，Dubbo 支持异步调用、连接管理、context上下文等，请参考 [RPC 框架核心功能]()
-- 您可以继续 [使用 API 为应用添加更多微服务治理能力]()，但我们更推进您使用 [Dubbo Spring Boot 开发微服务应用](../../microservice/develop/)
+- The Triple protocol is fully compatible with gRPC; you can refer here to learn how to [write gRPC-compatible services using IDL](/en/overview/mannual/java-sdk/quick-start/), or [use other communication protocols]()
+- As an RPC framework, Dubbo supports asynchronous calls, connection management, context, etc. Please refer to [RPC framework core features]()
+- You can continue to [add more microservice governance capabilities to your application using API]() but we encourage you to use [Dubbo Spring Boot to develop microservice applications](../../microservice/develop/)
+

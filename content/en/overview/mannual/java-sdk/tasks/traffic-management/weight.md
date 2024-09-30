@@ -3,57 +3,57 @@ aliases:
     - /en/overview/tasks/traffic-management/weight/
     - /en/overview/tasks/traffic-management/weight/
 description: ""
-linkTitle: 权重比例
-title: 基于权重值的比例流量转发
+linkTitle: Weight Ratio
+title: Proportional Traffic Forwarding Based on Weight Values
 type: docs
 weight: 7
 ---
 
 
 
-Dubbo 提供了基于权重的负载均衡算法，可以实现按比例的流量分布：权重高的提供者机器收到更多的请求流量，而权重低的机器收到相对更少的流量。
+Dubbo provides a weight-based load balancing algorithm that allows for proportional traffic distribution: machines with higher weight receive more request traffic, while those with lower weight receive relatively less.
 
-以基于权重的流量调度算法为基础，通过规则动态调整单个或一组机器的权重，可以在运行态改变请求流量的分布，实现动态的按比例的流量路由，这对于一些典型场景非常有用。
-* 当某一组机器负载过高，通过动态调低权重可有效减少新请求流入，改善整体成功率的同时给高负载机器提供喘息之机。
-* 刚刚发布的新版本服务，先通过赋予新版本低权重控制少量比例的流量进入，待验证运行稳定后恢复正常权重，并完全替换老版本。
-* 服务多区域部署或非对等部署时，通过高、低权重的设置，控制不同部署区域的流量比例。
+Based on a weight-based traffic scheduling algorithm, dynamically adjusting the weight of a single machine or a group of machines via rules can change the distribution of request traffic at runtime, enabling dynamic proportional traffic routing, which is useful for several typical scenarios.
+* When a certain group of machines is overloaded, dynamically reducing the weight can effectively reduce incoming new requests, improving overall success rates while giving overburdened machines a breather.
+* For newly launched versions of a service, initially assigning a low weight to control a small proportion of traffic, waiting for stable operation verification before restoring to normal weight and completely replacing the old version.
+* During multi-region or non-peer deployments, controlling traffic ratios for different deployment areas through high and low weight settings.
 
-## 开始之前
+## Before You Begin
 
-* [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
+* [Deploy Shop Mall Project](../#部署商场系统)
+* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
 
-## 任务详情
+## Task Details
 
-示例项目中，我们发布了 Order 服务 v2 版本，并在 v2 版本中优化了下单体验：用户订单创建完成后，显示订单收货地址信息。
+In the example project, we have released Order Service version 2 and optimized the ordering experience: after users create an order, the delivery address information is displayed.
 
 ![weight2.png](/imgs/v3/tasks/weight/weight2.png)
 
-现在如果你体验疯狂下单 (不停的点击 "Buy Now")，会发现 v1 与 v2 总体上是 50% 概率出现，说明两者目前具有相同的默认权重。但我们为了保证商城系统整体稳定性，接下来会先控制引导 20% 流量到 v2 版本，80% 流量依然访问 v1 版本。
+Now, if you try to place orders frantically (by continuously clicking "Buy Now"), you'll find that both v1 and v2 appear with an overall probability of 50%, indicating that both currently have the same default weight. However, to ensure the overall stability of the mall system, we will control and guide 20% of traffic to version v2, while 80% of traffic will still access version v1.
 
 ![weight1.png](/imgs/v3/tasks/weight/weight1.png)
 
-### 实现 Order 服务 80% v1 、20% v2 的流量分布
-在调整权重前，首先我们要知道 Dubbo 实例的权重 (weight) 都是绝对值，每个实例的默认权重 (weight) 是 100。举个例子，如果一个服务部署有两个实例：实例 A 权重值为 100，实例 B 权重值为 200，则 A 和 B 收到的流量分布为 1:2。
+### Implement Traffic Distribution of 80% v1 and 20% v2 in Order Service
+Before adjusting weights, we need to know that the weight of Dubbo instances is absolute, with each instance's default weight being 100. For example, if a service is deployed with two instances: Instance A has a weight of 100, and Instance B has a weight of 200, the traffic distribution between A and B will be 1:2.
 
-接下来，我们就开始调整订单服务访问 v1 和 v2 的流量比例，订单创建服务由 `org.apache.dubbo.samples.OrderService` 接口提供，接下来通过动态规则调整新版本 `OrderService` 实例的权重值。
+Next, we will begin adjusting the traffic ratio for the Order Service to access v1 and v2. The order creation service is provided by the `org.apache.dubbo.samples.OrderService` interface; we will then dynamically adjust the weight of the new version `OrderService` instances through rules.
 
-#### 操作步骤
-1. 打开 Dubbo Admin 控制台
-2. 在左侧导航栏选择【服务治理】>【动态配置】
-3. 点击 "创建"，输入要调整的 `org.apache.dubbo.samples.OrderService` 、目标实例匹配条件和权重值。
+#### Steps to Operate
+1. Open the Dubbo Admin console.
+2. In the left navigation bar, select [Service Governance] > [Dynamic Configuration].
+3. Click "Create," enter the `org.apache.dubbo.samples.OrderService`, the target instance matching conditions, and the weight value.
 
-![Admin 权重比例设置截图](/imgs/v3/tasks/weight/weight_admin.png)
+![Admin Weight Ratio Setting Screenshot](/imgs/v3/tasks/weight/weight_admin.png)
 
-再次疯狂点击 "Buy Now" 尝试多次创建订单，现在大概只有 20% 的机会看到 v2 版本的订单详情信息
+Click "Buy Now" frantically again to try to create orders multiple times; now there's only about a 20% chance of seeing the version v2 order details.
 
-在确定 v2 版本的 Order 服务稳定运行后，进一步的增加 v2 权重，直到所有老版本服务都被新版本替换掉，这样就完成了一次稳定的服务版本升级。
+After confirming that the v2 version of the Order Service operates stably, further increase the weight of v2 until all old version services are replaced by the new version, thus completing a stable service version upgrade.
 
-#### 规则详解
+#### Rule Details
 
-**规则 key** ：`org.apache.dubbo.samples.UserService`
+**Rule Key**: `org.apache.dubbo.samples.UserService`
 
-**规则体**
+**Rule Body**
 
 ```yaml
 configVersion: v3.0
@@ -70,7 +70,7 @@ configs:
       weight: 25
 ```
 
-以下匹配条件表示权重规则对所有带有 `orderVersion=v2` 标签的实例生效（Order 服务的所有 v2 版本都已经带有这个标签）。
+The following matching condition indicates that the weight rule applies to all instances tagged with `orderVersion=v2` (all v2 versions of the Order service have this tag).
 
 ```yaml
 match:
@@ -80,15 +80,16 @@ match:
         exact: v2
 ```
 
-`weight: 25` 是因为 v1 版本的默认权重是 `100`，这样 v2 和 v1 版本接收到的流量就变成了 25:100 即 1:4 的比例。
+`weight: 25` is because the default weight of the v1 version is `100`, thus changing the traffic received by v2 and v1 to a ratio of 25:100, which is 1:4.
 
 ```yaml
 parameters:
   weight: 25
 ```
 
-## 清理
-为了不影响其他任务效果，通过 Admin 删除或者禁用刚刚配置的权重规则。
+## Cleanup
+To avoid affecting other tasks, delete or disable the just configured weight rules through Admin.
 
-## 其他事项
+## Other Matters
 `weight=0`
+

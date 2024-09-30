@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/metadata-report/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/metadata-report/
-description: 元数据中心扩展
-linkTitle: 元数据中心扩展
-title: 元数据中心扩展
+description: Metadata Center Extension
+linkTitle: Metadata Center Extension
+title: Metadata Center Extension
 type: docs
 weight: 13
 ---
@@ -14,21 +14,21 @@ weight: 13
 
 
 
-## 设计目的
-请参见 [元数据中心手册](../../../metadata-center/overview/)
+## Design Purpose
+Please refer to the [Metadata Center Manual](../../../metadata-center/overview/)
 
-## 扩展接口
+## Extension Interfaces
 
 * `org.apache.dubbo.metadata.store.MetadataReportFactory`
 * `org.apache.dubbo.metadata.store.MetadataReport`
 
-## 已知扩展
+## Known Extensions
 
-## 实现原理
+## Implementation Principles
 
-### SPI定义
+### SPI Definition
 
-参考：org.apache.dubbo.metadata.store.MetadataReportFactory，org.apache.dubbo.metadata.store.MetadataReport
+Reference: org.apache.dubbo.metadata.store.MetadataReportFactory, org.apache.dubbo.metadata.store.MetadataReport
 
 ```java
 @SPI("redis")
@@ -40,13 +40,13 @@ public interface MetadataReportFactory {
 
 
 
-### 自定义元数据的存储
+### Custom Metadata Storage
 
-下面以Redis存储为例进行说明。
+The following example describes the Redis storage.
 
-新建一个project，需要支持以下修改：
+Create a new project that needs to support the following modifications:
 
-#### 扩展AbstractMetadataReport
+#### Extend AbstractMetadataReport
 
 ```java
 public class RedisMetadataReport extends AbstractMetadataReport {
@@ -76,7 +76,7 @@ public class RedisMetadataReport extends AbstractMetadataReport {
 }
 ```
 
-#### 扩展 AbstractMetadataReportFactory
+#### Extend AbstractMetadataReportFactory
 
 ```java
 public class RedisMetadataReportFactory extends AbstractMetadataReportFactory {
@@ -87,7 +87,7 @@ public class RedisMetadataReportFactory extends AbstractMetadataReportFactory {
 }
 ```
 
-#### 增加 MetadataReportFactory
+#### Add MetadataReportFactory
 
 > META-INF/dubbo/internal/org.apache.dubbo.metadata.store.MetadataReportFactory
 
@@ -95,6 +95,7 @@ public class RedisMetadataReportFactory extends AbstractMetadataReportFactory {
 redis=org.apache.dubbo.metadata.store.redis.RedisMetadataReportFactory
 ```
 
-只要将上面的修改和project打包成jar包，然后配置元数据中心的url：redis://10.20.153.10:6379。
+Just package the above modifications and the project into a jar file, then configure the metadata center's URL: redis://10.20.153.10:6379.
 
-至此，一个自定义的元数据存储就可以运行了。
+Thus, a custom metadata storage can now run.
+

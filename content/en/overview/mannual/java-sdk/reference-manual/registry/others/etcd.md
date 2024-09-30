@@ -1,5 +1,5 @@
 ---
-description: Etcd 注册中心的基本使用和工作原理。
+description: Basic usage and working principles of the Etcd registry.
 linkTitle: Etcd
 title: Etcd
 type: docs
@@ -8,15 +8,15 @@ weight: 5
 
 
 
-## 前置条件
-* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
-* 安装并启动 Etcd 服务
+## Prerequisites
+* Understand [basic development steps of Dubbo](/en/overview/mannual/java-sdk/quick-start/starter/)
+* Install and start the Etcd service
 
-## 使用说明
+## Instructions
 
-### 添加依赖
+### Adding Dependencies
 
-从 Dubbo3 开始，etcd 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-registry)。
+Starting from Dubbo 3, the Etcd registry adapter is no longer embedded in Dubbo and needs to be included as a separate [module](/en/download/spi-extensions/#dubbo-registry).
 
 ```xml
 <dependency>
@@ -26,25 +26,26 @@ weight: 5
 </dependency>
 ```
 
-### 基本配置
+### Basic Configuration
 ```xml
 <dubbo:registry address="etcd://10.20.153.10:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry address="etcd://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry protocol="etcd" address="10.20.153.10:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry protocol="etcd" address="10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379" />
 ```
+

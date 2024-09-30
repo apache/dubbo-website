@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/page/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/page/
-description: 对等网络节点组网器扩展
-linkTitle: 对等网络节点组网器扩展
-title: 对等网络节点组网器扩展
+description: Peer-to-peer network node aggregator extension
+linkTitle: Peer-to-peer network node aggregator extension
+title: Peer-to-peer network node aggregator extension
 type: docs
 weight: 19
 ---
@@ -16,32 +16,32 @@ weight: 19
 
 
 
-## 扩展说明
+## Extension Description
 
-对等网络节点组网器。
+Peer-to-peer network node aggregator.
 
-## 扩展接口
+## Extension Interfaces
 
 `org.apache.dubbo.container.page.PageHandler`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol page="xxx,yyy" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置page属性时，使用此配置 -->
+<!-- Default value settings, when <dubbo:protocol> does not configure the page attribute, use this configuration -->
 <dubbo:provider page="xxx,yyy" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.container.page.pages.HomePageHandler`
 * `org.apache.dubbo.container.page.pages.StatusPageHandler`
 * `org.apache.dubbo.container.page.pages.LogPageHandler`
 * `org.apache.dubbo.container.page.pages.SystemPageHandler`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -49,11 +49,11 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxPageHandler.java (实现PageHandler接口)
+                |-XxxPageHandler.java (implements PageHandler interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.container.page.PageHandler (纯文本文件，内容为：xxx=com.xxx.XxxPageHandler)
+                |-org.apache.dubbo.container.page.PageHandler (plain text file with content: xxx=com.xxx.XxxPageHandler)
 ```
 
 XxxPageHandler.java：
@@ -75,3 +75,4 @@ META-INF/dubbo/org.apache.dubbo.container.page.PageHandler：
 ```properties
 xxx=com.xxx.XxxPageHandler
 ```
+

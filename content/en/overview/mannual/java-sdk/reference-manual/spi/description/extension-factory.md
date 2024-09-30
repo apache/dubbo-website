@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/extension-factory/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/extension-factory/
-description: 扩展点加载扩展
-linkTitle: 扩展点加载扩展
-title: 扩展点加载扩展
+description: Extension Point Loading Extensions
+linkTitle: Extension Point Loading Extensions
+title: Extension Point Loading Extensions
 type: docs
 weight: 11
 ---
@@ -14,28 +14,28 @@ weight: 11
 
 
 
-## 扩展说明
+## Extension Description
 
-扩展点本身的加载容器，可从不同容器加载扩展点。
+The loading container for extension points, capable of loading extension points from different containers.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.common.extension.ExtensionFactory`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:application compiler="jdk" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.common.extension.factory.SpiExtensionFactory`
 * `org.apache.dubbo.config.spring.extension.SpringExtensionFactory`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -43,14 +43,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxExtensionFactory.java (实现ExtensionFactory接口)
+                |-XxxExtensionFactory.java (implements ExtensionFactory interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.common.extension.ExtensionFactory (纯文本文件，内容为：xxx=com.xxx.XxxExtensionFactory)
+                |-org.apache.dubbo.common.extension.ExtensionFactory (plain text file, content: xxx=com.xxx.XxxExtensionFactory)
 ```
 
-XxxExtensionFactory.java：
+XxxExtensionFactory.java:
 
 ```java
 package com.xxx;
@@ -64,8 +64,9 @@ public class XxxExtensionFactory implements ExtensionFactory {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.common.extension.ExtensionFactory：
+META-INF/dubbo/org.apache.dubbo.common.extension.ExtensionFactory:
 
 ```properties
 xxx=com.xxx.XxxExtensionFactory
 ```
+

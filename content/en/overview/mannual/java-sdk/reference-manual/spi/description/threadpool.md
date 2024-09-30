@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/threadpool/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/threadpool/
-description: 线程池扩展
-linkTitle: 线程池扩展
-title: 线程池扩展
+description: Thread Pool Extension
+linkTitle: Thread Pool Extension
+title: Thread Pool Extension
 type: docs
 weight: 15
 ---
@@ -14,30 +14,30 @@ weight: 15
 
 
 
-## 扩展说明
+## Extension Description
 
-服务提供方线程池实现策略，当服务器收到一个请求时，需要在线程池中创建一个线程去执行服务提供方业务逻辑。
+The thread pool implementation strategy for service providers requires creating a thread in the thread pool to execute the service provider's business logic when the server receives a request.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.common.threadpool.ThreadPool`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol threadpool="xxx" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置threadpool时，使用此配置 -->
+<!-- Default value configuration, used when <dubbo:protocol> does not configure threadpool -->
 <dubbo:provider threadpool="xxx" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.common.threadpool.FixedThreadPool`
 * `org.apache.dubbo.common.threadpool.CachedThreadPool`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -45,14 +45,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxThreadPool.java (实现ThreadPool接口)
+                |-XxxThreadPool.java (implements ThreadPool interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.common.threadpool.ThreadPool (纯文本文件，内容为：xxx=com.xxx.XxxThreadPool)
+                |-org.apache.dubbo.common.threadpool.ThreadPool (plain text file, content: xxx=com.xxx.XxxThreadPool)
 ```
 
-XxxThreadPool.java：
+XxxThreadPool.java:
 
 ```java
 package com.xxx;
@@ -67,8 +67,9 @@ public class XxxThreadPool implements ThreadPool {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.common.threadpool.ThreadPool：
+META-INF/dubbo/org.apache.dubbo.common.threadpool.ThreadPool:
 
 ```properties
 xxx=com.xxx.XxxThreadPool
 ```
+

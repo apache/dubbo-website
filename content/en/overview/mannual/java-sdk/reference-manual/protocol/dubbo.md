@@ -3,21 +3,19 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
     - /en/docs3-v2/java-sdk/reference-manual/protocol/dubbo/
     - /en/overview/what/ecosystem/protocol/dubbo/
-description: "本文描述 Dubbo 协议 java 实现的特点与具体实现细节"
+description: "This article describes the features and specific implementation details of the Dubbo protocol in Java."
 linkTitle: dubbo
-title: Dubbo协议
+title: Dubbo Protocol
 type: docs
 weight: 3
 ---
 
-Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用。
+The default protocol of Dubbo uses a single long connection and NIO asynchronous communication, which is suitable for service calls with small data sizes and high concurrency, especially in scenarios where the number of service consumers far exceeds the number of service providers. Dubbo RPC is the most core high-performance, high-throughput remote invocation method in the Dubbo system, which I like to refer to as multiplexing TCP long connection calls.
 
+It is mainly used for remote calls between two Dubbo systems, particularly suitable for high concurrency and small data internet scenarios. Conversely, the default Dubbo protocol is not suitable for transmitting large amounts of data, such as file transfers or video transfers, unless the request volume is very low.
 
-主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。
-
-* **长连接：避免了每次调用新建TCP连接，提高了调用的响应速度。**
-* **多路复用：单个TCP连接可交替传输多个请求和响应的消息，降低了连接的等待闲置时间，从而减少了同样并发数下的网络连接数，提高了系统吞吐量。**
-
+* **Long Connection: Avoids creating a new TCP connection for each call, improving response speed.**
+* **Multiplexing: A single TCP connection can alternately transmit multiple requests and response messages, reducing idle time for connections and thereby decreasing the number of network connections under the same concurrency, increasing system throughput.**
 
 ![dubbo-protocol.jpg](/imgs/user/dubbo-protocol.jpg)
 
@@ -26,104 +24,102 @@ Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据
 * Dispatcher: all, direct, message, execution, connection
 * ThreadPool: fixed, cached
 
+The default protocol uses tbremoting interaction based on netty `3.2.5.Final` and hessian2 `3.2.1-fixed-2 (Alibaba embed version)`.
 
-缺省协议，使用基于 netty `3.2.5.Final` 和 hessian2 `3.2.1-fixed-2(Alibaba embed version)` 的 tbremoting 交互。
+* Number of Connections: Single connection
+* Connection Method: Long connection
+* Transport Protocol: TCP
+* Transport Method: NIO asynchronous transmission
+* Serialization: Hessian binary serialization
+* Applicable Scope: incoming and outgoing parameter data packets are small (recommended less than 100K), more consumers than providers, a single consumer cannot fully utilize the provider, avoid using the Dubbo protocol to transmit large files or extremely large strings.
+* Applicable Scenario: Regular remote service method calls
 
-* 连接个数：单连接
-* 连接方式：长连接
-* 传输协议：TCP
-* 传输方式：NIO 异步传输
-* 序列化：Hessian 二进制序列化
-* 适用范围：传入传出参数数据包较小（建议小于100K），消费者比提供者个数多，单一消费者无法压满提供者，尽量不要用 dubbo 协议传输大文件或超大字符串。
-* 适用场景：常规远程服务方法调用
+**Constraints**
 
-**约束**
+* Parameters and return values must implement the `Serializable` interface.
+* Parameters and return values cannot use custom implementations of `List`, `Map`, `Number`, `Date`, `Calendar`, etc.; only JDK-provided implementations can be used, as Hessian will handle them specially, and properties of custom implementations will be lost.
+* Hessian serialization only transmits member property values and their types, not methods or static variables, compatibility provided by **Wu Yajun**.
 
-* 参数及返回值需实现 `Serializable` 接口
-* 参数及返回值不能自定义实现 `List`, `Map`, `Number`, `Date`, `Calendar` 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。
-* Hessian 序列化，只传成员属性值和值的类型，不传方法或静态变量，兼容情况由**吴亚军提供**
-
-| 数据通讯 | 情况 | 结果 |
+| Data Communication | Situation | Result |
 | ------------- | ------------- | ------------- |
-| A->B  | 类A多一种 属性（或者说类B少一种 属性）| 不抛异常，A多的那 个属性的值，B没有，其他正常 |
-| A->B  | 枚举A多一种 枚举（或者说B少一种 枚举）| A使用多 出来的枚举进行传输 | 抛异常 |
-| A->B  | 枚举A多一种 枚举（或者说B少一种 枚举）| A不使用 多出来的枚举进行传输 | 不抛异常，B正常接 收数据 |
-| A->B  | A和B的属性 名相同，但类型不相同 | 抛异常 |
-| A->B  | serialId 不相同 | 正常传输 |
+| A->B  | Class A has an additional property (or Class B has one less property) | No exceptions thrown, A’s additional property value, B does not have it, others are normal |
+| A->B  | Enum A has an additional enum (or B has one less enum) | A uses the additional enum for transmission | Throws an exception |
+| A->B  | Enum A has an additional enum (or B has one less enum) | A does not use the additional enum for transmission | No exception thrown, B normally receives data |
+| A->B  | A and B have the same property name but different types | Throws an exception |
+| A->B  | serialId is different | Normal transmission |
 
-接口增加方法，对客户端无影响，如果该方法不是客户端需要的，客户端不需要重新部署。输入参数和结果集中增加属性，对客户端无影响，如果客户端并不需要新属性，不用重新部署。
+Adding methods to the interface has no impact on the client; if the method is not needed by the client, redeployment is not required. Adding properties to input parameters and result sets has no impact on the client; if the client does not need the new properties, redeployment is not necessary.
 
-输入参数和结果集属性名变化，对客户端序列化无影响，但是如果客户端不重新部署，不管输入还是输出，属性名变化的属性值是获取不到的。
+Changes in input parameter and result set property names have no effect on client serialization, but if the client does not redeploy, property values for properties with changed names will not be retrievable.
 
-{{% alert title="总结" color="info" %}}
-- 服务器端和客户端对领域对象并不需要完全一致，而是按照最大匹配原则。
-- 会抛异常的情况：枚举值一边多一种，一边少一种，正好使用了差别的那种，或者属性名相同，类型不同。
+{{% alert title="Summary" color="info" %}}
+- The server and client do not need to have completely consistent domain objects but should follow the principle of maximum matching.
+- Exception scenarios: one side has more enum values, the other side has fewer, and the used enum varies between them, or property names are the same but types differ.
 {{% /alert %}}
 
-## 使用方式
+## Usage
 
-### 配置协议
+### Configuring Protocol
 
 ```xml
 <dubbo:protocol name="dubbo" port="20880" />
 ```
 
-### 设置默认协议
+### Setting Default Protocol
 
 ```xml
 <dubbo:provider protocol="dubbo" />
 ```
 
-### 设置某个服务的协议
+### Setting Protocol for a Specific Service
 
 ```xml
 <dubbo:service interface="..." protocol="dubbo" />
 ```
 
-### 多端口
+### Multiple Ports
 
 ```xml
 <dubbo:protocol id="dubbo1" name="dubbo" port="20880" />
 <dubbo:protocol id="dubbo2" name="dubbo" port="20881" />
 ```
 
-### 配置协议选项
+### Configuring Protocol Options
 
 ```xml
-<dubbo:protocol name=“dubbo” port=“9090” server=“netty” client=“netty” codec=“dubbo” serialization=“hessian2” charset=“UTF-8” threadpool=“fixed” threads=“100” queues=“0” iothreads=“9” buffer=“8192” accepts=“1000” payload=“8388608” />
+<dubbo:protocol name="dubbo" port="9090" server="netty" client="netty" codec="dubbo" serialization="hessian2" charset="UTF-8" threadpool="fixed" threads="100" queues="0" iothreads="9" buffer="8192" accepts="1000" payload="8388608" />
 ```
 
-### 多连接配置
+### Multi-Connection Configuration
 
-Dubbo 协议缺省每服务每提供者每消费者使用单一长连接，如果数据量较大，可以使用多个连接。
+The default Dubbo protocol uses a single long connection for each service, each provider, and each consumer. If the data volume is large, multiple connections can be employed.
 
 ```xml
 <dubbo:service interface="..." connections="1"/>
 <dubbo:reference interface="..." connections="1"/>
 ```
 
-* `<dubbo:service connections="0">` 或 `<dubbo:reference connections="0">` 表示该服务使用 JVM 共享长连接。**缺省**
-* `<dubbo:service connections="1">` 或 `<dubbo:reference connections="1">` 表示该服务使用独立长连接。
-* `<dubbo:service connections="2">` 或`<dubbo:reference connections="2">` 表示该服务使用独立两条长连接。
+* `<dubbo:service connections="0">` or `<dubbo:reference connections="0">` indicates that the service uses JVM shared long connections. **Default**
+* `<dubbo:service connections="1">` or `<dubbo:reference connections="1">` indicates that the service uses independent long connections.
+* `<dubbo:service connections="2">` or `<dubbo:reference connections="2">` indicates that the service uses two independent long connections.
 
-为防止被大量连接撑挂，可在服务提供方限制大接收连接数，以实现服务提供方自我保护。
+To prevent being overwhelmed by too many connections, the service provider can limit the number of large incoming connections for self-protection.
 
 ```xml
 <dubbo:protocol name="dubbo" accepts="1000" />
 ```
 
-## 常见问题
+## Common Issues
 
-### Q1 为什么要消费者比提供者个数多?
+### Q1 Why should the number of consumers exceed the number of providers?
 
-因 dubbo 协议采用单一长连接，假设网络为千兆网卡 **1024Mbit=128MByte**，根据测试经验数据每条连接最多只能压满 7MByte(不同的环境可能不一样，供参考)，理论上 1 个服务提供者需要 20 个服务消费者才能压满网卡。
+Because the Dubbo protocol uses a single long connection, assuming the network is a gigabit network **1024Mbit=128MByte**, based on testing experience, each connection can typically handle a maximum of 7MByte (varies by environment), theoretically, 1 service provider requires 20 service consumers to fully utilize the network card.
 
-### Q2 为什么不能传大包?
+### Q2 Why can’t large packets be transmitted?
 
-因 dubbo 协议采用单一长连接，如果每次请求的数据包大小为 500KByte，假设网络为千兆网卡 **1024Mbit=128MByte**，每条连接最大 7MByte (不同的环境可能不一样)，单个服务提供者的 TPS(每秒处理事务数)最大为：128MByte / 500KByte = 262。单个消费者调用单个服务提供者的 TPS (每秒处理事务数)最大为：7MByte / 500KByte = 14。如果能接受，可以考虑使用，否则网络将成为瓶颈。
+Because the Dubbo protocol uses a single long connection, if each request packet size is 500KByte, assuming the network is a gigabit network **1024Mbit=128MByte**, the maximum TPS (transactions per second) for a single service provider is: 128MByte / 500KByte = 262. The maximum TPS for a single consumer calling a single service provider is: 7MByte / 500KByte = 14. If this can be accepted, it could be considered; otherwise, the network will become a bottleneck.
 
-### Q3 为什么采用异步单一长连接?
+### Q3 Why use asynchronous single long connections?
 
-因为服务的现状大都是服务提供者少，通常只有几台机器，而服务的消费者多，可能整个网站都在访问该服务，比如 Morgan 的提供者只有 6 台提供者，却有上百台消费者，每天有 1.5 亿次调用，如果采用常规的 hessian 服务，服务提供者很容易就被压跨，通过单一连接，保证单一消费者不会压死提供者，长连接，减少连接握手验证等，并使用异步 IO，复用线程池，防止 C10K 问题。
-
+Because the current situation of services is mostly that there are fewer providers, typically only a few machines, while there are many consumers; the entire website may be accessing the service. For example, Morgan has only 6 providers but over a hundred consumers, with 150 million calls per day. If conventional Hessian services were used, it would be easy for the service providers to be overloaded; by using a single connection, it ensures that a single consumer won't overload the provider, long connections reduce connection handshake validation, etc., and asynchronous IO is used with a thread pool to prevent the C10K problem.
 

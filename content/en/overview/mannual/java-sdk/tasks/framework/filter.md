@@ -4,85 +4,84 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/async-call/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-call/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
-description: 使用 Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。
-linkTitle: Filter拦截器
-title: 使用 Filter 过滤器动态拦截请求（request）或响应（response）
+    - /en/overview/manonical/java-sdk/advanced-features-and-usage/service/async/
+description: Use Filter to dynamically intercept requests or responses to transform or utilize the information contained in requests or responses.
+linkTitle: Filter Interceptor
+title: Use Filter to Dynamically Intercept Requests or Responses
 type: docs
 weight: 3
 ---
 
-Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。
+The Filter dynamically intercepts requests or responses to transform or utilize the information contained within them. Filters themselves do not typically create responses but provide generic functions that can be "attached" to any RPC request. Dubbo Filters are pluggable, allowing us to insert any type and number of Filters into an RPC request.
 
-Filter 工作原理如下图所示：
+The operation of a Filter is illustrated as follows:
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/framework/filter.png"/>
 
-可以通过 Filter 实现的一些典型能力如下：
-* 记录请求参数、响应结果等到日志文件
-* 为 RPC 请求添加认证或校验逻辑
-* 在发送或执行请求之前，格式化请求体或 header 参数
-* 压缩响应结果
-* 对请求数据进行埋点，统计调用耗时、成功、失败次数等
-* 监测并发执行的请求数量，实现限流降级能力
+Some typical capabilities achievable through Filters include:
+* Logging request parameters and response results to log files
+* Adding authentication or verification logic for RPC requests
+* Formatting request bodies or header parameters before sending or executing requests
+* Compressing response results
+* Collecting metrics on request data, such as call time, success, and failure counts
+* Monitoring the number of concurrently executed requests to implement rate limiting and degradation capabilities
 
-## 使用方式
-如上图所示，Dubbo 代理会自动加载 Filter 实现并将它们组装到调用链路。Filter 是一个标准的 SPI 定义，框架按照一定的激活规则自动加载 Filter 实现。
+## Usage
+As shown in the figure above, the Dubbo proxy automatically loads Filter implementations and assembles them into the call chain. Filter is a standard SPI definition, and the framework automatically loads Filter implementations based on certain activation rules.
 
 ```java
 @SPI(scope = ExtensionScope.MODULE)
 public interface Filter extends BaseFilter {}
 ```
 
-Filter 的默认激活状态可在定义中通过 `@Activate` 注解设置，如以下定义表示该 Filter 在提供者端执行 RPC 请求时自动开启（在消费端不开启）。`@Activate` 支持多种条件控制，包括 classpath 下有某个类的定义时开启，URL 中有哪个参数值时开启等，具体可参见 [SPI 扩展 Activate 介绍]()。
+The default activation status of a Filter can be set in the definition using the `@Activate` annotation, as shown in the following definition, which indicates that this Filter is automatically enabled when executing RPC requests on the provider side (not enabled on the consumer side). The `@Activate` annotation supports various conditional controls, including enabling it when a specific class is present in the classpath, or when certain parameter values are present in the URL, more details can be referenced in [SPI Extension Activate Introduction]().
 
 ```java
 @Activate(group = PROVIDER)
 public class AccessLogFilter implements Filter {}
 ```
 
-### 关闭自动加载
-如想关闭某个 filter 加载，在不修改 Filter 定义的情况下，可通过以下几种配置关闭。
+### Disable Automatic Loading
+To disable loading for a specific Filter without modifying its definition, you can use the following configurations.
 
-全局关闭 filter，所有 rpc 调用均不启用 filter
+Globally disable filters, so all RPC calls do not enable filters:
 ```yaml
 dubbo:
   consumer:
     filter: "-accesslog,-tps"
 ```
 
-某个服务调用过程不执行 filter
+Skip filter execution for a specific service call:
 ```java
 @DubboReference(filter="-accesslog,-tps")
 private DemoService demoService;
 ```
 
-### 开启自动加载
-如想开启某个 filter 加载，在不修改 Filter 定义的情况下，可通过以下几种配置开启。
+### Enable Automatic Loading
+To enable loading for a specific Filter without modifying its definition, you can use the following configurations.
 
-全局开启 filter，所有 rpc 调用均启用 filter
+Globally enable filters, so all RPC calls will enable filters:
 ```yaml
 dubbo:
   consumer:
     filter: "accesslog,tps"
 ```
 
-某个服务调用过程执行该 filter
+Execute the specified filter for a specific service call:
 ```java
 @DubboReference(filter="accesslog,tps")
 private DemoService demoService;
 ```
 
-## 内置实现
-以下是 Dubbo 框架中内置的一些 Filter 实现，作为某些功能的底层实现原理，大部分情况下用户不需要关心这些 Filter 实现。这里列出来作为参考，方便用户了解如何开启某个特定功能，以及他们背后的工作原理：
+## Built-in Implementations
+The following are some built-in Filter implementations in the Dubbo framework, serving as underlying implementation principles for certain features, which most users typically do not need to be concerned about. They are listed here for reference, to help users understand how to enable certain specific functionalities and the working principles behind them:
 
 
+## Specific Definitions
+The following are details regarding the specific definitions and implementations of Filters, which can serve as references for users extending Filters.
 
-## 具体定义
-以下是关于 Filter 过滤器具体定义与实现的一些细节，对于扩展 Filter 的用户可作为参考。
-
-### Filter定义
-Dubbo Filter 的定义如下：
+### Filter Definition
+The definition of Dubbo Filter is as follows:
 ```java
 public interface BaseFilter {
     /**
@@ -114,7 +113,7 @@ public interface BaseFilter {
 }
 ```
 
-基于以上 BaseFilter 定义，Dubbo 定义了两个 SPI 接口：ClusterFilter 与 Filter。这两个 SPI 实现能实现的效果基本是一致的，之所以定义两个主要是出于性能优化考虑，建议用户关注 Filter SPI 即可，仅在有严苛性能需求的情况下（如集群 provider 提供者实例数量庞大）才关注 ClusterFilter。
+Based on the above BaseFilter definition, Dubbo defines two SPI interfaces: ClusterFilter and Filter. The effects achievable by these two SPI implementations are essentially the same, but the reason for defining two is mainly for performance optimization. It is recommended that users focus on the Filter SPI and only consider ClusterFilter under strict performance requirements (such as a large number of cluster provider instances).
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/framework/cluster-filter.png"/>
 
@@ -128,9 +127,7 @@ public interface Filter extends BaseFilter {}
 public interface ClusterFilter extends BaseFilter {}
 ```
 
-### 扩展Filter
+### Extend Filter
 
-可参考 [使用教程 - 自定义扩展]() 学习具体示例。
-
-
+Refer to [Usage Tutorial - Custom Extensions]() for specific examples.
 

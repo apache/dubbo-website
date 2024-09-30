@@ -1,9 +1,10 @@
 ---
 aliases:
     - /en/overview/what/ecosystem/serialization/
-description: "dubbo 协议支持的序列化协议"
+description: "Serialization protocols supported by the Dubbo protocol"
 linkTitle: dubbo
-title: dubbo 协议支持的序列化
+title: Serialization Supported by the Dubbo Protocol
 type: docs
 weight: 3
 ---
+

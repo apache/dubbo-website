@@ -2,16 +2,16 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/probe/
     - /en/docs3-v2/java-sdk/reference-manual/qos/probe/
-description: 框架状态命令
-linkTitle: 框架状态命令
-title: 框架状态命令
+description: Framework status commands
+linkTitle: Framework status commands
+title: Framework status commands
 type: docs
 weight: 4
 ---
 
-### startup 命令
+### startup command
 
-检测当前框架是否已经启动完毕
+Check whether the current framework has started completely
 
 ```
 dubbo>startup
@@ -20,9 +20,9 @@ true
 dubbo>
 ```
 
-### ready 命令
+### ready command
 
-检测当前框架是否能正常提供服务（可能是临时下线）
+Check whether the current framework can provide services normally (it may be temporarily offline)
 
 ```
 dubbo>ready
@@ -31,9 +31,9 @@ true
 dubbo>
 ```
 
-### live 命令
+### live command
 
-检测当前框架是否正常运行（可能是永久异常）
+Check whether the current framework is running normally (it may be permanently abnormal)
 
 ```
 dubbo>live
@@ -41,3 +41,4 @@ true
 
 dubbo>
 ```
+

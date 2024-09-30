@@ -3,9 +3,10 @@ aliases:
     - /en/docs3-v2/java-sdk/version/
     - /en/docs3-v2/java-sdk/version/
     - /en/overview/mannual/java-sdk/version/
-description: "Dubbo 各个版本变更记录（release note），跨版本升级兼容性说明。"
-linkTitle: 版本变更记录
-title: 版本变更记录
+description: "Dubbo version changelog (release note) and compatibility instructions for cross-version upgrades."
+linkTitle: Changelog
+title: Changelog
 type: docs
 weight: 100
 ---
+

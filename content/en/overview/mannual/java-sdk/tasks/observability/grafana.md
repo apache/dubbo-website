@@ -5,23 +5,23 @@ aliases:
 description: ""
 linkTitle: Grafana
 no_list: true
-title: 使用 Grafana 可视化查看集群 Metrics 指标
+title: Visualizing Cluster Metrics with Grafana
 type: docs
 weight: 3
 ---
 
-指标可视化页面目前推荐的方式是使用 Grafana 来配置 Dubbo 的可观测性监控大盘。
+The recommended way to visualize metrics is to use Grafana to configure the observability monitoring dashboard for Dubbo.
 
-## 在您开始之前
-- 一个可以访问的 Kubernetes 集群
-- 正确安装并配置 [普罗米修斯服务](/en/overview/reference/integrations/prometheus/#安装)
-- 安装 [Grafana](/en/overview/reference/integrations/grafana/)
-- 部署 [示例应用](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot) 并开启指标采集
+## Before You Begin
+- An accessible Kubernetes cluster
+- Properly installed and configured [Prometheus service](/en/overview/reference/integrations/prometheus/#installation)
+- Installed [Grafana](/en/overview/reference/integrations/grafana/)
+- Deployed [Sample Application](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot) and enabled metrics collection
 
-## 确认组件正常运行
+## Confirm Component Status
 
 ### Kubernetes
-确保 Prometheus 正常运行
+Ensure Prometheus is running
 
 ```sh
 $ kubectl -n dubbo-system get svc prometheus
@@ -29,7 +29,7 @@ NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
 prometheus   ClusterIP   10.0.250.230   <none>        9090/TCP   180s
 ```
 
-确保 Grafana 正常运行
+Ensure Grafana is running
 
 ```sh
 $ kubectl -n dubbo-system get svc grafana
@@ -37,57 +37,58 @@ NAME      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
 grafana   ClusterIP   10.0.244.130   <none>        3000/TCP   180s
 ```
 
-## 部署示例
+## Deploy Sample
 
 ```yaml
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml
 ```
 
-等待示例应用正常运行，通过以下命令确认应用状态：
+Wait for the sample application to run, and confirm the application status with the following command:
 ```yaml
 kubectl -n dubbo-demo get deployments
 ```
 
-## 查看 Grafana 可视化面板
+## View Grafana Visualization Panel
 
-示例程序启动后会自动模拟服务调用，只需等待一会能在 Grafana 中可视化的看到 Metrics 指标。
-1. 如果是通过 [Dubbo 控制面](../../../reference/admin/architecture/) 安装的 Grafana，则可以访问 Admin 控制台并在左侧菜单中找到 Grafana 可视化监控入口
+After the sample program starts, it will automatically simulate service calls; just wait a bit to see metrics visualized in Grafana.
+1. If Grafana was installed via the [Dubbo Admin Panel](../../../reference/admin/architecture/), access the Admin console and find the Grafana monitoring entry in the left menu.
 
-2. 如果是独立安装的 Grafana 组件，则可以直接访问 Grafana 可视化控制台地址：
+2. If Grafana is a standalone installation, access the Grafana console directly:
 
 ```sh
 $ kubectl port-forward service/grafana 3000:3000
 ```
 
-在浏览器打开 Grafana 控制台：http://localhost:3000
+Open Grafana console in your browser: http://localhost:3000
 
-### 服务统计视图
-支持基于应用、实例粒度的统计视图，同时对于每一种指标统计粒度，你还可以进一步查看：
+### Service Statistics View
+Supports application and instance-level statistical views. For each statistical granularity, you can further view:
 
-1. 提供者流量视图
-
-![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
-
-2. 消费者流量视图
+1. Provider traffic view
 
 ![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
 
-3. 注册中心视图
+2. Consumer traffic view
+
+![grafana-dashboard-1.png](/imgs/v3/advantages/grafana-dashboard-1.png)
+
+3. Registry center view
 
 TBD
 
-4. 配置中心视图
+4. Configuration center view
 
 TBD
 
-### JVM 实例视图
+### JVM Instance View
 
 ![grafana-dashboard-2.png](/imgs/v3/advantages/grafana-dashboard-2.png)
 
-### 关于 Dubbo 官方提供的 Grafana Dashboard
+### About the Official Grafana Dashboard for Dubbo
 
-Dubbo 提供了丰富的指标面板，以上视图面板均可以在 Grafana 官方面板库中找到：您可以直接导入如下模版，并配置好数据源即可。
+Dubbo provides rich metric panels. The views mentioned above can be found in Grafana's official panel library; you can directly import the following templates and configure the data source.
 
-**Apache Dubbo Observability Dashboard：**  [https://grafana.com/grafana/dashboards/18469](https://grafana.com/grafana/dashboards/18469)
+**Apache Dubbo Observability Dashboard:**  [https://grafana.com/grafana/dashboards/18469](https://grafana.com/grafana/dashboards/18469)
 
-**JVM (Micrometer) Dashboard：** [https://grafana.com/grafana/dashboards/4701](https://grafana.com/grafana/dashboards/4701)
+**JVM (Micrometer) Dashboard:** [https://grafana.com/grafana/dashboards/4701](https://grafana.com/grafana/dashboards/4701)
+

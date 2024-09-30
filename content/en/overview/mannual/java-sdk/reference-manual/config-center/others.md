@@ -1,18 +1,18 @@
 ---
-description: "更多配置中心扩展实现，包括 etcd、consul 等"
-linkTitle: 扩展实现
-title: 更多配置中心扩展实现
+description: "More implementations of configuration center extensions, including etcd, consul, etc."
+linkTitle: Extension Implementations
+title: More Implementations of Configuration Center Extensions
 type: docs
 weight: 4
 ---
 
-Dubbo 框架还默认提供了 etcd、consul 等配置中心适配实现。
+The Dubbo framework also provides default implementations for configuration centers such as etcd and consul.
 
 ## Etcd
 
-Etcd 配置中心由社区生态库维护，具体可参见 [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-configcenter-extensions/dubbo-configcenter-etcd)。
+The Etcd configuration center is maintained by the community ecosystem library, for more details see [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-configcenter-extensions/dubbo-configcenter-etcd).
 
-增加依赖：
+Add dependency:
 
 ```xml
 <dependency>
@@ -22,7 +22,7 @@ Etcd 配置中心由社区生态库维护，具体可参见 [](https://github.co
 </dependency>
 ```
 
-调整配置：
+Adjust configuration:
 
 ```yaml
 dubbo
@@ -33,9 +33,9 @@ dubbo
 
 ## Consul
 
-Consul 配置中心由社区生态库维护，具体可参见 [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-configcenter-extensions/dubbo-configcenter-consul)。
+The Consul configuration center is maintained by the community ecosystem library, for more details see [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-configcenter-extensions/dubbo-configcenter-consul).
 
-增加依赖：
+Add dependency:
 
 ```xml
 <dependency>
@@ -45,7 +45,7 @@ Consul 配置中心由社区生态库维护，具体可参见 [](https://github.
 </dependency>
 ```
 
-调整配置：
+Adjust configuration:
 
 ```yaml
 dubbo

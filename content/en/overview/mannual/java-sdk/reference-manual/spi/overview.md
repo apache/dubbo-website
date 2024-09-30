@@ -2,24 +2,24 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/overview/
     - /en/docs3-v2/java-sdk/reference-manual/spi/overview/
-description: Dubbo 通过 SPI 机制提供了非常灵活的可扩展性
-linkTitle: SPI 概述
-title: Dubbo SPI 概述
+description: Dubbo provides very flexible extensibility through the SPI mechanism
+linkTitle: SPI Overview
+title: Dubbo SPI Overview
 type: docs
 weight: 1
 ---
 
-使用 IoC 容器帮助管理组件的生命周期、依赖关系注入等是很多开发框架的常用设计，Dubbo 中内置了一个轻量版本的 IoC 容器，用来管理框架内部的插件，实现包括插件实例化、生命周期、依赖关系自动注入等能力。
+Using IoC containers to help manage the lifecycle of components, dependency injection, etc., is a common design in many development frameworks. Dubbo has a lightweight version of an IoC container built in, used to manage plugins within the framework, achieving capabilities such as plugin instantiation, lifecycle management, and automatic dependency injection.
 
-感兴趣的读者可以了解：
-* [Dubbo SPI 扩展体系的工作原理](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/)
-* [Dubbo SPI 扩展使用示例](/en/overview/mannual/java-sdk/tasks/extensibility/spi/)
+Readers interested may learn about:
+* [How the Dubbo SPI Extension System Works](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/)
+* [Examples of Using Dubbo SPI Extensions](/en/overview/mannual/java-sdk/tasks/extensibility/spi/)
 
-Dubbo 插件体系与 IoC 容器具有以下特点：
-* **[核心组件均被定义为插件](../spi-list/)，用户或二次开发者扩展非常简单。** 在无需改造框架内核的情况下，用户可以基于自身需求扩展如负载均衡、注册中心、通信协议、路由等策略。
-* **平等对待第三方扩展实现。** Dubbo 中所有内部实现和第三方实现都是平等的，用户可以基于自身业务需求替换 Dubbo 提供的原生实现。
-* **[插件依赖支持自动注入（IoC）](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#23-ioc-机制)。** 如果插件实现依赖其他插件属性，则 Dubbo 框架会完成该依赖对象的自动注入，支持属性、构造函数等方式。
-* **[插件扩展实现支持 AOP 能力](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#24-aop-机制)。** 框架可以自动发现扩展类的包装类，通过包装器模式对插件进行 AOP 增强。
-* **[支持插件自动激活](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#25-activate激活条件)。** 通过为插件实现指定激活条件（通过注解参数等），框架可在运行时自动根据当前上下文决策是否激活该插件实现。
-* **[支持插件扩展排序](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#26-扩展点排序)。**
+The Dubbo plugin system and IoC container have the following characteristics:
+* **[Core components are defined as plugins](../spi-list/), making it very easy for users or secondary developers to expand.** Users can extend strategies like load balancing, registration centers, communication protocols, routing, etc., based on their needs without modifying the framework kernel.
+* **Treating third-party extensions equally.** All internal and third-party implementations in Dubbo are treated the same, allowing users to replace the native implementations provided by Dubbo according to their business needs.
+* **[Plugin dependencies support automatic injection (IoC)](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#23-ioc-机制).** If a plugin implementation depends on other plugin properties, the Dubbo framework will automatically inject that dependent object, supporting methods like properties and constructors.
+* **[Plugin extension implementations support AOP capabilities](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#24-aop-机制).** The framework can automatically discover wrapper classes for extension classes and enhance the plugin using AOP through the wrapper pattern.
+* **[Automatic plugin activation is supported](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#25-activate激活条件).** By specifying activation conditions for plugin implementations (through annotation parameters, etc.), the framework can automatically decide whether to activate that plugin implementation based on the current context at runtime.
+* **[Support for plugin extension sorting](/en/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#26-扩展点排序).**
 

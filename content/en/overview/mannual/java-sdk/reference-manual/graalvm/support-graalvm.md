@@ -3,46 +3,46 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/support-graalvm/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/support-graalvm/
-description: "Dubbo AOT 技术详解，如何使用 GraalVM Native Image 实现 Dubbo 应用静态化。"
-linkTitle: 支持 GraalVM Native Image
-title: "Dubbo AOT -- 如何使用 GraalVM Native Image 实现 Dubbo 应用静态化"
+description: "Detailed explanation of Dubbo AOT technology and how to implement static Dubbo applications using GraalVM Native Image."
+linkTitle: Support for GraalVM Native Image
+title: "Dubbo AOT -- How to Implement Static Dubbo Applications using GraalVM Native Image"
 type: docs
 weight: 40
 ---
 
-在 Dubbo 3.3.0 版本中，我们正式发布了 Dubbo AOT 静态化解决方案。本文档将介绍将介绍如何借助 Dubbo AOT 技术将应用接入 GraalVM Native Image，将应用编译为 Native 二进制包的流程以及目前支持的组件。
+In the Dubbo 3.3.0 version, we officially released the Dubbo AOT static solution. This document will introduce how to connect applications to GraalVM Native Image through Dubbo AOT technology, the process of compiling applications into native binary packages, and the components currently supported.
 
-{{% alert title="Dubbo GraalVM 适配文档可能更新滞后" color="warning" %}}
-由于 Dubbo AOT 技术发展迅速，本文档内容可能无法总是保持及时更新，请结合以下内容了解最新内容与使用方式：
-* <a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry" target="_blank">示例项目源码</a>
-* <a href="/zh-cn/blog/2023/06/28/走向-native-化springdubbo-aot-技术示例与原理讲解/" target="_blank">博客文章与演讲</a>
+{{% alert title="Dubbo GraalVM adaptation document may be out of date" color="warning" %}}
+Due to the rapid development of Dubbo AOT technology, this document may not always be up to date. Please refer to the following content for the latest information and usage:
+* <a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry" target="_blank">Sample project source code</a>
+* <a href="/zh-cn/blog/2023/06/28/走向-native-化springdubbo-aot-技术示例与原理讲解/" target="_blank">Blog articles and talks</a>
 
-关于 GraalVm 的更多信息可以阅读 https://www.graalvm.org/docs/getting-started/container-images/ 此文档。
+For more information about GraalVm, you can read the document at https://www.graalvm.org/docs/getting-started/container-images/.
 {{% /alert %}}
 
-## 使用场景
-- 本机映像编译：将应用程序预编译为本机映像，缩短启动时间并减少内存使用。
+## Usage Scenarios
+- Native Image Compilation: Pre-compile applications into native images to reduce startup time and memory usage.
 
-- 语言互操作：GraalVM 能够用多种语言编写代码，在同一应用程序中进行互操作。
+- Language Interoperability: GraalVM allows writing code in multiple languages to interoperate within the same application.
 
-- 优化：GraalVM 为用 Java、JavaScript 和其他语言编写的应用程序提供优化，提高 Dubbo 应用程序的性能。
+- Optimization: GraalVM provides optimizations for applications written in Java, JavaScript, and other languages, enhancing the performance of Dubbo applications.
 
-- Polyglot 调试：GraalVM 能够在同一会话中调试用多种语言编写的代码，对复杂 Dubbo 应用程序中的问题进行故障排除时非常有用。
+- Polyglot Debugging: GraalVM can debug code written in multiple languages within the same session, which is very useful for troubleshooting issues in complex Dubbo applications.
 
-- Java 运行时：可以在 GraalVM 上运行，提供更快、更高效的 Java 运行时环境。
+- Java Runtime: It can run on GraalVM, providing a faster, more efficient Java runtime environment.
 
-- 开发微服务：可以与 GraalVM 结合，创建高性能、低资源利用率的微服务。
+- Developing Microservices: It can be combined with GraalVM to create high-performance, low-resource-utilization microservices.
 
-## 使用方式
-在编译我们的dubbo项目之前，需要确保我们正基于graalVm的环境。
+## How to Use
+Before compiling our Dubbo project, ensure that we are based on a GraalVM environment.
 
-### 第一步：安装GraalVM
-1. 在Graalvm官网根据自己的系统选取对应Graalvm版本：https://www.graalvm.org/downloads/
-2. 根据官方文档安装native-image：https://www.graalvm.org/latest/reference-manual/native-image/#install-native-image
+### Step 1: Install GraalVM
+1. Select the corresponding GraalVM version for your system from the official GraalVM website: https://www.graalvm.org/downloads/
+2. Install native-image according to the official documentation: https://www.graalvm.org/latest/reference-manual/native-image/#install-native-image
 
-### 第二步：配置profiles
+### Step 2: Configure Profiles
 
-其中包括maven-compiler-plugin、spring-boot-maven-plugin、native-maven-plugin、dubbo-maven-plugin，修改dubbo-maven-plugin中的mainClass为所需的启动类全路径。（其中API使用方式无需添加spring-boot-maven-plugin依赖。）
+This includes maven-compiler-plugin, spring-boot-maven-plugin, native-maven-plugin, and dubbo-maven-plugin. Modify the mainClass in dubbo-maven-plugin to the full path of the required startup class. (The API usage does not require adding the spring-boot-maven-plugin dependency.)
 
 ```xml
     <profiles>
@@ -112,11 +112,9 @@ weight: 40
     </profiles>
 ```
 
+### Step 3: Add Native Related Dependencies in Pom:
 
-
-### 第三步：在Pom依赖中添加native相关的依赖：
-
-**其中API使用方式无需添加dubbo-config-spring6依赖**。
+**The API usage does not require adding the dubbo-config-spring6 dependency.**
 
 ```xml
 <dependency>
@@ -131,9 +129,9 @@ weight: 40
 </dependency>
 ```
 
-### 第四步：配置应用
+### Step 4: Configure the Application
 
-示例配置如下：
+Example configuration:
 
 ```yaml
 dubbo:
@@ -157,67 +155,67 @@ dubbo:
     serialization: fastjson2
 ```
 
-### 第五步：编译
+### Step 5: Compile
 
-在项目根路径下执行以下编译命令：
+Run the following compile command in the project's root path:
 
-- API方式直接执行
+- Execute directly for API usage
 
 ```
  mvn clean install -P native -Dmaven.test.skip=true
 ```
 
-- 注解和xml方式（Springboot3集成的方式）
+- For annotation and XML methods (Springboot3 integration)
 
 ```shell
  mvn clean install -P native native:compile -Dmaven.test.skip=true
 ```
 
-### 第六步：执行二进制文件即可
+### Step 6: Execute the Binary File
 
-二进制文件在target/目录下，一般以工程名称为二进制包的名称，比如target/native-demo
+The binary file is located in the target/ directory, usually named after the project, for example, target/native-demo.
 
-## 支持的组件以及对应的版本
+## Supported Components and Corresponding Versions
 
-### 日志组件
+### Logging Components
 
-| 组件名称               | 所需的插件               | 插件版本               | 备注                |
-| ---------------------- | ------------------------ | ---------------------- | ------------------- |
-| Apache Commons Logging | native-maven-plugin      | 0.9.24 及其以上        |                     |
-| JDK Logger             | native-maven-plugin      | 0.9.24 及其以上        |                     |
-| slf4j                  | spring-boot-maven-plugin | 3.x.x (用最新版本即可) |                     |
-| Log4j                  | native-maven-plugin      | 0.10.0 及其以上        |                     |
-| Log4j2                 |                          |                        |                     |
+| Component Name               | Required Plugin               | Plugin Version               | Notes                |
+| ----------------------------- | ------------------------------ | ----------------------------- | ------------------- |
+| Apache Commons Logging        | native-maven-plugin           | 0.9.24 and above             |                     |
+| JDK Logger                    | native-maven-plugin           | 0.9.24 and above             |                     |
+| slf4j                         | spring-boot-maven-plugin      | 3.x.x (latest version)      |                     |
+| Log4j                         | native-maven-plugin           | 0.10.0 and above             |                     |
+| Log4j2                        |                                |                             |                     |
 
-### 序列化组件
+### Serialization Components
 
-| 组件名称     | 所需的插件          | 插件版本        | 备注                         |
-| ------------ | ------------------- |-------------| ---------------------------- |
-| FastJson2    | dubbo-maven-plugin  | 3.3.0 及其以上  |                              |
-| JDK          | native-maven-plugin | 0.9.24 及其以上 |                              |
-| Hessian-Lite |                     |             | 对JDK 17支持不友好，暂不支持 |
+| Component Name     | Required Plugin          | Plugin Version        | Notes                         |
+| ------------------ | ----------------------- |------------------| ---------------------------- |
+| FastJson2          | dubbo-maven-plugin      | 3.3.0 and above  |                              |
+| JDK                | native-maven-plugin     | 0.9.24 and above |                              |
+| Hessian-Lite       |                         |                  | Not friendly with JDK 17, unsupported for now |
 
-### 注册中心组件
+### Registry Center Components
 
-| 组件名称  | 所需的插件         | 插件版本                        | 备注                     |
-| --------- | ------------------ | ------------------------------- | ------------------------ |
-| Zookeeper | dubbo-maven-plugin | 3.3.0 | 仅支持Zookeeper Curator5 |
+| Component Name  | Required Plugin         | Plugin Version                        | Notes                     |
+| ---------------- | ----------------------- | ----------------------------------- | ------------------------ |
+| Zookeeper       | dubbo-maven-plugin      | 3.3.0 | Only supports Zookeeper Curator5 |
 
-### 元数据中心组件
+### Metadata Center Components
 
-| 组件名称  | 所需的插件         | 插件版本                        | 备注                     |
-| --------- | ------------------ | ------------------------------- | ------------------------ |
-| Zookeeper | dubbo-maven-plugin | 3.3.0 | 仅支持Zookeeper Curator5 |
+| Component Name  | Required Plugin         | Plugin Version                        | Notes                     |
+| ---------------- | ----------------------- | ----------------------------------- | ------------------------ |
+| Zookeeper       | dubbo-maven-plugin      | 3.3.0 | Only supports Zookeeper Curator5 |
 
-### 配置中心组件
+### Configuration Center Components
 
-| 组件名称  | 所需的插件         | 插件版本  | 备注                     |
-| --------- | ------------------ |-------| ------------------------ |
-| Zookeeper | dubbo-maven-plugin | 3.3.0 | 仅支持Zookeeper Curator5 |
+| Component Name  | Required Plugin         | Plugin Version  | Notes                     |
+| ---------------- | ----------------------- |----------------| ------------------------ |
+| Zookeeper       | dubbo-maven-plugin      | 3.3.0 | Only supports Zookeeper Curator5 |
 
-### 可观测性组件
+### Observability Components
 
-| 组件名称   | 所需的插件 | 插件版本 | 备注 |
-| ---------- | ---------- | -------- | ---- |
-| Micrometer |            |          |      |
+| Component Name   | Required Plugin | Plugin Version | Notes |
+| ---------------- | ---------------- | ---------------- | ---- |
+| Micrometer       |                  |                  |      |
 

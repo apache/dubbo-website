@@ -1,9 +1,10 @@
 ---
-description: 分布式事务
+description: Distributed Transactions
 hide: true
-linkTitle: 分布式事务
+linkTitle: Distributed Transactions
 no_list: true
-title: 分布式事务
+title: Distributed Transactions
 type: docs
 weight: 7
 ---
+

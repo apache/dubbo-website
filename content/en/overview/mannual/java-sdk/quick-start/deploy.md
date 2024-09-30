@@ -1,26 +1,26 @@
 ---
-description: 快速部署Dubbo应用
-linkTitle: 部署Dubbo应用
-title: 快速部署Dubbo应用
+description: Quick Deployment of Dubbo Applications
+linkTitle: Deploying Dubbo Applications
+title: Quick Deployment of Dubbo Applications
 type: docs
 toc_hide: true
 hide_summary: true
 weight: 3
 ---
 
-在上一篇文章中，我们从头创建了一个 Dubbo 应用并详细介绍了它的代码结构，接下来，我们将学习部署这个 Dubbo 应用。
+In the previous article, we created a Dubbo application from scratch and detailed its code structure. Next, we will learn how to deploy this Dubbo application.
 
-本文将以 Kubernetes 集群作为基础环境来讲解 Dubbo 应用的部署，部署架构如下图所示。
-![Dubbo+Kubernetes+Nacos 部署架构图]()
+This article will explain the deployment of Dubbo applications based on a Kubernetes cluster, and the deployment architecture is shown in the diagram below.
+![Dubbo+Kubernetes+Nacos Deployment Architecture]()
 
-{{% alert title="注意" color="info" %}}
-在实际使用中，部署环境可能变化多样，包括 Kubernetes Service、服务网格(Service Mesh)、虚拟机等多种部署模式，请参考 [部署文档]() 了解更多详细内容。
+{{% alert title="Note" color="info" %}}
+In real-world usage, the deployment environment may vary widely, including Kubernetes Services, Service Mesh, virtual machines, and more. Please refer to [Deployment Documentation]() for more detailed content.
 {{% /alert %}}
 
-## 前置条件
-Dubbo 社区提供了工具和解决方案来简化整个 Kubernetes 环境的打包与部署过程，所以开始前我们需要先安装相关工具。
+## Prerequisites
+The Dubbo community provides tools and solutions to simplify the packaging and deployment process in the entire Kubernetes environment. Therefore, we need to install the relevant tools before we begin.
 
-1. 安装 dubboctl（如尚未安装）
+1. Install dubboctl (if not already installed)
     ```sh
     curl -L https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/release/downloadDubbo.sh | sh -
 
@@ -28,95 +28,83 @@ Dubbo 社区提供了工具和解决方案来简化整个 Kubernetes 环境的�
     export PATH=$PWD/bin:$PATH
     ```
 
+## Deploying the Application
 
-## 部署应用
+### Initialize Microservices Cluster
 
-### 初始化微服务集群
-
-1. dubboctl 安装完成之后，接下来通过以下命令初始化微服务部署环境
-
+1. Once dubboctl is installed, initialize the microservice deployment environment with the following command:
     ```sh
     dubboctl manifest install --profile=demo
     ```
 
-    作为演示目的，以上命令会一键安装 Zookeeper、Dubbo Control Plane、Prometheus、Grafana、Zipkin、Ingress 等组件，关于 `--profile=demo` 更多解释及配置请参见文档说明。
+    For demonstration purposes, the above command will install Zookeeper, Dubbo Control Plane, Prometheus, Grafana, Zipkin, Ingress, and other components at once. For more explanations and configurations about `--profile=demo`, please refer to the documentation.
 
-2. 检查环境准备就绪
-
+2. Check if the environment is ready:
     ```sh
     kubectl get services -n dubbo-system
     ```
 
-3. 最后，为目标 kubernetes namespace 开启自动注入模式，以便应用部署后能够自动连接到刚刚安装的 Zookeeper 注册中心等组件。
-
+3. Finally, enable the automatic injection mode for the target Kubernetes namespace, so that the application can automatically connect to the Zookeeper registry and other components after deployment.
     ```shell
     kubectl label namespace dubbo-demo dubbo-injection=enabled --overwrite
     ```
 
-### 部署 Dubbo 应用
+### Deploying the Dubbo Application
 
-接下来我们为之前创建的应用打包镜像（请确保本地安装有 Docker 环境并且已经启动 Docker 进程），在应用根目录分别运行以下命令：
-
+Next, we will package the image for the application created earlier (please ensure that Docker is installed locally and the Docker process is running). Run the following command in the application's root directory:
 ```shell
 dubboctl build --dockerfile=./Dockerfile
 ```
 
-`build` 命令会将源码打包为镜像，并推送到远端仓库，取决于网络情况，可能需要一定时间等待命令执行完成。
+The `build` command packages the source code into an image and pushes it to a remote repository. Depending on the network situation, it may take some time to complete the command.
 
-接下来，我们需要生成部署应用的 Kubernetes 资源文件，运行以下命令：
+Next, we need to generate the Kubernetes resource files for deploying the application by running the following command:
 ```shell
 dubboctl deploy
 ```
 
-`deploy` 命令会使用刚刚 `build` 打包的镜像生成 Kubernetes 资源清单。命令执行成功后，在当前目录看到生成的 `kube.yaml` 文件，其中包括 deployment、service 等 kubernetes 资源定义。
+The `deploy` command will generate the Kubernetes resource manifests using the image just packaged by `build`. After successful execution of the command, you will see the generated `kube.yaml` file in the current directory, which includes the definitions of Kubernetes resources such as deployment and service.
 
-
-{{% alert title="注意" color="warning" %}}
-本地构建可能会花费比较长时间，如您本地构建遇到问题，也可以使用以下命令跳过 `build` 过程。
-
+{{% alert title="Note" color="warning" %}}
+Local builds may take a long time. If you encounter problems with local builds, you can use the following command to skip the `build` process.
 ```sh
 dubboctl deploy --image=apache/dubbo-demo:quickstart_0.1
-# `--image` 指定使用官方预先准备好的示例镜像
+# `--image` specifies using an officially prepared example image
 ```
 {{% /alert %}}
 
-接下来，将应用部署到 Kubernetes 环境。
-
+Next, deploy the application to the Kubernetes environment.
 ```shell
 kubectl apply -f ./kube.yaml
 ```
 
-检查部署状态
+Check the deployment status:
 ```shell
 kubectl get services -n dubbo-demo
 ```
 
-## 访问应用
-部署成功后，可以通过以下方式检查应用状态。
+## Accessing the Application
+After a successful deployment, you can check the application status in the following ways.
 
 {{< tabpane text=true >}}
-{{< tab header="请根据情况选择：" disabled=true />}}
-{{% tab header="本地 Kubernetes 集群" lang="en" %}}
+{{< tab header="Please choose according to your situation:" disabled=true />}}
+{{% tab header="Local Kubernetes Cluster" lang="en" %}}
 <br/>
 
-1. 如果使用的本地 Kubernetes 集群，请使用以下方式访问应用验证部署状态：
-
+1. If you are using a local Kubernetes cluster, please use the following method to access the application and verify the deployment status:
     ```shell
     dubboctl dashboard admin
     ```
 
-2. 以上命令会自动打开 admin 控制台，如果在您的环境下没有打开，请使用浏览器访问以下地址：
-
+2. The above command will automatically open the admin console. If it doesn't open in your environment, please visit the following address with your browser:
     http://localhost:38080/admin
 
-3. 通过 triple 协议，可以继续测试 Dubbo 服务，执行以下命令进行端口映射：
-
+3. To continue testing Dubbo services through the triple protocol, execute the following command for port mapping:
     ```shell
     kubectl port-forward <pod-name> 50051:50051
     ```
 
-4. 通过 curl 访问服务：
-
+4. Access the service using curl:
     ```shell
     curl \
         --header "Content-Type: application/json" \
@@ -126,14 +114,12 @@ kubectl get services -n dubbo-demo
 
 {{% /tab %}}
 
-{{% tab header="阿里云ACK" lang="zh-cn" %}}
+{{% tab header="Alibaba Cloud ACK" lang="zh-cn" %}}
 <br/>
 
-对于云上托管的哦 Kubernetes 集群，可以使用以下方式验证，这里以阿里云 ACK 集群为例：
+For cloud-hosted Kubernetes clusters, you can verify using the following method. Here, taking Alibaba Cloud ACK Cluster as an example:
 
-ACK ingerss-controller 的访问方式......
-
+ACK ingress-controller access method......
 {{% /tab %}}
 {{< /tabpane >}}
-
 

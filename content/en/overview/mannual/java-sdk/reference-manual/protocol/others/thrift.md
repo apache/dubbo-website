@@ -1,9 +1,9 @@
 ---
 aliases:
     - /en/overview/mannual/java-sdk/reference-manual/protocol/thrift/
-description: Thrift 协议
-linkTitle: Thrift 协议
-title: Thrift 协议
+description: Thrift Protocol
+linkTitle: Thrift Protocol
+title: Thrift Protocol
 type: docs
 weight: 4
 ---
@@ -11,15 +11,15 @@ weight: 4
 
 
 
-当前 dubbo 支持的 thrift 协议是对 thrift 原生协议 [^1] 的扩展，在原生协议的基础上添加了一些额外的头信息，比如 service name，magic number 等。
+The Thrift protocol currently supported by Dubbo is an extension of the native Thrift protocol [^1], adding some extra header information on top of the base protocol, such as service name, magic number, etc.
 
-{{% alert title="提示" color="primary" %}}
-`2.3.0` 以上版本支持
+{{% alert title="Note" color="primary" %}}
+Version `2.3.0` and above supported
 {{% /alert %}}
 
-使用 dubbo thrift 协议同样需要使用 thrift 的 idl compiler 编译生成相应的 java 代码，后续版本中会在这方面做一些增强。
+Using the Dubbo Thrift protocol also requires the Thrift IDL compiler to compile and generate the corresponding Java code. Future versions will enhance this aspect.
 
-## 依赖
+## Dependencies
 
 ```xml
 <dependency>
@@ -29,21 +29,22 @@ weight: 4
 </dependency>
 ```
 
-## 配置
+## Configuration
 
-所有服务共用一个端口 [^2]：
+All services share a common port [^2]:
 
 ```xml
 <dubbo:protocol name="thrift" port="3030" />
 ```
 
-## 使用
+## Usage
 
-可以参考 [dubbo 项目中的示例代码](https://github.com/apache/dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol/thrift)
+Refer to the [example code in the Dubbo project](https://github.com/apache/dubbo/tree/master/dubbo-rpc/dubbo-rpc-thrift/src/test/java/org/apache/dubbo/rpc/protocol/thrift)
 
-## 常见问题
+## Frequently Asked Questions
 
-* Thrift 不支持 null 值，即：不能在协议中传递 null 值
+* Thrift does not support null values, meaning: null values cannot be passed in the protocol.
 
-[^1]: [Thrift](http://thrift.apache.org) 是 Facebook 捐给 Apache 的一个 RPC 框架
-[^2]: 与原生Thrift不兼容
+[^1]: [Thrift](http://thrift.apache.org) is an RPC framework donated by Facebook to Apache.
+[^2]: Not compatible with native Thrift.
+

@@ -3,38 +3,37 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/distributed-transaction/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/distributed-transaction/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/distributed-transaction/
-description: "使用 Seata 解决 Dubbo 服务数据一致性问题，支持分布式事务。"
-linkTitle: 使用Seata让Dubbo支持分布式事务
-title: 使用 Seata 支持分布式事务
+description: "Use Seata to solve the data consistency problem of Dubbo services, supporting distributed transactions."
+linkTitle: Use Seata to enable distributed transactions in Dubbo
+title: Support Distributed Transactions with Seata
 type: docs
 weight: 42
 ---
-本示例演示如何使用 Apache Seata 实现 Dubbo 分布式事务功能，保证数据一致性。
+This example demonstrates how to implement Dubbo distributed transaction functionality using Apache Seata to ensure data consistency.
 
-Apache Seata 是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。
-在Dubbo中集成Seata实现分布式事务非常方便，只需简单几步即可完成，本文将通过一个示例带你快速体验，示例总体架构图如下：
+Apache Seata is an open-source distributed transaction solution that aims to provide high-performance and easy-to-use distributed transaction services under microservices architecture. Integrating Seata with Dubbo to achieve distributed transactions is very convenient, requiring just a few simple steps. This article will guide you through a quick experience with an example; the overall architecture diagram is as follows:
 
 ![seata-flow](/imgs/docs3-v2/java-sdk/seata/flow.png)
 
-开始前，请先完成以下内容:
+Before starting, please complete the following:
 
-1. 下载示例源码
+1. Download the example source code
 	```shell
 	git clone --depth=1 https://github.com/apache/dubbo-samples.git
 	```
 
-	进入示例源码目录：
+	Enter the example source directory:
 	```shell
 	cd dubbo-samples/2-advanced/dubbo-samples-seata
 	```
 
-2. 下载最新版的[seata-server二进制包](https://seata.apache.org/zh-cn/unversioned/download/seata-server)至本地。
+2. Download the latest version of the [seata-server binary package](https://seata.apache.org/zh-cn/unversioned/download/seata-server) to your local.
 
-## 步骤 1：建立数据库并初始化相关测试数据
-- 本文将使用MySQL 5.7 (更多支持的数据库可在文末查看附录)。
-进入dubbo-samples-seata的script目录，找到dubbo_biz.sql和undo_log.sql两个数据库脚本文件，内容如下:
+## Step 1: Create the database and initialize related test data
+- This article will use MySQL 5.7 (more supported databases can be viewed in the appendix at the end).
+Go to the script directory of dubbo-samples-seata, find the two database script files dubbo_biz.sql and undo_log.sql, the content is as follows:
 
-undo_log.sql是Seata AT 模式需要 `UNDO_LOG` 表
+undo_log.sql is the `UNDO_LOG` table required for Seata AT mode
 ```sql
 -- for AT mode you must to init this sql for you business database. the seata server not need it.
 CREATE TABLE IF NOT EXISTS `undo_log`
@@ -51,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `undo_log`
 ALTER TABLE `undo_log` ADD INDEX `ix_log_created` (`log_created`);
 
 ```
-dubbo_biz.sql是示例业务表以及初始化数据
+dubbo_biz.sql is the example business tables and initialization data
 
 ```sql
 DROP TABLE IF EXISTS `stock_tbl`;
@@ -92,14 +91,14 @@ INSERT INTO account_tbl(`user_id`,`money`) VALUES('ACC_001','1000');
 INSERT INTO stock_tbl(`commodity_code`,`count`) VALUES('STOCK_001','100');
 
 ```
-### 请依次执行以下操作:
-* 1.1 创建seata数据库(实际业务场景中会使用不同的数据库，本文为了方便演示仅创建一个数据库，所有的表都在该数据库中创建)
-* 1.2 执行undo_log.sql表中的脚本完成AT模式所需的undo_log表创建
-* 1.3 执行dubbo_biz.sql表中的脚本完成示例业务表创建以及测试数据的初始化
+### Please perform the following operations in order:
+* 1.1 Create the seata database (in a real business scenario, different databases will be used; this article creates only one database for demonstration convenience, and all tables are created in this database).
+* 1.2 Execute the scripts in undo_log.sql to create the undo_log table required for AT mode.
+* 1.3 Execute the scripts in dubbo_biz.sql to create the example business tables and initialize test data.
 
-## 步骤 2：更新spring-boot应用配置中的数据库连接信息
+## Step 2: Update the database connection information in the spring-boot application configuration
 
-请将以下3个子模块的数据库连接信息更新为你的信息，其他配置无需更改，至此，客户端的配置已经完毕。
+Please update the database connection information for the following 3 sub-modules with your information; other configurations do not need to be changed. At this point, the client configuration is complete.
 
 * dubbo-samples-seata-account
 * dubbo-samples-seata-order
@@ -110,50 +109,51 @@ username: root
 password: 123456
 ```
 
-## 步骤 3：启动Seata-Server
-- 本文使用的是Seata-Server V2.0.0版本。
+## Step 3: Start Seata-Server
+- This article uses Seata-Server version 2.0.0.
 
-请将下载的Seata-Server二进制包解压，并进入bin目录，然后执行以下命令即可启动Seata-Server。
+Please unzip the downloaded Seata-Server binary package, enter the bin directory, and then execute the following command to start Seata-Server.
 
-如果你是Mac OS 或者Linux操作系统，请执行:
+If you are using Mac OS or Linux, please execute:
 ```
 ./seata-server.sh
 ```
-或者你是Windows操作系统，请执行:
+Or if you are using Windows, please execute:
 ```
 ./seata-server.bat
 ```
 
-## 步骤 4：启动示例
+## Step 4: Start the Example
 
-一切准备就绪，开始启动示例
+Everything is ready; start the example.
 
-### 请依次启动以下子项目:
+### Please start the following sub-projects in order:
 * 4.1 Account Service
 * 4.2 Order Service
 * 4.3 Stock Service
 * 4.4 Business Service
 
-## 步骤 5：查看分布式事务执行结果
-通过访问以下链接，可以测试分布式事务成功提交流程:
+## Step 5: View the results of the distributed transaction execution
+By accessing the following link, you can test the successful submission flow of the distributed transaction:
 
 http://127.0.0.1:9999/test/commit?userId=ACC_001&commodityCode=STOCK_001&orderCount=1
 
-**分布式事务成功提交时，业务表的数据将正常更新，请注意观察数据库表中的数据。**
+**When the distributed transaction is successfully submitted, the data in the business table will be updated normally; please pay attention to observe the data in the database table.**
 
-通过访问以下链接，可以测试分布式事务失败回滚流程:
+By accessing the following link, you can test the failed rollback process of the distributed transaction:
 
 http://127.0.0.1:9999/test/rollback?userId=ACC_001&commodityCode=STOCK_001&orderCount=1
 
-**分布式事务失败回滚时，业务表的数据将没有任何改变，请注意观察数据库表中的数据。**
+**When the distributed transaction fails to roll back, there will be no changes in the data of the business table; please pay attention to observe the data in the database table.**
 
-## 附录
-* 支持的事务模式:Seata目前支持AT、TCC、SAGA、XA等模式，详情请访问[Seata官网](https://seata.apache.org/zh-cn/docs/user/mode/at)进行了解
-* 支持的配置中心:Seata支持丰富的配置中心，如zookeeper、nacos、consul、apollo、etcd、file(本文使用此配置中心，无需第三方依赖，方便快速演示)，详情请访问[Seata配置中心](https://seata.apache.org/zh-cn/docs/user/configuration/)进行了解
-* 支持的注册中心:Seata支持丰富的注册中心，如eureka、sofa、redis、zookeeper、nacos、consul、etcd、file(本文使用此注册中心，无需第三方依赖，方便快速演示)，详情请访问[Seata注册中心](https://seata.apache.org/zh-cn/docs/user/registry/)进行了解
-* 支持的部署方式:直接部署、Docker、K8S、Helm等部署方式，详情请访问[Seata部署方式](https://seata.apache.org/zh-cn/docs/ops/deploy-guide-beginner)进行了解
-* 支持的API:Seata的API分为两大类：High-Level API 和 Low-Level API，详情请访问[Seata API](https://seata.apache.org/zh-cn/docs/user/api)进行了解
-* 支持的数据库:Seata支持MySQL、Oracle、PostgreSQL、TiDB、MariaDB等数据库，不同的事务模式会有差别，详情请访问[Seata支持的数据库](https://seata.apache.org/zh-cn/docs/user/datasource)进行了解
-* 支持ORM框架:Seata 虽然是保证数据一致性的组件，但对于 ORM 框架并没有特殊的要求，像主流的Mybatis，Mybatis-Plus，Spring Data JPA, Hibernate等都支持。这是因为ORM框架位于JDBC结构的上层，而 Seata 的 AT,XA 事务模式是对 JDBC 标准接口操作的拦截和增强。详情请访问[Seata支持的ORM框架](https://seata.apache.org/zh-cn/docs/user/ormframework)进行了解
-* 支持的微服务框架:Seata目前支持Dubbo、gRPC、hsf、http、motan、sofa等框架，同时seata提供了丰富的拓展机制，理论上可以支持任何微服务框架。详情请访问[Seata支持的微服务框架](https://seata.apache.org/zh-cn/docs/user/microservice)进行了解
-* SQL限制:Seata 事务目前支持 INSERT、UPDATE、DELETE 三类 DML 语法的部分功能，这些类型都是已经经过Seata开源社区的验证。SQL 的支持范围还在不断扩大，建议在本文限制的范围内使用。详情请访问[Seata SQL限制](https://seata.apache.org/zh-cn/docs/user/sqlreference/sql-restrictions)进行了解
+## Appendix
+* Supported transaction modes: Seata currently supports AT, TCC, SAGA, XA, and more; for details, please visit [Seata official website](https://seata.apache.org/zh-cn/docs/user/mode/at).
+* Supported configuration centers: Seata supports various configuration centers such as zookeeper, nacos, consul, apollo, etcd, file (this article uses this configuration center for easy demonstration without third-party dependencies); for details, please visit [Seata configuration center](https://seata.apache.org/zh-cn/docs/user/configuration/).
+* Supported registry centers: Seata supports various registry centers such as eureka, sofa, redis, zookeeper, nacos, consul, etcd, file (this article uses this registry center for easy demonstration without third-party dependencies); for details, please visit [Seata registry center](https://seata.apache.org/zh-cn/docs/user/registry/).
+* Supported deployment methods: direct deployment, Docker, K8S, Helm, etc.; for details, please visit [Seata deployment methods](https://seata.apache.org/zh-cn/docs/ops/deploy-guide-beginner).
+* Supported APIs: Seata's APIs are divided into two categories: High-Level API and Low-Level API; for details, please visit [Seata API](https://seata.apache.org/zh-cn/docs/user/api).
+* Supported databases: Seata supports MySQL, Oracle, PostgreSQL, TiDB, MariaDB, etc.; different transaction modes may have differences; for details, please visit [Seata supported databases](https://seata.apache.org/zh-cn/docs/user/datasource).
+* Supported ORM frameworks: Although Seata is a component for ensuring data consistency, it does not have special requirements for ORM frameworks; mainstream frameworks such as Mybatis, Mybatis-Plus, Spring Data JPA, Hibernate, etc., are all supported. This is because ORM frameworks are located above the JDBC structure, while Seata's AT and XA transaction modes intercept and enhance the operations on the JDBC standard interface. For more details, please visit [Seata supported ORM frameworks](https://seata.apache.org/zh-cn/docs/user/ormframework).
+* Supported microservice frameworks: Seata currently supports Dubbo, gRPC, hsf, http, motan, sofa, etc. Additionally, Seata provides a rich extension mechanism and can theoretically support any microservice framework. For more details, please visit [Seata supported microservice frameworks](https://seata.apache.org/zh-cn/docs/user/microservice).
+* SQL limitations: Seata transactions currently support some functionalities of INSERT, UPDATE, DELETE DML statements; these have been validated by the Seata open-source community. The scope of SQL support is continually expanding; it is recommended to use within the limits specified in this article. For more details, please visit [Seata SQL limitations](https://seata.apache.org/zh-cn/docs/user/sqlreference/sql-restrictions).
+

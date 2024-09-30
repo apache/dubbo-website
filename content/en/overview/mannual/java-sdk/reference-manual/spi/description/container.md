@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/container/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/container/
-description: 容器扩展
-linkTitle: 容器扩展
-title: 容器扩展
+description: Container Extension
+linkTitle: Container Extension
+title: Container Extension
 type: docs
 weight: 22
 ---
@@ -14,29 +14,29 @@ weight: 22
 
 
 
-## 扩展说明
+## Extension Description
 
-服务容器扩展，用于自定义加载内容。
+Service container extension for customizing loading content.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.container.Container`
 
-## 扩展配置
+## Extension Configuration
 
 ```sh
 java org.apache.dubbo.container.Main spring jetty log4j
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.container.spring.SpringContainer`
 * `org.apache.dubbo.container.spring.JettyContainer`
 * `org.apache.dubbo.container.spring.Log4jContainer`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -44,11 +44,11 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxContainer.java (实现Container接口)
+                |-XxxContainer.java (implements Container interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.container.Container (纯文本文件，内容为：xxx=com.xxx.XxxContainer)
+                |-org.apache.dubbo.container.Container (plain text file, content: xxx=com.xxx.XxxContainer)
 ```
 
 XxxContainer.java：
@@ -74,3 +74,4 @@ META-INF/dubbo/org.apache.dubbo.container.Container：
 ```properties
 xxx=com.xxx.XxxContainer
 ```
+

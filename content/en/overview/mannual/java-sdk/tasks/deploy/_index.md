@@ -2,13 +2,14 @@
 aliases:
     - /en/overview/tasks/deploy/
     - /en/overview/tasks/deploy/
-description: "学习在 Kubernetes、Service Mesh（Kubernetes Service）、虚拟机（Zookeeper、Nacos）等场景部署 Dubbo 应用。"
+description: "Learn to deploy Dubbo applications in scenarios such as Kubernetes, Service Mesh (Kubernetes Service), and virtual machines (Zookeeper, Nacos)."
 feature:
     description: |
-        一键拉起服务治理体系，屏蔽底层跨平台的微服务基础设施复杂度，支持虚拟机、Docker、Kubernetes、服务网格等多种部署模式。
-    title: 灵活部署模式
-linkTitle: 打包部署
-title: 打包并部署应用
+        Start the service governance system with one click, shielding the complexity of cross-platform microservice infrastructure, and supporting various deployment modes such as virtual machines, Docker, Kubernetes, and service mesh.
+    title: Flexible Deployment Modes
+linkTitle: Package and Deploy
+title: Package and Deploy Applications
 type: docs
 weight: 5
 ---
+

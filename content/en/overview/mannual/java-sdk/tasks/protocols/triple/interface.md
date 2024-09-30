@@ -2,44 +2,44 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
     - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/pojo/
-description: "Triple 协议完全兼容 gRPC，但易用性更好不绑定 Protobuf，你可以继续使用 `Java 接口` 直接定义服务。"
-linkTitle: Java接口方式
-title: 使用 Java 接口方式开发 triple 通信服务
+description: "The Triple protocol is fully compatible with gRPC but offers better usability without binding to Protobuf, allowing you to define services directly using `Java interfaces`."
+linkTitle: Java Interface Method
+title: Developing triple communication services using Java interfaces
 type: docs
 weight: 1
 ---
 
-**不同于谷歌官方 gRPC 实现，Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），你可以继续使用 `Java 接口` 直接定义服务。对于期望平滑升级、没有多语言业务或者不熟悉 Protobuf 的用户而言，`Java 接口`方式是最简单的使用 triple 的方式。**
+**Unlike the official Google gRPC implementation, the Dubbo implementation of the triple protocol offers better usability (not bound to Protobuf), allowing you to define services directly using `Java interfaces`. For users looking for smooth upgrades, having no multi-language business, or unfamiliar with Protobuf, the `Java interface` method is the simplest way to use triple.**
 
-以下是一个使用`Java 接口`开发 Dubbo 服务的基本示例，示例使用 triple 协议通信，可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api)。
+Below is a basic example of developing a Dubbo service using the `Java interface`, which uses triple protocol communication. You can view the [full code for this example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api).
 
-{{% alert title="注意" color="info" %}}
-本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot) 供参考，同样是 `Java接口+triple` 的模式，此示例还额外加入了服务发现配置。
+{{% alert title="Note" color="info" %}}
+The example used in this article is coded based on the native API. There is also a [Spring Boot version of the example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot) for reference, which also follows the `Java interface + triple` model, with additional service discovery configuration.
 {{% /alert %}}
 
-## 运行示例
-首先，可通过以下命令下载示例源码
+## Run the Example
+First, you can download the example source code with the following command
 ```shell
 git clone --depth=1 https://github.com/apache/dubbo-samples.git
 ```
 
-进入示例源码目录：
+Enter the example source code directory:
 ```shell
 cd dubbo-samples/1-basic/dubbo-samples-api
 ```
 
-### 启动Server
-运行以下命令启动 server
+### Start the Server
+Run the following command to start the server
 
 ```bash
 mvn -Dexec.mainClass=org.apache.dubbo.samples.provider.Application exec:java
 ```
 
-### 启动Client
+### Start the Client
 
-有两种方式可以调用 server 发布的服务
-* 使用标准的 http 工具，如 cURL
-* 使用 Dubbo SDK 开发一个 client
+There are two ways to call the services published by the server:
+* Use standard HTTP tools, such as cURL
+* Develop a client using the Dubbo SDK
 
 #### cURL
 ```shell
@@ -55,19 +55,19 @@ curl \
 mvn -Dexec.mainClass=org.apache.dubbo.samples.client.Application exec:java
 ```
 
-## 源码讲解
-如果您是 Dubbo 老用户，你会发现以下内容与之前 Dubbo2 的开发模式基本一样，只是协议名称从 `dubbo` 换成了 `tri`。
+## Source Code Explanation
+If you are a long-time Dubbo user, you will find the following content is basically the same as the previous Dubbo2 development model, with the protocol name changed from `dubbo` to `tri`.
 
-### 定义服务
-首先是服务定义，使用 Java 接口定义 Dubbo 服务。
+### Define Service
+First is the service definition, using Java interfaces to define the Dubbo service.
 ```java
 public interface GreetingsService {
     String sayHi(String name);
 }
 ```
 
-### 服务提供者
-其次，对于提供者一侧而言，需要提供服务的具体实现：
+### Service Provider
+Next, on the provider side, you need to provide the specific implementation of the service:
 ```java
 public class GreetingsServiceImpl implements GreetingsService {
     @Override
@@ -77,7 +77,7 @@ public class GreetingsServiceImpl implements GreetingsService {
 }
 ```
 
-最后，是将服务发布出去：
+Finally, publish the service:
 ```java
 public static void main(String[] args) {
 	DubboBootstrap.getInstance()
@@ -88,9 +88,9 @@ public static void main(String[] args) {
 }
 ```
 
-### 服务消费者
+### Service Consumer
 
-接下来，就可以发起对远程服务的 RPC 调用了：
+Next, you can initiate an RPC call to the remote service:
 ```java
 public static void main(String[] args) throws IOException {
 	ReferenceConfig<GreetingsService> reference =
@@ -105,13 +105,13 @@ public static void main(String[] args) throws IOException {
 }
 ```
 
-## 注意事项
+## Notes
 
-### 序列化编码
+### Serialization Encoding
 
-Dubbo 是如何做到同时支持普通 Java 对象、Protobuf 对象的那？Dubbo 实现中有一个对象类型判断，首先判断参数类型是否为 protobuf 对象，如果不是。用一个 protobuf 对象将 request 和 response 进行包装（wrapper），将普通的 Java 对象传输在底层统一为 protobuf 对象传输。在 wrapper 对象内部声明序列化类型，来支持序列化的扩展。
+How does Dubbo support both ordinary Java objects and Protobuf objects? In the Dubbo implementation, there is an object type check that first determines whether the parameter type is a protobuf object. If not, a protobuf object will wrap the request and response to unify the transmission of ordinary Java objects as protobuf objects. The wrapper object declares serialization types internally to support serialization extensions.
 
-wrapper 的 IDL 如下:
+The IDL for the wrapper is as follows:
 ```proto
 syntax = "proto3";
 
@@ -132,17 +132,18 @@ message TripleResponseWrapper {
 }
 ```
 
-对于请求，使用`TripleRequestWrapper`进行包装，对于响应使用`TripleResponseWrapper`进行包装。
+For requests, use `TripleRequestWrapper` for wrapping, and for responses, use `TripleResponseWrapper` for wrapping.
 
-> 对于请求参数，可以看到 args 被`repeated`修饰，这是因为需要支持 java 方法的多个参数。当然，序列化只能是一种。序列化的实现沿用 Dubbo2 实现的 spi
+> For request parameters, note that args is marked as `repeated` to support multiple parameters for Java methods. Of course, there can only be one serialization. The serialization implementation follows the spi of Dubbo2.
 
-### 性能表现
-由于链路上传输的数据额外经过了一层序列化编码（如 hessian2），同时，server 端的方法调用基于反射，因此相比于 `protobuf+triple` 的编码模式，Java 接口方式在性能上会存在一定的下降。
+### Performance
+Due to an additional layer of serialization encoding for the data transmitted over the link (such as hessian2), and the method calls on the server side being based on reflection, the Java interface method may experience some performance degradation compared to the `protobuf + triple` encoding model.
 
-Protobuf 模式固然有一定的性能优势，但易用性与使用成本也会陡然增加，我们建议还是优先考虑业务场景，如果没有多语言业务、dubbo2老用户，则继续保持 Java 接口模式是一个比较好、低成本的选择。
+While the Protobuf model does have some performance advantages, usability and cost of use will also increase sharply. We recommend considering the business scenario first; if there is no multi-language business or if you are a Dubbo2 veteran, then sticking with the Java interface model is a good, low-cost option.
 
-### gRPC兼容性
-由于 gRPC 仅支持 protobuf 模式，因此本文介绍的 `接口+triple` 的模式无法与谷歌官方原生的 gRPC 协议互调。
+### gRPC Compatibility
+Since gRPC only supports the protobuf model, the `interface + triple` model introduced in this article cannot interoperate with the official native gRPC protocol from Google.
 
-### 前端流量接入
-对于来自前端的 HTTP 流量（比如浏览器或 web 应用），要想通过网关接入 triple，就要走 triple 内置的 `application/json` 模式发起调用，具体请参见[【使用教程-HTTP网关接入】](/en/overview/mannual/java-sdk/tasks/gateway/triple/)。
+### Frontend Traffic Access
+For HTTP traffic from the frontend (such as browsers or web applications), to access triple through the gateway, it must use the built-in `application/json` mode to initiate the call. For details, please refer to [【Usage Tutorial - HTTP Gateway Access】](/en/overview/mannual/java-sdk/tasks/gateway/triple/)。
+

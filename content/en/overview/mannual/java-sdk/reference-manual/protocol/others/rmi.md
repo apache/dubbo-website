@@ -4,9 +4,9 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/protocol/rmi/
     - /en/overview/what/ecosystem/protocol/rmi/
     - /en/overview/mannual/java-sdk/reference-manual/protocol/rmi/
-description: Rmi协议
-linkTitle: Rmi协议
-title: Rmi协议
+description: Rmi Protocol
+linkTitle: Rmi Protocol
+title: Rmi Protocol
 type: docs
 weight: 8
 ---
@@ -16,32 +16,32 @@ weight: 8
 
 
 
-## 特性说明
-RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和 JDK 标准序列化方式。
+## Feature Description
+The RMI protocol uses the JDK standard `java.rmi.*` implementation, employing a blocking short connection and JDK standard serialization.
 
-* 连接个数：多连接
-* 连接方式：短连接
-* 传输协议：TCP
-* 传输方式：同步传输
-* 序列化：Java 标准二进制序列化
-* 适用范围：传入传出参数数据包大小混合，消费者与提供者个数差不多，可传文件。
-* 适用场景：常规远程服务方法调用，与原生RMI服务互操作
+* Number of connections: Multiple connections
+* Connection type: Short connection
+* Transport protocol: TCP
+* Transport method: Synchronous transmission
+* Serialization: Java standard binary serialization
+* Applicable scope: Mixed sizes of incoming and outgoing parameter data packets, with a number of consumers and providers roughly the same, can transfer files.
+* Applicable scenarios: Routine remote service method calls, interoperable with native RMI services.
 
-#### 约束
+#### Constraints
 
-* 参数及返回值需实现 `Serializable` 接口
-* dubbo 配置中的超时时间对 RMI 无效，需使用 java 启动参数设置：`-Dsun.rmi.transport.tcp.responseTimeout=3000`，参见下面的 RMI 配置
+* Parameters and return values must implement the `Serializable` interface.
+* The timeout configured in Dubbo is ineffective for RMI and must be set using Java startup parameters: `-Dsun.rmi.transport.tcp.responseTimeout=3000`, refer to the RMI configuration below.
 
 
-## 使用场景
+## Usage Scenarios
 
-是 Java 的一组拥护开发分布式应用程序的 API，实现了不同操作系统之间程序的方法调用。
+It is a set of APIs in Java that support the development of distributed applications, achieving method calls between programs on different operating systems.
 
-## 使用方式
+## Usage Method
 
-### 引入依赖
+### Import Dependencies
 
-从 Dubbo 3 开始，RMI 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-rpc)。
+Since Dubbo 3, the RMI protocol is no longer embedded in Dubbo and needs to be imported as a separate [module](/en/download/spi-extensions/#dubbo-rpc).
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
@@ -53,38 +53,38 @@ RMI 协议采用 JDK 标准的 `java.rmi.*` 实现，采用阻塞式短连接和
 ```sh
 java -Dsun.rmi.transport.tcp.responseTimeout=3000
 ```
-> 更多 RMI 优化参数请查看 [JDK 文档](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
+> For more RMI optimization parameters, please refer to the [JDK Documentation](https://docs.oracle.com/javase/6/docs/technotes/guides/rmi/sunrmiproperties.html)
 
-### 接口说明
-如果服务接口继承了 `java.rmi.Remote` 接口，可以和原生 RMI 互操作，即：
+### Interface Description
+If the service interface extends the `java.rmi.Remote` interface, it can interoperate with native RMI, that is:
 
-* 提供者用 Dubbo 的 RMI 协议暴露服务，消费者直接用标准 RMI 接口调用，
-* 或者提供方用标准 RMI 暴露服务，消费方用 Dubbo 的 RMI 协议调用。
+* The provider exposes services using Dubbo's RMI protocol, while the consumer directly calls using the standard RMI interface,
+* or the provider exposes services using the standard RMI, while the consumer calls using Dubbo's RMI protocol.
 
-如果服务接口没有继承 `java.rmi.Remote` 接口：
+If the service interface does not extend the `java.rmi.Remote` interface:
 
-* 缺省 Dubbo 将自动生成一个 `com.xxx.XxxService$Remote` 的接口，并继承 `java.rmi.Remote` 接口，并以此接口暴露服务，
-* 但如果设置了 `<dubbo:protocol name="rmi" codec="spring" />`，将不生成 `$Remote` 接口，而使用 Spring 的 `RmiInvocationHandler` 接口暴露服务，和 Spring 兼容。
+* By default, Dubbo will automatically generate an interface `com.xxx.XxxService$Remote`, extending the `java.rmi.Remote` interface, and expose services via this interface,
+* However, if `<dubbo:protocol name="rmi" codec="spring" />` is set, the `$Remote` interface will not be generated, and the Spring `RmiInvocationHandler` interface will be used to expose services, maintaining Spring compatibility.
 
-**定义 RMI 协议**
+**Define RMI Protocol**
 
 ```xml
 <dubbo:protocol name="rmi" port="1099" />
 ```
 
-**设置默认协议**
+**Set Default Protocol**
 
 ```xml
 <dubbo:provider protocol="rmi" />
 ```
 
-**设置某个服务的协议**
+**Set Protocol for Specific Service**
 
 ```xml
 <dubbo:service interface="..." protocol="rmi" />
 ```
 
-**多端口**
+**Multiple Ports**
 
 ```xml
 <dubbo:protocol id="rmi1" name="rmi" port="1099" />
@@ -93,16 +93,17 @@ java -Dsun.rmi.transport.tcp.responseTimeout=3000
 <dubbo:service interface="..." protocol="rmi1" />
 ```
 
-**Spring 兼容性**
+**Spring Compatibility**
 
 ```xml
 <dubbo:protocol name="rmi" codec="spring" />
 ```
 
-{{% alert title="注意" color="primary" %}}
-- **如果正在使用 RMI 提供服务给外部访问，** 公司内网环境应该不会有攻击风险。
+{{% alert title="Note" color="primary" %}}
+- **If providing services via RMI for external access,** there should be no attack risks in the company's intranet environment.
 
-- **同时应用里依赖了老的 common-collections 包的情况下，** dubbo 不会依赖这个包，请排查自己的应用有没有使用。
+- **If the application relies on the old common-collections package,** Dubbo will not depend on this package; please check if your application uses it.
 
-- **存在反序列化安全风险。** 请检查应用：将 commons-collections3 请升级到 [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html)；将 commons-collections4 请升级到 [4.1](https://commons.apache.org/proper/commons-collections/release_4_1.html)。新版本的 commons-collections 解决了该问题。
+- **There are deserialization security risks.** Please check the application: upgrade commons-collections3 to [3.2.2](https://commons.apache.org/proper/commons-collections/release_3_2_2.html); upgrade commons-collections4 to [4.1](https://commons.apache.org/proper/commons-collections/release_4_1.html). The new versions of commons-collections resolve this issue.
 {{% /alert %}}
+

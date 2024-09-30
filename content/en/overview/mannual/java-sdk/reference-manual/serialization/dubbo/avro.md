@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/what/ecosystem/serialization/avro/
     - /en/overview/what/ecosystem/serialization/avro/
-description: "本文介绍 Avro 序列化"
+description: "This article introduces Avro serialization"
 linkTitle: Avro
 title: Avro
 type: docs
@@ -11,14 +11,14 @@ weight: 5
 
 
 
-## 1 介绍
+## 1 Introduction
 
-Avro是一种远程过程调用和数据序列化框架，是在Apache的Hadoop项目之内开发的。它使用JSON来定义数据类型和通讯协议，使用压缩二进制格式来序列化数据。它主要用于Hadoop，它可以为持久化数据提供一种序列化格式，并为Hadoop节点间及从客户端程序到Hadoop服务的通讯提供一种电报格式。
+Avro is a remote procedure call and data serialization framework developed within the Apache Hadoop project. It uses JSON to define data types and communication protocols, and a compact binary format to serialize data. It is primarily used with Hadoop, providing a serialization format for persistent data and serving as a protocol for communication between Hadoop nodes and from client programs to Hadoop services.
 
 
-## 2 使用方式
+## 2 Usage
 
-### 2.1 添加依赖
+### 2.1 Add Dependency
 
 ```xml
 <dependencies>
@@ -35,7 +35,7 @@ Avro是一种远程过程调用和数据序列化框架，是在Apache的Hadoop�
 </dependencies>
 ```
 
-### 2.2 配置启用
+### 2.2 Configuration Enable
 
 
 ```yaml
@@ -44,7 +44,7 @@ dubbo:
  protocol:
    serialization: avro
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.serialization=avro
@@ -55,7 +55,7 @@ dubbo.consumer.serialization=avro
 # or
 dubbo.reference.com.demo.DemoService.serialization=avro
 ```
-或
+or
 ```xml
 <dubbo:protocol serialization="avro" />
 
@@ -64,3 +64,4 @@ dubbo.reference.com.demo.DemoService.serialization=avro
 
 <!-- or -->
 <dubbo:reference interface="xxx" serialization="avro" />
+```

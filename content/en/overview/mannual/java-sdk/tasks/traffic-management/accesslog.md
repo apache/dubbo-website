@@ -4,38 +4,36 @@ aliases:
     - /en/overview/tasks/traffic-management/accesslog/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/accesslog/
 description: ""
-linkTitle: 访问日志
-title: 通过动态开启访问日志跟踪服务调用情况
+linkTitle: Access Log
+title: Dynamically Enable Access Log to Track Service Calls
 type: docs
 weight: 3
 ---
 
+The access log can effectively record all service request information processed by a machine over a period of time, including request reception time, remote IP, request parameters, response results, etc. Dynamically enabling the access log at runtime is very helpful for problem troubleshooting.
 
+## Before You Start
+* [Deploy the Shop Mall Project](../#Deploy-Mall-System)
+* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
 
-访问日志可以很好的记录某台机器在某段时间内处理的所有服务请求信息，包括请求接收时间、远端 IP、请求参数、响应结果等，运行态动态的开启访问日志对于排查问题非常有帮助。
+## Task Details
 
-## 开始之前
-* [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
+All user services of the mall are provided by the UserService of the `User` application. Through this task, we enable the access log for one or more machines of the `User` application to observe the overall access situation of user services.
 
-## 任务详情
+### Dynamically Enable Access Log
 
-商城的所有用户服务都由 `User` 应用的 UserService 提供，通过这个任务，我们为 `User` 应用的某一台或几台机器开启访问日志，以便观察用户服务的整体访问情况。
-
-### 动态开启访问日志
-
-Dubbo 通过 `accesslog` 标记识别访问日志的开启状态，我们可以指定日志文件的输出位置，也可以单独打开某台机器的访问日志。
+Dubbo identifies the access log status through the `accesslog` tag. We can specify the output location of the log file, and we can also enable the access log for a specific machine.
 
 ![accesslog.png](/imgs/v3/tasks/accesslog/accesslog1.png)
 
-#### 操作步骤
-1. 打开 Dubbo Admin 控制台
-2. 在左侧导航栏选择【服务治理】>【动态配置】
-3. 点击 "创建"，输入应用名 `shop-user` 并勾选 "开启访问日志"（此时访问日志将和普通日志打印在一起）。
+#### Operation Steps
+1. Open the Dubbo Admin console
+2. In the left navigation bar, select 【Service Governance】>【Dynamic Configuration】
+3. Click "Create", enter the application name `shop-user`, and check "Enable Access Log" (at this time, the access log will be printed together with the normal log).
 
-![Admin 访问日志设置截图](/imgs/v3/tasks/accesslog/accesslog_admin.png)
+![Admin Access Log Setting Screenshot](/imgs/v3/tasks/accesslog/accesslog_admin.png)
 
-再次访问登录页面，登录到 `User` 应用的任意一台机器，可以看到如下格式的访问日志。
+After visiting the login page again and logging into any machine of the `User` application, you can see the access log in the following format.
 
 ```text
 [2022-12-30 12:36:31.15900] -> [2022-12-30 12:36:31.16000] 192.168.0.103:60943 -> 192.168.0.103:20884 - org.apache.dubbo.samples.UserService login(java.lang.String,java.lang.String) ["test",""], dubbo version: 3.2.0-beta.4-SNAPSHOT, current host: 192.168.0.103
@@ -43,11 +41,11 @@ Dubbo 通过 `accesslog` 标记识别访问日志的开启状态，我们可以�
 [2022-12-30 12:36:31.93500] -> [2022-12-30 12:36:34.93600] 192.168.0.103:60943 -> 192.168.0.103:20884 - org.apache.dubbo.samples.UserService getInfo(java.lang.String) ["test"], dubbo version: 3.2.0-beta.4-SNAPSHOT, current host: 192.168.0.103
 ```
 
-#### 规则详解
+#### Rule Details
 
-**规则 key ：** shop-user
+**Rule Key:** shop-user
 
-**规则体**
+**Rule Body**
 
 ```yaml
 configVersion: v3.0
@@ -58,18 +56,18 @@ configs:
       accesslog: true
 ```
 
-以下是开启访问日志的关键配置
+The key configuration to enable access logs is as follows:
 
 ```yaml
 parameters:
   accesslog: true
 ```
 
-accesslog 的有效值如下：
-* `true` 或 `default` 时，访问日志将随业务 logger 一同输出，此时可以在应用内提前配置 `dubbo.accesslog` appender 调整日志的输出位置和格式
-* 具体的文件路径如 `/home/admin/demo/dubbo-access.log`，这样访问日志将打印到指定的文件内
+The effective values of accesslog are as follows:
+* When `true` or `default`, the access log will be output together with the business logger. You can configure the `dubbo.accesslog` appender in advance to adjust the output location and format of the logs.
+* A specific file path like `/home/admin/demo/dubbo-access.log` will print the access log to the specified file.
 
-在 Admin 界面，还可以单独指定开启某一台机器的访问日志，以方便精准排查问题，对应的后台规则如下：
+In the Admin interface, you can also specify whether to enable the access log for a specific machine for precise problem troubleshooting, with the corresponding backend rule as follows:
 
 ```yaml
 configVersion: v3.0
@@ -84,4 +82,5 @@ configs:
       accesslog: true
 ```
 
-其中，`{ip}` 替换为具体的机器地址即可。
+Here, replace `{ip}` with the specific machine address.
+

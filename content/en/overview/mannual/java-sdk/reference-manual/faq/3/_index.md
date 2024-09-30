@@ -3,9 +3,10 @@ aliases:
 - /en/docs3-v2/java-sdk/faq/3/
 - /en/docs3-v2/java-sdk/faq/3/
 - /en/overview/mannual/java-sdk/faq/3/_index/
-description: 3 - 动态代理层
-linkTitle: 3 - 动态代理层
-title: 3 - 动态代理层
+description: 3 - Dynamic Proxy Layer
+linkTitle: 3 - Dynamic Proxy Layer
+title: 3 - Dynamic Proxy Layer
 type: docs
 weight: 3
 ---
+

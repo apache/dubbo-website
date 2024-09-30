@@ -3,18 +3,18 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/metadata-center/redis/
     - /en/docs3-v2/java-sdk/reference-manual/metadata-center/redis/
     - /en/overview/what/ecosystem/metadata-center/redis/
-description: "更多元数据中心扩展实现，包括 redis、etcd、consul 等"
-linkTitle: 扩展实现
-title: 更多元数据中心扩展实现
+description: "More metadata center extension implementations, including redis, etcd, consul, etc."
+linkTitle: Extension Implementations
+title: More Metadata Center Extension Implementations
 type: docs
 weight: 4
 ---
 
-Dubbo 框架还默认提供了 redis、etcd、consul 等元数据中心适配实现
+The Dubbo framework also provides default implementations for metadata center adapters such as Redis, etcd, and Consul.
 
 ## Redis
 
-Redis 实现由主干库提供内置实现，但需要增加以下依赖：
+The Redis implementation is provided by the core library but requires the following dependency:
 
 ```xml
 <dependency>
@@ -32,7 +32,7 @@ dubbo
     address: redis://127.0.0.1:1111
 ```
 
-或者
+or
 
 ```properties
 dubbo.metadata-report.address=redis://127.0.0.1:1111
@@ -40,9 +40,9 @@ dubbo.metadata-report.address=redis://127.0.0.1:1111
 
 ## Etcd
 
-Etcd 元数据中心由社区生态库维护，具体可参见 [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-metadata-report-extensions/dubbo-metadata-report-etcd)。
+The etcd metadata center is maintained by the community ecosystem library. For details, see [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-metadata-report-extensions/dubbo-metadata-report-etcd).
 
-增加依赖：
+Add the dependency:
 
 ```xml
 <dependency>
@@ -52,7 +52,7 @@ Etcd 元数据中心由社区生态库维护，具体可参见 [](https://github
 </dependency>
 ```
 
-调整配置：
+Adjust the configuration:
 
 ```yaml
 dubbo
@@ -60,12 +60,11 @@ dubbo
     address: etcd://127.0.0.1:1111
 ```
 
-
 ## Consul
 
-Consul 元数据中心由社区生态库维护，具体可参见 [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-metadata-report-extensions/dubbo-metadata-report-consul)。
+The Consul metadata center is maintained by the community ecosystem library. For details, see [](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-metadata-report-extensions/dubbo-metadata-report-consul).
 
-增加依赖：
+Add the dependency:
 
 ```xml
 <dependency>
@@ -75,10 +74,11 @@ Consul 元数据中心由社区生态库维护，具体可参见 [](https://gith
 </dependency>
 ```
 
-调整配置：
+Adjust the configuration:
 
 ```yaml
 dubbo
   metadata-report
     address: consul://127.0.0.1:1111
 ```
+

@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/what/ecosystem/serialization/msgpack/
     - /en/overview/what/ecosystem/serialization/msgpack/
-description: "本文介绍 MessagePack 序列化"
+description: "This article introduces MessagePack serialization"
 linkTitle: MessagePack
 title: MessagePack
 type: docs
@@ -11,13 +11,13 @@ weight: 9
 
 
 
-## 1 介绍
+## 1 Introduction
 
-MessagePack是一种计算机数据交换格式。它是一种二进制形式，用于表示简单的数据结构，如数组和关联数组。MessagePack 旨在尽可能紧凑和简单。
+MessagePack is a computer data interchange format. It is a binary format used to represent simple data structures such as arrays and associative arrays. MessagePack is designed to be as compact and simple as possible.
 
-## 2 使用方式
+## 2 How to Use
 
-### 2.1 添加依赖
+### 2.1 Adding Dependencies
 
 ```xml
 <dependencies>
@@ -40,8 +40,7 @@ MessagePack是一种计算机数据交换格式。它是一种二进制形式，
 </dependencies>
 ```
 
-### 2.2 配置启用
-
+### 2.2 Configuration Enable
 
 ```yaml
 # application.yml (Spring Boot)
@@ -49,7 +48,7 @@ dubbo:
  protocol:
    serialization: msgpack
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.serialization=msgpack
@@ -60,7 +59,7 @@ dubbo.consumer.serialization=msgpack
 # or
 dubbo.reference.com.demo.DemoService.serialization=msgpack
 ```
-或
+or
 ```xml
 <dubbo:protocol serialization="msgpack" />
 

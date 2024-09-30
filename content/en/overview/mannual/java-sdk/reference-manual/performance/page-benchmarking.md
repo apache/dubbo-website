@@ -1,7 +1,7 @@
 ---
 description: ""
-linkTitle: RPC 控制台
-title: RPC 基准测试 控制台
+linkTitle: RPC Console
+title: RPC Benchmark Testing Console
 type: html
 weight: 1
 ---

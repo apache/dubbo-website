@@ -3,20 +3,20 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/registry/multiple-registry/
     - /en/docs3-v2/java-sdk/reference-manual/registry/multiple-registry/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/multi-registry/
-description: 本文介绍了 Dubbo 的多注册中心支持及使用场景，如何通过多注册/多订阅实现跨区域服务部署、服务迁移等，也描述了同机房有限等跨机房流量调度的实现方式。
-linkTitle: 多注册中心
-title: 多注册中心
+description: This article introduces the multi-registry support of Dubbo and its use cases, detailing how to achieve cross-region service deployment and service migration through multiple registries/subscriptions, as well as the implementation methods for cross-datacenter traffic scheduling with limited resources.
+linkTitle: Multi-Registry
+title: Multi-Registry
 type: docs
 weight: 6
 ---
 
-## 1 关联服务与多注册中心
+## 1 Associating Services with Multiple Registries
 
-### 1.1 全局默认注册中心
+### 1.1 Global Default Registry
 
-Dubbo 注册中心和服务是独立配置的，通常开发者不用设置服务和注册中心组件之间的关联关系，Dubbo 框架会将自动执行以下动作：
-* 对于所有的 Service 服务，向所有全局默认注册中心注册服务地址。
-* 对于所有的 Reference 服务，从所有全局默认注册中心订阅服务地址。
+Dubbo registries and services are independently configured, and developers usually do not need to set up the relationship between service and registry components. The Dubbo framework will automatically perform the following actions:
+* For all Service services, register service addresses with all global default registries.
+* For all Reference services, subscribe to service addresses from all global default registries.
 
 ```yml
 # application.yml (Spring Boot)
@@ -36,11 +36,11 @@ public class DemoServiceImpl implements DemoService {}
 public class HelloServiceImpl implements HelloService {}
 ```
 
-以上以 Spring Boot 开发为例（XML、API 方式类似）配置了两个全局默认注册中心 beijingRegistry 和 shanghaiRegistry，服务 DemoService 与 HelloService 会分别注册到两个默认注册中心。
+The above configuration, developed using Spring Boot (XML and API methods are similar), sets up two global default registries, beijingRegistry and shanghaiRegistry. The services DemoService and HelloService will be registered to the two default registries respectively.
 
-除了上面讲到的框架自动为服务设置全局注册中心之外，有两种方式可以灵活调整服务与多注册中心间的关联。
+In addition to the automatic configuration of the global registry mentioned above, there are two ways to flexibly adjust the association between services and multiple registries.
 
-### 1.2 设置全局默认注册中心
+### 1.2 Setting Global Default Registry
 ```yml
 # application.yml (Spring Boot)
 dubbo
@@ -53,61 +53,61 @@ dubbo
    default: false
 ```
 
-`default` 用来设置全局默认注册中心，默认值为 `true` 即被视作全局注册中心。未指定注册中心 id 的服务将自动注册或订阅全局默认注册中心。
+`default` is used to set the global default registry, and its default value is `true`, indicating it is viewed as the global registry. Services that do not specify a registry ID will automatically register or subscribe to the global default registry.
 
-### 1.3 显示关联服务与注册中心
+### 1.3 Explicitly Associating Services with Registries
 
-通过在 Dubbo 服务定义组件上增加 registry 配置，将服务与注册中心关联起来。
+By adding the registry configuration to the Dubbo service definition component, services can be associated with registries.
 
 ```java
-@DubboServiceregistry = {"beijingRegistry"}
+@DubboService(registry = {"beijingRegistry"})
 public class DemoServiceImpl implements DemoService {}
 
-@DubboServiceregistry = {"shanghaiRegistry"}
+@DubboService(registry = {"shanghaiRegistry"})
 public class HelloServiceImpl implements HelloService {}
 ```
 
-增加以上配置后，DemoService 将只注册到 beijingRegistry，而 HelloService 将注册到 shanghaiRegistry。
+With the above configuration, DemoService will only be registered to beijingRegistry, while HelloService will be registered to shanghaiRegistry.
 
-## 2 多注册中心订阅
+## 2 Multi-Registry Subscription
 
-服务订阅由于涉及到地址聚合和路由选址，因此逻辑会更加复杂一些。从单个服务订阅的视角，如果存在多注册中心订阅的情况，则可以根据注册中心间的地址是否聚合分为两种场景。
+Service subscription involves address aggregation and routing selection, making the logic more complex. From the perspective of subscriptions from a single service, if there are multiple registry subscriptions, they can be divided into two scenarios based on whether the addresses between registries are aggregated.
 
-### 2.1 多注册中心地址不聚合
+### 2.1 Non-Aggregated Multi-Registry Addresses
 
 ```xml
 <dubbo:registry id="hangzhouRegistry" address="10.20.141.150:9090" />
 <dubbo:registry id="qingdaoRegistry" address="10.20.141.151:9010" />
 ```
 
-如以上所示独立配置的注册中心组件，地址列表在消费端默认是完全隔离的，负载均衡选址要经过两步：
-1. 注册中心集群间选址，选定一个集群
-2. 注册中心集群内选址，在集群内进行地址筛选
+As shown, independently configured registry components have isolated address lists by default at the consumer end, and load balancing requires two steps:
+1. Selection among registry clusters to choose a cluster
+2. Selection within the registry cluster to filter addresses
 
 ![multi-registris-no-aggregation](/imgs/v3/registry/no-aggregation.png)
 
-下面我们着重分析下如何控制 **注册中心集群间选址**，可选的策略有如下几种
-**随机**
-每次请求都随机的分配到一个注册中心集群
+Next, we will focus on how to control **selection among registry clusters**. Available strategies include:
+**Random**
+Each request is randomly assigned to a registry cluster.
 
-> 随机的过程中会有可用性检查，即每个集群要确保至少有一个地址可用才有可能被选到。
+> During the random process, availability checks are performed, ensuring that each cluster must have at least one available address to be potentially selected.
 
-**preferred 优先**
+**Preferred**
 ```xml
 <dubbo:registry id="hangzhouRegistry" address="10.20.141.150:9090" preferred="true"/>
 <dubbo:registry id="qingdaoRegistry" address="10.20.141.151:9010" />
 ```
-如果有注册中心集群配置了 `preferred="true"`，则所有流量都会被路由到这个集群。
+If a registry cluster is configured with `preferred="true"`, all traffic will be routed to this cluster.
 
-**weighted**
+**Weighted**
 ```xml
 <dubbo:registry id="hangzhouRegistry" address="10.20.141.150:9090" weight="100"/>
 <dubbo:registry id="qingdaoRegistry" address="10.20.141.151:9010" weight="10" />
 ```
 
-基于权重的随机负载均衡，以上集群间会有大概 10:1 的流量分布。
+Based on weight for random load balancing, traffic distribution is roughly 10:1 across the clusters.
 
-**同 zone 优先**
+**Same Zone Priority**
 ```xml
 <dubbo:registry id="hangzhouRegistry" address="10.20.141.150:9090" zone="hangzhou" />
 <dubbo:registry id="qingdaoRegistry" address="10.20.141.151:9010" zone="qingdao" />
@@ -117,77 +117,78 @@ public class HelloServiceImpl implements HelloService {}
 RpcContext.getContext().setAttachment("registry_zone", "qingdao");
 ```
 
-根据 Invocation 中带的流量参数或者在当前节点通过 context 上下文设置的参数，流量会被精确的引导到对应的集群。
+Traffic can be precisely guided to the corresponding cluster based on parameters from the invocation or parameters set through the context at the current node. 
 
-除了通过 RpcContext 参数设置 zone 外，还可以通过扩展 `org.apache.dubbo.rpc.ZoneDetector` 实现，以更灵活的方式确定当前请求的 zone 归属。RuleConverter
+In addition to setting the zone via `RpcContext` parameters, the extension `org.apache.dubbo.rpc.ZoneDetector` can be implemented to determine the current request's zone more flexibly. RuleConverter
 
-### 2.2 多注册中心地址聚合
+### 2.2 Aggregated Multi-Registry Addresses
 ```xml
 <dubbo:registry address="multiple://127.0.0.1:2181?separator=;&reference-registry=zookeeper://address11?backup=address12,address13;zookeeper://address21?backup=address22,address23" />
 ```
 
-这里增加了一个特殊的 multiple 协议开头的注册中心，其中：
-* `multiple://127.0.0.1:2181` 并没有什么具体含义，只是一个特定格式的占位符，地址可以随意指定
-* `reference-registry` 指定了要聚合的注册中心集群的列表，示例中有两个集群，分别是 `zookeeper://address11?backup=address12,address13` 和 `zookeeper://address21?backup=address22,address23`，其中还特别指定了集群分隔符 `separator=";"`
+This introduces a special registry prefixed with the multiple protocol, where:
+* `multiple://127.0.0.1:2181` serves as a specific format placeholder and has no specific meaning.
+* `reference-registry` specifies the list of aggregated registry clusters, which in the example include two clusters: `zookeeper://address11?backup=address12,address13` and `zookeeper://address21?backup=address22,address23`, along with a specified cluster separator `separator=";"`.
 
-如下图所示，不同注册中心集群的地址会被聚合到一个地址池后在消费端做负载均衡或路由选址。
+As seen in the last image, different registry cluster addresses will be aggregated into a single pool of addresses for load balancing or routing selection at the consumer end.
 
 ![multi-registris-aggregation](/imgs/v3/registry/aggregation.png)
 
-在 3.1.0 版本及之后，还支持每个注册中心集群上设置特定的 attachments 属性，以实现对该注册中心集群下的地址做特定标记，后续配合 Router 组件扩展如 TagRouter 等就可以实现跨机房间的流量治理能力。
+From version 3.1.0 onwards, support has been added for setting specific attachments for each registry cluster to provide special tags for the addresses under that cluster. With components such as Router and TagRouter, traffic management capabilities across data centers can be achieved.
 
 ```xml
 <dubbo:registry address="multiple://127.0.0.1:2181?separator=;&reference-registry=zookeeper://address11?attachments=zone=hangzhou,tag=middleware;zookeeper://address21" />
 ```
 
-增加 `attachments=zone=hangzhou,tag=middleware` 后，所有来自该注册中心的 URL 地址将自动携带 `zone` 和 `tag` 两个标识，方便消费端更灵活的做流量治理。
+By adding `attachments=zone=hangzhou,tag=middleware`, all URLs from the registry will automatically carry the `zone` and `tag` identifiers, facilitating more flexible traffic management for the consumer.
 
-## 3 场景示例
+## 3 Scenario Examples
 
-### 3.1 场景一：跨区域注册服务
+### 3.1 Scenario 1: Cross-Region Registered Services
 
-比如：中文站有些服务来不及在青岛部署，只在杭州部署，而青岛的其它应用需要引用此服务，就可以将服务同时注册到两个注册中心。
+For example: some services for the Chinese site could not be deployed in Qingdao in time, but only in Hangzhou, and other applications in Qingdao need to reference these services. Thus, they can be registered to two registries simultaneously.
 
 ```xml
 <dubbo:registry id="hangzhouRegistry" address="10.20.141.150:9090" />
 <dubbo:registry id="qingdaoRegistry" address="10.20.141.151:9010" default="false" />
-<!-- 向多个注册中心注册 -->
+<!-- Register to multiple registries -->
 <dubbo:service interface="com.alibaba.hello.api.HelloService" version="1.0.0" ref="helloService" registry="hangzhouRegistry,qingdaoRegistry" />
 ```
 
-### 3.2 场景二：根据业务实现隔离
+### 3.2 Scenario 2: Isolation Based on Business
 
-CRM 有些服务是专门为国际站设计的，有些服务是专门为中文站设计的。
+Some CRM services are designed specifically for the international site, while others are tailored for the Chinese site.
 
 ```xml
-<!-- 多注册中心配置 -->
+<!-- Multi-registry configuration -->
 <dubbo:registry id="chinaRegistry" address="10.20.141.150:9090" />
 <dubbo:registry id="intlRegistry" address="10.20.154.177:9010" default="false" />
-<!-- 向中文站注册中心注册 -->
+<!-- Register to the Chinese site registry -->
 <dubbo:service interface="com.alibaba.hello.api.HelloService" version="1.0.0" ref="helloService" registry="chinaRegistry" />
-<!-- 向国际站注册中心注册 -->
+<!-- Register to the international site registry -->
 <dubbo:service interface="com.alibaba.hello.api.DemoService" version="1.0.0" ref="demoService" registry="intlRegistry" />
 ```
 
-### 3.3 场景三：根据业务调用服务
+### 3.3 Scenario 3: Service Calls Based on Business
 
-CRM 需同时调用中文站和国际站的 PC2 服务，PC2 在中文站和国际站均有部署，接口及版本号都一样，但连的数据库不一样。
+CRM requires invoking services from both the Chinese site and the international site. The PC2 service is deployed in both sites with the same interface and version but connects to different databases.
 
 ```xml
-<!-- 多注册中心配置 -->
+<!-- Multi-registry configuration -->
 <dubbo:registry id="chinaRegistry" address="10.20.141.150:9090" />
 <dubbo:registry id="intlRegistry" address="10.20.154.177:9010" default="false" />
-<!-- 引用中文站服务 -->
+<!-- Reference the Chinese site's service -->
 <dubbo:reference id="chinaHelloService" interface="com.alibaba.hello.api.HelloService" version="1.0.0" registry="chinaRegistry" />
-<!-- 引用国际站站服务 -->
+<!-- Reference the international site's service -->
 <dubbo:reference id="intlHelloService" interface="com.alibaba.hello.api.HelloService" version="1.0.0" registry="intlRegistry" />
 ```
 
-如果只是测试环境临时需要连接两个不同注册中心，使用竖号分隔多个不同注册中心地址：
+If there's a temporary need to connect to two different registries in a test environment, multiple registry addresses can be specified separated by vertical bars:
 
 ```xml
-<!-- 多注册中心配置，竖号分隔表示同时连接多个不同注册中心，同一注册中心的多个集群地址用逗号分隔 -->
+<!-- Multi-registry configuration, using vertical bars to connect to multiple registries, and comma for multiple addresses in the same registry -->
 <dubbo:registry address="10.20.141.150:9090|10.20.154.177:9010" />
-<!-- 引用服务 -->
+<!-- Reference the service -->
 <dubbo:reference id="helloService" interface="com.alibaba.hello.api.HelloService" version="1.0.0" />
 ```
+

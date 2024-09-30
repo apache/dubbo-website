@@ -3,9 +3,9 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/profiler/
     - /en/docs3-v2/java-sdk/reference-manual/qos/profiler/
     - /en/overview/mannual/java-sdk/reference-manual/qos/profiler/
-description: 性能采样命令
-linkTitle: 性能采样命令
-title: 性能采样命令
+description: Performance Sampling Command
+linkTitle: Performance Sampling Command
+title: Performance Sampling Command
 type: docs
 weight: 7
 ---
@@ -13,19 +13,15 @@ weight: 7
 
 
 
+The performance sampling feature can detect the time consumption at various points in the Dubbo processing chain. When a timeout occurs `( usageTime / timeout > profilerWarnPercent * 100 )`, the call duration is logged.
 
+This feature is divided into two modes: `simple profiler` and `detail profiler`. The `simple profiler` mode is enabled by default, while the `detail profiler` mode is disabled by default. The `detail profiler` collects additional information such as processing time for each filter and specific time consumption on protocols, compared to the `simple profiler`. If long processing times are found within the Dubbo framework while in `simple profiler`, the `detail profiler` can be enabled for better issue diagnosis.
 
-性能采样功能可以对 Dubbo 处理链路上的各处耗时进行检测，在出现超时的时候 `( usageTime / timeout > profilerWarnPercent * 100 )` 通过日志记录调用的耗时。
+> [Request Time Sampling](../../../advanced-features-and-usage/performance/profiler/)
 
-此功能分为 `simple profiler` 和 `detail profiler` 两个模式，其中 `simple profiler` 模式默认开启，`detail profiler` 模式默认关闭。
-`detail profiler` 相较 `simple profiler` 模式多采集了每个 filter 的处理耗时、协议上的具体耗时等。
-在 `simple profiler` 模式下如果发现 Dubbo 框架内部存在耗时长的情况，可以开启 `detail profiler` 模式，以便更好地排查问题。
+### enableSimpleProfiler Command
 
-> [请求耗时采样](../../../advanced-features-and-usage/performance/profiler/)
-
-### enableSimpleProfiler 命令
-
-开启 `simple profiler` 模式，默认开启
+Enable `simple profiler` mode, enabled by default
 
 ```
 dubbo>enableSimpleProfiler
@@ -34,9 +30,9 @@ OK
 dubbo>
 ```
 
-### disableSimpleProfiler 命令
+### disableSimpleProfiler Command
 
-关闭 `simple profiler` 模式，关闭后 `detail profiler` 也将不启用
+Disable `simple profiler` mode, which will also disable `detail profiler`
 
 ```
 dubbo>disableSimpleProfiler
@@ -45,9 +41,9 @@ OK
 dubbo>
 ```
 
-### enableDetailProfiler 命令
+### enableDetailProfiler Command
 
-开启 `detail profiler` 模式，默认关闭，需要开启 `simple profiler` 模式才会真实开启
+Enable `detail profiler` mode, disabled by default. It will only be truly enabled when `simple profiler` is on
 
 ```
 dubbo>enableDetailProfiler
@@ -56,9 +52,9 @@ OK. This will cause performance degradation, please be careful!
 dubbo>
 ```
 
-### disableDetailProfiler 命令
+### disableDetailProfiler Command
 
-关闭 `detail profiler` 模式，关闭后不影响 `simple profiler`
+Disable `detail profiler` mode, which does not affect `simple profiler`
 
 ```
 dubbo>disableDetailProfiler
@@ -67,13 +63,13 @@ OK
 dubbo>
 ```
 
-### setProfilerWarnPercent 命令
+### setProfilerWarnPercent Command
 
-设置超时时间的警告百分比
+Set the warning percentage for timeout
 
-命令：`setProfilerWarnPercent {profilerWarnPercent}`
+Command: `setProfilerWarnPercent {profilerWarnPercent}`
 
-profilerWarnPercent: 超时时间的警告百分比，取值范围 0.0 ~ 1.0，默认值为 0.75
+profilerWarnPercent: The warning percentage for timeout, range 0.0 ~ 1.0, default is 0.75
 
 ```
 dubbo>setProfilerWarnPercent 0.75
@@ -81,3 +77,4 @@ OK
 
 dubbo>
 ```
+

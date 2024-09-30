@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/readiness/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/readiness/
-description: Readiness 就绪探针
-linkTitle: 就绪探针
-title: Readiness 就绪探针
+description: Readiness Probe
+linkTitle: Readiness Probe
+title: Readiness Probe
 type: docs
 weight: 12
 ---
@@ -14,25 +14,25 @@ weight: 12
 
 
 
-## 扩展说明
+## Extension Description
 
 
-拓展应用就绪的检测点。
+Extend application readiness detection points.
 
 
-## 扩展接口
+## Extension Interface
 
 
 `org.apache.dubbo.qos.probe.ReadinessProbe`
 
 
-## 扩展配置
+## Extension Configuration
 
 
-Dubbo QOS `ready`  命令自动发现
+Dubbo QOS `ready` command auto-discovery
 
 
-## 已知扩展
+## Known Extensions
 
 
 - `org.apache.dubbo.qos.probe.impl.BootstrapReadinessProbe`
@@ -40,10 +40,10 @@ Dubbo QOS `ready`  命令自动发现
 
 
 
-## 扩展示例
+## Extension Example
 
 
-Maven 项目结构：
+Maven project structure:
 
 
 ```
@@ -52,15 +52,15 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxReadinessProbe.java (实现ReadinessProbe接口)
+                |-XxxReadinessProbe.java (implements ReadinessProbe interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.qos.probe.ReadinessProbe (纯文本文件，内容为：xxx=com.xxx.XxxReadinessProbe)
+                |-org.apache.dubbo.qos.probe.ReadinessProbe (plain text file, content: xxx=com.xxx.XxxReadinessProbe)
 ```
 
 
-XxxReadinessProbe.java：
+XxxReadinessProbe.java:
 
 
 ```java
@@ -75,7 +75,7 @@ public class XxxReadinessProbe implements ReadinessProbe {
 ```
 
 
-META-INF/dubbo/org.apache.dubbo.qos.probe.ReadinessProbe：
+META-INF/dubbo/org.apache.dubbo.qos.probe.ReadinessProbe:
 
 
 ```

@@ -2,11 +2,12 @@
 aliases:
     - /en/overview/tasks/protocols/
     - /en/overview/tasks/protocols/
-    - /en/overview/mannual/java-sdk/tasks/protocol/
-description: 演示 Dubbo 多协议的应用场景
+    - /en/overview/manual/java-sdk/tasks/protocol/
+description: Demonstration of Dubbo's multi-protocol application scenarios
 hide: true
-linkTitle: 通信协议
-title: 通信协议
+linkTitle: Communication Protocol
+title: Communication Protocol
 type: docs
 weight: 2
 ---
+

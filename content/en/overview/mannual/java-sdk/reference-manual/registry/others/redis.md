@@ -4,7 +4,7 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/registry/redis/
     - /en/overview/what/ecosystem/registry/redis/
     - /en/overview/mannual/java-sdk/reference-manual/registry/redis/
-description: Redis 注册中心的基本使用和工作原理。
+description: Basic usage and working principle of the Redis registry.
 linkTitle: Redis
 title: Redis
 type: docs
@@ -13,15 +13,15 @@ weight: 5
 
 
 
-## 前置条件
-* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
-* 安装并启动 [Redis](http://redis.io) 服务
+## Prerequisites
+* Understand [Dubbo basic development steps](/en/overview/mannual/java-sdk/quick-start/starter/)
+* Install and start the [Redis](http://redis.io) service
 
-## 使用说明
+## Instructions
 
-### 添加依赖
+### Add Dependency
 
-从 Dubbo3 开始，redis 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-registry)。
+Starting from Dubbo3, the Redis registry adaptation is no longer embedded in Dubbo and needs to be separately introduced as an independent [module](/en/download/spi-extensions/#dubbo-registry).
 
 ```xml
 <dependency>
@@ -31,64 +31,65 @@ weight: 5
 </dependency>
 ```
 
-### 基本配置
+### Basic Configuration
 ```xml
 <dubbo:registry address="redis://10.20.153.10:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry address="redis://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry protocol="redis" address="10.20.153.10:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry protocol="redis" address="10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379" />
 ```
 
-### 其他配置项
+### Other Configuration Items
 
-* 可通过 `<dubbo:registry group="dubbo" />` 设置 redis 中 key 的前缀，缺省为 `dubbo`。
-* 可通过 `<dubbo:registry cluster="replicate" />` 设置 redis 集群策略，缺省为 `failover`：
-    * `failover`: 只写入和读取任意一台，失败时重试另一台，需要服务器端自行配置数据同步
-    * `replicate`: 在客户端同时写入所有服务器，只读取单台，服务器端不需要同步，注册中心集群增大，性能压力也会更大
+* You can set the prefix for the keys in Redis with `<dubbo:registry group="dubbo" />`, default is `dubbo`.
+* You can set the Redis cluster policy with `<dubbo:registry cluster="replicate" />`, default is `failover`:
+    * `failover`: Only write and read from any one, retry another on failure, data synchronization needs to be configured on the server side.
+    * `replicate`: Write to all servers simultaneously from the client, read from one, no synchronization needed on the server side, the registration center cluster increases and so does performance pressure.
 
 
-## 工作原理
+## Working Principle
 
-基于 Redis [^1] 实现的注册中心。
+The registry is implemented based on Redis [^1].
 
-Redis 过期数据通过心跳的方式检测脏数据，服务器时间必须同步，并且对服务器有一定压力，否则过期检测会不准确
+Redis expired data is detected for dirty data through heartbeat; server time must be synchronized and there is certain pressure on the server, otherwise the expiration detection may be inaccurate.
 
 ![/user-guide/images/dubbo-redis-registry.jpg](/imgs/user/dubbo-redis-registry.jpg)
 
-使用 Redis 的 Key/Map 结构存储数据结构：
+Using Redis’s Key/Map structure to store data:
 
-* 主 Key 为服务名和类型
-* Map 中的 Key 为 URL 地址
-* Map 中的 Value 为过期时间，用于判断脏数据，脏数据由监控中心删除 [^3]
+* The main Key is the service name and type.
+* The Key in the Map is the URL address.
+* The Value in the Map is the expiration time, used to determine dirty data, dirty data is deleted by the monitoring center [^3].
 
-使用 Redis 的 Publish/Subscribe 事件通知数据变更：
+Using Redis’s Publish/Subscribe event to notify data changes:
 
-* 通过事件的值区分事件类型：`register`, `unregister`, `subscribe`, `unsubscribe`
-* 普通消费者直接订阅指定服务提供者的 Key，只会收到指定服务的 `register`, `unregister` 事件
-* 监控中心通过 `psubscribe` 功能订阅 `/dubbo/*`，会收到所有服务的所有变更事件
+* Distinguish event types through the event value: `register`, `unregister`, `subscribe`, `unsubscribe`.
+* Ordinary consumers subscribe directly to the Key of the specified service provider, only receiving `register`, `unregister` events for that service.
+* The monitoring center subscribes to `/dubbo/*` through `psubscribe`, receiving all change events for all services.
 
-调用过程：
+Call process:
 
-0. 服务提供方启动时，向 `Key:/dubbo/com.foo.BarService/providers` 下，添加当前提供者的地址
-1. 并向 `Channel:/dubbo/com.foo.BarService/providers` 发送 `register` 事件
-2. 服务消费方启动时，从 `Channel:/dubbo/com.foo.BarService/providers` 订阅 `register` 和 `unregister` 事件
-3. 并向 `Key:/dubbo/com.foo.BarService/consumers` 下，添加当前消费者的地址
-4. 服务消费方收到 `register` 和 `unregister` 事件后，从 `Key:/dubbo/com.foo.BarService/providers` 下获取提供者地址列表
-5. 服务监控中心启动时，从 `Channel:/dubbo/*` 订阅 `register` 和 `unregister`，以及 `subscribe` 和`unsubsribe `事件
-6. 服务监控中心收到 `register` 和 `unregister` 事件后，从 `Key:/dubbo/com.foo.BarService/providers` 下获取提供者地址列表
-7. 服务监控中心收到 `subscribe` 和 `unsubsribe` 事件后，从 `Key:/dubbo/com.foo.BarService/consumers` 下获取消费者地址列表
+0. When the service provider starts, it adds the current provider's address under `Key:/dubbo/com.foo.BarService/providers`.
+1. And sends the `register` event to `Channel:/dubbo/com.foo.BarService/providers`.
+2. When the service consumer starts, it subscribes to `register` and `unregister` events from `Channel:/dubbo/com.foo.BarService/providers`.
+3. And adds the current consumer's address under `Key:/dubbo/com.foo.BarService/consumers`.
+4. The service consumer retrieves the provider address list from `Key:/dubbo/com.foo.BarService/providers` after receiving `register` and `unregister` events.
+5. When the service monitoring center starts, it subscribes to `register`, `unregister`, `subscribe`, and `unsubscribe` events from `Channel:/dubbo/*`.
+6. The service monitoring center retrieves the provider address list from `Key:/dubbo/com.foo.BarService/providers` after receiving `register` and `unregister` events.
+7. The service monitoring center retrieves the consumer address list from `Key:/dubbo/com.foo.BarService/consumers` after receiving `subscribe` and `unsubscribe` events.
+

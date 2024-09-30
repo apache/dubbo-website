@@ -2,16 +2,16 @@
 aliases:
     - /en/overview/tasks/troubleshoot/start-failed/
     - /en/overview/tasks/troubleshoot/start-failed/
-description: 在 Dubbo 应用启动失败时的排查思路
-linkTitle: 应用启动失败
-title: 应用启动失败
+description: Troubleshooting ideas when a Dubbo application fails to start
+linkTitle: Application Start Failure
+title: Application Start Failure
 type: docs
 weight: 1
 ---
 
 
 
-在开发与生产部署过程中，由于各种非预期的变更，可能会出现应用无法启动的情况。对于 Dubbo 来说，通常启动失败时都会有类似以下的报错信息。
+During the development and production deployment stages, applications may fail to start due to various unexpected changes. For Dubbo, startup failures usually present error messages similar to the following.
 
 ```bash
 Caused by: java.lang.IllegalStateException: Dubbo Module[1.1.1] is stopping or stopped, can not start again
@@ -21,80 +21,79 @@ Caused by: java.lang.IllegalStateException: Dubbo Module[1.1.1] is stopping or s
 [DUBBO] Dubbo Application[1.1](first-dubbo-consumer) start failure
 ```
 
-## 一句话总结
-正确配置日志输出，往前翻到第一个报错的位置并进行处理。
+## Summary
+Correctly configure log output, go back to the first error location and handle it.
 
-## 排查方式
-### 1 配置日志输出
-目前 Dubbo 支持多种日志框架，如果环境中存在多种日志框架的支持（如 log4j 和 logback），Dubbo 会按照 （log4j > slf4j > log4j2 > jcl）的顺序输出日志框架。
+## Troubleshooting Methods
+### 1 Configure Log Output
+Dubbo currently supports multiple log frameworks. If multiple log frameworks (such as log4j and logback) are supported in the environment, Dubbo will output log frameworks in the order of (log4j > slf4j > log4j2 > jcl).
 
-如果与预期的日志框架不同时，会出现日志无法输出的问题。此时可以通过以下的配置进行调整：
+If the expected log framework differs, logs may not output. Adjust the following configuration:
 
 ```properties
 dubbo.application.logger=slf4j
 ```
 
-注：3.2.0 及以上的版本中将自动分析日志框架是否存在配置，优选日志框架输出。
+Note: Versions 3.2.0 and above will automatically analyze log framework configurations to optimize log framework output.
 
-### 2 找到真正的报错信息
-在正确配置日志输出之后，可以在日志中搜索 `[DUBBO] Model start failed` 或者 `start failure` 关键字，查看真正导致 Dubbo 启动失败的原因。
+### 2 Find the Real Error Message
+After correctly configuring log output, search the logs for `[DUBBO] Model start failed` or `start failure` keywords to find the actual reason for Dubbo startup failure.
 
-如下所示，启动失败的原因为有服务订阅找不到提供者。
+For example, the failure reason could be that a service subscription cannot find a provider.
 ```
 [27/02/23 12:49:18:018 CST] main ERROR deploy.DefaultModuleDeployer:  [DUBBO] Model start failed: Dubbo Module[1.1.1] start failed: java.lang.IllegalStateException: Failed to check the status of the service org.apache.dubbo.samples.api.GreetingsService. No provider available for the service org.apache.dubbo.samples.api.GreetingsService from the url consumer://30.221.144.195/org.apache.dubbo.samples.api.GreetingsService?application=first-dubbo-consumer&background=false&dubbo=2.0.2&environment=product&executor-management-mode=default&file-cache=true&interface=org.apache.dubbo.samples.api.GreetingsService&methods=sayHi&pid=54580&register.ip=30.221.144.195&release=3.2.0-beta.6-SNAPSHOT&side=consumer&sticky=false&timestamp=1677473358611&unloadClusterRelated=false to the consumer 30.221.144.195 use dubbo version 3.2.0-beta.6-SNAPSHOT, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions. 
 java.lang.IllegalStateException: Failed to check the status of the service org.apache.dubbo.samples.api.GreetingsService. No provider available for the service org.apache.dubbo.samples.api.GreetingsService from the url consumer://30.221.144.195/org.apache.dubbo.samples.api.GreetingsService?application=first-dubbo-consumer&background=false&dubbo=2.0.2&environment=product&executor-management-mode=default&file-cache=true&interface=org.apache.dubbo.samples.api.GreetingsService&methods=sayHi&pid=54580&register.ip=30.221.144.195&release=3.2.0-beta.6-SNAPSHOT&side=consumer&sticky=false&timestamp=1677473358611&unloadClusterRelated=false to the consumer 30.221.144.195 use dubbo version 3.2.0-beta.6-SNAPSHOT
 ```
 
-## 常见的原因
-本章将介绍 Dubbo 中常见的启动失败原因。
-### 1 消费端地址找不到
-消费端地址找不到的日志特征如下：
+## Common Reasons
+This section will cover common startup failure reasons in Dubbo.
+### 1 Consumer Side Address Not Found
+The log signature for the consumer side address not found is as follows:
 
 ```
 Failed to check the status of the service ***. No provider available for the service *** from the url
 ```
 
-解决方案：服务找不到时先自查服务是否已经开发完部署了，然后在注册中心中确认是否已经注册，如果注册检查服务端发布情况、如果未注册检查消费端订阅情况，中间任何一步出问题都会导致异常。
+Solution: If the service is not found, first self-check whether the service has been completed and deployed, then confirm whether it has been registered in the registry, check the server release status if registered, and check consumer subscription status if not registered. Any step failing will lead to an exception.
 
-更多关于地址找不到的排查思路可以参考[地址找不到异常](../no-provider)一文。
+For more troubleshooting ideas on address not found, refer to [Address Not Found Exception](../no-provider).
 
-### 2 配置异常
-#### 2.1 应用名未配置
-应用名未配置的日志特征如下：
+### 2 Configuration Exception
+#### 2.1 Application Name Not Configured
+The log signature for the application name not configured is as follows:
 
 ```
 [27/02/23 02:23:14:014 CST] main ERROR deploy.DefaultApplicationDeployer:  [DUBBO] Dubbo Application[1.1](unknown) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions. 
 java.lang.IllegalStateException: There's no ApplicationConfig specified.
-	at org.apache.dubbo.config.context.ConfigManager.lambda$getApplicationOrElseThrow$0(ConfigManager.java:85)
 ```
 
-典型的日志内容为 `There's no ApplicationConfig specified`。
+Typical log content is `There's no ApplicationConfig specified`.
 
-解决方案：
+Solution:
 
-1. Spring Boot 项目配置 `dubbo.application.name` 应用名并重新启动
-2. Spring 项目配置 `<dubbo:application name="xxx">` 属性并重新启动
-3. 直接使用 Dubbo API 的项目需要注入 `ApplicationConfig applicationConfig = new ApplicationConfig("xxx");` 属性并重新启动
+1. Spring Boot project sets `dubbo.application.name` and restarts.
+2. Spring project sets `<dubbo:application name="xxx">` attribute and restarts.
+3. Directly using Dubbo API project needs to inject `ApplicationConfig applicationConfig = new ApplicationConfig("xxx");` attribute and restart.
 
-#### 2.2 重复配置覆盖
-重复配置覆盖的日志特征如下：
+#### 2.2 Duplicate Configuration Overlap
+The log signature for duplicate configuration overlap is as follows:
 ```
 Exception in thread "main" java.lang.IllegalStateException: Duplicate Configs found for ApplicationConfig, only one unique ApplicationConfig is allowed for one application. previous: <dubbo:application environment="product" name="first-dubbo-consumer" />, later: <dubbo:application environment="product" name="second-dubbo-consumer" />. According to config mode [STRICT], please remove redundant configs and keep only one.
 ```
 
-典型的日志内容为 `Duplicate Configs found for`。
+Typical log content is `Duplicate Configs found for`.
 
-解决方案：
+Solution:
 
-1. Spring 项目中通常为注入了多个 Config 导致的，请按照日志提示删除到仅剩下一个并重新启动
-2. Spring XML 项目中通常引入了多个互斥的属性导致的，请按照日志提示删除到仅剩下一个并重新启动
-3. 直接使用 Dubbo API 的项目通常是注入了多个相同维度的配置导致的，请按照日志提示删除到仅剩下一个并重新启动
-4. 对于无法修改重复属性的用户，可以在启动参数中指定 `dubbo.config.mode` 为 `OVERRIDE` 或 `IGNORE` 分别代表着覆盖原配置或忽略新配置。
+1. Spring projects usually result from injecting multiple configs, delete duplicates as indicated in the logs and restart.
+2. Spring XML projects may import multiple mutually exclusive properties, delete down to one as indicated in the logs and restart.
+3. Projects using Dubbo API may result from injecting multiple identical dimensions; delete down to one as indicated in the logs and restart.
+4. For users unable to modify duplicate attributes, specify `dubbo.config.mode` in startup parameters as `OVERRIDE` or `IGNORE`, which represent overriding original configurations or ignoring new configurations.
 
-注：此异常为 3.x 中新检查行为，2.7.x 及以前版本中存在任意覆盖的问题。
+Note: This exception is a new check behavior in 3.x; older versions may have arbitrary overlap issues.
 
-### 3 类找不到
-类找不到的日志特征如下：
+### 3 Class Not Found
+The log signature for class not found is as follows:
 ```
 [27/02/23 02:44:50:050 CST] main ERROR deploy.DefaultApplicationDeployer:  [DUBBO] Dubbo Application[1.1](first-dubbo-consumer) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions. 
 java.lang.IllegalStateException: org.apache.dubbo.samples.api.Greetings
@@ -123,15 +122,15 @@ Caused by: java.lang.ClassNotFoundException: org.apache.dubbo.samples.api.Greeti
 
 ```
 
-典型的日志内容为 `java.lang.ClassNotFoundException`。
+Typical log content is `java.lang.ClassNotFoundException`.
 
-解决方案：
+Solution:
 
-1. 检查是否正确打包，是否存在依赖包丢失的情况。（可以结合 arthas 进行诊断）
-2. 对于确实不需要使用类对象的（如网关场景），可以配置 `generic` 属性开启泛化调用，会自动忽略类检查
+1. Check for correct packaging and missing dependency packages. (Can use arthas for diagnosis)
+2. For cases that genuinely don't need class objects (such as gateway scenarios), configure the `generic` attribute to enable generalized calls, which will automatically ignore class checks.
 
-### 4 方法找不到
-方法找不到的日志特征如下：
+### 4 Method Not Found
+The log signature for method not found is as follows:
 ```
 [27/02/23 02:49:31:031 CST] main ERROR deploy.DefaultApplicationDeployer:  [DUBBO] Dubbo Application[1.1](first-dubbo-consumer) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions. 
 java.lang.IllegalStateException: Failed to override field value of config bean: <dubbo:reference sticky="false" interface="org.apache.dubbo.samples.api.GreetingsService" />
@@ -163,16 +162,16 @@ Caused by: java.lang.IllegalStateException: Found invalid method config, the int
 
 ```
 
-典型的日志内容为 `Found invalid method config`。
+Typical log content is `Found invalid method config`.
 
-解决方案：
+Solution:
 
-1. 检查是否正确打包，是否存在依赖包丢失的情况。（可以结合 arthas 进行诊断）
-2. 如果确定该方法已经删除，请删除对应的 `MethodConfig` 并重新启动
-3. 对于确实不需要使用类对象的（如网关场景），可以配置 `generic` 属性开启泛化调用，会自动忽略类检查
+1. Check for correct packaging and missing dependency packages. (Can use arthas for diagnosis)
+2. If the method has indeed been deleted, remove the corresponding `MethodConfig` and restart.
+3. For cases that genuinely don't need class objects (such as gateway scenarios), configure the `generic` attribute to enable generalized calls, which will automatically ignore class checks.
 
-### 5 端口冲突
-端口冲突的日志特征如下：
+### 5 Port Conflict
+The log signature for port conflict is as follows:
 ```
 [27/02/23 02:52:00:000 CST] main ERROR deploy.DefaultApplicationDeployer:  [DUBBO] Dubbo Application[1.1](first-dubbo-provider) start failure, dubbo version: 3.2.0-beta.6-SNAPSHOT, current host: 30.221.144.195, error code: 5-14. This may be caused by , go to https://dubbo.apache.org/faq/5/14 to find instructions. 
 org.apache.dubbo.rpc.RpcException: Fail to start server(url: dubbo://30.221.144.195:20880/org.apache.dubbo.samples.api.GreetingsService?anyhost=true&application=first-dubbo-provider&background=false&bind.ip=30.221.144.195&bind.port=20880&channel.readonly.sent=true&codec=dubbo&deprecated=false&dubbo=2.0.2&dubbo.tag=dev&dynamic=true&executor-management-mode=default&file-cache=true&generic=false&heartbeat=60000&interface=org.apache.dubbo.samples.api.GreetingsService&methods=sayHi&pid=63841&prefer.serialization=fastjson2,hessian2&qos.port=22223&release=3.2.0-beta.6-SNAPSHOT&service-name-mapping=true&side=provider&timestamp=1677480719543) Failed to bind NettyServer on /0.0.0.0:20880, cause: Address already in use
@@ -245,9 +244,10 @@ at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.
 at java.lang.Thread.run(Thread.java:748)
 ```
 
-典型的日志内容为 `Address already in use`。
+Typical log content is `Address already in use`.
 
-解决方案：
+Solution:
 
-1. 检查本地是否有其他进程已经占用了端口（可以基于 `lsof -i:20880` 、`netstat -ano | grep 20880` 等命令排查）
-2. 如果本地启动多个 Dubbo 进程，请给不同的进程指定不同的 `dubbo.protocol.port` 。或者指定为 `-1`，Dubbo 将自动寻找一个可以使用的端口进行绑定。
+1. Check if other processes have occupied the port locally (you can use commands like `lsof -i:20880`, `netstat -ano | grep 20880`, etc. to troubleshoot).
+2. If multiple Dubbo processes are started locally, assign different `dubbo.protocol.port` to different processes. Or set it to `-1`, so Dubbo will automatically find an available port for binding.
+

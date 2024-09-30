@@ -3,7 +3,7 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
     - /en/docs3-v2/java-sdk/reference-manual/config-center/zookeeper/
     - /en/overview/what/ecosystem/config-center/zookeeper/
-description: Zookeeper 配置中心的基本使用和工作原理。
+description: Basic usage and working principles of the Zookeeper configuration center.
 linkTitle: Zookeeper
 title: Zookeeper
 type: docs
@@ -11,24 +11,24 @@ weight: 2
 ---
 
 
-## 1 前置条件
-* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
-* 安装并启动 [Zookeeper](/en/overview/reference/integrations/zookeeper/)
+## 1 Prerequisites
+* Understand [Dubbo basic development steps](/en/overview/mannual/java-sdk/quick-start/starter/)
+* Install and start [Zookeeper](/en/overview/reference/integrations/zookeeper/)
 
-## 2 使用说明
-在此查看[完整示例代码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/configcenter/dubbo-samples-configcenter-annotation)
+## 2 Usage Instructions
+View the [complete sample code](https://github.com/apache/dubbo-samples/tree/master/3-extensions/configcenter/dubbo-samples-configcenter-annotation)
 
-### 2.1 增加 Maven 依赖
-如果项目已经启用 Zookeeper 作为注册中心，则无需增加任何额外配置。
+### 2.1 Add Maven Dependencies
+If the project has already enabled Zookeeper as the registry, no additional configurations are necessary.
 
-如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-增加-maven-依赖)。
+If Zookeeper is not used as the registry, refer to [Add Zookeeper related dependencies for the registry](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-增加-maven-依赖).
 
-### 2.2 启用 Zookeeper 配置中心
+### 2.2 Enable Zookeeper Configuration Center
 ```xml
 <dubbo:config-center address="zookeeper://127.0.0.1:2181"/>
 ```
 
-或者
+or
 
 ```yaml
 dubbo
@@ -36,26 +36,26 @@ dubbo
     address: zookeeper://127.0.0.1:2181
 ```
 
-或者
+or
 
 ```properties
 dubbo.config-center.address=zookeeper://127.0.0.1:2181
 ```
 
-或者
+or
 
 ```java
 ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-`address` 格式请参考 [zookeeper 注册中心 - 启用配置](../../registry/zookeeper/#13-配置并启用-zookeeper)
+For the format of `address`, refer to [zookeeper registry - enable configuration](../../registry/zookeeper/#13-配置并启用-zookeeper)
 
-## 3 高级配置
-如要开启认证鉴权，请参考 [zookeeper 注册中心 - 启用认证鉴权](../../registry/zookeeper/#21-认证与鉴权)
+## 3 Advanced Configuration
+To enable authentication and authorization, refer to [zookeeper registry - enable authentication and authorization](../../registry/zookeeper/#21-认证与鉴权)
 
-### 3.1 定制外部化配置 key
-**1. 启用外部化配置，并指定 key**
+### 3.1 Customize Externalized Configuration Key
+**1. Enable externalized configuration and specify key**
 ```yaml
 dubbo
   config-center
@@ -63,21 +63,21 @@ dubbo
     config-file: dubbo.properties
 ```
 
-`config-file` - 外部化配置文件 key 值，默认 `dubbo.properties`。`config-file` 代表将 Dubbo 配置文件存储在远端注册中心时，文件在配置中心对应的 key 值，通常不建议修改此配置项。
+`config-file` - key value of the externalized configuration file, default `dubbo.properties`. `config-file` represents the key value corresponding to the Dubbo configuration file when stored in the remote registry, and it is generally not recommended to change this configuration item.
 
-**2. Zookeeper 配置中心增加配置**
-外部化配置的存储结构如下图所示
+**2. Add configuration to Zookeeper Configuration Center**
+The storage structure of externalized configuration is shown in the diagram below.
 
 ![zk-configcenter.jpg](/imgs/user/zk-configcenter.jpg)
 
-- namespace，用于不同配置的环境隔离。
-- config，Dubbo约定的固定节点，不可更改，所有配置和流量治理规则都存储在此节点下。
-- dubbo 与 application，分别用来隔离全局配置、应用级别配置：dubbo 是默认 group 值，application 对应应用名
-- dubbo.properties，此节点的node value存储具体配置内容
+- namespace, used for environment isolation of different configurations.
+- config, a fixed node defined by Dubbo, cannot be changed, all configurations and traffic governance rules are stored under this node.
+- dubbo and application, used for isolating global configuration and application-level configuration: dubbo is the default group value, and application corresponds to the application name.
+- dubbo.properties, the node value of this node stores specific configuration content.
 
-> 这里是为了说明工作原理，建议使用 dubbo-admin 进行配置管理。
+> This is to illustrate the working principle; it is recommended to use dubbo-admin for configuration management.
 
-### 3.2 设置 group 与 namespace
+### 3.2 Set Group and Namespace
 ```yaml
 dubbo
   config-center
@@ -86,14 +86,15 @@ dubbo
     namespace: dev1
 ```
 
-对配置中心而言，`group` 与 `namespace` 应该是全公司（集群）统一的，应该避免不同应用使用不同的值，外部化配置和治理规则也应该存放在对应的 group 与 namespace。
+For the configuration center, `group` and `namespace` should be unified across the company (cluster), and different applications should avoid using different values. Externalized configurations and governance rules should also be stored under the corresponding group and namespace.
 
-## 4 流量治理规则
-所有流量治理规则默认都存储在 `/dubbo/config` 节点下，具体节点结构图如下。流量治理规则的增删改建议通过 dubbo-control-plane（dubbo-admin） 完成，更多内容可查看 Dubbo 支持的具体流量治理能力
+## 4 Traffic Governance Rules
+All traffic governance rules are by default stored under the `/dubbo/config` node. The specific node structure diagram is as follows. It is recommended to use dubbo-control-plane (dubbo-admin) for adding, deleting, or modifying traffic governance rules. More content can be found in Dubbo's supported traffic governance capabilities.
 
 ![zk-configcenter-governance](/imgs/user/zk-configcenter-governance.jpg)
 
-- namespace，用于不同配置的环境隔离。
-- config，Dubbo 约定的固定节点，不可更改，所有配置和流量治理规则都存储在此节点下。
-- dubbo，所有服务治理规则都是全局性的，dubbo 为默认节点
-- configurators/tag-router/condition-router/migration，不同的服务治理规则类型，node value 存储具体规则内容
+- namespace, used for environment isolation of different configurations.
+- config, a fixed node defined by Dubbo, cannot be changed; all configuration and traffic governance rules are stored in this node.
+- dubbo, all service governance rules are global, and dubbo is the default node.
+- configurators/tag-router/condition-router/migration, different types of service governance rules, node value stores the specific rules content.
+

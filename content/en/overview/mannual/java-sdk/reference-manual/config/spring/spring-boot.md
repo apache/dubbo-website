@@ -3,20 +3,20 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/config/annotation/
     - /en/docs3-v2/java-sdk/reference-manual/config/annotation/
     - /en/overview/mannual/java-sdk/reference-manual/config/annotation/
-description: 以 Annotation、Spring Boot 开发 Dubbo 应用
+description: Develop Dubbo applications using Annotation and Spring Boot
 linkTitle: Spring Boot
 title: Spring Boot
 type: docs
 weight: 3
 ---
 
-关于 Spring Boot 的注解、基本使用方法等请参考 [使用教程 - Spring Boot](/en/overview/mannual/java-sdk/tasks/develop/springboot/)。以下是 spring boot 支持的配置详情与 starter 列表。
+For details about Spring Boot annotations and basic usage, please refer to [User Guide - Spring Boot](/en/overview/mannual/java-sdk/tasks/develop/springboot/). Below are the configuration details and starter list supported by Spring Boot.
 
 ## application.yaml
 
-以下是 Dubbo 框架支持的配置组件列表，可以在 Spring Boot 配置文件中指定所需配置。
+Below is the list of configuration components supported by the Dubbo framework, which can be specified in the Spring Boot configuration file.
 
-### 配置示例
+### Configuration Example
 
 ```yaml
 dubbo:
@@ -60,34 +60,35 @@ dubbo:
 * [**dubbo.tracing.sampling** - `org.apache.dubbo.config.nested.SamplingConfig`](../../properties#dubbotracingsampling)
 * [**dubbo.tracing.tracing-exporter** - `org.apache.dubbo.config.nested.ExporterConfig`](../../properties#dubbotracingtracing-exporter)
 
-## starter列表
+## Starter List
 
 ### dubbo-spring-boot-starter
-以下是一些 dubbo-spring-boot-starter 版本对应的 SpringBoot、JDK 依赖：
+Here are some version mappings of the dubbo-spring-boot-starter that correspond to Spring Boot and JDK dependencies:
 
-| 版本    | 兼容 Spring Boot 范围 |
+| Version | Compatible Spring Boot Range |
 |-------|---------------|
 | 3.3.x | [1.x ~ 3.x)   |
 | 3.2.x | [1.x ~ 3.x)   |
 | 3.1.x | [1.x ~ 2.x)   |
 | 2.7.x | [1.x ~ 2.x)   |
 
-### 其他组件starter
+### Other Component Starters
 
-以下是 Dubbo 官方社区提供的 starter 列表（3.3.0+ 版本），方便在 Spring Boot 应用中快速使用：
-* `dubbo-spring-boot-starter`，管理 dubbo 核心依赖，用于识别 application.properties 或 application.yml 中 `dubbo.` 开头的配置项，扫描 @DubboService 等注解。
-* `dubbo-spring-boot-starter3`，管理 dubbo 核心依赖，与 dubbo-spring-boot-starter 相同，支持 spring boot 3.2 版本。
-* `dubbo-nacos-spring-boot-starter`，管理 nacos-client 等依赖，使用 Nacos 作为注册中心、配置中心时引入。
-* `dubbo-zookeeper-spring-boot-starter`，管理 zookeeper、curator 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入（Zookeeper server 3.4 及以下版本使用）。
-* `dubbo-zookeeper-curator5-spring-boot-starter`，管理 zookeeper、curator5 等依赖，使用 Zookeeper 作为注册中心、配置中心时引入。
-* `dubbo-sentinel-spring-boot-starter`，管理 sentinel 等依赖，使用 Sentinel 进行限流降级时引入。
-* `dubbo-seata-spring-boot-starter`，管理 seata 等依赖，使用 Seata 作为分布式事务解决方案时引入。
-* `dubbo-observability-spring-boot-starter`，加入该依赖将自动开启 Dubbo 内置的 metrics 采集，可用于后续的 Prometheus、Grafana 等监控系统。
-* `dubbo-tracing-brave-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 Brave/Zipkin 作为 Tracer，将 Trace 信息 export 到 Zipkin。
-* `dubbo-tracing-otel-otlp-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 OTlp Collector。
-* `dubbo-tracing-otel-zipkin-spring-boot-starter`，管理 brave/zipkin、micrometer 等相关相关依赖，使用 OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin。
+Here is the list of starters provided by the Dubbo official community (version 3.3.0+) for quick usage in Spring Boot applications:
+* `dubbo-spring-boot-starter`, manages the core dubbo dependencies, identifies configuration items starting with `dubbo.` in application.properties or application.yml, and scans annotations like @DubboService.
+* `dubbo-spring-boot-starter3`, manages the same core dubbo dependencies as dubbo-spring-boot-starter, supports Spring Boot version 3.2.
+* `dubbo-nacos-spring-boot-starter`, manages nacos-client and other dependencies to introduce when using Nacos as the registry and configuration center.
+* `dubbo-zookeeper-spring-boot-starter`, manages zookeeper, curator and other dependencies to introduce when using Zookeeper as the registry and configuration center (for Zookeeper server version 3.4 and below).
+* `dubbo-zookeeper-curator5-spring-boot-starter`, manages zookeeper, curator5 and other dependencies to introduce when using Zookeeper as the registry and configuration center.
+* `dubbo-sentinel-spring-boot-starter`, manages sentinel and other dependencies to introduce when using Sentinel for rate limiting and degradation.
+* `dubbo-seata-spring-boot-starter`, manages seata and other dependencies to introduce when using Seata as a distributed transaction solution.
+* `dubbo-observability-spring-boot-starter`, adding this dependency will automatically enable the built-in metrics collection of Dubbo, which can be used for subsequent monitoring systems like Prometheus and Grafana.
+* `dubbo-tracing-brave-spring-boot-starter`, manages brave/zipkin, micrometer, and related dependencies, uses Brave/Zipkin as Tracer, and exports Trace information to Zipkin.
+* `dubbo-tracing-otel-otlp-spring-boot-starter`, manages brave/zipkin, micrometer, and related dependencies, uses OpenTelemetry as Tracer, and exports Trace information to OTlp Collector.
+* `dubbo-tracing-otel-zipkin-spring-boot-starter`, manages brave/zipkin, micrometer, and related dependencies, uses OpenTelemetry as Tracer, and exports Trace information to Zipkin.
 
-{{% alert title="注意" color="info" %}}
-* 关于每个 starter 适配的第三方组件版本，请查看 [组件版本映射表](/en/overview/mannual/java-sdk/versions/#版本说明)。
-* 每个 starter 都有对应的 application.yml 配置项，请跟随上文 [配置项列表](./#配置示例) 了解使用细节。
+{{% alert title="Note" color="info" %}}
+* For the versions of third-party components compatible with each starter, please refer to the [Component Version Mapping Table](/en/overview/mannual/java-sdk/versions/#版本说明).
+* Each starter has corresponding application.yml configuration items; please refer to the above [Configuration Items List](./#配置示例) for detailed usage.
 {{% /alert %}}
+

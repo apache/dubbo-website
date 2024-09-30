@@ -2,25 +2,25 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/logger-management/
     - /en/docs3-v2/java-sdk/reference-manual/qos/logger-management/
-description: 当用户未接入 prometheus 时可以使用默认的监控指标命令
-linkTitle: 默认监控指标命令
-title: 默认监控指标命令
+description: The default monitoring metrics command can be used when the user has not connected to Prometheus.
+linkTitle: Default Monitoring Metrics Command
+title: Default Monitoring Metrics Command
 type: docs
 weight: 10
 ---
 
 
-### 查询所有监控指标
+### Query All Monitoring Metrics
 
-命令：`metrics_default`
+Command: `metrics_default`
 
-示例：
+Example:
 ```bash
 > telnet 127.0.0.1 22222
 > metrics_default
 ```
 
-输出：
+Output:
 ```
 Trying 127.0.0.1...
 Connected to localhost.
@@ -35,20 +35,20 @@ dubbo.register.rt.milliseconds.max{application.module.id=1.1,application.name=du
 
 ```
 
-### 根据关键词查询监控指标
+### Query Monitoring Metrics by Keyword
 
-命令：`metrics_default {applicationName} {keyword}`
+Command: `metrics_default {applicationName} {keyword}`
 
-applicationName: 应用名称  
-keyword: 关键词
+applicationName: Application name  
+keyword: Keyword
 
-示例：
+Example:
 ```bash
 > telnet 127.0.0.1 22222
 > metrics_default dubbo-springboot-demo-provider registry
 ```
 
-输出：
+Output:
 ```
 Trying 127.0.0.1...
 Connected to localhost.
@@ -61,3 +61,4 @@ dubbo> metrics_default dubbo-springboot-demo-provider registry
 dubbo.registry.subscribe.num.total{application.module.id=1.1,application.name=dubbo-springboot-demo-provider,application.version=,git.commit.id=,hostname=hujundeMacBook-Pro.local,ip=10.224.214.80,} 0.0
 dubbo.registry.directory.num.disable.total{application.module.id=1.1,application.name=dubbo-springboot-demo-provider,application.version=,git.commit.id=,hostname=hujundeMacBook-Pro.local,interface=dubbo-springboot-demo-provider/org.apache.dubbo.metrics.service.MetricsService:1.0.0,ip=10.224.214.80,} 0.0
 ```
+

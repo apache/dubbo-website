@@ -1,44 +1,44 @@
 ---
 aliases:
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/others/set-host/
-description: 自定义 Dubbo 服务对外暴露的主机地址
-linkTitle: 主机配置
-title: 主机配置
+description: Customizing the host address exposed by Dubbo services
+linkTitle: Host Configuration
+title: Host Configuration
 type: docs
 weight: 37
 ---
 
 
 
-## 背景
+## Background
 
-在 Dubbo 中， Provider 启动时主要做两个事情，一是启动 server，二是向注册中心注册服务。启动 server 时需要绑定 socket，向注册中心注册服务时也需要发送 socket 唯一标识服务地址。
+In Dubbo, when a Provider starts, it does two main things: it starts the server and registers the service with the registry. When starting the server, it needs to bind the socket, and when registering the service with the registry, it also needs to send the socket's unique identifier as the service address.
 
-1. `dubbo`中不设置`host`时默认`host`是什么?
-2. 那在`dubbo`中如何指定服务的`host`,我们是否可以用hostname或domain代替IP地址作为`host`?
-3. 在使用docker时,有时需要设置端口映射,此时,启动server时绑定的socket和向注册中心注册的socket使用不同的端口号,此时又该如何设置?
+1. What is the default `host` when `host` is not set in `dubbo`?
+2. How do we specify the service's `host` in `dubbo`, can we use a hostname or domain instead of an IP address as `host`?
+3. When using Docker, sometimes port mapping needs to be set, in this case, how should we set the socket bound during server startup and the socket registered with the registry to use different port numbers?
 
-## 示例
-#### dubbo 中不设置 host 时默认 host 是什么
+## Example
+#### What is the default host when host is not set in dubbo
 
-一般的 dubbo 协议配置如下:
+The general dubbo protocol configuration is as follows:
 ``` xml
     ...
     <dubbo:protocol name="dubbo" port="20890" />
     ...
 ```
 
-可以看到,只配置了端口号,没有配置 host，此时设置的 host 又是什么呢?
+It can be seen that only the port number is configured, and the host is not set. So what is the host set in this case?
 
-查看代码发现,在 `org.apache.dubbo.config.ServiceConfig#findConfigedHosts()` 中,通过 `InetAddress.getLocalHost().getHostAddress()` 获取默认 host。其返回值如下：
+Looking at the code, it is found that in `org.apache.dubbo.config.ServiceConfig#findConfigedHosts()`, the default host is obtained through `InetAddress.getLocalHost().getHostAddress()`. Its return values are as follows:
 
-1. 未联网时，返回 127.0.0.1
-2. 在阿里云服务器中，返回私有地址,如: 172.18.46.234
-3. 在本机测试时，返回公有地址，如: 30.5.10.11
+1. When not connected to the network, returns 127.0.0.1
+2. On Alibaba Cloud servers, returns a private address, e.g., 172.18.46.234
+3. When testing on localhost, returns a public address, e.g., 30.5.10.11
 
-#### 那在 dubbo 中如何指定服务的 socket?
+#### How to specify the service's socket in dubbo?
 
-除此之外,可以通过 `dubbo.protocol` 或 `dubbo.provider `的 `host` 属性对 `host` 进行配置,支持IP地址和域名,如下:
+In addition, the `host` can be configured through the `dubbo.protocol` or `dubbo.provider` `host` attribute, supporting both IP addresses and domain names, as follows:
 
 ``` xml
     ...
@@ -46,36 +46,37 @@ weight: 37
     ...
 ```
 
-####  在使用 docker 时，有时需要设置端口映射，此时，启动 server 时绑定的 socket 和向注册中心注册的 socket 使用不同的端口号，此时又该如何设置？
+#### When using Docker, sometimes port mapping needs to be set, how should we configure it if the socket bound during server startup and the socket registered with the registry use different port numbers?
 
-见 [dubbo 通过环境变量设置 host](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
+See [Setting host in Dubbo via environment variables](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
 
-有些部署场景需要动态指定服务注册的地址，如 docker bridge 网络模式下要指定注册宿主机 ip 以实现外网通信。dubbo 提供了两对启动阶段的系统属性，用于设置对外通信的ip、port地址。
+Some deployment scenarios require dynamically specifying the service registration address, such as specifying the IP of the host machine under the Docker bridge network mode to achieve external communication. Dubbo provides two pairs of system properties at startup for setting the communication IP and port address.
 
-* **DUBBO_IP_TO_REGISTRY**：注册到注册中心的 ip 地址
-* **DUBBO_PORT_TO_REGISTRY**：注册到注册中心的 port 端口
-* **DUBBO_IP_TO_BIND**：监听 ip 地址
-* **DUBBO_PORT_TO_BIND**：监听 port 端口
+* **DUBBO_IP_TO_REGISTRY**: IP address registered with the registry
+* **DUBBO_PORT_TO_REGISTRY**: Port registered with the registry
+* **DUBBO_IP_TO_BIND**: Listening IP address
+* **DUBBO_PORT_TO_BIND**: Listening port
 
-以上四个配置项均为可选项，如不配置 dubbo 会自动获取 ip 与端口，请根据具体的部署场景灵活选择配置。
-dubbo 支持多协议，如果一个应用同时暴露多个不同协议服务，且需要为每个服务单独指定 ip 或 port，请分别在以上属性前加协议前缀。 如：
+All four configuration items are optional, if not configured, dubbo will automatically obtain the IP and port, please flexibly choose configurations based on specific deployment scenarios. 
+Dubbo supports multiple protocols; if an application exposes multiple different protocol services and requires separate IP or port for each service, please add the protocol prefix to these properties. For example:
 
-* **HESSIAN_DUBBO_PORT_TO_BIND**：hessian 协议绑定的 port
-* **DUBBO_DUBBO_PORT_TO_BIND**：dubbo 协议绑定的 port
-* **HESSIAN_DUBBO_IP_TO_REGISTRY**：hessian 协议注册的 ip
-* **DUBBO_DUBBO_IP_TO_REGISTRY**：dubbo 协议注册的 ip
+* **HESSIAN_DUBBO_PORT_TO_BIND**: Port bound to the Hessian protocol
+* **DUBBO_DUBBO_PORT_TO_BIND**: Port bound to the Dubbo protocol
+* **HESSIAN_DUBBO_IP_TO_REGISTRY**: IP registered for the Hessian protocol
+* **DUBBO_DUBBO_IP_TO_REGISTRY**: IP registered for the Dubbo protocol
 
-PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BIND，但是反过来是成立的。如：
+PORT_TO_REGISTRY or IP_TO_REGISTRY will not be used as the default PORT_TO_BIND or IP_TO_BIND, but the opposite is valid. For example:
 
-* 设置 `PORT_TO_REGISTRY=20881` 和 `IP_TO_REGISTRY=30.5.97.6`，则 `PORT_TO_BIND` 和 `IP_TO_BIND` 不受影响
-* 设置 `PORT_TO_BIND=20881` 和 `IP_TO_BIND=30.5.97.6`，则默认 `PORT_TO_REGISTRY=20881`  且 `IP_TO_REGISTRY=30.5.97.6`
+* Setting `PORT_TO_REGISTRY=20881` and `IP_TO_REGISTRY=30.5.97.6` will not affect `PORT_TO_BIND` and `IP_TO_BIND`
+* Setting `PORT_TO_BIND=20881` and `IP_TO_BIND=30.5.97.6` will default `PORT_TO_REGISTRY=20881` and `IP_TO_REGISTRY=30.5.97.6`
 
-## 总结
+## Summary
 
- 1. 可以通过`dubbo.protocol`或`dubbo.provider`的`host`属性对`host`进行配置,支持IP地址和域名.但此时注册到注册中心的IP地址和监听IP地址是同一个值
- 2. 为了解决在虚拟环境或局域网内consumer无法与provider通信的问题,可以通过环境变量分别设置注册到注册中心的IP地址和监听IP地址,其优先级高于`dubbo.protocol`或`dubbo.provider`的`host`配置
+1. The `host` can be configured through the `dubbo.protocol` or `dubbo.provider` `host` attributes, supporting IP addresses and domain names. However, the registered IP address and listening IP address will be the same value.
+2. To solve communication issues between consumer and provider in virtual or local area network environments, you can set the registered IP address and listening IP address using environment variables, which have a higher priority than the `host` configuration in `dubbo.protocol` or `dubbo.provider`.
 
-## 参考
+## References
 
- 1. [Proposal: support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
- 2. [dubbo通过环境变量设置host](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
+1. [Proposal: support hostname or domain in service discovery.](https://github.com/apache/dubbo/issues/2043)
+2. [Setting host in Dubbo via environment variables](https://github.com/dubbo/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
+

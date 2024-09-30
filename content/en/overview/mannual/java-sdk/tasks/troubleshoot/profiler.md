@@ -2,43 +2,41 @@
 aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/
-description: Dubbo 请求耗时采样
-linkTitle: 请求耗时采样
-title: 请求耗时采样
+description: Dubbo Request Timing Sampling
+linkTitle: Request Timing Sampling
+title: Request Timing Sampling
 type: docs
 weight: 1
 ---
 
 
-性能采样功能可以对 Dubbo 处理链路上的各处耗时进行检测，在出现超时的时候 `( usageTime / timeout > profilerWarnPercent * 100 )` 通过日志记录调用的耗时。
+The performance sampling feature can detect the time spent at various points in the Dubbo processing chain, logging the call duration when a timeout occurs `( usageTime / timeout > profilerWarnPercent * 100 )`.
 
-此功能分为 `simple profiler` 和 `detail profiler` 两个模式，其中 `simple profiler` 模式默认开启，`detail profiler` 模式默认关闭。
-`detail profiler` 相较 `simple profiler` 模式多采集了每个 filter 的处理耗时、协议上的具体耗时等。
-在 `simple profiler` 模式下如果发现 Dubbo 框架内部存在耗时长的情况，可以开启 `detail profiler` 模式，以便更好地排查问题。
+This feature has two modes: `simple profiler` and `detail profiler`, where the `simple profiler` mode is enabled by default and the `detail profiler` mode is disabled by default. The `detail profiler` collects more data, such as the processing time of each filter and specific protocol timing. If long processing times are detected in the Dubbo framework while in `simple profiler` mode, you can enable `detail profiler` mode to better troubleshoot issues.
 
-## 使用场景
+## Usage Scenarios
 
-需要对 Dubbo 请求的精确耗时进行采集分析的场景，如服务不明原因的超时等
+Scenarios that require precise timing analysis of Dubbo requests, such as unexplained service timeouts.
 
-## 使用方式
+## Usage
 
-`simple profiler` 默认自动开启，对于请求处理时间超过超时时间 3/4 的，都会通过日志打印出慢调用信息。如果需要开启 `detail profiler` 模式或者修改超时告警比例，可以参考[性能采样命令](/en/overview/mannual/java-sdk/reference-manual/qos/profiler/)文档。
+The `simple profiler` is automatically enabled by default, and for requests exceeding three-quarters of the timeout duration, slow call information will be logged. To enable `detail profiler` mode or modify the timeout alert ratio, refer to the [performance sampling command](/en/overview/mannual/java-sdk/reference-manual/qos/profiler/) documentation.
 
-### 日志说明
+### Log Description
 
-日志中各字段的含义如下：
+The meanings of various fields in the log are as follows:
 
 ```
-[Dubbo-Consumer] execute service 接口#方法 cost 实际耗时, this invocation almost (maybe already) timeout. Timeout: 超时时间
+[Dubbo-Consumer] execute service interface#method cost actual time spent, this invocation almost (maybe already) timeout. Timeout: timeout duration
 invocation context:
-请求上下文
+request context
 thread info: 
-Start time: 开始请求时间（nano 时间）
-+-[ Offset: 当前节点开始时间; Usage: 当前节点使用总耗时, 当前节点耗时比例 ] 当前节点描述
-  +-[ Offset: 当前节点开始时间; Usage: 当前节点使用总耗时, 当前节点耗时比例 ] 当前节点描述
+Start time: request start time (nano time)
++-[ Offset: current node start time; Usage: total time spent at current node, current node time spent ratio ] current node description
+  +-[ Offset: current node start time; Usage: total time spent at current node, current node time spent ratio ] current node description
 ```
 
-对于请求耗时这里以两个例子进行介绍：
+Here are two examples for request timing:
 
 ```
 methodA() {
@@ -61,7 +59,7 @@ methodC() {
   +-[ Offset: (1) ms; Usage: (4) + (5) + (6) = (2) ms ] execute methodB
     +-[ Offset: (1) + (4) ms; Usage: (7) = (5) ms ] execute methodC
     
-(1) (2) (3) ... 均为时间占位符
+(1) (2) (3) ... are all time placeholders
 ```
 
 ```
@@ -97,12 +95,12 @@ methodE() {
     +-[ Offset: (1) + (5) + (6) ms; Usage: (10) = (7) ms ] execute methodD
   +-[ Offset: (1) + (2) ms; Usage: (11) = (3) ms ] execute methodE
     
-(1) (2) (3) ... 均为时间占位符
+(1) (2) (3) ... are all time placeholders
 ```
 
-### simple profiler
+### Simple Profiler
 
-Consumer 侧：
+Consumer Side:
 ```
 [19/07/22 07:08:35:035 CST] main  WARN proxy.InvokerInvocationHandler:  [DUBBO] [Dubbo-Consumer] execute service org.apache.dubbo.samples.api.GreetingsService#sayHi cost 1003.015746 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
 invocation context:
@@ -117,7 +115,7 @@ Start time: 285821581299853
   +-[ Offset: 7.987015ms; Usage: 994.207928ms, 99% ] Invoker invoke. Target Address: xx.xx.xx.xx:20880, dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
 ```
 
-Provider 侧：
+Provider Side:
 ```
 [19/07/22 07:08:35:035 CST] DubboServerHandler-30.227.64.173:20880-thread-2  WARN filter.ProfilerServerFilter:  [DUBBO] [Dubbo-Provider] execute service org.apache.dubbo.samples.api.GreetingsService:0.0.0#sayHi cost 808.494672 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
 client: xx.xx.xx.xx:51604
@@ -135,9 +133,9 @@ Start time: 285821754461125
   +-[ Offset: 1.030912ms; Usage: 804.236342ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
 ```
 
-### detail profiler
+### Detail Profiler
 
-Consumer 侧：
+Consumer Side:
 ```
 [19/07/22 07:10:59:059 CST] main  WARN proxy.InvokerInvocationHandler:  [DUBBO] [Dubbo-Consumer] execute service org.apache.dubbo.samples.api.GreetingsService#sayHi cost 990.828336 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
 invocation context:
@@ -158,7 +156,7 @@ Start time: 285965458479241
                  +-[ Offset: 8.258359ms; Usage: 981.612033ms, 99% ] Invoker invoke. Target Address: xx.xx.xx.xx:20880, dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
 ```
 
-Provider 侧：
+Provider Side:
 ```
 [19/07/22 07:10:59:059 CST] DubboServerHandler-30.227.64.173:20880-thread-2  WARN filter.ProfilerServerFilter:  [DUBBO] [Dubbo-Provider] execute service org.apache.dubbo.samples.api.GreetingsService:0.0.0#sayHi cost 811.017347 ms, this invocation almost (maybe already) timeout. Timeout: 1000ms
 client: xx.xx.xx.xx:52019
@@ -185,6 +183,7 @@ Start time: 285965612316294
                              +-[ Offset: 1.536964ms; Usage: 809.335907ms, 99% ] Filter org.apache.dubbo.rpc.filter.ClassLoaderCallbackFilter invoke.
                                 +-[ Offset: 1.558545ms; Usage: 804.276436ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
 ```
-{{% alert title="注意" color="warning" %}}
-由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](../../others/logger-management/)动态修改日志输出框架。
+{{% alert title="Note" color="warning" %}}
+For empty logs caused by log framework mismatches, refer to [Log Framework Adaptation and Runtime Management](../../others/logger-management/) for dynamically modifying the log output framework.
 {{% /alert %}}
+

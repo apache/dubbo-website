@@ -2,80 +2,79 @@
 aliases:
     - /en/overview/tasks/deploy/deploy-on-vm/
     - /en/overview/tasks/deploy/deploy-on-vm/
-description: "部署 Dubbo 应用到 Kubernetes 环境，使用 Nacos 或者 Zookeeper 等作为注册中心。"
+description: "Deploy Dubbo applications to Kubernetes environments, using Nacos or Zookeeper as the registry."
 linkTitle: Kubernetes
-title: 部署 Dubbo 应用到 Kubernetes 环境
+title: Deploying Dubbo Applications to Kubernetes Environments
 type: docs
 weight: 2
 ---
-这种模式与传统的非 Kubernetes 部署并无太大差异，如下图所示，仍然使用 Nacos 或者 Zookeeper 等作为注册中心，只不过将 Kubernetes 作为应用生命周期调度的底层平台。
+This model is not much different from traditional non-Kubernetes deployments. As shown in the picture below, Nacos or Zookeeper is still used as the registry, but Kubernetes is used as the underlying platform for application lifecycle scheduling.
 
 <img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes.png" style="max-width:650px;height:auto;" />
 
-## 安装 Nacos
-在 Kubernetes 模式下，我们推荐使用 `dubboctl` 快速安装 Nacos、dubbo-control-plane、prometheus 等组件：
+## Install Nacos
+In Kubernetes mode, we recommend using `dubboctl` to quickly install components like Nacos, dubbo-control-plane, prometheus, etc.:
 
 ```yaml
 $ dubboctl install --profile=demo
 ```
 
-{{% alert title="提示" color="primary" %}}
-1. 请查看 dubboctl 了解更多细节
-2. 您也可以在此了解 Nacos 官方提供的 Kubernetes 集群安装方案
+{{% alert title="Tip" color="primary" %}}
+1. Please refer to dubboctl for more details.
+2. You can also check out the official Nacos installation plan for Kubernetes clusters.
 {{% /alert %}}
 
+## Deploy Application
+We still take the project in [Quick Start]() as an example to demonstrate the specific steps for packaging and deploying the application.
 
-## 部署应用
-我们仍然以 [快速开始]() 中的项目为例，演示应用打包部署的具体步骤。
-
-首先，克隆示例项目到本地：
+First, clone the sample project locally:
 ```shell
 $ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
 ````
 
-切换到示例目录：
+Switch to the example directory:
 ```shell
 $ cd dubbo-samples/11-quickstart
 ```
 
-### 打包镜像
+### Package Image
 ```shell
 $ dubboctl build
-# 具体写一下推送到 docker 仓库
+# Specifically push to docker repository
 ```
 
-### 部署
+### Deploy
 
 ```shell
 $ dubboctl deploy
 ```
 
-以下是生成的完整 Kubernetes manifests：
+Here are the generated complete Kubernetes manifests:
 
 ```yaml
 
 ```
 
-执行以下命令，将应用部署到 Kubernetes 集群：
+Run the following command to deploy the application to the Kubernetes cluster:
 ```shell
 $ kubectl apply -f xxx.yml
 ```
 
-### 查看部署状态
-如果之前已经使用 `dubboctl` 安装 dubbo-control-plane，则可以通过以下方式查看服务部署情况：
+### Check Deployment Status
+If you have previously installed dubbo-control-plane using `dubboctl`, you can check the service deployment status as follows:
 
 ```shell
 $ kubectl port-forward
 ```
 
-访问 `http://xxx` 查看服务部署详情。
+Access `http://xxx` to view the service deployment details.
 
-### 优雅上下线
-如上面的架构图所示，我们仍然使用 Nacos 作为注册中心，因此，与传统 Linux 部署模式类似，控制实例发布到注册中心、实例从注册中心摘除的时机，是我们实现优雅上下线的关键：
-1. 上线阶段，通过 [延迟发布]() 机制控制实例注册到注册中心的时机，通过开启 [消费端预热]() 确保流量缓慢的被转发到新节点上。
-2. 下线阶段，通过配置 `prestop` 确保先从注册中心摘除实例注册信息，之后再进入进程销毁过程。
+### Graceful Online/Offline
+As shown in the architecture diagram above, we still use Nacos as the registry. Therefore, similar to traditional Linux deployment models, the timing of publishing instances to the registry and removing instances from the registry is key to achieving graceful online/offline:
+1. Online phase, control when instances register to the registry using the [delayed publishing]() mechanism, and ensure traffic is gradually directed to new nodes by enabling [consumer-side warming]().
+2. Offline phase, configure `prestop` to ensure instance registration information is removed from the registry first, before proceeding to the process destruction phase.
 
-优雅下线摘除实例的示例配置：
+Example configuration for gracefully offline removing instances:
 
 ```yaml
 preStop:
@@ -83,7 +82,7 @@ preStop:
 	  command: ["/bin/sh","-c","curl /offline; sleep 10"]
 ```
 
-{{% alert title="提示" color="primary" %}}
-在这个模式下，由于 Dubbo 服务的发布与注销与注册中心强关联，因此与 Kubernetes 中的 liveness、readiness 关联并不大。在下一篇文档中，我们会讲到 Kubernetes Service 部署模式下如何配置 liveness、readiness。
+{{% alert title="Tip" color="primary" %}}
+In this model, since the publishing and unpublishing of Dubbo services are strongly tied to the registry, they do not correlate much with liveness and readiness in Kubernetes. In the next document, we will discuss how to configure liveness and readiness in Kubernetes Service deployment mode.
 {{% /alert %}}
 

@@ -2,31 +2,31 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/overview/
     - /en/docs3-v2/java-sdk/reference-manual/qos/overview/
-description: "QoS 命令的设计目的、使用方法说明，包括如何开启、关闭 qos 命令等，支持 HTTP/Telnet 访问方式，"
-linkTitle: QOS 概述
-title: QOS 概述
+description: "The design purpose and usage instructions of the QoS command, including how to enable and disable the qos command, supporting HTTP/Telnet access methods."
+linkTitle: QOS Overview
+title: QOS Overview
 type: docs
 weight: 1
 ---
 
 
-## 如何使用
-QoS 提供了一些启动参数，来对启动进行配置，他们主要包括：
+## How to Use
+QoS provides some startup parameters for configuration, mainly including:
 
-| 参数                              | 说明             | 默认值       |
+| Parameter                              | Description             | Default Value       |
 |---------------------------------|----------------|-----------|
-| qos-enable                      | 是否启动QoS        | true      |
-| qos-port                        | 启动QoS绑定的端口     | 22222     |
-| qos-accept-foreign-ip           | 是否允许远程访问       | false     |
-| qos-accept-foreign-ip-whitelist | 支持的远端主机ip地址（段） | (无)       |
-| qos-anonymous-access-permission-level | 支持的匿名访问的权限级别   | PUBLIC(1) |
+| qos-enable                      | Whether to enable QoS        | true      |
+| qos-port                        | The port that QoS binds to     | 22222     |
+| qos-accept-foreign-ip           | Whether to allow remote access       | false     |
+| qos-accept-foreign-ip-whitelist | Supported remote host IP addresses (segments) | (none)       |
+| qos-anonymous-access-permission-level | Supported permission level for anonymous access   | PUBLIC(1) |
 
-> 注意，从2.6.4/2.7.0开始，qos-accept-foreign-ip默认配置改为false，如果qos-accept-foreign-ip设置为true，有可能带来安全风险，请仔细评估后再打开。
+> Note: Starting from 2.6.4/2.7.0, the default configuration of qos-accept-foreign-ip is changed to false. If qos-accept-foreign-ip is set to true, it may pose security risks; please evaluate carefully before enabling.
 
-### telnet 与 http 协议
+### telnet and HTTP Protocol
 
-telnet 模块现在同时支持 http 协议和 telnet 协议，方便各种情况的使用
-示例：
+The telnet module now simultaneously supports HTTP protocol and telnet protocol for ease of use in various situations.
+Example:
 ```
 ➜  ~ telnet localhost 22222
 Trying ::1...
@@ -59,86 +59,85 @@ As Consumer side:
 dubbo>
 ```
 
-### 端口
-新版本的 telnet 端口 与 dubbo 协议的端口是不同的端口，默认为 `22222`
+### Port
+The new version of the telnet port is different from the dubbo protocol port, defaulting to `22222`.
 
-可以通过配置文件`dubbo.properties` 修改:
+It can be modified in the configuration file `dubbo.properties`:
 ```
 dubbo.application.qos-port=33333
 ```
-或者
+or
 
-可以通过设置 JVM 参数:
+It can be set via JVM parameters:
 ```
 -Ddubbo.application.qos-port=33333
 ```
 
-### 安全
-默认情况下，dubbo 接收任何主机发起的命令
+### Security
+By default, dubbo accepts commands initiated from any host.
 
-可以通过配置文件`dubbo.properties` 修改:
+It can be modified in the configuration file `dubbo.properties`:
 ```
 dubbo.application.qos-accept-foreign-ip=false
 ```
 
-或者
+or
 
-可以通过设置 JVM 参数:
+It can be set via JVM parameters:
 ```
 -Ddubbo.application.qos-accept-foreign-ip=false
 ```
-拒绝远端主机发出的命令，只允许服务本机执行。
+to reject commands from remote hosts, allowing only local execution.
 
-同时可以通过设置`qos-accept-foreign-ip-whitelist`来指定支持的远端主机ip地址（段），多个ip地址（段）之间用**逗号**分隔，如：
+You can also specify supported remote host IP addresses (segments) using `qos-accept-foreign-ip-whitelist`, separating multiple IP addresses (segments) with **commas**, like:
 
-配置文件`dubbo.properties`
+In the `dubbo.properties` file:
 ```
 dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
 ```
-设置 JVM 参数:
+Set JVM parameters:
 ```
 -Ddubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13,132.12.10.13/24
 ```
 
-### 权限
-为了对生命周期探针的默认支持，QoS 提供了匿名访问的能力以及对权限级别的设置，目前支持的权限级别有：
+### Permission
+To support the lifecycle probe by default, QoS offers anonymous access and permission level settings. The currently supported permission levels are:
 - PUBLIC(1)   
-  默认支持匿名访问的命令权限级别，目前只支持生命周期探针相关的命令
+  The default permission level for anonymous access commands, currently only supports lifecycle probe related commands.
 - PROTECTED(2)  
-  命令默认的权限级别
+  The default permission level for commands.
 - PRIVATE(3)  
-  保留的最高权限级别，目前未支持
+  The highest reserved permission level, currently unsupported.
 - NONE(4)
-  最低权限级别，即不支持匿名访问
+  The lowest permission level, which does not support anonymous access.
 
-> 权限级别 `PRIVATE`> `PROTECTED`> `PUBLIC`> `NONE`, 高级别权限可访问同级别和低级别权限命令。
-当前以下命令权限为`PUBLIC`, 其它命令默认权限别为`PROTECTED`。
+> Permission levels are `PRIVATE` > `PROTECTED` > `PUBLIC` > `NONE`, higher-level permissions can access commands of equal or lower level.
+Currently, the following commands have a permission of `PUBLIC`, while other commands have a default permission of `PROTECTED`.
 
-| 命令                                    | 权限等级      |
+| Command                                    | Permission Level      |
 |---------------------------------------|-------------------|
 | Live                                  | PUBLIC (1)    |
 | Startup                               | PUBLIC (1)     |
 | Ready                                 | PUBLIC (1)     |
 | Quit                                  | PUBLIC (1)|
 
-默认情况下，dubbo 允许匿名主机发起匿名访问，只有`PUBLIC`权限级别的命令可以执行，其他更高权限的命令会被拒绝。
+By default, dubbo allows anonymous hosts to initiate anonymous access, and only commands with `PUBLIC` permission level can be executed; commands with higher permissions will be rejected.
 
-**关闭匿名访问**  
-可以通过设置`qos-anonymous-access-permission-level=NONE`来关闭匿名访问。
+**Disable Anonymous Access**  
+You can disable anonymous access by setting `qos-anonymous-access-permission-level=NONE`.
 
-**设置权限级别**  
-可以通过配置文件`dubbo.properties` 修改:
+**Set Permission Level**  
+You can modify it in the `dubbo.properties` file:
 ```
 dubbo.application.qos-anonymous-access-permission-level=PROTECTED
 ```
-或者
+or
 
-可以通过设置 JVM 参数:
+Set JVM parameters:
 ```
 -Ddubbo.application.qos-anonymous-access-permission-level=PROTECTED
 ```
-来允许匿名访问更高级别的权限的命令。
-
+to allow anonymous access to higher-level permission commands.
 
 ```
 ➜  ~ curl "localhost:22222/ls?arg1=xxx&arg2=xxxx"
@@ -153,10 +152,10 @@ As Consumer side:
 |Consumer Service Name|NUM|
 +---------------------+---+
 ```
-## 配置方式
-> 优先顺序: **系统属性 > dubbo.properties > XML/Spring-boot 自动装配**
+## Configuration Methods
+> Priority Order: **System Properties > dubbo.properties > XML/Spring-boot Autowiring**
 
-### 系统属性
+### System Properties
 ```
 -Ddubbo.application.qos-enable=true
 -Ddubbo.application.qos-port=33333
@@ -166,7 +165,7 @@ As Consumer side:
 ```
 
 ### dubbo.properties
-在项目的`src/main/resources`目录下添加 dubbo.properties文件，内容如下:
+Add the dubbo.properties file in the project’s `src/main/resources` directory, with the following content:
 ```
 dubbo.application.qos-enable=true
 dubbo.application.qos-port=33333
@@ -176,7 +175,7 @@ dubbo.application.qos-anonymous-access-permission-level=PUBLIC
 ```
 
 ### XML
-如果要通过 XML 配置响应的QoS相关的参数，可以进行如下配置：
+If you want to configure QoS related parameters through XML, you can configure as follows:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -199,8 +198,8 @@ dubbo.application.qos-anonymous-access-permission-level=PUBLIC
 </beans>
 ```
 
-###  spring-boot 自动装配
-如果是 spring-boot 的应用，可以在`application.properties`或者`application.yml`上配置:
+### Spring Boot Autowiring
+For Spring Boot applications, you can configure in `application.properties` or `application.yml`:
 
 ```
 dubbo.application.qos-enable=true
@@ -208,4 +207,4 @@ dubbo.application.qos-port=33333
 dubbo.application.qos-accept-foreign-ip=false
 dubbo.application.qos-accept-foreign-ip-whitelist=123.12.10.13, 132.12.10.13/24
 dubbo.application.qos-anonymous-access-permission-level=NONE
-
+```

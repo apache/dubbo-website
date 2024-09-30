@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/tasks/extensibility/protocol/
     - /en/overview/tasks/extensibility/protocol/
-description: 本文讲解如何通过扩展 `org.apache.dubbo.rpc.Protocol` SPI，提供自定义的 RPC 协议实现。
+description: This article explains how to provide a custom RPC protocol implementation by extending the `org.apache.dubbo.rpc.Protocol` SPI.
 linkTitle: Protocol
 no_list: true
 title: Protocol
@@ -10,27 +10,27 @@ type: docs
 weight: 2
 ---
 
-在 [通信协议](/en/overview/mannual/java-sdk/tasks/protocols/) 一章中，我们了解了 Dubbo 内置的几个核心 RPC 协议 `dubbo`、`rest`、和`tri` 以及它们的使用方式。本文讲解如何通过扩展 `org.apache.dubbo.rpc.Protocol` SPI，提供自定义的 RPC 协议实现。
+In the [Communication Protocol](/en/overview/mannual/java-sdk/tasks/protocols/) chapter, we learned about several core RPC protocols built into Dubbo: `dubbo`, `rest`, and `tri`, and how to use them. This article explains how to provide a custom RPC protocol implementation by extending the `org.apache.dubbo.rpc.Protocol` SPI.
 
-自定义一套私有协议有两种方式，第一种是对原有的协议进行包装，添加一些特定的业务逻辑。另外一种是完全自定义一套协议。前者实现简单，在`dubbo`中也是有广泛的使用，比如：`ProtocolFilterWrapper`, `QosProtocolWrapper`, `ProtocolListenerWrapper`等。后者实现相对复杂，但却具有最大的灵活性，比如 Dubbo 框架内置的协议 `dubbo`、`triple` 协议都可以算作这种实现方式。
+There are two ways to create a private protocol: the first is to wrap the existing protocol and add specific business logic. The second is to completely customize a protocol. The former is simpler to implement and is widely used in `dubbo`, such as `ProtocolFilterWrapper`, `QosProtocolWrapper`, and `ProtocolListenerWrapper`. The latter is relatively complex but offers maximum flexibility; for instance, the built-in protocols `dubbo` and `triple` in the Dubbo framework fall under this implementation style.
 
-本示例的完整源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/)。除了本示例之外，Dubbo 核心仓库 apache/dubbo 以及扩展库 [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-protocol-extensions/) 中的众多 Protocol 实现，都可以作为扩展参考实现：
+For the complete source code of this example, refer to [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/). In addition to this example, many Protocol implementations in the core Dubbo repository apache/dubbo and the extension library [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-protocol-extensions/) can also serve as extension references: 
 
 ```properties
-# Dubbo对外支持的常用协议
+# Common protocols supported by Dubbo
 dubbo=org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
 tri=org.apache.dubbo.rpc.protocol.tri.TripleProtocol
 ```
 
-## 任务详情
+## Task Details
 
-基于现有的`dubbo`协议来实现自定义协议`edubbo`。
+Implement a custom protocol `edubbo` based on the existing `dubbo` protocol.
 
-## 实现方式
+## Implementation
 
-通过对`dubbo`协议进行包装来实现`edubbo`协议。
+The `edubbo` protocol is implemented by wrapping the `dubbo` protocol.
 
-#### 代码结构
+#### Code Structure
 
 ##### Common
 
@@ -45,7 +45,7 @@ src
                         |-extensibility
                             |-protocol
                                 |-common
-                                    |-EnhancedProtocol.java (实现Protocol接口)
+                                    |-EnhancedProtocol.java (Implements Protocol interface)
 ```
 
 ##### Provider
@@ -64,9 +64,9 @@ src
                                     |-ExtensibilityProtocolServiceImpl.java
     |-resources
         |-META-INF
-            |-application.properties (Dubbo Provider配置文件)
+            |-application.properties (Dubbo Provider configuration file)
             |-dubbo
-                |-org.apache.dubbo.rpc.Protocol (纯文本文件)
+                |-org.apache.dubbo.rpc.Protocol (Plain text file)
 ```
 
 ##### Consumer
@@ -85,12 +85,12 @@ src
                                     |-ExtensibilityProtocolConsumerTask.java
     |-resources
         |-META-INF
-            |-application.properties (Dubbo Consumer配置文件)
+            |-application.properties (Dubbo Consumer configuration file)
             |-dubbo
-                |-org.apache.dubbo.rpc.Protocol (纯文本文件)
+                |-org.apache.dubbo.rpc.Protocol (Plain text file)
 ```
 
-#### 代码详情
+#### Code Details
 ```java
 package org.apache.dubbo.samples.extensibility.protocol.common;
 
@@ -142,47 +142,48 @@ public class EnhancedProtocol implements Protocol {
 }
 ```
 
-#### SPI配置
+#### SPI Configuration
 
 ##### Provider
 
-在`resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol`文件中添加如下配置：
+Add the following configuration in the `resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol` file:
 ```properties
 edubbo=org.apache.dubbo.samples.extensibility.protocol.common.EnhancedProtocol
 ```
 
 ##### Consumer
 
-在`resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol`文件中添加如下配置：
+Add the following configuration in the `resources/META-INF/dubbo/org.apache.dubbo.rpc.Protocol` file:
 ```properties
 edubbo=org.apache.dubbo.samples.extensibility.protocol.common.EnhancedProtocol
 ```
 
-#### 配置文件
+#### Configuration File
 
 ##### Provider
 
-在`resources/application.properties`文件中添加如下配置：
+Add the following configuration in the `resources/application.properties` file:
 ```properties
-# 自定义协议
+# Custom protocol
 dubbo.provider.protocol=edubbo
 ```
 
 ##### Consumer
 
-在`resources/application.properties`文件中添加如下配置：
+Add the following configuration in the `resources/application.properties` file:
 ```properties
-# 自定义协议
+# Custom protocol
 dubbo.consumer.protocol=edubbo
 ```
 
-## 运行结果
-以**使用本地IDE**的方式来运行任务，结果如下：
+## Run Results
+Run the task using **local IDE**, the results are as follows:
 
-#### 注册协议
+#### Registered Protocol
 
 ![dubbo-samples-extensibility-protocol-output2.jpg](/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-protocol-output2.jpg)
 
-#### 输出结果
+#### Output Result
 
 ![dubbo-samples-extensibility-protocol-output1.png](/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-protocol-output1.png)
+

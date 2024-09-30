@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/exporter-listener/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/exporter-listener/
-description: 暴露监听扩展
-linkTitle: 暴露监听扩展
-title: 暴露监听扩展
+description: Export Listener Extension
+linkTitle: Export Listener Extension
+title: Export Listener Extension
 type: docs
 weight: 4
 ---
@@ -14,30 +14,30 @@ weight: 4
 
 
 
-## 扩展说明
+## Extension Description
 
-当有服务暴露时，触发该事件。
+This event is triggered when services are exposed.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.rpc.ExporterListener`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
-<!-- 暴露服务监听 -->
+<!-- Service export listener -->
 <dubbo:service listener="xxx,yyy" />
-<!-- 暴露服务缺省监听器 -->
+<!-- Default listener for service export -->
 <dubbo:provider listener="xxx,yyy" />
 ```
 
-## 已知扩展
+## Known Extension
 
 `org.apache.dubbo.registry.directory.RegistryExporterListener`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -45,14 +45,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxExporterListener.java (实现ExporterListener接口)
+                |-XxxExporterListener.java (implements ExporterListener interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.rpc.ExporterListener (纯文本文件，内容为：xxx=com.xxx.XxxExporterListener)
+                |-org.apache.dubbo.rpc.ExporterListener (plain text file, content: xxx=com.xxx.XxxExporterListener)
 ```
 
-XxxExporterListener.java：
+XxxExporterListener.java:
 
 ```java
 package com.xxx;
@@ -72,8 +72,9 @@ public class XxxExporterListener implements ExporterListener {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.rpc.ExporterListener：
+META-INF/dubbo/org.apache.dubbo.rpc.ExporterListener:
 
 ```properties
 xxx=com.xxx.XxxExporterListener
 ```
+

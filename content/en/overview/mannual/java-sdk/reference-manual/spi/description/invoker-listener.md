@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/invoker-listener/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/invoker-listener/
-description: 引用监听扩展
-linkTitle: 引用监听扩展
-title: 引用监听扩展
+description: Invoker Listener Extension
+linkTitle: Invoker Listener Extension
+title: Invoker Listener Extension
 type: docs
 weight: 3
 ---
@@ -14,30 +14,30 @@ weight: 3
 
 
 
-## 扩展说明
+## Extension Description
 
-当有服务引用时，触发该事件。
+This event is triggered when there is a service reference.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.rpc.InvokerListener`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
-<!-- 引用服务监听 -->
+<!-- Reference Service Listener -->
 <dubbo:reference listener="xxx,yyy" /> 
-<!-- 引用服务缺省监听器 -->
+<!-- Default Listener for Reference Services -->
 <dubbo:consumer listener="xxx,yyy" /> 
 ```
 
-## 已知扩展
+## Known Extensions
 
 `org.apache.dubbo.rpc.listener.DeprecatedInvokerListener`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -45,14 +45,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxInvokerListener.java (实现InvokerListener接口)
+                |-XxxInvokerListener.java (implements InvokerListener interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.rpc.InvokerListener (纯文本文件，内容为：xxx=com.xxx.XxxInvokerListener)
+                |-org.apache.dubbo.rpc.InvokerListener (text file containing: xxx=com.xxx.XxxInvokerListener)
 ```
 
-XxxInvokerListener.java：
+XxxInvokerListener.java:
 
 ```java
 package com.xxx;
@@ -71,8 +71,9 @@ public class XxxInvokerListener implements InvokerListener {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.rpc.InvokerListener：
+META-INF/dubbo/org.apache.dubbo.rpc.InvokerListener:
 
 ```properties
 xxx=com.xxx.XxxInvokerListener
 ```
+

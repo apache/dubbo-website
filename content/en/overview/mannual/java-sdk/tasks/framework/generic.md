@@ -5,36 +5,36 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/generic-service/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-service/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-reference/
+    - /en/overview/mannel/java-sdk/advanced-features-and-usage/service/generic-reference/
     - /en/overview/mannual/java-sdk/tasks/framework/more/generic/
-description: 泛化调用，用于在调用方没有服务方提供的 API（SDK）的情况下，对服务方进行调用
-linkTitle: 泛化调用
-title: 泛化调用
+description: Generic call for invoking the service when the caller does not have the API (SDK) provided by the service provider.
+linkTitle: Generic Call
+title: Generic Call
 type: docs
 weight: 9
 ---
 
- {{% alert title="注意" color="warning" %}}
- 泛化调用适用于老版本 dubbo 通信协议，如果您使用的是 3.3 及之后版本的 triple 协议，请直接使用 triple 自带的 http application/json 能力直接发起服务调用，相关示例可参考 [网关接入说明](/en/overview/mannual/java-sdk/tasks/gateway/triple/)。
+ {{% alert title="Note" color="warning" %}}
+ Generic calls are suitable for older versions of the Dubbo communication protocol. If you are using the triple protocol from version 3.3 and onwards, please use the HTTP application/json capabilities provided by the triple protocol to directly initiate service calls. Relevant examples can be found in [Gateway Access Instructions](/en/overview/mannual/java-sdk/tasks/gateway/triple/).
  {{% /alert %}}
 
-泛化调用（客户端泛化调用）是指在调用方没有服务提供方 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。调用方没有接口及模型类元，知道服务的接口的全限定类名和方法名的情况下，可以通过泛化调用调用对应接口。
+A generic call (client generic call) refers to invoking the service when the caller does not have the service provider's API (SDK) and can still obtain the call result. The caller can invoke the corresponding interface through a generic call by knowing the fully qualified class name and method name of the service interface.
 
-## 使用场景
+## Usage Scenarios
 
-泛化调用可通过一个通用的 GenericService 接口对所有服务发起请求。典型使用场景如下：
+Generic calls can initiate requests to all services through a universal GenericService interface. Typical use cases include:
 
-1. 网关服务：如果要搭建一个网关服务，那么服务网关要作为所有 RPC 服务的调用端。但是网关本身不应该依赖于服务提供方的接口 API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。
+1. Gateway Service: When building a gateway service, the service gateway acts as the caller for all RPC services without relying on the service provider's API. Therefore, it requires support for generic calls.
 
-2. 测试平台：如果要搭建一个可以测试 RPC 调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的 RPC 服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口 API。所以需要泛化调用的支持。
+2. Testing Platform: When creating a platform to test RPC calls, users can input group names, interfaces, method names, etc., to test the corresponding RPC services. Similar to the gateway, it should not depend on the service provider's API, hence requiring support for generic calls.
 
-## 使用方式
+## Usage Method
 
-本示例的完整源码请参考 [dubbo-samples-generic-call](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic/dubbo-samples-generic-call/)。
+Please refer to the complete source code of this example at [dubbo-samples-generic-call](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic/dubbo-samples-generic-call/).
 
-示例中有以下 Dubbo 服务定义和实现
+The example includes the following Dubbo service definitions and implementations.
 
-服务接口定义：
+Service interface definition:
 
 ```java
 public interface HelloService {
@@ -45,7 +45,7 @@ public interface HelloService {
 }
 ```
 
-服务具体实现并发布：
+Service implementation and publishing:
 
 ```java
 @DubboService
@@ -73,9 +73,9 @@ public class HelloServiceImpl implements HelloService {
 }
 ```
 
-### API 调用方式
+### API Invocation Method
 
-针对以上 Dubbo 服务，我们可以通过泛化调用 API 直接发起调用。
+For the above Dubbo service, we can initiate calls directly through the generic call API.
 
 ```java
 private GenericService genericService;
@@ -113,25 +113,25 @@ public static void invokeSayHello() throws InterruptedException {
 }
 ```
 
-1. 在设置 `ReferenceConfig` 时，使用 `setGeneric("true")` 来开启泛化调用
-2. 配置完 `ReferenceConfig` 后，使用 `referenceConfig.get()` 获取到 `GenericService` 类的实例
-3. 使用其 `$invoke` 方法获取结果
-4. 其他设置与正常服务调用配置一致即可
+1. When setting `ReferenceConfig`, use `setGeneric("true")` to enable generic calls.
+2. After configuring `ReferenceConfig`, use `referenceConfig.get()` to get the instance of the `GenericService` class.
+3. Use its `$invoke` method to get the result.
+4. Other settings are consistent with normal service call configuration.
 
-### Spring 调用方式
-Spring 中服务暴露与服务发现有多种使用方式，如 xml，注解。这里以 xml 为例。
+### Spring Invocation Method
+In Spring, there are various ways to expose services and discover services, such as XML and annotations. Here, XML is used as an example.
 
-1. 生产者端无需改动
+1. No changes are needed on the producer side.
 
-2. 消费者端原有的 `dubbo:reference` 标签加上 `generic=true` 的属性。
+2. The existing `dubbo:reference` tag on the consumer side should have the `generic=true` attribute added.
 
 ``` xml
    <dubbo:reference id="helloService" generic = "true" interface="org.apache.dubbo.samples.generic.call.api.HelloService"/>
 ```
 
-3. 获取到 Bean 容器，通过 Bean 容器拿到 `GenericService` 实例。
+3. Obtain the Bean container and retrieve the `GenericService` instance via the Bean container.
 
-4. 调用 `$invoke` 方法获取结果
+4. Call the `$invoke` method to get the result.
 
 ``` java
 
@@ -140,9 +140,9 @@ Spring 中服务暴露与服务发现有多种使用方式，如 xml，注解。
     public static void main(String[] args) throws Exception {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/generic-impl-consumer.xml");
         context.start();
-        //服务对应bean的名字由xml标签的id决定
+        // The name of the service corresponding bean is determined by the id of the xml tag.
         genericService = context.getBean("helloService");
-        //获得结果
+        // Obtain the result.
         Object result = genericService.$invoke("sayHello", new String[]{"java.lang.String"}, new Object[]{"world"});
     }
 ```

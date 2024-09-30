@@ -4,59 +4,59 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/consumer/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/threading-model/
-description: Dubbo 消费端线程池模型用法
-linkTitle: 线程模型
-title: 消费端线程模型，提供者端线程模型
+description: Usage of Dubbo consumer thread pool model
+linkTitle: Thread Model
+title: Consumer Thread Model, Provider Thread Model
 type: docs
 weight: 2
 ---
 
-## 消费端线程模型
+## Consumer Thread Model
 
-对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 [Need a limited Threadpool in consumer side #2013](https://github.com/apache/dubbo/issues/2013)
+For Dubbo applications prior to version 2.7.5, especially some consumer applications, when faced with consuming a large number of services with a high concurrency scenario (typical in gateway scenarios), there often arises the issue of excessive thread allocation on the consumer side. For specific discussions, refer to [Need a limited Threadpool in consumer side #2013](https://github.com/apache/dubbo/issues/2013).
 
-改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。
+The improved consumer thread pool model effectively addresses this issue by reusing the blocked business threads on the service side.
 
-**老的线程池模型**
+**Old Thread Pool Model**
 
-![消费端线程池.png](/imgs/user/consumer-threadpool0.png)
+![Consumer Thread Pool.png](/imgs/user/consumer-threadpool0.png)
 
-我们重点关注 Consumer 部分：
+We focus on the Consumer part:
 
-1. 业务线程发出请求，拿到一个 Future 实例。
-2. 业务线程紧接着调用 future.get 阻塞等待业务结果返回。
-3. 当业务数据返回后，交由独立的 Consumer 端线程池进行反序列化等处理，并调用 future.set 将反序列化后的业务结果置回。
-4. 业务线程拿到结果直接返回
+1. Business threads issue a request and obtain a Future instance.
+2. The business thread immediately calls future.get to block while waiting for the business result to return.
+3. Once the business data returns, it is processed by a dedicated Consumer thread pool for deserialization, and future.set is called to place the deserialized business result back.
+4. The business thread directly returns the result.
 
-**当前线程池模型**
+**Current Thread Pool Model**
 
-![消费端线程池新.png](/imgs/user/consumer-threadpool1.png)
+![New Consumer Thread Pool.png](/imgs/user/consumer-threadpool1.png)
 
-1. 业务线程发出请求，拿到一个 Future 实例。
-2. 在调用 future.get() 之前，先调用 ThreadlessExecutor.wait()，wait 会使业务线程在一个阻塞队列上等待，直到队列中被加入元素。
-3. 当业务数据返回后，生成一个 Runnable Task 并放入 ThreadlessExecutor 队列
-4. 业务线程将 Task 取出并在本线程中执行：反序列化业务数据并 set 到 Future。
-5. 业务线程拿到结果直接返回
+1. Business threads issue a request and obtain a Future instance.
+2. Before calling future.get(), it first calls ThreadlessExecutor.wait(), which makes the business thread wait in a blocking queue until an element is added to the queue.
+3. When the business data returns, a Runnable Task is created and placed into the ThreadlessExecutor queue.
+4. The business thread retrieves the Task and executes it in its thread: deserializes the business data and sets it to Future.
+5. The business thread directly returns the result.
 
-这样，相比于老的线程池模型，由业务线程自己负责监测并解析返回结果，免去了额外的消费端线程池开销。
+This way, compared to the old thread pool model, the business thread is responsible for monitoring and parsing return results, saving the overhead of an additional consumer thread pool.
 
-## 提供端线程模型
-Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。
+## Provider Thread Model
+The current thread models for the Dubbo protocol and the Triple protocol have not yet been aligned. Below, the thread models for the Triple protocol and Dubbo protocol will be introduced separately.
 
-### Dubbo协议
+### Dubbo Protocol
 
-介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：
+Before introducing the Provider-side thread model of the Dubbo protocol, it is important to first explain that Dubbo abstracts channel operations into five behaviors:
 
-- 建立连接：connected，主要是的职责是在channel记录read、write的时间，以及处理建立连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（onconnect），即在该操作中执行。
-- 断开连接：disconnected，主要是的职责是在channel移除read、write的时间，以及处理端开连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（ondisconnect），即在该操作中执行。
-- 发送消息：sent，包括发送请求和发送响应。记录write的时间。
-- 接收消息：received，包括接收请求和接收响应。记录read的时间。
-- 异常捕获：caught，用于处理在channel上发生的各类异常。
+- Establish connection: connected, responsible for recording read and write times on the channel, as well as processing callback logic after establishing a connection.
+- Disconnect: disconnected, responsible for removing read and write times on the channel and processing callback logic after disconnecting.
+- Send message: sent, including sending requests and responses, and recording write times.
+- Receive message: received, including receiving requests and responses, and recording read times.
+- Exception capture: caught, used to handle various exceptions occurring on the channel.
 
-Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Provider线程模型可以分为五类，也就是AllDispatcher、DirectDispatcher、MessageOnlyDispatcher、ExecutionDispatcher、ConnectionOrderedDispatcher。
+The thread model of the Dubbo framework is closely related to these five behaviors, and the Provider thread model of the Dubbo protocol can be divided into five types: AllDispatcher, DirectDispatcher, MessageOnlyDispatcher, ExecutionDispatcher, ConnectionOrderedDispatcher.
 
-#### 配置方式
-| 线程模型  | 配置值 |
+#### Configuration Method
+| Thread Model  | Configuration Value |
 | ---- | -- |
 All Dispatcher | all
 Direct Dispatcher | direct
@@ -64,7 +64,7 @@ Execution Dispatcher | execution
 Message Only Dispatcher | message
 Connection Ordered Dispatcher | connection
 
-拿 application.yaml 的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher
+Taking the configuration method in application.yaml as an example: configuring dispatcher: all under protocol can adjust the thread model of the Dubbo protocol to All Dispatcher
 
 ```yaml
 dubbo:
@@ -81,93 +81,92 @@ dubbo:
 
 #### All Dispatcher
 
-下图是All Dispatcher的线程模型说明图：
+The following figure illustrates the thread model of the All Dispatcher:
 
 ![dubbo-provider-alldispatcher](/imgs/v3/feature/performance/threading-model/dubbo-provider-alldispatcher.png)
 
-- 在IO线程中执行的操作有：
-  1. sent操作在IO线程上执行。
-  2. 序列化响应在IO线程上执行。
-- 在Dubbo线程中执行的操作有：
-  1. received、connected、disconnected、caught都是在Dubbo线程上执行的。
-  2. 反序列化请求的行为在Dubbo中做的。
+- Operations executed in IO threads:
+  1. The sent operation is executed in the IO thread.
+  2. The serialization response is executed in the IO thread.
+- Operations executed in Dubbo threads:
+  1. Received, connected, disconnected, and caught are executed in the Dubbo thread.
+  2. The behavior of deserializing requests is done in Dubbo.
 
 #### Direct Dispatcher
 
-下图是Direct Dispatcher的线程模型说明图：
+The following figure illustrates the thread model of the Direct Dispatcher:
 
 ![dubbo-provider-directDispatcher](/imgs/v3/feature/performance/threading-model/dubbo-provider-directDispatcher.png)
 
-- 在IO线程中执行的操作有：
-  1. received、connected、disconnected、caught、sent操作在IO线程上执行。
-  2. 反序列化请求和序列化响应在IO线程上执行。
-- 1. 并没有在Dubbo线程操作的行为。
+- Operations executed in IO threads:
+  1. Received, connected, disconnected, caught, and sent operations are executed in the IO thread.
+  2. The deserialization of requests and the serialization of responses occur in the IO thread.
+- There are no operations performed in the Dubbo thread.
 
 #### Execution Dispatcher
 
-下图是Execution Dispatcher的线程模型说明图：
+The following figure illustrates the thread model of the Execution Dispatcher:
 
 ![dubbo-provider-ExecutionDispatcher](/imgs/v3/feature/performance/threading-model/dubbo-provider-executionDispatcher.png)
 
-- 在IO线程中执行的操作有：
-  1. sent、connected、disconnected、caught操作在IO线程上执行。
-  2. 序列化响应在IO线程上执行。
-- 在Dubbo线程中执行的操作有：
-  1. received都是在Dubbo线程上执行的。
-  2. 反序列化请求的行为在Dubbo中做的。
+- Operations executed in IO threads:
+  1. Sent, connected, disconnected, and caught operations are executed in the IO thread.
+  2. The serialization response is executed in the IO thread.
+- Operations executed in Dubbo threads:
+  1. Received is executed in the Dubbo thread.
+  2. The behavior of deserializing requests is done in Dubbo.
 
 #### Message Only Dispatcher
 
-在Provider端，Message Only Dispatcher和Execution Dispatcher的线程模型是一致的，所以下图和Execution Dispatcher的图一致，区别在Consumer端。见下方Consumer端的线程模型。
+On the Provider side, the thread model of Message Only Dispatcher is consistent with that of Execution Dispatcher, so the following figure is the same as the Execution Dispatcher.
 
-下图是Message Only Dispatcher的线程模型说明图：
+The following figure illustrates the thread model of the Message Only Dispatcher:
 
 ![dubbo-provider-ExecutionDispatcher](/imgs/v3/feature/performance/threading-model/dubbo-provider-executionDispatcher.png)
 
-- 在IO线程中执行的操作有：
-  1. sent、connected、disconnected、caught操作在IO线程上执行。
-  2. 序列化响应在IO线程上执行。
-- 在Dubbo线程中执行的操作有：
-  1. received都是在Dubbo线程上执行的。
-  2. 反序列化请求的行为在Dubbo中做的。
+- Operations executed in IO threads:
+  1. Sent, connected, disconnected, and caught operations are executed in the IO thread.
+  2. The serialization response is executed in the IO thread.
+- Operations executed in Dubbo threads:
+  1. Received is executed in the Dubbo thread.
+  2. The behavior of deserializing requests is done in Dubbo.
 
 #### Connection Ordered Dispatcher
 
-下图是Connection Ordered Dispatcher的线程模型说明图：
+The following figure illustrates the thread model of the Connection Ordered Dispatcher:
 
 ![dubbbo-provider-connectionOrderedDispatcher](/imgs/v3/feature/performance/threading-model/dubbbo-provider-connectionOrderedDispatcher.png)
 
-- 在IO线程中执行的操作有：
-  1. sent操作在IO线程上执行。
-  2. 序列化响应在IO线程上执行。
-- 在Dubbo线程中执行的操作有：
-  1. received、connected、disconnected、caught都是在Dubbo线程上执行的。但是connected和disconnected两个行为是与其他两个行为通过线程池隔离开的。并且在Dubbo connected thread pool中提供了链接限制、告警灯能力。
-  2. 反序列化请求的行为在Dubbo中做的。
+- Operations executed in IO threads:
+  1. The sent operation is executed in the IO thread.
+  2. The serialization response is executed in the IO thread.
+- Operations executed in Dubbo threads:
+  1. Received, connected, disconnected, and caught are executed in the Dubbo thread; however, the connected and disconnected behaviors are isolated from the other two behaviors through a thread pool and provide link limitation and alarm capabilities in the Dubbo connected thread pool.
+  2. The behavior of deserializing requests is done in Dubbo.
 
+### Triple Protocol
 
-### Triple协议
-
-下图为Triple协议 Provider端的线程模型
+The following figure shows the thread model of the Triple protocol Provider side.
 
 ![triple-provider](/imgs/v3/feature/performance/threading-model/triple-provider.png)
 
-Triple协议Provider线程模型目前还比较简单，目前序列化和反序列化操作都在Dubbo线程上工作，而IO线程并没有承载这些工作。
+The thread model for Triple protocol Provider is currently quite simple, with both serialization and deserialization operations working in the Dubbo thread, while the IO thread does not carry these tasks.
 
 
-## 线程池隔离
-一种新的线程池管理方式，使得提供者应用内各个服务的线程池隔离开来，互相独立，某个服务的线程池资源耗尽不会影响其他正常服务。支持线程池可配置化，由用户手动指定。
+## Thread Pool Isolation
+A new thread pool management method isolates the thread pools of each service within the provider application, making them independent from each other. If a service's thread pool resources are exhausted, it will not affect other normal services. Thread pool configuration is supported, allowing users to specify their desired configuration.
 
-使用线程池隔离来确保 Dubbo 用于调用远程方法的线程与微服务用于执行其任务的线程是分开的。可以通过防止线程阻塞或相互竞争来帮助提高系统的性能和稳定性。
+Thread pool isolation ensures that the threads used for invoking remote methods by Dubbo are separate from the threads used by the microservice to execute its tasks. This helps improve system performance and stability by preventing thread blocking or competition.
 
-目前可以以 API、XML、Annotation 的方式进行配置
+Currently, configuration can be done via API, XML, or Annotation.
 
-**配置参数**
-- `ApplicationConfig` 新增 `String executor-management-mode` 参数，配置值为 `default` 和 `isolation` ，默认为 `default`。
-    - `executor-management-mode = default` 使用原有 **以协议端口为粒度、服务间共享** 的线程池管理方式
-    - `executor-management-mode = isolation` 使用新增的 **以服务三元组为粒度、服务间隔离** 的线程池管理方式
-- `ServiceConfig` 新增 `Executor executor` 参数，**用以服务间隔离的线程池**，可以由用户配置化、提供自己想要的线程池，若没有指定，则会根据协议配置(`ProtocolConfig`)信息构建默认的线程池用以服务隔离。
+**Configuration Parameters**
+- `ApplicationConfig` adds `String executor-management-mode` parameter with values default and isolation, defaulting to default.
+    - `executor-management-mode = default` uses the original **thread pool management method shared between services granular by protocol port**
+    - `executor-management-mode = isolation` uses the new **thread pool management method isolated between services granular by service tuple**
+- `ServiceConfig` adds `Executor executor` parameter, **for the thread pool isolated between services**, which can be user-configurable. If not specified, a default thread pool for service isolation will be built using the protocol's configuration (`ProtocolConfig`).
 
-> `ServiceConfig` 新增 `Executor executor` 配置参数只有指定`executor-management-mode = isolation` 才生效。
+> The new `Executor executor` configuration parameter in `ServiceConfig` is only valid if `executor-management-mode = isolation` is specified.
 #### API
 ```java
     public void test() {
@@ -178,7 +177,7 @@ Triple协议Provider线程模型目前还比较简单，目前序列化和反序
         serviceConfig1.setInterface(DemoService.class);
         serviceConfig1.setRef(new DemoServiceImpl());
         serviceConfig1.setVersion(version1);
-        // set executor1 for serviceConfig1, max threads is 10
+        // Set executor1 for serviceConfig1, max threads is 10
         NamedThreadFactory threadFactory1 = new NamedThreadFactory("DemoService-executor");
         ExecutorService executor1 = Executors.newFixedThreadPool(10, threadFactory1);
         serviceConfig1.setExecutor(executor1);
@@ -187,7 +186,7 @@ Triple协议Provider线程模型目前还比较简单，目前序列化和反序
         serviceConfig2.setInterface(HelloService.class);
         serviceConfig2.setRef(new HelloServiceImpl());
         serviceConfig2.setVersion(version2);
-        // set executor2 for serviceConfig2, max threads is 100
+        // Set executor2 for serviceConfig2, max threads is 100
         NamedThreadFactory threadFactory2 = new NamedThreadFactory("HelloService-executor");
         ExecutorService executor2 = Executors.newFixedThreadPool(100, threadFactory2);
         serviceConfig2.setExecutor(executor2);
@@ -313,7 +312,7 @@ public class ProviderConfiguration {
 }
 ```
 ```java
-// customized thread pool
+// custom thread pool
 public class DemoServiceExecutor extends ThreadPoolExecutor {
     public DemoServiceExecutor() {
         super(10, 10, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(),
@@ -323,7 +322,7 @@ public class DemoServiceExecutor extends ThreadPoolExecutor {
 ```
 
 ```java
-// customized thread pool
+// custom thread pool
 public class HelloServiceExecutor extends ThreadPoolExecutor {
     public HelloServiceExecutor() {
         super(100, 100, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(),
@@ -377,18 +376,18 @@ public class HelloServiceImplV3 implements HelloService {
 
 
 
-## 线程池状态导出
-dubbo 通过 Jstack 自动导出线程堆栈来保留现场，方便排查问题。
+## Thread Pool Status Export
+Dubbo automatically exports thread stacks through Jstack to preserve the scene for troubleshooting.
 
-默认策略
+Default strategy
 
-* 导出路径: user.home标识的用户主目录
-* 导出间隔: 最短间隔允许每隔10分钟导出一次
-* 导出开关: 默认打开
+* Export path: user.home identifies the user's home directory
+* Export interval: the shortest interval allows exports every 10 minutes
+* Export switch: defaults to open
 
-当业务线程池满时，我们需要知道线程都在等待哪些资源、条件，以找到系统的瓶颈点或异常点。
+When the business thread pool is full, we need to know what resources and conditions the threads are waiting for to find bottlenecks or exceptions in the system.
 
-#### 导出开关控制
+#### Export Switch Control
 ```properties
 # dubbo.properties
 dubbo.application.dump.enable=true
@@ -406,7 +405,7 @@ dubbo:
 
 
 
-#### 导出路径
+#### Export Path
 
 ```properties
 # dubbo.properties

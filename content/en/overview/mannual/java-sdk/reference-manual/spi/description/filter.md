@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/filter/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/filter/
-description: 调用拦截扩展
-linkTitle: 调用拦截扩展
-title: 调用拦截扩展
+description: Call Interceptor Extension
+linkTitle: Call Interceptor Extension
+title: Call Interceptor Extension
 type: docs
 weight: 2
 ---
@@ -14,35 +14,35 @@ weight: 2
 
 
 
-## 扩展说明
+## Extension Description
 
-服务提供方和服务消费方调用过程拦截，Dubbo 本身的大多功能均基于此扩展点实现，每次远程方法执行，该拦截都会被执行，请注意对性能的影响。
+The interception during the call process of service providers and consumers is mainly implemented based on this extension point. This interceptor is executed each time a remote method is invoked, so be mindful of its impact on performance.
 
-约定：
+Convention:
 
-* 用户自定义 filter 默认在内置 filter 之后。
-* 特殊值 `default`，表示缺省扩展点插入的位置。比如：`filter="xxx,default,yyy"`，表示 `xxx` 在缺省 filter 之前，`yyy` 在缺省 filter 之后。
-* 特殊符号 `-`，表示剔除。比如：`filter="-foo1"`，剔除添加缺省扩展点 `foo1`。比如：`filter="-default"`，剔除添加所有缺省扩展点。
-* provider 和 service 同时配置的 filter 时，累加所有 filter，而不是覆盖。比如：`<dubbo:provider filter="xxx,yyy"/>` 和 `<dubbo:service filter="aaa,bbb" />`，则 `xxx`,`yyy`,`aaa`,`bbb` 均会生效。如果要覆盖，需配置：`<dubbo:service filter="-xxx,-yyy,aaa,bbb" />`
+* User-defined filters are executed after built-in filters by default.
+* The special value `default` indicates the position where the default extension point is inserted. For example: `filter="xxx,default,yyy"` means `xxx` is before the default filter, and `yyy` is after it.
+* The special symbol `-` indicates exclusion. For example: `filter="-foo1"` excludes the default extension point `foo1`. For instance: `filter="-default"` excludes all default extension points.
+* When filters are configured for both provider and service, all filters are accumulated rather than overridden. For example: `<dubbo:provider filter="xxx,yyy"/>` and `<dubbo:service filter="aaa,bbb" />` means `xxx`, `yyy`, `aaa`, `bbb` will all be effective. To override, configure: `<dubbo:service filter="-xxx,-yyy,aaa,bbb" />`
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.rpc.Filter`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
-<!-- 消费方调用过程拦截 -->
+<!-- Consumer call process interception -->
 <dubbo:reference filter="xxx,yyy" />
-<!-- 消费方调用过程缺省拦截器，将拦截所有reference -->
+<!-- Default interceptor for consumer call process, which intercepts all references -->
 <dubbo:consumer filter="xxx,yyy"/>
-<!-- 提供方调用过程拦截 -->
+<!-- Provider call process interception -->
 <dubbo:service filter="xxx,yyy" />
-<!-- 提供方调用过程缺省拦截器，将拦截所有service -->
+<!-- Default interceptor for provider call process, which intercepts all services -->
 <dubbo:provider filter="xxx,yyy"/>
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.rpc.filter.EchoFilter`
 * `org.apache.dubbo.rpc.filter.GenericFilter`
@@ -58,9 +58,9 @@ weight: 2
 * `org.apache.dubbo.rpc.filter.ExecuteLimitFilter`
 * `org.apache.dubbo.rpc.filter.DeprecatedFilter`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -68,24 +68,24 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxFilter.java (实现Filter接口)
+                |-XxxFilter.java (implements Filter interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.rpc.Filter (纯文本文件，内容为：xxx=com.xxx.XxxFilter)
+                |-org.apache.dubbo.rpc.Filter (plain text file, content: xxx=com.xxx.XxxFilter)
 ```
 
-XxxFilter.java：
+XxxFilter.java:
 
 ```java
 package com.xxx;
- 
+
 import org.apache.dubbo.rpc.Filter;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcException;
- 
+
 public class XxxFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         // before filter ...
@@ -96,7 +96,7 @@ public class XxxFilter implements Filter {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.rpc.Filter：
+META-INF/dubbo/org.apache.dubbo.rpc.Filter:
 
 ```properties
 xxx=com.xxx.XxxFilter

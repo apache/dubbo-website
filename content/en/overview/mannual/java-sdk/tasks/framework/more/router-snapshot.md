@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/router-snapshot/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/performance/router-snapshot/
-description: 路由状态采集
-linkTitle: 路由状态采集
-title: 路由状态采集
+description: Route Status Collection
+linkTitle: Route Status Collection
+title: Route Status Collection
 type: docs
 weight: 50
 ---
@@ -13,42 +13,42 @@ weight: 50
 
 
 
-## 功能说明
-路由状态收集功能可用于识别可能影响服务性能的任何潜在问题，识别可能阻碍服务尽可能高效使用的任何潜在瓶颈或问题，确保服务平稳运行，用户在尝试访问服务时不会遇到任何问题，允许用户检查路由的状态是启用还是禁用，确保仅使用授权的服务，并且访问仅限于具有适当授权的人员。
+## Function Description
+The route status collection feature can be used to identify any potential issues that may affect service performance, to identify any potential bottlenecks or problems that may hinder the efficient use of services, ensuring smooth operation of services, and that users do not encounter any issues when trying to access services. It allows users to check whether the route is enabled or disabled, ensuring that only authorized services are used and access is limited to authorized personnel.
 
-## 使用场景
+## Use Cases
 
-Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环境中，如果出现流量结果不符合预期的情况，可以通过路由状态命令来查看路由的状态，以此来定位可能存在的问题。
+Many flow governance capabilities of Dubbo are implemented based on the Router. In production environments, if traffic results do not meet expectations, the route status command can be used to check the status of the routes to locate potential issues.
 
-## 使用方式
+## Usage
 
-### 查看路由缓存状态
+### View Route Cache Status
 
-Dubbo 在收到地址变更的时候，会将地址信息推送给所有的 `Router`，这些 `Router` 可以在此阶段提前计算路由的分组，缓存起来，以避免在调用时需要遍历所有的提供者计算分组参数。
-在 Dubbo 3 中引入的 `StateRouter` 提供了通过 qos 命令工具实时获取每个路由的状态的能力。
+When Dubbo receives address changes, it pushes address information to all `Router`s. These `Router`s can calculate the route groups in advance during this phase, caching them to avoid traversing all providers to calculate grouping parameters at the time of invocation.
+The `StateRouter` introduced in Dubbo 3 provides the ability to retrieve the status of each route in real time through the qos command tool.
 
-运维人员可以通过 `getRouterSnapshot` 命令获取路由的状态。具体命令使用方式可以参考 [getRouterSnapshot 命令](/en/overview/mannual/java-sdk/reference-manual/qos/qos-list/) 文档。
+Operations personnel can obtain the status of the route via the `getRouterSnapshot` command. For specific command usage, please refer to the [getRouterSnapshot command](/en/overview/mannual/java-sdk/reference-manual/qos/qos-list/) documentation.
 
-**注：此功能仅支持 `StateRoute`，且 `StateRouter` 需要基于 `AbstractStateRouter` 实现 `doBuildSnapshot` 接口。**
+**Note: This feature only supports `StateRoute`, and `StateRouter` needs to implement the `doBuildSnapshot` interface based on `AbstractStateRouter`.**
 
-### 查看实际请求的路由计算结果
+### View Actual Request Route Calculation Results
 
-Dubbo 3 中默认在路由筛选后为空的时候打印路由计算的节点状态。运维人员可以通过日志判断每个路由的计算结果是否符合预期。
+In Dubbo 3, the route calculation node status is printed by default when the route filtering result is empty. Operations personnel can determine whether the calculation results for each route meet expectations through logs.
 
-#### 日志格式
+#### Log Format
 
 ```
-No provider available after route for the service 服务 from registry 注册中心地址 on the consumer 消费端IP using the dubbo version 3.0.7. Router snapshot is below: 
-[ Parent (Input: 当前节点输入地址数) (Current Node Output: 当前节点计算结果数) (Chain Node Output: 当前节点和后级节点交集结果数) ] Input: 输入的地址示例（显示最多 5 个） -> Chain Node Output: 当前节点输出的地址示例（显示最多 5 个）
-  [ 路由名称 (Input: 当前节点输入地址数) (Current Node Output: 当前节点计算结果数) (Chain Node Output: 当前节点和后级节点交集结果数) Router message: 路由日志 ] Current Node Output: 当前节点输出的地址示例（显示最多 5 个）
-    [ 路由名称 (Input: 当前节点输入地址数) (Current Node Output: 当前节点计算结果数) (Chain Node Output: 当前节点和后级节点交集结果数) Router message: 路由日志 ] Current Node Output: 当前输入的地址示例（显示最多 5 个）
+No provider available after route for the service Service from registry Registry Address on the consumer Consumer IP using the dubbo version 3.0.7. Router snapshot is below: 
+[ Parent (Input: Current Node Input Address Count) (Current Node Output: Current Node Calculation Result Count) (Chain Node Output: Current Node and Subsequent Nodes Intersection Result Count) ] Input: Input Address Example (showing up to 5) -> Chain Node Output: Current Node Output Address Example (showing up to 5)
+  [ Route Name (Input: Current Node Input Address Count) (Current Node Output: Current Node Calculation Result Count) (Chain Node Output: Current Node and Subsequent Nodes Intersection Result Count) Router message: Route Log ] Current Node Output: Current Node Output Address Example (showing up to 5)
+    [ Route Name (Input: Current Node Input Address Count) (Current Node Output: Current Node Calculation Result Count) (Chain Node Output: Current Node and Subsequent Nodes Intersection Result Count) Router message: Route Log ] Current Node Output: Current Input Address Example (showing up to 5)
 ```
 
-#### 注意：
-- 路由日志需要依赖路由实现判断 `needToPrintMessage` 参数，并在需要时写入 `messageHolder` 路由日志
-- 由于多级路由结果是结果取交集的，所以当前节点计算结果数可能和后级取交后为空
+#### Note:
+- Route logs rely on the route implementation to judge the `needToPrintMessage` parameter and write to `messageHolder` route logs when necessary.
+- Due to the results of multi-level routing being intersections, the current node calculation result count may be empty after the subsequent filter.
 
-#### 日志示例
+#### Log Example
 
 ```
 [19/07/22 07:42:46:046 CST] main  WARN cluster.RouterChain:  [DUBBO] No provider available after route for the service org.apache.dubbo.samples.governance.api.DemoService from registry 30.227.64.173 on the consumer 30.227.64.173 using the dubbo version 3.0.7. Router snapshot is below: 
@@ -58,9 +58,9 @@ No provider available after route for the service 服务 from registry 注册中
       [ TagStateRouter (Input: 2) (Current Node Output: 0) (Chain Node Output: 0) Router message: FAILOVER: return all Providers without any tags ] Current Node Output: Empty, dubbo version: 3.0.7, current host: 30.227.64.173
 ```
 
-#### 开启路由全采样
+#### Open Full Route Sampling
 
-在一些特殊情况下，请求可能调用到错误的服务端，但是因为选址非空，所以无法看到路由的过程信息，此时可以 [通过 qos 开启路由全采样](/en/overview/mannual/java-sdk/reference-manual/qos/router-snapshot/)。通过 qos 的 `getRecentRouterSnapshot` 命令可以远程获取最近的路由快照。
+In some special cases, requests may call an incorrect server, but since the selection is not empty, the routing process information cannot be viewed. In this case, you can [enable full route sampling through qos](/en/overview/mannual/java-sdk/reference-manual/qos/router-snapshot/). The `getRecentRouterSnapshot` command of qos can be used to remotely obtain the most recent route snapshots.
 
 ```
 dubbo>getRecentRouterSnapshot
@@ -85,5 +85,6 @@ dubbo>getRecentRouterSnapshot
 dubbo>
 ```
 
-#### 注意：
-由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](../../others/logger-management/)动态修改日志输出框架。
+#### Note:
+For cases where logs are empty due to incompatibility with the logging framework, you can refer to [Log Framework Adaptation and Runtime Management](../../others/logger-management/) to dynamically modify the log output framework.
+

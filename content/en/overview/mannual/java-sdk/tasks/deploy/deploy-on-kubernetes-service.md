@@ -2,28 +2,28 @@
 aliases:
     - /en/overview/tasks/deploy/deploy-on-vm/
     - /en/overview/tasks/deploy/deploy-on-vm/
-description: "部署 Dubbo 应用到服务网格（Service Mesh），基于 Kubernetes Service 与控制面。"
-linkTitle: 服务网格
-title: 部署 Dubbo 应用到虚拟机环境
+description: "Deploying Dubbo applications to a Service Mesh based on Kubernetes Service and control plane."
+linkTitle: Service Mesh
+title: Deploying Dubbo Applications to a Virtual Machine Environment
 type: docs
 weight: 3
 ---
-这种模式将 Dubbo Service 与 <a target="_blank" href="">Kubernetes Service</a> 概念映射起来，不再需要 Nacos 等传统注册中心，而是由 Kubernetes APISERVER 承担注册中心指责。
+This model maps Dubbo Service to the concept of <a target="_blank" href="">Kubernetes Service</a>, eliminating the need for traditional registries like Nacos, with the Kubernetes APISERVER taking on the role of the registry.
 
 <img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes-service.png" style="max-width:650px;height:auto;" />
 
-## 安装 Control Plane
-在这个模式下，我们需要安装 `dubbo-control-plane`
-> 这里是要用 istio 配合一起工作（提供xds推送能力），还是dubbo-control-plane自己实现xds server？
+## Install Control Plane
+In this model, we need to install `dubbo-control-plane`
+> Should it work with istio (providing xds push capability), or should dubbo-control-plane implement the xds server itself?
 
 ```yaml
 dubboctl manifests install --profile=control-plane
 ```
 
-## 部署应用
-### 打包镜像
-### 定义 YAML
-请查看 dubbo-samples 了解示例
+## Deploy Application
+### Package Image
+### Define YAML
+Please refer to dubbo-samples for examples.
 
 ```yaml
 kind: service
@@ -33,64 +33,57 @@ kind: service
 kind: deployment
 ```
 
-### 优雅上下线
+### Graceful Shutdown
 
-配置 probe
-配置 pre-stop
+Configure probe
+Configure pre-stop
 
-### 观测服务状态
+### Observe Service Status
 
-## 与 Service Mesh 的区别
+## Differences with Service Mesh
 
+## Feature Description
+[Pod Lifecycle](https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/) is closely related to service scheduling. By implementing Kubernetes official probes, Dubbo3 and the entire application's lifecycle can be affected throughout the Pod's lifecycle through health checks, which can be configured using liveness probe and readiness probe.
 
+Through Dubbo3's SPI mechanism, multiple "probes" are internally implemented based on Dubbo3 QOS operations module's HTTP services, enabling container probes to obtain corresponding probe states within the application. Moreover, the SPI implementation mechanism also facilitates users to extend internal "probes," making the entire application lifecycle more effectively governed.
 
-
-
-
-
-
-## 特性说明
-[Pod 的生命周期](https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/)  与服务调度息息相关，通过对 Kubernetes 官方探针的实现，能够使 Dubbo3 乃至整个应用的生命周期与 Pod 的生命周期，在 Pod 的整个生命周期中，影响到 Pod 的就只有健康检查这一部分, 我们可以通过配置 liveness probe（存活探针）和 readiness probe（可读性探针）来影响容器的生命周期。
-
-通过 Dubbo3 的 SPI 机制，在内部实现多种“探针”，基于 Dubbo3 QOS 运维模块的 HTTP 服务，使容器探针能够获取到应用内对应探针的状态。另外，SPI 的实现机制也利于用户自行拓展内部“探针”，使整个应用的生命周期更有效的进行管控。
-
-**三种探针对应的 SPI 接口**
+**Three Probes Corresponding SPI Interfaces**
 
 -   livenessProbe:  `org.apache.dubbo.qos.probe.LivenessProbe`
 -   readinessProbe:  `org.apache.dubbo.qos.probe.ReadinessProbe`
 -   startupProbe:  `org.apache.dubbo.qos.probe.StartupProbe`
 
-接口将自动获取当前应用所有 SPI 的实现，对应接口的 SPI 实现均成功就绪则接口返回成功。
+The interface will automatically acquire all SPI implementations of the current application, returning success if all corresponding SPI implementations are successfully ready.
 
-Dubbo3 SPI 更多扩展的介绍见 [Dubbo SPI扩展](/en/overview/mannual/java-sdk/reference-manual/spi/description/)
+See more about Dubbo3 SPI extensions at [Dubbo SPI Extensions](/en/overview/mannual/java-sdk/reference-manual/spi/description/)
 
-## 使用场景
-`liveness probe` 来确定你的应用程序是否正在运行，查看是否存活。
+## Usage Scenarios
+`liveness probe` to determine if your application is running and check if it is alive.
 
-`readiness probe` 来确定容器是否已经就绪可以接收流量过来,是否准备就绪,是否可以开始工作。
+`readiness probe` to determine whether the container is ready to receive traffic, whether it is prepared, and whether it can start working.
 
-`startup probe` 来确定容器内的应用程序是否已启动，如果提供了启动探测则禁用所有其他探测，直到它成功为止，如果启动探测失败则杀死容器，容器将服从其重启策略。如果容器没有提供启动探测，则默认状态为成功。
+`startup probe` to determine whether the application inside the container has started. If a startup probe is provided, all other probes are disabled until it succeeds. If the startup probe fails, the container will be killed, and it will follow its restart policy. If no startup probe is provided, the default state is successful.
 
-## 使用方式
+## Usage
 
-### 存活检测
+### Liveness Check
 
-对于 livenessProbe 存活检测，由于 Dubbo3 框架本身无法获取到应用的存活状态，因此本接口无默认实现，且默认返回成功。开发者可以根据 SPI 定义对此 SPI 接口进行拓展，从应用层次对是否存活进行判断。
+For livenessProbe checks, since the Dubbo3 framework cannot obtain the application’s liveness status, this interface has no default implementation and defaults to returning success. Developers can extend this SPI interface to determine liveness from the application level.
 
-关于 [liveness 存活探针](/en/overview/mannual/java-sdk/reference-manual/spi/description/liveness/) 扩展示例
-### 就绪检测
+See [liveness probe](/en/overview/mannual/java-sdk/reference-manual/spi/description/liveness/) extension example.
+### Readiness Check
 
-对于 readinessProbe 就绪检测，目前 Dubbo3 默认提供了两个检测维度，一是对 Dubbo3 服务自身是否启停做判断，另外是对所有服务是否存在已注册接口，如果所有服务均已从注册中心下线（可以通过 QOS 运维进行操作）将返回未就绪的状态。
+For readinessProbe checks, Dubbo3 currently provides two dimensions for checking; one is to determine if Dubbo3 services are starting and stopping, and the other is to check if all registered interfaces exist. If all services are offline from the registry (which can be operated via QOS), it will return an unready status.
 
-关于 [readiness 就绪探针](/en/overview/mannual/java-sdk/reference-manual/spi/description/readiness/) 扩展示例
+See [readiness probe](/en/overview/mannual/java-sdk/reference-manual/spi/description/readiness/) extension example.
 
-### 启动检测
+### Startup Check
 
-对于 startupProbe 启动检测，目前 Dubbo3 默认提供了一个检测维度，即是在所有启动流程（接口暴露、注册中心写入等）均结束后返回已就绪状态。
+For startupProbe checks, Dubbo3 currently provides a check dimension where it returns a ready state after all startup processes (interface exposure, writing to registry, etc.) are complete.
 
-关于 [startup 启动探针](/en/overview/mannual/java-sdk/reference-manual/spi/description/startup/) 扩展示例
+See [startup probe](/en/overview/mannual/java-sdk/reference-manual/spi/description/startup/) extension example.
 
-### 参考示例
+### Reference Example
 ```yaml
 livenessProbe:
   httpGet:
@@ -111,6 +104,7 @@ startupProbe:
   failureThreshold: 30
   periodSeconds: 10
 ```
-> QOS 当计算节点检测到内存压力时，kuberentes 会 BestEffort -> Burstable -> Guaranteed 依次驱逐 Pod。
+> When the QOS calculates that the node detects memory pressure, Kubernetes will evict Pods in the order of BestEffort -> Burstable -> Guaranteed.
 
-目前三种探针均有对应的接口，路径为 QOS 中的命令，端口信息请根据 QOS 配置进行对应修改（默认端口为 22222）。其他参数请参考 [Kubernetes官方文档说明](https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)。
+Currently, all three probes have corresponding interfaces, with paths being commands in QOS, and port information should be modified according to QOS configuration (default port is 22222). Refer to the [Kubernetes official documentation](https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) for other parameters.
+

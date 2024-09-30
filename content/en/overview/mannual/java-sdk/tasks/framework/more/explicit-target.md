@@ -3,68 +3,69 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/explicit-target/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/explicit-target/
-description: Dubbo 中点对点的直连方式
-linkTitle: 直连提供者
-title: 直连提供者
+description: Direct connection method in Dubbo for point-to-point communication
+linkTitle: Direct Connection Provider
+title: Direct Connection Provider
 type: docs
 weight: 5
 ---
 
 
-在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者，这时候可能需要点对点直连，点对点直连方式，将以服务接口为单位，忽略注册中心的提供者列表，A 接口配置点对点，不影响 B 接口从注册中心获取列表。
+In development and testing environments, it is often necessary to bypass the registry and only test specific service providers. In this case, point-to-point direct connection may be required. The point-to-point direct connection method will ignore the provider list from the registry on a service interface basis. Configuring point-to-point for interface A will not affect interface B from obtaining the list from the registry.
 
 ![/user-guide/images/dubbo-directly.jpg](/imgs/user/dubbo-directly.jpg)
 
-如果是线上需求需要点对点，可在 `reference` 节点中配置 url 指向提供者，将绕过注册中心，多个地址用分号隔开，配置如下：
+If point-to-point communication is needed in a production environment, you can configure the `reference` node to point to the provider URL, bypassing the registry. Multiple addresses can be separated by semicolons, configured as follows:
 
-## 注解配置方式
+## Annotation Configuration Method
 
 ```java
 @DubboReference(url="tri://localhost:50051")
 private XxxService xxxService
 ```
 
-## xml配置方式
+## XML Configuration Method
 
 ```xml
 <dubbo:reference id="xxxService" interface="com.alibaba.xxx.XxxService" url="dubbo://localhost:20890" />
 ```
 
-## 更多配置方式
-{{% alert title="注意" color="warning" %}}
-请注意以下配置方式是为了兼容老版本 Dubbo2 而保留，在部分 Dubbo3 版本中可能存在问题，请尽量使用文档前面推荐的配置方式。
+## More Configuration Methods
+{{% alert title="Note" color="warning" %}}
+Please note that the following configuration methods are retained for compatibility with older versions of Dubbo2 and may have issues in some Dubbo3 versions. Please try to use the recommended configuration methods mentioned earlier in the document.
 {{% /alert %}}
 
-### 通过 -D 参数指定
+### Specify via -D Parameter
 
-在 JVM 启动参数中加入-D参数映射服务地址，如：
+Add the -D parameter to the JVM startup parameters to map the service address, such as:
 
 ```sh
 java -Dcom.alibaba.xxx.XxxService=dubbo://localhost:20890
 ```
 
-{{% alert title="提示" color="primary" %}}
-key 为服务名，value 为服务提供者 url，此配置优先级最高，`1.0.15` 及以上版本支持
+{{% alert title="Tip" color="primary" %}}
+The key is the service name, and the value is the service provider URL. This configuration has the highest priority and is supported in version `1.0.15` and above.
 {{% /alert %}}
 
-### 通过文件映射
+### File Mapping
 
-如果服务比较多，也可以用文件映射，用 `-Ddubbo.resolve.file` 指定映射文件路径，此配置优先级高于 `<dubbo:reference>` 中的配置 [^3]，如：
+If there are many services, you can also use file mapping by specifying the mapping file path with `-Ddubbo.resolve.file`, which has a higher priority than the configuration in `<dubbo:reference>` [^3], such as:
 
 ```sh
 java -Ddubbo.resolve.file=xxx.properties
 ```
-    
-然后在映射文件 `xxx.properties` 中加入配置，其中 key 为服务名，value 为服务提供者 URL：
-    
+
+Then add the configuration in the mapping file `xxx.properties`, where the key is the service name, and the value is the service provider URL:
+
 ```properties
 com.alibaba.xxx.XxxService=dubbo://localhost:20890
 ```
 
-{{% alert title="提示" color="primary" %}}
-`1.0.15` 及以上版本支持，`2.0` 以上版本自动加载 ${user.home}/dubbo-resolve.properties文件，不需要配置
+{{% alert title="Tip" color="primary" %}}
+Supported in version `1.0.15` and above. Version `2.0` and higher automatically loads the ${user.home}/dubbo-resolve.properties file without needing configuration.
 {{% /alert %}}
-    
-{{% alert title="注意" color="warning" %}}
-为了避免复杂化线上环境，不要在线上使用这个功能，只应在测试阶段使用。
+
+{{% alert title="Note" color="warning" %}}
+To avoid complicating the production environment, do not use this feature in production; it should only be used during testing.
 {{% /alert %}}
+

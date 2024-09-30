@@ -2,9 +2,10 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/config/
     - /en/docs3-v2/java-sdk/reference-manual/config/
-description: Dubbo 配置指南
+description: Dubbo Configuration Guide
 linkTitle: Spring
-title: 配置手册
+title: Configuration Manual
 type: docs
 weight: 1
 ---
+

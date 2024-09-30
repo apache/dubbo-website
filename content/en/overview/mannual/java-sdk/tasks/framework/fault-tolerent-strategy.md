@@ -2,47 +2,47 @@
 aliases:
     - /en/docsv2.7/user/examples/fault-tolerent-strategy/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/fault-tolerent-strategy/
-description: 集群调用失败时，Dubbo 提供的容错方案
-linkTitle: 集群容错(重试)
-title: 集群容错
+description: Fault tolerance solutions provided by Dubbo when cluster calls fail
+linkTitle: Cluster Fault Tolerance (Retry)
+title: Cluster Fault Tolerance
 type: docs
 weight: 8
 ---
 
-## 背景
-在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
+## Background
+When cluster calls fail, Dubbo provides various fault tolerance solutions, with failover retry as the default.
 
 ![cluster](/imgs/user/cluster.jpg)
 
-各节点关系：
+Node relationships:
 
-* 这里的 `Invoker` 是 `Provider` 的一个可调用 `Service` 的抽象，`Invoker` 封装了 `Provider` 地址及 `Service` 接口信息
-* `Directory` 代表多个 `Invoker`，可以把它看成 `List<Invoker>` ，但与 `List` 不同的是，它的值可能是动态变化的，比如注册中心推送变更
-* `Cluster` 将 `Directory` 中的多个 `Invoker` 伪装成一个 `Invoker`，对上层透明，伪装过程包含了容错逻辑，调用失败后，重试另一个
-* `Router` 负责从多个 `Invoker` 中按路由规则选出子集，比如读写分离，应用隔离等
-* `LoadBalance` 负责从多个 `Invoker` 中选出具体的一个用于本次调用，选的过程包含了负载均衡算法，调用失败后，需要重选
+* Here, `Invoker` is an abstraction of a callable `Service` of `Provider`, encapsulating the `Provider` address and `Service` interface information.
+* `Directory` represents multiple `Invokers`, which can be viewed as `List<Invoker>`, but unlike `List`, its values may change dynamically, such as changes pushed by the registry.
+* `Cluster` disguises multiple `Invokers` in `Directory` as a single `Invoker`, transparent to the upper layer, involving fault tolerance logic; if a call fails, it retries another.
+* `Router` selects a subset from multiple `Invokers` based on routing rules, such as read-write separation and application isolation.
+* `LoadBalance` selects a specific `Invoker` for the current call from multiple `Invokers`, involving load balancing algorithms; if a call fails, it needs to reselect.
 
-## 集群容错模式
+## Cluster Fault Tolerance Modes
 
-可以自行扩展集群容错策略，参见：[集群扩展](../../../dev/impls/cluster)
+You can extend the cluster fault tolerance strategy. See: [Cluster Extension](../../../dev/impls/cluster)
 
 ### Failover Cluster
 
-失败自动切换，当出现失败，重试其它服务器。通常用于读操作，但重试会带来更长延迟。可通过 `retries="2"` 来设置重试次数(不含第一次)。
+Automatically switches on failure, retrying other servers. Typically used for read operations, but retries introduce longer delays. The retry count can be set with `retries="2"` (excluding the first attempt).
 
-重试次数配置如下：
+Retry count configuration:
 
 ```xml
 <dubbo:service retries="2" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:reference retries="2" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:reference>
@@ -50,58 +50,55 @@ weight: 8
 </dubbo:reference>
 ```
 
-{{% alert title="提示" color="primary" %}}
-该配置为缺省配置
+{{% alert title="Tip" color="primary" %}}
+This configuration is the default configuration.
 {{% /alert %}}
 
 ### Failfast Cluster
 
-快速失败，只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录。
+Fast failure, initiating only one call, error on failure immediately. Typically used for non-idempotent write operations, such as adding records.
 
 ### Failsafe Cluster
 
-失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。
+Safe failure, directly ignoring exceptions. Typically used for writing audit logs and similar tasks.
 
 ### Failback Cluster
 
-失败自动恢复，后台记录失败请求，定时重发。通常用于消息通知操作。
+Automatic recovery from failure, recording failed requests and resending them at intervals. Typically used for message notification operations.
 
 ### Forking Cluster
 
-并行调用多个服务器，只要一个成功即返回。通常用于实时性要求较高的读操作，但需要浪费更多服务资源。可通过 `forks="2"` 来设置最大并行数。
+Parallel calls to multiple servers, returning as soon as one succeeds. Typically used for read operations with high real-time requirements but requires more service resources. The maximum parallel number can be set with `forks="2"`.
 
 ### Broadcast Cluster
 
-广播调用所有提供者，逐个调用，任意一台报错则报错。通常用于通知所有提供者更新缓存或日志等本地资源信息。
+Broadcast calls to all providers, calling them one by one; if any one fails, it reports an error. Typically used to notify all providers to update local resources like caches or logs.
 
-现在广播调用中，可以通过 broadcast.fail.percent 配置节点调用失败的比例，当达到这个比例后，BroadcastClusterInvoker
-将不再调用其他节点，直接抛出异常。 broadcast.fail.percent 取值在 0～100 范围内。默认情况下当全部调用失败后，才会抛出异常。
-broadcast.fail.percent 只是控制的当失败后是否继续调用其他节点，并不改变结果(任意一台报错则报错)。broadcast.fail.percent 参数
-在 dubbo2.7.10 及以上版本生效。
+In a broadcast call, you can configure the proportion of node call failures with broadcast.fail.percent. When this proportion is reached, the BroadcastClusterInvoker will stop calling other nodes and throw an exception directly. The value of broadcast.fail.percent ranges from 0 to 100. By default, an exception is only thrown when all calls fail. The broadcast.fail.percent parameter takes effect in versions 2.7.10 and above.
 
-Broadcast Cluster 配置 broadcast.fail.percent。
+Broadcast Cluster configuration for broadcast.fail.percent.
 
-broadcast.fail.percent=20 代表了当 20% 的节点调用失败就抛出异常，不再调用其他节点。
+broadcast.fail.percent=20 means that an exception will be thrown when 20% of the nodes fail, with no further calls to other nodes.
 
 ```text
 @reference(cluster = "broadcast", parameters = {"broadcast.fail.percent", "20"})
 ```
 
-
-{{% alert title="提示" color="primary" %}}
-`2.1.0` 开始支持
+{{% alert title="Tip" color="primary" %}}
+Supported since `2.1.0`
 {{% /alert %}}
 
-### 集群模式配置
+### Cluster Mode Configuration
 
-按照以下示例在服务提供方和消费方配置集群模式
+Configure the cluster mode as follows on both the service provider and consumer sides.
 
 ```xml
 <dubbo:service cluster="failsafe" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:reference cluster="failsafe" />
 ```
+

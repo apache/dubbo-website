@@ -2,15 +2,15 @@
 aliases:
     - /en/overview/tasks/extensibility/
     - /en/overview/tasks/extensibility/
-description: 演示 Dubbo 扩展能力特性的使用方式。
-linkTitle: 自定义扩展
+description: Demonstrates the usage of Dubbo's extensibility capabilities.
+linkTitle: Custom Extensions
 no_list: true
-title: 自定义扩展
+title: Custom Extensions
 type: docs
 weight: 6
 ---
 
-通过如下任务项分别来介绍 Dubbo 的扩展特性。
+This section introduces Dubbo's extensibility features through the following tasks.
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -20,9 +20,9 @@ weight: 6
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./filter/" >}}'>自定义过滤器</a>
+                    <a href='{{< relref "./filter/" >}}'>Custom Filter</a>
                 </h4>
-                <p>通过SPI机制动态加载自定义过滤器，可以对返回的结果进行统一的处理、验证等，减少对开发人员的打扰。</p>
+                <p>Custom filters can be dynamically loaded using the SPI mechanism, allowing for unified processing and validation of returned results, reducing interruptions for developers.</p>
             </div>
         </div>
     </div>
@@ -30,9 +30,9 @@ weight: 6
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./router/" >}}'>自定义路由</a>
+                    <a href='{{< relref "./router/" >}}'>Custom Router</a>
                 </h4>
-                <p>在服务调用的过程中根据实际使用场景自定义路由策略，可以有效的改善服务吞吐量和耗时。</p>
+                <p>Custom routing strategies can be implemented based on actual usage scenarios during service calls, effectively improving service throughput and latency.</p>
             </div>
         </div>
     </div>
@@ -40,9 +40,9 @@ weight: 6
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./protocol/" >}}'>自定义协议</a>
+                    <a href='{{< relref "./protocol/" >}}'>Custom Protocol</a>
                 </h4>
-                <p>针对不同的异构系统可以使用自定义传输协议，为系统之间的整合屏蔽了协议之间的差异。
+                <p>Custom transport protocols can be used for different heterogeneous systems, masking the differences between protocols for better system integration.
                 </p>
             </div>
         </div>
@@ -51,9 +51,9 @@ weight: 6
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./registry/" >}}'>自定义注册中心</a>
+                    <a href='{{< relref "./registry/" >}}'>Custom Registry Center</a>
                 </h4>
-                <p>将不同注册中心中的服务都纳入到 Dubbo 体系中，自定义注册中心是打通异构服务体系之间的利刃。
+                <p>Integrating services from different registry centers into the Dubbo framework, custom registry centers serve as a cutting edge for bridging heterogeneous service systems.
                 </p>
             </div>
         </div>
@@ -63,3 +63,4 @@ weight: 6
 </div>
 
 {{< /blocks/section >}}
+

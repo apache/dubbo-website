@@ -5,7 +5,7 @@ aliases:
 description: ""
 hide_summary: true
 linkTitle: GraalVM
-title: Dubbo 集成 Graalvm参考手册
+title: Dubbo Integration GraalVM Reference Manual
 type: docs
 weight: 9
 ---
@@ -15,40 +15,40 @@ weight: 9
 
 
 
-dubbo3.0支持native-image文档
+Dubbo 3.0 supports native-image documentation
 
-## 概述
+## Overview
 
-本文档将介绍将dubbo3.0项目接入GraalVM，进行native-image编译为二进制的流程。
+This document will introduce the process of integrating Dubbo 3.0 with GraalVM for native-image compilation into a binary.
 
-关于GraalVm的更多信息可以阅读 https://www.graalvm.org/docs/getting-started/container-images/ 此文档。
+For more information about GraalVM, you can read [this document](https://www.graalvm.org/docs/getting-started/container-images/).
 
-## 使用样例
+## Usage Example
 
-在编译我们的dubbo项目之前，需要确保我们正基于graalVm的环境。
+Before compiling our Dubbo project, we need to ensure that we are working in a GraalVM environment.
 
-1. 安装GraalVM
+1. Install GraalVM
 
-进入https://www.graalvm.org/ 官网根据自己的系统选取最新版本安装：
+Visit [https://www.graalvm.org/](https://www.graalvm.org/) to select and install the latest version for your system:
 
 ![img](/imgs/blog/dubbo3.0-graalvm-support/graalvmgw.jpg)
 
-安装完成后，修改配置JAVA_HOME的路径，生效后查看本地jdk可以看到如下：
+After installation, modify the configuration of JAVA_HOME path. After it takes effect, you can see the local JDK as follows:
 
 ![img](/imgs/blog/dubbo3.0-graalvm-support/graalvm_env.jpg)
-这里我们使用的基于jdk1.8版本的GraalVM。
+Here we use the GraalVM based on JDK 1.8.
 
-- 安装native-image，只需执行gu install native-image即可。
+- Install native-image by executing `gu install native-image`.
 
-1. 拉取dubbo代码，切换到[apache:3.0](https://github.com/apache/dubbo)分支。
-2. 手动执行生成SPI代码。
+1. Pull the Dubbo code and switch to the [apache:3.0](https://github.com/apache/dubbo) branch.
+2. Manually generate SPI code.
 
-由于目前编译native-image不支持代码动态生成编译，所以有关代码动态生成的部分需要我们手动先生成，这里提供了工具函数：
+Since native-image compilation does not currently support dynamic code generation, the parts that require dynamic code generation need to be generated manually first. Here is a tool function provided:
 
 ![img](/imgs/blog/dubbo3.0-graalvm-support/code_generator.jpg)
-执行CodeGenerator即可在dubbo-native模块下生成SPI代码。
+Run CodeGenerator to generate SPI code under the dubbo-native module.
 
-1. 在根目录下执行install
+1. Execute install in the root directory
 
 ```
 MacdeMacBook-pro-3:incubator-dubbo mac$ pwd
@@ -58,28 +58,28 @@ MacdeMacBook-pro-3:incubator-dubbo mac$ pwd
 MacdeMacBook-pro-3:incubator-dubbo mac$ mvn clean package install -Dmaven.test.skip=true
 ```
 
-1. 编译demo项目
+1. Compile the demo project
 
-这里我们提供了可直接进行编译的示例项目，dubbo-demo/dubbo-demo-native。上面步骤install完成后，先到dubbo-demo-native的provider下，执行native-image编译：
+We provide an example project that can be compiled directly, namely dubbo-demo/dubbo-demo-native. After completing the above install steps, go to the provider under dubbo-demo-native and execute the native-image compilation:
 
 ```
  mvn clean package -P native -Dmaven.test.skip=true
 ```
 
-这里由于我们在maven中引入了native-image插件，所以直接-P native即可执行该插件。
+Since we have included the native-image plugin in Maven, executing `-P native` will directly use this plugin.
 
 ![img](/imgs/blog/dubbo3.0-graalvm-support/native_image_build.jpg)
-编译成功后可以在target下看到已经生成的二进制文件，本地启动一个zookeeper，直接执行该二进制，可见启动成功如下：
+After successful compilation, you can see the generated binary in the target directory; start a Zookeeper locally and run this binary to see that it starts successfully as shown below:
 
 ![img](/imgs/blog/dubbo3.0-graalvm-support/run_provider.jpg)
-consumer端同样执行编译，在consumer的target下也会生成二进制文件：demo-native-consumer,执行该二进制可以看到调用结果如下：
+The consumer side also compiles similarly, and a binary file will be generated at the consumer's target: demo-native-consumer. Running this binary will show the calling results as below:
 
 ![img](/imgs/blog/dubbo3.0-graalvm-support/run_consumer.jpg)
-### 具体步骤
+### Specific Steps
 
-实际上在这个demo下我们做了一些工作来确保项目可以编译执行，主要有以下几个步骤
+In fact, we have done some work in this demo to ensure that the project can compile and run, mainly consisting of the following steps:
 
-- 引入dubbo-native依赖
+- Introduce the dubbo-native dependency
 
 ```
 <dependency>
@@ -93,9 +93,9 @@ consumer端同样执行编译，在consumer的target下也会生成二进制文�
 </dependency>
 ```
 
-该模块下有我们生成的SPI代码。
+This module contains the SPI code we generated.
 
-- 引入native-image插件
+- Introduce the native-image plugin
 
 ```
 <plugin>
@@ -201,23 +201,22 @@ consumer端同样执行编译，在consumer的target下也会生成二进制文�
 </plugin>
 ```
 
-其中定义了生成的镜像名以及一些构建镜像的参数。
+Here we define the name of the generated image and some parameters for building the image.
 
-- 挂载native-image-agent
+- Mount the native-image agent
 
-由于我们需要将一些反射、JNI等类先指定出来，我们需要先使用该agent以正常方式运行一遍生成这些类的json形式的信息。
+Since we need to specify some classes such as reflection, JNI, etc., we need to use this agent to run the application normally and generate the JSON information for these classes.
 
-在启动参数中添加：
+Add to the startup parameters:
 
 ```
 -agentlib:native-image-agent=config-output-dir=/tmp/config/,config-write-period-secs=300,config-write-initial-delay-secs=5
 ```
 
-以正常方式启动，在项目的resources下建立文件夹META-INF.native-image，把在本地目录中生成的文件粘进去：
+Start normally, and create a folder META-INF.native-image under resources in the project, then paste the files generated in the local directory:
 
 ![img](/imgs/blog/dubbo3.0-graalvm-support/resources.jpg)
-（可能会有缺漏没有生成的类信息，需要根据编译或运行时的报错信息手动添加。）
+(There may be some missing class information that was not generated, which needs to be added manually based on the compilation or runtime error messages.)
 
+**After completing the above steps, you can compile the project.**
 
-
-**完成以上几步后就可以进行项目的编译了。**

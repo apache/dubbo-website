@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/tasks/observability/tracing/otlp/
     - /en/overview/tasks/observability/tracing/otlp/
-description: "这个案例展示了在 Dubbo 项目中以 OpenTelemetry 作为 Tracer，将 Trace 信息上报到 Otlp Collector，再由 collector 转发至 Zipkin、Jagger。"
+description: "This example demonstrates how to use OpenTelemetry as a Tracer in a Dubbo project to report Trace information to the Otlp Collector, which then forwards it to Zipkin and Jagger."
 linkTitle: OpenTelemetry
 no_list: true
 title: OTlp
@@ -10,53 +10,53 @@ type: docs
 weight: 2
 ---
 
-## 概述
+## Overview
 
-这个案例展示了在 Dubbo 项目中以 OpenTelemetry 作为 Tracer，将 Trace 信息上报到 Otlp Collector，再由 collector 转发至 Zipkin、Jagger。[代码地址](https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-otel-otlp)
+This example demonstrates how to use OpenTelemetry as a Tracer in a Dubbo project to report Trace information to the Otlp Collector, which then forwards it to Zipkin and Jagger. [Code repository](https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-otel-otlp)
 
-有三部分组成：
+It consists of three parts:
 
 - dubbo-samples-spring-boot-tracing-otel-oltp-interface
 - dubbo-samples-spring-boot-tracing-otel-oltp-provider
 - dubbo-samples-spring-boot-tracing-otel-oltp-consumer
 
-## 案例架构图
+## Case Architecture Diagram
 
-![案例架构图](/imgs/v3/tasks/observability/tracing/otlp/demo_arch.png)
+![Case Architecture Diagram](/imgs/v3/tasks/observability/tracing/otlp/demo_arch.png)
 
-## 快速开始
+## Quick Start
 
-### 安装 & 启动 Otlp Collector
+### Install & Start Otlp Collector
 
-按照 [OpenTelemetry Collector Quick Start](https://OpenTelemetry.io/docs/collector/getting-started/) 去启动 otlp collector.
+Follow the [OpenTelemetry Collector Quick Start](https://OpenTelemetry.io/docs/collector/getting-started/) to start the otlp collector.
 
-### 启动 Provider
+### Start Provider
 
-直接运行`org.apache.dubbo.springboot.demo.provider.ProviderApplication` directly from IDE.
+Run `org.apache.dubbo.springboot.demo.provider.ProviderApplication` directly from the IDE.
 
-### 启动 Consumer
+### Start Consumer
 
-Start `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication` directly from IDE.
+Start `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication` directly from the IDE.
 
-### 查看 Trace 信息
+### View Trace Information
 
-在浏览器中打开zipkin看板 `http://localhost:9411/zipkin/` :
+Open the Zipkin dashboard in the browser at `http://localhost:9411/zipkin/`:
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/otlp/zipkin_search.png)
 
 ![zipkin.png](/imgs/v3/tasks/observability/tracing/otlp/zipkin_detail.png)
 
-在浏览器中打开Jaeger看板 `http://localhost:16686/search` :
+Open the Jaeger dashboard in the browser at `http://localhost:16686/search`:
 
 ![jaeger_search.png](/imgs/v3/tasks/observability/tracing/otlp/jaeger_search.png)
 
 ![jaeger_detail.png](/imgs/v3/tasks/observability/tracing/otlp/jaeger_detail.png)
 
-## 如何在SpringBoot项目中使用
+## How to Use in a SpringBoot Project
 
-### 1. 在你的项目中添加依赖
+### 1. Add Dependencies in Your Project
 
-对于 SpringBoot 项目，你可以使用`dubbo-spring-boot-tracing-otel-otlp-starter` ：
+For SpringBoot projects, you can use `dubbo-spring-boot-tracing-otel-otlp-starter`:
 
 ```xml
 
@@ -67,7 +67,7 @@ Start `org.apache.dubbo.springboot.demo.consumer.ConsumerApplication` directly f
 </dependency>
 ```
 
-### 2. 配置
+### 2. Configuration
 
 #### application.yml
 
@@ -95,12 +95,12 @@ logging:
     console: '[%d{dd/MM/yy HH:mm:ss:SSS z}] %t %5p %c{2} [%X{traceId:-}, %X{spanId:-}]: %m%n'
 ```
 
-## 如何基于Dubbo API使用
+## How to Use Based on Dubbo API
 
-### 1. 在你的项目中添加依赖
+### 1. Add Dependencies in Your Project
 
 ```xml
-    <!-- 必选，dubbo-tracing核心依赖 -->
+    <!-- Required, core dependency of dubbo-tracing -->
     <dependency>
         <groupId>org.apache.dubbo</groupId>
         <artifactId>dubbo-tracing</artifactId>
@@ -117,19 +117,20 @@ logging:
     </dependency>
 ```
 
-### 2. 配置
+### 2. Configuration
 
 ```java
 TracingConfig tracingConfig = new TracingConfig();
-// 开启dubbo tracing
+// Enable dubbo tracing
 tracingConfig.setEnabled(true);
-// 设置采样率
+// Set sampling rate
 tracingConfig.setSampling(new SamplingConfig(1.0f));
-// 设置Propagation，默认为W3C，可选W3C/B3
+// Set Propagation, default is W3C, optional W3C/B3
 tracingConfig.setPropagation(new PropagationConfig("W3C"));
-// 设置trace上报
+// Set trace reporting
 ExporterConfig exporterConfig = new ExporterConfig();
-// 设置将trace上报到Zipkin
+// Set to report trace to Zipkin
 exporterConfig.setZipkin(new ExporterConfig.OtlpConfig("http://localhost:4317", Duration.ofSeconds(10), "none"));
 tracingConfig.setExporter(exporterConfig);
 ```
+

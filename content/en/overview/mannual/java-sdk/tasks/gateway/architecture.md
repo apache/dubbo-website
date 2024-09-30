@@ -1,41 +1,40 @@
 ---
 description: |
-    本文讲述前端 http 流量接入后端 Dubbo 微服务的的基本架构，包括移动端、浏览器、桌面应用、异构的微服务体系等。
-linkTitle: 基本架构
-title: 前端 http 流量接入 Dubbo 后端微服务体系的基础架构
+    This article discusses the basic architecture of front-end HTTP traffic access to back-end Dubbo microservices, including mobile devices, browsers, desktop applications, and heterogeneous microservice systems.
+linkTitle: Basic Architecture
+title: The Infrastructure of Front-end HTTP Traffic Access to Dubbo Back-end Microservice System
 type: docs
 weight: 1
 ---
 
-不论你开发的是什么样的产品（电子商城、管理系统、手机 app 等），绝大多数下产品的流量入口都会是 http，用户可能通过浏览器、手机移动设备、桌面软件等来访问产品。在这种情况下，如何将后端开发的 Dubbo 微服务集群接入前端访问设备就成为一个需要解决的问题，其实也就是 http 与 rpc 之间的转换与连接问题。
+Regardless of the type of product you are developing (e-commerce, management systems, mobile apps, etc.), the vast majority of traffic entry points will be HTTP, as users may access the product through browsers, mobile devices, or desktop software. In this case, connecting the Dubbo microservice cluster developed by the back-end to the front-end access devices becomes a problem to solve, which is essentially the problem of conversion and connection between HTTP and RPC.
 
-总的来说，有中心化和去中心化两种架构模式。其中，中心化接入模式更具通用性，对后端 rpc 协议、前端网关没有太多特殊要求，但保证中心化应用的性能、稳定性是一个较大的挑战；去中心化模式由于不需要维护入口应用，因此可适应更大流量、更大规模的集群。
+In general, there are two architectural patterns: centralized and decentralized. The centralized access mode is more universal and does not place many special demands on the back-end RPC protocol and the front-end gateway, but ensuring the performance and stability of the centralized application is a significant challenge. The decentralized mode does not require maintaining an entry application, thus it can accommodate larger traffic and larger-scale clusters.
 
-## 中心化接入方式
-中心化接入方式的架构图如下：
-* 在后端服务与前端设备之间有一层网关，负责流量过滤、路由、限流等流量管理工作
-* 在后端集群中有一个连接 http 与 dubbo 服务的 “统一微服务入口应用”（通常也叫做 BFF，即Backend for Frontend）。
+## Centralized Access Mode
+The architecture diagram for centralized access mode is as follows:
+* There is a layer of gateway between the back-end services and front-end devices, responsible for traffic filtering, routing, rate limiting, and other traffic management tasks.
+* In the back-end cluster, there is a "unified microservice entry application" that connects HTTP and Dubbo services (commonly known as BFF, or Backend for Frontend).
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/arch-centralized-bff.png"/>
 
-BFF 应用通常可以使用 Spring Web 等常用框架开发，应用发布一系列的 http 服务，接收网关或前端设备流量，同时负责按需发起 dubbo 调用。
+BFF applications can typically be developed using common frameworks such as Spring Web, which publish a series of HTTP services to receive traffic from the gateway or front-end devices and are responsible for initiating Dubbo calls as needed.
 
-{{% alert title="注意" color="info" %}}
-`dubbo`、`triple` 协议都支持这种接入架构。另外，在配置 BFF 应用调用 dubbo 服务时，可以使用普通的 dubbo 配置方式，也可以使用泛化调用等方式：
-* 配置接入 dubbo 协议时，使用 [泛化调用]() 的优势是可以避免对服务二进制包的依赖，实现配置动态生效的效果。
-* 配置接入 triple 协议时，可以使用 http 调用方式，同样可避免对服务二进制包的依赖，实现配置动态生效的效果。
+{{% alert title="Note" color="info" %}}
+Both `dubbo` and `triple` protocols support this access architecture. Additionally, when configuring BFF applications to call Dubbo services, you can use the regular Dubbo configuration method or use generalized calls:
+* The advantage of using [generalized calls]() for accessing Dubbo protocol is that it avoids dependency on the service binary package and achieves dynamic configuration effects.
+* When configuring access to the triple protocol, you can use HTTP calling methods to similarly avoid dependency on the service binary package for dynamic configuration effects.
 {{% /alert %}}
 
-## 去中心化接入方式
-与中心化架构相比，此方式并没有太大的差异，唯一的区别在于不需要额外的 BFF 应用，我们可以在网关直接调用后端 dubbo 服务。
+## Decentralized Access Mode
+Compared to centralized architecture, this approach does not differ much, the only difference is that there is no need for an additional BFF application; we can call the back-end Dubbo services directly through the gateway.
 
-但这种方式对网关有特别要求。如果后端是 dubbo 协议的话，则要求网关具备 `http -> dubbo` 协议转换的能力，但你会在接下来的文档中发现，我们可以通过多协议发布绕过协议转换，让网关直接通过 http 访问后端服务；如果后端是 triple 协议，就会更简单了，因为 triple 协议支持 application/json 格式的 http 请求。
+However, this method places special demands on the gateway. If the back-end uses the Dubbo protocol, the gateway must have the capability to convert `http -> dubbo` protocol, but as you will discover in the upcoming documents, we can bypass protocol conversion by publishing multiple protocols, allowing the gateway to access back-end services directly through HTTP. If the back-end uses the triple protocol, it becomes simpler because the triple protocol supports HTTP requests in application/json format.
 
 <img style="max-width:800px;height:auto;" src="/imgs/v3/tasks/gateway/arch-decentralized-dubbo.png"/>
 
-## 总结
-使用不同的协议也会影响架构选择，triple 协议由于原生支持 HTTP 访问，因此对两种架构方式都可以无差别支持，并且接入原理上也会更简单直接。而 dubbo 协议作为 Dubbo2 时代主推的协议，由于是基于 tcp 的二进制协议，因此在接入方式上存在一些不同。
+## Summary
+Using different protocols will also affect architecture choices; the triple protocol, due to its native support for HTTP access, can support both architectural modes without difference, and the access principle is simpler and more direct. However, the Dubbo protocol, as the main protocol promoted during the Dubbo2 era, is a binary protocol based on TCP, which results in some differences in access methods.
 
-我们将在接下来的两篇文档中介绍 dubbo、triple 两种协议的具体前端流量接入方式，文档同样适用于中心化、去中心化架构。
-
+In the upcoming two documents, we will introduce the specific front-end traffic access methods for the Dubbo and triple protocols; the documents are also applicable to both centralized and decentralized architectures.
 

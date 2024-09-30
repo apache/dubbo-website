@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/status-checker/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/status-checker/
-description: 状态检查扩展
-linkTitle: 状态检查扩展
-title: 状态检查扩展
+description: Status Check Extension
+linkTitle: Status Check Extension
+title: Status Check Extension
 type: docs
 weight: 21
 ---
@@ -14,23 +14,23 @@ weight: 21
 
 
 
-## 扩展说明
+## Extension Description
 
-检查服务依赖各种资源的状态，此状态检查可同时用于 telnet 的 status 命令和 hosting 的 status 页面。
+Checks the status of various resources that the service depends on. This status check can be used for both telnet's status command and hosting's status page.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.common.status.StatusChecker`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol status="xxx,yyy" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置status属性时，使用此配置 -->
+<!-- Default value setting. When the <dubbo:protocol> does not have a status attribute configured, this configuration is used -->
 <dubbo:provider status="xxx,yyy" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.common.status.support.MemoryStatusChecker`
 * `org.apache.dubbo.common.status.support.LoadStatusChecker`
@@ -40,9 +40,9 @@ weight: 21
 * `org.apache.dubbo.rpc.config.spring.status.SpringStatusChecker`
 * `org.apache.dubbo.rpc.config.spring.status.DataSourceStatusChecker`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -50,14 +50,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxStatusChecker.java (实现StatusChecker接口)
+                |-XxxStatusChecker.java (implements StatusChecker interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.common.status.StatusChecker (纯文本文件，内容为：xxx=com.xxx.XxxStatusChecker)
+                |-org.apache.dubbo.common.status.StatusChecker (plain text file, content: xxx=com.xxx.XxxStatusChecker)
 ```
 
-XxxStatusChecker.java：
+XxxStatusChecker.java:
 
 ```java
 package com.xxx;
@@ -71,8 +71,9 @@ public class XxxStatusChecker implements StatusChecker {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.common.status.StatusChecker：
+META-INF/dubbo/org.apache.dubbo.common.status.StatusChecker:
 
 ```properties
 xxx=com.xxx.XxxStatusChecker
 ```
+

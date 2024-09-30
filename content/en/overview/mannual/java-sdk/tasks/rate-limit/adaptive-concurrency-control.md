@@ -1,27 +1,27 @@
 ---
-description: "自适应限流，区别于普通限流策略，其具备自动调整限流策略是否生效、限流阈值的能力，heuristic flow control。"
-linkTitle: 自适应限流
-title: 自适应限流
+description: "Adaptive flow control, different from ordinary flow control strategies, has the ability to automatically adjust whether the flow control strategy is effective and the flow control threshold, heuristic flow control."
+linkTitle: Adaptive Flow Control
+title: Adaptive Flow Control
 type: docs
 weight: 3
 ---
 
-自适应限流的设计与实现思路请参考 [Dubbo 自适应限流功能](/en/overview/reference/proposals/heuristic-flow-control/#自适应限流)。自适应限流能够确保分布式系统稳定性和可靠性，例如在服务提供商资源有限且多变的场景下。
+For the design and implementation ideas of adaptive flow control, please refer to [Dubbo Adaptive Flow Control Function](/en/overview/reference/proposals/heuristic-flow-control/#自适应限流). Adaptive flow control can ensure the stability and reliability of distributed systems, especially in scenarios where service provider resources are limited and variable.
 
-## 使用场景
-- 服务降级预防：当服务提供者因资源耗尽而性能下降时，使用自适应限流暂时减少其接受的请求数直至恢复正常。
-- 峰值流量处理：当服务流量突然激增时，自适应流量限制可以通过动态减少接受的请求数量来帮助防止服务过载。
-- 不可预测流量处理：服务提供商可能会遇到不可预测的流量，第三方应用程序使用服务时可能会偶尔产生流量，自适应流量限制可以根据当前系统负载调整允许的最大并发请求数并防止过载。
+## Use Cases
+- Service Degradation Prevention: When service providers face performance degradation due to resource exhaustion, adaptive flow control temporarily reduces the number of requests it accepts until normal operations resume.
+- Peak Traffic Handling: When service traffic surges suddenly, adaptive flow control can help prevent service overload by dynamically reducing the number of accepted requests.
+- Unpredictable Traffic Handling: Service providers may encounter unpredictable traffic, and third-party applications may occasionally generate traffic while using the service. Adaptive flow control can adjust the maximum allowed concurrent requests based on current system load to prevent overload.
 
-## 使用方式
+## Implementation
 
-设置方法与静态的最大并发值设置类似，只需在服务端设置 flowcontrol 参数即可，可选值有以下两种：
-* heuristicSmoothingFlowControl。当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从 HeuristicSmoothingFlowControl 算法中获得当前的 maxConcurrency 值。如果当前正在处理的请求数量超过了 maxConcurrency，则拒绝该请求。
-* autoConcurrencyLimiter。与 HeuristicSmoothingFlowControl 的最大区别是，AutoConcurrencyLimiter 是基于窗口的，每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到 maxConcurrency，其次，利用exploreRatio来对剩余的容量进行探索。
+The setup method is similar to static maximum concurrency value settings; simply set the flowcontrol parameter on the server side. There are two optional values:
+* heuristicSmoothingFlowControl. When the server receives a request, it first checks if CPU usage exceeds 50%. If not, it accepts and processes the request. If it exceeds 50%, indicating high current load, it obtains the current maxConcurrency value from the HeuristicSmoothingFlowControl algorithm. If the number of currently processed requests exceeds maxConcurrency, the request is rejected.
+* autoConcurrencyLimiter. The main difference from HeuristicSmoothingFlowControl is that AutoConcurrencyLimiter is window-based; it uses the accumulated sample data within the window to update maxConcurrency whenever a certain amount of data is accumulated, and utilizes exploreRatio to explore remaining capacity.
 
-> 在确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。
+> The flow control function can better work when there are multiple nodes on the server side and the consumer side has enabled retry strategy.
 
-### 示例一：使用 heuristicSmoothingFlowControl 自适应限流算法
+### Example 1: Using heuristicSmoothingFlowControl Adaptive Flow Control Algorithm
 
 ```properties
 dubbo.provider.flowcontrol=heuristicSmoothingFlowControl
@@ -31,7 +31,7 @@ dubbo.provider.flowcontrol=heuristicSmoothingFlowControl
 <dubbo:provider flowcontrol="heuristicSmoothingFlowControl" />
 ```
 
-### 示例二：使用 autoConcurrencyLimiter 自适应限流算法
+### Example 2: Using autoConcurrencyLimiter Adaptive Flow Control Algorithm
 ```properties
 dubbo.provider.flowcontrol=autoConcurrencyLimiter
 ```
@@ -40,7 +40,7 @@ dubbo.provider.flowcontrol=autoConcurrencyLimiter
 <dubbo:provider flowcontrol="autoConcurrencyLimiter" />
 ```
 
-### 示例三：设置服务粒度的 heuristicSmoothingFlowControl 自适应限流
+### Example 3: Setting Service Granularity of heuristicSmoothingFlowControl Adaptive Flow Control
 
 ```xml
 <dubbo:service interface="com.foo.BarService" flowcontrol="heuristicSmoothingFlowControl" />

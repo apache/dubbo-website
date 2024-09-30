@@ -3,9 +3,9 @@ aliases:
 - /en/docs3-v2/java-sdk/faq/81/
 - /en/docs3-v2/java-sdk/faq/81/
 - /en/overview/mannual/java-sdk/faq/81/_index/
-description: 81 - 单元测试辅助模块（注册中心）
-linkTitle: 81 - 单元测试辅助模块（注册中心）
-title: 81 - 单元测试辅助模块（注册中心）
+description: 81 - Unit Test Helper Module (Registry)
+linkTitle: 81 - Unit Test Helper Module (Registry)
+title: 81 - Unit Test Helper Module (Registry)
 type: docs
 weight: 81
 ---
@@ -15,4 +15,5 @@ weight: 81
 
 
 
-这里主要是 `dubbo-test` 模块中用于测试注册中心模块的代码的相关错误码。
+This section mainly discusses the error codes related to the code used for testing the registry module in the `dubbo-test` module.
+

@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/service-management/
     - /en/docs3-v2/java-sdk/reference-manual/qos/service-management/
-description: 服务管理命令
-linkTitle: 服务管理命令
-title: 服务管理命令
+description: Service Management Commands
+linkTitle: Service Management Commands
+title: Service Management Commands
 type: docs
 weight: 3
 ---
@@ -12,13 +12,13 @@ weight: 3
 
 
 
-服务管理功能提供了一系列的命令对 Dubbo 服务进行管理。
+The service management feature provides a series of commands to manage Dubbo services.
 
-## 服务管理
+## Service Management
 
-### ls 命令
+### ls Command
 
-列出消费者和提供者
+List Consumers and Providers
 
 ```
 dubbo>ls
@@ -39,46 +39,46 @@ As Consumer side:
 
 ```
 
-列出 dubbo 的所提供的服务和消费的服务，以及消费的服务地址数。
+This command lists the services provided and consumed by Dubbo, as well as the number of addresses for the consumed services.
 
-{{% alert title="注意" color="primary" %}}
-- 带有 `DubboInternal` 前缀的服务是 Dubbo 内置的服务，默认不向注册中心中注册。
-- 服务发布状态中的 `nacos-A(Y)` 第一部分是对应的注册中心名，第二部分是注册的模式（`A` 代表应用级地址注册，`I` 代表接口级地址注册），第三部分代表对应模式是否已经注册
-- 服务订阅状态中的 `nacos-AF(I-2,A-2)` 第一部分是对应的注册中心名，第二部分是订阅的模式（`AF` 代表双订阅模式，`FA` 代表仅应用级订阅，`FI` 代表仅接口级订阅），第三部分中前半部分代表地址模式来源（`A` 代表应用级地址，`I` 代表接口级地址）后半部分代表对应的地址数量
+{{% alert title="Note" color="primary" %}}
+- Services prefixed with `DubboInternal` are built-in services of Dubbo and are not registered with the registry by default.
+- The first part of the service publishing status `nacos-A(Y)` represents the corresponding registry name, the second part represents the registration model (`A` stands for application-level address registration, `I` stands for interface-level address registration), and the third part indicates whether the corresponding model is registered.
+- The first part of the service subscription status `nacos-AF(I-2,A-2)` represents the corresponding registry name, the second part represents the subscription model (`AF` stands for dual subscription mode, `FA` stands for application-level subscription only, `FI` stands for interface-level subscription only), the first half of the third part represents the address mode source (`A` stands for application-level addresses, `I` stands for interface-level addresses), and the second half represents the corresponding number of addresses.
 {{% /alert %}}
 
-## 上线
+## Online
 
-### online 命令
+### online Command
 
-Online 上线服务命令
+Command to bring services online.
 
-当使用延迟发布功能的时候(通过设置 org.apache.dubbo.config.AbstractServiceConfig#register 为 false)，后续需要上线的时候，可通过 Online 命令
+When using delayed publishing (by setting org.apache.dubbo.config.AbstractServiceConfig#register to false), to bring services online later, you can use the Online command.
 ```
-//上线所有服务
+// Bring all services online
 dubbo>online
 OK
 
-//根据正则，上线部分服务
+// Bring some services online based on regex
 dubbo>online com.*
 OK
 ```
 
-## 下线
+## Offline
 
 
-### offline 命令
+### offline Command
 
-下线服务命令
+Command to take services offline.
 
-由于故障等原因，需要临时下线服务保持现场，可以使用 Offline 下线命令。
+If services need to be temporarily taken offline due to failure or other reasons, use the Offline command.
 
 ```
-//下线所有服务
+// Take all services offline
 dubbo>offline
 OK
 
-//根据正则，下线部分服务
+// Take some services offline based on regex
 dubbo>offline com.*
 OK
 ```

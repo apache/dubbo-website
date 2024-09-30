@@ -1,22 +1,22 @@
 ---
-description: Dubbo Maven Plugin 的配置方式
-linkTitle: Maven Plugin 配置
-title: Dubbo Maven Plugin 的配置方式
+description: Configuration of the Dubbo Maven Plugin
+linkTitle: Maven Plugin Configuration
+title: Configuration of the Dubbo Maven Plugin
 type: docs
 weight: 3
 ---
 
-本文主要讲解 Dubbo Maven Plugin 的配置方式。
+This article mainly explains the configuration of the Dubbo Maven Plugin.
 
-当前 Dubbo Maven Plugin 支持以下功能：
-- Dubbo Maven Plugin For Protobuf：生成 Dubbo 服务接口的 Stub 代码
-- Dubbo Maven Plugin For Native Image：基于 AOT 机制，生成 Native Image 必要的 Metadata 信息
+The current Dubbo Maven Plugin supports the following features:
+- Dubbo Maven Plugin For Protobuf: Generates Stub code for Dubbo service interfaces
+- Dubbo Maven Plugin For Native Image: Generates necessary Metadata information for Native Image based on AOT mechanism
 
 ## Dubbo Maven Plugin For Protobuf
 
-### 如何使用 Dubbo Maven Plugin 生成 Protobuf Stub 代码
+### How to use Dubbo Maven Plugin to generate Protobuf Stub code
 
-#### 1. 编写 .proto 文件
+#### 1. Write the .proto file
 
 greeter.proto
 
@@ -44,10 +44,9 @@ message HelloRequest {
 message HelloReply {
   string message = 1;
 }
-
 ```
 
-#### 2. 引入 dubbo-maven-plugin 依赖
+#### 2. Include the dubbo-maven-plugin dependency
 
 ```xml
 
@@ -65,7 +64,7 @@ message HelloReply {
 </plugin>
 ```
 
-#### 3. 生成文件示例
+#### 3. Example of generated file
 
 ```java
 /*
@@ -104,7 +103,6 @@ public final class DemoServiceDubbo {
                         org.apache.dubbo.demo.HelloRequest.getDefaultInstance());
             }
         } catch (ClassNotFoundException e) {
-// ignore
         }
         return clazz;
     }
@@ -124,31 +122,27 @@ public final class DemoServiceDubbo {
         org.apache.dubbo.demo.HelloReply sayHello(org.apache.dubbo.demo.HelloRequest request);
 
         CompletableFuture<org.apache.dubbo.demo.HelloReply> sayHelloAsync(org.apache.dubbo.demo.HelloRequest request);
-
-
     }
-
 }
-
 ```
 
-### 配置列表
+### Configuration List
 
-Dubbo Maven Plugin For Protobuf 支持以下配置：
+Dubbo Maven Plugin For Protobuf supports the following configurations:
 
-| 配置参数                 | 必填    | 解释                                                     | 默认值                                                        | 示例                                                                        |
-|----------------------|-------|--------------------------------------------------------|------------------------------------------------------------|---------------------------------------------------------------------------|
-| dubboVersion         | true  | Dubbo 版本号，用于查找 dubbo-compiler 组件                       | ${dubbo.version}                                           | 3.3.0                                                                     |
-| dubboGenerateType    | true  | 生成的文件类型                                                | tri                                                        | tri  或  tri-reactor                                             |
-| protocExecutable     | false | 可执行的 protoc 路径，如不配置将自动从 Maven 仓库下载                     |                                                            | protoc                                                                    |
-| protocArtifact       | false | protoc 在 Maven 仓库中定位，用于下载 protoc 文件，如不配置将自动识别操作系统类型并下载 |                                                            | com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier} |
-| protoSourceDir       | true  | proto 文件目录                                             | ${basedir}/src/main/proto                                  | ./proto                                                                   |
-| outputDir            | true  | 生成文件的目标目录                                              | ${project.build.directory}/generated-sources/protobuf/java | ${basedir}/src/main/java                                                  |
-| protocPluginDirectory | false | 临时存储 protoc 的目录                                        | ${project.build.directory}/protoc-plugins                  | ./target/protoc-plugins                                                   |
+| Configuration Parameter    | Required | Description                                               | Default Value                                                | Example                                                                    |
+|----------------------------|----------|-----------------------------------------------------------|------------------------------------------------------------|----------------------------------------------------------------------------|
+| dubboVersion               | true     | Dubbo version number, used to find the dubbo-compiler component | ${dubbo.version}                                           | 3.3.0                                                                     |
+| dubboGenerateType          | true     | Type of the generated file                                | tri                                                        | tri or tri-reactor                                                        |
+| protocExecutable           | false    | Path to the executable protoc; if not configured, it will be downloaded from Maven repository |                                                            | protoc                                                                    |
+| protocArtifact             | false    | The protocol used to locate protoc in Maven repository, if not configured, it will automatically detect the OS type and download |                                                            | com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier} |
+| protoSourceDir             | true     | Directory for proto files                                 | ${basedir}/src/main/proto                                  | ./proto                                                                   |
+| outputDir                  | true     | Target directory for generated files                      | ${project.build.directory}/generated-sources/protobuf/java | ${basedir}/src/main/java                                                  |
+| protocPluginDirectory       | false    | Directory for temporary storage of protoc                 | ${project.build.directory}/protoc-plugins                  | ./target/protoc-plugins                                                   |
 
 ## Dubbo Maven Plugin For Native Image
 
-### 示例
+### Example
 
 ```xml
 <plugin>
@@ -169,11 +163,11 @@ Dubbo Maven Plugin For Protobuf 支持以下配置：
 </plugin>
 ```
 
+### Configuration List
 
-### 配置列表
+Dubbo Maven Plugin For Native Image supports the following configurations:
 
-Dubbo Maven Plugin For Native Image 支持以下配置：
+| Configuration Parameter    | Required | Description   | Default Value                                                | Example                                                                    |
+|----------------------------|----------|---------------|------------------------------------------------------------|----------------------------------------------------------------------------|
+| mainClass                  | true     | Name of the main class |                                           | com.example.nativedemo.NativeDemoApplication                             |
 
-| 配置参数                 | 必填    | 解释   | 默认值                                                        | 示例                                                                        |
-|----------------------|-------|------|------------------------------------------------------------|---------------------------------------------------------------------------|
-| mainClass         | true  | 启动类名 |                                           | com.example.nativedemo.NativeDemoApplication                                                                     |

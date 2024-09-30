@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/what/ecosystem/serialization/hessian/
     - /en/overview/what/ecosystem/serialization/hessian/
-description: "本文介绍 Hessian 序列化"
+description: "This article introduces Hessian serialization"
 linkTitle: Hessian
 title: Hessian
 type: docs
@@ -11,21 +11,20 @@ weight: 2
 
 
 
-## 1 介绍
+## 1 Introduction
 
-Hessian序列化是一种支持动态类型、跨语言、基于对象传输的网络协议，Java对象序列化的二进制流可以被其他语言（如，c++，python）。特性如下：
+Hessian serialization is a network protocol that supports dynamic typing, cross-language, and object-based transfer. The binary stream of Java object serialization can be used by other languages (such as C++, Python). Its features include:
 
-1. 自描述序列化类型。不依赖外部描述文件或者接口定义，用一个字节表示常用的基础类型，极大缩短二进制流。
-2. 语言无关，支持脚本语言
-3. 协议简单，比Java原生序列化高效
-4. 相比hessian1，hessian2中增加了压缩编码，其序列化二进制流大小是Java序列化的50%，序列化耗时是Java序列化的30%，反序列化耗时是Java序列化的20%。
+1. Self-describing serialization types. It does not rely on external description files or interface definitions and uses one byte to represent common basic types, significantly shortening the binary stream.
+2. Language-independent, supports scripting languages.
+3. Simple protocol, more efficient than Java native serialization.
+4. Compared to Hessian1, Hessian2 adds compressed encoding, the size of its serialized binary stream is 50% of Java serialization, serialization time is 30% of Java serialization, and deserialization time is 20% of Java serialization.
 
-## 2 使用方式
+## 2 Usage
 
-在 Dubbo 框架中，当使用 dubbo 通信协议时，默认使用 Hessian2 作为序列化。
+In the Dubbo framework, when using the Dubbo communication protocol, Hessian2 is used as the default serialization.
 
-### 2.1 配置启用
-
+### 2.1 Configuration
 
 ```yaml
 # application.yml (Spring Boot)
@@ -33,7 +32,7 @@ dubbo:
  protocol:
    serialization: hessian2
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.serialization=hessian2
@@ -44,7 +43,7 @@ dubbo.consumer.serialization=hessian2
 # or
 dubbo.reference.com.demo.DemoService.serialization=hessian2
 ```
-或
+or
 ```xml
 <dubbo:protocol serialization="hessian2" />
 
@@ -54,4 +53,5 @@ dubbo.reference.com.demo.DemoService.serialization=hessian2
         <!-- or -->
 <dubbo:reference interface="xxx" serialization="hessian2" />
 ```
+
 

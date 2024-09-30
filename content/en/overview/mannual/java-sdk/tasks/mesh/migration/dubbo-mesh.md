@@ -2,134 +2,134 @@
 aliases:
     - /en/overview/tasks/mesh/migration/dubbo-mesh/
     - /en/overview/tasks/mesh/migration/dubbo-mesh/
-description: 本示例演示了如何使用 Istio+Envoy 的 Service Mesh 部署模式开发 Dubbo3 服务。Dubbo3 服务使用 Triple 作为通信协议，通信过程经过 Envoy 数据面拦截，同时使用标准 Istio 的流量治理能力治理 Dubbo。
-linkTitle: 地址同步
-title: 地址同步
+description: This example demonstrates how to develop Dubbo3 services using the Service Mesh deployment model of Istio+Envoy. The Dubbo3 service uses Triple as the communication protocol, and communication is intercepted through the Envoy data plane, while governance on Dubbo is achieved using standard Istio traffic management capabilities.
+linkTitle: Address Synchronization
+title: Address Synchronization
 type: docs
 weight: 1
 ---
 
 
 
-遵循以下步骤，可以轻松掌握如何开发符合 Service Mesh 架构的 Dubbo 服务，并将其部署到 Kubernetes 并接入 Istio 的流量治理体系。在此查看 [完整示例源码](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s)
+By following these steps, you can easily master how to develop Dubbo services that comply with the Service Mesh architecture and deploy them to Kubernetes while integrating with Istio's traffic management system. Here you can view the [complete example source code](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s).
 
-## 1 总体目标
+## 1 Overall Goal
 
-* 部署 Dubbo 应用到 Kubernetes
-* Istio 自动注入 Envoy 并实现流量拦截
-* 基于 Istio 规则进行流量治理
+* Deploy Dubbo applications to Kubernetes
+* Istio automatically injects Envoy and implements traffic interception
+* Implement traffic governance based on Istio rules
 
-## 2 基本流程与工作原理
-这个示例演示了如何将 Dubbo 开发的应用部署在 Istio 体系下，以实现 Envoy 对 Dubbo 服务的自动代理，示例总体架构如下图所示。
+## 2 Basic Process and Working Principle
+This example demonstrates how to deploy applications developed with Dubbo under the Istio framework to achieve automatic proxying of Dubbo services by Envoy. The overall architecture of the example is shown in the figure below.
 
 ![thinsdk](/imgs/v3/mesh/thinsdk-envoy.png)
 
-完成示例将需要的步骤如下：
+The steps needed to complete the example are as follows:
 
-1. 创建一个 Dubbo 应用( [dubbo-samples-mesh-k8s](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s) )
-2. 构建容器镜像并推送到镜像仓库（ [本示例官方镜像](https://hub.docker.com/r/apache/dubbo-demo) ）
-3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes 并验证 Envoy 代理注入成功
-4. 验证 Envoy 发现服务地址、正常拦截 RPC 流量并实现负载均衡
-5. 基于 Istio VirtualService 实现按比例流量转发
+1. Create a Dubbo application ([dubbo-samples-mesh-k8s](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s))
+2. Build the container image and push it to the image repository ([official image for this example](https://hub.docker.com/r/apache/dubbo-demo))
+3. Deploy the Dubbo Provider and Dubbo Consumer to Kubernetes and verify that the Envoy proxy has been successfully injected
+4. Verify that Envoy discovers the service address, properly intercepts RPC traffic, and implements load balancing
+5. Implement proportional traffic forwarding based on Istio VirtualService
 
-## 3 详细步骤
+## 3 Detailed Steps
 
-### 3.1 环境要求
+### 3.1 Environment Requirements
 
-请确保本地安装如下环境，以提供容器运行时、Kubernetes集群及访问工具
+Please ensure the following environments are installed locally to provide container runtime, Kubernetes cluster, and access tools:
 
 * [Docker](https://www.docker.com/get-started/)
 * [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 * [Kubectl](https://kubernetes.io/docs/tasks/tools/)
 * [Istio](https://istio.io/latest/docs/setup/getting-started/)
-* [Kubens(optional)](https://github.com/ahmetb/kubectx)
+* [Kubens (optional)](https://github.com/ahmetb/kubectx)
 
-通过以下命令启动本地 Kubernetes 集群
+Start the local Kubernetes cluster with the following command:
 
 ```shell
 minikube start
 ```
 
-通过 kubectl 检查集群正常运行，且 kubectl 绑定到默认本地集群
+Check that the cluster is running properly and that kubectl is bound to the default local cluster:
 
 ```shell
 kubectl cluster-info
 ```
 
-### 3.2 创建独立命名空间并开启自动注入
+### 3.2 Create a Separate Namespace and Enable Automatic Injection
 
-通过以下命令为示例项目创建独立的 Namespace `dubbo-demo`，同时开启 sidecar 自动注入。
+Run the following commands to create a separate Namespace `dubbo-demo` for the example project and enable sidecar automatic injection.
 
 ```shell
-# 初始化命名空间
+# Initialize namespace
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/Namespace.yml
 
-# 切换命名空间
+# Switch namespace
 kubens dubbo-demo
 
-# dubbo-demo 开启自动注入
+# Enable automatic injection for dubbo-demo
 kubectl label namespace dubbo-demo istio-injection=enabled
 
 ```
 
-### 3.3 部署到 Kubernetes
+### 3.3 Deploy to Kubernetes
 
-#### 3.3.1 部署 Provider
+#### 3.3.1 Deploy Provider
 
 ```shell
-# 部署 Service
+# Deploy Service
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Service.yml
 
-# 部署 Deployment
+# Deploy Deployment
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Deployment.yml
 ```
 
-以上命令创建了一个名为 `dubbo-samples-mesh-provider` 的 Service，注意这里的 service name 与项目中的 dubbo 应用名是一样的。
+The above commands create a Service named `dubbo-samples-mesh-provider`. Note that the service name here is the same as the Dubbo application name in the project.
 
-接着 Deployment 部署了一个 2 副本的 pod 实例，至此 Provider 启动完成。
+Next, the Deployment deploys a pod instance with 2 replicas, completing the Provider startup.
 
-可以通过如下命令检查启动日志。
+You can check the startup logs with the following commands:
 
 ```shell
-# 查看 pod 列表
+# View pod list
 kubectl get pods -l app=dubbo-samples-mesh-provider
 
-# 查看 pod 部署日志
+# View pod deployment logs
 kubectl logs your-pod-id
 ```
 
-这时 pod 中应该有一个 dubbo provider 容器实例，同时还有一个 Envoy Sidecar 容器实例。
+At this point, there should be a Dubbo provider container instance in the pod, along with an Envoy Sidecar container instance.
 
-#### 3.3.2 部署 Consumer
+#### 3.3.2 Deploy Consumer
 
 ```shell
-# 部署 Service
+# Deploy Service
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/consumer/Service.yml
 
-# 部署 Deployment
+# Deploy Deployment
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/consumer/Deployment.yml
 ```
 
-部署 consumer 与 provider 是一样的，这里也保持了 K8S Service 与 Dubbo consumer application name(在 [dubbo.properties](https://github.com/apache/dubbo-samples/blob/master/3-extensions/registry//dubbo-samples-mesh-k8s/dubbo-samples-mesh-consumer/src/main/resources/spring/dubbo-consumer.properties) 中定义) 一致： `dubbo.application.name=dubbo-samples-mesh-consumer`。
+Deploying the consumer is the same as the provider, with the K8S Service and Dubbo consumer application name (defined in [dubbo.properties](https://github.com/apache/dubbo-samples/blob/master/3-extensions/registry//dubbo-samples-mesh-k8s/dubbo-samples-mesh-consumer/src/main/resources/spring/dubbo-consumer.properties)) kept consistent: `dubbo.application.name=dubbo-samples-mesh-consumer`.
 
-> Dubbo Consumer 服务声明中还指定了消费的 Provider 服务（应用）名 `@DubboReference(version = "1.0.0", providedBy = "dubbo-samples-mesh-provider", lazy = true)`
+> The Dubbo Consumer service declaration also specifies the provider's service (application) name as `@DubboReference(version = "1.0.0", providedBy = "dubbo-samples-mesh-provider", lazy = true)`
 
-### 3.4 检查 Provider 和 Consumer 正常通信
+### 3.4 Check Normal Communication Between Provider and Consumer
 
-继执行 3.3 步骤后， 检查启动日志，查看 consumer 完成对 provider 服务的消费。
+After executing step 3.3, check the startup logs to see if the consumer has finished consuming the provider service.
 
 ```shell
-# 查看 pod 列表
+# View pod list
 kubectl get pods -l app=dubbo-samples-mesh-consumer
 
-# 查看 pod 部署日志
+# View pod deployment logs
 kubectl logs your-pod-id
 
-# 查看 pod isitio-proxy 日志
+# View pod istio-proxy logs
 kubectl logs your-pod-id -c istio-proxy
 ```
 
-可以看到 consumer pod 日志输出如下( Triple 协议被 Envoy 代理负载均衡):
+You can see that the consumer pod log outputs as follows (Triple protocol is load balanced by Envoy):
 
 ```bash
 ==================== dubbo invoke 0 end ====================
@@ -140,7 +140,7 @@ kubectl logs your-pod-id -c istio-proxy
 
 ```
 
-consumer istio-proxy 日志输出如下:
+The logs output from the consumer istio-proxy is as follows:
 
 ```shell
 [2022-07-15T05:35:14.418Z] "POST /org.apache.dubbo.samples.Greeter/greet HTTP/2" 200
@@ -149,7 +149,7 @@ consumer istio-proxy 日志输出如下:
 outbound|50052||dubbo-samples-mesh-provider.dubbo-demo.svc.cluster.local 172.17.0.7:52768 10.101.172.129:50052 172.17.0.7:38488 - default
 ```
 
-可以看到 provider pod 日志输出如下:
+You can see that the provider pod logs output as follows:
 
 ```shell
 [10/08/22 07:08:47:047 UTC] tri-protocol-50052-thread-8  INFO impl.GreeterImpl: Server test dubbo tri mesh received greet request name: "service mesh"
@@ -157,7 +157,7 @@ outbound|50052||dubbo-samples-mesh-provider.dubbo-demo.svc.cluster.local 172.17.
 [10/08/22 07:08:57:057 UTC] tri-protocol-50052-thread-9  INFO impl.GreeterImpl: Server test dubbo tri mesh received greet request name: "service mesh"
 ```
 
-provider istio-proxy 日志输出如下:
+The logs output from the provider istio-proxy is as follows:
 
 ```shell
 [2022-07-15T05:25:34.061Z] "POST /org.apache.dubbo.samples.Greeter/greet HTTP/2" 200
@@ -167,19 +167,21 @@ provider istio-proxy 日志输出如下:
   outbound_.50052_._.dubbo-samples-mesh-provider.dubbo-demo.svc.cluster.local default
 ```
 
-### 3.5 流量治理 - VirtualService 实现按比例流量转发
+### 3.5 Traffic Management - VirtualService for Proportional Traffic Forwarding
 
-部署 v2 版本的 demo provider
+Deploy the v2 version of the demo provider:
+
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/provider/Deployment-v2.yml
 ```
 
-设置 VirtualService 与 DestinationRule，观察流量按照 4:1 的比例分别被引导到 provider v1 与 provider v2 版本。
+Set up VirtualService and DestinationRule, observe traffic being directed to provider v1 and provider v2 versions in a ratio of 4:1:
+
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3-extensions/registry/dubbo-samples-mesh-k8s/deploy/traffic/virtual-service.yml
 ```
 
-从消费端日志输出中，观察流量分布效果如下图：
+From the consumer's log output, observe the traffic distribution effect as shown in the figure below:
 
 ```java
 ==================== dubbo invoke 100 end ====================
@@ -211,19 +213,17 @@ kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/3
 
 ==================== dubbo invoke 109 end ====================
 [10/08/22 07:16:44:044 UTC] main  INFO action.GreetingServiceConsumer: consumer Unary reply <-message: "hello,service mesh, response from provider-v1: 172.18.96.18:50052, client: 172.18.96.18, local: dubbo-samples-mesh-provider, remote: null, isProviderSide: true"
-
-
 ```
 
-### 3.6 查看 dashboard
-Istio 官网查看 [如何启动 dashboard](https://istio.io/latest/docs/setup/getting-started/#dashboard)。
+### 3.6 View Dashboard
+Refer to the Istio website for [how to start the dashboard](https://istio.io/latest/docs/setup/getting-started/#dashboard).
 
-## 4 修改示例
+## 4 Modify Example
 
-> 1. 修改示例并非必须步骤，本小节是为想要调整代码并查看部署效果的读者准备的。
-> 2. 注意项目源码存储路径一定是英文，否则 protobuf 编译失败。
+> 1. Modifying the example is not a mandatory step. This section is prepared for readers who want to adjust the code and observe the deployment effects.
+> 2. Note that the project source code storage path must be in English; otherwise, protobuf compilation will fail.
 
-修改 Dubbo Provider 配置 `dubbo-provider.properties`
+Modify Dubbo Provider configuration in `dubbo-provider.properties`.
 
 ```properties
 # provider
@@ -233,11 +233,11 @@ dubbo.registry.address=N/A
 dubbo.protocol.name=tri
 dubbo.protocol.port=50052
 dubbo.application.qosEnable=true
-# 为了使 Kubernetes 集群能够正常访问到探针，需要开启 QOS 允许远程访问，此操作有可能带来安全风险，请仔细评估后再打开
+# To allow Kubernetes cluster to access the probe normally, QOS must be enabled for remote access. This operation may pose security risks; please assess carefully before enabling.
 dubbo.application.qosAcceptForeignIp=true
 ```
 
-修改 Dubbo Consumer 配置 `dubbo-consumer.properties`
+Modify Dubbo Consumer configuration in `dubbo-consumer.properties`.
 
 ```properties
 # consumer
@@ -248,51 +248,51 @@ dubbo.protocol.name=tri
 dubbo.protocol.port=20880
 dubbo.consumer.timeout=30000
 dubbo.application.qosEnable=true
-# 为了使 Kubernetes 集群能够正常访问到探针，需要开启 QOS 允许远程访问，此操作有可能带来安全风险，请仔细评估后再打开
+# To allow Kubernetes cluster to access the probe normally, QOS must be enabled for remote access. This operation may pose security risks; please assess carefully before enabling.
 dubbo.application.qosAcceptForeignIp=true
-# 标记开启 mesh sidecar 代理模式
+# Mark to enable mesh sidecar proxy mode
 dubbo.consumer.meshEnable=true
 ```
 
-完成代码修改后，通过项目提供的 Dockerfile 打包镜像
+After completing code modifications, package the image using the Dockerfile provided by the project.
 
 ```shell
-# 打包并推送镜像
+# Package and push the image
 mvn compile jib:build
 ```
 
-> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 apache/dubbo-demo 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
-> 可以通过直接在命令行指定 `mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth.username=x`，或者使用 docker-credential-helper.
+> The Jib plugin will automatically package and publish the image. Note that for local development, change the organization `apache/dubbo-demo` in the configuration of the Jib plugin to an organization you have permission for (including other Kubernetes manifests also need to be modified to ensure that the Kubernetes deployment is the customized image). If you encounter Jib plugin authentication issues, refer to the [relevant link](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized) for configuring Docker registry credentials.
+> You can directly specify in the command line `mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth.username=x`, or use docker-credential-helper.
 
-## 5 常用命令
+## 5 Common Commands
 
 ```shell
 # dump current Envoy configs
 kubectl exec -it ${your pod id} -c istio-proxy curl http://127.0.0.1:15000/config_dump > config_dump
 
-# 进入 istio-proxy 容器
+# Enter istio-proxy container
 kubectl exec -it ${your pod id} -c istio-proxy -- /bin/bash
 
-# 查看容器日志
+# View container logs
 kubectl logs ${your pod id} -n ${your namespace}
 
 kubectl logs ${your pod id} -n ${your namespace} -c istio-proxy
 
-# 开启自动注入sidecar
+# Enable automatic sidecar injection
 kubectl label namespace ${your namespace} istio-injection=enabled --overwrite
 
-# 关闭自动注入sidecar
+# Disable automatic sidecar injection
 kubectl label namespace ${your namespace} istio-injection=disabled --overwrite
 ```
-## 6 注意事项
-1. 示例中，生产者消费者都属于同一个namespace；如果需要调用不同的namespace的提供者，需要按如下配置(**dubbo版本>=3.1.2**)：
+## 6 Precautions
+1. In this example, both the producer and consumer belong to the same namespace; if you need to call providers from different namespaces, you need to configure as follows (**dubbo version >= 3.1.2**):
 
-注解方式：
+Annotation method:
 ```java
- @DubboReference(providedBy = "istio-demo-dubbo-producer",providerPort = 20885, providerNamespace = "istio-demo")
+ @DubboReference(providedBy = "istio-demo-dubbo-producer", providerPort = 20885, providerNamespace = "istio-demo")
 
 ```
-xml方式
+XML method
 ```xml
 <dubbo:reference id="demoService" check="true"
                   interface="org.apache.dubbo.samples.basic.api.DemoService"
@@ -300,3 +300,4 @@ xml方式
                   provided-by="istio-dubbo-producer"
                   provider-namespace="istio-demo"/>
 ```
+

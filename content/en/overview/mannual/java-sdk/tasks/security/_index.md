@@ -1,10 +1,11 @@
 ---
 aliases:
   - /en/overview/mannual/java-sdk/advanced-features-and-usage/security/
-description: 演示 Dubbo 配置安全策略的方式
+description: Demonstrating how to configure security policies in Dubbo
 hide: true
-linkTitle: 安全策略
-title: 安全策略
+linkTitle: Security Policy
+title: Security Policy
 type: docs
 weight: 12
 ---
+

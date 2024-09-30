@@ -3,61 +3,62 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/local-stub/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/local-stub/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/local-stub/
-description: 了解 Dubbo 中本地存根在客户端执行部分逻辑的使用
-linkTitle: 本地存根
-title: 本地存根
+description: Understand the use of local stubs executing part of the logic on the client side in Dubbo
+linkTitle: Local Stub
+title: Local Stub
 type: docs
 weight: 11
 ---
 
-## 特性说明：
+## Feature Description:
 
-远程服务后，客户端通常只剩下接口，而实现全在服务器端，但提供方有些时候想在客户端也执行部分逻辑。
+After invoking a remote service, the client typically only has the interface, while the implementation resides entirely on the server. However, sometimes the provider wants to execute part of the logic on the client side as well.
 
 ![/user-guide/images/stub.jpg](/imgs/user/stub.jpg)
 
-## 使用场景
-做 ThreadLocal 缓存，提前验证参数，调用失败后伪造容错数据等等，此时就需要在 API 中带上 Stub，客户端生成 Proxy 实例，会把 Proxy 通过构造函数传给 Stub [^1]，然后把 Stub 暴露给用户，Stub 可以决定要不要去调 Proxy。
+## Usage Scenarios
+For scenarios such as creating ThreadLocal caches, validating parameters in advance, or simulating fault tolerance data after a failed call, the API needs to have a Stub. The client generates a Proxy instance, which is passed to the Stub through the constructor [^1], and then the Stub is exposed to the user. The Stub can decide whether to invoke the Proxy.
 
-## 使用方式
+## Usage Method
 
-完整示例源码请参见 [dubbo-samples-stub](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-stub)
+For complete example source code, please refer to [dubbo-samples-stub](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-stub)
 
-### spring 配置文件配置
+### Spring Configuration File
 
 ```xml
 <dubbo:consumer interface="com.foo.BarService" stub="true" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:consumer interface="com.foo.BarService" stub="com.foo.BarServiceStub" />
 ```
 
-### 提供 Stub 的实现 [^2]
+### Providing Stub Implementation [^2]
 
 ```java
 package com.foo;
 public class BarServiceStub implements BarService {
-    private final BarSer    vice barService;
+    private final BarService barService;
     
-    // 构造函数传入真正的远程代理对象
+    // Constructor takes in the real remote proxy object
     public BarServiceStub(BarService barService){
         this.barService = barService;
     }
  
     public String sayHello(String name) {
-        // 此代码在客户端执行, 你可以在客户端做ThreadLocal本地缓存，或预先验证参数是否合法，等等
+        // This code runs on the client; you can create ThreadLocal local caches or validate parameters
         try {
             return barService.sayHello(name);
         } catch (Exception e) {
-            // 你可以容错，可以做任何AOP拦截事项
-            return "容错数据";
+            // You can provide fault tolerance; perform any AOP interception here
+            return "Fault tolerance data";
         }
     }
 }
 ```
 
-[^1]: Stub 必须有可传入 Proxy 的构造函数。
-[^2]: 在 interface 旁边放一个 Stub 实现，它实现 BarService 接口，并有一个传入远程 BarService 实例的构造函数。
+[^1]: The Stub must have a constructor that accepts a Proxy.
+[^2]: Place a Stub implementation next to the interface that implements the BarService interface and has a constructor that accepts the remote BarService instance.
+

@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/router/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/router/
-description: 路由扩展
-linkTitle: 路由扩展
-title: 路由扩展
+description: Router Extensions
+linkTitle: Router Extensions
+title: Router Extensions
 type: docs
 weight: 6
 ---
@@ -14,16 +14,16 @@ weight: 6
 
 
 
-## 扩展说明
+## Extension Description
 
-从多个服务提供方中选择一个进行调用。
+Select one from multiple service providers to call.
 
-## 扩展接口
+## Extension Interfaces
 
 * `org.apache.dubbo.rpc.cluster.RouterFactory`
 * `org.apache.dubbo.rpc.cluster.Router`
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.rpc.cluster.router.ScriptRouterFactory`
 * `org.apache.dubbo.rpc.cluster.router.FileRouterFactory`
@@ -34,9 +34,9 @@ weight: 6
 * `org.apache.dubbo.rpc.cluster.router.condition.config.ServiceRouterFactory`
 * `org.apache.dubbo.rpc.cluster.router.tag.TagRouterFactory`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -44,15 +44,15 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxRouterFactory.java (实现RouterFactory接口)
+                |-XxxRouterFactory.java (implements RouterFactory interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.rpc.cluster.RouterFactory (纯文本文件，内容为：xxx=com.xxx.XxxRouterFactory)
+                |-org.apache.dubbo.rpc.cluster.RouterFactory (plain text file, content: xxx=com.xxx.XxxRouterFactory)
 
 ```
 
-XxxRouterFactory.java：
+XxxRouterFactory.java:
 
 ```java
 package com.xxx;
@@ -69,8 +69,9 @@ public class XxxRouterFactory implements RouterFactory {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.rpc.cluster.RouterFactory：
+META-INF/dubbo/org.apache.dubbo.rpc.cluster.RouterFactory:
 
 ```properties
 xxx=com.xxx.XxxRouterFactory
 ```
+

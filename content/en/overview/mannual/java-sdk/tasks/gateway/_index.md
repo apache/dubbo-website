@@ -1,7 +1,7 @@
 ---
-description: "如果通过 Higress、APISIX 等网关产品解决前端 http 流量接入后端 RPC 微服务问题。"
-linkTitle: HTTP网关接入
-title: HTTP流量接入
+description: "If the issue of front-end HTTP traffic access to back-end RPC microservices is resolved through gateway products such as Higress, APISIX, etc."
+linkTitle: HTTP Gateway Access
+title: HTTP Traffic Access
 type: docs
 weight: 8
 ---

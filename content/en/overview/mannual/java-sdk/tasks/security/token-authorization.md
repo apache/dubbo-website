@@ -3,9 +3,9 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/token-authorization/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/token-authorization/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/security/token-authorization/
-description: 了解 Dubbo 权限控制的配置和使用
-linkTitle: 权限控制
-title: 权限控制
+description: Understand the configuration and usage of Dubbo permission control
+linkTitle: Permission Control
+title: Permission Control
 type: docs
 weight: 2
 ---
@@ -15,45 +15,43 @@ weight: 2
 
 
 
-## 特性说明
+## Feature Description
 
-通过令牌验证在注册中心控制权限，以决定要不要下发令牌给消费者，
-可以防止消费者绕过注册中心访问提供者，
-另外通过注册中心可灵活改变授权方式，而不需修改或升级提供者。
+Control permissions in the registry through token verification to decide whether to issue a token to consumers, which can prevent consumers from bypassing the registry to access providers. Moreover, the authorization method can be flexibly changed through the registry without modifying or upgrading the provider.
 
 ![/user-guide/images/dubbo-token.jpg](/imgs/user/dubbo-token.jpg)
 
-## 使用场景
+## Usage Scenarios
 
-在一定程度上实现客户端和服务端的可信鉴权，避免任意客户端都可以访问，降低出现安全问题的风险。
+To a certain extent, achieve trusted authentication between the client and server, preventing any client from gaining access and reducing the risk of security issues.
 
-## 使用方式
+## Usage Method
 
-### 全局设置
+### Global Settings
 
-开启令牌验证
+Enable token verification
 
 ```xml
-<!--随机token令牌，使用UUID生成-->
+<!-- Random token, generated using UUID -->
 <dubbo:provider token="true" />
 ```
 
-或
+or
 
 ```xml
-<!--固定token令牌，相当于密码-->
+<!-- Fixed token, equivalent to a password -->
 <dubbo:provider token="123456" />
 ```
-### 服务级别设置
+### Service Level Settings
 
 ```xml
-<!--随机token令牌，使用UUID生成-->
+<!-- Random token, generated using UUID -->
 <dubbo:service interface="com.foo.BarService" token="true" />
 ```
 
-或
+or
 
 ```xml
-<!--固定token令牌，相当于密码-->
+<!-- Fixed token, equivalent to a password -->
 <dubbo:service interface="com.foo.BarService" token="123456" />
 ```

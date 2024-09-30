@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/protocol/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/protocol/
-description: 协议扩展
-linkTitle: 协议扩展
-title: 协议扩展
+description: Protocol Extension
+linkTitle: Protocol Extension
+title: Protocol Extension
 type: docs
 weight: 1
 ---
@@ -14,21 +14,21 @@ weight: 1
 
 
 
-## 扩展说明
+## Extension Description
 
-RPC 协议扩展，封装远程调用细节。
+RPC protocol extension, encapsulating remote call details.
 
-契约：
+Contract:
 
-* 当用户调用 `refer()` 所返回的 `Invoker` 对象的 `invoke()` 方法时，协议需相应执行同 URL 远端 `export()` 传入的 `Invoker` 对象的 `invoke()` 方法。
-* 其中，`refer()` 返回的 `Invoker` 由协议实现，协议通常需要在此 `Invoker` 中发送远程请求，`export()` 传入的 `Invoker` 由框架实现并传入，协议不需要关心。
+* When the user calls the `invoke()` method of the `Invoker` object returned by `refer()`, the protocol should execute the `invoke()` method of the `Invoker` object passed in by remote `export()` with the same URL.
+* The `Invoker` returned by `refer()` is implemented by the protocol, which usually sends a remote request within this `Invoker`. The `Invoker` passed in by `export()` is implemented and provided by the framework, which the protocol does not need to be concerned about.
 
-{{% alert title="注意" color="primary" %}}
-* 协议不关心业务接口的透明代理，以 `Invoker` 为中心，由外层将 `Invoker` 转换为业务接口。
-* 协议不一定要是 TCP 网络通讯，比如通过共享文件，IPC 进程间通讯等。
+{{% alert title="Note" color="primary" %}}
+* The protocol does not concern itself with the transparent proxying of business interfaces; it is `Invoker` centric, with the outer layer converting `Invoker` to the business interface.
+* The protocol does not necessarily have to be TCP network communication, such as through shared files, IPC inter-process communication, etc.
 {{% /alert %}}
 
-## 扩展接口
+## Extension Interface
 
 * `org.apache.dubbo.rpc.Protocol`
 * `org.apache.dubbo.rpc.Exporter`
@@ -37,47 +37,47 @@ RPC 协议扩展，封装远程调用细节。
 ```java
 public interface Protocol {
     /**
-     * 暴露远程服务：<br>
-     * 1. 协议在接收请求时，应记录请求来源方地址信息：RpcContext.getContext().setRemoteAddress();<br>
-     * 2. export()必须是幂等的，也就是暴露同一个URL的Invoker两次，和暴露一次没有区别。<br>
-     * 3. export()传入的Invoker由框架实现并传入，协议不需要关心。<br>
+     * Expose remote service:<br>
+     * 1. The protocol, upon receiving requests, should record the request source address information: RpcContext.getContext().setRemoteAddress();<br>
+     * 2. export() must be idempotent, meaning exposing the same URL's Invoker twice is the same as exposing it once.<br>
+     * 3. The Invoker passed to export() is provided by the framework, and the protocol does not need to be concerned.<br>
      * 
-     * @param <T> 服务的类型
-     * @param invoker 服务的执行体
-     * @return exporter 暴露服务的引用，用于取消暴露
-     * @throws RpcException 当暴露服务出错时抛出，比如端口已占用
+     * @param <T> Service type
+     * @param invoker Service execution body
+     * @return exporter Reference to exposed service for cancellation
+     * @throws RpcException Thrown when an error occurs in exposing the service, such as port occupied.
      */
     <T> Exporter<T> export(Invoker<T> invoker) throws RpcException;
  
     /**
-     * 引用远程服务：<br>
-     * 1. 当用户调用refer()所返回的Invoker对象的invoke()方法时，协议需相应执行同URL远端export()传入的Invoker对象的invoke()方法。<br>
-     * 2. refer()返回的Invoker由协议实现，协议通常需要在此Invoker中发送远程请求。<br>
-     * 3. 当url中有设置check=false时，连接失败不能抛出异常，需内部自动恢复。<br>
+     * Reference a remote service:<br>
+     * 1. When the user calls invoke() on the Invoker object returned by refer(), the protocol should execute the invoke() method of the Invoker object passed in by remote export() with the same URL.<br>
+     * 2. The Invoker returned by refer() is implemented by the protocol, typically sending the remote request within this Invoker.<br>
+     * 3. When check=false is set in the URL, connection failures should not throw exceptions but should automatically recover internally.<br>
      * 
-     * @param <T> 服务的类型
-     * @param type 服务的类型
-     * @param url 远程服务的URL地址
-     * @return invoker 服务的本地代理
-     * @throws RpcException 当连接服务提供方失败时抛出
+     * @param <T> Service type
+     * @param type Service type
+     * @param url Remote service's URL
+     * @return invoker Local proxy of the service
+     * @throws RpcException Thrown when connection to the service provider fails.
      */
     <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException;
  
 }
 ```
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
-<!-- 声明协议，如果没有配置id，将以name为id -->
+<!-- Declare protocol, if no id is configured, name will be used as id -->
 <dubbo:protocol id="xxx1" name="xxx" />
-<!-- 引用协议，如果没有配置protocol属性，将在ApplicationContext中自动扫描protocol配置 -->
+<!-- Reference protocol, if no protocol attribute is configured, it will automatically scan protocol configuration in ApplicationContext -->
 <dubbo:service protocol="xxx1" />
-<!-- 引用协议缺省值，当<dubbo:service>没有配置prototol属性时，使用此配置 -->
+<!-- Default value for referenced protocol, used when <dubbo:service> does not configure protocol attribute -->
 <dubbo:provider protocol="xxx1" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol`
 * `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol`
@@ -86,9 +86,9 @@ public interface Protocol {
 * `org.apache.dubbo.rpc.protocol.http.hessian.HessianProtocol`
 * `org.apache.dubbo.rpc.support.MockProtocol`
 
-## 扩展示例
+## Extension Example
 
-Maven项目结构：
+Maven project structure:
 
 ```
 src
@@ -96,16 +96,16 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxProtocol.java (实现Protocol接口)
-                |-XxxExporter.java (实现Exporter接口)
-                |-XxxInvoker.java (实现Invoker接口)
+                |-XxxProtocol.java (implements Protocol interface)
+                |-XxxExporter.java (implements Exporter interface)
+                |-XxxInvoker.java (implements Invoker interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.rpc.Protocol (纯文本文件，内容为：xxx=com.xxx.XxxProtocol)
+                |-org.apache.dubbo.rpc.Protocol (plain text file, content: xxx=com.xxx.XxxProtocol)
 ```
 
-XxxProtocol.java：
+XxxProtocol.java:
 
 ```java
 package com.xxx;
@@ -122,7 +122,7 @@ public class XxxProtocol implements Protocol {
 }
 ```
 
-XxxExporter.java：
+XxxExporter.java:
 
 ```java
 package com.xxx;
@@ -141,7 +141,7 @@ public class XxxExporter<T> extends AbstractExporter<T> {
 }
 ```
 
-XxxInvoker.java：
+XxxInvoker.java:
 
 ```java
 package com.xxx;
@@ -165,3 +165,4 @@ META-INF/dubbo/org.apache.dubbo.rpc.Protocol：
 ```properties
 xxx=com.xxx.XxxProtocol
 ```
+

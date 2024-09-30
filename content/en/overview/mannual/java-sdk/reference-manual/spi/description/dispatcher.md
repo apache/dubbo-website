@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/dispatcher/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/dispatcher/
-description: 消息派发扩展
-linkTitle: 消息派发扩展
-title: 消息派发扩展
+description: Message Dispatch Extension
+linkTitle: Message Dispatch Extension
+title: Message Dispatch Extension
 type: docs
 weight: 14
 ---
@@ -14,23 +14,23 @@ weight: 14
 
 
 
-## 扩展说明
+## Extension Description
 
-通道信息派发器，用于指定线程池模型。
+Channel information dispatcher, used to specify thread pool model.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.remoting.Dispatcher`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol dispatcher="xxx" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置dispatcher属性时，使用此配置 -->
+<!-- Default value setting. When <dubbo:protocol> does not configure the dispatcher attribute, this configuration is used -->
 <dubbo:provider dispatcher="xxx" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.remoting.transport.dispatcher.all.AllDispatcher`
 * `org.apache.dubbo.remoting.transport.dispatcher.direct.DirectDispatcher`
@@ -38,9 +38,9 @@ weight: 14
 * `org.apache.dubbo.remoting.transport.dispatcher.execution.ExecutionDispatcher`
 * `org.apache.dubbo.remoting.transport.dispatcher.connection.ConnectionOrderedDispatcher`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -48,11 +48,11 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxDispatcher.java (实现Dispatcher接口)
+                |-XxxDispatcher.java (implements Dispatcher interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.remoting.Dispatcher (纯文本文件，内容为：xxx=com.xxx.XxxDispatcher)
+                |-org.apache.dubbo.remoting.Dispatcher (plain text file, content: xxx=com.xxx.XxxDispatcher)
 ```
 
 XxxDispatcher.java：

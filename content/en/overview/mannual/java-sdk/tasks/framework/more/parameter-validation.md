@@ -2,18 +2,18 @@
 aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/parameter-validation/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/service/parameter-validation/
-    - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/parameter-validation/
-description: 在 Dubbo 中进行参数校验
-linkTitle: 参数校验
-title: 参数校验
+    - /en/overview/manual/java-sdk/advanced-features-and-usage/service/parameter-validation/
+description: Parameter validation in Dubbo
+linkTitle: Parameter Validation
+title: Parameter Validation
 type: docs
 weight: 100
 ---
 
-## 特性说明
-参数验证功能是基于 [JSR303](https://jcp.org/en/jsr/detail?id=303) 实现的，用户只需标识 JSR303 标准的验证 annotation，并通过声明 filter 来实现验证。
+## Feature Description
+The parameter validation feature is implemented based on [JSR303](https://jcp.org/en/jsr/detail?id=303). Users only need to specify validation annotations from the JSR303 standard and implement validation through a declared filter.
 
-####  Maven 依赖
+#### Maven Dependency
 
 ```xml
 <dependency>
@@ -28,16 +28,16 @@ weight: 100
 </dependency>
 ```
 
-## 使用场景
+## Usage Scenario
 
-服务端在向外提供接口服务时，解决各种接口参数校验问题。
+The server addresses various interface parameter validation issues when providing interface services externally.
 
-> 参考用例
+> Reference Case
 [https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-validation](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-validation)
 
-## 使用方式
+## Usage Method
 
-### 参数标注示例
+### Parameter Annotation Example
 
 ```java
 import java.io.Serializable;
@@ -54,22 +54,22 @@ import javax.validation.constraints.Size;
 public class ValidationParameter implements Serializable {
     private static final long serialVersionUID = 7158911668568000392L;
  
-    @NotNull // 不允许为空
-    @Size(min = 1, max = 20) // 长度或大小范围
+    @NotNull // Cannot be null
+    @Size(min = 1, max = 20) // Length or size range
     private String name;
  
-    @NotNull(groups = ValidationService.Save.class) // 保存时不允许为空，更新时允许为空 ，表示不更新该字段
+    @NotNull(groups = ValidationService.Save.class) // Cannot be null when saving, can be null when updating, indicating no update to this field
     @Pattern(regexp = "^\\s*\\w+(?:\\.{0,1}[\\w-]+)*@[a-zA-Z0-9]+(?:[-.][a-zA-Z0-9]+)*\\.[a-zA-Z]+\\s*$")
     private String email;
  
-    @Min(18) // 最小值
-    @Max(100) // 最大值
+    @Min(18) // Minimum value
+    @Max(100) // Maximum value
     private int age;
  
-    @Past // 必须为一个过去的时间
+    @Past // Must be a past date
     private Date loginDate;
  
-    @Future // 必须为一个未来的时间
+    @Future // Must be a future date
     private Date expiryDate;
  
     public String getName() {
@@ -114,23 +114,23 @@ public class ValidationParameter implements Serializable {
 }
 ```
 
-### 分组验证示例
+### Group Validation Example
 
 ```java
-public interface ValidationService { // 缺省可按服务接口区分验证场景，如：@NotNull(groups = ValidationService.class)   
-    @interface Save{} // 与方法同名接口，首字母大写，用于区分验证场景，如：@NotNull(groups = ValidationService.Save.class)，可选
+public interface ValidationService { // Default can differentiate validation scenarios by service interface, e.g., @NotNull(groups = ValidationService.class)   
+    @interface Save{} // Interface name same as method, capitalized first letter, used to differentiate validation scenarios, e.g., @NotNull(groups = ValidationService.Save.class), optional
     void save(ValidationParameter parameter);
     void update(ValidationParameter parameter);
 }
 ```
 
-### 关联验证示例
+### Related Validation Example
 
 ```java
 import javax.validation.GroupSequence;
  
 public interface ValidationService {   
-    @GroupSequence(Update.class) // 同时验证Update组规则
+    @GroupSequence(Update.class) // Validate Update group rules simultaneously
     @interface Save{}
     void save(ValidationParameter parameter);
  
@@ -139,33 +139,33 @@ public interface ValidationService {
 }
 ```
 
-### 参数验证示例
+### Parameter Validation Example
 
 ```java
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
  
 public interface ValidationService {
-    void save(@NotNull ValidationParameter parameter); // 验证参数不为空
-    void delete(@Min(1) int id); // 直接对基本类型参数验证
+    void save(@NotNull ValidationParameter parameter); // Validate parameter is not null
+    void delete(@Min(1) int id); // Directly validate basic type parameter
 }
 ```
 
-### 在客户端验证参数
+### Validate Parameters on Client
 
 ```xml
 <dubbo:reference id="validationService" interface="org.apache.dubbo.examples.validation.api.ValidationService" validation="true" />
 ```
 
-### 在服务器端验证参数
+### Validate Parameters on Server
 
 ```xml
 <dubbo:service interface="org.apache.dubbo.examples.validation.api.ValidationService" ref="validationService" validation="true" />
 ```
 
-> **Dubbo 默认支持 hibernate-validator 版本 <=6.x，若使用 hibernate-validator 7.x 版本，请将 validation 参数声明为 jvalidationNew**
+> **Dubbo supports hibernate-validator version <=6.x by default. If using hibernate-validator version 7.x, declare the validation parameter as jvalidationNew.**
 
-### 验证异常信息
+### Validation Exception Information
 
 ```java
 import javax.validation.ConstraintViolationException;
@@ -188,13 +188,14 @@ public class ValidationConsumer {
             parameter = new ValidationParameter();
             validationService.save(parameter);
             System.out.println("Validation ERROR");
-        } catch (RpcException e) { // 抛出的是RpcException
-            ConstraintViolationException ve = (ConstraintViolationException) e.getCause(); // 里面嵌了一个ConstraintViolationException
-            Set<ConstraintViolation<?>> violations = ve.getConstraintViolations(); // 可以拿到一个验证错误详细信息的集合
+        } catch (RpcException e) { // Throws RpcException
+            ConstraintViolationException ve = (ConstraintViolationException) e.getCause(); // Inside is a nested ConstraintViolationException
+            Set<ConstraintViolation<?>> violations = ve.getConstraintViolations(); // Can get a collection of detailed validation error information
             System.out.println(violations);
         }
     } 
 }
 ```
 
-> **验证方式可扩展，扩展方式参见开发者手册中的 [验证扩展](/en/overview/mannual/java-sdk/reference-manual/spi/description/validation)**
+> **Validation methods are extensible. See the developer manual for [validation extensions](/en/overview/manual/java-sdk/reference-manual/spi/description/validation) for more information.**
+

@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/networker/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/networker/
-description: 组网扩展
-linkTitle: 组网扩展
-title: 组网扩展
+description: Networking Extension
+linkTitle: Networking Extension
+title: Networking Extension
 type: docs
 weight: 19
 ---
@@ -14,30 +14,30 @@ weight: 19
 
 
 
-## 扩展说明
+## Extension Description
 
-对等网络节点组网器。
+Peer network node networker.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.remoting.p2p.Networker`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol networker="xxx" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置networker属性时，使用此配置 -->
+<!-- Default setting. When <dubbo:protocol> does not configure the networker attribute, use this configuration -->
 <dubbo:provider networker="xxx" /> 
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.remoting.p2p.support.MulticastNetworker`
 * `org.apache.dubbo.remoting.p2p.support.FileNetworker`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -45,14 +45,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxNetworker.java (实现Networker接口)
+                |-XxxNetworker.java (implements Networker interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.remoting.p2p.Networker (纯文本文件，内容为：xxx=com.xxx.XxxNetworker)
+                |-org.apache.dubbo.remoting.p2p.Networker (plain text file, content: xxx=com.xxx.XxxNetworker)
 ```
 
-XxxNetworker.java：
+XxxNetworker.java:
 
 ```java
 package com.xxx;
@@ -66,8 +66,9 @@ public class XxxNetworker implements Networker {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.remoting.p2p.Networker：
+META-INF/dubbo/org.apache.dubbo.remoting.p2p.Networker:
 
 ```properties
 xxx=com.xxx.XxxNetworker
 ```
+

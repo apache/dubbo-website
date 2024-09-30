@@ -3,9 +3,9 @@ aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/security/auth/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/security/auth/
-description: 了解 Dubbo 服务鉴权
-linkTitle: 服务鉴权
-title: 服务鉴权
+description: Understanding Dubbo Service Authorization
+linkTitle: Service Authorization
+title: Service Authorization
 type: docs
 weight: 23
 ---
@@ -15,28 +15,28 @@ weight: 23
 
 
 
-## 特性说明
+## Feature Description
 
-类似支付之类的对安全性敏感的业务可能会有限制匿名调用的需求。在加固安全性方面，2.7.5 引入了基于 AK/SK 机制的认证鉴权机制，并且引入了鉴权服务中心，主要原理是消费端在请求需要鉴权的服务时，会通过 SK、请求元数据、时间戳、参数等信息来生成对应的请求签名，通过 Dubbo 的 Attahcment 机制携带到对端进行验签，验签通过才进行业务逻辑处理。如下图所示：
+Business scenarios that are sensitive to security, such as payment, may have limitations on anonymous calls. To enhance security, version 2.7.5 introduced an authentication and authorization mechanism based on the AK/SK model, along with an authorization service center. The main principle is that the consumer client generates the corresponding request signature using SK, request metadata, timestamp, parameters, etc., when requesting a service that requires authorization. This signature is carried to the other end via Dubbo's Attachment mechanism for verification. Only after successful verification will business logic be processed. As shown in the figure below:
 
 ![img](/imgs/docsv2.7/user/examples/auth/auth.png)
 
 
-## 使用场景
-部署新服务时，使用身份验证来确保只部署正确的服务,如果部署了未经授权的服务，则使用身份验证来拒绝访问并防止使用未经授权服务。
+## Usage Scenarios
+When deploying new services, use authentication to ensure only the correct services are deployed. If unauthorized services are deployed, authentication will deny access and prevent the use of these unauthorized services.
 
-## 使用方式
+## Usage Method
 
-### 接入方式
+### Access Method
 
-1. 使用者需要在微服务站点上填写自己的应用信息，并为该应用生成唯一的证书凭证。
+1. Users need to fill in their application information on the microservice site and generate a unique certificate credential for that application.
 
-2. 之后在管理站点上提交工单，申请某个敏感业务服务的使用权限，并由对应业务管理者进行审批，审批通过之后，会生成对应的 AK/SK 到鉴权服务中心。
+2. Then submit a ticket on the management site to request access to a certain sensitive business service, which will be approved by the corresponding business manager. Once approved, corresponding AK/SK will be generated in the authorization service center.
 
-3. 导入该证书到对应的应用下，并且进行配置。配置方式也十分简单，以注解方式为例：
+3. Import the certificate into the corresponding application and configure it. The configuration is very simple; for example, using annotations:
 
-   ### 服务提供端
-   只需要设置 `service.auth` 为 true，表示该服务的调用需要鉴权认证通过。`param.sign` 为 `true` 表示需要对参数也进行校验。
+   ### Service Provider Side
+   Just set `service.auth` to true, indicating that the service call requires authentication. `param.sign` set to `true` indicates that parameters also need to be validated.
 
    ```java
    @Service(parameters = {"service.auth","true","param.sign","true"})
@@ -45,7 +45,8 @@ weight: 23
 
    ```
 
-   ### 服务消费端
-   只需要配置好对应的证书等信息即可，之后会自动地在对这些需要认证的接口发起调用前进行签名操作，通过与鉴权服务的交互，用户无需在代码中配置 AK/SK 这些敏感信息，并且在不重启应用的情况下刷新 AK/SK，达到权限动态下发的目的。
+   ### Service Consumer Side
+   Just configure the corresponding certificate and other information; then it will automatically perform signature operations before invoking these authenticated interfaces. The user does not need to configure sensitive information like AK/SK in the code and can refresh AK/SK without restarting the application, achieving dynamic permission distribution.
 
-> 该方案目前已经提交给 Dubbo 开源社区，并且完成了基本框架的合并，除了 AK/SK 的鉴权方式之外，通过 SPI 机制支持用户可定制化的鉴权认证以及适配公司内部基础设施的密钥存储。
+> This solution has currently been submitted to the Dubbo open-source community and has completed the basic framework integration. In addition to the AK/SK authorization method, it supports customizable authentication through the SPI mechanism and adapts to the company's internal infrastructure for key storage.
+

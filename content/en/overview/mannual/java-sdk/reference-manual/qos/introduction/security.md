@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/security/
     - /en/docs3-v2/java-sdk/reference-manual/qos/security/
-description: 序列化安全审计
-linkTitle: 序列化安全审计
-title: 序列化安全审计
+description: Serialization Security Audit
+linkTitle: Serialization Security Audit
+title: Serialization Security Audit
 type: docs
 weight: 9
 ---
@@ -14,11 +14,11 @@ weight: 9
 
 
 
-Dubbo 支持通过 QoS 命令实时查看当前的配置信息以及可信/不可信类列表。目前共支持两个命令：`serializeCheckStatus` 查看当前配置信息，`serializeWarnedClasses` 查看实时的告警列表。
+Dubbo supports real-time viewing of current configuration information and the list of trusted/untrusted classes through QoS commands. Currently, two commands are supported: `serializeCheckStatus` to view current configuration information, and `serializeWarnedClasses` to view the real-time warning list.
 
-### `serializeCheckStatus` 命令
+### `serializeCheckStatus` Command
 
-通过控制台直接访问：
+Access directly through the console:
 ```bash
 > telnet 127.0.0.1 22222
 Trying 127.0.0.1...
@@ -43,15 +43,15 @@ DisAllowedPrefix:
 dubbo>
 ```
 
-通过 http 请求 json 格式结果：
+By HTTP request for JSON format results:
 ```bash
 > curl http://127.0.0.1:22222/serializeCheckStatus      
 {"checkStatus":"WARN","allowedPrefix":[...],"checkSerializable":true,"disAllowedPrefix":[...]}
 ```
 
-### `serializeWarnedClasses` 命令
+### `serializeWarnedClasses` Command
 
-通过控制台直接访问：
+Access directly through the console:
 ```bash
 > telnet 127.0.0.1 22222                          
 Trying 127.0.0.1...
@@ -72,13 +72,14 @@ org.apache.dubbo.samples.NotSerializable
 dubbo>
 ```
 
-通过 http 请求 json 格式结果：
+By HTTP request for JSON format results:
 ```bash
 > curl http://127.0.0.1:22222/serializeWarnedClasses
 {"warnedClasses":["io.dubbo.test2.NotSerializable","org.apache.dubbo.samples.NotSerializable","io.dubbo.test.NotSerializable","io.dubbo.test2.OthersSerializable"]}
 ```
-{{% alert title="注意" color="primary" %}}
-建议及时关注 `serializeWarnedClasses` 的结果，通过返回结果是否非空来判断是否受到攻击。
+{{% alert title="Note" color="primary" %}}
+It is recommended to pay attention to the results of `serializeWarnedClasses` promptly and determine if an attack is occurring by checking whether the returned result is non-empty.
 
-[Dubbo 类检查机制](/en/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/)。
+[Dubbo Class Check Mechanism](/en/overview/mannual/java-sdk/advanced-features-and-usage/security/class-check/)。
 {{% /alert %}}
+

@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/exchanger/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/exchanger/
-description: 信息交换扩展
-linkTitle: 信息交换扩展
-title: 信息交换扩展
+description: Information Exchange Extension
+linkTitle: Information Exchange Extension
+title: Information Exchange Extension
 type: docs
 weight: 18
 ---
@@ -14,31 +14,31 @@ weight: 18
 
 
 
-## 扩展说明
+## Extension Description
 
-基于传输层之上，实现 Request-Response 信息交换语义。
+Implement the Request-Response information exchange semantics based on the transport layer.
 
-## 扩展接口
+## Extension Interfaces
 
 * `org.apache.dubbo.remoting.exchange.Exchanger`
 * `org.apache.dubbo.remoting.exchange.ExchangeServer`
 * `org.apache.dubbo.remoting.exchange.ExchangeClient`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol exchanger="xxx" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置exchanger属性时，使用此配置 -->
+<!-- Default value setting, when <dubbo:protocol> does not configure the exchanger attribute, this configuration is used -->
 <dubbo:provider exchanger="xxx" />
 ```
 
-## 已知扩展
+## Known Extension
 
 `org.apache.dubbo.remoting.exchange.exchanger.HeaderExchanger`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -46,13 +46,13 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxExchanger.java (实现Exchanger接口)
-                |-XxxExchangeServer.java (实现ExchangeServer接口)
-                |-XxxExchangeClient.java (实现ExchangeClient接口)
+                |-XxxExchanger.java (implements Exchanger interface)
+                |-XxxExchangeServer.java (implements ExchangeServer interface)
+                |-XxxExchangeClient.java (implements ExchangeClient interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.remoting.exchange.Exchanger (纯文本文件，内容为：xxx=com.xxx.XxxExchanger)
+                |-org.apache.dubbo.remoting.exchange.Exchanger (plain text file, content: xxx=com.xxx.XxxExchanger)
 ```
 
 XxxExchanger.java：
@@ -103,3 +103,4 @@ META-INF/dubbo/org.apache.dubbo.remoting.exchange.Exchanger：
 ```properties
 xxx=com.xxx.XxxExchanger
 ```
+

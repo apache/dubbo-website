@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/telnet-handler/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/telnet-handler/
-description: Telnet 命令扩展
-linkTitle: Telnet 命令扩展
-title: Telnet 命令扩展
+description: Telnet Command Extension
+linkTitle: Telnet Command Extension
+title: Telnet Command Extension
 type: docs
 weight: 20
 ---
@@ -14,23 +14,23 @@ weight: 20
 
 
 
-## 扩展说明
+## Extension Description
 
-所有服务器均支持 telnet 访问，用于人工干预。
+All servers support telnet access for manual intervention.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.remoting.telnet.TelnetHandler`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol telnet="xxx,yyy" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置telnet属性时，使用此配置 -->
+<!-- Default value setting, when <dubbo:protocol> does not configure the telnet attribute, use this configuration -->
 <dubbo:provider telnet="xxx,yyy" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.remoting.telnet.support.ClearTelnetHandler`
 * `org.apache.dubbo.remoting.telnet.support.ExitTelnetHandler`
@@ -44,9 +44,9 @@ weight: 20
 * `org.apache.dubbo.rpc.dubbo.telnet.CountTelnetHandler`
 * `org.apache.dubbo.rpc.dubbo.telnet.PortTelnetHandler`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -54,14 +54,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxTelnetHandler.java (实现TelnetHandler接口)
+                |-XxxTelnetHandler.java (implements TelnetHandler interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.remoting.telnet.TelnetHandler (纯文本文件，内容为：xxx=com.xxx.XxxTelnetHandler)
+                |-org.apache.dubbo.remoting.telnet.TelnetHandler (plain text file, content: xxx=com.xxx.XxxTelnetHandler)
 ```
 
-XxxTelnetHandler.java：
+XxxTelnetHandler.java:
 
 ```java
 package com.xxx;
@@ -77,13 +77,13 @@ public class XxxTelnetHandler implements TelnetHandler {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.remoting.telnet.TelnetHandler：
+META-INF/dubbo/org.apache.dubbo.remoting.telnet.TelnetHandler:
 
 ```properties
 xxx=com.xxx.XxxTelnetHandler
 ```
 
-## 命令用法
+## Command Usage
 
 ```sh
 telnet 127.0.0.1 20880

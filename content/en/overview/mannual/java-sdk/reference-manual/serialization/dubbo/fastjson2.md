@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/what/ecosystem/serialization/fastjson2/
     - /en/overview/what/ecosystem/serialization/fastjson2/
-description: "本文介绍 Fastjson2 序列化"
+description: "This article introduces Fastjson2 serialization"
 linkTitle: Fastjson2
 title: Fastjson2
 type: docs
@@ -11,22 +11,22 @@ weight: 3
 
 
 
-## 1 介绍
+## 1 Introduction
 
-`FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，
+`FASTJSON v2` is an important upgrade of the `FASTJSON` project, aimed at providing a high-performance `JSON` library for the next decade. With the same `API`,
 
-- 支持`JSON/JSONB`两种协议，[`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn) 是一等公民。
-- 支持全量解析和部分解析。
-- 支持`Java`服务端、客户端`Android`、大数据场景。
-- 支持`Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
-- 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
-- 支持`Android 8+`
-- 支持`Graal Native-Image`
-- 支持 `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+- Supports both `JSON/JSONB` protocols, with [`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn) as a first-class citizen.
+- Supports full parsing and partial parsing.
+- Supports `Java` server-side, client-side `Android`, and big data scenarios.
+- Supports `Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
+- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+- Supports `Android 8+`
+- Supports `Graal Native-Image`
+- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 
-## 2 使用方式
+## 2 Usage
 
-### 2.1 添加依赖
+### 2.1 Add Dependency
 
 ```xml
 <dependencies>
@@ -38,10 +38,9 @@ weight: 3
 </dependencies>
 ```
 
-注：Fastjson2 序列化仅 Dubbo > 3.1.0 版本支持。在 Dubbo > 3.2.0 中将替代 Hessian 作为默认序列化方式。
+Note: Fastjson2 serialization is only supported in Dubbo > 3.1.0. In Dubbo > 3.2.0, it will replace Hessian as the default serialization method.
 
-### 2.2 配置启用
-
+### 2.2 Configure to Enable
 
 ```yaml
 # application.yml (Spring Boot)
@@ -49,7 +48,7 @@ dubbo:
  protocol:
    serialization: fastjson2
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.serialization=fastjson2
@@ -60,7 +59,7 @@ dubbo.consumer.serialization=fastjson2
 # or
 dubbo.reference.com.demo.DemoService.serialization=fastjson2
 ```
-或
+or
 ```xml
 <dubbo:protocol serialization="fastjson2" />
 
@@ -70,4 +69,5 @@ dubbo.reference.com.demo.DemoService.serialization=fastjson2
 <!-- or -->
 <dubbo:reference interface="xxx" serialization="fastjson2" />
 ```
+
 

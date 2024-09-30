@@ -2,7 +2,7 @@
 aliases:
   - /en/overview/what/ecosystem/serialization/fastjson/
   - /en/overview/what/ecosystem/serialization/fastjson/
-description: "本文介绍 Fastjson 序列化"
+description: "This article introduces Fastjson serialization"
 linkTitle: Fastjson
 title: Fastjson
 type: docs
@@ -11,13 +11,13 @@ weight: 4
 
 
 
-## 1 介绍
+## 1 Introduction
 
-Fastjson 是一个 Java 库，可用于将 Java 对象转换为其 JSON 表示形式。它还可用于将 JSON 字符串转换为等效的 Java 对象。 Fastjson 可以处理任意 Java 对象，包括您没有源代码的预先存在的对象。
+Fastjson is a Java library used to convert Java objects to their JSON representation. It can also be used to convert JSON strings to equivalent Java objects. Fastjson can handle any Java object, including pre-existing objects for which you do not have source code.
 
-## 2 使用方式
+## 2 How to Use
 
-### 2.1 添加依赖
+### 2.1 Adding Dependencies
 
 ```xml
 <dependencies>
@@ -34,8 +34,7 @@ Fastjson 是一个 Java 库，可用于将 Java 对象转换为其 JSON 表示�
 </dependencies>
 ```
 
-### 2.2 配置启用
-
+### 2.2 Configuration Enabling
 
 ```yaml
 # application.yml (Spring Boot)
@@ -43,7 +42,7 @@ dubbo:
  protocol:
    serialization: fastjson
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.serialization=fastjson
@@ -54,7 +53,7 @@ dubbo.consumer.serialization=fastjson
 # or
 dubbo.reference.com.demo.DemoService.serialization=fastjson
 ```
-或
+or
 ```xml
 <dubbo:protocol serialization="fastjson" />
 
@@ -65,4 +64,5 @@ dubbo.reference.com.demo.DemoService.serialization=fastjson
 <dubbo:reference interface="xxx" serialization="fastjson" />
 ```
 
-## 3 支持的rpc协议
+## 3 Supported RPC Protocols
+

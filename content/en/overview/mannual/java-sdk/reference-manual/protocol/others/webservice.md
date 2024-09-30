@@ -3,38 +3,38 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/protocol/webservice/
     - /en/docs3-v2/java-sdk/reference-manual/protocol/webservice/
     - /en/overview/mannual/java-sdk/reference-manual/protocol/webservice/
-description: Webservice协议
-linkTitle: Webservice协议
-title: Webservice协议
+description: Webservice Protocol
+linkTitle: Webservice Protocol
+title: Webservice Protocol
 type: docs
 weight: 11
 ---
 
-## 特性说明
-基于 WebService 的远程调用协议，基于 [Apache CXF](http://cxf.apache.org) 的 `frontend-simple` 和 `transports-http` 实现。`2.3.0` 以上版本支持。
+## Feature Description
+WebService-based remote call protocol, implemented based on [Apache CXF](http://cxf.apache.org) `frontend-simple` and `transports-http`. Supported in versions `2.3.0` and above.
 
-CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
-* 连接个数：多连接
-* 连接方式：短连接
-* 传输协议：HTTP
-* 传输方式：同步传输
-* 序列化：SOAP 文本序列化
-* 适用场景：系统集成，跨语言调用
+CXF is an Apache open-source RPC framework formed by the merger of Xfire and Celtix.
+* Number of connections: Multiple connections
+* Connection method: Short connections
+* Transport protocol: HTTP
+* Transport method: Synchronous transmission
+* Serialization: SOAP text serialization
+* Applicable scenarios: System integration, cross-language calls
 
-可以和原生 WebService 服务互操作，即：
+It can interoperate with native WebService services, meaning:
 
-* 提供者用 Dubbo 的 WebService 协议暴露服务，消费者直接用标准 WebService 接口调用，
-* 或者提供方用标准 WebService 暴露服务，消费方用 Dubbo 的 WebService 协议调用。
-#### 约束
-* 参数及返回值需实现 `Serializable` 接口
-* 参数尽量使用基本类型和 POJO
+* The provider exposes the service via Dubbo's WebService protocol, and the consumer directly calls using the standard WebService interface,
+* Or the provider uses standard WebService to expose services, and the consumer calls using Dubbo's WebService protocol.
+#### Constraints
+* Parameters and return values must implement the `Serializable` interface
+* Parameters should preferably use basic types and POJOs
 
-## 使用场景
-发布一个服务（对内/对外），不考虑客户端类型，不考虑性能，建议使用webservice。服务端已经确定使用webservice，客户端不能选择，必须使用webservice。
-## 使用方式
-### 依赖
+## Usage Scenarios
+Publishing a service (internally/externally), regardless of client type or performance, it is recommended to use webservice. If the server has determined to use webservice, the client has no choice and must use webservice.
+## Usage Method
+### Dependencies
 
-从 Dubbo 3 开始，Webservice 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-rpc)。
+Starting from Dubbo 3, the Webservice protocol is no longer embedded in Dubbo and needs to be imported as a separate [module](/en/download/spi-extensions/#dubbo-rpc).
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
@@ -56,28 +56,28 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 </dependency>
 ```
 
-### 配置协议
+### Configure Protocol
 ```xml
 <dubbo:protocol name="webservice" port="8080" server="jetty" />
 ```
 
-### 配置默认协议
+### Configure Default Protocol
 ```xml
 <dubbo:provider protocol="webservice" />
 ```
 
-### 配置服务协议
+### Configure Service Protocol
 ```xml
 <dubbo:service protocol="webservice" />
 ```
 
-### 多端口
+### Multiple Ports
 ```xml
 <dubbo:protocol id="webservice1" name="webservice" port="8080" />
 <dubbo:protocol id="webservice2" name="webservice" port="8081" />
 ```
 
-### 直连
+### Direct Connection
 ```xml
 <dubbo:reference id="helloService" interface="HelloWorld" url="webservice://10.20.153.10:8080/com.foo.HelloWorld" />
 ```
@@ -87,18 +87,18 @@ CXF 是 Apache 开源的一个 RPC 框架，由 Xfire 和 Celtix 合并而来。
 http://10.20.153.10:8080/com.foo.HelloWorld?wsdl
 ```
 
-### Jetty Server (默认)
+### Jetty Server (Default)
 
 ```xml
 <dubbo:protocol ... server="jetty" />
 ```
 
-### Servlet Bridge Server (推荐)
+### Servlet Bridge Server (Recommended)
 ```xml
 <dubbo:protocol ... server="servlet" />
 ```
 
-### 配置 DispatcherServlet
+### Configure DispatcherServlet
 ```xml
 <servlet>
          <servlet-name>dubbo</servlet-name>
@@ -110,10 +110,11 @@ http://10.20.153.10:8080/com.foo.HelloWorld?wsdl
          <url-pattern>/*</url-pattern>
 </servlet-mapping>
 ```
-{{% alert title="注意" color="primary" %}}
- 如果使用 servlet 派发请求:
+{{% alert title="Note" color="primary" %}}
+ If using servlet to dispatch requests:
  
- 协议的端口 `<dubbo:protocol port="8080" />` 必须与 servlet 容器的端口相同。
+ The protocol port `<dubbo:protocol port="8080" />` must match the port of the servlet container.
  
- 协议的上下文路径 `<dubbo:protocol contextpath="foo" />` 必须与 servlet 应用的上下文路径相同。
+ The protocol context path `<dubbo:protocol contextpath="foo" />` must match the context path of the servlet application.
 {{% /alert %}}
+

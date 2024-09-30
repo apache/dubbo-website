@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/compiler/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/compiler/
-description: 编译器扩展
-linkTitle: 编译器扩展
-title: 编译器扩展
+description: Compiler Extension
+linkTitle: Compiler Extension
+title: Compiler Extension
 type: docs
 weight: 13
 ---
@@ -14,26 +14,26 @@ weight: 13
 
 
 
-## 扩展说明
+## Extension Description
 
-Java 代码编译器，用于动态生成字节码，加速调用。
+Java code compiler for dynamically generating bytecode to accelerate calls.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.common.compiler.Compiler`
 
-## 扩展配置
+## Extension Configuration
 
-自动加载
+Automatically loaded
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.common.compiler.support.JdkCompiler`
 * `org.apache.dubbo.common.compiler.support.JavassistCompiler`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -41,11 +41,11 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxCompiler.java (实现Compiler接口)
+                |-XxxCompiler.java (implements Compiler interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.common.compiler.Compiler (纯文本文件，内容为：xxx=com.xxx.XxxCompiler)
+                |-org.apache.dubbo.common.compiler.Compiler (text file containing: xxx=com.xxx.XxxCompiler)
 ```
 
 XxxCompiler.java：
@@ -67,3 +67,4 @@ META-INF/dubbo/org.apache.dubbo.common.compiler.Compiler：
 ```properties
 xxx=com.xxx.XxxCompiler
 ```
+

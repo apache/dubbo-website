@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/serialize/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/serialize/
-description: 序列化扩展
-linkTitle: 序列化扩展
-title: 序列化扩展
+description: Serialization Extension
+linkTitle: Serialization Extension
+title: Serialization Extension
 type: docs
 weight: 16
 ---
@@ -14,35 +14,35 @@ weight: 16
 
 
 
-## 扩展说明
+## Extension Description
 
-将对象转成字节流，用于网络传输，以及将字节流转为对象，用于在收到字节流数据后还原成对象。
+Convert objects into byte streams for network transmission, and convert byte streams into objects for restoring the received byte stream data back into objects.
 
-## 扩展接口
+## Extension Interfaces
 
 * `org.apache.dubbo.common.serialize.Serialization`
 * `org.apache.dubbo.common.serialize.ObjectInput`
 * `org.apache.dubbo.common.serialize.ObjectOutput`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
-<!-- 协议的序列化方式 -->
+<!-- Serialization method for the protocol -->
 <dubbo:protocol serialization="xxx" />
-<!-- 缺省值设置，当<dubbo:protocol>没有配置serialization时，使用此配置 -->
+<!-- Default value setting, when <dubbo:protocol> does not configure serialization, use this configuration -->
 <dubbo:provider serialization="xxx" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.common.serialize.dubbo.DubboSerialization`
 * `org.apache.dubbo.common.serialize.hessian.Hessian2Serialization`
 * `org.apache.dubbo.common.serialize.java.JavaSerialization`
 * `org.apache.dubbo.common.serialize.java.CompactedJavaSerialization`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -50,13 +50,13 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxSerialization.java (实现Serialization接口)
-                |-XxxObjectInput.java (实现ObjectInput接口)
-                |-XxxObjectOutput.java (实现ObjectOutput接口)
+                |-XxxSerialization.java (implements Serialization interface)
+                |-XxxObjectInput.java (implements ObjectInput interface)
+                |-XxxObjectOutput.java (implements ObjectOutput interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.common.serialize.Serialization (纯文本文件，内容为：xxx=com.xxx.XxxSerialization)
+                |-org.apache.dubbo.common.serialize.Serialization (plain text file, content: xxx=com.xxx.XxxSerialization)
 ```
 
 XxxSerialization.java：

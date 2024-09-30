@@ -3,20 +3,20 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/config/xml/
     - /en/docs3-v2/java-sdk/reference-manual/config/xml/
     - /en/overview/mannual/java-sdk/reference-manual/config/xml/
-description: 以 Spring XML 开发 Dubbo 应用
-linkTitle: XML 配置
-title: XML 配置
+description: Developing Dubbo applications with Spring XML
+linkTitle: XML Configuration
+title: XML Configuration
 type: docs
 weight: 4
 ---
 
 
-Dubbo 有基于 Spring Schema 扩展的自定义配置组件，XML 支持的配置项与 [配置参考手册](../properties) 中描述的一一对。本文使用的示例请参考 [dubbo-samples-spring-xml](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml)
+Dubbo has a custom configuration component based on Spring Schema, and the configuration options supported by XML correspond to those described in the [configuration reference manual](../properties). Please refer to the examples used in this article at [dubbo-samples-spring-xml](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-spring-xml).
 
-## XML完整示例
-### 服务提供者
+## Complete XML Example
+### Service Provider
 
-#### 定义服务接口
+#### Define Service Interface
 
 DemoService.java：
 
@@ -28,7 +28,7 @@ public interface DemoService {
 }
 ```
 
-#### 在服务提供方实现接口
+#### Implement Interface in Service Provider
 
 DemoServiceImpl.java：
 
@@ -43,7 +43,7 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-#### 用 Spring 配置声明暴露服务
+#### Declare Service Exposure with Spring Configuration
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -67,7 +67,7 @@ public class DemoServiceImpl implements DemoService {
 </beans>
 ```
 
-#### 加载 Spring 配置
+#### Load Spring Configuration
 
 ```java
 public class Application {
@@ -82,9 +82,9 @@ public class Application {
 }
 ```
 
-### 服务消费者
+### Service Consumer
 
-#### 通过 Spring 配置引用远程服务
+#### Reference Remote Service through Spring Configuration
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -104,7 +104,7 @@ public class Application {
 </beans>
 ```
 
-#### 加载 Spring 配置，并调用远程服务
+#### Load Spring Configuration and Call Remote Service
 
 ```java
 public class Application {
@@ -121,17 +121,17 @@ public class Application {
 }
 ```
 
-## 更多示例
+## More Examples
 
-### 版本与分组
+### Version and Group
 
 ```xml
 <dubbo:service interface="com.foo.BarService" version="1.0.0" />
 <dubbo:service interface="org.apache.dubbo.example.service.DemoService" group="demo2"/>
 ```
 
-### 集群容错
-配置 failover 重试次数：
+### Cluster Fault Tolerance
+Configure failover retry count:
 
 ```xml
 <dubbo:service retries="2" />
@@ -141,21 +141,21 @@ public class Application {
 </dubbo:reference>
 ```
 
-### 多协议
+### Multiple Protocols
 
 ```xml
 <dubbo:application name="world"  />
 <dubbo:registry id="registry" address="10.20.141.150:9090" username="admin" password="hello1234" />
-<!-- 多协议配置 -->
+<!-- Multiple protocol configuration -->
 <dubbo:protocol name="dubbo" port="20880" />
 <dubbo:protocol name="rmi" port="1099" />
-<!-- 使用dubbo协议暴露服务 -->
+<!-- Use dubbo protocol to expose service -->
 <dubbo:service interface="com.alibaba.hello.api.HelloService" version="1.0.0" ref="helloService" protocol="dubbo" />
-<!-- 使用rmi协议暴露服务 -->
+<!-- Use rmi protocol to expose service -->
 <dubbo:service interface="com.alibaba.hello.api.DemoService" version="1.0.0" ref="demoService" protocol="rmi" />
 ```
 
-### 多注册中心
+### Multiple Registries
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -163,25 +163,25 @@ public class Application {
     xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
     <dubbo:application name="world"  />
-    <!-- 多注册中心配置 -->
+    <!-- Multiple registry configuration -->
     <dubbo:registry id="chinaRegistry" address="10.20.141.150:9090" />
     <dubbo:registry id="intlRegistry" address="10.20.154.177:9010" default="false" />
-    <!-- 向中文站注册中心注册 -->
+    <!-- Register with Chinese registry -->
     <dubbo:service interface="com.alibaba.hello.api.HelloService" version="1.0.0" ref="helloService" registry="chinaRegistry" />
-    <!-- 向国际站注册中心注册 -->
+    <!-- Register with international registry -->
     <dubbo:service interface="com.alibaba.hello.api.DemoService" version="1.0.0" ref="demoService" registry="intlRegistry" />
 </beans>
 ```
 
-### 全局默认值
-指定全局默认超时时间，多所有服务生效：
+### Global Default Values
+Specify global default timeout, effective for all services:
 
 ```xml
 <dubbo:provider timeout="5000" />
 <dubbo:consumer timeout="5000" />
 ```
 
-基于分组的默认值：
+Based on group default values:
 
 ```xml
 <dubbo:provider timeout="5000">
@@ -194,6 +194,7 @@ public class Application {
 	<dubbo:service interface="com.alibaba.hello.api.DemoService2" ref="demoService2"/>
 </dubbo:provider>
 ```
+
 
 
 

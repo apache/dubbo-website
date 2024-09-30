@@ -2,7 +2,7 @@
 aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/meter/
-description: "开启 Metrics 指标埋点"
+description: "Enable Metrics Indicator Tracking"
 hide_summary: true
 linkTitle: Metrics
 no_list: true
@@ -12,14 +12,14 @@ weight: 1
 ---
 
 
-## 概述
+## Overview
 
-Dubbo Metrics 的总体设计请参考 [可观测性 Metrics Proposal](/en/overview/reference/proposals/metrics/)。
+For the overall design of Dubbo Metrics, please refer to [Observability Metrics Proposal](/en/overview/reference/proposals/metrics/) .
 
-以下是 Dubbo Java 相关的具体实现与使用方式讲解。
+The following explains the specific implementation and usage related to Dubbo Java.
 
-## 使用方式
-要为 Dubbo 进程开启指标采集，需要在项目中引入相关依赖并增加配置。以 Spring Boot 项目为例，增加以下 spring-boot-starter 依赖到项目中，即会自动开启指标采集。
+## Usage
+To enable metric collection for the Dubbo process, you need to introduce relevant dependencies and add configurations in your project. For example, in a Spring Boot project, add the following spring-boot-starter dependency to automatically enable metric collection.
 
 ```xml
 <!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-metrics-prometheus -->
@@ -30,25 +30,25 @@ Dubbo Metrics 的总体设计请参考 [可观测性 Metrics Proposal](/en/overv
 </dependency>
 ```
 
-* 完整示例请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot" target="_blank">dubbo-samples-metrics-spring-boot</a>
-* 完整配置参数请参见 [Metrics 配置项手册](/en/overview/mannual/java-sdk/reference-manual/config/properties//)
+* For a complete example, please refer to <a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-metrics-spring-boot" target="_blank">dubbo-samples-metrics-spring-boot</a>
+* For complete configuration parameters, please refer to [Metrics Configuration Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties//)
 
-## 实现原理解析
+## Implementation Principle Analysis
 
-### 代码结构与工作流程
-- 移除原来与 Metrics 相关的类
-- 创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类
-- 使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换
+### Code Structure and Workflow
+- Remove the original classes related to Metrics.
+- Create new modules dubbo-metrics/dubbo-metrics-api, dubbo-metrics/dubbo-metrics-prometheus, with MetricsConfig as the configuration class for these modules.
+- Use Micrometer, representing metrics with primitive types like Long, Double, etc., and introduce Micrometer in dubbo-metrics-api, letting Micrometer convert internal metrics.
 
-以下是 Dubbo 实现中的关键组件及数据流转过程
+The following are the key components and data flow in the Dubbo implementation:
 
 ![img.png](/imgs/docs3-v2/java-sdk/observability/dataflow.png)
 
-### 指标上报接口
-根据上图架构，指标接口是 Dubbo 对外暴露指标数据的出口，以下是指标接口的具体定义：
+### Metrics Reporting Interface
+According to the architecture in the above figure, the metrics interface is the exit for Dubbo to expose metric data. Here is the specific definition of the metrics interface:
 
-> 另外，该 Service 还作为一些 [智能自适应流量调度算法](/en/overview/reference/proposals/heuristic-flow-control/) 的数据来源
-   
+> Additionally, this Service also serves as a data source for some [Intelligent Adaptive Traffic Scheduling Algorithms](/en/overview/reference/proposals/heuristic-flow-control/)
+
 ```java
 public interface MetricsService {
 
@@ -92,7 +92,7 @@ public interface MetricsService {
 }
 ```
 
-其中 MetricsCategory 设计如下:
+The design of MetricsCategory is as follows:
 ```java
 public enum MetricsCategory {
     RT,
@@ -101,7 +101,7 @@ public enum MetricsCategory {
 }
 ```
 
-MetricsEntity 设计如下
+The design of MetricsEntity is as follows:
 ```java
 public class MetricsEntity {
     private String name;
@@ -111,13 +111,13 @@ public class MetricsEntity {
 }
 ```
 
-### 指标采集埋点
+### Metrics Collection Tracking
 
-Dubbo 是通过扩展 Filter SPI 扩展点实现对请求调用指标进行拦截的，目前在消费端和提供端分别增加了 Filter 扩展实现
-* MetricsFilter 提供端请求指标埋点
-* MetricsClusterFilter 消费端请求指标埋点
+Dubbo intercepts request call metrics through the extended Filter SPI. Currently, Filter extension implementations have been added for both consumer and provider sides:
+* MetricsFilter provides request metrics tracking for the provider.
+* MetricsClusterFilter provides request metrics tracking for the consumer.
 
-以下是 MetricsFilter 的实现源码，注意 try-catch-finally 处理。
+The implementation source code for MetricsFilter is as follows; note the try-catch-finally handling.
 
 ```java
 @Activate(group = PROVIDER, order = -1)
@@ -145,8 +145,8 @@ public class MetricsFilter implements Filter, ScopeModelAware {
 
 ```
 
-### 指标统计单位
-以下五个属性是指标统计的基本单位（应用、服务、方法的组合），也是源代码 MetricsCollector 中 Map 数据结构的 key
+### Metric Statistics Units
+The following five attributes are the basic units of metric statistics (a combination of application, service, and method), which are also the keys in the Map data structure of the source code MetricsCollector.
 
 ```java
 public class MethodMetric {
@@ -158,9 +158,9 @@ public class MethodMetric {
 }
 ```
 
-### 基础指标
+### Basic Metrics
 
-dubbo-common 模块下的 MetricsCollector 负责存储所有指标数据
+The MetricsCollector under the dubbo-common module is responsible for storing all metric data.
    
 ```java
 public class DefaultMetricsCollector implements MetricsCollector {
@@ -183,19 +183,19 @@ public class DefaultMetricsCollector implements MetricsCollector {
  }
 ```
 
-### 本地指标聚合
+### Local Metric Aggregation
 
-本地聚合指将一些简单的指标通过计算获取各分位数指标的过程。
+Local aggregation refers to the process of obtaining various quantiles' metrics by calculating some simple metrics.
 
-#### 开启本地聚合
+#### Enabling Local Aggregation
 
-收集指标时，默认只收集基础指标，而一些单机聚合指标则需要开启服务柔性或者本地聚合后另起线程计算。
+When collecting metrics, only the basic metrics are collected by default; some single-machine aggregation metrics need to have service flexibility or local aggregation enabled, and then a separate thread is started for calculation.
 
 ```properties
 dubbo.metrics.enable=true
 ```
 
-另外，还可以设置一些更多的指标
+Additionally, more metrics can be set.
 
 ```properties
 dubbo.metrics.aggregation.enable=true
@@ -203,10 +203,11 @@ dubbo.metrics.aggregation.bucket-num=5
 dubbo.metrics.aggregation.time-window-seconds=10
 ```
 
-#### 具体指标
-[具体指标](/en/overview/reference/metrics/standard_metrics/) 请参考 Dubbo Metrics 总体设计文档。
+#### Specific Metrics
 
-#### 聚合收集器实现
+For [specific metrics](/en/overview/reference/metrics/standard_metrics/), please refer to the overall design document of Dubbo Metrics.
+
+#### Aggregation Collector Implementation
 
 ```java
 public class AggregateMetricsCollector implements MetricsCollector, MetricsListener {
@@ -225,7 +226,7 @@ public class AggregateMetricsCollector implements MetricsCollector, MetricsListe
     private static final Integer DEFAULT_BUCKET_NUM = 10;
     private static final Integer DEFAULT_TIME_WINDOW_SECONDS = 120;
 
-//在构造函数中解析配置信息
+//Configuration parsing in the constructor
 
     public AggregateMetricsCollector(ApplicationModel applicationModel) {
         this.applicationModel = applicationModel;
@@ -243,7 +244,7 @@ public class AggregateMetricsCollector implements MetricsCollector, MetricsListe
 }
 ```
 
-如果开启了本地聚合，则通过 spring 的 BeanFactory 添加监听，将 AggregateMetricsCollector 与 DefaultMetricsCollector 绑定，实现一种生存者消费者的模式，DefaultMetricsCollector 中使用监听器列表，方便扩展
+If local aggregation is enabled, Spring's BeanFactory adds listeners to bind AggregateMetricsCollector with DefaultMetricsCollector, implementing a producer-consumer pattern. DefaultMetricsCollector uses a listener list for easy expansion.
 
 ```java
 private void registerListener() {
@@ -251,23 +252,22 @@ private void registerListener() {
 }
 ```
 
-### 指标聚合原理
-滑动窗口
-假设我们初始有6个bucket，每个窗口时间设置为2分钟
-每次写入指标数据时，会将数据分别写入6个bucket内，每隔两分钟移动一个bucket并且清除原来bucket内的数据
-读取指标时，读取当前current指向的bucket，以达到滑动窗口的效果
-具体如下图所示，实现了当前 bucket 内存储了配置中设置的 bucket 生命周期内的数据，即近期数据
+### Metric Aggregation Principle
+Sliding Window
+Assuming we have initially 6 buckets, each window time is set to 2 minutes. 
+Each time metric data is written, it will be written into the 6 buckets, moving a bucket every two minutes and clearing the original data. 
+When reading metrics, it reads from the current bucket to achieve the sliding window effect. The specific reference is shown in the following diagram, where the current bucket stores data within the configured bucket lifecycle, i.e., recent data.
 ![img_1.png](/imgs/docs3-v2/java-sdk/observability/aggre.png)
 
-在每个bucket内，使用**TDigest 算法**计算分位数指标
+In each bucket, the **TDigest algorithm** is used to calculate quantile metrics.
 
-> **TDigest 算法**（极端分位精确度高，如p1 p99，中间分位精确度低，如p50），相关资料如下
+> **TDigest Algorithm** (high accuracy for extreme quantiles like p1, p99, lower accuracy for intermediate quantiles like p50). Relevant materials are as follows:
 >
 > - https://op8867555.github.io/posts/2018-04-09-tdigest.html
 > - https://blog.csdn.net/csdnnews/article/details/116246540
-> - 开源实现：https://github.com/tdunning/t-digest
+> - Open source implementation: https://github.com/tdunning/t-digest
 
-代码实现如下，除了 TimeWindowQuantile 用来计算分位数指标外，另外提供了 TimeWindowCounter 来收集时间区间内的指标数量
+The code implementation is as follows. In addition to the TimeWindowQuantile used to calculate quantile metrics, another TimeWindowCounter is provided to collect the count of metrics within the time interval.
 ```java
 public class TimeWindowQuantile {
     private final double compression;
@@ -315,17 +315,17 @@ public class TimeWindowQuantile {
 }
 ```
 
-### 指标推送
+### Metric Push
 
-指标推送只有用户在设置了 `dubbo.metrics.protocol=prometheus` 参数后才开启，若只开启指标聚合，则默认不推送指标。
+Metric push is only enabled when the user sets the parameter `dubbo.metrics.protocol=prometheus`. If only metric aggregation is enabled, metrics will not be pushed by default.
 
 #### Prometheus Pull Service Discovery
 
-目前 Dubbo Admin 内置了 prometheus http_sd service discovery 实例地址发现机制，Admin 默认会使用 `qos 端口`、  `/metrics` 作为这样 Admin 就能够将所有示例地址汇聚后以标准 http_sd 的方式同步给 Prometheus Server。
+Currently, Dubbo Admin has a built-in Prometheus HTTP_SD service discovery instance address discovery mechanism. Admin will default to using the `qos port` and `/metrics`, allowing Admin to gather all instance addresses and sync to the Prometheus Server in a standard HTTP_SD format.
 
-具体配置方式如下
+The specific configuration method is as follows:
 
+Here, address, port, and url are all optional items. If not configured, Admin will use default convention values.
 
-其中，address、port、url 均是可选项，如不配置则 Admin 使用默认约定值。
+> Users can directly configure the address of the Prometheus Pushgateway in the Dubbo configuration file, such as <dubbo:metrics protocol="prometheus" mode="push" address="${prometheus.pushgateway-url}" interval="5" />, where interval represents the push interval.
 
-> 用户直接在Dubbo配置文件中配置Prometheus Pushgateway的地址即可，如<dubbo:metrics protocol="prometheus" mode="push" address="${prometheus.pushgateway-url}" interval="5" />，其中interval代表推送间隔

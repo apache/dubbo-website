@@ -2,24 +2,24 @@
 aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/tracing/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/tracing/
-description: Dubbo 内置了全链路追踪能力，你可以通过引入 spring-boot-starter 或者相关依赖开启链路跟踪能力，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等后端系统，可以实现全链路跟踪数据的分析与可视化展示。
+description: Dubbo has built-in end-to-end tracing capabilities. You can enable link tracing by introducing spring-boot-starter or related dependencies. By exporting trace data to mainstream implementations such as Zipkin, Skywalking, Jaeger, etc., you can achieve analysis and visualization of end-to-end tracing data.
 hide_summary: true
-linkTitle: 链路追踪
+linkTitle: Link Tracing
 no_list: true
-title: 全链路追踪使用与实现说明
+title: End-to-End Tracing Usage and Implementation Instructions
 type: docs
 weight: 1
 ---
 
-Dubbo 内置了全链路追踪能力，你可以通过引入 spring-boot-starter 或者相关依赖开启链路跟踪能力，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等后端系统，可以实现全链路跟踪数据的分析与可视化展示。
+Dubbo has built-in end-to-end tracing capabilities. You can enable link tracing by introducing spring-boot-starter or related dependencies. By exporting trace data to mainstream implementations such as Zipkin, Skywalking, Jaeger, etc., you can achieve analysis and visualization of end-to-end tracing data.
 
-Dubbo 目前借助 Micrometer Observation 完成 Tracing 的所有埋点工作，依赖 Micrometer 提供的各种 Bridge 适配，我们可以实现将 Tracing 导入各种后端系统，具体工作原理如下。
+Currently, Dubbo completes all tracing embedding through Micrometer Observation, relying on various Bridge adaptations provided by Micrometer, allowing us to import tracing into various back-end systems. The specific working principle is as follows.
 
 ![micrometer-bridge](/imgs/docs3-v2/java-sdk/observability/micrometer-bridge.png)
 
-## 使用方式
+## Usage
 
-以 Dubbo Spring Boot 应用为例，通过加入如下依赖即可开启链路追踪，并使用 zipkin exporter bridge 将链路追踪数据导入 Zipkin 后端系统。
+Using a Dubbo Spring Boot application as an example, you can enable link tracing by adding the following dependency and use the Zipkin exporter bridge to import tracing data into the Zipkin back-end system.
 
 ```xml
 <dependency>
@@ -29,38 +29,38 @@ Dubbo 目前借助 Micrometer Observation 完成 Tracing 的所有埋点工作�
 </dependency>
 ```
 
-更多完整示例请参见：
-* [使用 Zipkin 实现 Dubbo 全链路追踪](/en/overview/tasks/observability/tracing/zipkin/)
-* [使用 Skywalking 实现 Dubbo 全链路追踪](/en/overview/tasks/observability/tracing/skywalking/)
+For more complete examples, please refer to:
+* [Implementing Dubbo end-to-end tracing with Zipkin](/en/overview/tasks/observability/tracing/zipkin/)
+* [Implementing Dubbo end-to-end tracing with Skywalking](/en/overview/tasks/observability/tracing/skywalking/)
 
-## 关联日志
+## Associated Logs
 
-Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、span-id 等信息自动置入日志 MDC 上下文，你只需要设置日志输出格式中包含类似 `%X{traceId:-},%X{spanId:-}]`，即可实现业务日志与 tracing 系统的自动关联，具体可参见 [Tracing 日志上下文配置示例](https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-otel-otlp/provider/src/main/resources/application.yml)。
+Dubbo Tracing also implements automatic association with log systems, automatically including tracing-id, span-id, and other information in the log MDC context. You only need to set the log output format to include something like `%X{traceId:-},%X{spanId:-}]` to achieve automatic association of business logs with the tracing system. For details, refer to [Tracing log context configuration example](https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-tracing/dubbo-samples-spring-boot-tracing-otel-otlp/provider/src/main/resources/application.yml).
 
-## 工作原理
-### Tracing相关概念
+## Working Principle
+### Tracing Related Concepts
 
-- Span：基本工作单元。例如，发送 RPC 是一个新的 span，发送对 RPC 的响应也是如此。Span还有其他数据，例如description、带时间戳的事件、键值注释（标签）、导致它们的跨度的 ID 和进程 ID（通常是 IP 地址）。跨度可以启动和停止，并且它们会跟踪它们的时间信息。创建跨度后，您必须在将来的某个时间点停止它。
+- Span: The basic unit of work. For example, sending an RPC is a new span, and sending a response to the RPC is also a new span. Spans contain other data such as description, timestamped events, key-value annotations (tags), and the span ID and process ID (usually the IP address) of the spans that caused them. Spans can start and stop and track their timing information. Once a span is created, it must be stopped at some future point.
 
-- Trace：一组形成树状结构的跨度。例如，如果您运行分布式大数据存储，则可能会通过请求形成跟踪PUT。
+- Trace: A group of spans forming a tree structure. For example, if you run a distributed big data storage system, you might form a trace through a PUT request.
 
-- Annotation/Event : 用于及时记录一个事件的存在。
+- Annotation/Event: Used to record the existence of an event in a timely manner.
 
-- Tracing context：为了使分布式跟踪工作，跟踪上下文（跟踪标识符、跨度标识符等）必须通过进程（例如通过线程）和网络传播。
+- Tracing context: For distributed tracing to work, the tracing context (trace identifiers, span identifiers, etc.) must propagate through processes (for example, via threads) and networks.
 
-- Log correlation：部分跟踪上下文（例如跟踪标识符、跨度标识符）可以填充到给定应用程序的日志中。然后可以将所有日志收集到一个存储中，并通过跟踪 ID 对它们进行分组。这样就可以从所有按时间顺序排列的服务中获取单个业务操作（跟踪）的所有日志。
+- Log correlation: Parts of the tracing context (e.g., trace identifiers, span identifiers) can be populated into logs of a given application. All logs can then be collected into a single repository and grouped by trace ID. This allows you to obtain all logs for a single business operation (trace) from all services in chronological order.
 
-- Latency analysis tools：一种收集导出跨度并可视化整个跟踪的工具。允许轻松进行延迟分析。
+- Latency analysis tools: Tools that collect and visualize exported spans to provide insights into overall tracing. They allow for easy latency analysis.
 
-- Tracer: 处理span生命周期的库（Dubbo 目前支持 OpenTelemetry 和 Brave）。它可以通过 Exporter 创建、启动、停止和报告 Spans 到外部系统（如 Zipkin、Jagger 等）。
+- Tracer: A library that manages the lifecycle of spans (Dubbo currently supports OpenTelemetry and Brave). It can create, start, stop, and report spans to external systems (e.g., Zipkin, Jaeger) through an Exporter.
 
-- Exporter: 将产生的 Trace 信息通过 http 等接口上报到外部系统，比如上报到 Zipkin。
+- Exporter: Reports the generated trace information to external systems, such as sending it to Zipkin via HTTP.
 
 ### SpringBoot Starters
 
-对于 SpringBoot 用户，Dubbo 提供了 Tracing 相关的 starters，自动装配 Micrometer 相关的配置代码，且用户可自由选择 Tracer 和Exporter。
+For SpringBoot users, Dubbo provides tracing-related starters that automatically configure Micrometer-related configuration code, allowing users to freely choose a Tracer and Exporter.
 
-#### OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 Zipkin
+#### OpenTelemetry as Tracer, exporting trace information to Zipkin
 
 ```yml
   <dependency>
@@ -70,7 +70,7 @@ Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、s
   </dependency>
 ```
 
-#### OpenTelemetry 作为 Tracer，将 Trace 信息 export 到 OTlp Collector
+#### OpenTelemetry as Tracer, exporting trace information to OTLP Collector
 
 ```yml
   <dependency>
@@ -80,7 +80,7 @@ Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、s
   </dependency>
 ```
 
-#### Brave 作为 Tracer，将 Trace 信息 export 到 Zipkin
+#### Brave as Tracer, exporting trace information to Zipkin
 
 ```yml
   <dependency>
@@ -90,24 +90,24 @@ Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、s
   </dependency>
 ```
 
-#### 自由组装 Tracer 和 Exporter
+#### Freely Assemble Tracer and Exporter
 
-如果用户基于 Micrometer 有自定义的需求，想将 Trace 信息上报至其他外部系统观测，可参照如下自由组装 Tracer 和 Exporter：
+If users have custom requirements based on Micrometer and want to report trace information to other external observation systems, they can refer to the following for freely assembling Tracer and Exporter:
 
 ```yml
-  <!-- 自动装配 -->
+  <!-- Automatic assembly -->
   <dependency>
       <groupId>org.apache.dubbo</groupId>
       <artifactId>dubbo-spring-boot-observability-starter</artifactId>
       <version>${version}</version>
   </dependency>
-  <!-- otel作为tracer -->
+  <!-- Use otel as tracer -->
   <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-tracing-bridge-otel</artifactId>
       <version>${version}</version>
   </dependency>
-  <!-- export到zipkin -->
+  <!-- Export to Zipkin -->
   <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-exporter-zipkin</artifactId>
@@ -116,19 +116,19 @@ Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、s
 ```
 
 ```yml
-  <!-- 自动装配 -->
+  <!-- Automatic assembly -->
   <dependency>
       <groupId>org.apache.dubbo</groupId>
       <artifactId>dubbo-spring-boot-observability-starter</artifactId>
       <version>${version}</version>
   </dependency>
-  <!-- brave作为tracer  -->
+  <!-- Use Brave as tracer -->
   <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-tracing-bridge-brave</artifactId>
       <version>${version}</version>
   </dependency>
-  <!-- export到zipkin -->
+  <!-- Export to Zipkin -->
   <dependency>
       <groupId>io.zipkin.reporter2</groupId>
       <artifactId>zipkin-reporter-brave</artifactId>
@@ -136,12 +136,11 @@ Dubbo Tracing 还实现了与日志系统的自动关联，即将 tracing-id、s
   </dependency>
 ```
 
-后续还会补齐更多的 starters，如 Jagger、SkyWalking等。
+More starters will be added later, such as Jaeger, SkyWalking, etc.
 
 ### Dubbo Bootstrap API
 
-对于像非 SpringBoot 的项目，可以使用 Dubbo API 使用Tracing。
+For non-SpringBoot projects, the Dubbo API can be used for Tracing.
 
-详细案例可参考[代码地址](https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-sample-api-tracing-otel-zipkin)
-
+For detailed cases, refer to [code address](https://github.com/conghuhu/dubbo-samples/tree/master/4-governance/dubbo-samples-tracing/dubbo-sample-api-tracing-otel-zipkin)
 

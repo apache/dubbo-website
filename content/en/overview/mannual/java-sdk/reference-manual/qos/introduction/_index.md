@@ -1,7 +1,8 @@
 ---
-description: "QoS 命令详解，包含对每个命令的使用方法、效果的详细说明"
-linkTitle: 部分命令详解
-title: 包含对每个命令的使用方法、效果的详细说明
+description: "Detailed explanation of QoS commands, including detailed instructions and effects for each command"
+linkTitle: Detailed Explanation of Some Commands
+title: Detailed Instructions and Effects for Each Command
 type: docs
 weight: 99
 ---
+

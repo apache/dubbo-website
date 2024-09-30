@@ -3,9 +3,9 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/logger-management/
     - /en/docs3-v2/java-sdk/reference-manual/qos/logger-management/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/others/logger-management/
-description: 在 Dubbo 中运行时动态切换使用的日志框架
-linkTitle: 日志框架运行时管理
-title: 日志框架运行时管理
+description: Dynamically switch the logging framework used in Dubbo at runtime
+linkTitle: Runtime Management of the Logging Framework
+title: Runtime Management of the Logging Framework
 type: docs
 weight: 5
 ---
@@ -14,24 +14,24 @@ weight: 5
 
 
 
-{{% alert title="注意" color="primary" %}}
+{{% alert title="Note" color="primary" %}}
 
-自 `3.0.10` 开始，dubbo-qos 运行时管控支持查询日志配置以及动态修改使用的日志框架和日志级别。
+Starting from `3.0.10`, dubbo-qos runtime control supports querying logging configurations and dynamically modifying the logging framework and log levels used.
 
-通过 dubbo-qos 修改的日志配置不进行持久化存储，在应用重启后将会失效。
+The logging configurations modified through dubbo-qos are not persistently stored and will be ineffective after application restarts.
 {{% /alert %}}
 
-### 查询日志配置
+### Query Logging Configuration
 
-命令：`loggerInfo`
+Command: `loggerInfo`
 
-示例：
+Example:
 ```bash
 > telnet 127.0.0.1 22222
 > loggerInfo
 ```
 
-输出：
+Output:
 ```
 Trying 127.0.0.1...
 Connected to localhost.
@@ -44,19 +44,19 @@ dubbo>loggerInfo
 Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: INFO
 ```
 
-### 修改日志级别
+### Change Log Level
 
-命令：`switchLogLevel {level}`
+Command: `switchLogLevel {level}`
 
 level: `ALL`, `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`
 
-示例：
+Example:
 ```bash
 > telnet 127.0.0.1 22222
 > switchLogLevel WARN
 ```
 
-输出：
+Output:
 ```
 Trying 127.0.0.1...
 Connected to localhost.
@@ -73,19 +73,19 @@ dubbo>loggerInfo
 Available logger adapters: [jcl, jdk, log4j, slf4j]. Current Adapter: [log4j]. Log level: WARN```
 ```
 
-### 修改日志输出框架
+### Change Logging Output Framework
 
-命令：`switchLogger {loggerAdapterName}`
+Command: `switchLogger {loggerAdapterName}`
 
 loggerAdapterName: `slf4j`, `jcl`, `log4j`, `jdk`, `log4j2`
 
-示例：
+Example:
 ```bash
 > telnet 127.0.0.1 22222
 > switchLogger slf4j
 ```
 
-输出：
+Output:
 ```
 Trying 127.0.0.1...
 Connected to localhost.
@@ -101,3 +101,4 @@ OK
 dubbo>loggerInfo
 Available logger adapters: [jcl, slf4j, log4j, jdk]. Current Adapter: [slf4j]. Log level: INFO
 ```
+

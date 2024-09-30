@@ -3,9 +3,9 @@ aliases:
     - /en/overview/tasks/observability/tracing/
     - /en/overview/tasks/observability/tracing/
 description: ""
-linkTitle: 全链路追踪
+linkTitle: End-to-End Tracing
 no_list: true
-title: 全链路追踪
+title: End-to-End Tracing
 type: docs
 weight: 5
 ---
@@ -20,9 +20,9 @@ weight: 5
           <div class="h-100 card shadow">
                 <div class="card-body">
                     <h4 class="card-title">
-                        <a href='{{< relref "./zipkin/" >}}'>Zipkin 全链路追踪</a>
+                        <a href='{{< relref "./zipkin/" >}}'>Zipkin End-to-End Tracing</a>
                     </h4>
-                    <p>演示如果通过 Zipkin 实现对 Dubbo 服务的全链路追踪。
+                    <p>Demonstrates how to implement end-to-end tracing of Dubbo services using Zipkin.
                     </p>
                 </div>
             </div>
@@ -31,9 +31,9 @@ weight: 5
             <div class="h-100 card shadow">
                 <div class="card-body">
                     <h4 class="card-title">
-                        <a href='{{< relref "./skywalking/" >}}'>Skywalking 全链路追踪</a>
+                        <a href='{{< relref "./skywalking/" >}}'>Skywalking End-to-End Tracing</a>
                     </h4>
-                    <p>演示如果通过 Skywalking 实现对 Dubbo 服务的全链路追踪。
+                    <p>Demonstrates how to implement end-to-end tracing of Dubbo services using Skywalking.
                     </p>
                 </div>
             </div>
@@ -42,9 +42,9 @@ weight: 5
             <div class="h-100 card shadow">
                 <div class="card-body">
                     <h4 class="card-title">
-                        <a href='{{< relref "./otlp/" >}}'>OTlp 全链路追踪</a>
+                        <a href='{{< relref "./otlp/" >}}'>OTlp End-to-End Tracing</a>
                     </h4>
-                    <p>演示如果通过 OpenTelemetry 的 Otlp Collector 实现对 Dubbo 服务的全链路追踪。
+                    <p>Demonstrates how to implement end-to-end tracing of Dubbo services using the OpenTelemetry Otlp Collector.
                     </p>
                 </div>
             </div>
@@ -53,3 +53,4 @@ weight: 5
 <hr>
 </div>
 {{< /blocks/section >}}
+

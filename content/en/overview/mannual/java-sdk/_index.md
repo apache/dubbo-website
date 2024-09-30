@@ -3,32 +3,33 @@ aliases:
     - /en/docs3-v2/java-sdk/
     - /en/docs3-v2/java-sdk/
 content:
-    - 快速开始:
-        - description: 快速体验 Dubbo Java 微服务开发
-          name: '[Spring Boot 快速开发 Dubbo 服务](quick-start/starter/)'
-        - description: 配置参考手册
-          name: '[配置参考手册](reference-manual/config/)'
-    - 高级特性:
-        - description: 扩展 Filter、Router 拦截流量
-          name: '[扩展 Filter、Router 拦截流量](concepts-and-architecture/service-invocation/)'
-    - 参考手册:
-        - description: 注册中心配置指南
-          name: '[注册中心配置指南](reference-manual/registry/)'
-    - 升级与兼容性:
-        - description: 版本迁移指南
-          name: '[版本迁移指南](reference-manual/upgrades-and-compatibility/)'
-    - 历史版本文档:
-            - description: 历史版本文档
-              name: '[2.x 及早期版本文档](/en/docsv2.7/)'
-description: Java SDK 手册
+    - Quick Start:
+        - description: Experience Dubbo Java microservices development quickly
+          name: '[Spring Boot Quick Start for Dubbo Services](quick-start/starter/)'
+        - description: Configuration Reference Manual
+          name: '[Configuration Reference Manual](reference-manual/config/)'
+    - Advanced Features:
+        - description: Extend Filter and Router to intercept traffic
+          name: '[Extend Filter and Router to Intercept Traffic](concepts-and-architecture/service-invocation/)'
+    - Reference Manual:
+        - description: Registry Center Configuration Guide
+          name: '[Registry Center Configuration Guide](reference-manual/registry/)'
+    - Upgrades and Compatibility:
+        - description: Version Migration Guide
+          name: '[Version Migration Guide](reference-manual/upgrades-and-compatibility/)'
+    - Historical Version Documentation:
+            - description: Historical Version Documentation
+              name: '[2.x and Earlier Version Documentation](/en/docsv2.7/)'
+description: Java SDK Manual
 hide_feedback: true
 hide_summary: true
 linkTitle: Java SDK
 no_list: true
-title: Java SDK 手册
+title: Java SDK Manual
 type: docs
 weight: 1
 ---
 
 
 {{% docs/content_box %}}
+

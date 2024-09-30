@@ -2,9 +2,10 @@
 aliases:
     - /en/overview/tasks/observability/
     - /en/overview/tasks/observability/
-description: 基于 Admin、Metrics、Grafana 等可视化的观测集群状态。
-linkTitle: 观测服务
-title: 观测服务
+description: Observing cluster status based on Admin, Metrics, Grafana and other visualizations.
+linkTitle: Observability Service
+title: Observability Service
 type: docs
 weight: 4
 ---
+

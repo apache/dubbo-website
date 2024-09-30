@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/command/
     - /en/docs3-v2/java-sdk/reference-manual/qos/command/
-description: 基础命令手册
-linkTitle: 基础命令手册
-title: 基础命令手册
+description: Basic Command Manual
+linkTitle: Basic Command Manual
+title: Basic Command Manual
 type: docs
 weight: 2
 ---
@@ -13,16 +13,16 @@ weight: 2
 
 
 
-基础命令功能提供了一系列的基础命令。
+The basic command functionality provides a set of fundamental commands.
 
-### help 命令
+### help command
 
-显示更多命令
+Display more commands
 ```
-//列出所有命令
+// List all commands
 dubbo>help
 
-//列出单个命令的具体使用情况
+// List specific usage of a single command
 dubbo>help online
 +--------------+----------------------------------------------------------------------------------+
 | COMMAND NAME | online                                                                           |
@@ -34,9 +34,9 @@ dubbo>help online
 dubbo>
 ```
 
-### version 命令
+### version command
 
-显示当前运行的 Dubbo 的版本号
+Display the version number of the currently running Dubbo
 
 ```
 dubbo>version
@@ -45,9 +45,9 @@ dubbo version "3.0.10-SNAPSHOT"
 dubbo>
 ```
 
-### quit 命令
+### quit command
 
-退出命令状态
+Exit the command state
 
 ```
 dubbo>quit

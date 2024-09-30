@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/cluster/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/cluster/
-description: 集群扩展
-linkTitle: 集群扩展
-title: 集群扩展
+description: Cluster extension
+linkTitle: Cluster extension
+title: Cluster extension
 type: docs
 weight: 5
 ---
@@ -14,23 +14,23 @@ weight: 5
 
 
 
-## 扩展说明
+## Extension Description
 
-当有多个服务提供方时，将多个服务提供方组织成一个集群，并伪装成一个提供方。
+When there are multiple service providers, organize them into a cluster and masquerade as a single provider.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.rpc.cluster.Cluster`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:protocol cluster="xxx" />
-<!-- 缺省值配置，如果<dubbo:protocol>没有配置cluster时，使用此配置 -->
+<!-- Default configuration; if <dubbo:protocol> does not configure cluster, this configuration will be used -->
 <dubbo:provider cluster="xxx" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.rpc.cluster.support.wrapper.MockClusterWrapper`
 * `org.apache.dubbo.rpc.cluster.support.FailoverCluster`
@@ -43,9 +43,9 @@ weight: 5
 * `org.apache.dubbo.rpc.cluster.support.BroadcastCluster`
 * `org.apache.dubbo.rpc.cluster.support.registry.ZoneAwareCluster`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -53,14 +53,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxCluster.java (实现Cluster接口)
+                |-XxxCluster.java (implements Cluster interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.rpc.cluster.Cluster (纯文本文件，内容为：xxx=com.xxx.XxxCluster)
+                |-org.apache.dubbo.rpc.cluster.Cluster (plain text file with content: xxx=com.xxx.XxxCluster)
 ```
 
-XxxCluster.java：
+XxxCluster.java:
 
 ```java
 package com.xxx;
@@ -85,8 +85,9 @@ public class XxxCluster implements Cluster {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.rpc.cluster.Cluster：
+META-INF/dubbo/org.apache.dubbo.rpc.cluster.Cluster:
 
 ```properties
 xxx=com.xxx.XxxCluster
 ```
+

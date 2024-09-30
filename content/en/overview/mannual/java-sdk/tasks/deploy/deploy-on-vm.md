@@ -2,52 +2,52 @@
 aliases:
     - /en/overview/tasks/deploy/deploy-on-vm/
     - /en/overview/tasks/deploy/deploy-on-vm/
-description: "传统基于 Zookeeper、Nacos 的注册中心部署架构，部署 Dubbo 应用到虚拟机环境"
-linkTitle: 传统注册中心
-title: 传统基于 Zookeeper、Nacos 的注册中心部署架构，部署 Dubbo 应用到虚拟机环境
+description: "Traditional deployment architecture based on Zookeeper and Nacos for deploying Dubbo applications in a virtual machine environment"
+linkTitle: Traditional Registration Center
+title: Traditional deployment architecture based on Zookeeper and Nacos for deploying Dubbo applications in a virtual machine environment
 type: docs
 weight: 1
 ---
 
-下图是使用 Nacos、Zookeeper 作为注册中心的典型 Dubbo 微服务部署架构。
+The following diagram illustrates a typical Dubbo microservice deployment architecture using Nacos and Zookeeper as the registration center.
 
 <img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes.png" style="max-width:650px;height:auto;" />
 
-## 安装 Nacos
-请参考以下文档了解如何在本地 [安装 Nacos]()。
+## Install Nacos
+Please refer to the following documentation for how to [install Nacos]() locally.
 
-## 部署应用
-我们仍然以 [快速开始]() 中的项目为例，演示应用打包部署的具体步骤。
+## Deploy Application
+We will continue to use the project in [Quick Start]() as an example to demonstrate the detailed steps for application packaging and deployment.
 
-克隆示例项目到本地：
+Clone the sample project locally:
 ```shell
 $ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
 ````
 
-切换到示例目录：
+Switch to the sample directory:
 ```shell
 $ cd dubbo-samples/11-quickstart
 ```
 
-以下是两种打包部署模式：
+Here are two packaging and deployment modes:
 
-### 方式一：本地进程
+### Method 1: Local Process
 
-本地打包进程：
+Local packaging process:
 ```shell
 $ mvn clean package
 ```
 
-启动 Dubbo 进程：
+Start the Dubbo process:
 ```shell
 $ java -jar ./quickstart-service/target/quickstart-service-0.0.1-SNAPSHOT.jar
 ```
 
-{{% alert title="提示" color="primary" %}}
-为了程序正常运行，请确保 `application.yml` 文件中的注册中心地址已经正确指向你想要的注册中心。
+{{% alert title="Tip" color="primary" %}}
+To ensure the program runs correctly, please make sure the registration center address in the `application.yml` file is correctly pointing to the desired registration center.
 {{% /alert %}}
 
-### 方式二：docker容器
+### Method 2: Docker Container
 
 ```shell
 $ docker build -f ./Dockerfile -t quickstart
@@ -55,63 +55,62 @@ $ docker build -f ./Dockerfile -t quickstart
 
 ```shell
 $ docker run quickstart -p port1:port2
-# 对于一些端口或连接注册中心的细节要写清楚
+# Some port or connection details to the registration center need to be clarified
 ```
 
-{{% alert title="提示" color="primary" %}}
-Docker 容器环境下，不同容器间用于网络通信的地址需要特别关注，因此你可能需要设置 Dubbo 进程监听或者注册到注册中心的地址，请参考以下链接了解更多内容。
+{{% alert title="Tip" color="primary" %}}
+In a Docker container environment, special attention is needed for the addresses used for network communication between different containers. Therefore, you may need to set the address that the Dubbo process listens to or registers with the registration center. Please refer to the following link for more information.
 
-见 [dubbo 通过环境变量设置 host](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
+See [dubbo sets host through environment variables](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-docker)
 
-有些部署场景需要动态指定服务注册的地址，如 docker bridge 网络模式下要指定注册宿主机 ip 以实现外网通信。dubbo 提供了两对启动阶段的系统属性，用于设置对外通信的ip、port地址。
+Some deployment scenarios require dynamically specifying the service registration address, such as specifying the host machine IP to enable external communication in the Docker bridge network mode. Dubbo provides two pairs of system properties for the startup phase to set the external communication IP and port addresses.
 
-* **DUBBO_IP_TO_REGISTRY**：注册到注册中心的 ip 地址
-* **DUBBO_PORT_TO_REGISTRY**：注册到注册中心的 port 端口
-* **DUBBO_IP_TO_BIND**：监听 ip 地址
-* **DUBBO_PORT_TO_BIND**：监听 port 端口
+* **DUBBO_IP_TO_REGISTRY**: IP address registered with the registration center
+* **DUBBO_PORT_TO_REGISTRY**: Port registered with the registration center
+* **DUBBO_IP_TO_BIND**: IP address to listen on
+* **DUBBO_PORT_TO_BIND**: Port to listen on
 
-以上四个配置项均为可选项，如不配置 dubbo 会自动获取 ip 与端口，请根据具体的部署场景灵活选择配置。
-dubbo 支持多协议，如果一个应用同时暴露多个不同协议服务，且需要为每个服务单独指定 ip 或 port，请分别在以上属性前加协议前缀。 如：
+The above four configuration items are optional. If not configured, dubbo will automatically obtain IP and port. Please flexibly choose configurations based on specific deployment scenarios. Dubbo supports multiple protocols, and if an application exposes multiple different protocol services at the same time and needs to specify IP or port for each service separately, please prefix the above properties with the protocol prefix. For example:
 
-* **HESSIAN_DUBBO_PORT_TO_BIND**：hessian 协议绑定的 port
-* **DUBBO_DUBBO_PORT_TO_BIND**：dubbo 协议绑定的 port
-* **HESSIAN_DUBBO_IP_TO_REGISTRY**：hessian 协议注册的 ip
-* **DUBBO_DUBBO_IP_TO_REGISTRY**：dubbo 协议注册的 ip
+* **HESSIAN_DUBBO_PORT_TO_BIND**: Port bound for the hessian protocol
+* **DUBBO_DUBBO_PORT_TO_BIND**: Port bound for the dubbo protocol
+* **HESSIAN_DUBBO_IP_TO_REGISTRY**: IP for registering the hessian protocol
+* **DUBBO_DUBBO_IP_TO_REGISTRY**: IP for registering the dubbo protocol
 
-PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BIND，但是反过来是成立的。如：
+PORT_TO_REGISTRY or IP_TO_REGISTRY will not be used as the default PORT_TO_BIND or IP_TO_BIND, but the reverse is true. For example:
 
-* 设置 `PORT_TO_REGISTRY=20881` 和 `IP_TO_REGISTRY=30.5.97.6`，则 `PORT_TO_BIND` 和 `IP_TO_BIND` 不受影响
-* 设置 `PORT_TO_BIND=20881` 和 `IP_TO_BIND=30.5.97.6`，则默认 `PORT_TO_REGISTRY=20881`  且 `IP_TO_REGISTRY=30.5.97.6`
+* Setting `PORT_TO_REGISTRY=20881` and `IP_TO_REGISTRY=30.5.97.6` does not affect `PORT_TO_BIND` and `IP_TO_BIND`.
+* Setting `PORT_TO_BIND=20881` and `IP_TO_BIND=30.5.97.6`, then by default `PORT_TO_REGISTRY=20881` and `IP_TO_REGISTRY=30.5.97.6`.
 
 {{% /alert %}}
 
-### 查看部署状态
-安装并运行 dubbo-control-plane，查看本地服务部署状态：
+### Check Deployment Status
+Install and run dubbo-control-plane to check the local service deployment status:
 
-1. 下载安装包
+1. Download the installation package
 
 	```shell
 	$ curl -L https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/release/downloadDubbo.sh | sh -
 	$ cd dubbo-$version/bin
 	```
 
-2. 运行以下命令，启动 dubbo-control-plane 进程
+2. Run the following command to start the dubbo-control-plane process
 	```shell
 	$ ./dubbo-cp run
 	```
 
-{{% alert title="提示" color="primary" %}}
-为了 dubbo-control-plane 正常运行，请修改 `conf/dubbo-cp.yml` 以确保其指向你想要的注册中心。
+{{% alert title="Tip" color="primary" %}}
+To ensure dubbo-control-plane runs properly, please modify `conf/dubbo-cp.yml` to ensure it points to your desired registration center.
 {{% /alert %}}
 
-访问 `http://xxx` 查看服务部署详情。
+Visit `http://xxx` to view service deployment details.
 
-### 优雅上下线
-在使用传统注册中心的情况下，我们需要控制实例发布到注册中心、实例从注册中心摘除的时机，以实现优雅上下线：
-1. 上线阶段，通过 [延迟发布]() 机制控制实例注册到注册中心的时机，通过开启 [消费端预热]() 确保流量缓慢的被转发到新节点上。
-2. 下线阶段，通过配置 `prestop` 确保先从注册中心摘除实例注册信息，之后再进入进程销毁过程。
+### Graceful Online and Offline
+In the case of using a traditional registration center, we need to control the timing of when instances are published to the registration center and when instances are removed from the registration center to achieve a graceful online and offline:
+1. In the online phase, control the timing of instance registration to the registration center through the [delayed release]() mechanism and ensure that traffic is gradually forwarded to the new nodes through enabling [consumer preheating]().
+2. In the offline phase, configure `prestop` to ensure that instance registration information is first removed from the registration center, and then enter the process of destruction.
 
-在下线之前，建议调用以下 http 端口，先从注册中心摘除实例，然后再尝试停止进程
+Before going offline, it is recommended to call the following http port to remove the instance from the registration center first, then attempt to stop the process.
 
 ```shell
 $ curl http://offline

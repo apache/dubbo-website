@@ -2,95 +2,95 @@
 aliases:
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/
     - /en/docs3-v2/java-sdk/advanced-features-and-usage/observability/
-description: 可观测性
-linkTitle: 控制台
-title: 可观测性
+description: Observability
+linkTitle: Console
+title: Observability
 type: docs
 weight: 1
 ---
 
-管理 Dubbo 最直接的方式就是通过 Dubbo 控制面（即 dubbo-control-plane）提供的可视化界面，之前我们在[【快速开始 - 部署 Dubbo 应用】]()一文的最后，也有用到它查看服务启动后的状态。
+The most direct way to manage Dubbo is through the visual interface provided by the Dubbo control plane (dubbo-control-plane). In the previous article on [Quick Start - Deploying Dubbo Applications]() we also used it to check the status after the service was started.
 
-**`dubbo-control-plane` 支持可视化的展示、监控集群状态，还支持实时下发流量管控规则。**
+**`dubbo-control-plane` supports visual displays, monitoring cluster status, and real-time delivery of traffic control rules.**
 
-## 安装控制台
-为了体验效果，我们首先需要安装 dubbo-control-plane，以下是在 Linux 环境下安装 dubbo-control-plane 的具体步骤：
-1. 下载 & 解压
+## Installing the Console
+To experience the effects, we first need to install dubbo-control-plane. Here are the specific steps to install dubbo-control-plane in a Linux environment:
+1. Download & Extract
     ```shell
     curl -L https://dubbo.apache.org/releases/downloadDubbo.sh | sh -
 
     cd dubbo-$version
     export PATH=$PWD/bin:$PATH
     ```
-2. 安装
+2. Install
     ```shell
     dubbo-cp run --mode universal --config conf/dubbo.yml
     ```
-    注意，`conf/dubbo.yml` 配置需要按需调整，指向你要连接的注册中心等后台服务，具体请查看 dubbo-control-plane 架构中依赖的后台服务。
-3. 访问 `http://xxx` 即可打开控制台页面。
-    ![页面截图]()
+    Note that the `conf/dubbo.yml` configuration needs to be adjusted according to your needs to point to the registry and other backend services you want to connect to. For specifics, please refer to the backend services dependent on the dubbo-control-plane architecture.
+3. Access `http://xxx` to open the console page.
+    ![Page Screenshot]()
 
-{{% alert title="注意" color="info" %}}
-* 请查看文档了解 dubbo-control-plane 详细安装步骤，包括多个平台的安装方法与配置指导。
-* 对于 Kubernetes 环境下的 Dubbo 服务开发（包括 dubbo-control-plane 安装），我们有专门的章节说明，对于 Kubernetes 环境下的开发者可以去参考。
+{{% alert title="Note" color="info" %}}
+* Please refer to the documentation for detailed installation steps of dubbo-control-plane, including installation methods and configuration guidance for multiple platforms.
+* For Dubbo service development in Kubernetes environments (including dubbo-control-plane installation), we have a dedicated section explaining this for developers working in Kubernetes environments.
 {{% /alert %}}
 
-## 功能介绍
-Admin 控制台提供了从开发、测试到流量治理等不同层面的丰富功能，功能总体上可分为以下几类：
-* 服务状态与依赖关系查询
-* 服务在线测试与文档管理
-* 集群状态监控
-* 实例诊断
-* 流量管控
+## Feature Introduction
+The Admin console provides rich features across different levels from development, testing, to traffic governance. The functions can generally be categorized as follows:
+* Service status and dependency query
+* Online service testing and documentation management
+* Cluster status monitoring
+* Instance diagnostics
+* Traffic control
 
-### 服务状态与依赖关系查询
-服务状态查询以接口为维度展示 dubbo 集群信息，包含服务提供者、消费者信息和服务的元数据等。元数据包含了服务定义、方法名和参数列表等信息。Admin 支持最新版本 dubbo3 所提供的应用级发现模型，以统一的页面交互展示了应用级&接口级地址信息，并以特殊的标记对记录进行区分。
+### Service Status and Dependency Query
+Service status queries display dubbo cluster information with interfaces as the dimension, including service provider, consumer information, and service metadata. Metadata includes service definitions, method names, and parameter lists. Admin supports the application-level discovery model provided by the latest version of dubbo3, presenting application-level & interface-level address information in a unified page interaction, and differentiating records with special tags.
 
-#### 基于服务名查询
+#### Query by Service Name
 ![img](/imgs/v3/tasks/observability/admin/1-search-by-service.png)
 
-#### 基于应用名查询
+#### Query by Application Name
 ![img](/imgs/v3/tasks/observability/admin/1-search-by-appname.png)
 
-#### 基于实例地址查询
+#### Query by Instance Address
 ![img](/imgs/v3/tasks/observability/admin/1-search-by-ip.png)
 
-#### 服务实例详情
+#### Service Instance Details
 ![img](/imgs/v3/tasks/observability/admin/1-service-detail.png)
 
-### 服务在线测试与文档管理
-#### 服务测试
-服务测试相，主要用于模拟服务消费方，验证 Dubbo 服务的使用方式与正确性。
+### Online Service Testing and Documentation Management
+#### Service Testing
+Service testing is mainly used to simulate service consumers, verifying the usage and correctness of Dubbo services.
 
 ![img](/imgs/v3/tasks/observability/admin/2-service-test2.png)
 
 ![img](/imgs/v3/tasks/observability/admin/2-service-test.png)
 
-#### 服务 Mock
-服务Mock通过无代码嵌入的方式将Consumer对Provider的请求进行拦截，动态的对Consumer的请求进行放行或返回用户自定义的Mock数据。从而解决在前期开发过程中，Consumer所依赖的Provider未准备就绪时，造成Consumer开发方的阻塞问题。
-只需要以下两步，即可享受服务Mock功能带来的便捷：
+#### Service Mock
+Service Mock interrupts requests from Consumer to Provider without code embedding, dynamically allowing or returning user-defined Mock data. This resolves blocking issues faced by Consumer developers when the Provider they depend on is not ready in the early stages of development.
+Simply follow these two steps to enjoy the convenience brought by service Mock:
 
-第一步：
-Consumer应用引入服务Mock依赖，添加JVM启动参数-Denable.dubbo.admin.mock=true开启服务Mock功能。
+First step:
+Consumer applications import service Mock dependencies, adding JVM startup parameter -Denable.dubbo.admin.mock=true to enable service Mock functionality.
 ```xml
-<denpendency>
+<dependency>
   <groupId>org.apache.dubbo.extensions</groupId>
   <artifactId>dubbo-mock-admin</artifactId>
   <version>${version}</version>
-</denpendency>
+</dependency>
 ```
 
-第二步：在Dubbo Admin中配置对应的Mock数据。
+Second step: Configure the corresponding Mock data in Dubbo Admin.
 
 ![img](/imgs/v3/tasks/observability/admin/2-service-mock.png)
 
-#### 服务文档管理
-Admin 提供的接口文档，相当于 swagger 对于 RESTful 风格的 Web 服务的作用。使用该功能可以有效的管理 Dubbo 接口文档。
+#### Service Documentation Management
+The interface documentation provided by Admin is similar to what Swagger does for RESTful style web services. This function effectively manages Dubbo interface documentation.
 
 ![img](/imgs/v3/tasks/observability/admin/2-service-doc.png)
 
-### 集群状态监控
-#### 首页大盘
+### Cluster Status Monitoring
+#### Home Dashboard
 TBD
 
 #### Grafana
@@ -99,14 +99,14 @@ TBD
 #### Tracing
 ![img](/imgs/v3/tasks/observability/admin/3-tracing-zipkin.png)
 
-### 流量管控
-Admin 提供了四种路由规则的可视化管理支持，分别是条件路由规则、标签路由规则、动态配置规则、脚本路由规则，所提供的功能可以轻松实现黑白名单、灰度环境隔离、多套测试环境、金丝雀发布等服务治理诉求。接下来以条件路由为例，可以可视化的创建条件路由规则。
+### Traffic Control
+Admin provides visual management support for four types of routing rules: conditional routing rules, label routing rules, dynamic configuration rules, and script routing rules. The functionality offered easily realizes service governance needs such as black and white lists, gray environment isolation, multiple testing environments, and canary releases. Next, we take conditional routing as an example to visually create conditional routing rules.
 
-#### 条件路由
+#### Conditional Routing
 
-条件路由可以编写一些自定义路由规则实现服务治理的需求比如同区域优先、参数路由、黑白名单、读写分离等。路由规则在发起一次RPC调用前起到过滤目标服务器地址的作用，过滤后的地址列表，将作为消费端最终发起RPC调用的备选地址。
+Conditional routing allows for custom routing rules to meet service governance needs, such as priority by region, parameter routing, black and white lists, and read-write separation. The routing rules filter target server addresses before initiating an RPC call, and the filtered address list will serve as candidate addresses for the consumer to initiate the RPC call.
 
 ![img](/imgs/v3/tasks/observability/admin/4-traffic-management.png)
 
-请参考 [流量管控任务](../../traffic-management/) 中关于如何进行路由规则配置的更多详细描述。
+Please refer to [Traffic Management Tasks](../../traffic-management/) for more details on configuring routing rules.
 

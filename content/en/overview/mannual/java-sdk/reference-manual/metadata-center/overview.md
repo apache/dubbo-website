@@ -2,30 +2,28 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/metadata-center/overview/
     - /en/docs3-v2/java-sdk/reference-manual/metadata-center/overview/
-description: 元数据中心概述
-linkTitle: 元数据中心概述
-title: 元数据中心概述
+description: Overview of the Metadata Center
+linkTitle: Overview of the Metadata Center
+title: Overview of the Metadata Center
 type: docs
 weight: 1
 ---
 
 
-元数据中心为 Dubbo 中的两类元数据提供了存取能力
-- 1 地址发现元数据，用于应用级服务发现
-- 2 服务运维元数据，用于外围运维系统如可视化控制台进行服务查询、测试等。
+The Metadata Center provides access to two types of metadata in Dubbo:
+- 1. Address discovery metadata, used for application-level service discovery.
+- 2. Service operation and maintenance metadata, used for peripheral operation and maintenance systems such as visualization consoles for service queries, testing, etc.
 
-## 1 地址发现元数据
-Dubbo3 中引入了 [应用级服务发现机制](/en/overview/core-features/service-discovery/#面向百万实例集群的服务发现机制) 用来解决异构微服务体系互通与大规模集群实践的性能问题，应用级服务发现将全面取代 2.x 时代的接口级服务发现。
-同时为了保持 Dubbo 面向服务/接口的易用性、服务治理的灵活性，Dubbo 围绕应用级服务发现构建了一套元数据机制，即 `接口 - 应用映射关系` 与 `接口配置元数据`。
+## 1 Address Discovery Metadata
+Dubbo3 introduces the [application-level service discovery mechanism](/en/overview/core-features/service-discovery/#服务发现机制面向百万实例集群) to address performance issues in heterogeneous microservice systems and large-scale cluster practices. Application-level service discovery will fully replace the interface-level service discovery of version 2.x. To maintain Dubbo's usability oriented towards services/interfaces and flexibility in service governance, Dubbo has built a metadata mechanism around application-level service discovery, specifically `interface-application mapping relations` and `interface configuration metadata`.
 
-### 1.1 接口 - 应用映射关系
-Dubbo 一直以来都能做到精确的地址发现，即只订阅 Consumer 声明要关心的服务及相关的地址列表，相比于拉取/订阅全量地址列表，这样做有很好的性能优势。
-在应用级服务发现模型中，想做到精确地址订阅并不容易，因为 Dubbo Consumer 只声明了要消费的接口列表，Consumer 需要能够将接口转换为 Provider 应用名才能进行精准服务订阅，
+### 1.1 Interface-Application Mapping Relation
+Dubbo has always been capable of precise address discovery, subscribing only to the list of services and addresses declared by the Consumer. Achieving precise address subscription in the application-level service discovery model is not easy, as the Dubbo Consumer only declares the list of interfaces to consume. Therefore, the Consumer needs to convert the interface into the Provider's application name for accurate service subscription.
 
-为此，Dubbo 需要在元数据中心维护这一份 `接口名->应用名` 的对应关系，Dubbo3 中通过 provider 启动的时候主动向元数据中心上报实现。
-接口 (service name) - 应用 (Provider application name) 的映射关系可以是一对多的，即一个 service name 可能会对应多个不同的 application name。
+For this, Dubbo must maintain this mapping of `interface name -> application name` in the metadata center, reported actively by the provider during startup in Dubbo3.
+The mapping relation of interfaces (service names) to applications (Provider application names) can be one-to-many, where one service name may correspond to multiple application names.
 
-以 zookeeper 为例，映射关系保存在以下位置:
+Taking Zookeeper as an example, the mapping is stored in the following location:
 
 ```shell
 $ ./zkCli.sh
@@ -33,22 +31,22 @@ $ get /dubbo/mapping/org.apache.dubbo.demo.DemoService
 $ demo-provider,two-demo-provider,dubbo-demo-annotation-provider
 ```
 
-*① 节点路径是 `/dubbo/mapping/{interface name}`*
+*① The node path is `/dubbo/mapping/{interface name}`*
 
-*② 多个应用名通过英文逗号 `,` 隔开*
+*② Multiple application names are separated by a comma `,`*
 
-### 1.2 接口配置元数据
+### 1.2 Interface Configuration Metadata
 
-`接口级配置元数据`是作为地址发现的补充，相比于 Spring Cloud 等地址发现模型只能同步 ip、port 信息，Dubbo 的服务发现机制可以同步接口列表、接口定义、接口级参数配置等信息。
-这部分内容根据当前应用的自身信息、以及接口信息计算而来，并且从性能角度出发，还根据元数据生成 revision，以实现不同机器实例间的元数据聚合。
+`Interface-level configuration metadata` supplements address discovery. Unlike address discovery models like Spring Cloud, which can only sync IP and port information, Dubbo's service discovery mechanism can sync interface lists, interface definitions, and interface-level parameter configurations.
+This part of the content is calculated based on the application's current information and interface information. Moreover, from a performance perspective, it generates metadata revisions for metadata aggregation across different machine instances.
 
-> 可通过设置 `dubbo.metadata-report.report-metadata=false` 关闭元数据上报。
+> Metadata reporting can be disabled by setting `dubbo.metadata-report.report-metadata=false`.
 
-以 Zookeeper 为例，接口配置元数据保存在以下位置，如果多个实例生成的 revision 相同，则最终会共享同一份元数据配置：
+Using Zookeeper as an example, the interface configuration metadata is stored in the following location. If multiple instances generate the same revision, they will eventually share the same metadata configuration:
 
 `/dubbo/metadata/{application name}/{revision}`
 
-```shell script
+```bash
 [zk: localhost:2181(CONNECTED) 33] get /dubbo/metadata/demo-provider/da3be833baa2088c5f6776fb7ab1a436
 ```
 
@@ -112,16 +110,16 @@ $ demo-provider,two-demo-provider,dubbo-demo-annotation-provider
 }
 ```
 
-## 2 服务运维元数据
+## 2 Service Operation and Maintenance Metadata
 
-Dubbo 上报的服务运维元数据通常为各种运维系统所用，如服务测试、网关数据映射、服务静态依赖关系分析等。
+The service operation and maintenance metadata reported by Dubbo is typically used by various operation and maintenance systems, such as service testing, gateway data mapping, and service static dependency analysis.
 
-各种第三方系统可直接读取并使用这部分数据，具体对接方式可参见本章提及的几个第三方系统。
+Various third-party systems can directly read and use this part of the data; specific integration methods can refer to the several third-party systems mentioned in this chapter.
 
-> 可通过设置 `dubbo.metadata-report.report-definition=false` 关闭元数据上报。
+> Metadata reporting can be disabled by setting `dubbo.metadata-report.report-definition=false`.
 
-### 2.1 Provider 上报的元数据
-provider端存储的元数据内容如下：
+### 2.1 Metadata Reported by Providers
+The metadata content stored on the provider side is as follows:
 
 ```json
 {
@@ -166,11 +164,11 @@ provider端存储的元数据内容如下：
 }
 ```
 
-*① `parameters` 为服务配置与参数详情。*
+*① `parameters` are details of service configuration and parameters.*
 
-*② `types` 为服务定义信息。*
+*② `types` contains service definition information.*
 
-##### Consumer 上报的元数据：
+##### Metadata Reported by Consumers:
 
 ```json
 {
@@ -187,31 +185,32 @@ provider端存储的元数据内容如下：
 }
 ```
 
-*Consumer 进程订阅时使用的配置元数据。*
+*Configuration metadata used when the Consumer process subscribes.*
 
-## 3 元数据上报工作机制
+## 3 Metadata Reporting Work Mechanism
 
-元数据上报默认是一个异步的过程，为了更好的控制异步行为，元数据配置组件 (metadata-report) 开放了两个配置项：
-* 失败重试
-* 每天定时重试刷新
+Metadata reporting is an asynchronous process by default. To better control asynchronous behavior, the metadata reporting component (metadata-report) exposes two configuration items:
+* Failure retry
+* Daily scheduled retry refresh
 
-### 3.1 retrytimes 失败重试
-失败重试可以通过 retrytimes （重试次数。默认 100），retryperiod（重试周期。默认 3000ms）进行设置。
+### 3.1 retrytimes Failure Retry
+Failure retry can be set through retrytimes (number of retries, default 100) and retryperiod (retry period, default 3000ms).
 
-### 3.2 定时刷新
-默认开启，可以通过设置 cycleReport=false 进行关闭。
+### 3.2 Scheduled Refresh
+Enabled by default, can be disabled by setting cycleReport=false.
 
-### 3.3 完整的配置项
+### 3.3 Complete Configuration Items
 
 ```properties
 dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
-dubbo.metadata-report.username=xxx         ##非必须
-dubbo.metadata-report.password=xxx         ##非必须
-dubbo.metadata-report.retry-times=30       ##非必须,default值100
-dubbo.metadata-report.retry-period=5000    ##非必须,default值3000
-dubbo.metadata-report.cycle-report=false   ##非必须,default值true
-dubbo.metadata-report.sync.report=false    ##非必须,default值为false
+dubbo.metadata-report.username=xxx         ## optional
+dubbo.metadata-report.password=xxx         ## optional
+dubbo.metadata-report.retry-times=30       ## optional, default is 100
+dubbo.metadata-report.retry-period=5000    ## optional, default is 3000
+dubbo.metadata-report.cycle-report=false   ## optional, default is true
+dubbo.metadata-report.sync.report=false    ## optional, default is false
 ```
-> 如果元数据地址(dubbo.metadata-report.address)也不进行配置，会判断注册中心的协议是否支持元数据中心，如果支持，会使用注册中心的地址来用作元数据中心。
+> If the metadata address (dubbo.metadata-report.address) is not configured, it will judge whether the protocol of the registry center supports the metadata center. If supported, it will use the registry center's address as the metadata center.
 
-请参见 [metadata-report](../../spi/description/metadata-report/) 了解如何扩展自定义第三方实现。
+Please refer to [metadata-report](../../spi/description/metadata-report/) for details on how to extend custom third-party implementations.
+

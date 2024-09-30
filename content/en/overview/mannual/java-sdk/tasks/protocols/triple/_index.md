@@ -2,10 +2,10 @@
 aliases:
     - /en/overview/tasks/protocols/
     - /en/overview/tasks/protocols/
-description: "演示了如何开发基于 `triple` 协议通信的服务。"
+description: "Demonstrates how to develop services based on `triple` protocol communication."
 hide: true
-linkTitle: triple协议
-title: "基于 HTTP1/2 的 RPC 通信协议 - triple"
+linkTitle: triple protocol
+title: "RPC Communication Protocol Based on HTTP1/2 - triple"
 type: docs
 weight: 2
 ---

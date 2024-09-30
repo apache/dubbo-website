@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/qos-permission/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/qos-permission/
-description: QoS匿名访问权限验证扩展
-linkTitle: QoS匿名访问权限验证扩展
-title: QoS匿名访问权限验证扩展
+description: QoS Anonymous Access Permission Verification Extension
+linkTitle: QoS Anonymous Access Permission Verification Extension
+title: QoS Anonymous Access Permission Verification Extension
 type: docs
 weight: 27
 ---
@@ -14,26 +14,26 @@ weight: 27
 
 
 
-## 扩展说明
+## Extension Description
 
-QoS匿名访问权限验证扩展点。
+QoS anonymous access permission verification extension point.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.qos.permission.PermissionChecker`
 
-## 扩展配置
+## Extension Configuration
 
 
-Dubbo QoS `dubbo.application.qos-anonymous-access-permission-level` 匿名访问权限校验。
+Dubbo QoS `dubbo.application.qos-anonymous-access-permission-level` anonymous access permission verification.
 
-## 默认实现
+## Default Implementation
 
 `org.apache.dubbo.qos.permission.DefaultAnonymousAccessPermissionChecker`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -41,14 +41,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxPermissionChecker.java (实现PermissionChecker接口)
+                |-XxxPermissionChecker.java (Implementing the PermissionChecker interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.qos.permission.PermissionChecker` (纯文本文件，内容为：qosPermissionChecker=com.xxx.XxxPermissionChecker)
+                |-org.apache.dubbo.qos.permission.PermissionChecker` (Plain text file, content: qosPermissionChecker=com.xxx.XxxPermissionChecker)
 ```
 
-XxxPermissionChecker.java：
+XxxPermissionChecker.java:
 
 ```java
 package com.xxx.qos.permission;
@@ -64,8 +64,9 @@ public class XxxAnonymousAccessPermissionChecker implements PermissionChecker {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.qos.permission.PermissionChecker：
+META-INF/dubbo/org.apache.dubbo.qos.permission.PermissionChecker:
 
 ```properties
 qosPermissionChecker=com.xxx.XxxPermissionChecker
 ```
+

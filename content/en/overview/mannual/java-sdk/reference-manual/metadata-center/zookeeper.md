@@ -3,7 +3,7 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/metadata-center/zookeeper/
     - /en/docs3-v2/java-sdk/reference-manual/metadata-center/zookeeper/
     - /en/overview/what/ecosystem/metadata-center/zookeeper/
-description: Zookeeper 元数据中心基本使用与工作原理
+description: Basic usage and working principle of Zookeeper metadata center
 linkTitle: Zookeeper
 title: Zookeeper
 type: docs
@@ -11,23 +11,23 @@ weight: 3
 ---
 
 
-## 1 预备工作
-- 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/spring-boot/)
-- 安装并启动 [Zookeeper](/en/overview/reference/integrations/zookeeper/)
+## 1 Preparation
+- Understand [Dubbo Basic Development Steps](/en/overview/mannual/java-sdk/quick-start/spring-boot/)
+- Install and start [Zookeeper](/en/overview/reference/integrations/zookeeper/)
 
-## 2 使用说明
+## 2 Instructions
 
-### 2.1 增加 Maven 依赖
-如果项目已经启用 Zookeeper 作为注册中心，则无需增加任何额外配置。
+### 2.1 Adding Maven Dependency
+If the project has already enabled Zookeeper as the registry center, no additional configuration is needed.
 
-如果未使用 Zookeeper 注册中心，则请参考 [为注册中心增加 Zookeeper 相关依赖](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-增加-maven-依赖)。
+If Zookeeper is not used as the registry center, please refer to [Add Zookeeper-related dependencies for the registry center](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-add-maven-dependency).
 
-### 2.2 启用 Zookeeper 配置中心
+### 2.2 Enable Zookeeper Configuration Center
 ```xml
 <dubbo:metadata-report address="zookeeper://127.0.0.1:2181"/>
 ```
 
-或者
+or
 
 ```yaml
 dubbo
@@ -35,42 +35,42 @@ dubbo
     address: zookeeper://127.0.0.1:2181
 ```
 
-或者
+or
 
 ```properties
 dubbo.metadata-report.address=zookeeper://127.0.0.1:2181
 ```
 
-或者
+or
 
 ```java
 MetadataReportConfig metadataConfig = new MetadataReportConfig();
 metadataConfig.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-`address` 格式请参考 [zookeeper 注册中心 - 启用配置](../../registry/zookeeper/#22-配置并启用-zookeeper)
+For the format of `address`, please refer to [zookeeper register center - Enable Configuration](../../registry/zookeeper/#22-configure-and-enable-zookeeper)
 
-## 3 高级配置
+## 3 Advanced Configuration
 
-完整配置参数请参考 [metadata-report-config](/en/overview/mannual/java-sdk/reference-manual/config/properties/#dubbometadata-report)。
+For complete configuration parameters, please refer to [metadata-report-config](/en/overview/mannual/java-sdk/reference-manual/config/properties/#dubbometadata-report).
 
-## 4 工作原理
+## 4 Working Principle
 
-### 4.1 [服务运维元数据](../overview/#2-服务运维元数据)
+### 4.1 [Service Operation Metadata](../overview/#2-service-operation-metadata)
 
-Zookeeper 基于树形结构进行数据存储，它的元数据信息位于以下节点:
+Zookeeper stores data based on a tree structure, and its metadata information is located at the following nodes:
 ```text
 Provider: /dubbo/metadata/{interface name}/{version}/{group}/provider/{application name}
 Consumer: /dubbo/metadata/{interface name}/{version}/{group}/consumer/{application name}
 ```
 
-当 version 或者 group 不存在时，version 路径和 group 路径会取消，路径如下:
+When version or group does not exist, the version path and group path will be removed, paths are as follows:
 ```text
 Provider: /dubbo/metadata/{interface name}/provider/{application name}
 Consumer: /dubbo/metadata/{interface name}/consumer/{application name}
 ```
 
-通过 zkCli get 操作查看数据.
+Use zkCli get command to view data.
 
 Provider node:
 ```shell script
@@ -106,14 +106,13 @@ dataLength = 219
 numChildren = 0
 ```
 
-### 4.2 [地址发现 - 接口-应用名映射](../overview/#11-接口---应用映射关系)
-在Dubbo 3.0 中，默认使用了服务自省机制去实现服务发现，关于服务自省可以查看[服务自省](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
+### 4.2 [Address Discovery - Interface-Application Name Mapping](../overview/#11-interface---application-mapping-relationship)
+In Dubbo 3.0, the service introspection mechanism is used by default to achieve service discovery. For service introspection, you can refer to [Service Introspection](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
 
-简而言之，服务自省机制需要能够通过 interface name 去找到对应的 application name，这个关系可以是一对多的，即一个 service name 可能会对应多个不同的 application name。在 3.0 中，元数据中心提供此项映射的能力。
-
+In short, the service introspection mechanism needs to find the corresponding application name through the interface name. This relationship can be one-to-many, meaning a service name may correspond to multiple different application names. In 3.0, the metadata center provides this mapping capability.
 
 ##### Zookeeper
-在上面提到，service name 和 application name 可能是一对多的，在 zookeeper 中，使用单个 key-value 进行保存，多个 application name 通过英文逗号`,`隔开。由于是单个 key-value 去保存数据，在多客户端的情况下可能会存在并发覆盖的问题。因此，我们使用 zookeeper 中的版本机制 version 去解决该问题。在 zookeeper 中，每一次对数据进行修改，dataVersion 都会进行增加，我们可以利用 version 这个机制去解决多个客户端同时更新映射的并发问题。不同客户端在更新之前，先去查一次 version，当作本地凭证。在更新时，把凭证 version 传到服务端比对 version, 如果不一致说明在此期间被其他客户端修改过，重新获取凭证再进行重试(CAS)。目前如果重试6次都失败的话，放弃本次更新映射行为。
+As mentioned above, service name and application name may be one-to-many. In Zookeeper, a single key-value pair is used for storage, with multiple application names separated by commas `,`. Since it is a single key-value for data storage, there may be concurrent overwrite issues in a multi-client scenario. Therefore, we use Zookeeper's version mechanism to address this issue. In Zookeeper, each modification to data increases the dataVersion, allowing the use of the version mechanism to resolve concurrent issues during updates by multiple clients. Different clients check the version before updating, treating it as a local credential. During the update, the version credential is sent to the server for comparison. If they do not match, it indicates modification by another client, and the credential should be re-obtained for retry (CAS). Currently, if 6 retries fail, the update mapping action is abandoned.
 
 Curator api.
 ```java
@@ -121,12 +120,12 @@ CuratorFramework client = ...
 client.setData().withVersion(ticket).forPath(path, dataBytes);
 ```
 
-映射信息位于:
+Mapping information is located at:
 ```text
 /dubbo/mapping/{service name}
 ```
 
-通过 zkCli get 操作查看数据.
+Use zkCli get command to view data.
 
 ```shell script
 [zk: localhost:2181(CONNECTED) 26] get /dubbo/mapping/org.apache.dubbo.demo.DemoService
@@ -144,22 +143,22 @@ dataLength = 62
 numChildren = 0
 ```
 
-### 4.3 [地址发现 - 接口配置元数据](../overview/#12-接口配置元数据)
+### 4.3 [Address Discovery - Interface Configuration Metadata](../overview/#12-interface-configuration-metadata)
 
-要开启远程接口配置元数据注册，需在应用中增加以下配置，因为默认情况下 Dubbo3 应用级服务发现会启用服务自省模式，并不会注册数据到元数据中心。
+To enable remote interface configuration metadata registration, the following configuration must be added to the application, as by default Dubbo3 application-level service discovery will enable service introspection mode and will not register data to the metadata center.
 
 ```properties
  dubbo.application.metadata-type=remote
  ```
 
-或者，在自省模式下仍开启中心化元数据注册
+Or to enable centralized metadata registration while in introspection mode
 
 ```properties
 dubbo.application.metadata-type=local
 dubbo.metadata-report.report-metadata=true
 ```
 
-Zookeeper 的应用级别元数据位于 /dubbo/metadata/{application name}/{revision}
+The application-level metadata in Zookeeper is located at /dubbo/metadata/{application name}/{revision}
 
 ```shell script
 [zk: localhost:2181(CONNECTED) 33] get /dubbo/metadata/demo-provider/da3be833baa2088c5f6776fb7ab1a436
@@ -176,3 +175,4 @@ ephemeralOwner = 0x0
 dataLength = 1286
 numChildren = 0
 ```
+

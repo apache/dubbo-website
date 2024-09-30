@@ -2,60 +2,60 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
     - /en/docs3-v2/java-sdk/reference-manual/protocol/triple/streaming/
-description: "演示了服务端流、双向流等 Streaming 流式通信的基本使用方法。"
-linkTitle: Streaming流式通信
-title: Streaming 通信
+description: "Demonstrates basic usage of Streaming communication such as server streaming, bidirectional streaming, etc."
+linkTitle: Streaming Communication
+title: Streaming Communication
 type: docs
 weight: 4
 ---
-在 [选择 RPC 通信协议](../../protocol/) 一节提到，Streaming 是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:
+In the section [Choosing RPC Communication Protocol](../../protocol/), it is mentioned that Streaming is a new RPC data transmission model provided by Dubbo3, suitable for the following scenarios:
 
-- 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
-- 流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的
-- 推送类场景，多个消息在同一个调用的上下文中被发送和处理
+- The interface needs to send a large amount of data that cannot be placed in a single RPC request or response and needs to be sent in batches. If the application layer cannot solve sequence and performance issues using traditional multiple RPC methods, it can only be sent serially to ensure order.
+- In streaming scenarios, data needs to be processed in the order it is sent, and the data itself does not have fixed boundaries.
+- In push scenarios, multiple messages are sent and processed within the same call context.
 
-Streaming 分为以下三种:
-- SERVER_STREAM(服务端流)
-- CLIENT_STREAM(客户端流)
-- BIDIRECTIONAL_STREAM(双向流)
+Streaming is divided into the following three types:
+- SERVER_STREAM
+- CLIENT_STREAM
+- BIDIRECTIONAL_STREAM
 
-以下示例演示 triple streaming 流式通信的基本使用方法，涵盖了客户端流、服务端流、双向流等三种模式，示例使用 Protocol Buffers 的服务开发模式，对于 Java 接口模式的开发者可以在本文最后查看相应说明。可在此查看 [本示例完整代码](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-streaming)。
+The following example demonstrates the basic usage of triple streaming communication, covering client streams, server streams, bidirectional streams, etc. The example uses the service development model of Protocol Buffers; developers using the Java interface model can refer to the corresponding instructions at the end of this article. You can view [the complete code for this example](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-triple-streaming).
 
-## 运行示例
+## Running the Example
 
-首先，可通过以下命令下载示例源码：
+First, download the example source code using the following command:
 ```shell
 git clone --depth=1 https://github.com/apache/dubbo-samples.git
 ```
 
-进入示例源码目录：
+Navigate to the example source directory:
 ```shell
 cd dubbo-samples/2-advanced/dubbo-samples-triple-streaming
 ```
 
-编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：
+Compile the project, generating code from IDL, which will call the protoc plugin provided by Dubbo to generate the corresponding service definition code:
 ```shell
 mvn clean compile
 ```
 
-### 启动server
+### Start Server
 
-运行以下命令，启动 server：
+Run the following command to start the server:
 ```shell
 $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.streaming.TriStreamServer"
 ```
 
-#### 启动client
-运行以下命令，启动 client：
+#### Start Client
+Run the following command to start the client:
 
 ```shell
 $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.streaming.TriStreamClient"
 ```
 
-## 源码解读
-与 [使用 Protobuf(IDL) 开发 triple 协议服务](../idl/) 一节中提到的一样，这个示例使用 protobuf 定义服务，因此示例需要的依赖、配置等基本是一致的，请参考那一节了解完整详情。接下来，我们将重点讲解流式通信部分的内容。
+## Source Code Interpretation
+As mentioned in the section [Using Protobuf (IDL) to Develop Triple Protocol Services](../idl/), this example uses protobuf to define services, so the dependencies and configurations required by the example are basically the same; please refer to that section for complete details. Next, we will focus on the streaming communication part.
 
-### protobuf服务定义
+### Protobuf Service Definition
 
 ```protobuf
 syntax = "proto3";
@@ -75,14 +75,14 @@ service Greeter{
 }
 ```
 
-在上面的 proto 文件中，我们定义了两个方法：
-* `biStream(stream GreeterRequest) returns (stream GreeterReply)` 双向流
-* `serverStream(GreeterRequest) returns (stream GreeterReply)` 服务端流
+In the above proto file, we define two methods:
+* `biStream(stream GreeterRequest) returns (stream GreeterReply)` bidirectional stream
+* `serverStream(GreeterRequest) returns (stream GreeterReply)` server stream
 
-### 生成代码
-接下来，我们需要从 .proto 服务定义生成 Dubbo 客户端和服务器接口。protoc dubbo 插件可以帮助我们生成需要的代码，在使用 Gradle 或 Maven 时，protoc 构建插件可以生成必要的代码作为构建的一部分。具体 maven 配置及代码生成步骤我们在 [上一节](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 中有具体的描述。
+### Generate Code
+Next, we need to generate Dubbo client and server interfaces from the .proto service definition. The protoc dubbo plugin can help us generate the required code, and when using Gradle or Maven, the protoc build plugin can generate necessary code as part of the build. Specific Maven configurations and code generation steps are described in [the previous section](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/).
 
-target/generated-sources/protobuf/java/org/apache/dubbo/samples/tri/streaming/ 目录中可以发现如下生成代码，其中我们将重点讲解 `DubboGreeterTriple.java`：
+In the target/generated-sources/protobuf/java/org/apache/dubbo/samples/tri/streaming/ directory, you can find the following generated code, where we will focus on `DubboGreeterTriple.java`:
 
 ```
 ├── DubboGreeterTriple.java
@@ -95,23 +95,23 @@ target/generated-sources/protobuf/java/org/apache/dubbo/samples/tri/streaming/ �
 ```
 
 ### Server
-首先，让我们看一下如何定义服务实现并启动提供者：
-1. 实现 IDL 代码生成过程中定义的服务基类，提供自定义的业务逻辑。
-2. 运行 Dubbo 服务以侦听来自客户端的请求并返回服务响应。
+First, let's look at how to define the service implementation and start the provider:
+1. Implement the service base class defined during the IDL code generation process, providing custom business logic.
+2. Run the Dubbo service to listen for requests from clients and return service responses.
 
-#### 提供服务实现 GreeterImplBase
-定义类 `GreeterImpl` 实现 `DubboGreeterTriple.GreeterImplBase`。
+#### Provide Service Implementation `GreeterImplBase`
+Define class `GreeterImpl` implementing `DubboGreeterTriple.GreeterImplBase`.
 
 ```java
 public class GreeterImpl extends DubboGreeterTriple.GreeterImplBase {
    // ...
 }
 ```
-##### 服务端流
+##### Server Stream
 
-`GreeterImpl` 实现了所有 rpc 定义中的方法。接下里，我们看一下 server-side streaming 的具体定义。
+`GreeterImpl` implements all methods defined in the rpc. Next, we look at the specific definition of the server-side streaming.
 
-不同于普通的方法定义，`serverStream` 方法有两个参数，第一个参数 `request` 是入参，第二个参数 `responseObserver` 为响应值，其参数类型是 `StreamObserver<GreeterReply>`。在方法实现中，我们不停的调用 `responseObserver.onNext(...)` 将结果发送回消费方，并在最后调用 `onCompleted()` 表示流式响应结束。
+Unlike ordinary method definitions, the `serverStream` method has two parameters; the first parameter `request` is the input parameter, and the second parameter `responseObserver` is the response value, which has a parameter type of `StreamObserver<GreeterReply>`. In the method implementation, we continuously call `responseObserver.onNext(...)` to send the result back to the consumer and finally call `onCompleted()` to indicate the end of the stream response.
 
 ```java
 @Override
@@ -125,10 +125,10 @@ public void serverStream(GreeterRequest request, StreamObserver<GreeterReply> re
 }
 ```
 
-##### 双向流
-双向流方法 `biStream` 的参数和返回值都是 `StreamObserver<...>` 类型。但需要注意的是，它与我们传统方法定义中参数是请求值、返回值是响应的理解是反过来的，在这里，参数 `StreamObserver<GreeterReply> responseObserver` 是响应，我们通过 responseObserver 不停的写回响应。
+##### Bidirectional Stream
+The parameters and return values of the bidirectional stream method `biStream` are both of type `StreamObserver<...>`. However, it should be noted that it is reversed from our traditional understanding of method definitions, where the parameter `StreamObserver<GreeterReply> responseObserver` is the response, and we continuously write back responses through `responseObserver`.
 
-请注意这里`请求流`与`响应流`是独立的，我们在写回响应流数据的过程中，随时可能有请求流到达，对于每个流而言，值都是有序的。
+Note that the `request stream` and `response stream` are independent; during the process of writing back response stream data, a request stream may arrive at any time, and values are ordered for each stream.
 
 ```java
 @Override
@@ -153,8 +153,8 @@ public StreamObserver<GreeterRequest> biStream(StreamObserver<GreeterReply> resp
 }
 ```
 
-#### 启动 server
-启动 Dubbo 服务的过程与普通应用完全一致：
+#### Start Server
+The process of starting a Dubbo service is entirely consistent with ordinary applications:
 
 ```java
 public static void main(String[] args) throws IOException {
@@ -175,7 +175,7 @@ public static void main(String[] args) throws IOException {
 ```
 
 ### Client
-和普通的 Dubbo 服务调用一样，我们首先需要声明 rpc 服务引用：
+As with ordinary Dubbo service calls, we first need to declare the rpc service reference:
 
 ```java
 public static void main(String[] args) throws IOException {
@@ -188,17 +188,17 @@ public static void main(String[] args) throws IOException {
 }
 ```
 
-接下来，我们就可以利用 `greeter` 像调用本地方法一样发起调用了。
+Next, we can use `greeter` to initiate calls as if calling local methods.
 
-#### 服务端流
-调用 `serverStream()` 传入能够处理流式响应的 `SampleStreamObserver` 对象，调用发起后即快速返回，之后流式响应会不停的发送到 `SampleStreamObserver`。
+#### Server Stream
+Call `serverStream()` passing a `SampleStreamObserver` object that can handle streaming responses. The call returns quickly after initiation, and thereafter streaming responses will continuously send to `SampleStreamObserver`.
 
 ```java
 GreeterRequest request = GreeterRequest.newBuilder().setName("server stream request.").build();
 greeter.serverStream(request, new SampleStreamObserver());
 ```
 
-以下是 `SampleStreamObserver` 类的具体定义，包含其收到响应后的具体处理逻辑。
+Below is the specific definition of the `SampleStreamObserver` class, including its specific handling logic after receiving the response.
 
 ```java
 private static class SampleStreamObserver implements StreamObserver<GreeterReply> {
@@ -211,10 +211,10 @@ private static class SampleStreamObserver implements StreamObserver<GreeterReply
 }
 ```
 
-#### 双向流
-调用 `greeter.biStream()` 方法会立即返回一个 `requestStreamObserver`，同时，需要为方法传入一个能处理响应的 observer 对象 `new SampleStreamObserver()`。
+#### Bidirectional Stream
+Calling the `greeter.biStream()` method will immediately return a `requestStreamObserver`, while you need to pass an observer object that can process the response `new SampleStreamObserver()` to the method.
 
-接下来，我们就可以用才刚才返回值中得到的 `requestStreamObserver` 持续发送请求 `requestStreamObserver.onNext(request)`；此时，如果有响应返回，则会由 `SampleStreamObserver` 接收处理，其定义请参考上文。
+Next, we can continue to send requests using the `requestStreamObserver` obtained from the return value by calling `requestStreamObserver.onNext(request)`; at this point, if there is a response returned, it will be processed by `SampleStreamObserver`, whose definition can be referred to above.
 
 ```java
 StreamObserver<GreeterRequest> requestStreamObserver = greeter.biStream(new SampleStreamObserver());
@@ -225,26 +225,26 @@ for (int i = 0; i < 10; i++) {
 requestStreamObserver.onCompleted();
 ```
 
-## 其他
-### Java接口模式下的流式通信
-对于不使用 Protobuf 的用户而言，你可以直接在接口中定义 streaming 格式的方法，这样你就能使用流式通信了。
+## Others
+### Streaming Communication in Java Interface Mode
+For users not using Protobuf, you can define streaming format methods directly in your interface to use streaming communication.
 
-#### 接口定义
+#### Interface Definition
 ```java
 public interface WrapperGreeter {
-    // 双向流
+    // Bidirectional stream
     StreamObserver<String> sayHelloStream(StreamObserver<String> response);
-    // 服务端流
+    // Server stream
     void sayHelloServerStream(String request, StreamObserver<String> response);
 }
 ```
 
-其中，`org.apache.dubbo.common.stream.StreamObserver` 是 Dubbo 框架提供的流式通信参数类型，请务必按照以上示例所示的方式定义
+Among them, `org.apache.dubbo.common.stream.StreamObserver` is the parameter type for streaming communication provided by the Dubbo framework, and must be defined as demonstrated above.
 
-> Stream 方法的方法入参和返回值是严格约定的，为防止写错而导致问题，Dubbo3 框架侧做了对参数的检查, 如果出错则会抛出异常。
-> 对于 `双向流(BIDIRECTIONAL_STREAM)`, 需要注意参数中的 `StreamObserver` 是响应流，返回参数中的 `StreamObserver` 为请求流。
+> The method parameters and return values of streaming methods are strictly specified. To prevent issues from incorrect writing, the Dubbo3 framework performs parameter checks, throwing exceptions if errors occur.
+> For `BIDIRECTIONAL_STREAM`, note that the `StreamObserver` in the parameters is the response stream, while the `StreamObserver` in the return parameter is the request stream.
 
-#### 实现类
+#### Implementation Class
 ```java
 public class WrapGreeterImpl implements WrapGreeter {
 
@@ -282,7 +282,7 @@ public class WrapGreeterImpl implements WrapGreeter {
 }
 ```
 
-#### 调用方式
+#### Calling Method
 ```java
 delegate.sayHelloServerStream("server stream", new StreamObserver<String>() {
     @Override
@@ -323,3 +323,4 @@ for (int i = 0; i < n; i++) {
 }
 request.onCompleted();
 ```
+

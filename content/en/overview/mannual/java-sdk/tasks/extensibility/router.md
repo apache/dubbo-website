@@ -2,7 +2,7 @@
 aliases:
     - /en/overview/tasks/extensibility/router/
     - /en/overview/tasks/extensibility/router/
-description: 本文讲解如何通过扩展 Router 实现自定义路由策略，可以根据业务场景的特点来实现特定的路由方式。
+description: This article explains how to implement a custom routing strategy by extending the Router, which can achieve specific routing methods based on the characteristics of business scenarios.
 linkTitle: Router
 no_list: true
 title: Router
@@ -10,19 +10,19 @@ type: docs
 weight: 4
 ---
 
-通过自定义路由，可以根据业务场景的特点来实现特定的路由方式。本示例 router 扩展实现源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/)。
+By customizing the router, specific routing methods can be implemented based on the characteristics of business scenarios. Please refer to the source code for the router extension implementation in the example at [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/) .
 
-## 开始之前
+## Before You Begin
 
-## 任务详情
+## Task Details
 
-对所有的请求都使用第一提供服务的Provider，如果该Provider下线，则从新选择一个新的Provider。
+Use the first provided service Provider for all requests. If this Provider goes offline, choose a new Provider.
 
-## 实现方式
+## Implementation Method
 
-在Consumer中自定义一个Router，在Router中将第一次调用的Provider保存下来，如果后续有请求调用且Provider列表中包含第一次调用时使用的Provider，则继续使用第一次调用时使用的Provider，否则重新选去一个Provider。
+In the Consumer, customize a Router that saves the Provider used in the first call. If there are subsequent requests and the Provider list includes the Provider used in the first call, continue to use that Provider; otherwise, select a new Provider.
 
-#### 代码结构
+#### Code Structure
 ```properties
 src
  |-main
@@ -35,15 +35,15 @@ src
                             |-router
                                 |-consumer
                                     |-router
-                                        |-StickFirstStateRouter.java (实现StateRouter接口)
-                                        |-StickFirstStateRouterFactory.java (实现StateRouterFactory接口)
+                                        |-StickFirstStateRouter.java (Implements the StateRouter interface)
+                                        |-StickFirstStateRouterFactory.java (Implements the StateRouterFactory interface)
     |-resources
         |-META-INF
-            |-application.properties (Dubbo Consumer配置文件)
+            |-application.properties (Dubbo Consumer configuration file)
             |-dubbo
-                |-org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory (纯文本文件)
+                |-org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory (Plain text file)
 ```
-#### 代码详情
+#### Code Details
 
 + StickFirstStateRouter
 ```java
@@ -130,20 +130,21 @@ public class StickFirstStateRouterFactory implements StateRouterFactory {
 }
 ```
 
-#### SPI配置
-在`resources/META-INF/dubbo/org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory`文件中添加如下配置：
+#### SPI Configuration
+Add the following configuration to the `resources/META-INF/dubbo/org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory` file:
 ```properties
 stickfirst=org.apache.dubbo.samples.extensibility.router.consumer.router.StickFirstStateRouterFactory
 ```
 
-#### 配置文件
-在`resources/application.properties`文件中添加如下配置：
+#### Configuration File
+Add the following configuration to the `resources/application.properties` file:
 ```properties
-# 配置自定义路由
+# Configure custom routing
 dubbo.consumer.router=stickfirst
 ```
 
-## 运行结果
-以**使用本地IDE**的方式来运行任务，结果如下：
+## Execution Result
+Running the task using **local IDE**, the result is as follows:
 
 ![dubbo-samples-extensibility-router-output.png](/imgs/v3/tasks/extensibility/dubbo-samples-extensibility-router-output.png)
+

@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/startup/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/startup/
-description: Startup 启动探针
-linkTitle: 启动探针
-title: Startup 启动探针
+description: Startup Probe
+linkTitle: Startup Probe
+title: Startup Probe
 type: docs
 weight: 12
 ---
@@ -14,35 +14,35 @@ weight: 12
 
 
 
-## 扩展说明
+## Expansion Description
 
 
-拓展应用启动的检测点。
+Detection points for extended application startup.
 
 
-## 扩展接口
+## Extension Interface
 
 
 `org.apache.dubbo.qos.probe.StartupProbe`
 
 
-## 扩展配置
+## Extension Configuration
 
 
-Dubbo QOS `startup`   命令自动发现
+Dubbo QOS `startup` command auto-discovery
 
 
-## 已知扩展
+## Known Extensions
 
 
 - `org.apache.dubbo.qos.probe.impl.BootstrapLivenessProbe`
 
 
 
-## 扩展示例
+## Extension Example
 
 
-Maven 项目结构：
+Maven project structure:
 
 
 ```
@@ -51,15 +51,15 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxStartupProbe.java (实现StartupProbe接口)
+                |-XxxStartupProbe.java (implements StartupProbe interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.qos.probe.StartupProbe (纯文本文件，内容为：xxx=com.xxx.XxxStartupProbe)
+                |-org.apache.dubbo.qos.probe.StartupProbe (plain text file, content: xxx=com.xxx.XxxStartupProbe)
 ```
 
 
-XxxStartupProbee.java：
+XxxStartupProbe.java:
 
 
 ```java
@@ -74,7 +74,7 @@ public class XxxStartupProbe implements StartupProbe {
 ```
 
 
-META-INF/dubbo/org.apache.dubbo.qos.probe.StartupProbe：
+META-INF/dubbo/org.apache.dubbo.qos.probe.StartupProbe:
 
 
 ```

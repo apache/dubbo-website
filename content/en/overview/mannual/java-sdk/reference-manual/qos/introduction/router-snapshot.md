@@ -3,9 +3,9 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/
     - /en/docs3-v2/java-sdk/reference-manual/qos/router-snapshot/
     - /en/overview/mannual/java-sdk/reference-manual/qos/router-snapshot/
-description: 路由状态命令
-linkTitle: 路由状态命令
-title: 路由状态命令
+description: Router Status Command
+linkTitle: Router Status Command
+title: Router Status Command
 type: docs
 weight: 8
 ---
@@ -13,19 +13,17 @@ weight: 8
 
 
 
+Many traffic governance capabilities in Dubbo are implemented based on the Router. In production environments, if traffic results do not meet expectations, you can use the router status command to check the router's status to locate potential issues.
 
+> [Router Status Collection](../../../advanced-features-and-usage/performance/router-snapshot/)
 
-Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环境中，如果出现流量结果不符合预期的情况，可以通过路由状态命令来查看路由的状态，以此来定位可能存在的问题。
+### getRouterSnapshot Command
 
-> [路由状态采集](../../../advanced-features-and-usage/performance/router-snapshot/)
+Retrieve the grouping status of each layer of the router. (Only supports StateRouter)
 
-### getRouterSnapshot 命令
+Command: `getRouterSnapshot {serviceName}`
 
-获取当前的每层路由的分组状态。（仅支持 StateRouter）
-
-命令：`getRouterSnapshot {serviceName}`
-
-`serviceName` 为需要采集的服务名，支持匹配
+`serviceName` is the name of the service to collect, supports matching.
 
 ```
 dubbo>getRouterSnapshot com.dubbo.dubbointegration.BackendService
@@ -50,13 +48,13 @@ TailStateRouter End
 dubbo>
 ```
 
-### enableRouterSnapshot 命令
+### enableRouterSnapshot Command
 
-开启路由结果采集模式
+Enable router result collection mode.
 
-命令：`enableRouterSnapshot {serviceName}`
+Command: `enableRouterSnapshot {serviceName}`
 
-`serviceName` 为需要采集的服务名，支持匹配
+`serviceName` is the name of the service to collect, supports matching.
 
 ```
 dubbo>enableRouterSnapshot com.dubbo.*
@@ -65,13 +63,13 @@ OK. Found service count: 1. This will cause performance degradation, please be c
 dubbo>
 ```
 
-### disableRouterSnapshot 命令
+### disableRouterSnapshot Command
 
-关闭路由结果采集模式
+Disable router result collection mode.
 
-命令：`disableRouterSnapshot {serviceName}`
+Command: `disableRouterSnapshot {serviceName}`
 
-`serviceName` 为需要采集的服务名，支持匹配
+`serviceName` is the name of the service to collect, supports matching.
 
 ```
 dubbo>disableRouterSnapshot com.dubbo.*
@@ -80,9 +78,9 @@ OK. Found service count: 1
 dubbo>
 ```
 
-### getEnabledRouterSnapshot 命令
+### getEnabledRouterSnapshot Command
 
-获取当前已经开启采集的服务
+Get the services that have collection enabled.
 
 ```
 dubbo>getEnabledRouterSnapshot
@@ -91,9 +89,9 @@ com.dubbo.dubbointegration.BackendService
 dubbo>
 ```
 
-### getRecentRouterSnapshot 命令
+### getRecentRouterSnapshot Command
 
-通过 qos 命令获取历史的路由状态。（最多存储 32 个结果）
+Obtain historical router status through the qos command. (Stores up to 32 results)
 
 ```
 dubbo>getRecentRouterSnapshot
@@ -117,3 +115,4 @@ dubbo>getRecentRouterSnapshot
 
 dubbo>
 ```
+

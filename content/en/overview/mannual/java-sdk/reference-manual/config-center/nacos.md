@@ -3,32 +3,32 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/config-center/nacos/
     - /en/docs3-v2/java-sdk/reference-manual/config-center/nacos/
     - /en/overview/what/ecosystem/config-center/nacos/
-description: Nacos 配置中心的基本使用和工作原理。
+description: Basic usage and working principles of the Nacos configuration center.
 linkTitle: Nacos
 title: Nacos
 type: docs
 weight: 3
 ---
 
-## 1 前置条件
-* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
-* 安装并启动 [Nacos](/en/overview/reference/integrations/nacos/)
+## 1 Prerequisites
+* Understand [Basic Development Steps of Dubbo](/en/overview/mannual/java-sdk/quick-start/starter/)
+* Install and start [Nacos](/en/overview/reference/integrations/nacos/)
 
-> 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本。请参考 [nacos 注册中心](/en/overview/mannual/java-sdk/reference-manual/registry/nacos/#12-nacos-版本) 了解 nacos 版本适配情况。
+> When Dubbo uses version `3.0.0` or above, Nacos version `2.0.0` or above is required. Please refer to [nacos registry]( /en/overview/mannual/java-sdk/reference-manual/registry/nacos/#12-nacos-version) for Nacos version compatibility.
 
-## 2 使用说明
+## 2 Instructions
 
-### 2.1 增加 Maven 依赖
-如果项目已经启用 Nacos 作为注册中心，则无需增加任何额外配置。
+### 2.1 Add Maven Dependency
+If the project has already enabled Nacos as a registry, no additional configuration is required.
 
-如果未启用 Nacos 注册中心，则请参考 [为注册中心增加 Nacos 依赖](/en/overview/mannual/java-sdk/reference-manual/registry/nacos/#11-增加依赖)。
+If Nacos registry is not enabled, please refer to [Add Nacos dependency for registry](/en/overview/mannual/java-sdk/reference-manual/registry/nacos/#11-add-dependency).
 
-### 2.2 启用 Nacos 配置中心
+### 2.2 Enable Nacos Configuration Center
 ```xml
 <dubbo:config-center address="nacos://127.0.0.1:8848"/>
 ```
 
-或者
+or
 
 ```yaml
 dubbo
@@ -36,44 +36,44 @@ dubbo
     address: nacos://127.0.0.1:8848
 ```
 
-或者
+or
 
 ```properties
 dubbo.config-center.address=nacos://127.0.0.1:8848
 ```
 
-或者
+or
 
 ```java
 ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("nacos://127.0.0.1:8848");
 ```
 
-`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#22-配置并启用-nacos)
+For `address` format, please refer to [Nacos Registry - Enable Configuration](../../registry/nacos/#22-configure-and-enable-nacos)
 
-## 3 高级配置
-如要开启认证鉴权，请参考 [Nacos 注册中心 - 启用认证鉴权](../../registry/nacos/#31-认证)
+## 3 Advanced Configuration
+To enable authentication, please refer to [Nacos Registry - Enable Authentication](../../registry/nacos/#31-authentication)
 
-### 3.1 外部化配置
-#### 3.1.1 全局外部化配置
-**1. 应用开启 config-center 配置**
+### 3.1 Externalized Configuration
+#### 3.1.1 Global Externalized Configuration
+**1. Application enable config-center configuration**
 ```yaml
 dubbo
   config-center
     address: nacos://127.0.0.1:2181
     config-file: dubbo.properties # optional
 ```
-`config-file` - 全局外部化配置文件 key 值，默认 `dubbo.properties`。`config-file` 代表将 Dubbo 配置文件存储在远端注册中心时，文件在配置中心对应的 key 值，通常不建议修改此配置项。
+`config-file` - Key for global externalized configuration file, default is `dubbo.properties`. It represents the key in the configuration center when storing the Dubbo configuration file remotely. It is generally not recommended to modify this configuration.
 
-**2. Nacos Server 增加配置**
+**2. Add Configuration to Nacos Server**
 
 ![nacos-configcenter-global-properties.png](/imgs/user/nacos-configcenter-global-properties.png)
 
-dataId 是 `dubbo.properties`，group 分组与 config-center 保持一致，如未设置则默认填 `dubbo`。
+dataId is `dubbo.properties`, group is the same as config-center, default is `dubbo` if not set.
 
-#### 3.1.2 应用特有外部化配置
+#### 3.1.2 Application-Specific Externalized Configuration
 
-**1. 应用开启 config-center 配置**
+**1. Application enable config-center configuration**
 ```yaml
 dubbo
   config-center
@@ -81,15 +81,15 @@ dubbo
     app-config-file: dubbo.properties # optional
 ```
 
-`app-config-file` - 当前应用特有的外部化配置文件 key 值，如 `app-name-dubbo.properties`，仅在需要覆盖全局外部化配置文件 `config-file` 时才配置。
+`app-config-file` - Key for the application-specific externalized configuration file, such as `app-name-dubbo.properties`, configured only when needing to override the global externalization `config-file`.
 
-**2. Nacos Server 增加配置**
+**2. Add Configuration to Nacos Server**
 
 ![nacos-configcenter-application-properties.png](/imgs/user/nacos-configcenter-application-properties.png)
 
-dataId 是 `dubbo.properties`，group 分组设置为应用名即 `demo-provider`。
+dataId is `dubbo.properties`, group is the application name `demo-provider`.
 
-### 3.2 设置 group 与 namespace
+### 3.2 Set Group and Namespace
 ```yaml
 dubbo
   config-center
@@ -98,19 +98,20 @@ dubbo
     namespace: dev1
 ```
 
-对配置中心而言，`group` 与 `namespace` 应该是全公司（集群）统一的，应该避免不同应用使用不同的值。
+For the configuration center, `group` and `namespace` should be consistent across the company (cluster) and avoid different values for different applications.
 
-### 3.3 Nacos 扩展配置
-更多 Nacos sdk/server 支持的参数配置请参见 [Nacos 注册中心 - 更多配置](../../registry/nacos/#35-更多配置)
+### 3.3 Nacos Extended Configuration
+For more Nacos sdk/server supported parameter configurations, refer to [Nacos Registry - More Configurations](../../registry/nacos/#35-more-configurations)
 
-## 4 流量治理规则
-对 Nacos 而言，所有流量治理规则和外部化配置都应该是全局可见的，因此相同逻辑集群内的应用都必须使用相同的 namespace 与 group。其中，namespace 的默认值是 `public`，group 默认值是 `dubbo`，应用不得擅自修改 namespace 与 group，除非能保持全局一致。
+## 4 Traffic Governance Rules
+For Nacos, all traffic governance rules and externalized configurations should be globally visible, thus applications in the same logical cluster must use the same namespace and group. The default value for namespace is `public` and the default value for group is `dubbo`. Applications must not modify the namespace and group without maintaining global consistency.
 
-流量治理规则的增删改建议通过 dubbo-admin 完成，更多内容可查看 Dubbo 支持的流量治理能力。
+Changes to traffic governance rules are recommended to be made through dubbo-admin; for more details, see Dubbo's supported traffic governance capabilities.
 
 ![nacos-configcenter-governance.jpg](/imgs/user/nacos-configcenter-governance.png)
 
-流量治理规则有多种类型，不同类型的规则 dataId 的后缀是不同的：
+There are various types of traffic governance rules, and different types of rules have different suffixes for dataId:
 
-- configurators [覆盖规则](/en/overview/core-features/traffic/configuration-rule/)
-- tag-router [标签路由](/en/overview/core-features/traffic/tag-rule/) 与 condition-router [条件路由](/en/overview/core-features/traffic/condition-rule/)
+- configurators [override rules](/en/overview/core-features/traffic/configuration-rule/)
+- tag-router [tag routing](/en/overview/core-features/traffic/tag-rule/) and condition-router [condition routing](/en/overview/core-features/traffic/condition-rule/)
+

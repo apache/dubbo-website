@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/logger-adapter/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/logger-adapter/
-description: 日志适配扩展
-linkTitle: 日志适配扩展
-title: 日志适配扩展
+description: Logger Adapter Extension
+linkTitle: Logger Adapter Extension
+title: Logger Adapter Extension
 type: docs
 weight: 26
 ---
@@ -14,27 +14,27 @@ weight: 26
 
 
 
-## 扩展说明
+## Extension Description
 
-日志输出适配扩展点。
+Log output adaptation extension point.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.common.logger.LoggerAdapter`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:application logger="xxx" />
 ```
 
-或者：
+or:
 
 ```sh
 -Ddubbo:application.logger=xxx
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.common.logger.slf4j.Slf4jLoggerAdapter`
 * `org.apache.dubbo.common.logger.jcl.JclLoggerAdapter`
@@ -42,9 +42,9 @@ weight: 26
 * `org.apache.dubbo.common.logger.log4j2.Log4j2LoggerAdapter`
 * `org.apache.dubbo.common.logger.jdk.JdkLoggerAdapter`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -52,14 +52,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxLoggerAdapter.java (实现LoggerAdapter接口)
+                |-XxxLoggerAdapter.java (implements LoggerAdapter interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.common.logger.LoggerAdapter (纯文本文件，内容为：xxx=com.xxx.XxxLoggerAdapter)
+                |-org.apache.dubbo.common.logger.LoggerAdapter (plain text file, content: xxx=com.xxx.XxxLoggerAdapter)
 ```
 
-XxxLoggerAdapter.java：
+XxxLoggerAdapter.java:
 
 ```java
 package com.xxx;
@@ -73,7 +73,7 @@ public class XxxLoggerAdapter implements LoggerAdapter {
 }
 ```
 
-XxxLogger.java：
+XxxLogger.java:
 
 ```java
 package com.xxx;
@@ -91,8 +91,9 @@ public class XxxLogger implements Logger {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.common.logger.LoggerAdapter：
+META-INF/dubbo/org.apache.dubbo.common.logger.LoggerAdapter:
 
 ```properties
 xxx=com.xxx.XxxLoggerAdapter
 ```
+

@@ -3,55 +3,55 @@ aliases:
     - /en/overview/tasks/traffic-management/mock/
     - /en/overview/tasks/traffic-management/mock/
 description: ""
-linkTitle: 服务降级
-title: 在大促之前对弱依赖调用进行服务降级
+linkTitle: Service Downgrading
+title: Service Downgrading for Weak Dependencies Before Major Promotions
 type: docs
 weight: 8
 ---
 
 
 
-由于微服务系统的分布式特性，一个服务往往需要依赖非常多的外部服务来实现某一项功能，因此，一个服务的稳定性不但取决于其自身，同时还取决于所有外部依赖的稳定性。我们可以根据这些依赖的重要程度将它们划分为强依赖和弱依赖：强依赖是指那些无论如何都要保证稳定性的服务，如果它们不可用则当前服务也就不可用；弱依赖项指当它们不可用之后当前服务仍能正常工作的依赖项，弱依赖不可用只是影响功能的部分完整性。
+Due to the distributed nature of microservice systems, a service often needs to rely on many external services to implement a certain function. Therefore, the stability of a service depends not only on itself but also on the stability of all external dependencies. We can categorize these dependencies based on their importance into strong and weak dependencies: strong dependencies are those that must ensure stability at all costs, as the current service will also be unavailable if they are not; weak dependencies refer to those dependencies that allow the current service to function normally even when they are unavailable, as their unavailability only affects part of the functionality.
 
-服务降级的核心目标就是针对这些弱依赖项。在弱依赖不可用或调用失败时，通过返回降级结果尽可能的维持功能完整性；另外，我们有时也会主动的屏蔽一些非关键弱依赖项的调用，比如在大促流量洪峰之前，通过预先设置一些有效的降级策略来短路部分依赖调用，来有效的提升流量高峰时期系统的整体效率和稳定性。
+The core objective of service downgrading is to address these weak dependencies. When weak dependencies are unavailable or calls fail, we maintain functional integrity by returning degraded results whenever possible. Additionally, we may also proactively mask the calls to some non-critical weak dependencies, such as pre-setting effective downgrade strategies to short-circuit some dependency calls before the peak traffic during promotions, thus effectively improving the overall efficiency and stability of the system during traffic peaks.
 
-## 开始之前
+## Before You Start
 
-* [部署 Shop 商城项目](../#部署商场系统)
-* 部署并打开 [Dubbo Admin](../.././../reference/admin/architecture/)
+* [Deploy Shop Mall Project](../#deploy-the-mall-system)
+* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
 
-## 任务详情
+## Task Details
 
-正常情况下，商品详情页会展示来自顾客的商品评论信息。
+Under normal circumstances, the product detail page displays product review information from customers.
 
 ![mock1.png](/imgs/v3/tasks/mock/mock1.png)
 
-评论信息的缺失在很多时候并不会影响用户浏览和购买商品，因此，我们定义评论信息属于商品详情页面的弱依赖。接下来，我们就模拟在大促前夕常用的一个策略，通过服务降级提前关闭商品详情页对于评论服务的调用（返回一些本地预先准备好的历史评论数据），来降低集群整体负载水位并提高响应速度。
+The absence of review information often does not affect users browsing and purchasing products; therefore, we define review information as a weak dependency of the product detail page. Next, we will simulate a common strategy used before major promotions by proactively closing the product detail page's call to the review service (returning some locally prepared historical review data) to reduce the overall load on the cluster and improve response speed.
 
 ![mock0.png](/imgs/v3/tasks/mock/mock0.png)
 
-### 通过降级规则短路 Comment 评论服务调用
+### Short-circuit Comment Service Calls by Downgrade Rules
 
-评论数据由 Comment 应用的 `org.apache.dubbo.samples.CommentService` 服务提供，接下来我们就为 `CommentService` 配置降级规则。
+Review data is provided by the `org.apache.dubbo.samples.CommentService` service of the Comment application; next, we will configure downgrade rules for `CommentService`.
 
-#### 操作步骤
-1. 打开 Dubbo Admin 控制台
-2. 在左侧导航栏选择【流量管控】>【服务降级】
-3. 点击 "创建"，输入服务 `org.apache.dubbo.samples.CommentService` 和降级规则。
+#### Steps
+1. Open the Dubbo Admin console
+2. In the left sidebar, select 【Traffic Control】>【Service Downgrade】
+3. Click "Create," enter the service `org.apache.dubbo.samples.CommentService` and the downgrade rules.
 
-![Admin 服务降级规则配置截图](/imgs/v3/tasks/mock/mock_admin.png)
+![Admin Service Downgrade Rule Configuration Screenshot](/imgs/v3/tasks/mock/mock_admin.png)
 
-等待降级规则推送完成之后，刷新商品详情页面，发现商品评论信息已经变为我们预先设置的 "Mock Comment"，因为商品详情页的 Comment 服务调用已经在本地短路，并没有真正的发送到后端服务提供者机器上。
+After waiting for the downgrade rules to be pushed, refresh the product detail page to find that the product review information has changed to our preset "Mock Comment," as the Comment service call for the product detail page has been short-circuited locally and was not actually sent to the backend service provider machine.
 
 ![mock2.png](/imgs/v3/tasks/mock/mock2.png)
 
-再次刷新页面
+Refresh the page again.
 
-#### 规则详解
+#### Rule Explanation
 
-**规则 key** ：`org.apache.dubbo.samples.CommentService`
+**Rule Key**: `org.apache.dubbo.samples.CommentService`
 
-**规则体**
+**Rule Body**
 
 ```yaml
 configVersion: v3.0
@@ -62,11 +62,12 @@ configs:
       mock: force:return Mock Comment
 ```
 
-## 清理
-为了不影响其他任务效果，通过 Admin 删除或者禁用刚刚配置的降级规则。
+## Cleanup
+To avoid affecting other tasks, delete or disable the downgrade rules just configured through Admin.
 
-## 其他事项
+## Other Matters
 
-服务降级功能也可以用于开发测试环境，由于微服务分布式的特点，不同的服务或应用之间都有相互依赖关系，因此，一个服务或应用很难不依赖其他服务而独立部署工作。但测试环境下并不是所有服务都是随时就绪的状态，这对于微服务强调的服务独立演进是一个很大的障碍，通过服务降级这个功能，我们可以模拟或短路应用对其他服务的依赖，从而可以让应用按照自己预期的行为 Mock 外部服务调用的返回结果。具体可参见 [Dubbo Admin 服务 Mock](../.././../reference/admin/mock/) 特性的使用方式。
+The service downgrading feature can also be utilized in development and testing environments. Due to the distributed characteristics of microservices, there are interdependencies among different services or applications. Thus, it is challenging for a service or application to be deployed independently without relying on other services. However, not all services in the testing environment are always ready, presenting a significant obstacle to the independent evolution of services emphasized in microservices. By using the service downgrading feature, we can simulate or short-circuit an application’s dependency on other services, allowing the application to mock the return results of external service calls as expected. For details, refer to the usage of [Dubbo Admin Service Mock](../.././../reference/admin/mock/).
 
-Dubbo 的降级规则用来设置发生降级时的行为和返回值，而对于何时应该执行限流降级动作，即限流降级时机的判断并没有过多涉猎，这一点 Dubbo 通过集成更专业的限流降级产品如 Sentinel 进行了补全，可以配合 Dubbo 降级规则一起使用，具体可参见 [限流降级](/en/overview/core-features/traffic/circuit-breaking/) 文档。
+Dubbo's downgrade rules are used to set behaviors and return values upon downgrading. However, the judgment of when to execute flow limiting downgrade actions has not been extensively covered. Dubbo has completed this by integrating more specialized flow limiting downgrade products such as Sentinel, which can be used in conjunction with Dubbo downgrade rules, as detailed in the [flow limiting downgrade](/en/overview/core-features/traffic/circuit-breaking/) documentation.
+

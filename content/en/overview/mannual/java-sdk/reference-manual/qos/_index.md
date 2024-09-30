@@ -2,9 +2,10 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/qos/
     - /en/docs3-v2/java-sdk/reference-manual/qos/
-description: Dubbo QOS 操作指南
-linkTitle: 单机运维命令(QOS)
-title: QOS 操作手册
+description: Dubbo QOS Operation Guide
+linkTitle: Standalone Operation Commands (QOS)
+title: QOS Operation Manual
 type: docs
 weight: 99
 ---
+

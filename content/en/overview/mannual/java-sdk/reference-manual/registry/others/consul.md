@@ -1,5 +1,5 @@
 ---
-description: Consul 注册中心的基本使用和工作原理。
+description: Basic use and working principles of the Consul registration center.
 linkTitle: Consul
 title: Consul
 type: docs
@@ -7,15 +7,15 @@ weight: 5
 ---
 
 
-## 前置条件
-* 了解 [Dubbo 基本开发步骤](/en/overview/mannual/java-sdk/quick-start/starter/)
-* 安装并启动 [Consul](http://consul.io) 服务
+## Prerequisites
+* Understand [Dubbo basic development steps](/en/overview/mannual/java-sdk/quick-start/starter/)
+* Install and start the [Consul](http://consul.io) service
 
-## 使用说明
+## Instructions
 
-### 添加依赖
+### Add Dependencies
 
-从 Dubbo3 开始，consul 注册中国适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-registry)。
+Starting from Dubbo 3, the Consul registration center adaptation is no longer embedded in Dubbo. It needs to be separately introduced with an independent [module](/en/download/spi-extensions/#dubbo-registry).
 
 ```xml
 <dependency>
@@ -25,29 +25,30 @@ weight: 5
 </dependency>
 ```
 
-### 基本配置
+### Basic Configuration
 ```xml
 <dubbo:registry address="redis://10.20.153.10:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry address="redis://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry protocol="redis" address="10.20.153.10:6379" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:registry protocol="redis" address="10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379" />
 ```
 
-## 使用场景
+## Use Cases
 
-使用 Consul 作为共享注册中心实现，可用于 [Dubbo 与 Spring Cloud 体系的互通或迁移](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)
+Using Consul as a shared registration center can facilitate the [interoperability or migration between Dubbo and Spring Cloud systems](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/)
+

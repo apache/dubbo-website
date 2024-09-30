@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/merger/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/merger/
-description: 合并结果扩展
-linkTitle: 合并结果扩展
-title: 合并结果扩展
+description: Merger Result Extension
+linkTitle: Merger Result Extension
+title: Merger Result Extension
 type: docs
 weight: 8
 ---
@@ -14,21 +14,21 @@ weight: 8
 
 
 
-## 扩展说明
+## Extension Description
 
-合并返回结果，用于分组聚合。
+Merging return results, used for grouping aggregation.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.rpc.cluster.Merger`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:method merger="xxx" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.rpc.cluster.merger.ArrayMerger`
 * `org.apache.dubbo.rpc.cluster.merger.ListMerger`
@@ -43,9 +43,9 @@ weight: 8
 * `org.apache.dubbo.rpc.cluster.merger.DoubleArrayMerger`
 * `org.apache.dubbo.rpc.cluster.merger.BooleanArrayMerger`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -53,11 +53,11 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxMerger.java (实现Merger接口)
+                |-XxxMerger.java (implements Merger interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.rpc.cluster.Merger (纯文本文件，内容为：xxx=com.xxx.XxxMerger)
+                |-org.apache.dubbo.rpc.cluster.Merger (plain text file, content: xxx=com.xxx.XxxMerger)
 ```
 
 XxxMerger.java：

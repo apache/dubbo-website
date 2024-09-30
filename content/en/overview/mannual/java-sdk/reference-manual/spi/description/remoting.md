@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/remoting/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/remoting/
-description: 网络传输扩展
-linkTitle: 网络传输扩展
-title: 网络传输扩展
+description: Network Transport Extension
+linkTitle: Network Transport Extension
+title: Network Transport Extension
 type: docs
 weight: 17
 ---
@@ -12,38 +12,36 @@ weight: 17
 
 
 
+## Extension Description
 
+Implementations for remote communication servers and client transports.
 
-## 扩展说明
-
-远程通讯的服务器及客户端传输实现。
-
-## 扩展接口
+## Extension Interfaces
 
 * `org.apache.dubbo.remoting.Transporter`
 * `org.apache.dubbo.remoting.Server`
 * `org.apache.dubbo.remoting.Client`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
-<!-- 服务器和客户端使用相同的传输实现 -->
+<!-- Server and client use the same transport implementation -->
 <dubbo:protocol transporter="xxx" /> 
-<!-- 服务器和客户端使用不同的传输实现 -->
+<!-- Server and client use different transport implementations -->
 <dubbo:protocol server="xxx" client="xxx" /> 
-<!-- 缺省值设置，当<dubbo:protocol>没有配置transporter/server/client属性时，使用此配置 -->
+<!-- Default settings, used when <dubbo:protocol> does not configure transporter/server/client attributes -->
 <dubbo:provider transporter="xxx" server="xxx" client="xxx" />
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.remoting.transport.transporter.netty.NettyTransporter`
 * `org.apache.dubbo.remoting.transport.transporter.mina.MinaTransporter`
 * `org.apache.dubbo.remoting.transport.transporter.grizzly.GrizzlyTransporter`
 
-## 扩展示例
+## Extension Example
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -51,13 +49,13 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxTransporter.java (实现Transporter接口)
-                |-XxxServer.java (实现Server接口)
-                |-XxxClient.java (实现Client接口)
+                |-XxxTransporter.java (implements Transporter interface)
+                |-XxxServer.java (implements Server interface)
+                |-XxxClient.java (implements Client interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.remoting.Transporter (纯文本文件，内容为：xxx=com.xxx.XxxTransporter)
+                |-org.apache.dubbo.remoting.Transporter (plain text file, contents: xxx=com.xxx.XxxTransporter)
 ```
 
 XxxTransporter.java：
@@ -134,3 +132,4 @@ META-INF/dubbo/org.apache.dubbo.remoting.Transporter：
 ```properties
 xxx=com.xxx.XxxTransporter
 ```
+

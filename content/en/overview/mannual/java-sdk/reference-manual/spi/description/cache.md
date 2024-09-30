@@ -2,9 +2,9 @@
 aliases:
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/cache/
     - /en/docs3-v2/java-sdk/reference-manual/spi/description/cache/
-description: 缓存扩展
-linkTitle: 缓存扩展
-title: 缓存扩展
+description: Cache Extension
+linkTitle: Cache Extension
+title: Cache Extension
 type: docs
 weight: 24
 ---
@@ -14,34 +14,34 @@ weight: 24
 
 
 
-## 扩展说明
+## Extension Description
 
-用请求参数作为 key，缓存返回结果。
+Use request parameters as keys to cache return results.
 
-## 扩展接口
+## Extension Interface
 
 `org.apache.dubbo.cache.CacheFactory`
 
-## 扩展配置
+## Extension Configuration
 
 ```xml
 <dubbo:service cache="lru" />
-<!-- 方法级缓存 -->
+<!-- Method-level caching -->
 <dubbo:service><dubbo:method cache="lru" /></dubbo:service> 
-<!-- 缺省值设置，当<dubbo:service>没有配置cache属性时，使用此配置 -->
+<!-- Default value setting, used when <dubbo:service> does not configure the cache property -->
 <dubbo:provider cache="xxx,yyy" /> 
 ```
 
-## 已知扩展
+## Known Extensions
 
 * `org.apache.dubbo.cache.support.lru.LruCacheFactory`
 * `org.apache.dubbo.cache.support.threadlocal.ThreadLocalCacheFactory`
 * `org.apache.dubbo.cache.support.jcache.JCacheFactory`
 
 
-## 扩展示例
+## Extension Examples
 
-Maven 项目结构：
+Maven project structure:
 
 ```
 src
@@ -49,14 +49,14 @@ src
     |-java
         |-com
             |-xxx
-                |-XxxCacheFactory.java (实现CacheFactory接口)
+                |-XxxCacheFactory.java (implements CacheFactory interface)
     |-resources
         |-META-INF
             |-dubbo
-                |-org.apache.dubbo.cache.CacheFactory (纯文本文件，内容为：xxx=com.xxx.XxxCacheFactory)
+                |-org.apache.dubbo.cache.CacheFactory (plain text file, content: xxx=com.xxx.XxxCacheFactory)
 ```
 
-XxxCacheFactory.java：
+XxxCacheFactory.java:
 
 ```java
 package com.xxx;
@@ -70,7 +70,7 @@ public class XxxCacheFactory implements CacheFactory {
 }
 ```
 
-XxxCache.java：
+XxxCache.java:
 
 ```java
 package com.xxx;
@@ -90,8 +90,9 @@ public class XxxCache implements Cache {
 }
 ```
 
-META-INF/dubbo/org.apache.dubbo.cache.CacheFactory：
+META-INF/dubbo/org.apache.dubbo.cache.CacheFactory:
 
 ```properties
 xxx=com.xxx.XxxCacheFactory
 ```
+

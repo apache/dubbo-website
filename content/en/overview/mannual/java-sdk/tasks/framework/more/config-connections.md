@@ -8,9 +8,9 @@ aliases:
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/lazy-connect/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/config-connections/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/performance/config-connections/
-description: Dubbo 中服务端和客户端的连接控制
-linkTitle: 连接控制
-title: 连接控制
+description: Connection control between server and client in Dubbo
+linkTitle: Connection Control
+title: Connection Control
 type: docs
 weight: 29
 ---
@@ -19,66 +19,66 @@ weight: 29
 
 
 
-## 功能说明
-连接控制功能可以使用户能够控制和管理进出服务器连接数，限制连接数并设置超时，以确保 Dubbo 系统的稳定性和性能，还允许用户根据 IP 地址、端口和协议配置不同级别的访问控制，保护系统免受恶意流量的影响，并降低服务中断的风险，此外提供了一种监视当前流量和连接状态的方法。
+## Function Description
+The connection control feature allows users to manage and control the number of incoming and outgoing connections to the server, limit the number of connections, and set timeouts, ensuring the stability and performance of the Dubbo system. It also allows users to configure different levels of access control based on IP address, port, and protocol to protect the system from malicious traffic and reduce the risk of service interruptions. Additionally, it provides a way to monitor current traffic and connection status.
 
-## 使用场景
-1. 服务器过载时减少连接数：当服务器过载时，使用 Dubbo 通过设置最大连接限制来减少连接数减少服务器上的负载并防止其崩溃。
-2. 减少服务器受到攻击时的连接数：Dubbo 可以限制服务器受到攻击的连接数防止恶意连接充斥服务器并导致服务器崩溃。
-3. 限制特定服务的连接数：Dubbo 可以限制特定服务连接数防止服务过载过多的请求并确保及时响应所有请求。
-4. 限制来自单个IP地址的连接数：Dubbo 可以限制来自单个地址的连接数降低来自单个IP地址的恶意活动的风险。
+## Use Cases
+1. Reduce connections when the server is overloaded: When the server is overloaded, use Dubbo to set a maximum connection limit to reduce load and prevent crashes.
+2. Limit connections during attacks: Dubbo can limit the number of connections during an attack to prevent malicious connections from overwhelming the server and causing a crash.
+3. Limit connections to specific services: Dubbo can limit the number of connections to specific services to prevent overload from too many requests and ensure timely responses.
+4. Limit connections from a single IP address: Dubbo can limit the number of connections from a single IP to reduce the risk of malicious activity.
 
-## 使用方式
-### 服务端连接控制
+## Usage
+### Server-Side Connection Control
 
-限制服务器端接受的连接不能超过 10 个 [^1]：
+Limit the server-side accepted connections to no more than 10 [^1]:
 
 ```xml
 <dubbo:provider protocol="dubbo" accepts="10" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:protocol name="dubbo" accepts="10" />
 ```
 
-### 客户端连接控制
+### Client-Side Connection Control
 
-限制客户端服务使用连接不能超过 10 个 [^2]：
+Limit the client service connections to no more than 10 [^2]:
 
 ```xml
 <dubbo:reference interface="com.foo.BarService" connections="10" />
 ```
 
-或
+or
 
 ```xml
 <dubbo:service interface="com.foo.BarService" connections="10" />
 ```
 
-如果 `<dubbo:service>` 和 `<dubbo:reference>` 都配了 connections，`<dubbo:reference>` 优先，参见：[配置的覆盖策略](/en/overview/mannual/java-sdk/reference-manual/config/principle/)
+If both `<dubbo:service>` and `<dubbo:reference>` are configured with connections, `<dubbo:reference>` takes precedence, see: [Configuration Override Policy](/en/overview/mannual/java-sdk/reference-manual/config/principle/)
 
-[^1]: 因为连接在 Server上，所以配置在 Provider 上
-[^2]: 如果是长连接，比如 Dubbo 协议，connections 表示该服务对每个提供者建立的长连接数
-
-
+[^1]: Because connections are on the Server, this is configured on the Provider.
+[^2]: If it is a long connection, such as the Dubbo protocol, connections indicate the number of long connections established for each provider of that service.
 
 
-## 功能说明
-允许消费者在提供者接收请求之前向提供者发送请求，消费者等待提供者准备就绪，然后将发送消费者者的请求，当消费者需要连接到提供者，提供者尚未准备好接受请求时，确保在正确的时间发送请求，防止消费者被速度慢或不可用的提供程序阻止。
 
-## 使用场景
-粘滞连接用于有状态服务，尽可能让客户端总是向同一提供者发起调用，除非该提供者挂了，再连另一台。
 
-粘滞连接将自动开启 [延迟连接](../lazy-connect)，以减少长连接数。
+## Function Description
+Consumers can send requests to the provider before the provider is ready to receive requests, ensuring requests are sent at the right time and preventing consumers from being blocked by slow or unavailable providers.
 
-## 使用方式
+## Use Cases
+Sticky connections are used for stateful services, allowing clients to always invoke the same provider unless that provider is down.
+
+Sticky connections will automatically enable [lazy connect](../lazy-connect) to reduce the number of long connections.
+
+## Usage
 ```xml
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService" sticky="true" />
 ```
 
-Dubbo 支持方法级别的粘滞连接，如果你想进行更细粒度的控制，还可以这样配置。
+Dubbo supports method-level sticky connections, allowing for more granular control.
 
 ```xml
 <dubbo:reference id="xxxService" interface="com.xxx.XxxService">
@@ -90,15 +90,16 @@ Dubbo 支持方法级别的粘滞连接，如果你想进行更细粒度的控�
 
 
 
-## 功能说明
-当消费者请求服务时，实际使用服务时才建立真正的连接，避免不必要的连接来减少延迟并提高系统稳定性。
+## Function Description
+True connections are established only when the consumer actually uses the service, avoiding unnecessary connections to reduce latency and improve system stability.
 
-## 使用场景
-延迟连接用于减少长连接数。当有调用发起时，再创建长连接。
+## Use Cases
+Lazy connections are used to reduce the number of long connections. Long connections are created when a call is initiated.
 
-## 使用方式
+## Usage
 ```xml
 <dubbo:protocol name="dubbo" lazy="true" />
 ```
 
-> 该配置只对使用长连接的 dubbo 协议生效。
+> This configuration only takes effect for the Dubbo protocol used with long connections.
+

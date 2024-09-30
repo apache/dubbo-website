@@ -2,27 +2,26 @@
 aliases:
     - /en/overview/what/ecosystem/serialization/fastjson/
     - /en/overview/what/ecosystem/serialization/fastjson/
-description: "本文介绍基于 Java 接口模式开发 triple 服务时，底层的序列化机制实现。"
+description: "This article introduces the underlying serialization mechanism implementation when developing triple services based on the Java interface model."
 linkTitle: Protobuf Wrapper
-title: 基于 Java 接口模式开发 triple 服务时，底层的序列化机制实现
+title: Implementation of the underlying serialization mechanism when developing triple services based on the Java interface model
 type: docs
 weight: 2
 ---
 
-## 1 介绍
+## 1 Introduction
 
-Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），开发者可以继续使用 Java 接口 直接定义服务。对于期望平滑升级、没有多语言业务或者不熟悉 Protobuf 的用户而言，Java 接口方式是最简单的使用 triple 的方式。
+The triple protocol implemented by Dubbo offers better usability (not binding Protobuf), allowing developers to directly define services using Java interfaces. For users expecting a smooth upgrade, with no multilingual services, or unfamiliar with Protobuf, the Java interface approach is the simplest way to use triple.
 
-以下介绍这种协议模式下的底层序列化细节：框架会用一个内置的 protobuf 对象将 request 和 response 进行包装（wrapper），**也就是对象会被序列化两次，第一次是使用如 `serialization=hessian` 指定的方式进行序列化，第二次是用 protobuf wrapper 对第一步中序列化后的 byte[] 进行包装后传输**。
+The following details the underlying serialization specifics in this protocol model: the framework will wrap the request and response using a built-in protobuf object, **which means the object will be serialized twice. The first serialization is done using the method specified by `serialization=hessian`, and the second is to wrap the byte[] serialized in the first step with the protobuf wrapper before transmission**.
 
+## 2 Usage
 
-## 2 使用方式
+**When using [Java interface method development for triple communication services](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/), the dubbo server will automatically enable support for protobuf and protobuf-json serialization modes.**
 
-**在使用 [Java 接口方式开发 triple 通信服务](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 的时候，dubbo server 将自动启用 protobuf、protobuf-json 序列化模式支持。**
+### 2.1 Add Dependencies
 
-### 2.1 添加依赖
-
-使用 triple 协议，必须先添加如下依赖：
+To use the triple protocol, you must first add the following dependencies:
 
 ```xml
 <dependencies>
@@ -31,7 +30,7 @@ Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），开发者
 		<artifactId>protobuf-java</artifactId>
 		<version>3.19.6</version>
 	</dependency>
-	<!-- 提供 protobuf-json 格式请求支持 -->>
+	<!-- Providing support for protobuf-json formatted requests -->
 	<dependency>
 		<groupId>com.google.protobuf</groupId>
 		<artifactId>protobuf-java-util</artifactId>
@@ -40,18 +39,18 @@ Dubbo 实现的 triple 协议易用性更好（不绑定 Protobuf），开发者
 </dependencies>
 ```
 
-### 2.2 配置启用
-只要是基于 [Java 接口方式模式使用 triple 协议](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) ，就会使用 protobuf wrapper 序列化，只要定义 Java 接口并启用 triple 协议即可：
+### 2.2 Configuration Enablement
 
-通过 Java 接口定义 Dubbo 服务：
+As long as you use [the Java interface method for the triple protocol](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/), protobuf wrapper serialization will be used, simply define the Java interface and enable the triple protocol:
+
+Define Dubbo service via Java interface:
 ```java
 public interface GreetingsService {
     String sayHi(String name);
 }
 ```
 
-
-配置使用 triple 协议（如果要设置底层使用的序列化协议，需要继续设置 serialization，如 hessian、msgpack 等）：
+Configure to use the triple protocol (if you need to set the underlying serialization protocol, continue setting serialization, such as hessian, msgpack, etc.):
 
 ```yaml
 # application.yml (Spring Boot)
@@ -60,14 +59,15 @@ dubbo:
    name: tri
    serialization: hessian
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.name=tri
 dubbo.protocol.serialization=hessian
 ```
 
-或
+or
 ```xml
 <dubbo:protocol name="tri" serialization="hessian"/>
+```
 

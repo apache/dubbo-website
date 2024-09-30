@@ -1,9 +1,10 @@
 ---
 aliases:
     - /en/overview/what/ecosystem/serialization/
-description: "triple 协议支持的序列化协议"
+description: "Serialization protocols supported by the triple protocol"
 linkTitle: triple
-title: triple 协议支持的序列化
+title: Serialization supported by the triple protocol
 type: docs
 weight: 2
 ---
+

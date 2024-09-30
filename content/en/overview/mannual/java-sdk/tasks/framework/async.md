@@ -5,226 +5,217 @@ aliases:
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-call/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
-description: 某些情况下希望dubbo接口异步调用，避免不必要的等待。
-linkTitle: 异步调用
-title: 异步调用
+description: In certain situations, we hope Dubbo interfaces can be called asynchronously to avoid unnecessary waiting.
+linkTitle: Asynchronous Call
+title: Asynchronous Call
 type: docs
 weight: 3
 ---
 
-Dubbo 异步调用分为 Provider 端异步调用和 Consumer 端异步两种模式。
-* Consumer 端异步是指发起 RPC 调用后立即返回，调用线程继续处理其他业务逻辑，当响应结果返回后通过回调函数通知消费端结果。
-* Provider 端异步执行将阻塞的业务从 Dubbo 内部线程池切换到业务自定义线程，避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。
+Dubbo asynchronous calls can be divided into Provider-side asynchronous calls and Consumer-side asynchronous calls.  
+* Consumer-side asynchronous means that after initiating an RPC call, it returns immediately, allowing the calling thread to continue processing other business logic. When the response returns, a callback function is used to notify the consumer of the result.  
+* Provider-side asynchronous execution moves blocking business from Dubbo's internal thread pool to a user-defined thread, avoiding excessive occupation of the Dubbo thread pool, which helps prevent interference between different services.
 
-以下是消费端 consumer 异步调用的工作示例图：
+Below is a working example diagram of consumer asynchronous calls:
 
 ![/user-guide/images/future.jpg](/imgs/user/future.jpg)
 
-Provider 端异步执行和 Consumer 端异步调用是相互独立的，你可以任意正交组合两端配置。
-+ Consumer同步 - Provider同步
-+ Consumer异步 - Provider同步
-+ Consumer同步 - Provider异步
-+ Consumer异步 - Provider异步
+Provider-side asynchronous execution and Consumer-side asynchronous calls are mutually independent, and you can combine the configurations of both sides in any orthogonal manner.  
++ Consumer synchronous - Provider synchronous  
++ Consumer asynchronous - Provider synchronous  
++ Consumer synchronous - Provider asynchronous  
++ Consumer asynchronous - Provider asynchronous  
 
-本文档演示的完整示例源码请参见：
-* [Consumer 服务调用异步](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-simple-boot)
-* [Provider 服务执行异步](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-provider)
-* [定义 CompletableFuture 方法签名的服务](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-original-future)
+Please refer to the complete example source code demonstrated in this document:  
+* [Consumer asynchronous service call](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-simple-boot)  
+* [Provider asynchronous service execution](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-provider)  
+* [Defining service methods with CompletableFuture signatures](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-original-future)  
 
-## Provider异步
+## Provider Asynchronous  
 
-### 1 使用CompletableFuture
+### 1 Using CompletableFuture  
 
-接口定义：
-```java
-public interface AsyncService {
-    /**
-     * 同步调用方法
-     */
-    String invoke(String param);
-    /**
-     * 异步调用方法
-     */
-    CompletableFuture<String> asyncInvoke(String param);
-}
+Interface Definition:  
+```java  
+public interface AsyncService {  
+    /**  
+     * Synchronous call method  
+     */  
+    String invoke(String param);  
+    /**  
+     * Asynchronous call method  
+     */  
+    CompletableFuture<String> asyncInvoke(String param);  
+}  
+```  
+Service Implementation:  
+```java  
+@DubboService  
+public class AsyncServiceImpl implements AsyncService {  
 
-```
-服务实现：
-```java
-@DubboService
-public class AsyncServiceImpl implements AsyncService {
+    @Override  
+    public String invoke(String param) {  
+        try {  
+            long time = ThreadLocalRandom.current().nextLong(1000);  
+            Thread.sleep(time);  
+            StringBuilder s = new StringBuilder();  
+            s.append("AsyncService invoke param:").append(param).append(",sleep:").append(time);  
+            return s.toString();  
+        }  
+        catch (InterruptedException e) {  
+            Thread.currentThread().interrupt();  
+        }  
+        return null;  
+    }  
 
-    @Override
-    public String invoke(String param) {
-        try {
-            long time = ThreadLocalRandom.current().nextLong(1000);
-            Thread.sleep(time);
-            StringBuilder s = new StringBuilder();
-            s.append("AsyncService invoke param:").append(param).append(",sleep:").append(time);
-            return s.toString();
-        }
-        catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        return null;
-    }
+    @Override  
+    public CompletableFuture<String> asyncInvoke(String param) {  
+        // It is recommended to provide a custom thread pool for supplyAsync  
+        return CompletableFuture.supplyAsync(() -> {  
+            try {  
+                // Do something  
+                long time = ThreadLocalRandom.current().nextLong(1000);  
+                Thread.sleep(time);  
+                StringBuilder s = new StringBuilder();  
+                s.append("AsyncService asyncInvoke param:").append(param).append(",sleep:").append(time);  
+                return s.toString();  
+            } catch (InterruptedException e) {  
+                Thread.currentThread().interrupt();  
+            }  
+            return null;  
+        });  
+    }  
+}  
+```  
+By returning CompletableFuture.supplyAsync(), the business execution has switched from the Dubbo thread to the business thread, avoiding blocking the Dubbo thread pool.  
 
-    @Override
-    public CompletableFuture<String> asyncInvoke(String param) {
-        // 建议为supplyAsync提供自定义线程池
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // Do something
-                long time = ThreadLocalRandom.current().nextLong(1000);
-                Thread.sleep(time);
-                StringBuilder s = new StringBuilder();
-                s.append("AsyncService asyncInvoke param:").append(param).append(",sleep:").append(time);
-                return s.toString();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return null;
-        });
-    }
-}
+### 2 Using AsyncContext  
 
-```
-通过 return CompletableFuture.supplyAsync() ，业务执行已从 Dubbo 线程切换到业务线程，避免了对 Dubbo 线程池的阻塞。
+Dubbo provides an asynchronous interface AsyncContext similar to Servlet 3.0, which can also achieve Provider-side asynchronous execution without a CompletableFuture signature interface.  
 
-### 2 使用AsyncContext
+Interface Definition:  
+```java  
+public interface AsyncService {  
+    String sayHello(String name);  
+}  
+```  
 
-Dubbo 提供了一个类似 Servlet 3.0 的异步接口AsyncContext，在没有 CompletableFuture 签名接口的情况下，也可以实现 Provider 端的异步执行。
+Service Implementation:  
+```java  
+public class AsyncServiceImpl implements AsyncService {  
+    public String sayHello(String name) {  
+        final AsyncContext asyncContext = RpcContext.startAsync();  
+        new Thread(() -> {  
+            // If you want to use the context, it must be executed on the first line  
+            asyncContext.signalContextSwitch();  
+            try {  
+                Thread.sleep(500);  
+            } catch (InterruptedException e) {  
+                e.printStackTrace();  
+            }  
+            // Write back the response  
+            asyncContext.write("Hello " + name + ", response from provider.");  
+        }).start();  
+        return null;  
+    }  
+}  
+```  
 
-接口定义：
-```java
-public interface AsyncService {
-    String sayHello(String name);
-}
+## Consumer Asynchronous  
 
-```
+### 1 Using CompletableFuture  
+```java  
+@DubboReference  
+private AsyncService asyncService;  
 
-服务实现：
+@Override  
+public void run(String... args) throws Exception {  
+    // Call asynchronous interface  
+    CompletableFuture<String> future1 = asyncService.asyncInvoke("async call request1");  
+    future1.whenComplete((v, t) -> {  
+        if (t != null) {  
+            t.printStackTrace();  
+        } else {  
+            System.out.println("AsyncTask Response-1: " + v);  
+        }  
+    });  
+    // Two calls do not return in order  
+    CompletableFuture<String> future2 = asyncService.asyncInvoke("async call request2");  
+    future2.whenComplete((v, t) -> {  
+        if (t != null) {  
+            t.printStackTrace();  
+        } else {  
+            System.out.println("AsyncTask Response-2: " + v);  
+        }  
+    });  
+    // Consumer asynchronous call  
+    CompletableFuture<String> future3 = CompletableFuture.supplyAsync(() -> {  
+        return asyncService.invoke("invoke call request3");  
+    });  
+    future3.whenComplete((v, t) -> {  
+        if (t != null) {  
+            t.printStackTrace();  
+        } else {  
+            System.out.println("AsyncTask Response-3: " + v);  
+        }  
+    });  
 
-```java
-public class AsyncServiceImpl implements AsyncService {
-    public String sayHello(String name) {
-        final AsyncContext asyncContext = RpcContext.startAsync();
-        new Thread(() -> {
-            // 如果要使用上下文，则必须要放在第一句执行
-            asyncContext.signalContextSwitch();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // 写回响应
-            asyncContext.write("Hello " + name + ", response from provider.");
-        }).start();
-        return null;
-    }
-}
+    System.out.println("AsyncTask Executed before response return.");  
+}  
+```  
 
-```
+### 2 Using RpcContext  
+Configure in the annotation:  
+```java  
+@DubboReference(async="true")  
+private AsyncService asyncService;  
+```  
 
-## Consumer异步
+You can also specify method-level asynchronous configurations:  
+```java  
+@DubboReference(methods = {@Method(name = "sayHello", timeout = 5000)})  
+private AsyncService asyncService;  
+```  
 
-### 1 使用CompletableFuture
-```java
-@DubboReference
-private AsyncService asyncService;
+The subsequent calls will be asynchronous:  
+```java  
+// This call will immediately return null  
+asyncService.sayHello("world");  
+// Get the Future reference of the call, which will be notified and set to this Future when the result returns  
+CompletableFuture<String> helloFuture = RpcContext.getServiceContext().getCompletableFuture();  
+// Add a callback to the Future  
+helloFuture.whenComplete((retValue, exception) -> {  
+    if (exception == null) {  
+        System.out.println(retValue);  
+    } else {  
+        exception.printStackTrace();  
+    }  
+});  
+```  
 
-@Override
-public void run(String... args) throws Exception {
-    //调用异步接口
-    CompletableFuture<String> future1 = asyncService.asyncInvoke("async call request1");
-    future1.whenComplete((v, t) -> {
-        if (t != null) {
-            t.printStackTrace();
-        } else {
-            System.out.println("AsyncTask Response-1: " + v);
-        }
-    });
-    //两次调用并非顺序返回
-    CompletableFuture<String> future2 = asyncService.asyncInvoke("async call request2");
-    future2.whenComplete((v, t) -> {
-        if (t != null) {
-            t.printStackTrace();
-        } else {
-            System.out.println("AsyncTask Response-2: " + v);
-        }
-    });
-    //consumer异步调用
-    CompletableFuture<String> future3 =  CompletableFuture.supplyAsync(() -> {
-        return asyncService.invoke("invoke call request3");
-    });
-    future3.whenComplete((v, t) -> {
-        if (t != null) {
-            t.printStackTrace();
-        } else {
-            System.out.println("AsyncTask Response-3: " + v);
-        }
-    });
+Or, you can also do asynchronous calls this way  
+```java  
+CompletableFuture<String> future = RpcContext.getServiceContext().asyncCall(  
+    () -> {  
+        asyncService.sayHello("oneway call request1");  
+    }  
+);  
 
-    System.out.println("AsyncTask Executed before response return.");
-}
-```
+future.get();  
+```  
 
-### 2 使用 RpcContext
-在注解中配置:
+**Asynchronous calls never wait for a return**, and you can also set whether to wait for the message to be sent  
+- `sent="true"` waits for the message to be sent; an exception will be thrown if the message sending fails.  
+- `sent="false"` does not wait for the message to be sent, puts the message into the IO queue, and returns immediately.  
 
-```java
-@DubboReference(async="true")
-private AsyncService asyncService;
-```
+```java  
+@DubboReference(methods = {@Method(name = "sayHello", timeout = 5000, sent = true)})  
+private AsyncService asyncService;  
+```  
 
-也可以指定方法级别的异步配置：
-
-```java
-@DubboReference(methods = {@Method(name = "sayHello", timeout = 5000)})
-private AsyncService asyncService;
-```
-
-接下来的调用即会是异步的：
-
-```java
-// 此调用会立即返回null
-asyncService.sayHello("world");
-// 拿到调用的Future引用，当结果返回后，会被通知和设置到此Future
-CompletableFuture<String> helloFuture = RpcContext.getServiceContext().getCompletableFuture();
-// 为Future添加回调
-helloFuture.whenComplete((retValue, exception) -> {
-    if (exception == null) {
-        System.out.println(retValue);
-    } else {
-        exception.printStackTrace();
-    }
-});
-```
-
-或者，也可以这样做异步调用
-```java
-CompletableFuture<String> future = RpcContext.getServiceContext().asyncCall(
-    () -> {
-        asyncService.sayHello("oneway call request1");
-    }
-);
-
-future.get();
-```
-
-**异步总是不等待返回**，你也可以设置是否等待消息发出
-- `sent="true"`  等待消息发出，消息发送失败将抛出异常。
-- `sent="false"` 不等待消息发出，将消息放入 IO 队列，即刻返回。
-
-```java
-@DubboReference(methods = {@Method(name = "sayHello", timeout = 5000， sent = true)})
-private AsyncService asyncService;
-```
-
-如果你只是想异步，完全忽略返回值，可以配置 `return="false"`，以减少 Future 对象的创建和管理成本
-```java
-@DubboReference(methods = {@Method(name = "sayHello", timeout = 5000， return = false)})
-private AsyncService asyncService;
-```
-
+If you just want to be asynchronous and completely ignore the return value, you can configure `return="false"` to reduce the creation and management cost of Future objects  
+```java  
+@DubboReference(methods = {@Method(name = "sayHello", timeout = 5000, return = false)})  
+private AsyncService asyncService;  
+```  
 

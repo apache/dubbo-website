@@ -1,22 +1,22 @@
 ---
 aliases:
     - /en/overview/mannual/java-sdk/reference-manual/protocol/memcached/
-description: Memcached 协议
-linkTitle: Memcached 协议
-title: Memcached 协议
+description: Memcached Protocol
+linkTitle: Memcached Protocol
+title: Memcached Protocol
 type: docs
 weight: 5
 ---
 
 
 
-基于 memcached [^1] 实现的 RPC 协议。
+RPC protocol based on memcached [^1].
 
-{{% alert title="提示" color="primary" %}}
-`2.3.0` 以上版本支持
+{{% alert title="Tip" color="primary" %}}
+Support for version `2.3.0` and above
 {{% /alert %}}
 
-## 注册 memcached 服务的地址
+## Registering the memcached service address
 
 ```java
 RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
@@ -24,34 +24,35 @@ Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.1
 registry.register(URL.valueOf("memcached://10.20.153.11/com.foo.BarService?category=providers&dynamic=false&application=foo&group=member&loadbalance=consistenthash"));
 ```
 
-## 在客户端引用
+## Referencing on the client side
 
-在客户端使用 [^2]：
+Use on the client side [^2]:
 
 ```xml
 <dubbo:reference id="cache" interface="java.util.Map" group="member" />
 ```
 
-或者，点对点直连：
+Or, connect directly point-to-point:
 
 ```xml
 <dubbo:reference id="cache" interface="java.util.Map" url="memcached://10.20.153.10:11211" />
 ```
 
-也可以使用自定义接口：
+Custom interfaces can also be used:
 
 ```xml
 <dubbo:reference id="cache" interface="com.foo.CacheService" url="memcached://10.20.153.10:11211" />
 ```
 
-方法名建议和 memcached 的标准方法名相同，即：get(key), set(key, value), delete(key)。
+It is recommended that method names match the standard method names of memcached, namely: get(key), set(key, value), delete(key).
 
-如果方法名和 memcached 的标准方法名不相同，则需要配置映射关系 [^3]：
+If the method names do not match the standard method names of memcached, a mapping relationship needs to be configured [^3]:
 
 ```xml
 <dubbo:reference id="cache" interface="com.foo.CacheService" url="memcached://10.20.153.10:11211" p:set="putFoo" p:get="getFoo" p:delete="removeFoo" />
 ```
 
-[^1]: [Memcached](http://memcached.org/) 是一个高效的 KV 缓存服务器
-[^2]: 不需要感知 Memcached 的地址
-[^3]: 其中 "p:xxx" 为 spring 的标准 p 标签
+[^1]: [Memcached](http://memcached.org/) is an efficient KV cache server
+[^2]: No need to be aware of the address of Memcached
+[^3]: Where "p:xxx" is the standard p tag of spring
+

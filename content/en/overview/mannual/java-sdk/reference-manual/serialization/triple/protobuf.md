@@ -1,22 +1,22 @@
 ---
 aliases:
     - /en/overview/mannual/java-sdk/reference-manual/protocol/triple/idl/
-description: "本文介绍 protobuf 序列化，如何在 triple 协议场景下使用 protobuf、json 序列化。"
+description: "This article introduces protobuf serialization, and how to use protobuf and json serialization in the context of the triple protocol."
 linkTitle: Protobuf
-title: 如何在 triple 协议场景下使用 protobuf、json 序列化
+title: How to Use Protobuf and JSON Serialization in the Context of the Triple Protocol
 type: docs
 weight: 1
 ---
 
-## 1 介绍
+## 1 Introduction
 
-<a href="" target="_blank">Protobuf（Protocol Buffers）</a> 是由 Google 开发的一种轻量级、高效的数据交换格式，它被用于结构化数据的序列化、反序列化和传输。 相比于XML 和JSON 等文本格式，Protobuf 具有更小的数据体积、更快的解析速度和更强的可扩展性。
+<a href="" target="_blank">Protobuf (Protocol Buffers)</a> is a lightweight and efficient data interchange format developed by Google, used for the serialization, deserialization, and transmission of structured data. Compared to text formats like XML and JSON, Protobuf has smaller data sizes, faster parsing speeds, and better scalability.
 
-## 2 使用方式
-**在使用 [Protobuf(IDL) 开发 triple 通信服务](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 的时候，dubbo server 将自动启用 protobuf、protobuf-json 序列化模式支持。**
+## 2 Usage
+**When using [Protobuf (IDL) to develop triple communication services](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/), the Dubbo server will automatically enable support for protobuf and protobuf-json serialization modes.**
 
-### 2.1 添加依赖
-使用 triple + protobuf 模式，必须添加以下依赖：
+### 2.1 Add Dependencies
+To use the triple + protobuf mode, the following dependencies must be added:
 
 ```xml
 <dependencies>
@@ -25,7 +25,7 @@ weight: 1
 		<artifactId>protobuf-java</artifactId>
 		<version>3.19.6</version>
 	</dependency>
-	<!-- 提供 protobuf-json 格式请求支持 -->>
+	<!-- Provides support for protobuf-json format requests -->
 	<dependency>
 		<groupId>com.google.protobuf</groupId>
 		<artifactId>protobuf-java-util</artifactId>
@@ -34,10 +34,10 @@ weight: 1
 </dependencies>
 ```
 
-### 2.2 配置启用
-只要是基于 [Protobuf(IDL) 开发模式进行 triple 协议通信](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/) ，就会使用 protobuf 序列化，只要定义 protobuf 文件并启用 triple 协议即可。
+### 2.2 Configuring Enablement
+As long as the communication is based on [Protobuf (IDL)](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/), protobuf serialization will be used once the protobuf file is defined and the triple protocol is enabled.
 
-当使用 cURL 访问 triple 服务时，是会启用 protobuf-json 序列化模式
+When accessing the triple service with cURL, the protobuf-json serialization mode will be enabled.
 
 ```shell
 curl \
@@ -46,7 +46,7 @@ curl \
     http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
 ```
 
-protobuf 服务定义示例：
+Example of protobuf service definition:
 
 ```protobuf
 syntax = "proto3";
@@ -65,8 +65,7 @@ service Greeter{
 }
 ```
 
-
-协议配置：
+Protocol configuration:
 
 ```yaml
 # application.yml (Spring Boot)
@@ -74,12 +73,14 @@ dubbo:
  protocol:
    name: tri
 ```
-或
+or
 ```properties
 # dubbo.properties
 dubbo.protocol.name=tri
 ```
 
-或
+or
 ```xml
 <dubbo:protocol name="tri" />
+```
+

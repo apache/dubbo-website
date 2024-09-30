@@ -3,9 +3,9 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/protocol/hessian/
     - /en/docs3-v2/java-sdk/reference-manual/protocol/hessian/
     - /en/overview/mannual/java-sdk/reference-manual/protocol/hessian/
-description: Hessian协议
-linkTitle: Hessian协议
-title: Hessian协议
+description: Hessian Protocol
+linkTitle: Hessian Protocol
+title: Hessian Protocol
 type: docs
 weight: 10
 ---
@@ -13,37 +13,37 @@ weight: 10
 
 
 
-## 特性说明
-Hessian 协议用于集成 Hessian 的服务，Hessian 底层采用 Http 通讯，采用 Servlet 暴露服务，Dubbo 缺省内嵌 Jetty 作为服务器实现。
+## Feature Description
+The Hessian protocol is used for integrating services that utilize Hessian. It is based on HTTP communication and uses Servlet to expose services, with Dubbo embedding Jetty as the server implementation by default.
 
-[Hessian](http://hessian.caucho.com) 是 Caucho 开源的一个 RPC 框架，其通讯效率高于 WebService 和 Java 自带的序列化。
+[Hessian](http://hessian.caucho.com) is an open-source RPC framework from Caucho, whose communication efficiency is higher than that of WebService and Java's built-in serialization.
 
-* 连接个数：多连接
-* 连接方式：短连接
-* 传输协议：HTTP
-* 传输方式：同步传输
-* 序列化：Hessian二进制序列化
-* 适用范围：传入传出参数数据包较大，提供者比消费者个数多，提供者压力较大，可传文件。
-* 适用场景：页面传输，文件传输，或与原生hessian服务互操作。
+* Number of connections: multiple connections
+* Connection method: short connection
+* Transport protocol: HTTP
+* Transport method: synchronous transmission
+* Serialization: Hessian binary serialization
+* Applicable scope: larger incoming and outgoing parameter data packets, more providers than consumers, higher pressure on providers, allows file transfer.
+* Applicable scenarios: page transfer, file transfer, or interoperability with native Hessian services.
 
-Dubbo 的 Hessian 协议可以和原生 Hessian 服务互操作，即：
+Dubbo's Hessian protocol can interoperate with native Hessian services, which means:
 
-* 提供者用 Dubbo 的 Hessian 协议暴露服务，消费者直接用标准 Hessian 接口调用，
-* 或者提供方用标准 Hessian 暴露服务，消费方用 Dubbo 的 Hessian 协议调用。
+* Providers expose services using Dubbo's Hessian protocol, and consumers can directly call it using the standard Hessian interface,
+* or providers can expose services using standard Hessian while consumers call it using Dubbo's Hessian protocol.
 
-#### 约束
-* 参数及返回值需实现 `Serializable` 接口。
-* 参数及返回值不能自定义实现 `List`, `Map`, `Number`, `Date`, `Calendar` 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。
+#### Constraints
+* Parameters and return values must implement the `Serializable` interface.
+* Parameters and return values cannot implement interfaces like `List`, `Map`, `Number`, `Date`, `Calendar`, etc., via custom implementations; only JDK's built-in implementations can be used, as Hessian applies special processing that causes property values in custom classes to be lost.
 
-## 使用场景
-hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序列化与反序列化实例。
+## Usage Scenarios
+Hessian is a lightweight RPC service implemented based on Binary-RPC protocol, demonstrating serialization and deserialization instances.
 
 
-## 使用方式
+## Usage
 
-### 依赖
+### Dependencies
 
-从 Dubbo 3 开始，Hessian 协议已经不再内嵌在 Dubbo 中，需要单独引入独立的[模块](/en/download/spi-extensions/#dubbo-rpc)。
+As of Dubbo 3, the Hessian protocol is no longer embedded in Dubbo and needs to be separately introduced as an independent [module](/en/download/spi-extensions/#dubbo-rpc).
 ```xml
 <dependency>
     <groupId>org.apache.dubbo.extensions</groupId>
@@ -60,28 +60,28 @@ hessian是一个轻量级的RPC服务，是基于Binary-RPC协议实现的，序
 </dependency>
 ```
 
-### 定义 hessian 协议
+### Define Hessian Protocol
 ```xml
 <dubbo:protocol name="hessian" port="8080" server="jetty" />
 ```
 
-### 设置默认协议
+### Set Default Protocol
 ```xml
 <dubbo:provider protocol="hessian" />
 ```
 
-### 设置 service 协议
+### Set Service Protocol
 ```xml
 <dubbo:service protocol="hessian" />
 ```
 
-### 多端口
+### Multiple Ports
 ```xml
 <dubbo:protocol id="hessian1" name="hessian" port="8080" />
 <dubbo:protocol id="hessian2" name="hessian" port="8081" />
 ```
 
-### 直连
+### Direct Connection
 ```xml
 <dubbo:reference id="helloService" interface="HelloWorld" url="hessian://10.20.153.10:8080/helloWorld" />
 ```

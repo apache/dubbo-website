@@ -3,8 +3,8 @@ aliases:
     - /en/docs3-v2/java-sdk/reference-manual/performance/rpc-benchmarking/
     - /en/docs3-v2/java-sdk/reference-manual/performance/rpc-benchmarking/
 description: ""
-linkTitle: RPC 基准
-title: RPC 协议 Triple&Dubbo 基准测试
+linkTitle: RPC Benchmark
+title: RPC Protocol Triple&Dubbo Benchmark Testing
 type: docs
 weight: 1
 ---
@@ -14,50 +14,51 @@ weight: 1
 
 
 
-- Dubbo3 的 _Dubbo协议 _实现与 Dubbo2 版本在性能上基本持平。
-- 由于 Triple协议 本身是基于 HTTP/2 构建，因此在单条链路上的 RPC 调用并未比基于 TCP 的 Dubbo2 有提升，反而在某些调用场景出现一定下降。但 _Triple协议 _更大的优势在于网关穿透性、通用性，以及 Stream 通信模型带来的总体吞吐量提升。
-- Triple 预期在网关代理场景下一定会有更好的性能表现，鉴于当前压测环境，本轮 benchmark 暂未提供。
+- The implementation of the _Dubbo protocol_ in Dubbo3 is basically on par with the Dubbo2 version in terms of performance.
+- Since the Triple protocol is built on HTTP/2, RPC calls over a single link do not show an improvement compared to Dubbo2 based on TCP, and there is actually a certain decrease in some calling scenarios. However, the _Triple protocol_ has greater advantages in gateway penetration, universality, and overall throughput improvement brought by the Stream communication model.
+- Triple is expected to perform better under gateway proxy scenarios, and benchmarks were not provided in the current stress test environment.
 
-## 1.1 环境
+## 1.1 Environment
 
 
-|     | 描述 |
+|     | Description |
 | ------------ | ------------------------------------------------------------ |
-| **机器**     | 4C8G Linux JDK 1.8（Provider）4C8G Linux JDK 1.8 （Consumer） |
-| **压测用例** | RPC 方法类型包括：无参无返回值、普通pojo返回值、pojo列表返回值<br /><br />2.7 版本 Dubbo 协议（Hessian2 序列化）<br />3.0 版本 Dubbo 协议（Hessian2 序列化）<br />3.0 版本 Dubbo 协议（Protobuf 序列化）<br />3.0 版本 Triple 协议（Protobuf 序列化）<br />3.0 版本 Triple 协议（Protobuf 套 Hessian2 序列化） |
-| **压测方法** | 单链接场景下，消费端起 32 并发线程（当前机器配置 qps rt 较均衡的并发数），持续压后采集压测数据<br /> 压测数据通过 https://github.com/apache/dubbo-benchmark 得出 |
+| **Machine**     | 4C8G Linux JDK 1.8 (Provider) 4C8G Linux JDK 1.8 (Consumer) |
+| **Stress Test Cases** | RPC method types include: no-parameter no return value, ordinary pojo return value, pojo list return value<br /><br />Version 2.7 Dubbo protocol (Hessian2 serialization)<br />Version 3.0 Dubbo protocol (Hessian2 serialization)<br />Version 3.0 Dubbo protocol (Protobuf serialization)<br />Version 3.0 Triple protocol (Protobuf serialization)<br />Version 3.0 Triple protocol (Protobuf plus Hessian2 serialization) |
+| **Stress Testing Method** | In a single link scenario, the consumer starts 32 concurrent threads (the current machine configuration has a balanced qps rt concurrency), continuously collecting test data<br /> Test data is obtained from https://github.com/apache/dubbo-benchmark |
 
 <br />
 
-## 1.2 数据分析
+## 1.2 Data Analysis
 
 |                    | **Dubbo + Hessian2<br />2.7** | **Dubbo + Hessian2<br />3.0** | **Dubbo + Protobuf<br />3.0** | **Triple + Protobuf<br />3.0** | **Triple + Protobuf(Hessian)<br />3.0** |
 | ------------------ | ----------------------------- | ----------------------------- | ----------------------------- | ------------------------------ | --------------------------------------- |
-| **无参方法**       | 30333 ops/s<br />2.5ms P99    | 30414 ops/s<br />2.4ms P99    | 24123 ops/s<br />3.2ms P99    | 7016 ops/s<br />8.7ms P99      | 6635 ops/s<br />9.1ms P99               |
-| **pojo返回值**     | 8984 ops/s<br />6.1 ms P99    | 12279 ops/s<br />5.7 ms P99   | 21479 ops/s<br />3.0 ms P99   | 6255 ops/s<br />8.9 ms P99     | 6491 ops/s<br />10 ms P99               |
-| **pojo列表返回值** | 1916 ops/s<br />34 ms P99     | 2037 ops/s<br />34 ms P99     | 12722 ops/s<br />7.7 ms P99   | 6920 ops/s<br />9.6 ms P99     | 2833 ops/s<br />27 ms P99               |
+| **No-parameter Method**       | 30333 ops/s<br />2.5ms P99    | 30414 ops/s<br />2.4ms P99    | 24123 ops/s<br />3.2ms P99    | 7016 ops/s<br />8.7ms P99      | 6635 ops/s<br />9.1ms P99               |
+| **Pojo Return Value**     | 8984 ops/s<br />6.1 ms P99    | 12279 ops/s<br />5.7 ms P99   | 21479 ops/s<br />3.0 ms P99   | 6255 ops/s<br />8.9 ms P99     | 6491 ops/s<br />10 ms P99               |
+| **Pojo List Return Value** | 1916 ops/s<br />34 ms P99     | 2037 ops/s<br />34 ms P99     | 12722 ops/s<br />7.7 ms P99   | 6920 ops/s<br />9.6 ms P99     | 2833 ops/s<br />27 ms P99               |
 
-### 1.2.1 Dubbo 协议不同版本实现对比
+### 1.2.1 Comparison of Different Versions of Dubbo Protocol Implementations
 
 ![//imgs/v3/performance/rpc-dubbo.svg](/imgs/v3/performance/rpc-dubbo.svg)
 
-<br />图三  Dubbo协议在不同版本的实现对比<br />
+<br />Figure 3  Comparison of Dubbo protocol implementations across different versions<br />
 
-- 就 Dubbo RPC + Hessian 的默认组合来说，Dubbo3 与 Dubbo2 在性能上在不同调用场景下基本持平
+- In terms of the default combination of Dubbo RPC + Hessian, Dubbo3 and Dubbo2 are basically on par in performance across different calling scenarios.
 
-### 1.2.2 Dubbo协议 vs Triple协议
+### 1.2.2 Dubbo Protocol vs. Triple Protocol
 
 ![//imgs/v3/performance/rpc-triple.svg](/imgs/v3/performance/rpc-triple.svg)
 
-<br />图四 Triple vs Dubbo<br />
+<br />Figure 4 Triple vs Dubbo<br />
 
-- 单纯看 Consumer <-> Provider 的点对点调用，可以看出 Triple 协议本身并不占优势，同样使用 Protobuf 序列化方式，Dubbo RPC 协议总体性能还是要优于 Triple。<br /><br />
-- Triple 实现在 3.0 版本中将会得到持续优化，但不能完全改变在某些场景下“基于 HTTP/2 的 RPC 协议”对比“基于 TCP 的 RPC 协议”处于劣势的局面
+- Looking solely at point-to-point calls between Consumer and Provider, it can be seen that the Triple protocol does not have an advantage; similarly using Protobuf serialization, Dubbo RPC protocol overall performance still outperforms Triple.<br /><br />
+- The implementation of Triple in version 3.0 will continue to be optimized, but it cannot completely change the disadvantage of "HTTP/2-based RPC protocol" compared to "TCP-based RPC protocol" in certain scenarios.
 
-### 1.2.3 补充网关场景
+### 1.2.3 Additional Gateway Scenarios
 
 TBD<br /><br />
 
-### 1.2.4 模拟 Stream 通信场景的吞吐量提升
+### 1.2.4 Throughput Improvement Simulating Stream Communication Scenarios
 
 TBD
+

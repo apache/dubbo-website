@@ -5,66 +5,66 @@ aliases:
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-call/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async-execute-on-provider/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/async/
-description: 某些情况下希望dubbo接口异步调用，避免不必要的等待。
-linkTitle: 超时时间
-title: 为服务调用指定 timeout 超时时间
+description: In some cases, you may want the Dubbo interface to call asynchronously to avoid unnecessary waiting.
+linkTitle: Timeout Duration
+title: Specify timeout duration for service calls
 type: docs
 weight: 3
 ---
 
-为 RPC 调用设置超时时间可以提升集群整体稳定性，避免无限等待响应结果导致的资源占用（比如大量长期无响应的请求占用线程池等）。在调用没有响应的情况下，比如 5s 之后，Dubbo 框架就会自动终止调用等待过程（抛出 TimeoutException），释放此次调用占用的资源。
+Setting a timeout for RPC calls can improve the overall stability of the cluster, avoiding resource occupation caused by waiting indefinitely for response results (e.g., a large number of long-running unresponsive requests occupying the thread pool). In cases of no response, for example, after 5 seconds, the Dubbo framework will automatically terminate the call wait process (throwing a TimeoutException) and release the resources occupied by this call.
 
-## 使用方式
-有多种方式可以配置 rpc 调用超时时间，从粗粒度的全局默认值，到特定服务、特定方法级别的独立配置：
+## Usage
+There are multiple ways to configure the RPC call timeout, from coarse-grained global defaults to independent configurations at the specific service or method level:
 
-配置全局默认超时时间为 5s（不配置的情况下，所有服务的默认超时时间是 1s）。
+Configure the global default timeout to 5 seconds (without configuration, the default timeout for all services is 1 second).
 ```yaml
 dubbo:
   provider:
     timeout: 5000
 ```
 
-在消费端，指定 DemoService 服务调用的超时时间为 5s
+At the consumer side, specify the timeout for DemoService calls to 5 seconds.
 ```java
 @DubboReference(timeout=5000)
 private DemoService demoService;
 ```
 
-在提供端，指定 DemoService 服务调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）
+At the provider side, specify the timeout for DemoService calls to 5 seconds (can serve as the default for all consumers, but has a lower priority if the consumer specifies its own).
 ```java
 @DubboService(timeout=5000)
 public class DemoServiceImpl implements DemoService{}
 ```
 
-在消费端，指定 DemoService sayHello 方法调用的超时时间为 5s
+At the consumer side, specify the timeout for the DemoService sayHello method call to 5 seconds.
 ```java
 @DubboReference(methods = {@Method(name = "sayHello", timeout = 5000)})
 private DemoService demoService;
 ```
 
-在提供端，指定 DemoService sayHello 方法调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）
+At the provider side, specify the timeout for the DemoService sayHello method call to 5 seconds (can serve as the default for all consumers, but has a lower priority if the consumer specifies its own).
 ```java
 @DubboService(methods = {@Method(name = "sayHello", timeout = 5000)})
 public class DemoServiceImpl implements DemoService{}
 ```
 
-以上配置形式的优先级从高到低依次为：`方法级别配置 > 服务级别配置 > 全局配置 > 默认值`。
+The priority of the above configuration forms from high to low is: `method-level configuration > service-level configuration > global configuration > default value`.
 
-## Deadline 机制
+## Deadline Mechanism
 <img style="max-width:600px;height:auto;" src="/imgs/v3/tasks/framework/timeout.png"/>
 
-我们来分析一下以上调用链路以及可能出现的超时情况：
-* A 调用 B 设置了超时时间 5s，因此 `B -> C -> D` 总计耗时不应该超过 5s，否则 A 就会收到超时异常
-* 在任何情形下，只要 A 等待 5s 没有收到响应，整个调用链路就可以被终止了（如果此时 C 正在运行，则 `C -> D` 就没有发起的意义了）
-* 理论上 `B -> C`、`C -> D` 都有自己独立的超时时间设置，超时计时也是独立计算的，它们不知道 A 作为调用发起方是否超时
+Let's analyze the above calling chain and the possible timeout situations:
+* A calls B and sets a timeout of 5 seconds, therefore the total time for `B -> C -> D` should not exceed 5 seconds, otherwise A will receive a timeout exception.
+* In any case, as long as A waits 5 seconds without receiving a response, the entire call chain can be terminated (if C is running at this time, then `C -> D` has no meaning to initiate).
+* Theoretically, both `B -> C` and `C -> D` have their own independent timeout settings and the timeout counting is also calculated independently; they do not know whether A as the caller has timed out.
 
-在 Dubbo 框架中，`A -> B` 的调用就像一个开关，一旦启动，在任何情形下整个 `A -> B -> C -> D` 调用链路都会被完整执行下去，即便调用方 A 已经超时，后续的调用动作仍会继续。这在一些场景下是没有意义的，尤其是链路较长的情况下会带来不必要的资源消耗，deadline 就是设计用来解决这个问题，通过在调用链路中传递 deadline（deadline初始值等于超时时间，随着时间流逝而减少）可以确保调用链路只在有效期内执行，deadline 消耗殆尽之后，调用链路中其他尚未执行的任务将被取消。
+In the Dubbo framework, the call `A -> B` acts like a switch; once activated, the entire `A -> B -> C -> D` call chain will be executed completely, even if the caller A has already timed out, subsequent calling actions will continue. This can be meaningless in some scenarios, especially in long chains as it leads to unnecessary resource consumption. The deadline is designed to solve this problem by passing a deadline through the call chain (the initial value of the deadline equals the timeout, decreasing as time passes). This ensures the call chain only executes within its validity period; once the deadline is exhausted, other unexecuted tasks in the call chain will be canceled.
 
-因此 deadline 机制就是将 ` B -> C -> D` 当作一个整体看待，这一系列动作必须在 5s 之内完成。随着时间流逝 deadline 会从 5s 逐步扣减，后续每一次调用实际可用的超时时间即是当前 deadline 值，比如 `C` 收到请求时已经过去了 3s，则 `C -> D` 的超时时间只剩下 2s。
+Thus, the deadline mechanism treats `B -> C -> D` as a whole, and this series of actions must be completed within 5 seconds. As time passes, the deadline will decrease from 5 seconds. For each subsequent call, the actual available timeout is the current deadline value; for example, if `C` receives the request 3 seconds later, then the timeout for `C -> D` only has 2 seconds left.
 
 <img style="max-width:600px;height:auto;" src="/imgs/v3/tasks/framework/timeout-deadline.png"/>
 
-deadline 机制默认是关闭的，如果要启用 deadline 机制，需要配置以下参数：
+The deadline mechanism is off by default. To enable the deadline mechanism, configure the following parameters:
 ```yaml
 dubbo:
   provider:
@@ -72,7 +72,7 @@ dubbo:
     parameters.enable-timeout-countdown: true
 ```
 
-也可以指定某个服务调用开启 deadline 机制：
+You can also enable the deadline mechanism for a specific service call:
 ```java
 @DubboReference(timeout=5000, parameters={"enable-timeout-countdown", "true"})
 private DemoService demoService;
