@@ -15,7 +15,7 @@ Automatic address discovery and load balancing mechanisms have many advantages; 
 
 ## Before You Begin
 
-* [Deploy the Shop Mall Project](../#部署商场系统)
+* [Deploy the Shop Mall Project](../#deploy-the-shop-mall-project)
 * Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
 
 ## Task Details
@@ -37,10 +37,10 @@ Set conditional routing rules for the `getInfo` method call of the `org.apache.d
 
 #### Steps
 1. Open the Dubbo Admin console.
-2. In the left navigation bar, select【服务治理】>【条件路由】.
+2. In the left navigation bar, select【Service Governance】>【Conditional Routing】.
 3. Click "Create" and enter the service `org.apache.dubbo.samples.UserService`.
 
-![Admin 指定机器导流配置截图](/imgs/v3/tasks/host/host_admin.png)
+![Admin screenshot for specifying machine flow configuration](/imgs/v3/tasks/host/host_admin.png)
 
 Open the machine logs and refresh the page to trigger user detail service calls. You can see that only the specified instance in the rules keeps refreshing the following log:
 ```text
