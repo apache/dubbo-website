@@ -1,26 +1,26 @@
 ---
-description: Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供的丰富的 `dubbo-spring-boot-starter` 高效开发 Dubbo 微服务应用。
+description: Dubbo provides full support for the Spring framework, and we recommend using the officially provided rich `dubbo-spring-boot-starter` for efficient development of Dubbo microservice applications.
 linkTitle: Spring Boot Starter
 title: Spring Boot
 type: docs
 weight: 1
 ---
 
-Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供的 `dubbo-spring-boot-starter` 高效开发 Dubbo 微服务应用。
+Dubbo provides full support for the Spring framework, and we recommend using the official `dubbo-spring-boot-starter` for efficient development of Dubbo microservice applications.
 
-## 创建项目
-创建 Dubbo 应用最快捷的方式就是使用官方项目脚手架工具 - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> 在线服务。它可以帮助开发者创建 Spring Boot 结构应用，自动管理 `dubbo-spring-boot-starter` 等依赖和必要配置。
+## Creating a Project
+The fastest way to create a Dubbo application is to use the official project scaffold tool - <a href="https://start.dubbo.apache.org" target="_blank">start.dubbo.apache.org</a> online service. It helps developers create Spring Boot structured applications and automatically manage dependencies like `dubbo-spring-boot-starter` along with necessary configurations.
 
-另外，Jetbrain 官方也提供了 Apache Dubbo 项目插件，可用于快速创建 Dubbo Spring Boot 项目，能力与 start.dubbo.apache.org 对等，具体安装使用请查看 [博客文章](/en/blog/2023/10/23/intellij-idea%EF%B8%8Fapache-dubboidea官方插件正式发布/)
+Additionally, Jetbrain also provides an Apache Dubbo project plugin for quickly creating Dubbo Spring Boot projects, which is on par with start.dubbo.apache.org. For specific installation and usage, please refer to the [blog post](/en/blog/2023/10/23/intellij-idea%EF%B8%8Fapache-dubboidea官方插件正式发布/).
 
 ## dubbo-spring-boot-starter
-在 [快速开始](/en/overview/mannual/java-sdk/quick-start/) 中，我们已经详细介绍了典型的 Dubbo Spring Boot 工程源码及其项目结构，不熟悉的开发者可以前往查看。
+In the [Quick Start](/en/overview/mannual/java-sdk/quick-start/), we have detailed typical Dubbo Spring Boot project source code and its project structure. Developers who are unfamiliar can refer there.
 
-`dubbo-spring-boot-starter` 可为项目引入 dubbo 核心依赖，自动扫描 dubbo 相关配置与注解。
+`dubbo-spring-boot-starter` can introduce Dubbo core dependencies into the project and automatically scan Dubbo-related configurations and annotations.
 
-### Maven 依赖
+### Maven Dependencies
 
-使用 Dubbo Spring Boot Starter，首先引入以下 Maven 依赖
+To use the Dubbo Spring Boot Starter, first include the following Maven dependency:
 
 ```xml
     <dependencyManagement>
@@ -36,7 +36,7 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
     </dependencyManagement>
 ```
 
-然后，在相应模块的 pom 中增加必要的 starter 依赖：
+Then, add the necessary starter dependencies in the respective module's pom:
 ```xml
     <dependencies>
         <dependency>
@@ -50,10 +50,10 @@ Dubbo 提供了对 Spring 框架的完整支持，我们推荐使用官方提供
     </dependencies>
 ```
 
-`dubbo-spring-boot-starter` 和 `dubbo-zookeeper-spring-boot-starter` 是官方提供的 starter，提供了 Spring Boot 的集成适配，它们的版本号与 Dubbbo 主框架版本号完全一致。
+`dubbo-spring-boot-starter` and `dubbo-zookeeper-spring-boot-starter` are official starters that provide integration adaptations for Spring Boot, and their version numbers are fully consistent with the Dubbo main framework version.
 
-### application.yml 配置文件
-以下是一个示例文件配置
+### application.yml Configuration File
+Here is an example configuration file:
 
 ```yaml
 dubbo:
@@ -67,9 +67,9 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-除 service、reference 之外的组件都可以在 application.yml 文件中设置，具体可参考 [配置列表](/en/overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml)。
+Other components besides service and reference can be set in the application.yml file, and for specifics, please refer to the [configuration list](/en/overview/mannual/java-sdk/reference-manual/config/spring/spring-boot/#applicationyaml).
 
-service、reference 组件也可以通过 `id` 与 application 中的全局组件做关联，以下面配置为例。如果要扩展 service 或 reference 的注解配置，则需要增加 `dubbo.properties` 配置文件或使用其他非注解如 Java Config 方式，具体请看下文 [扩展注解的配置](#扩展注解配置)。
+Service and reference components can also be associated with global components in the application by using `id`, as in the following configuration. To extend the annotation configuration of service or reference, you need to add the `dubbo.properties` configuration file or use other non-annotation methods like Java Config; please see the section on [Extending Annotation Configuration](#扩展注解配置) for details. 
 
 ```yaml
 dubbo:
@@ -83,13 +83,13 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-通过注解将 service 关联到上文定义的特定注册中心（通过id关联）
+Associate the service with the specific registry defined above (linked by id) using annotations:
 ```java
 @DubboService(registry="zk-registry")
 public class DemoServiceImpl implements DemoService {}
 ```
 
-通过 Java Config 配置进行关联也是同样道理
+Using Java Config for association works similarly:
 ```java
 @Configuration
 public class ProviderConfiguration {
@@ -102,30 +102,30 @@ public class ProviderConfiguration {
 }
 ```
 
-### Dubbo 注解
-* `application.properties` 或 `application.yml` 配置文件。
-* `@DubboService`、`@DubboReference` 与 `EnableDubbo` 注解。其中 `@DubboService` 与 `@DubboReference` 用于标记 Dubbo 服务，`EnableDubbo` 启动 Dubbo 相关配置并指定 Spring Boot 扫描包路径。
+### Dubbo Annotations
+* `application.properties` or `application.yml` configuration files.
+* `@DubboService`, `@DubboReference`, and `EnableDubbo` annotations. Among them, `@DubboService` and `@DubboReference` are used to mark Dubbo services, while `EnableDubbo` starts Dubbo-related configurations and specifies the package path for Spring Boot scanning.
 
-#### @DubboService 注解
+#### @DubboService Annotation
 
-> `@Service` 注解从 3.0 版本开始就已经废弃，改用 `@DubboService`，以区别于 Spring 的 `@Service` 注解
+> The `@Service` annotation has been deprecated since version 3.0, replaced by `@DubboService` to differentiate it from the Spring `@Service` annotation.
 
-定义好 Dubbo 服务接口后，提供服务接口的实现逻辑，并用 `@DubboService` 注解标记，就可以实现 Dubbo 的服务暴露
+Once the Dubbo service interface is defined, implement the service interface logic and mark it with the `@DubboService` annotation to expose the Dubbo service:
 
 ```java
 @DubboService
 public class DemoServiceImpl implements DemoService {}
 ```
 
-如果要设置服务参数，`@DubboService` 也提供了常用参数的设置方式。如果有更复杂的参数设置需求，则可以考虑使用其他设置方式
+If you need to set service parameters, `@DubboService` also provides a way to set common parameters. For more complex parameter settings, consider using other configuration methods:
 ```java
 @DubboService(version = "1.0.0", group = "dev", timeout = 5000)
 public class DemoServiceImpl implements DemoService {}
 ```
 
-#### @DubboReference 注解
+#### @DubboReference Annotation
 
-> `@Reference` 注解从 3.0 版本开始就已经废弃，改用 `@DubboReference`，以区别于 Spring 的 `@Reference` 注解
+> The `@Reference` annotation has been deprecated since version 3.0, replaced by `@DubboReference` to differentiate it from the Spring `@Reference` annotation.
 
 ```java
 @Component
@@ -135,10 +135,10 @@ public class DemoClient {
 }
 ```
 
-`@DubboReference` 注解将自动注入为 Dubbo 服务代理实例，使用 demoService 即可发起远程服务调用
+The `@DubboReference` annotation will automatically inject a Dubbo service proxy instance, allowing remote service calls via demoService.
 
-#### @EnableDubbo 注解
-`@EnableDubbo` 注解必须配置，否则将无法加载 Dubbo 注解定义的服务，`@EnableDubbo` 可以定义在主类上
+#### @EnableDubbo Annotation
+The `@EnableDubbo` annotation must be configured; otherwise, services defined by Dubbo annotations will not load. `@EnableDubbo` can be defined on the main class:
 
 ```java
 @SpringBootApplication
@@ -150,19 +150,19 @@ public class ProviderApplication {
 }
 ```
 
-Spring Boot 注解默认只会扫描 main 类所在的 package，如果服务定义在其它 package 中，需要增加配置 `EnableDubbo(scanBasePackages = {"org.apache.dubbo.springboot.demo.provider"})`
+Spring Boot annotations will only scan the package where the main class is located by default. If services are defined in other packages, you need to add the configuration `EnableDubbo(scanBasePackages = {"org.apache.dubbo.springboot.demo.provider"})`.
 
-#### 扩展注解配置
-虽然可以通过 `@DubboService` 和 `DubboReference` 调整配置参数（如下代码片段所示），但总体来说注解是为易用性设计的，其提供的仅仅是 80% 场景下常用的配置项。在这种情况下，如果有更复杂的参数设置需求，可以使用 `Java Config` 或 `dubbo.properties` 两种方式。
+#### Extending Annotation Configuration
+While it is possible to adjust configuration parameters through `@DubboService` and `DubboReference` (as shown in the code snippet below), overall, annotations are designed for ease of use and provide only 80% of commonly used configuration items for scenarios. In such cases, if there are more complex parameter setting needs, you can use either Java Config or `dubbo.properties`.
 
 ```java
 @DubboService(version = "1.0.0", group = "dev", timeout = 5000)
 @DubboReference(version = "1.0.0", group = "dev", timeout = 5000)
 ```
 
-#### 使用 Java Config 代替注解
+#### Using Java Config in Place of Annotations
 
-注意，Java Config 是 `DubboService` 或 `DubboReference` 的替代方式，对于有复杂配置需求的服务建议使用这种方式。
+Note that Java Config is an alternative to `DubboService` or `DubboReference`. For services with complex configuration needs, this approach is recommended.
 
 ```java
 @Configuration
@@ -181,9 +181,8 @@ public class ProviderConfiguration {
 }
 ```
 
-
-#### 通过 dubbo.properties 补充配置
-对于使用 `DubboService` 或 `DubboReference` 的场景，可以通过在项目 resources 目录下增加 dubbo.properties 文件作为配置补充，[具体格式](../principle/#1-配置格式)这里有更详细解释。
+#### Supplementing Configuration Through dubbo.properties
+For scenarios using `DubboService` or `DubboReference`, additional configuration can be provided by adding a dubbo.properties file under the project's resources directory. [Specific format](../principle/#1-配置格式) has more detailed explanations here.
 
 ```properties
 dubbo.service.org.apache.dubbo.springboot.demo.DemoService.timeout=5000
@@ -191,17 +190,15 @@ dubbo.service.org.apache.dubbo.springboot.demo.DemoService.parameters=[{myKey:my
 dubbo.reference.org.apache.dubbo.springboot.demo.DemoService.timeout=6000
 ```
 
-> properties 格式配置目前结构性不太强，比如体现在 key 字段冗余较多，后续会考虑提供对于 yaml 格式的支持。
+> The properties format currently has limited structural strength, such as excessive redundancy in key fields, and support for YAML format will be considered in the future.
 
-## 更多微服务开发模式
-* [纯 API 开发模式](../api/)
-* 其他 Spring 开发模式
+## More Microservice Development Patterns
+* [Pure API Development Pattern](../api/)
+* Other Spring Development Patterns
     * [Spring XML](/en/overview/mannual/java-sdk/reference-manual/config/spring/xml/)
 
-## Dubbo 与 Spring Cloud 的关系
-Dubbo 与 Spring Cloud 是两套平行的微服务开发与解决方案，两者都提供了微服务定义、发布、治理的相关能力，对于微服务开发者来说，我们建议在开发之初就确定好 Apache Dubbo 与 Spring Cloud 之间的选型，尽量避免两个不同体系在同一集群中出现，以降低集群维护复杂度。而对于一些确需两套体系共存的场景，为了解决相互之间的通信问题，我们提供了 [Dubbo 与 Spring Cloud 异构微服务体系互通最佳实践](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/) 解决方案。
+## Relationship Between Dubbo and Spring Cloud
+Dubbo and Spring Cloud are two parallel microservice development and solution frameworks. Both provide the capability for defining, publishing, and governing microservices. For microservice developers, we recommend making a clear choice between Apache Dubbo and Spring Cloud at the beginning of development to minimize the complexity of maintaining different systems within the same cluster. For scenarios that require both systems to coexist, we provide a solution for communication issues between them in [Best Practices for Intercommunication between Dubbo and Spring Cloud Heterogeneous Microservice Systems](/en/blog/2023/10/07/微服务最佳实践零改造实现-spring-cloud-apache-dubbo-互通/).
 
- Dubbo 与 Spring Boot 是互补的关系，Dubbo 在 Spring Boot 体系之上提供了完整的微服务开发、治理能力，关于这一点我们在另一篇文章中有更详尽的说明：[Dubbo、Spring Cloud 与 Istio](/en/overview/what/xyz-difference/)。
-
-
+Dubbo and Spring Boot have a complementary relationship, where Dubbo provides complete microservice development and governance capabilities atop the Spring Boot framework. More detailed explanations on this can be found in another article: [Dubbo, Spring Cloud, and Istio](/en/overview/what/xyz-difference/).
 

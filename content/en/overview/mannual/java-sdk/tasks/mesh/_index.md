@@ -2,10 +2,10 @@
 aliases:
     - /en/overview/tasks/mesh/
     - /en/overview/tasks/mesh/
-description: '演示多种部署形态的 Dubbo Mesh 解决方案，以及 Dubbo Mesh 如何帮助用户实现架构的平滑迁移。 '
-linkTitle: 服务网格
+description: 'Demonstrates multiple deployment models of the Dubbo Mesh solution and how Dubbo Mesh helps users achieve a smooth migration of architecture.'
+linkTitle: Service Mesh
 no_list: true
-title: 服务网格
+title: Service Mesh
 toc_hide: true
 type: docs
 weight: 70
@@ -21,9 +21,9 @@ weight: 70
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./migration/dubbo-mesh/" >}}'>Istio & Envoy 示例</a>
+                    <a href='{{< relref "./migration/dubbo-mesh/" >}}'>Istio & Envoy Example</a>
                 </h4>
-                <p>演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系。</p>
+                <p>Demonstrates the Dubbo service access based on the Envoy proxy in the Istio service mesh framework.</p>
             </div>
         </div>
     </div>
@@ -31,9 +31,9 @@ weight: 70
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./migration/proxyless/" >}}'>Istio & Proxyless 示例</a>
+                    <a href='{{< relref "./migration/proxyless/" >}}'>Istio & Proxyless Example</a>
                 </h4>
-                <p>演示 Dubbo Proxyless 接入 Istio 服务网格体系。</p>
+                <p>Demonstrates Dubbo Proxyless access to the Istio service mesh framework.</p>
             </div>
         </div>
     </div>
@@ -42,3 +42,4 @@ weight: 70
 </div>
 
 {{< /blocks/section >}}
+

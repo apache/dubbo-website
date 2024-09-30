@@ -2,9 +2,10 @@
 aliases:
     - /en/overview/tasks/develop/
     - /en/overview/tasks/develop/
-description: 演示 Dubbo 框架提供的微服务开发 API 与编程模式
-linkTitle: 快速创建应用
-title: 快速创建应用
+description: Demonstrates the microservice development APIs and programming model provided by the Dubbo framework
+linkTitle: Quickly Create Applications
+title: Quickly Create Applications
 type: docs
 weight: 1
 ---
+

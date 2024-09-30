@@ -3,26 +3,25 @@ aliases:
     - /en/overview/tasks/mesh/migration/proxyless/
     - /en/overview/tasks/mesh/migration/proxyless/
 description: ""
-linkTitle: 其他问题？
-title: 其他问题？
+linkTitle: Other Issues?
+title: Other Issues?
 type: docs
 weight: 3
 ---
 
 
 
-Proxyless 模式是指 Dubbo 直接与 Istiod 通信，通过 xDS 协议实现服务发现和服务治理等能力。
-本示例中将通过一个简单的示例来演示如何使用 Proxyless 模式。
+Proxyless mode refers to Dubbo communicating directly with Istiod, utilizing the xDS protocol to achieve capabilities such as service discovery and service governance. This example will demonstrate how to use Proxyless mode through a simple demonstration.
 
-[示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds)
+[Example Address](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds)
 
-## 代码架构
+## Code Architecture
 
-本小节中主要介绍本文所使用的示例的代码架构，通过模仿本示例中的相关配置改造已有的项目代码可以使已有的项目快速跑在 Proxyless Mesh 模式下。
+This section primarily introduces the code architecture of the example used in this article. By mimicking the relevant configurations in this example, existing project code can be quickly adapted to run in Proxyless Mesh mode.
 
-### 1. 接口定义
+### 1. Interface Definition
 
-为了示例足够简单，这里使用了一个简单的接口定义，仅对参数做拼接进行返回。
+To keep the example simple, a straightforward interface definition is used, returning a concatenated result of parameters.
 
 ```java
 public interface GreetingService {
@@ -30,7 +29,7 @@ public interface GreetingService {
 }
 ```
 
-### 2. 接口实现
+### 2. Interface Implementation
 
 ```java
 @DubboService(version = "1.0.0")
@@ -43,11 +42,11 @@ public class AnnotatedGreetingService implements GreetingService {
 }
 ```
 
-### 3. 客户端订阅方式
+### 3. Client Subscription Method
 
-**由于原生 xDS 协议无法支持获取从接口到应用名的映射，因此需要配置 `providedBy` 参数来标记此服务来自哪个应用。**
+**Since the native xDS protocol does not support obtaining the mapping from the interface to the application name, the `providedBy` parameter needs to be configured to indicate which application this service comes from.**
 
-未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务映射](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
+In the future, we will implement automatic [service mapping](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/) relationship retrieval based on Dubbo Mesh's control panel, eliminating the need for independent parameter configurations.
 
 ```java
 @Component("annotatedConsumer")
@@ -60,13 +59,13 @@ public class GreetingServiceConsumer {
 }
 ```
 
-### 4. 服务端配置
+### 4. Server Configuration
 
-服务端配置注册中心为 istio 的地址，协议为 xds。
+The server configuration registers the Istio address as the registration center, and the protocol is xds.
 
-我们建议将 `protocol` 配置为 tri 协议（全面兼容 grpc 协议），以获得在 istio 体系下更好的体验。
+We recommend setting the `protocol` to tri (fully compatible with grpc) for a better experience within the Istio environment.
 
-为了使 Kubernetes 感知到应用的状态，需要配置 `qosAcceptForeignIp` 参数，以便 Kubernetes 可以获得正确的应用状态，[对齐生命周期](/en/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/)。
+To allow Kubernetes to be aware of the application's status, the `qosAcceptForeignIp` parameter needs to be configured for Kubernetes to obtain the correct application status, [aligning the lifecycle](/en/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/).
 
 ```properties
 dubbo.application.name=dubbo-samples-xds-provider
@@ -77,9 +76,9 @@ dubbo.protocol.port=50052
 dubbo.application.qosAcceptForeignIp=true
 ```
 
-### 5. 客户端配置
+### 5. Client Configuration
 
-客户端配置注册中心为 istio 的地址，协议为 xds。
+The client configuration registers the Istio address as the registration center, and the protocol is xds.
 
 ```properties
 dubbo.application.name=dubbo-samples-xds-consumer
@@ -88,13 +87,13 @@ dubbo.registry.address=xds://istiod.istio-system.svc:15012
 dubbo.application.qosAcceptForeignIp=true
 ```
 
-## 快速开始
+## Quick Start
 
-### Step 1: 搭建 Kubernetes 环境
+### Step 1: Set Up Kubernetes Environment
 
-目前 Dubbo 仅支持在 Kubernetes 环境下的 Mesh 部署，所以在运行启动本示例前需要先搭建 Kubernetes 环境。
+Currently, Dubbo only supports Mesh deployment in Kubernetes environments, so you need to set up a Kubernetes environment before running this example.
 
-搭建参考文档：
+Reference Documentation:
 
 > [minikube(https://kubernetes.io/zh-cn/docs/tutorials/hello-minikube/)](https://kubernetes.io/zh-cn/docs/tutorials/hello-minikube/)
 > 
@@ -102,15 +101,15 @@ dubbo.application.qosAcceptForeignIp=true
 > 
 > [k3s(https://k3s.io/)](https://k3s.io/)
 
-### Step 2: 搭建 Istio 环境
+### Step 2: Set Up Istio Environment
 
-搭建 Istio 环境参考文档：
+Reference Documentation for Istio Installation:
 
-[Istio 安装文档(https://istio.io/latest/docs/setup/getting-started/)](https://istio.io/latest/docs/setup/getting-started/)
+[Istio Installation Documentation(https://istio.io/latest/docs/setup/getting-started/)](https://istio.io/latest/docs/setup/getting-started/)
 
-注：安装 Istio 的时候**需要开启 [first-party-jwt 支持](https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens)（使用 `istioctl` 工具安装的时候加上 `--set values.global.jwtPolicy=first-party-jwt` 参数）**，否则将导致客户端认证失败的问题。
+Note: When installing Istio, **you must enable [first-party-jwt support](https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens) (add the `--set values.global.jwtPolicy=first-party-jwt` parameter when using the `istioctl` tool)**; otherwise, client authentication will fail.
 
-附安装命令参考：
+Reference for Installation Commands:
 
 ```bash
 curl -L https://istio.io/downloadIstio | sh -
@@ -119,7 +118,7 @@ export PATH=$PWD/bin:$PATH
 istioctl install --set profile=demo --set values.global.jwtPolicy=first-party-jwt -y
 ```
 
-### Step 3: 拉取代码并构建
+### Step 3: Pull Code and Build
 
 ```bash
 git clone https://github.com/apache/dubbo-samples.git
@@ -127,9 +126,9 @@ cd dubbo-samples/dubbo-samples-xds
 mvn clean package -DskipTests
 ```
 
-### Step 4: 构建镜像
+### Step 4: Build Images
 
-由于 Kubernetes 采用容器化部署，需要将代码打包在镜像中再进行部署。
+Since Kubernetes adopts containerized deployment, the code needs to be packaged in an image before deployment.
 
 ```bash
 cd ./dubbo-samples-xds-provider/
@@ -141,17 +140,17 @@ docker build -t apache/dubbo-demo:dubbo-samples-xds-consumer_0.0.1 .
 cd ../
 ```
 
-### Step 5: 创建namespace
+### Step 5: Create Namespace
 
 ```bash
-# 初始化命名空间
+# Initialize namespace
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-xds/deploy/Namespace.yml
 
-# 切换命名空间
+# Switch namespace
 kubens dubbo-demo
 ```
 
-### Step 6: 部署容器
+### Step 6: Deploy Containers
 
 ```bash
 cd ./dubbo-samples-xds-provider/src/main/resources/k8s
@@ -165,7 +164,7 @@ kubectl apply -f Deployment.yml
 cd ../../../../../
 ```
 
-查看 consumer 的日志可以观察到如下的日志：
+By checking the logs of the consumer, the following logs can be observed:
 ```
 result: hello, xDS Consumer! from host: 172.17.0.5
 result: hello, xDS Consumer! from host: 172.17.0.5
@@ -173,15 +172,15 @@ result: hello, xDS Consumer! from host: 172.17.0.6
 result: hello, xDS Consumer! from host: 172.17.0.6
 ```
 
-## 常见问题
+## Common Issues
 
-1. 配置独立的 Istio 集群 `clusterId`
+1. Configuring a Separate Istio Cluster `clusterId`
 
-通常在 Kubernetes 体系下 Istio 的 `clusterId` 是 `Kubernetes`，如果你使用的是自建的 istio 生产集群或者云厂商提供的集群则可能需要配置 `clusterId`。
+Typically, in Kubernetes, Istio's `clusterId` is `Kubernetes`. If you are using a self-built Istio production cluster or a cluster provided by a cloud vendor, you may need to configure the `clusterId`.
 
-配置方式：指定 `ISTIO_META_CLUSTER_ID` 环境变量为所需的 `clusterId`。
+Configuration Method: Specify the `ISTIO_META_CLUSTER_ID` environment variable to the desired `clusterId`.
 
-参考配置：
+Reference Configuration:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -205,25 +204,25 @@ spec:
           image: xxx
 ```
 
-`clusterId` 获取方式：
+`clusterId` Retrieval Method:
 > kubectl describe pod -n istio-system istiod-58b4f65df9-fq2ks
-> 读取环境变量中 `CLUSTER_ID` 的值
+> Read the value of `CLUSTER_ID` from the environment variables.
 
-2. Istio 认证失败
+2. Istio Authentication Failure
 
-由于当前 Dubbo 版本还不支持 istio 的 `third-party-jwt` 认证，所以需要配置 `jwtPolicy` 为 `first-party-jwt`。
+Since the current Dubbo version does not support Istio's `third-party-jwt` authentication, it is necessary to configure `jwtPolicy` as `first-party-jwt`.
 
 3. providedBy
 
-由于当前 Dubbo 版本受限于 istio 的通信模型无法获取接口所对应的应用名，因此需要配置 `providedBy` 参数来标记此服务来自哪个应用。
-未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务映射](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
+Due to the current limitations of the Dubbo version with Istio's communication model, it is not possible to obtain the application name corresponding to the interface. Therefore, the `providedBy` parameter needs to be configured to indicate which application this service comes from. In the future, we will implement automatic [service mapping](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/) retrieval based on Dubbo Mesh's control panel.
 
-4. protocol name
+4. Protocol Name
 
-Proxyless 模式下应用级服务发现通过 `Kubernetes Native Service` 来进行应用服务发现，而由于 istio 的限制，目前只支持 `http` 协议和 `grpc` 协议的流量拦截转发，所以 `Kubernetes Service` 在配置的时候需要指定 `spec.ports.name` 属性为 `http` 或者 `grpc` 开头。
-因此我们建议使用 triple 协议（完全兼容 grpc 协议）。此处即使 `name` 配置为 `grpc` 开头，但是实际上是 `dubbo` 协议也可以正常服务发现，但是影响流量路由的功能。
+In Proxyless mode, application-level service discovery is performed via `Kubernetes Native Service`. However, due to Istio's limitations, currently, only `http` and `grpc` traffic interception and forwarding are supported. Therefore, the `Kubernetes Service` configuration needs to specify the `spec.ports.name` attribute to start with `http` or `grpc`.
 
-参考配置：
+Thus, we recommend using the triple protocol (fully compatible with grpc). Even if the `name` is configured to start with `grpc`, it can still function properly, but it affects the traffic routing capabilities.
+
+Reference Configuration:
 ```yaml
 apiVersion: v1
 kind: Service
@@ -242,34 +241,35 @@ spec:
 
 5. metadataServicePort
 
-由于 Dubbo 3 应用级服务发现的元数据无法从 istio 中获取，需要走服务自省模式。这要求了 `Dubbo MetadataService` 的端口在全集群的是统一的。
+Since Dubbo 3's application-level service discovery metadata cannot be obtained from Istio, it must rely on service introspection. This requires the `Dubbo MetadataService` port to be unified across the entire cluster.
 
-参考配置：
+Reference Configuration:
 ```properties
 dubbo.application.metadataServicePort=20885
 ```
 
-未来我们将基于 Dubbo Mesh 的控制面实现自动的[服务元数据](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/)获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。
+In the future, we will implement automatic retrieval of [service metadata](/en/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/) based on Dubbo Mesh's control panel.
 
 6. qosAcceptForeignIp
 
-由于 Kubernetes probe 探活机制的工作原理限制，探活请求的发起方不是 `localhost`，所以需要配置 `qosAcceptForeignIp` 参数开启允许全局访问。
+Due to the working principles of Kubernetes probe health checks, if the initiator of the health check request is not `localhost`, the `qosAcceptForeignIp` parameter needs to be configured to allow global access.
 
 ```properties
 dubbo.application.qosAcceptForeignIp=true
 ```
 
-注：qos 端口存在危险命令，请先评估网络的安全性。即使 qos 不开放也仅影响 Kubernetes 无法获取 Dubbo 的生命周期状态。
+Note: The qos port contains dangerous commands; please assess network security first. Even if qos is not open, it only affects Kubernetes's ability to retrieve Dubbo's lifecycle status.
 
-7. 不需要开启注入
+7. No Injection Needed
 
-Proxyless 模式下 pod 不需要再开启 envoy 注入，请确认 namespace 中没有 `istio-injection=enabled` 的标签。
+In Proxyless mode, pods do not require envoy injection. Please ensure there are no labels of `istio-injection=enabled` in the namespace.
 
-8. 明文连接istiod
+8. Plain Text Connection to Istiod
 
-Proxyless 模式下默认通过ssl方式连接istiod，同时也支持通过明文的方式连接istiod。
+In Proxyless mode, the default connection to Istiod is via SSL, but plain text connections to Istiod are also supported.
 
-明文连接参考配置：
+Reference Configuration for Plain Text Connection:
 ```properties
 dubbo.registry.secure=plaintext
 ```
+

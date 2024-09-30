@@ -2,17 +2,17 @@
 aliases:
     - /en/overview/tasks/mesh/bookinfo-sidecar/traffic/
     - /en/overview/tasks/mesh/bookinfo-sidecar/traffic/
-description: Envoy Traffic Management Bookinfo 示例。
+description: Envoy Traffic Management Bookinfo example.
 linkTitle: Traffic Management
 no_list: true
-title: Envoy Bookinfo 流量管控示例
+title: Envoy Bookinfo Traffic Control Example
 type: docs
 weight: 10
 ---
 
 
 
-通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系，如何进行流量管理。
+This demonstration showcases how to perform traffic management in the Dubbo service access based on the Envoy proxy within the Istio service mesh, using the complete Bookinfo example.
 
 {{< blocks/section color="white" height="auto">}}
 {{< /blocks/section >}}
@@ -37,7 +37,7 @@ weight: 10
                 <h4 class="card-title">
                     <a href='{{< relref "./request-routing/" >}}'>Traffic Shifting</a>
                 </h4>
-                <p>Shows you how to migrate traffic from an old to new version of a service.</p>
+                <p>Shows you how to migrate traffic from an old to a new version of a service.</p>
             </div>
         </div>
     </div>
@@ -46,7 +46,7 @@ weight: 10
             <div class="card-body">
                 <h4 class="card-title">
                     <a href='{{< relref "./request-routing/" >}}'>TCP Traffic Shifting</a>
-                    <p>Shows you how to migrate TCP traffic from an old to new version of a TCP service.</p>
+                    <p>Shows you how to migrate TCP traffic from an old to a new version of a TCP service.</p>
                 </h4>
                 <p></p>
             </div>
@@ -90,3 +90,4 @@ weight: 10
 </div>
 
 {{< /blocks/section >}}
+

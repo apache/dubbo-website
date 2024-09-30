@@ -2,17 +2,17 @@
 aliases:
     - /en/overview/tasks/mesh/bookinfo-sidecar/security/
     - /en/overview/tasks/mesh/bookinfo-sidecar/security/
-description: Envoy Security Bookinfo 示例。
+description: Envoy Security Bookinfo example.
 linkTitle: security
 no_list: true
-title: Envoy Bookinfo 认证鉴权示例
+title: Envoy Bookinfo Authentication and Authorization Example
 type: docs
 weight: 20
 ---
 
 
 
-通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系，如何配置认证鉴权体系。
+The complete Bookinfo example demonstrates how to access Dubbo services within the Istio service mesh framework based on the Envoy proxy, and how to configure the authentication and authorization system.
 
 {{< blocks/section color="white" height="auto">}}
 {{< /blocks/section >}}
@@ -90,3 +90,4 @@ weight: 20
 </div>
 
 {{< /blocks/section >}}
+

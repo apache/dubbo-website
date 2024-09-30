@@ -2,17 +2,17 @@
 aliases:
     - /en/overview/tasks/mesh/bookinfo-proxyless/traffic/
     - /en/overview/tasks/mesh/bookinfo-proxyless/traffic/
-description: Envoy Traffic Management Bookinfo 示例。
+description: Envoy Traffic Management Bookinfo example.
 linkTitle: Traffic Management
 no_list: true
-title: Envoy Bookinfo 流量管控示例
+title: Envoy Bookinfo Traffic Management Example
 type: docs
 weight: 10
 ---
 
 
 
-通过完整的 Bookinfo 示例操作演示 Dubbo 服务接入基于 Envoy 代理的 Istio 服务网格体系，如何进行流量管理。
+Demonstrates traffic management in the Envoy proxy-based Istio service mesh architecture through a complete Bookinfo example with Dubbo service access.
 
 {{< blocks/section color="white" height="auto">}}
 {{< /blocks/section >}}
@@ -90,3 +90,4 @@ weight: 10
 </div>
 
 {{< /blocks/section >}}
+

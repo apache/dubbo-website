@@ -2,129 +2,126 @@
 aliases:
     - /en/overview/tasks/mesh/migration/deploy-on-k8s/
     - /en/overview/tasks/mesh/migration/deploy-on-k8s/
-description: 该示例演示了直接以 API-SERVER 为注册中心，将 Dubbo 应用部署到 Kubernetes 并复用 Kubernetes Native Service 的使用示例。 此示例的局限在于需要授予每个 Dubbo 应用访问 API-SERVER 特定资源的权限，同时直接访问和监听 API-SERVER 对中小集群来说并没有什么问题， 但对于较大规模集群而言可能给 API-SERVER 的稳定性带来一定的考验。除此之外，可以考虑配合 Dubbo 控制面将 Dubbo 应用部署到 Kuberntes 的方案， 该方案无需授予 Dubbo 应用访问 API-SERVER 的权限，也无需为 API-SERVER 引连接过多数据面造成的稳定性而担心。
-linkTitle: 协议识别
-title: 协议识别
+description: This example demonstrates the deployment of a Dubbo application to Kubernetes using API-SERVER as the registry center and reusing Kubernetes Native Service. The limitation of this example is that each Dubbo application must be granted permissions to access specific resources on API-SERVER. Direct access and monitoring of API-SERVER is not an issue for small to medium clusters, but it may challenge the stability of API-SERVER in larger clusters. Additionally, consider deploying Dubbo applications to Kubernetes with a Dubbo control plane, which does not require granting access to API-SERVER and alleviates concerns about stability caused by excessive data connections.
+linkTitle: Protocol Recognition
+title: Protocol Recognition
 type: docs
 weight: 2
 ---
 
 
 
-可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 [完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes)
+You can easily deploy Dubbo services to a Kubernetes cluster by following the steps below, with the [full code example available here](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes).
 
-## 1 总体目标
+## 1 Overall Goals
 
-* 部署 Dubbo 应用到 Kubernetes
-* 基于 Kubernetes 内置 Service 实现服务发现
-* 将 Dubbo 应用对接到 Kubernetes 生命周期
+* Deploy Dubbo applications to Kubernetes
+* Implement service discovery based on Kubernetes built-in Service
+* Integrate Dubbo applications with Kubernetes lifecycle
 
-## 2 基本流程
+## 2 Basic Workflow
 
-1. 创建一个 Dubbo
-   应用( [dubbo-samples-kubernetes](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes) )
-2. 构建容器镜像并推送到镜像仓库（ [dubbo-demo 示例例镜像](https://hub.docker.com/r/apache/dubbo-demo) ）
-3. 分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes
-4. 验证服务发现与调用正常
+1. Create a Dubbo application ([dubbo-samples-kubernetes](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes))
+2. Build container images and push to the image repository ([dubbo-demo example image](https://hub.docker.com/r/apache/dubbo-demo))
+3. Deploy Dubbo Provider and Dubbo Consumer to Kubernetes
+4. Verify service discovery and calls are normal
 
-## 3 详细步骤
+## 3 Detailed Steps
 
-### 3.1 环境要求
+### 3.1 Environment Requirements
 
-请确保本地安装如下环境，以提供容器运行时、Kubernetes集群及访问工具
+Ensure that the following environment is installed locally to provide container runtime, Kubernetes cluster, and access tools.
 
 * [Docker](https://www.docker.com/get-started/)
 * [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 * [Kubectl](https://kubernetes.io/docs/tasks/tools/)
-* [Kubens(optional)](https://github.com/ahmetb/kubectx)
+* [Kubens (optional)](https://github.com/ahmetb/kubectx)
 
-通过以下命令启动本地 Kubernetes 集群
+Start the local Kubernetes cluster using the following command:
 
 ```shell
 minikube start
 ```
 
-通过 kubectl 检查集群正常运行，且 kubectl 绑定到默认本地集群
+Check if the cluster is running normally and if kubectl is bound to the default local cluster:
 
 ```shell
 kubectl cluster-info
 ```
 
-### 3.2 前置条件
+### 3.2 Prerequisites
 
-由于示例 Dubbo 项目均部署在 Pod 中且与 API-SERVER 有交互，因此有相应的权限要求，我们这里创建独立 ServiceAccount 并绑定必须的 Roles，后面所有的 Dubbo Kubernetes
-资源都将使用这里新建的 ServiceAccount。
+As the example Dubbo project is deployed in Pods and interacts with API-SERVER, there are corresponding permission requirements. Here we create an independent ServiceAccount and bind the necessary Roles. All later Dubbo Kubernetes resources will use the newly created ServiceAccount.
 
-通过以下命令我们创建了独立的 Namespace `dubbo-demo` 与 ServiceAccount `dubbo-sa`。
+With the following command, we created an independent Namespace `dubbo-demo` and ServiceAccount `dubbo-sa`.
 
 ```shell
-# 初始化命名空间和账号
+# Initialize the namespace and account
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-provider/src/main/resources/k8s/ServiceAccount.yml
 
-# 切换命名空间
+# Switch namespace
 kubens dubbo-demo
 ```
 
-### 3.3 部署到 Kubernetes
+### 3.3 Deploying to Kubernetes
 
-#### 3.3.1 部署 Provider
+#### 3.3.1 Deploy Provider
 
 ```shell
-# 部署 Service
+# Deploy Service
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-provider/src/main/resources/k8s/Service.yml
 
-# 部署 Deployment
+# Deploy Deployment
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-provider/src/main/resources/k8s/Deployment.yml
 ```
 
-以上命令创建了一个名为 `dubbo-samples-apiserver-provider` 的 Service，注意这里的 service name 与项目中的 dubbo 应用名是一样的。
+The above commands create a Service named `dubbo-samples-apiserver-provider`. Note that the service name here is the same as the Dubbo application name.
 
-接着 Deployment 部署了一个 3 副本的 pod 实例，至此 Provider 启动完成。
-可以通过如下命令检查启动日志。
+The Deployment then deploys a pod instance with 3 replicas, thus completing the Provider startup.
+You can check the startup logs with the following commands.
 
 ```shell
-# 查看 pod 列表
+# Check the pod list
 kubectl get pods -l app=dubbo-samples-apiserver-provider
 
-# 查看 pod 部署日志
+# Check pod deployment logs
 kubectl logs your-pod-id
 ```
 
-#### 3.3.2 部署 Consumer
+#### 3.3.2 Deploy Consumer
 
 ```shell
-# 部署 Service
+# Deploy Service
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-consumer/src/main/resources/k8s/Service.yml
 
-# 部署 Deployment
+# Deploy Deployment
 kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/dubbo-samples-kubernetes/dubbo-samples-apiserver-consumer/src/main/resources/k8s/Deployment.yml
 ```
 
-部署 consumer 与 provider 是一样的，这里也保持了 K8S Service 与 Dubbo consumer 名字一致： dubbo-samples-apiserver-consumer。
+Deploying the consumer is the same as the provider. Here, the K8S Service and Dubbo consumer names are kept consistent: dubbo-samples-apiserver-consumer.
 
-检查启动日志，consumer 完成对 provider 服务的消费。
+Check the startup logs, and the consumer completes the consumption of the provider service.
 
 ```shell
-# 查看 pod 列表
+# Check the pod list
 kubectl get pods -l app=dubbo-samples-apiserver-consumer
 
-# 查看 pod 部署日志
+# Check pod deployment logs
 kubectl logs your-pod-id
 ```
 
-可以看到日志输出如下:
+The logs output as follows:
 
 ```java
 [22/04/22 01:10:24:024UTC]main INFO deploy.DefaultApplicationDeployer:[DUBBO]Dubbo Application[1.1](dubbo-samples-apiserver-consumer)is ready.,dubbo version:3.0.7,current host:172.17.0.6
         result:hello,Kubernetes Api Server
 ```
 
-### 3.4 修改项目并打包（可跳过）
+### 3.4 Modify Project and Package (Optional)
 
-示例项目及相关镜像均已就绪，此小节仅面向需要修改示例并查看部署效果的用户。在此查看[完整代码示例地址](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes)
+The example project and related images are ready. This section is for users who need to modify the example and check the deployment effect. You can view the [full code example here](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes).
 
-设置 Dubbo 项目使用 Kubernetes 作为注册中心，这里通过 DEFAULT_MASTER_HOST指定使用默认 API-SERVER 集群地址 kubernetes.default.srv，同时还指定了
-namespace、trustCerts 两个参数
+Configure the Dubbo project to use Kubernetes as the registry, specifying the default API-SERVER cluster address `kubernetes.default.srv` through `DEFAULT_MASTER_HOST`, along with two additional parameters: `namespace` and `trustCerts`.
 
 ```properties
 dubbo.application.name=dubbo-samples-apiserver-provider
@@ -137,25 +134,25 @@ dubbo.application.qosAcceptForeignIp=true
 dubbo.provider.token=true
 ```
 
-如果要在本地打包镜像，可通过 jib-maven-plugin 插件打包镜像
+To package the image locally, you can use the `jib-maven-plugin` to package the image.
 
 ```shell
-# 打包并推送镜像
+# Package and push the image
 mvn compile jib:build
 ```
 
-> Jib 插件会自动打包并发布镜像。注意，本地开发需将 jib 插件配置中的 docker registry 组织 apache/dubbo-demo 改为自己有权限的组织（包括其他 kubernetes manifests 中的 dubboteam 也要修改，以确保 kubernetes 部署的是自己定制后的镜像），如遇到 jib 插件认证问题，请参考[相应链接](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized)配置 docker registry 认证信息。
-> 可以通过直接在命令行指定 `mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth.username=x`，或者使用 docker-credential-helper.
+> The Jib plugin automatically packages and publishes the image. Note that for local development, you must change the Docker registry organization in the jib plugin configuration from apache/dubbo-demo to an organization you have permission for (ensure to modify others in the Kubernetes manifests, as well, to deploy your custom image). If you encounter authentication issues with the jib plugin, refer to [the relevant link](https://github.com/GoogleContainerTools/jib/blob/master/docs/faq.md#what-should-i-do-when-the-registry-responds-with-unauthorized) for configuring Docker registry authentication information.
+> You can specify directly in the command line `mvn compile jib:build -Djib.to.auth.username=x -Djib.to.auth.password=x -Djib.from.auth.username=x -Djib.from.auth.username=x`, or use docker-credential-helper.
 
-## 4 最佳实践
+## 4 Best Practices
 
 TBD
 
-* rediness probe
+* readiness probe
 * liveness probe
-* ci/cd 接入 Skalfold
+* CI/CD access with Skalfold
 
-## 5 附录 k8s manifests
+## 5 Appendix k8s manifests
 
 ServiceAccount.yml
 
@@ -321,3 +318,4 @@ spec:
             failureThreshold: 30
             periodSeconds: 10
 ```
+

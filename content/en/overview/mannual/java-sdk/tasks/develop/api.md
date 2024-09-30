@@ -1,16 +1,16 @@
 ---
-description: 作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 RPC 服务和微服务应用
-linkTitle: 纯 API 开发模式
-title: 使用原生 API 开发 Dubbo 应用
+description: As an RPC framework, Dubbo defines a comprehensive set of API interfaces, allowing us to develop RPC services and microservice applications based on the native API.
+linkTitle: Pure API Development Model
+title: Developing Dubbo Applications Using Native APIs
 type: docs
 weight: 2
 ---
 
-你可能已经注意到了，文档中大部分的功能、示例都是基于 Spring Boot 模式编写的，但 Spring Boot 或 Spring 仅仅是 Dubbo 适配的一种应用或者微服务开发模式。**作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 Dubbo 应用**，纯 API 可以实现的业务场景包括：
-* **轻量 RPC Server & Client**，通常用于一些应用内、基础组件、中间件等内的简单远程调用场景
-* **微服务应用**，不依赖 Spring 的情况下，直接用 API 开发微服务
+You may have noticed that most of the functions and examples in the documentation are based on the Spring Boot model, but Spring Boot or Spring is merely one application or microservice development model adapted by Dubbo. **As an RPC framework, Dubbo defines a comprehensive set of API interfaces, enabling us to develop Dubbo applications based on the native APIs**. Business scenarios that can be achieved with pure APIs include:
+* **Lightweight RPC Server & Client**, typically used for simple remote call scenarios within applications, foundational components, middleware, etc.
+* **Microservices Applications**, without relying on Spring, directly using APIs to develop microservices.
 
-## API 概览
+## API Overview
 ```java
 public class Application {
     public static void main(String[] args) {
@@ -23,36 +23,36 @@ public class Application {
 }
 ```
 
-以上是启动 Dubbo RPC Server 的一段代码示例，`DubboBootstrap` 实例代表一个 Dubbo 应用，是整个 Dubbo 应用的启动入口。在 DubboBootstrap 基础上，我们可以设置 `protocol`、`service`、`registry`、`metrics` 等来注册服务、连接注册中心等，这和我们在 Spring Boot 中调整 application.yml 或者 application.properties 文件是对等的作用。
+The above is a code example of starting a Dubbo RPC Server. The `DubboBootstrap` instance represents a Dubbo application and serves as the entry point for starting the entire Dubbo application. Based on DubboBootstrap, we can set `protocol`, `service`, `registry`, `metrics`, etc., to register services, connect to the registry, etc., similar to adjusting application.yml or application.properties files in Spring Boot.
 
-官方推荐使用 `DubboBootstrap.start()` 作为应用的集中启动入口，但为了方便在进程启动后，在运行态单独发布一些服务，Dubbo 框架也允许直接调用 `ServiceConfig.export()` 或 `ReferenceConfig.refer()` 方法发布单个服务，这时 Service/Reference 会注册到默认的 DubboBootstrap 实例中，效果同调用 `DubboBootstrap.service(...).start()` 类似。
+The official recommendation is to use `DubboBootstrap.start()` as the centralized entry for application startup, but to facilitate the separate publication of some services after the process starts, the Dubbo framework also allows directly calling `ServiceConfig.export()` or `ReferenceConfig.refer()` methods to publish individual services. In this case, Service/Reference will register with the default DubboBootstrap instance, similar to calling `DubboBootstrap.service(...).start()`.
 
-以下是开发中会常用到的一些组件，完整组件定义及详细参数说明请参见 [参考手册 - 配置项手册](/en/overview/mannual/java-sdk/reference-manual/config/properties/#配置项手册)：
+Below are some components commonly used in development. For a complete component definition and detailed parameter description, please refer to the [Reference Manual - Configuration Items Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties/#配置项手册):
 
-| API 组件 | 全局唯一 | 核心方法或属性 | 说明 |
+| API Component | Globally Unique | Core Methods or Properties | Description |
 | --- | --- | --- | --- |
-| <span style="display:inline-block;width:160px">DubboBootstrap</span> | 是（多应用场景除外） | start()、stop() | DubboBootstrap 实例代表一个 Dubbo 应用，是整个 Dubbo 应用的启动入口。 |
-| ApplicationConfig | 是 | name | 应用名及应用级别的一些全局配置 |
-| MetricsConfig | 是 | protocol、prometheus、tracing | Metrics、tracing 采集相关配置 |
-| ProtocolConfig | 否。多协议场景服务通过 id 关联 | id、name、port、serialization、threadpool | RPC 协议端口、序列化协议、运行时行为配置 |
-| RegistrtyConfig | 否。多注册中心场景服务通过 id 关联 | id、address、protocol、group | 注册中心实现、地址、订阅等配置 |
-| ConfigCenterConfig | 否。多配置中心场景服务通过 id 关联 | id、address、protocol、group、namespace | 配置中心实现、地址、分组隔离等配置 |
-| MetadataReportConfig | 否。多元数据中心场景服务通过 id 关联 | id、address、protocol、group、namespace | 元数据中心实现、地址、分组隔离等配置 |
-| ProviderConfig | 否 | 参考 ServiceConfig | 作为多个ServiceConfig的默认值 |
-| ConsumerConfig | 否 | 参考 ReferenceConfig | 作为多个ReferenceConfig的默认值 |
-| ServiceConfig | 否 | - 方法：export()<br/> - 属性： interfaceClass、ref、group、version、timeout、retry | 一个 ServiceConfig 实例代表一个 RPC 服务 |
-| ReferenceConfig | 否 | - 方法：refer()<br/> - 属性：interfaceClass、group、version、timeout、retry、cluster、loadbalance | 一个 ReferenceConfig 实例代表一个 RPC 服务 |
-| MethodConfig | 否 | name、oninvoke、onreturn、onthrow | ServiceConfig/ReferenceConfig 内嵌的方法级别配置 |
-| ArgumentConfig | 否 | index、type、callback | MethodConfig 内嵌的参数级别配置 |
+| <span style="display:inline-block;width:160px">DubboBootstrap</span> | Yes (except for multi-application scenarios) | start(), stop() | The DubboBootstrap instance represents a Dubbo application and serves as the entry point for starting the entire Dubbo application. |
+| ApplicationConfig | Yes | name | Application name and some global configurations at the application level |
+| MetricsConfig | Yes | protocol, prometheus, tracing | Configurations related to Metrics and tracing collection |
+| ProtocolConfig | No. Services in multi-protocol scenarios are associated by id | id, name, port, serialization, threadpool | RPC protocol port, serialization protocol, runtime behavior configuration |
+| RegistrtyConfig | No. Services in multi-registry scenarios are associated by id | id, address, protocol, group | Registry implementation, address, subscription, etc. configurations |
+| ConfigCenterConfig | No. Services in multi-configuration center scenarios are associated by id | id, address, protocol, group, namespace | Configuration center implementation, address, group isolation, etc. configurations |
+| MetadataReportConfig | No. Services in multi-metadata center scenarios are associated by id | id, address, protocol, group, namespace | Metadata center implementation, address, group isolation, etc. configurations |
+| ProviderConfig | No | Reference ServiceConfig | Default values for multiple ServiceConfig |
+| ConsumerConfig | No | Reference ReferenceConfig | Default values for multiple ReferenceConfig |
+| ServiceConfig | No | - Method: export()<br/> - Properties: interfaceClass, ref, group, version, timeout, retry | A ServiceConfig instance represents an RPC service |
+| ReferenceConfig | No | - Method: refer()<br/> - Properties: interfaceClass, group, version, timeout, retry, cluster, loadbalance | A ReferenceConfig instance represents an RPC service |
+| MethodConfig | No | name, oninvoke, onreturn, onthrow | Method-level configuration embedded in ServiceConfig/ReferenceConfig |
+| ArgumentConfig | No | index, type, callback | Parameter-level configuration embedded in MethodConfig |
 
-## 轻量 RPC 示例
-本示例演示如何使用轻量 Dubbo SDK 开发 RPC Server 与 Client，示例使用 Java Interface 方式定义、发布和访问 RPC 服务，底层使用 Triple 协议通信。本示例完整代码请参见 <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>。
+## Lightweight RPC Example
+This example demonstrates how to use the lightweight Dubbo SDK to develop RPC Server and Client. The example defines, publishes, and accesses RPC services using Java Interface, with Triple protocol communications. For complete code, please see <a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples</a>.
 
-基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Java SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。
+Based on the Triple protocol defined by Dubbo, you can easily write browser and gRPC compatible RPC services and run them simultaneously on HTTP/1 and HTTP/2. The Dubbo Java SDK supports defining services using IDL or language-specific methods and provides a lightweight API for publishing or calling these services.
 
-### Maven 依赖
+### Maven Dependency
 
-在基于 Dubbo RPC 编码之前，您只需要在项目添加一个非常轻量的 `dubbo`依赖包即可，以 Maven 为例：
+Before coding with Dubbo RPC, you only need to add a lightweight `dubbo` dependency package to your project. For Maven, it looks like this:
 ```xml
 <dependency>
     <groupId>org.apache.dubbo</groupId>
@@ -61,9 +61,9 @@ public class Application {
 </dependency>
 ```
 
-### 定义服务
+### Define Service
 
-定义一个名为 `DemoService`的标准 Java 接口作为 Dubbo 服务（Dubbo 还支持[基于 IDL 的服务定义模式](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/)）。
+Define a standard Java interface named `DemoService` as a Dubbo service (Dubbo also supports [IDL-based service definition patterns](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/)).
 
 ```java
 public interface DemoService {
@@ -71,7 +71,7 @@ public interface DemoService {
 }
 ```
 
-实现 `DemoService` 接口并编写业务逻辑代码。
+Implement the `DemoService` interface and write the business logic code.
 
 ```java
 public class DemoServiceImpl implements DemoService {
@@ -82,12 +82,12 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-### 注册服务并启动 Server
+### Register Service and Start Server
 
-启动 server 并在指定端口监听 RPC 请求，在此之前，我们向 server 注册了以下信息：
+Start the server and listen for RPC requests on the specified port. Before this, we registered the following information with the server:
 
-- 使用 `Triple` 作为通信 RPC 协议与并监听端口 `50051`
-- 注册 Dubbo 服务到 `DemoService` server
+- Using `Triple` as the communication RPC protocol and listening on port `50051`
+- Registering the Dubbo service to `DemoService` server
 
 ```java
 public class Application {
@@ -101,9 +101,9 @@ public class Application {
 }
 ```
 
-### 访问服务
+### Access Service
 
-最简单方式是使用 HTTP/1.1 POST 请求访问服务，参数则以标准 JSON 格式作为 HTTP 负载传递。如下是使用 cURL 命令的访问示例：
+The simplest way is to use an HTTP/1.1 POST request to access the service, with parameters passed as standard JSON format in the HTTP payload. Here is an example using the cURL command:
 
 ```shell
 curl \
@@ -112,9 +112,9 @@ curl \
     http://localhost:50051/org.apache.dubbo.demo.DemoService/sayHello
 ```
 
-> 参数必须以数组格式进行传递，如果有多个参数，则格式类似 `["param1", {"param2-field": "param2-value"}, ...]`，具体请参见 triple 协议规范。
+> Parameters must be passed in array format. If there are multiple parameters, the format should be like `["param1", {"param2-field": "param2-value"}, ...]`, please refer to the triple protocol specification for specifics.
 
-接下来，您也可以使用标准的 Dubbo client 请求服务，指定 server 地址即可发起 RPC 调用，其格式为 `protocol://ip:host`
+Next, you can also use a standard Dubbo client to request the service, specifying the server address to initiate an RPC call. The format is `protocol://ip:host`.
 
 ```java
 public class Application {
@@ -132,14 +132,13 @@ public class Application {
 }
 ```
 
-恭喜您， 以上即是 Dubbo Java RPC 通信的基本使用方式！  🎉
+Congratulations! The above is the basic usage of Dubbo Java RPC communication! 🎉
 
+### More Examples
+Besides the simple usage scenarios above, developers can also publish multiple services, directly call ServiceConfig/ReferenceConfig to publish/subscribe individual services, etc.
 
-### 更多示例
-除了以上简单使用场景之外，开发者还可以发布多个服务、直接调用 ServiceConfig/ReferenceConfig 发布/订阅单个服务等。
-
-#### 发布多个服务
-以下示例注册并发布任意多个服务 FooService、BarService，这些服务都将使用 providerConfig 中配置的默认超时时间，省去多个服务重复配置的烦恼。
+#### Publish Multiple Services
+The following example registers and publishes any number of services FooService, BarService. These services will all use the default timeout configured in providerConfig, avoiding the hassle of repeated configurations for multiple services.
 
 ```java
 public static void main(String[] args) {
@@ -158,10 +157,10 @@ public static void main(String[] args) {
 }
 ```
 
-#### 发布单个服务
-直接调用 ServiceConfig.export() 发布服务，适用于运行态动态发布或订阅一个服务，对于 ReferenceConfig 同理。对于正常的应用启动流程，推荐使用 DubboBootstrap 而非直接调用 ServiceConfig.export() 发布单个服务。
+#### Publish Individual Services
+Directly call ServiceConfig.export() to publish services suitable for dynamic publication or subscription of a single service in runtime; it is similar for ReferenceConfig. For routine application startup processes, it is recommended to use DubboBootstrap instead of directly calling ServiceConfig.export() to publish individual services.
 
-1. 通过 ServiceConfig 发布服务
+1. Publishing a service through ServiceConfig
 ```java
 public static void main(String[] args) {
     ServiceConfig<DemoService> demoServiceConfig = new ServiceConfig<>();
@@ -173,7 +172,7 @@ public static void main(String[] args) {
 }
 ```
 
-2. 通过 ReferenceConfig 订阅服务
+2. Subscribing to services through ReferenceConfig
 
 ```java
 private DemoService referService() {
@@ -189,10 +188,10 @@ private DemoService referService() {
 }
 ```
 
-由于 ReferenceConfig.get() 创建的代理对象持有连接、地址等大量资源，因此建议缓存复用，Dubbo 官方提供了 SimpleReferenceCache 实现参考实现。关于 SimpleReferenceCache 更多内容，请参考 [RPC 框架](/en/overview/mannual/java-sdk/tasks/framework/more/reference-config-cache/)。
+Because the proxy object created by ReferenceConfig.get() holds a lot of resources such as connections and addresses, it is recommended to cache and reuse it. Dubbo officially provides a SimpleReferenceCache implementation for reference. For more content on SimpleReferenceCache, please refer to [RPC Framework](/en/overview/mannual/java-sdk/tasks/framework/more/reference-config-cache/).
 
-#### 获得引用代理
-使用 DubboBootstrap 作为启动入口，订阅服务并获得代理对象。
+#### Getting Reference Proxy
+Use DubboBootstrap as the startup entry, subscribe to services, and obtain proxy objects.
 
 ```java
 public static void main(String[] args) {
@@ -205,9 +204,9 @@ public static void main(String[] args) {
 }
 ```
 
-## 微服务示例
-### 注册中心和应用名
-相比于 RPC server、RPC client，基于 API 的微服务应用开发需要配置应用名、注册中心。
+## Microservices Example
+### Registry Center and Application Name
+Compared to RPC server and RPC client, developing microservice applications based on APIs requires configurations for the application name and registry center.
 
 ```java
 public static void main(String[] args) {
@@ -222,8 +221,8 @@ public static void main(String[] args) {
 }
 ```
 
-### 多个注册中心
-多个注册中心可指定不同的 id，服务通过 id 关联注册中心实例。如下示例中，GreetingsService 发布到 bjRegistry，DemoService 发布到 hzRegistry。
+### Multiple Registry Centers
+Multiple registry centers can specify different ids, and services are associated with the registry center instances by id. In the following example, GreetingsService is published to bjRegistry, while DemoService is published to hzRegistry.
 
 ```java
 public static void main(String[] args) {
@@ -245,14 +244,14 @@ public static void main(String[] args) {
 }
 ```
 
-### 发布单个服务
-直接调用 ServiceConfig.export() 发布服务，适用于运行态动态发布或订阅一个服务，对于 ReferenceConfig 同理。对于正常的应用启动流程，推荐使用 DubboBootstrap 而非直接调用 ServiceConfig.export() 发布单个服务。
+### Publish Individual Services
+Directly call ServiceConfig.export() to publish services, suitable for dynamically publishing or subscribing to a single service in runtime; it is similar for ReferenceConfig. For routine application startup processes, it is recommended to use DubboBootstrap instead of directly calling ServiceConfig.export() to publish individual services.
 
-{{% alert title="注意" color="primary" %}}
+{{% alert title="Note" color="primary" %}}
 
 {{% /alert %}}
 
-1. 通过 ServiceConfig 发布服务
+1. Publishing a service through ServiceConfig
 ```java
 public static void main(String[] args) {
 	RegistryConfig hzRegistry = new RegistryConfig();
@@ -270,7 +269,7 @@ public static void main(String[] args) {
 }
 ```
 
-2. 通过 ReferenceConfig 订阅服务
+2. Subscribing to services through ReferenceConfig
 
 ```java
 private DemoService referService() {
@@ -292,8 +291,9 @@ private DemoService referService() {
 }
 ```
 
-## 更多内容
+## More Content
 
-- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/)，或者 [使用其他通信协议](/en/overview/mannual/java-sdk/tasks/protocols/)
-- 作为 RPC 框架，Dubbo 支持异步调用、连接管理、context上下文等，请参考 [RPC 框架核心功能](/en/overview/mannual/java-sdk/tasks/framework/)
-- 使用 [Dubbo Spring Boot 开发微服务应用](/en/overview/mannual/java-sdk/tasks/develop/springboot/)
+- The Triple protocol is fully compatible with gRPC, you can refer to here to learn how to [write gRPC compatible services using IDL](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/), or [use other communication protocols](/en/overview/mannual/java-sdk/tasks/protocols/)
+- As an RPC framework, Dubbo supports asynchronous calls, connection management, context, etc., please refer to [Core Functions of RPC Framework](/en/overview/mannual/java-sdk/tasks/framework/)
+- Use [Dubbo Spring Boot to develop microservice applications](/en/overview/mannual/java-sdk/tasks/develop/springboot/)
+
