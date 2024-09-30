@@ -120,7 +120,6 @@ Overall, this topic aims to construct a universal zero-trust system, offering th
 - [https://kuma.io/docs/2.5.x/policies/mutual-tls/](https://kuma.io/docs/2.5.x/policies/mutual-tls/)
 - [https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol#xds-protocol-delta](https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol#xds-protocol-delta)
 
-
 ### 4 Next Generation Microservice Cluster Monitoring Mechanism for Cloud Native, Covering Kubernetes, Nacos (Golang)
 
 #### 4.1 Topic Background and Goals
@@ -235,3 +234,4 @@ For any questions about the competition topics, please scan to join the followin
 ### Competition Details Poster
 
 ![openatom-2024](/imgs/blog/2024/01/openatom/openatom-2024.png)
+

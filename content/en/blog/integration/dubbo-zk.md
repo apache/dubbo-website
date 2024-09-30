@@ -1,47 +1,47 @@
 ---
-title: "在 Dubbo 应用中使用 Zookeeper"
-linkTitle: "在 Dubbo 应用中使用 Zookeeper"
+title: "Using Zookeeper in Dubbo Applications"
+linkTitle: "Using Zookeeper in Dubbo Applications"
 date: 2018-08-07
-tags: ["生态", "Java"]
+tags: ["Ecosystem", "Java"]
 description: >
-    本文介绍了 Zookeeper 的基本概念、用法，以及如何在 Dubbo 应用中使用 Zookeeper 作为注册中心。
+    This article introduces the basic concepts and usage of Zookeeper, as well as how to use Zookeeper as a registry in Dubbo applications.
 ---
 
-## Zookeeper 介绍
+## Introduction to Zookeeper
 
-### 基本概念
+### Basic Concepts
 
-在现代的分布式应用中，往往会出现节点和节点之间的协调问题，其中就包括了：选主、集群管理、分布式锁、分布式配置管理、统一命名服务、状态同步等诉求。[Apache Zookeeper](https://zookeeper.apache.org)，正如它的名字所暗示的那样，*动物园管理员*，就是为了解决这些诉求的一个分布式协调服务框架。
+In modern distributed applications, coordination issues often arise between nodes, including leader election, cluster management, distributed locks, distributed configuration management, unified naming services, and state synchronization. [Apache Zookeeper](https://zookeeper.apache.org), as its name suggests, is a distributed coordination service framework designed to address these concerns.
 
-为了保证高可用，ZooKeeper 本身也可以部署成集群模式，称之为 *ZooKeeper ensemble*。ZooKeeper 集群中始终确保其中的一台为 leader 的角色，并通过 *ZAB (Zookeeper Atomic Broadcast Protocol) [^1]* 协议确保所有节点上的信息的一致。客户端可以访问集群中的任何一台进行读写操作，而不用担心数据出现不一致的现象。
+To ensure high availability, ZooKeeper can be deployed in a cluster mode, known as a *ZooKeeper ensemble*. Within a ZooKeeper cluster, one node always acts as the leader, and through the *ZAB (Zookeeper Atomic Broadcast Protocol) [^1]* protocol, it ensures the consistency of information across all nodes. Clients can access any node in the cluster for read and write operations without worrying about data inconsistency.
 
 ![Diagram shows client-server architecture of ZooKeeper](/imgs/blog/zk-emsemble.png)
 *Image Credit : ebook -Zookeeper-Distributed Process Coordination from O'Reilly*
 
-Zookeeper 中的数据存储方式与传统的 UNIX 文件系统相似，节点按照树状结构来组织，其中，节点被称之为 *znodes (ZooKeeper data nodes)*
+Zookeeper stores data in a manner similar to a traditional UNIX file system, organized in a tree structure where nodes are called *znodes (ZooKeeper data nodes)*.
 
 ![zk-tree](/imgs/blog/zk-tree.png)
 *Image Credit : ebook -Zookeeper-Distributed Process Coordination from O'Reilly*
 
-### 基本用法
+### Basic Usage
 
-可以通过直接下载的方式 [^2]安装并运行 Zookeeper ，在 Mac 上也可以通过 Homebrew [^3]  `brew install zookeeper`  来安装，考虑到通用性，本文采用 docker 的方式来运行 Zookeeper。如果没有安装 docker，请先准备好 docker 环境 [^4]。
+You can install and run Zookeeper by downloading it directly [^2], or on a Mac using Homebrew [^3] with `brew install zookeeper`. This article uses Docker to run Zookeeper for general usability. Please prepare your Docker environment first if it is not installed [^4].
 
-#### 1. 启动 Zookeeper
+#### 1. Start Zookeeper
 
-执行命令将 Zookeeper 运行在 docker 容器中 
+Run Zookeeper in a Docker container with the following command:
 
 ```shell
 docker run --rm --name zookeeper -p 2181:2181 zookeeper
 ```
 
-#### 2. 进入 Zookeeper 容器 
+#### 2. Access the Zookeeper Container
 
 ```shell
 docker exec -it zookeeper bash
 ```
 
-在 `bin` 目录下有启动 Zookeeper 的命令 `zkServer` 以及管理控制台 `zkCli`
+The `bin` directory contains the command to start Zookeeper `zkServer` and the management console `zkCli`.
 
 ```shell
 bash-4.4# ls -l bin
@@ -56,9 +56,9 @@ total 36
 -rwxr-xr-x    1 zookeepe zookeepe      6773 Mar 27 04:32 zkServer.sh
 ```
 
-#### 3. 通过 zkCli 进入 Zookeeper 管理界面
+#### 3. Enter the Zookeeper Management Interface via zkCli
 
-由于是通过 Docker 启动，Zookeeper 进程已经启动，并通过 2181 端口对外提供服务。
+Since you started Zookeeper through Docker, the Zookeeper process is already running and is available at port 2181.
 
 ```shell
 bash-4.4# ps
@@ -68,7 +68,7 @@ PID   USER     TIME  COMMAND
    42 root      0:00 ps
 ```
 
-因此可以直接通过 `zkCli` 来访问 Zookeeper 的控制台来进行管理。
+You can directly access the Zookeeper console for management using `zkCli`.
 
 ```shell
 bash-4.4# bin/zkCli.sh -server 127.0.0.1:2181
@@ -103,30 +103,30 @@ ZooKeeper -server host:port cmd args
 	connect host:port
 ```
 
-#### 4. zkCli 上的一些基本操作 
+#### 4. Basic Operations in zkCli
 
-创建 `/hello-zone` 节点：
+Create the node `/hello-zone`:
 
 ```shell
 [zk: 127.0.0.1:2181(CONNECTED) 19] create /hello-zone 'world'
 Created /hello-zone
 ```
 
-列出 `/` 下的子节点，确认 `hello-zone` 被创建：
+List child nodes under `/` to confirm that `hello-zone` was created:
 
 ```shell
 [zk: 127.0.0.1:2181(CONNECTED) 20] ls /
 [zookeeper, hello-zone]
 ```
 
-列出 `/hello-zone` 的子节点，确认为空：
+List child nodes under `/hello-zone` to confirm it is empty:
 
 ```shell
 [zk: 127.0.0.1:2181(CONNECTED) 21] ls /hello-zone
 []
 ```
 
-获取存储在 `/hello-zone` 节点上的数据：
+Get the data stored in the `/hello-zone` node:
 
 ```shell
 [zk: 127.0.0.1:2181(CONNECTED) 22] get /hello-zone
@@ -135,27 +135,27 @@ world
 
 
 
-## 在 Dubbo 中使用 Zookeeper
+## Using Zookeeper in Dubbo
 
-Dubbo 使用 Zookeeper 用于服务的注册发现和配置管理，在 Zookeeper 中数据的组织由下图所示：
+Dubbo uses Zookeeper for service registration, discovery, and configuration management. The organization of data in Zookeeper is illustrated in the following diagram:
 
 ![dubbo-in-zk](/imgs/blog/dubbo-in-zk.jpg)
 
-首先，所有 Dubbo 相关的数据都组织在 `/dubbo` 的根节点下。
+First, all Dubbo-related data is organized under the root node `/dubbo`.
 
-二级目录是服务名，如 `com.foo.BarService`。
+The second-level directory represents the service name, such as `com.foo.BarService`.
 
-三级目录有两个子节点，分别是 `providers` 和 `consumers`，表示该服务的提供者和消费者。
+The third-level directory has two subnodes, `providers` and `consumers`, indicating the service providers and consumers, respectively.
 
-四级目录记录了与该服务相关的每一个应用实例的 URL 信息，在 `providers` 下的表示该服务的所有提供者，而在 `consumers` 下的表示该服务的所有消费者。举例说明，`com.foo.BarService` 的服务提供者在启动时将自己的 URL 信息注册到 `/dubbo/com.foo.BarService/providers` 下；同样的，服务消费者将自己的信息注册到相应的 `consumers` 下，同时，服务消费者会订阅其所对应的 `providers` 节点，以便能够感知到服务提供方地址列表的变化。
+The fourth-level directory records the URL information of each application instance related to that service. Under `providers`, it shows all providers of the service, and under `consumers`, it shows all consumers. For example, the service provider for `com.foo.BarService` registers its URL information under `/dubbo/com.foo.BarService/providers` when it starts; similarly, the service consumer registers its information under the corresponding `consumers` node, and subscribes to the corresponding `providers` node to be notified of any changes to the service provider address list.
 
-### 准备示例代码
+### Preparing Example Code
 
-本文的代码可以在 https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper 中找到。
+The code for this article can be found at https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper.
 
-#### 1. 接口定义
+#### 1. Interface Definition
 
-定义一个简单的 `GreetingService` 接口，里面只有一个简单的方法 `sayHello` 向调用者问好。
+Define a simple `GreetingService` interface with a simple method `sayHello` that greets the caller.
 
 ```java
 public interface GreetingService {
@@ -163,9 +163,9 @@ public interface GreetingService {
 }
 ```
 
-#### 2. 服务端：服务实现
+#### 2. Server: Service Implementation
 
-实现 `GreetingService` 接口，并通过 `@Service` 来标注其为 Dubbo 的一个服务。
+Implement the `GreetingService` interface and annotate it with `@Service` to mark it as a Dubbo service.
 
 ```java
 @Service
@@ -176,9 +176,9 @@ public class AnnotatedGreetingService implements GreetingService {
 }
 ```
 
-#### 3. 服务端：组装
+#### 3. Server: Assembly
 
-定义 ProviderConfiguration 来组装 Dubbo 服务。
+Define `ProviderConfiguration` to assemble Dubbo services.
 
 ```java
 @Configuration
@@ -187,7 +187,7 @@ public class AnnotatedGreetingService implements GreetingService {
 static class ProviderConfiguration {}
 ```
 
-dubbo-provider.properties 是在 Spring 应用中外置配置的方式，内容如下：
+The `dubbo-provider.properties` file is an external configuration method in a Spring application, with the following contents:
 
 ```properties
 dubbo.application.name=demo-provider
@@ -196,15 +196,15 @@ dubbo.protocol.name=dubbo
 dubbo.protocol.port=20880
 ```
 
-由于 Zookeeper 运行在 Docker 容器中，需要注意的是：
+Since Zookeeper runs in a Docker container, it is important to note:
 
-* 本文假定 Dubbo 应用运行在宿主机上，也就是 Docker 容器外，需要将 Zookeeper 的地址替换成环境变量 *${DOCKER_HOST}* 所指定的 IP 地址，相关信息请查阅 Docker 官方文档
-* 如果 Dubbo 应用也是 Docker 化的应用，只需要用 Zookeeper 的容器名，在本文中容器名是 **zookeeper**
-* 当然，如果不用容器方式启动 Zookeeper，只需要简单的将这里的 *$DOCKER_HOST* 换成 **localhost** 即可
+* This article assumes that the Dubbo application runs on the host machine, i.e., outside the Docker container, and you need to replace Zookeeper's address with the IP address specified by the environment variable *${DOCKER_HOST}*. Please refer to the Docker official documentation for details.
+* If the Dubbo application is also a Dockerized application, you simply use the container name for Zookeeper, which is **zookeeper** in this article.
+* Of course, if you start Zookeeper without using a container, you can simply change the *$DOCKER_HOST* here to **localhost**.
 
-#### 4. 服务端：启动服务
+#### 4. Server: Start Service
 
-在 `main` 方法中通过启动一个 Spring Context 来对外提供 Dubbo 服务。
+In the `main` method, start a Spring Context to expose the Dubbo service.
 
 ```java
 public class ProviderBootstrap {
@@ -216,13 +216,13 @@ public class ProviderBootstrap {
 }
 ```
 
-启动服务端的 `main` 方法，将会看到下面的输出，代表服务端启动成功，并在注册中心（ZookeeperRegistry）上注册了 `GreetingService` 这个服务：
+When you run the server's `main` method, you will see the following output, indicating that the server has started successfully and registered the `GreetingService` at the registry (ZookeeperRegistry):
 
 ```sh
 [03/08/18 10:50:33:033 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Register: dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=true&application=demo-provider&dubbo=2.6.2&generic=false&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=12938&side=provider&timestamp=1533264631849, dubbo version: 2.6.2, current host: 192.168.99.1
 ```
 
-通过 Zookeeper 管理终端观察服务提供方的注册信息：
+Use the Zookeeper management terminal to observe the registration information of the service provider:
 
 ```sh
 $ docker exec -it zookeeper bash
@@ -236,11 +236,11 @@ JLine support is enabled
 [dubbo%3A%2F%2F192.168.99.1%3A20880%2Fcom.alibaba.dubbo.samples.api.GreetingService%3Fanyhost%3Dtrue%26application%3Ddemo-provider%26dubbo%3D2.6.2%26generic%3Dfalse%26interface%3Dcom.alibaba.dubbo.samples.api.GreetingService%26methods%3DsayHello%26pid%3D12938%26side%3Dprovider%26timestamp%3D1533264631849]
 ```
 
-可以看到刚刚启动的 Dubbo 的服务在 `providers` 节点下注册了自己的 URL 地址：*dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=true&application=demo-provider&dubbo=2.6.2&generic=false&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=12938&side=provider&timestamp=1533264631849*
+You can see that the just-started Dubbo service registered its URL at the `providers` node: *dubbo://192.168.99.1:20880/com.alibaba.dubbo.samples.api.GreetingService?anyhost=true&application=demo-provider&dubbo=2.6.2&generic=false&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=12938&side=provider&timestamp=1533264631849*.
 
-#### 5. 客户端：引用服务
+#### 5. Client: Reference Service
 
-通过 `@Reference` 来在客户端声明服务的引用，运行时将会通过该引用发起全程调用，而服务的目标地址将会从 Zookeeper 的 `provider` 节点下查询。
+Use `@Reference` to declare a reference to the service in the client. At runtime, this reference will launch a full call, and the service's target address will be queried from the `provider` node in Zookeeper.
 
 ```java
 @Component("annotatedConsumer")
@@ -254,9 +254,9 @@ public class GreetingServiceConsumer {
 }
 ```
 
-#### 6. 客户端：组装
+#### 6. Client: Assembly
 
-定义 ConsumerConfiguration 来组装 Dubbo 服务。
+Define `ConsumerConfiguration` to assemble Dubbo services.
 
 ```java
 @Configuration
@@ -266,7 +266,7 @@ public class GreetingServiceConsumer {
 static class ConsumerConfiguration {}
 ```
 
-dubbo-consumer.properties 是在 Spring 应用中外置配置的方式，内容如下：
+The `dubbo-consumer.properties` file is an external configuration method in a Spring application, with the following contents:
 
 ```properties
 dubbo.application.name=demo-consumer
@@ -274,11 +274,11 @@ dubbo.registry.address=zookeeper://$DOCKER_HOST:2181
 dubbo.consumer.timeout=3000
 ```
 
-与 **3. 服务端：组装** 相同，需要根据自己的运行环境来修改 *dubbo.registry.address* 中定义的 *$DOCKER_HOST*。请参阅步骤 3 的说明部分。
+As with **3. Server: Assembly**, you need to modify the *$DOCKER_HOST* defined in *dubbo.registry.address* according to your running environment. Please refer to the explanation in step 3.
 
-#### 7. 客户端：发起远程调用
+#### 7. Client: Initiate Remote Call
 
-运行 `main` 向已经启动的服务提供方发起一次远程调用。Dubbo 会先向 Zookeeper 订阅服务地址，然后从返回的地址列表中选取一个，向对端发起调用：
+Run the `main` method to make a remote call to the already started service provider. Dubbo will first subscribe to the service address from Zookeeper, then select one from the returned address list to call the remote service:
 
 ```java
 public class ConsumerBootstrap {
@@ -296,7 +296,7 @@ public class ConsumerBootstrap {
 }
 ```
 
-运行结果如下：
+The output is as follows:
 
 ```shell
 [03/08/18 01:42:31:031 CST] main  INFO zookeeper.ZookeeperRegistry:  [DUBBO] Register: consumer://192.168.99.1/com.alibaba.dubbo.samples.api.GreetingService?application=demo-consumer&category=consumers&check=false&default.timeout=3000&dubbo=2.6.2&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=82406&side=consumer&timestamp=1533274951195, dubbo version: 2.6.2, current host: 192.168.99.1 #1
@@ -305,12 +305,12 @@ public class ConsumerBootstrap {
 result: hello, zookeeper
 ```
 
-说明：
+Notes:
 
-1. **Register**: consumer://192.168.99.1/...&**category=consumers**&：消费者向 Zookeeper 注册自己的信息，并放在 `consumers` 节点下
-2. **Subscribe**: consumer://192.168.99.1/...&**category=providers,configurators,routers**&：消费者同时向 Zookeeper 订阅了 `providers`、`configurators`、`routers` 节点，其中 `configurations` 与 Dubbo 配置相关，`routers` 与路由规则相关，值得注意的是 `providers` 节点的订阅，当有新的服务提供方加入后，由于订阅的关系，新的地址列表会推送给订阅方，服务的消费者也因此动态感知到了地址列表的变化。
+1. **Register**: consumer://192.168.99.1/...&**category=consumers**&: The consumer registers its information with Zookeeper under the `consumers` node.
+2. **Subscribe**: consumer://192.168.99.1/...&**category=providers,configurators,routers**&: The consumer subscribes to the `providers`, `configurators`, and `routers` nodes, where `configurations` are related to Dubbo configurations and `routers` are related to routing rules. Notably, the subscription to the `providers` node means that when new service providers join, the new address list will be pushed to subscribers, allowing service consumers to dynamically perceive changes to the address list.
 
-通过 Zookeeper 管理终端观察服务提供方的注册信息：
+Use the Zookeeper management terminal to observe the registration information of the service provider:
 
 ```sh
 $ docker exec -it zookeeper bash
@@ -324,20 +324,18 @@ JLine support is enabled
 [consumer%3A%2F%2F192.168.99.1%2Fcom.alibaba.dubbo.samples.api.GreetingService%3Fapplication%3Ddemo-consumer%26category%3Dconsumers%26check%3Dfalse%26default.timeout%3D3000%26dubbo%3D2.6.2%26interface%3Dcom.alibaba.dubbo.samples.api.GreetingService%26methods%3DsayHello%26pid%3D82406%26side%3Dconsumer%26timestamp%3D1533274951195]
 ```
 
-可以看到 Dubbo 的服务消费者在 `consumers` 节点下注册了自己的 URL 地址：*consumer://192.168.99.1/com.alibaba.dubbo.samples.api.GreetingService?application=demo-consumer&category=providers,configurators,routers&default.timeout=3000&dubbo=2.6.2&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=82406&side=consumer&timestamp=1533274951195* 
+You can see that the Dubbo service consumer registered its URL at the `consumers` node: *consumer://192.168.99.1/com.alibaba.dubbo.samples.api.GreetingService?application=demo-consumer&category=providers,configurators,routers&default.timeout=3000&dubbo=2.6.2&interface=com.alibaba.dubbo.samples.api.GreetingService&methods=sayHello&pid=82406&side=consumer&timestamp=1533274951195*.
 
-## 总结
+## Conclusion
 
-本文侧重介绍了如何在 Dubbo 应用中使用 Zookeeper 做为注册中心，当然，本文也提到了 Zookeeper 在 Dubbo 的应用场景下还承担了配置中心和服务治理的职责。本文中的 Zookeeper 是单节点、Standalone 的模式，在生产环境中为了高可用的诉求，往往会组件 Zookeeper 集群，也就是 *Zookeeper ensemble* 模式。
+This article focuses on how to use Zookeeper as a registry in Dubbo applications. Additionally, it mentions that Zookeeper also serves as a configuration center and service governance role in the context of Dubbo. The Zookeeper discussed in this article is a single-node, standalone mode; in production environments, to meet the requirement of high availability, a Zookeeper cluster is usually assembled, known as *Zookeeper ensemble* mode.
 
-通过本文的学习，读者可以掌握到：
+Through this article, readers will grasp:
 
-* Zookeeper 的基本概念和基本用法
-* Zookeeper 在 Dubbo 应用中的作用
-* 通过实战了解 Zookeeper 与 Dubbo 的交互
-* Dubbo 在 Zookeeper 中服务注册、消费信息的存储方式
-
-
+* The basic concepts and usage of Zookeeper.
+* The role of Zookeeper in Dubbo applications.
+* Practical understanding of the interaction between Zookeeper and Dubbo.
+* How Dubbo stores service registration and consumption information in Zookeeper.
 
 [^1]: https://en.wikipedia.org/wiki/Atomic_broadcast
 [^2]: https://www.apache.org/dyn/closer.cgi/zookeeper/

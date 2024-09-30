@@ -34,7 +34,7 @@ Some may worry about the storage pressure on the registration center caused by d
 
 Similar to the provider side, the consumer side must also undergo a dual subscription process for smooth migration, which we will not elaborate on further. The consumer's dual subscription behavior can also be dynamically adjusted through rules or switches to control the migration of a certain service or application to the application-level address model. Additionally, Dubbo3 has a built-in automatic decision mechanism that will automatically complete the switch when application-level addresses are available, and this behavior is default.
 
-以下是消费端双订阅时的选址流程：
+Here is the selection process during consumer-side dual subscription:
 
 ![elem-upgrade-consumer1](/imgs/user/eleme/elem-upgrade-consumer1.png)
 
@@ -47,3 +47,4 @@ Ele.me successfully upgraded to Dubbo3 and the application-level service discove
 * Overall resource consumption of the registration center’s data storage decreased by 90%
 * Permanent memory consumption of the consumer framework itself decreased by 50%
 The overall stability and performance of the cluster have significantly improved, also preparing for future capacity expansion.
+

@@ -146,9 +146,9 @@ RPC monitoring in Dubbo has traditionally been provided by MonitorFilter and Dub
 
 These capabilities can meet basic migration tasks. However, from our current status concerning the need for a smooth migration, the observability of migration traffic, and gray and controllable procedures, there still seems to be some distance. Yet while sorting out Dubbo3’s capabilities, we found relatively simple extension solutions. Thus, a general outline of the overall migration方案 is established.
 
-# 4 Design of Upgrade & Migration方案
+# 4 Design of Upgrade & Migration
 
-The design of the方案 focuses on "smooth and controllable." Based on the new architecture of Dubbo3, the current migration方案 schematic is being validated as follows:
+The design of the focuses on "smooth and controllable." Based on the new architecture of Dubbo3, the current migration方案 schematic is being validated as follows:
 
 ![pingan](/imgs/v3/users/pingan-8.png)
 
@@ -227,3 +227,4 @@ The overall architectural upgrade of Dubbo3 has resolved past pressures on servi
 # 5 Community Collaboration
 
 Currently, this project is still under continuous upgrading, and we maintain close contact with the community. During this period, we have encountered many problems, all of which have been patiently resolved by community developers. Users looking to upgrade to Dubbo3 can register on the community's GitHub User Issue ([https://github.com/apache/dubbo/issues/9436](https://github.com/apache/dubbo/issues/9436)), and those interested in participating in the community can follow the official Dubbo public account (search for Apache Dubbo) to learn more about the developments in the Dubbo community.
+
