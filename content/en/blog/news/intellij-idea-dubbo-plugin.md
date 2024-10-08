@@ -1,56 +1,51 @@
 ---
-title: "Introduction to Apache Dubbo plugin for IntelliJ IDEA"
-linkTitle: "Introduction to Apache Dubbo plugin for IntelliJ IDEA"
+title: "IntelliJ IDEA❤️Apache Dubbo, Official IDEA Plugin Released!"
+linkTitle: "IntelliJ IDEA❤️Apache Dubbo, Official IDEA Plugin Released!"
 date: 2023-10-23
-tags: ["news"]
+tags: ["News"]
 authors: Dubbo Community
 description: >
-   A brief introduction to Apache Dubbo plugin for IntelliJ IDEA
+   IntelliJ IDEA loves Apache Dubbo. The official IDEA has released the Apache Dubbo in Spring Framework plugin, supporting Dubbo scaffolding and project template creation.
 ---
 
-The most popular Java IDE, IntelliJ IDEA, has collaborated with the open-source microservice framework Apache Dubbo community, bringing good news to microservice developers. Along with IntelliJ IDEA version 2023.2, Jetbras has officially released the new **Apache Dubbo in Spring Framework** plugin version.
+The most popular Java Integrated Development Environment, IntelliJ IDEA, has teamed up with the open-source microservices framework Apache Dubbo community, bringing great news to microservices developers. Alongside IntelliJ IDEA version 2023.2, **Jetbrains officially released a new plugin - Apache Dubbo in Spring Framework**.
 
-This plugin can help developers with Dubbo project initialization and facilitate the identification of Dubbo services and their dependencies during the project development process. Developing microservices based on Apache Dubbo will become very simple.
+![IntelliJ IDEA loves️ Apache Dubbo](/imgs/blog/2023/10/plugin/img_6.png)
 
+This plugin helps developers address Dubbo project initialization issues and facilitates the identification of Dubbo services and their dependencies during the project development process, making microservice development based on Apache Dubbo very simple.
 
-## How to install
-Before installing the Apache Dubbo plugin, please ensure that you are using IntelliJ IDEA version 2023.2 and above.
-
+## Install Plugin
+Before installing the Apache Dubbo plugin, please ensure you are using IntelliJ IDEA version 2023.2 or above.
 ![image.png](/imgs/blog/2023/10/plugin/img.png)
 
-There are two ways to complete the installation of the Apache Dubbo plugin
+There are two ways to install the Apache Dubbo plugin.
 
-### Method 1
-Open [the Apache Dubbo in Spring Framework plugin page](https://plugins.jetbrains.com/plugin/20938-apache-dubbo-in-spring-framework) with browser, and in the upper right corner of the page, click the "Install to IntelliJ IDEA 2023.2" button to complete the plugin installation.
-
+### Method One
+Open the plugin's official page [Apache Dubbo in Spring Framework](https://plugins.jetbrains.com/plugin/20938-apache-dubbo-in-spring-framework) in your browser, and click the “Install to IntelliJ IDEA 2023.2” button at the top right corner to complete the installation.
 ![image.png](/imgs/blog/2023/10/plugin/img_1.png)
-### Method 2
-Open 'Preferences ->Plugins', enter 'Apache Dubbo' to search for plugins, and then install them.
 
+### Method Two
+Go to Preferences -> Plugins, search for 'Apache Dubbo', and install it.
 ![image.png](/imgs/blog/2023/10/plugin/img_2.png)
 
-## Create a new Dubbo application
-Next, let's take a look at how to use the plugin to create and develop an Apache Dubbo microservice application.
-### The 'New Project' pop-up window
-Open the 'New Project' window through 'File>New>Project'. In the pop-up window, you can see that the Apache Dubbo plugin has appeared in the generators list on the left. Click to select it.
+## Create Application Using the Plugin
+Once the plugin is installed, let's see how to create and develop an Apache Dubbo microservice application using the plugin.
 
+### Open Popup
+Open the new project dialog by selecting "File -> New -> Project". In the dialog, you will see the Apache Dubbo plugin listed in the template list on the left. Click to select it.
 ![image.png](/imgs/blog/2023/10/plugin/img_3.png)
 
-According to the application needs, enter the project name, save path, coordinates, JDK version, and other information. Click "Next" to proceed to the next step.
-
+Depending on the application needs, enter the project name, save path, coordinates, JDK version, and other information, then click "Next" to proceed to the next step.
 ### Select Components
-
 ![image.png](/imgs/blog/2023/10/plugin/img_4.png)
 
-The plugin will use dubbo spring boot starter to create a Spring Boot project, so we
+The plugin will use `dubbo-spring-boot-starter` to create a Spring Boot project, so we need to
 
-- Firstly, you need to choose the versions of Dubbo and Spring Boot.
-- Secondly, select the corresponding Dubbo and business components according to the project needs
+- First, select the versions of Dubbo and Spring Boot.
+- Second, choose the appropriate Dubbo and business components based on project needs.
 
-Finally, click "Create" to complete the project creation.
-
+Finally, click “Create” to complete the project creation.
 ![image.png](/imgs/blog/2023/10/plugin/img_5.png)
-
 ## Summary
-The release of the official IntelliJ IDEA plugin greatly simplifies the cost of initializing the Dubbo project.
-In addition to the plugin format, you can also directly open the start.dubbo.apache.org online service to quickly create Dubbo projects through a browser.
+The release of the official IntelliJ IDEA plugin greatly simplifies the cost of Dubbo project initialization. The Apache Dubbo community will continue to collaborate with IntelliJ to abstract more Dubbo features into plugin components to simplify issues such as dependency and configuration management in Dubbo usage. In addition to the plugin form, you can also directly open [start.dubbo.apache.org](https://start.dubbo.apache.org) online service to quickly create Dubbo projects through your browser.
+

@@ -1,8 +1,5 @@
-
 ---
-title: "Articles About Apache Dubbo"
-linkTitle: "Articles"
-weight: 20
----
-
-
+title: "Community Updates"
+linkTitle: "Community Updates"
+weight: 10
+---  

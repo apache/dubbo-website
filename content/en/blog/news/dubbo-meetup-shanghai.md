@@ -1,14 +1,16 @@
 ---
-title: "The second Dubbo Shanghai meetup has been held successfully"
-linkTitle: "The second Dubbo meetup"
+title: "The Second Dubbo Developer Salon Successfully Held in Shanghai"
+linkTitle: "The Second Dubbo Developer Salon Successfully Held in Shanghai"
 date: 2018-06-23
-description: The second Dubbo Shanghai meetup has been held successfully.
+tags: ["News"]
+description: The Second Dubbo Developer Salon was successfully held in Shanghai.
 ---
 
-The sencond Dubbo meetup has successfully been held in Shanghai, over 700 people submitted registration, and over 300 were present, more than 10,000 watched the live online.
 
-Please enjoy the slides of the topics:
-  * Jerrick Zhu: Dubbo Status and Roadmap (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-status-and-roadmap.pdf)
-  * Mercy Ma: Dubbo Cloud Native Practices and Thoughts (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-cloud-native-practices-and-thoughts.pdf)
-  * Ping Guo: Nacos Open Source Initiative (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/nacos-open-source-initiative.pdf)
-  * Zhiwei Pan: Dubbo Practices on Internet Finance Industries (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-practices-on-internet-finance-industries.pdf) 
+The Second Dubbo Developer Salon was successfully held in Shanghai, with over 700 developers registered and 300+ participants on site. The online live broadcast, guided by Alibaba Cloud Tianchi, Yunqi Community, and Daka Shuo, reached over 10,000 views.
+
+Speakers and PPT:
+  * Zhu Yong: The Current State and Future Plans of Dubbo (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-status-and-roadmap.pdf)
+  * Xiao Ma Ge: Practical Experiences and Reflections on the Road to Dubbo Cloud Native (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-cloud-native-practices-and-thoughts.pdf)
+  * Guo Ping: Nacos - Contributing to the Dubbo Ecosystem, Alibaba's Open Source Plans for the Registration Center and Configuration Center (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/nacos-open-source-initiative.pdf)
+  * Pan Zhiwei: Application Scenarios of Dubbo in the Internet Finance Industry (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201806%40Shanghai/dubbo-practices-on-internet-finance-industries.pdf) 

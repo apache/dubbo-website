@@ -1,39 +1,38 @@
 ---
 title: "RPC Protocol Security"
-linkTitle: "RPC protocol security"
+linkTitle: "RPC Protocol Security"
 weight: 2
-description: "Use RPC protocol more securely in Dubbo"
 type: docs
+description: "Using RPC protocols securely in Dubbo"
 ---
 
-Dubbo supports the extension of the RPC protocol. In theory, users can enable any RPC protocol based on this extension mechanism. This brings great flexibility, but at the same time, users must be aware of the hidden security risks.
+Dubbo supports the extension of RPC protocols, allowing users to enable any RPC protocol based on this extension mechanism in theory. This provides great flexibility but also comes with potential security risks.
 
-The serialization protocols provided by the official version of Dubbo 2.7 are as follows:
+The following serialization protocols are provided in the official version of Dubbo 2.7:
 * Dubbo
 * RMI
 * Hessian
-* Http/Rest
+* Http / Rest
 * Webservice
 * Thrift
 * gRPC
-* …
+* ……
 
-Starting from Dubbo 3.0, only the following serialization protocol support is provided by default:
+Starting from Dubbo 3.0, only the following serialization protocols are supported by default:
 * Dubbo
-* Triple/gRPC
-* Http/Rest
+* Triple / gRPC
+* Http / Rest
 
-The Triple, gRPC, Http, and Rest protocols are all built based on the HTTP protocol. The format of the request can be strictly distinguished. For example, the header is plain text to avoid risks such as RCE when reading the Token.
-For the Dubbo protocol, since it is designed based on TCP binary directly, except for a few specific fields, it is written using the serialization protocol. Therefore, if a risky serialization protocol is turned on, there will still be risks such as RCE.
-For the RMI protocol, since it is based on the Java serialization mechanism, there are risks such as RCE.
-For the Hessian protocol, because it is based on the Hessian serialization mechanism, and the default Hessian protocol (non-Dubbo Shade's Hessian-Lite protocol) cannot configure a black and white list and has no default black list, there are risks such as RCE.
+Triple, gRPC, Http, and Rest protocols are all built on the HTTP protocol, which can strictly distinguish the format of requests, such as headers being plain text, avoiding risks like RCE when reading tokens.
+The Dubbo protocol, due to its direct TCP binary design, uses serialization protocols for most fields except specific ones, so enabling risky serialization protocols can still pose RCE risks.
+The RMI protocol, based on Java serialization, poses RCE risks.
+The Hessian protocol, based on Hessian serialization, poses RCE risks especially since the default Hessian protocol (not the Dubbo-shaded Hessian-Lite) cannot configure blacklists and whitelists and has no default blacklist.
 
-1. If the user wants to use the Token authentication mechanism to prevent unauthenticated and untrusted request sources from threatening the security of the Provider, they should use protocols based on HTTP standard extensions such as Triple to avoid security risks when reading token parameters.
+(1) If users wish to use a token authentication mechanism to prevent unauthenticated requests from threatening the security of the Provider, they should use protocols like Triple based on HTTP standards to avoid security risks during token parameter reading.
 
-2. In particular, the Dubbo community **strongly does not recommend** exposing the Dubbo protocol, RMI protocol, Hessian protocol and other protocols that are not based on HTTP standard extensions to the public network environment, because the original intention of the Dubbo protocol is to be used on the intranet Provide high-performance RPC services in the environment, rather than in the public network environment.
+(2) Specifically, the Dubbo community **highly discourages** exposing Dubbo, RMI, Hessian protocols, and other non-HTTP-standard extended protocols to the public internet, as the Dubbo protocol was initially designed to provide high-performance RPC services within an intranet environment, not in a public internet environment.
 
-3. If your application needs to expose public network access, the Dubbo community recommends that you use the Triple protocol and avoid using non-Protobuf mode or services based on Dubbo 3.3 and above that only expose standard application/json format services.
+(3) If your application needs public internet exposure, the Dubbo community recommends using the Triple protocol and avoiding the non-Protobuf mode or exposing services only in the standard application/json format based on Dubbo 3.3 and above.
 
-4. Please be advised that all networked servers are susceptible to Denial of Service (DoS) attacks. We are unable to provide **magic** solutions for common issues, such as clients transmitting large amounts of data to your server or repeatedly requesting the same URL. Generally, Apache Dubbo aims to defend against attacks that could cause server resource consumption to become disproportionate to the size or structure of the input data. Therefore, to safeguard your server, ensure you have a Web Application Firewall (WAF) or other security devices in place before exposing your Dubbo services to the public internet, in order to prevent such attacks.
-
+(4) Note that all networked servers are susceptible to denial-of-service (DoS) attacks. We cannot provide **specific** solutions for general issues (e.g., clients sending large amounts of data to your server or repeatedly requesting the same URL). Apache Dubbo aims to prevent any attacks that could cause server resource consumption disproportionate to the size or structure of input data. Therefore, to protect your server, ensure you have a Web Application Firewall (WAF) or other security devices in place before exposing Dubbo services to the public internet to prevent these attacks.
 

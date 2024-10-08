@@ -1,5 +1,6 @@
 ---
-title: "Proposals About Apache Dubbo"
-linkTitle: "Proposals"
-weight: 20
+title: "Technical Solutions"
+linkTitle: "Technical Solutions"
+weight: 12
 ---
+
