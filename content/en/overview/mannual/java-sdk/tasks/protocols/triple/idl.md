@@ -6,135 +6,28 @@ type: docs
 weight: 2
 ---
 
-This example demonstrates how to define a service using Protocol Buffers and publish it as an externally callable Triple protocol service. If you have multi-language interoperability, gRPC interaction, or are familiar with and prefer Protobuf development, you can use this approach; otherwise, consider the previous Java interface-based triple development model.
+## Usage
 
-You can view the [full code for this example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl).
-
-{{% alert title="Note" color="info" %}}
-The example used in this article is based on native API coding; here is a [Spring Boot version of the example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl) for reference, which also follows the `protobuf+triple` model but includes service discovery configuration.
-{{% /alert %}}
-
-## Run the Example
-
-First, download the example source code with the following command:
-```shell
-git clone --depth=1 https://github.com/apache/dubbo-samples.git
-```
-
-Change to the example source code directory:
-```shell
-cd dubbo-samples/1-basic/dubbo-samples-api-idl
-```
-
-Compile the project to generate code from the IDL, which calls the protoc plugin provided by Dubbo to generate the corresponding service definition code:
-```shell
-mvn clean compile
-```
-
-The generated code is as follows:
-
-```text
-├── build
-│   └── generated
-│       └── source
-│           └── proto
-│               └── main
-│                   └── java
-│                       └── org
-│                           └── apache
-│                               └── dubbo
-│                                   └── samples
-│                                       └── tri
-│                                           └── unary
-│                                               ├── DubboGreeterTriple.java
-│                                               ├── Greeter.java
-│                                               ├── GreeterOuterClass.java
-│                                               ├── GreeterReply.java
-│                                               ├── GreeterReplyOrBuilder.java
-│                                               ├── GreeterRequest.java
-│                                               └── GreeterRequestOrBuilder.java
-```
-
-### Start Server
-Run the following command to start the server.
-```shell
-mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryServer"
-```
-
-### Access the Service
-There are two ways to access the Triple service:
-* Using standard HTTP tools
-* Using Dubbo client SDK
-
-#### cURL Access
-
-```shell
-curl \
-    --header "Content-Type: application/json" \
-    --data '{"name":"Dubbo"}' \
-    http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
-```
-
-#### Dubbo Client Access
-Run the following command to start the Dubbo client and complete the service call.
-```shell
-mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryClient"
-```
-
-### Source Code Explanation
-
-### Project Dependencies
-Due to the use of the IDL development model, the dependencies such as dubbo, protobuf-java must be added. Additionally, plugins like protobuf-maven-plugin must be configured to generate the stub code.
-
-```xml
-<dependency>
-	<groupId>org.apache.dubbo</groupId>
-	<artifactId>dubbo</artifactId>
-	<version>${dubbo.version}</version>
-</dependency>
-<dependency>
-	<groupId>com.google.protobuf</groupId>
-	<artifactId>protobuf-java</artifactId>
-	<version>3.19.6</version>
-</dependency>
-<dependency>
-	<groupId>com.google.protobuf</groupId>
-	<artifactId>protobuf-java-util</artifactId>
-	<version>3.19.6</version>
-</dependency>
-```
-
+### POM dependency
 ```xml
 <plugin>
-	<groupId>org.xolstice.maven.plugins</groupId>
-	<artifactId>protobuf-maven-plugin</artifactId>
-	<version>0.6.1</version>
-	<configuration>
-		<protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
-		<outputDirectory>build/generated/source/proto/main/java</outputDirectory>
-		<protocPlugins>
-			<protocPlugin>
-				<id>dubbo</id>
-				<groupId>org.apache.dubbo</groupId>
-				<artifactId>dubbo-compiler</artifactId>
-				<version>${dubbo.version}</version>
-				<mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
-			</protocPlugin>
-		</protocPlugins>
-	</configuration>
-	<executions>
-		<execution>
-			<goals>
-				<goal>compile</goal>
-			</goals>
-		</execution>
-	</executions>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-maven-plugin</artifactId>
+    <version>${dubbo.version}</version> <!-- Version 3.3.0 and above -->
+    <configuration>
+        <outputDir>build/generated/source/proto/main/java</outputDir> <!-- Refer to the following text for configurable parameters -->
+    </configuration>
 </plugin>
 ```
+Configurable parameters
 
-{{% alert title="protoc Plugin Version Note" color="warning" %}}
-
-{{% /alert %}}
+|     Parameter     |   Required    |                                           Default value                                           |                    Description                     |                 Notes                 |
+|:-----------------:|:-------------:|:-------------------------------------------------------------------------------------------------:|:--------------------------------------------------:|:-------------------------------------:|
+|     outputDir     |     false     |                    ${project.build.directory}/generated-sources/protobuf/java                     |       Generated java file storage directory        |                                       |
+|  protoSourceDir   |     false     |                                     ${basedir}/src/main/proto                                     |                proto file directory                |                                       |
+|  protocArtifact   |     false     |     com.google.protobuf:protoc:3.25.0:exe:Operating System Name:Operating System Architecture     |              proto compiler component              |                                       |
+|   protocVersion   |     false     |                                              3.25.0                                               |              version of protobuf-java              |                                       |
+| dubboGenerateType |     false     |                                                tri                                                |                Code generation type                | Can be filled with tri or tri_reactor |
 
 ### Service Definition
 Define the Greeter service using Protocol Buffers.
@@ -215,7 +108,6 @@ public class TriUnaryClient {
     }
 }
 ```
-
 ## Frequently Asked Questions
 
 ### Protobuf Class Not Found
@@ -242,22 +134,7 @@ Additionally, to support direct access to `application/json` format requests, th
 ### Generated Code Cannot Compile
 When using Protobuf, ensure that the core Dubbo library version matches the protoc plugin version and run `mvn clean compile` to regenerate the code.
 
-**1. After version 3.3.0**
-
-Starting from version 3.3.0+, configure the protoc plugin using `dubbo-maven-plugin`. The version of `dubbo-maven-plugin` must match the core dubbo version used:
-
-```xml
-<plugin>
-	<groupId>org.apache.dubbo</groupId>
-	<artifactId>dubbo-maven-plugin</artifactId>
-	<version>${dubbo.version}</version>
-	<configuration>
-
-	</configuration>
-</plugin>
-```
-
-**2. Before version 3.3.0**
+**Before version 3.3.0**
 
 Versions before 3.3.0 use `protobuf-maven-plugin` to configure the protoc plugin, and the `dubbo-compiler` must match the core dubbo version used:
 
@@ -287,4 +164,77 @@ Versions before 3.3.0 use `protobuf-maven-plugin` to configure the protoc plugin
 		</execution>
 	</executions>
 </plugin>
+```
+## Run the Example
+This example demonstrates how to define a service using Protocol Buffers and publish it as an externally callable Triple protocol service. If you have multi-language interoperability, gRPC interaction, or are familiar with and prefer Protobuf development, you can use this approach; otherwise, consider the previous Java interface-based triple development model.
+
+You can view the [full code for this example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl).
+
+{{% alert title="Note" color="info" %}}
+The example used in this article is based on native API coding; here is a [Spring Boot version of the example](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl) for reference, which also follows the `protobuf+triple` model but includes service discovery configuration.
+{{% /alert %}}
+
+First, download the example source code with the following command:
+```shell
+git clone --depth=1 https://github.com/apache/dubbo-samples.git
+```
+
+Change to the example source code directory:
+```shell
+cd dubbo-samples/1-basic/dubbo-samples-api-idl
+```
+
+Compile the project to generate code from the IDL, which calls the protoc plugin provided by Dubbo to generate the corresponding service definition code:
+```shell
+mvn clean compile
+```
+
+The generated code is as follows:
+
+```text
+├── build
+│   └── generated
+│       └── source
+│           └── proto
+│               └── main
+│                   └── java
+│                       └── org
+│                           └── apache
+│                               └── dubbo
+│                                   └── samples
+│                                       └── tri
+│                                           └── unary
+│                                               ├── DubboGreeterTriple.java
+│                                               ├── Greeter.java
+│                                               ├── GreeterOuterClass.java
+│                                               ├── GreeterReply.java
+│                                               ├── GreeterReplyOrBuilder.java
+│                                               ├── GreeterRequest.java
+│                                               └── GreeterRequestOrBuilder.java
+```
+
+### Start Server
+Run the following command to start the server.
+```shell
+mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryServer"
+```
+
+### Access the Service
+There are two ways to access the Triple service:
+* Using standard HTTP tools
+* Using Dubbo client SDK
+
+#### cURL Access
+
+```shell
+curl \
+    --header "Content-Type: application/json" \
+    --data '{"name":"Dubbo"}' \
+    http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
+```
+
+#### Dubbo Client Access
+Run the following command to start the Dubbo client and complete the service call.
+```shell
+mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryClient"
 ```

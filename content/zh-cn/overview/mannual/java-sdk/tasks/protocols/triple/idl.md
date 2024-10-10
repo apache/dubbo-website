@@ -22,13 +22,13 @@ weight: 2
 ```
 configuration可配置参数
 
-|     参数     | 必填参数 |                            默认值                             |        说明        |  备注   |
-|:----------:|:----:|:----------------------------------------------------------:|:----------------:|:-----:|
-| outputDir  |  否   | ${project.build.directory}/generated-sources/protobuf/java |  生成的java文件存放目录   |
-| protoSourceDir | 否 |                 ${basedir}/src/main/proto                  |    proto文件目录     |
-| protocArtifact | 否 |    com.google.protobuf:protoc:3.25.0:exe:操作系统名:操作系统架构      |    proto编译器组件    |
-| protocVersion | 否 |                           3.25.0                           | protobuf-java的版本 |
-|dubboGenerateType| 否 | tri | 代码生成类型 | 可填tri或者tri_reactor |
+|        参数         |  必填参数  |                            默认值                             |        说明        |         备注         |
+|:-----------------:|:------:|:----------------------------------------------------------:|:----------------:|:------------------:|
+|     outputDir     |   否    | ${project.build.directory}/generated-sources/protobuf/java |  生成的java文件存放目录   |                    |
+|  protoSourceDir   |   否    |                 ${basedir}/src/main/proto                  |    proto文件目录     |                    |
+|  protocArtifact   |   否    |     com.google.protobuf:protoc:3.25.0:exe:操作系统名:操作系统架构     |    proto编译器组件    |                    |
+|   protocVersion   |   否    |                           3.25.0                           | protobuf-java的版本 |                    |
+| dubboGenerateType |   否    |                            tri                             |      代码生成类型      | 可填tri或者tri_reactor |
 
 ### 服务定义
 使用 Protocol Buffers 定义 Greeter 服务
