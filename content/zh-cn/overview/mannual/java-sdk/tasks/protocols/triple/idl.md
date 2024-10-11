@@ -6,135 +6,29 @@ type: docs
 weight: 2
 ---
 
-本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑上一篇基于Java接口的 triple 开发模式。
+## 使用方式
 
-可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl)。
-
-{{% alert title="注意" color="info" %}}
-本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl) 供参考，同样是 `protobuf+triple` 的模式，但额外加入了服务发现配置。
-{{% /alert %}}
-
-## 运行示例
-
-首先，可通过以下命令下载示例源码：
-```shell
-git clone --depth=1 https://github.com/apache/dubbo-samples.git
-```
-
-进入示例源码目录：
-```shell
-cd dubbo-samples/1-basic/dubbo-samples-api-idl
-```
-
-编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：
-```shell
-mvn clean compile
-```
-
-生成代码如下
-
-```text
-├── build
-│   └── generated
-│       └── source
-│           └── proto
-│               └── main
-│                   └── java
-│                       └── org
-│                           └── apache
-│                               └── dubbo
-│                                   └── samples
-│                                       └── tri
-│                                           └── unary
-│                                               ├── DubboGreeterTriple.java
-│                                               ├── Greeter.java
-│                                               ├── GreeterOuterClass.java
-│                                               ├── GreeterReply.java
-│                                               ├── GreeterReplyOrBuilder.java
-│                                               ├── GreeterRequest.java
-│                                               └── GreeterRequestOrBuilder.java
-```
-
-### 启动Server
-运行以下命令启动 server。
-```shell
-mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryServer"
-```
-
-### 访问服务
-有两种方式可以访问 Triple 服务：
-* 以标准 HTTP 工具访问
-* 以 Dubbo client sdk 访问
-
-#### cURL 访问
-
-```shell
-curl \
-    --header "Content-Type: application/json" \
-    --data '{"name":"Dubbo"}' \
-    http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
-```
-
-#### Dubbo client 访问
-运行以下命令，启动 Dubbo client 并完成服务调用
-```shell
-mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryClient"
-```
-
-## 源码讲解
-
-### 项目依赖
-由于使用 IDL 开发模式，因此要添加 dubbo、protobuf-java 等依赖，同时还要配置 protobuf-maven-plugin 等插件，用于生成桩代码。
-
-```xml
-<dependency>
-	<groupId>org.apache.dubbo</groupId>
-	<artifactId>dubbo</artifactId>
-	<version>${dubbo.version}</version>
-</dependency>
-<dependency>
-	<groupId>com.google.protobuf</groupId>
-	<artifactId>protobuf-java</artifactId>
-	<version>3.19.6</version>
-</dependency>
-<dependency>
-	<groupId>com.google.protobuf</groupId>
-	<artifactId>protobuf-java-util</artifactId>
-	<version>3.19.6</version>
-</dependency>
-```
+### POM依赖
 
 ```xml
 <plugin>
-	<groupId>org.xolstice.maven.plugins</groupId>
-	<artifactId>protobuf-maven-plugin</artifactId>
-	<version>0.6.1</version>
-	<configuration>
-		<protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
-		<outputDirectory>build/generated/source/proto/main/java</outputDirectory>
-		<protocPlugins>
-			<protocPlugin>
-				<id>dubbo</id>
-				<groupId>org.apache.dubbo</groupId>
-				<artifactId>dubbo-compiler</artifactId>
-				<version>${dubbo.version}</version>
-				<mainClass>org.apache.dubbo.gen.tri.Dubbo3TripleGenerator</mainClass>
-			</protocPlugin>
-		</protocPlugins>
-	</configuration>
-	<executions>
-		<execution>
-			<goals>
-				<goal>compile</goal>
-			</goals>
-		</execution>
-	</executions>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-maven-plugin</artifactId>
+    <version>${dubbo.version}</version> <!-- 3.3.0及以上版本 -->
+    <configuration>
+        <outputDir>build/generated/source/proto/main/java</outputDir> <!-- 参考下文可配置参数 -->
+    </configuration>
 </plugin>
 ```
+configuration可配置参数
 
-{{% alert title="protoc 插件版本说明" color="warning" %}}
-
-{{% /alert %}}
+|        参数         |  必填参数  |                            默认值                             |        说明        |         备注         |
+|:-----------------:|:------:|:----------------------------------------------------------:|:----------------:|:------------------:|
+|     outputDir     |   否    | ${project.build.directory}/generated-sources/protobuf/java |  生成的java文件存放目录   |                    |
+|  protoSourceDir   |   否    |                 ${basedir}/src/main/proto                  |    proto文件目录     |                    |
+|  protocArtifact   |   否    |     com.google.protobuf:protoc:3.25.0:exe:操作系统名:操作系统架构     |    proto编译器组件    |                    |
+|   protocVersion   |   否    |                           3.25.0                           | protobuf-java的版本 |                    |
+| dubboGenerateType |   否    |                            tri                             |      代码生成类型      | 可填tri或者tri_reactor |
 
 ### 服务定义
 使用 Protocol Buffers 定义 Greeter 服务
@@ -242,22 +136,7 @@ public class TriUnaryClient {
 ### 生成的代码无法编译
 在使用 Protobuf 时，请尽量保持 dubbo 核心库版本与 protoc 插件版本一致，并运行 `mvn clean compile` 重新生成代码。
 
-**1. 3.3.0 版本之后**
-
-3.3.0+ 版本开始使用 `dubbo-maven-plugin` 配置 protoc 插件，`dubbo-maven-plugin` 的版本必须保持和使用的内核 dubbo 版本一致：
-
-```xml
-<plugin>
-	<groupId>org.apache.dubbo</groupId>
-	<artifactId>dubbo-maven-plugin</artifactId>
-	<version>${dubbo.version}</version>
-	<configuration>
-
-	</configuration>
-</plugin>
-```
-
-**2. 3.3.0 版本之前**
+**3.3.0 版本之前的POM依赖**
 
 3.3.0 之前的版本使用 `protobuf-maven-plugin` 配置 protoc 插件，其中 `dubbo-compiler` 必须保持和使用的内核 dubbo 版本一致：
 
@@ -287,4 +166,79 @@ public class TriUnaryClient {
 		</execution>
 	</executions>
 </plugin>
+```
+
+## 运行示例
+
+本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑上一篇基于Java接口的 triple 开发模式。
+
+可在此查看 [本示例的完整代码](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl)。
+
+{{% alert title="注意" color="info" %}}
+本文使用的示例是基于原生 API 编码的，这里还有一个 [Spring Boot 版本的示例](https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl) 供参考，同样是 `protobuf+triple` 的模式，但额外加入了服务发现配置。
+{{% /alert %}}
+
+首先，可通过以下命令下载示例源码：
+```shell
+git clone --depth=1 https://github.com/apache/dubbo-samples.git
+```
+
+进入示例源码目录：
+```shell
+cd dubbo-samples/1-basic/dubbo-samples-api-idl
+```
+
+编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：
+```shell
+mvn clean compile
+```
+
+生成代码如下
+
+```text
+├── build
+│   └── generated
+│       └── source
+│           └── proto
+│               └── main
+│                   └── java
+│                       └── org
+│                           └── apache
+│                               └── dubbo
+│                                   └── samples
+│                                       └── tri
+│                                           └── unary
+│                                               ├── DubboGreeterTriple.java
+│                                               ├── Greeter.java
+│                                               ├── GreeterOuterClass.java
+│                                               ├── GreeterReply.java
+│                                               ├── GreeterReplyOrBuilder.java
+│                                               ├── GreeterRequest.java
+│                                               └── GreeterRequestOrBuilder.java
+```
+
+### 启动Server
+运行以下命令启动 server。
+```shell
+mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryServer"
+```
+
+### 访问服务
+有两种方式可以访问 Triple 服务：
+* 以标准 HTTP 工具访问
+* 以 Dubbo client sdk 访问
+
+#### cURL 访问
+
+```shell
+curl \
+    --header "Content-Type: application/json" \
+    --data '{"name":"Dubbo"}' \
+    http://localhost:50052/org.apache.dubbo.samples.tri.unary.Greeter/greet/
+```
+
+#### Dubbo client 访问
+运行以下命令，启动 Dubbo client 并完成服务调用
+```shell
+mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.tri.unary.TriUnaryClient"
 ```
