@@ -31,46 +31,82 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="sdk-client">SDK Client&lt;/h4>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mvn -Dexec.mainClass&lt;span style="color:#719e07">=&lt;/span>org.apache.dubbo.samples.client.Application exec:java
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="源码讲解">源码讲解&lt;/h2>
-&lt;p>如果您是 Dubbo 老用户，你会发现以下内容与之前 Dubbo2 的开发模式基本一样，只是协议名称从 &lt;code>dubbo&lt;/code> 换成了 &lt;code>tri&lt;/code>。&lt;/p></description></item><item><title>使用 Protobuf(IDL) 开发 triple 通信服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</guid><description>&lt;p>本示例演示如何使用 Protocol Buffers 定义服务，并将其发布为对外可调用的 triple 协议服务。如果你有多语言业务互调、gRPC互通，或者熟悉并喜欢 Protobuf 的开发方式，则可以使用这种模式，否则可以考虑上一篇基于Java接口的 triple 开发模式。&lt;/p>
-&lt;p>可在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl">本示例的完整代码&lt;/a>。&lt;/p>
-
-
-&lt;div class="alert alert-info" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
-
- 本文使用的示例是基于原生 API 编码的，这里还有一个 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl">Spring Boot 版本的示例&lt;/a> 供参考，同样是 &lt;code>protobuf+triple&lt;/code> 的模式，但额外加入了服务发现配置。
-
-&lt;/div>
-
-&lt;h2 id="运行示例">运行示例&lt;/h2>
-&lt;p>首先，可通过以下命令下载示例源码：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone --depth&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-samples.git
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>进入示例源码目录：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> dubbo-samples/1-basic/dubbo-samples-api-idl
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>编译项目，由 IDL 生成代码，这会调用 dubbo 提供的 protoc 插件生成对应的服务定义代码：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>mvn clean compile
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>生成代码如下&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>├── build
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── generated
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── source
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── proto
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── main
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── java
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── org
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── apache
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── dubbo
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── samples
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── tri
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── unary
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── DubboGreeterTriple.java
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── Greeter.java
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterOuterClass.java
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterReply.java
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterReplyOrBuilder.java
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── GreeterRequest.java
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── GreeterRequestOrBuilder.java
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动server">启动Server&lt;/h3>
-&lt;p>运行以下命令启动 server。&lt;/p></description></item><item><title>Streaming 通信</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</guid><description>&lt;p>在 &lt;a href="../../protocol/">选择 RPC 通信协议&lt;/a> 一节提到，Streaming 是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:&lt;/p>
+&lt;p>如果您是 Dubbo 老用户，你会发现以下内容与之前 Dubbo2 的开发模式基本一样，只是协议名称从 &lt;code>dubbo&lt;/code> 换成了 &lt;code>tri&lt;/code>。&lt;/p></description></item><item><title>使用 Protobuf(IDL) 开发 triple 通信服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/</guid><description>&lt;h2 id="使用方式">使用方式&lt;/h2>
+&lt;h3 id="pom依赖">POM依赖&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- 3.3.0及以上版本 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;outputDir&amp;gt;&lt;/span>build/generated/source/proto/main/java&lt;span style="color:#268bd2">&amp;lt;/outputDir&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- 参考下文可配置参数 --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>configuration可配置参数&lt;/p>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: center">参数&lt;/th>
+ &lt;th style="text-align: center">必填参数&lt;/th>
+ &lt;th style="text-align: center">默认值&lt;/th>
+ &lt;th style="text-align: center">说明&lt;/th>
+ &lt;th style="text-align: center">备注&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: center">outputDir&lt;/td>
+ &lt;td style="text-align: center">否&lt;/td>
+ &lt;td style="text-align: center">${project.build.directory}/generated-sources/protobuf/java&lt;/td>
+ &lt;td style="text-align: center">生成的java文件存放目录&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">protoSourceDir&lt;/td>
+ &lt;td style="text-align: center">否&lt;/td>
+ &lt;td style="text-align: center">${basedir}/src/main/proto&lt;/td>
+ &lt;td style="text-align: center">proto文件目录&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">protocArtifact&lt;/td>
+ &lt;td style="text-align: center">否&lt;/td>
+ &lt;td style="text-align: center">com.google.protobuf:protoc:3.25.0:exe:操作系统名:操作系统架构&lt;/td>
+ &lt;td style="text-align: center">proto编译器组件&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">protocVersion&lt;/td>
+ &lt;td style="text-align: center">否&lt;/td>
+ &lt;td style="text-align: center">3.25.0&lt;/td>
+ &lt;td style="text-align: center">protobuf-java的版本&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">dubboGenerateType&lt;/td>
+ &lt;td style="text-align: center">否&lt;/td>
+ &lt;td style="text-align: center">tri&lt;/td>
+ &lt;td style="text-align: center">代码生成类型&lt;/td>
+ &lt;td style="text-align: center">可填tri或者tri_reactor&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="服务定义">服务定义&lt;/h3>
+&lt;p>使用 Protocol Buffers 定义 Greeter 服务&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_multiple_files &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.samples.tri.unary;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreeterRequest&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreeterReply&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> Greeter{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> greet(GreeterRequest) &lt;span style="color:#719e07">returns&lt;/span> (GreeterReply);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>请注意以上 package 定义 &lt;code>package org.apache.dubbo.samples.tri.unary;&lt;/code>，在此示例中 package 定义的路径将同时作为 java 包名和服务名前缀。这意味着 rpc 服务的完整定义是：&lt;code>org.apache.dubbo.samples.tri.unary.Greeter&lt;/code>，与生成代码的路径完全一致。&lt;/p></description></item><item><title>Streaming 通信</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/streaming/</guid><description>&lt;p>在 &lt;a href="../../protocol/">选择 RPC 通信协议&lt;/a> 一节提到，Streaming 是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:&lt;/p>
 &lt;ul>
 &lt;li>接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送&lt;/li>
 &lt;li>流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的&lt;/li>

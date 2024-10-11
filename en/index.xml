@@ -2574,19 +2574,67 @@ This example will demonstrate how to compile the dubbo-pilot control plane and h
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>prometheus-server ClusterIP 10.109.160.254 &amp;lt;none&amp;gt; 9090/TCP 4m
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="deploy-sample">Deploy Sample&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-samples/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Wait for the sample application to run normally, and confirm the application status using the following command:&lt;/p></description></item><item><title>Developing Triple Communication Services Using Protobuf (IDL)</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/</guid><description>&lt;p>This example demonstrates how to define a service using Protocol Buffers and publish it as an externally callable Triple protocol service. If you have multi-language interoperability, gRPC interaction, or are familiar with and prefer Protobuf development, you can use this approach; otherwise, consider the previous Java interface-based triple development model.&lt;/p>
-&lt;p>You can view the &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api-idl">full code for this example&lt;/a>.&lt;/p>
-
-
-&lt;div class="alert alert-info" role="alert">
-&lt;h4 class="alert-heading">Note&lt;/h4>
-
- The example used in this article is based on native API coding; here is a &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-spring-boot-idl">Spring Boot version of the example&lt;/a> for reference, which also follows the &lt;code>protobuf+triple&lt;/code> model but includes service discovery configuration.
-
-&lt;/div>
-
-&lt;h2 id="run-the-example">Run the Example&lt;/h2>
-&lt;p>First, download the example source code with the following command:&lt;/p></description></item><item><title>Implementation of the underlying serialization mechanism when developing triple services based on the Java interface model</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/serialization/triple/wrapper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/serialization/triple/wrapper/</guid><description>&lt;h2 id="1-introduction">1 Introduction&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Wait for the sample application to run normally, and confirm the application status using the following command:&lt;/p></description></item><item><title>Developing Triple Communication Services Using Protobuf (IDL)</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/</guid><description>&lt;h2 id="usage">Usage&lt;/h2>
+&lt;h3 id="pom-dependency">POM dependency&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- Version 3.3.0 and above --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;outputDir&amp;gt;&lt;/span>build/generated/source/proto/main/java&lt;span style="color:#268bd2">&amp;lt;/outputDir&amp;gt;&lt;/span> &lt;span style="color:#586e75">&amp;lt;!-- Refer to the following text for configurable parameters --&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Configurable parameters&lt;/p>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: center">Parameter&lt;/th>
+ &lt;th style="text-align: center">Required&lt;/th>
+ &lt;th style="text-align: center">Default value&lt;/th>
+ &lt;th style="text-align: center">Description&lt;/th>
+ &lt;th style="text-align: center">Notes&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: center">outputDir&lt;/td>
+ &lt;td style="text-align: center">false&lt;/td>
+ &lt;td style="text-align: center">${project.build.directory}/generated-sources/protobuf/java&lt;/td>
+ &lt;td style="text-align: center">Generated java file storage directory&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">protoSourceDir&lt;/td>
+ &lt;td style="text-align: center">false&lt;/td>
+ &lt;td style="text-align: center">${basedir}/src/main/proto&lt;/td>
+ &lt;td style="text-align: center">proto file directory&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">protocArtifact&lt;/td>
+ &lt;td style="text-align: center">false&lt;/td>
+ &lt;td style="text-align: center">com.google.protobuf:protoc:3.25.0:exe:Operating System Name:Operating System Architecture&lt;/td>
+ &lt;td style="text-align: center">proto compiler component&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">protocVersion&lt;/td>
+ &lt;td style="text-align: center">false&lt;/td>
+ &lt;td style="text-align: center">3.25.0&lt;/td>
+ &lt;td style="text-align: center">version of protobuf-java&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">dubboGenerateType&lt;/td>
+ &lt;td style="text-align: center">false&lt;/td>
+ &lt;td style="text-align: center">tri&lt;/td>
+ &lt;td style="text-align: center">Code generation type&lt;/td>
+ &lt;td style="text-align: center">Can be filled with tri or tri_reactor&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="service-definition">Service Definition&lt;/h3>
+&lt;p>Define the Greeter service using Protocol Buffers.&lt;/p></description></item><item><title>Implementation of the underlying serialization mechanism when developing triple services based on the Java interface model</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/serialization/triple/wrapper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/reference-manual/serialization/triple/wrapper/</guid><description>&lt;h2 id="1-introduction">1 Introduction&lt;/h2>
 &lt;p>The triple protocol implemented by Dubbo offers better usability (not binding Protobuf), allowing developers to directly define services using Java interfaces. For users expecting a smooth upgrade, with no multilingual services, or unfamiliar with Protobuf, the Java interface approach is the simplest way to use triple.&lt;/p>
 &lt;p>The following details the underlying serialization specifics in this protocol model: the framework will wrap the request and response using a built-in protobuf object, &lt;strong>which means the object will be serialized twice. The first serialization is done using the method specified by &lt;code>serialization=hessian&lt;/code>, and the second is to wrap the byte[] serialized in the first step with the protobuf wrapper before transmission&lt;/strong>.&lt;/p></description></item><item><title>Protocol</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/extensibility/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/extensibility/protocol/</guid><description>&lt;p>In the &lt;a href="https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/protocols/">Communication Protocol&lt;/a> chapter, we learned about several core RPC protocols built into Dubbo: &lt;code>dubbo&lt;/code>, &lt;code>rest&lt;/code>, and &lt;code>tri&lt;/code>, and how to use them. This article explains how to provide a custom RPC protocol implementation by extending the &lt;code>org.apache.dubbo.rpc.Protocol&lt;/code> SPI.&lt;/p>
 &lt;p>There are two ways to create a private protocol: the first is to wrap the existing protocol and add specific business logic. The second is to completely customize a protocol. The former is simpler to implement and is widely used in &lt;code>dubbo&lt;/code>, such as &lt;code>ProtocolFilterWrapper&lt;/code>, &lt;code>QosProtocolWrapper&lt;/code>, and &lt;code>ProtocolListenerWrapper&lt;/code>. The latter is relatively complex but offers maximum flexibility; for instance, the built-in protocols &lt;code>dubbo&lt;/code> and &lt;code>triple&lt;/code> in the Dubbo framework fall under this implementation style.&lt;/p></description></item><item><title>Protocol Recognition</title><link>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/mesh/migration/deploy-on-k8s/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/mannual/java-sdk/tasks/mesh/migration/deploy-on-k8s/</guid><description>&lt;p>You can easily deploy Dubbo services to a Kubernetes cluster by following the steps below, with the &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes">full code example available here&lt;/a>.&lt;/p>
