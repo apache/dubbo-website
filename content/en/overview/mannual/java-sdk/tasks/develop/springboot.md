@@ -61,7 +61,7 @@ dubbo:
     name: dubbo-springboot-demo-provider
     logger: slf4j
   protocol:
-    name: triple
+    name: tri
     port: -1
   registry:
     address: zookeeper://127.0.0.1:2181
@@ -76,7 +76,7 @@ dubbo:
   application:
     name: dubbo-springboot-demo-provider
   protocol:
-    name: triple
+    name: tri
     port: -1
   registry:
     id: zk-registry
