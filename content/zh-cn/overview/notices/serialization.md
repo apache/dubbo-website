@@ -37,7 +37,7 @@ Dubbo 2.7 官方版本提供的序列化协议有如下几种：
 * JDK
 * Protocol Buffers
 
-处于安全性考虑，从 Dubbo 3.3 开始将默认仅提供以下序列化协议支持：
+出于安全性考虑，从 Dubbo 3.3 开始将默认仅提供以下序列化协议支持：
 * Hessian2
 * Fastjson2
 * Protocol Buffers
