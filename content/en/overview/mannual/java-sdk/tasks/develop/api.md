@@ -16,7 +16,7 @@ public class Application {
     public static void main(String[] args) {
         DubboBootstrap.getInstance()
             .protocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051))
-            .service(ServiceBuilder.newBuilder().ref(new DemoServiceImpl()).build())
+            .service(ServiceBuilder.newBuilder().interfaceClass(DemoService.class).ref(new DemoServiceImpl()).build())
             .start()
             .await();
     }
@@ -94,7 +94,7 @@ public class Application {
     public static void main(String[] args) {
         DubboBootstrap.getInstance()
             .protocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051))
-            .service(ServiceBuilder.newBuilder().ref(new DemoServiceImpl()).build())
+            .service(ServiceBuilder.newBuilder().interfaceClass(DemoService.class).ref(new DemoServiceImpl()).build())
             .start()
             .await();
     }
@@ -150,8 +150,8 @@ public static void main(String[] args) {
     DubboBootstrap.getInstance()
         .protocol(protocolConfig)
         .provider(providerConfig)
-        .service(ServiceBuilder.newBuilder().ref(new FooServiceImpl()).build())
-        .service(ServiceBuilder.newBuilder().ref(new BarServiceImpl()).build())
+        .service(ServiceBuilder.newBuilder().interfaceClass(FooService.class).ref(new FooServiceImpl()).build())
+        .service(ServiceBuilder.newBuilder().interfaceClass(BarService.class).ref(new BarServiceImpl()).build())
         .start()
         .await();
 }
@@ -214,8 +214,8 @@ public static void main(String[] args) {
         .application()
         .registry(new RegistryConfig("nacos://127.0.0.1:8848"))
         .protocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051))
-        .service(ServiceBuilder.newBuilder().ref(new DemoServiceImpl()).build())
-        .service(ServiceBuilder.newBuilder().ref(new FooServiceImpl()).build())
+        .service(ServiceBuilder.newBuilder().interfaceClass(DemoService.class).ref(new DemoServiceImpl()).build())
+        .service(ServiceBuilder.newBuilder().interfaceClass(FooService.class).ref(new FooServiceImpl()).build())
         .start()
         .await();
 }
