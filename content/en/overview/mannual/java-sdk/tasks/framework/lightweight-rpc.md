@@ -62,7 +62,7 @@ public class Application {
     public static void main(String[] args) {
         DubboBootstrap.getInstance()
             .protocol(new ProtocolConfig(CommonConstants.TRIPLE, 50051))
-            .service(ServiceBuilder.newBuilder().ref(new DemoServiceImpl()).build())
+            .service(ServiceBuilder.newBuilder().interfaceClass(DemoService.class).ref(new DemoServiceImpl()).build())
             .start()
             .await();
     }
