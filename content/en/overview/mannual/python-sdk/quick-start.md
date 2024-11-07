@@ -1,33 +1,31 @@
 ---
 aliases:
-    - /zh/docs3-v2/python-sdk/quick-start/
-    - /zh-cn/docs3-v2/python-sdk/quick-start/
-    - /zh/overview/quickstart/python/
-    - /zh-cn/overview/quickstart/python/
-description: Dubbo-python 快速开始
-linkTitle: 快速开始
-title: 快速开始
+    - /en/docs3-v2/python-sdk/quick-start/
+    - /en/overview/quickstart/python/
+description: Dubbo-python Quick Start
+linkTitle: Quick Start
+title: Quick Start
 type: docs
 weight: 1
 ---
 
-本指南将通过一个简单的工作示例帮助您开始使用 Python 中的 Dubbo，在此查看完整[示例](https://github.com/apache/dubbo-python/tree/main/samples/helloworld)。
+This guide will help you get started with Dubbo in Python with a simple working example. See the full [example here](https://github.com/apache/dubbo-python/tree/main/samples/helloworld).
 
-## 1 前置条件
+## 1. Prerequisites
 
-- Python 3.11 或更高版本
-- 合适的`pip` 版本
+- Python 3.11 or higher
+- Compatible `pip` version
 
-## 2 安装Dubbo-python
+## 2. Install Dubbo-Python
 
-```python
+```bash
 git clone https://github.com/apache/dubbo-python.git
 cd dubbo-python && pip install .
 ```
 
-## 3 构建Dubbo服务
+## 3. Build a Dubbo Service
 
-构建Dubbo Server
+### Building the Dubbo Server
 
 ```python
 import dubbo
@@ -63,7 +61,7 @@ if __name__ == "__main__":
     input("Press Enter to stop the server...\n")
 ```
 
-构建Dubbo Client
+### Building the Dubbo Client
 
 ```python
 import dubbo
@@ -89,31 +87,31 @@ if __name__ == "__main__":
     print(result)
 ```
 
-## 4 运行Dubbo 服务
+## 4. Run the Dubbo Service
 
-切换到快速开始示例目录
+Navigate to the Quick Start example directory:
 
 ```bash
 cd samples/helloworld
 ```
 
-运行Server
+Run the Server:
 
 ```bash
 python server.py
 ```
 
-运行Client
+Run the Client:
 
 ```bash
 python client.py
 ```
 
-## 5 源码解读
+## 5. Code Walkthrough
 
-### 5.1 暴露服务
+### 5.1 Exposing the Service
 
-首先我们需要定义和编写需要暴露的服务方法，如下所示：
+First, define the service methods you want to expose, as shown below:
 
 ```python
 class UnaryServiceServicer:
@@ -122,14 +120,14 @@ class UnaryServiceServicer:
         return b"Hello from server"
 ```
 
-接下来，我们需要使用 `RpcMethodHandler` 的构建方法（`unary`、`client_stream`、`server_stream`、`bi_stream`）构建需要暴露的方法及其属性，其参数包括：
+Next, we use the `RpcMethodHandler` constructor methods (`unary`, `client_stream`, `server_stream`, `bi_stream`) to build the method and define its properties. Key parameters include:
 
-- `callable_method`：方法本身
-- `method_name`：暴露的方法名，默认为自身方法名
-- `request_deserializer`：请求（或称方法参数）的反序列化函数（默认不反序列化，即直接返回 `bytes`）
-- `response_serializer`：响应（或称返回值）的序列化函数（如果不设置，需要确保返回值必须是 `bytes`、`bytearray` 或 `memoryview`）
+- `callable_method`: The method itself.
+- `method_name`: The exposed method name, defaulting to the method’s own name.
+- `request_deserializer`: The deserialization function for requests (or method parameters). By default, it returns raw `bytes`.
+- `response_serializer`: The serialization function for responses (or return values). If not set, the return value must be in `bytes`, `bytearray`, or `memoryview`.
 
-如果我们的方法参数和返回值均为 `bytes`，则可以得到一个最简的 `RpcMethodHandler`，如下所示：
+If the method’s parameters and return values are in `bytes`, we can get a minimal `RpcMethodHandler` as follows:
 
 ```python
 method_handler = RpcMethodHandler.unary(
@@ -137,12 +135,12 @@ method_handler = RpcMethodHandler.unary(
     )
 ```
 
-接下来，我们需要使用 `RpcServiceHandler` 构建需要暴露的服务，其参数包括：
+Next, we use `RpcServiceHandler` to build the service, with parameters including:
 
-- `service_name`：暴露的服务名
-- `method_handlers`：该服务对应的方法集合 - `List[RpcMethodHandler]`
+- `service_name`: The name of the exposed service.
+- `method_handlers`: The set of methods for the service, as a `List[RpcMethodHandler]`.
 
-因此，我们可以得到以下 `RpcServiceHandler`：
+This results in the following `RpcServiceHandler`:
 
 ```python
 service_handler = RpcServiceHandler(
@@ -151,7 +149,7 @@ service_handler = RpcServiceHandler(
     )
 ```
 
-最后，我们需要配置 `ServiceConfig`，传入之前的 `RpcServiceHandler` 以及需要暴露的地址（`host`）、端口（`port`）、所使用的协议（`protocol`）等信息。然后将其传入 `dubbo.Server`，就能成功暴露一个服务。如下所示：
+Finally, we configure `ServiceConfig`, passing in the `RpcServiceHandler` as well as the `host` (address), `port`, `protocol`, and other details for the service. Passing this to `dubbo.Server` exposes the service, as shown below:
 
 ```python
 service_config = ServiceConfig(
@@ -161,18 +159,18 @@ service_config = ServiceConfig(
 server = dubbo.Server(service_config).start()
 ```
 
-### 5.2 引用服务
+### 5.2 Referencing the Service
 
-要引用对应 Server 的服务，我们首先需要配置 `ReferenceConfig`，其参数如下：
+To reference the service on the Server, we first configure `ReferenceConfig` with the following parameters:
 
-- `protocol`：Server 使用的通信协议，例如 `tri`（Triple）等。
-- `service`：引用的服务名。
-- `host`：服务地址。
-- `port`：服务端口。
+- `protocol`: The protocol used by the Server, such as `tri` (Triple).
+- `service`: The name of the referenced service.
+- `host`: The service address.
+- `port`: The service port.
 
-此外，我们还可以通过 `ReferenceConfig.from_url` 自动解析 URL 字符串来配置 `ReferenceConfig`。之后，我们就能创建一个 `dubbo.Client` 了。
+Additionally, we can use `ReferenceConfig.from_url` to configure `ReferenceConfig` by parsing a URL string automatically. Once configured, we can create a `dubbo.Client`.
 
-如下所示：
+Example:
 
 ```python
 reference_config = ReferenceConfig.from_url(
@@ -181,13 +179,13 @@ reference_config = ReferenceConfig.from_url(
 dubbo_client = dubbo.Client(reference_config)
 ```
 
-接下来，我们可以使用 `dubbo.Client` 的 `unary`、`client_stream`、`server_stream` 和 `bi_stream` 方法构建并调用服务。这些方法的参数如下：
+Then, we can use the `unary`, `client_stream`, `server_stream`, and `bi_stream` methods of `dubbo.Client` to construct and call the service. Parameters for these methods are:
 
-- `method_name`：引用的方法名。
-- `request_serializer`：请求（或称方法参数）的序列化函数（如果不设置，需要确保返回值是 `bytes`、`bytearray` 或 `memoryview`）。
-- `response_deserializer`：响应（或称返回值）的反序列化函数（默认不反序列化，即直接返回 `bytes`）。
+- `method_name`: The name of the referenced method.
+- `request_serializer`: The serialization function for the request (or method parameters). If not set, ensure that the return value is `bytes`, `bytearray`, or `memoryview`.
+- `response_deserializer`: The deserialization function for the response (or return value). By default, it returns raw `bytes`.
 
-此时，我们就能利用上述方法返回的 `RpcCallable` 对象完成服务的调用。如下所示：
+This lets us use the `RpcCallable` object returned by these methods to make the service call. Example:
 
 ```python
 class UnaryServiceStub:
@@ -198,7 +196,7 @@ class UnaryServiceStub:
         return self.unary(message)
 ```
 
-## 6 更多示例
+## 6 More examples
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -208,9 +206,9 @@ class UnaryServiceStub:
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/python-sdk/custom-serialization/" >}}'>自定义序列化</a>
+                     <a href='{{< relref "../../mannual/python-sdk/custom-serialization/" >}}'>Custom Serialization</a>
                 </h4>
-                <p>Dubbo-python 自定义序列化</p>
+                <p>Dubbo-python Custom Serialization</p>
             </div>
         </div>
     </div>
@@ -218,9 +216,9 @@ class UnaryServiceStub:
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../../mannual/python-sdk/streaming/" >}}'>Streaming 通信模式</a>
+                     <a href='{{< relref "../../mannual/python-sdk/streaming/" >}}'>Streaming Communication Mode</a>
                 </h4>
-                <p>Dubbo-python 实现 Streaming 通信模型</p>
+                <p>Implementing a Streaming Communication Model with Dubbo-Python</p>
             </div>
         </div>
     </div>
