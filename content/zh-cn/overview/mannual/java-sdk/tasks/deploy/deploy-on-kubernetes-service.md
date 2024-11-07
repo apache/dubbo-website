@@ -7,6 +7,7 @@ linkTitle: 服务网格
 title: 部署 Dubbo 应用到虚拟机环境
 type: docs
 weight: 3
+working_in_progress: true
 ---
 这种模式将 Dubbo Service 与 <a target="_blank" href="">Kubernetes Service</a> 概念映射起来，不再需要 Nacos 等传统注册中心，而是由 Kubernetes APISERVER 承担注册中心指责。
 

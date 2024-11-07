@@ -190,10 +190,10 @@ To achieve this effect, we only need to add multi-protocol configuration in the 
 ```yaml
 dubbo:
   protocols:
-    - id: rest
+    rest:
       name: rest
       port: 8090
-    - id: dubbo
+    dubbo:
       name: dubbo
       port: 20880
 ```
