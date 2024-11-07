@@ -212,9 +212,11 @@ Multi-protocol publishing means providing multiple access methods for the same s
 ```yaml
 dubbo:
  protocols:
-   - name: tri
+   tri:
+     name: tri
      port: 50051
-   - name: dubbo
+   dubbo:
+     name: dubbo
 	 port: 20880
 ```
 

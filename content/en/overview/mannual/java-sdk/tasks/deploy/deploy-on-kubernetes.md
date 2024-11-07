@@ -7,6 +7,7 @@ linkTitle: Kubernetes
 title: Deploying Dubbo Applications to Kubernetes Environments
 type: docs
 weight: 2
+
 ---
 This model is not much different from traditional non-Kubernetes deployments. As shown in the picture below, Nacos or Zookeeper is still used as the registry, but Kubernetes is used as the underlying platform for application lifecycle scheduling.
 
