@@ -28,10 +28,10 @@ weight: 4
 ```yaml
 dubbo:
   protocols:
-    - id: dubbo-id
+    dubbo-id:
       name: dubbo
       port: 20880
-    - id: tri-id
+    tri-id:
       name: tri
       port: 50051
 ```
@@ -56,10 +56,10 @@ private DemoServiceImpl implements DemoService {}
 ```yaml
 dubbo:
   protocols:
-    - id: dubbo-id
+    dubbo-id:
       name: dubbo
       port: 20880
-    - id: tri-id
+    tri-id:
       name: tri
       port: 50051
 ```
@@ -98,9 +98,11 @@ private GreetingService greetingService;
 ```yaml
 dubbo:
  protocols:
-   - name: tri
+   tri:
+     name: tri
      port: 50051
-   - name: dubbo
+   dubbo:
+     name: dubbo
 	 port: 20880
 ```
 

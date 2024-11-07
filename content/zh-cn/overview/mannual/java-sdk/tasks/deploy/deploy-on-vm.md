@@ -7,6 +7,7 @@ linkTitle: 传统注册中心
 title: 传统基于 Zookeeper、Nacos 的注册中心部署架构，部署 Dubbo 应用到虚拟机环境
 type: docs
 weight: 1
+working_in_progress: true
 ---
 
 下图是使用 Nacos、Zookeeper 作为注册中心的典型 Dubbo 微服务部署架构。

@@ -28,10 +28,10 @@ If using Spring Boot, you can modify application.yml or application.properties a
 ```yaml
 dubbo:
   protocols:
-    - id: dubbo-id
+    dubbo-id:
       name: dubbo
       port: 20880
-    - id: tri-id
+    tri-id:
       name: tri
       port: 50051
 ```
@@ -56,10 +56,10 @@ If using Spring Boot, modify application.yml or application.properties as follow
 ```yaml
 dubbo:
   protocols:
-    - id: dubbo-id
+    dubbo-id:
       name: dubbo
       port: 20880
-    - id: tri-id
+    tri-id:
       name: tri
       port: 50051
 ```
@@ -98,9 +98,11 @@ Multi-protocol publishing means providing multiple protocol access methods for t
 ```yaml
 dubbo:
  protocols:
-   - name: tri
+   tri:
+     name: tri
      port: 50051
-   - name: dubbo
+   dubbo:
+     name: dubbo
      port: 20880
 ```
 

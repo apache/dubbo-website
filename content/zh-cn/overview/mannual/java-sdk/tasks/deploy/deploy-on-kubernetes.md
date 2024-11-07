@@ -7,6 +7,7 @@ linkTitle: Kubernetes
 title: 部署 Dubbo 应用到 Kubernetes 环境
 type: docs
 weight: 2
+working_in_progress: true
 ---
 这种模式与传统的非 Kubernetes 部署并无太大差异，如下图所示，仍然使用 Nacos 或者 Zookeeper 等作为注册中心，只不过将 Kubernetes 作为应用生命周期调度的底层平台。
 
