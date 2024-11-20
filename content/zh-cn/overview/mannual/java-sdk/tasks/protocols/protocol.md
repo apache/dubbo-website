@@ -113,7 +113,7 @@ Protobuf 模式支持的序列化方式有 Protobuf、Protobuf-json 两种模式
 | 是不是 Dubbo2 老用户，想零改造迁移到 triple 协议？ | Java 接口 | Protobuf |
 
 ### HTTP 接入方式
-triple 协议支持标准 HTTP 工具的直接访问，因此前端组件如浏览器、网关等接入非常边便捷，同时服务测试也变得更简单。
+triple 协议支持标准 HTTP 工具的直接访问，因此前端组件如浏览器、网关等接入非常便捷，同时服务测试也变得更简单。
 
 当服务启动后，可以使用 cURL 命令直接访问：
 ```shell
