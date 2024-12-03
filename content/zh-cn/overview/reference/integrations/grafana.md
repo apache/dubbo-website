@@ -24,7 +24,7 @@ Grafana 是一种开源的监控解决方案，可用于为 Dubbo 配置可视�
 你可以使用 Dubbo 社区提供的示例配置快速安装 Grafana，安装后的 Grafana 提供了社区默认指标面板视图。
 
 ```bash
-kubectl create -f https://raw.githubusercontent.com/apache/dubbo-admin/refactor-with-go/deploy/kubernetes/grafana.yaml
+kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/grafana.yaml
 ```
 
 你可能需要端口映射获得访问地址 `$ kubectl port-forward service/grafana 3000:3000`，打开浏览器访问页面 `http://localhost:3000`。

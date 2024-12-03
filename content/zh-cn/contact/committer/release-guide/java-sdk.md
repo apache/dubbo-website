@@ -220,9 +220,9 @@ $ mvn deploy -Prelease -DskipTests
 
 5. 拷贝`dubbo-distribution/dubbo-apache-release/target`下的source相关的包到svn本地仓库`dubbo/${release_version}`
 
-6. 生成sha512签名
+6. 生成sha512签名和asc签名
 
-   针对`src.zip`
+   针对`src.zip` 进行sha512签名
 
    ```shell
    $ shasum -a 512 apache-dubbo-${release_version}-src.zip >> apache-dubbo-${release_version}-src.zip.sha512
@@ -233,6 +233,11 @@ $ mvn deploy -Prelease -DskipTests
    ```shell
    $ shasum -b -a 512 apache-dubbo-${release_version}-bin.zip >> apache-dubbo-${release_version}-bin.zip.sha512
    ```
+   
+   针对`src.zip` 进行asc签名
+    ```shell
+   $ gpg --armor --output apache-dubbo-${release_version}-src.zip.asc --detach-sig apache-dubbo-${release_version}-src.zip
+    ```
 
 
 7. 如果有binary release要同时发布
@@ -271,6 +276,10 @@ https://dist.apache.org/repos/dist/dev/dubbo/${release_version}/
 ```sh
 $ shasum -c apache-dubbo-${release_version}-src.zip.sha512
 $ shasum -c apache-dubbo-${release_version}-bin.zip.sha512
+```
+#### 检查asc签名
+```shell
+$  gpg --verify apache-dubbo-${release_version}-src.zip.asc
 ```
 
 #### 检查gpg签名

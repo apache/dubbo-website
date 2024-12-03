@@ -1,13 +1,14 @@
 ---
-title: "The third Dubbo meetup has been held in Shenzhen"
-linkTitle: "The third Dubbo meetup"
+title: "The Third Dubbo Developer Salon Held Successfully in Shenzhen"
+linkTitle: "The Third Dubbo Developer Salon Held Successfully in Shenzhen"
 date: 2018-07-30
-description: The third Dubbo meetup has been held in Shenzhen
+tags: ["News"]
+description: The Third Dubbo Developer Salon Held Successfully in Shenzhen
 ---
 
-The third Dubbo meetup has successfully been held in Shenzhen, over 2000 people submitted registration, and over 700 were present, more than 17,000 watched the live online. 
+The third Dubbo Developer Salon was successfully held in Shenzhen, with over 2,000 developers registering, more than 700 participants on-site, and a total of 17,000 online views guided by Alibaba Cloud's Tianchi, Yunqi Community, and Daka Talk.
 
-Please enjoy the slides of the topics:
-  * Zhixuan Chen: Dubbo-present-and-2.7-update (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201807%40shenzhen/dubbo-present-and-2.7-update.pdf)
-  * Bin Kang: Microservice-in-lexinfintech (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201807%40shenzhen/microservice-in-lexinfintech.pdf)
-  * Jialiang lin: sentinel (Chinese) [slides](https://github.com/dubbo/awesome-dubbo/blob/master/slides/meetup/201807%40shenzhen/sentinel.pdf)
+Speakers
+  * Chen Zhixuan: The Current State of Dubbo Open Source and the Plan for 2.7
+  * Kang Bin: The Microservices Journey of Lexin Group
+  * Lin Jialiang: Sentinel - The All-Round Traffic Sentinel for Enterprise Users

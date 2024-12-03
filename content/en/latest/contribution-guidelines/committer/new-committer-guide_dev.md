@@ -32,7 +32,7 @@ weight: 1
 2. 关于 apache 邮箱：apache.org 邮箱并没有自己的邮件内容存储服务器。它需要借用其他邮件提供商的邮件内容存储、分发功能。在很多投票环节是建议使用 apache 邮箱的。
     这里就有一个问题，怎么在其它邮箱里面配置 apache.org 邮箱转发功能：
     * 收件箱：收取发送到 apache.org 的邮件。这个在第一步配置好 Apache 账户工具的 forward 邮箱就可以用 forward 邮箱收取邮件了
-    * 发件箱：将发出的邮件显示发件邮箱为 apache.org 邮箱。请参考：[设置 apache 邮箱指南](https://reference.apache.org/committer/email)和[ gmail 邮箱设置方式](https://support.google.com/mail/answer/22370)。 其他邮箱服务的设置方式不方便找到，gmail 的最方便，建议换成 gmail 邮箱(不是广告)。
+    * 发件箱：将发出的邮件显示发件邮箱为 apache.org 邮箱。请参考：[设置 apache 邮箱指南](https://infra.apache.org/committer-email.html)和[ gmail 邮箱设置方式](https://support.google.com/mail/answer/22370)。 其他邮箱服务的设置方式不方便找到，gmail 的最方便，建议换成 gmail 邮箱(不是广告)。
 3. 修改编辑页面的 homepage url，[apache 提交者列表页](http://people.apache.org/committer-index.html)中你的账户能加主页链接。
 4. 修改编辑页面的 github 账户(username)，提交确认后两个小时内会有邮件邀请你加入 github.com/apache-committers 组。这期间可以阅读[ ASF 工作方式](http://www.apache.org/foundation/how-it-works.html#developers)以对 ASF 开发做一些基本了解。
 ## 四、提交者获得对项目的写权限

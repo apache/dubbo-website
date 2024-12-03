@@ -313,7 +313,7 @@ Caused by: org.apache.dubbo.remoting.TimeoutException: Waiting server-side respo
 
 [^stub-samples]: https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-stub
 [^mock-samples]:  https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-mock
-[^mock]: /zh-cn/docsv2.7/user/examples/local-mock/
+[^mock]: https://cn.dubbo.apache.org/zh-cn/docsv2.7/user/examples/local-mock/
 
 
 

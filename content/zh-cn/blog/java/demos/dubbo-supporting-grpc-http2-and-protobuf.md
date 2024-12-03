@@ -28,7 +28,7 @@ description: >
 
 相比于直接构建与 TPC 传输层的私有 RPC 协议，构建于 HTTP 之上的远程调用解决方案会有更好的通用性，如WebServices 或 REST 架构，使用 HTTP + JSON 可以说是一个事实标准的解决方案。
 
-之所有选择构建在 HTTP 之上，我认为有两个最大的优势：
+之所以选择构建在 HTTP 之上，我认为有两个最大的优势：
 
 1. HTTP 的语义和可扩展性能很好的满足 RPC 调用需求。
 2. 通用性，HTTP 协议几乎被网络上的所有设备所支持，具有很好的协议穿透性。
@@ -155,7 +155,7 @@ service SearchService {
 
 [gRPC](https://grpc.io/) 是 Google 开源的构建在 HTTP/2 之上的一个 PRC 通信协议。Dubbo 依赖其灵活的协议扩展机制，增加了对 gRPC (HTTP/2) 协议的支持。
 
-目前的支持限定在 Dubbo Java 语言版本，后续 Go 语言或其他语言版本将会以类似方式提供支持。下面，通过一个[简单的示例](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc)来演示如何在 Dubbo 中使用 gRPC 协议通信。
+目前的支持限定在 Dubbo Java 语言版本，后续 Go 语言或其他语言版本将会以类似方式提供支持。下面，通过一个[简单的示例](https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc)来演示如何在 Dubbo 中使用 gRPC 协议通信。
 
 #### 1. 定义服务 IDL
 
@@ -228,7 +228,7 @@ pluginArtifact 指定了 Dubbo 定制版本的 Java Protobuf Compiler 插件，�
  <pluginArtifact>org.apache.dubbo:protoc-gen-dubbo-java:1.19.0-SNAPSHOT:exe:${os.detected.classifier}</pluginArtifact>
 ```
 
-由于 `protoc-gen-dubbo-java` 支持 gRPC 和 Dubbo 两种协议，可生成的 stub 类型，默认值是 gRPC，关于 dubbo 协议的使用可参见 [使用 Protobuf 开发 Dubbo 服务](/zh-cn/overview/mannual/java-sdk/quick-start/idl/)。
+由于 `protoc-gen-dubbo-java` 支持 gRPC 和 Dubbo 两种协议，可生成的 stub 类型，默认值是 gRPC，关于 dubbo 协议的使用可参见 [使用 Protobuf 开发 Dubbo 服务](/zh-cn/overview/mannual/java-sdk/quick-start/)。
 
 ```xml
 <pluginParameter>grpc</pluginParameter>
@@ -385,7 +385,7 @@ public static void main(String[] args) throws IOException {
 	// ...
   GreeterGrpc.IGreeter greeter = (GreeterGrpc.IGreeter) context.getBean("greeter");
   ListenableFuture<HelloReply> future =   
-        greeter.sayHAsyncello(HelloRequest.newBuilder().setName("world!").build());
+        greeter.sayHelloAsync(HelloRequest.newBuilder().setName("world!").build());
   // ...
 }
 ```
@@ -515,7 +515,7 @@ default=org.apache.dubbo.samples.basic.comtomize.MyGrpcConfigurator
 
 **三、TLS 配置**
 
-配置方式和 Dubbo 提供的通用的 [TLS 支持](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/security/tls/)一致，具体请参见文档
+配置方式和 Dubbo 提供的通用的 [TLS 支持](/zh-cn/overview/mannual/java-sdk/reference-manual/protocol/tls/)一致，具体请参见文档
 
 
 
@@ -589,7 +589,7 @@ message HelloReply {
 </plugin>
 ```
 
-注意，这里与 [Dubbo 对 gRPC](https://github.com/apache/dubbo-samples/tree/master/99-integration/dubbo-samples-grpc) 支持部分的区别在于： 
+注意，这里与 [Dubbo 对 gRPC](https://github.com/apache/dubbo-samples/tree/925c3d150d9030bc72988564e4f97eca1f6fcb89/3-extensions/protocol/dubbo-samples-grpc) 支持部分的区别在于： 
 ` <pluginParameter>dubbo</pluginParameter>` 
 
 2. 生成 Dubbo stub

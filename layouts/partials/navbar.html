@@ -1,36 +1,187 @@
 {{ $cover := .HasShortcode "blocks/cover" }}
-<nav class="js-navbar-scroll navbar navbar-expand navbar-dark {{ if $cover}}  {{ end }} flex-column flex-md-row td-navbar" data-auto-burger="primary">
-	<a class="navbar-brand" href="{{ .Site.Home.RelPermalink }}">		<span class="navbar-logo">{{ if .Site.Params.ui.navbar_logo }}{{ with resources.Get "icons/logo.svg" }}{{ ( . | minify).Content | safeHTML }}{{ end }}{{ end }}</span><span class="text-uppercase font-weight-bold">{{ .Site.Title }}</span>
-	</a>
-	<div class="td-navbar-nav-scroll ml-md-auto" id="main_navbar">
-		<ul class="navbar-nav mt-2 mt-lg-0">
-			{{ $p := . }}
-			{{ range .Site.Menus.main }}
-			<li class="nav-item mr-4 mb-2 mb-lg-0">
-				{{ $active := or ($p.IsMenuCurrent "main" .) ($p.HasMenuCurrent "main" .) }}
-				{{ with .Page }}
-				{{ $active = or $active ( $.IsDescendant .)  }}
-				{{ end }}
-				{{ $pre := .Pre }}
-				{{ $post := .Post }}
-				{{ $url := urls.Parse .URL }}
-				{{ $baseurl := urls.Parse $.Site.Params.Baseurl }}
-				<a class="nav-link{{if $active }} active{{end}}" href="{{ with .Page }}{{ .RelPermalink }}{{ else }}{{ .URL | relLangURL }}{{ end }}" {{ if ne $url.Host $baseurl.Host }}target="_blank" {{ end }}>{{ with .Pre}}{{ $pre }}{{ end }}<span{{if $active }} class="active"{{end}}>{{ .Name }}</span>{{ with .Post}}{{ $post }}{{ end }}</a>
-			</li>
-			{{ end }}
-			{{ if  .Site.Params.versions }}
-			<li class="nav-item dropdown mr-4 d-none d-lg-block">
-				{{ partial "navbar-version-selector.html" . }}
-			</li>
-			{{ end }}
-			{{ if  (gt (len .Site.Home.Translations) 0) }}
-			<li class="nav-item dropdown d-lg-block">
-				{{ partial "navbar-lang-selector.html" . }}
-			</li>
-			{{ end }}
-			<li class="nav-item dropdown d-lg-block">
-				<div class="nav-item d-none d-lg-block">{{ partial "search-input.html" . }}</div>
-			</li>
-		</ul>
-	</div>
+<nav
+  class="js-navbar-scroll navbar navbar-expand navbar-link {{ if $cover}}  {{ end }} flex-column flex-md-row td-navbar navbar-parent"
+  data-auto-burger="primary">
+  <div class="container-navbar">
+    <a class="navbar-brand" href="{{ .Site.Home.RelPermalink }}"> <span class="navbar-logo">{{ if
+        .Site.Params.ui.navbar_logo }}{{ with resources.Get "icons/logo.svg" }}{{ ( . | minify).Content |
+        safeHTML }}{{ end }}{{ end }}</span><span class="text-uppercase font-weight-bold">{{ .Site.Title
+        }}</span>
+    </a>
+    <div class="td-navbar-nav-scroll menu_navbar_list" id="main_navbar">
+      <ul class="navbar-nav mt-2 mt-lg-0 ">
+        {{ $p := . }}
+        {{ $insertDone := false }}
+        {{ with .Site.Menus.main }}
+        {{ range . }}
+        <li class="nav-item nav-item-line px-2 mb-2 mb-lg-0">
+          {{ $active := or ($p.IsMenuCurrent "main" .) ($p.HasMenuCurrent "main" .) }}
+          {{ with .Page }}
+          {{ $active = or $active ( $.IsDescendant .) }}
+          {{ end }}
+          {{ $pre := .Pre }}
+          {{ $post := .Post }}
+          {{ $url := urls.Parse .URL }}
+          {{ $baseurl := urls.Parse $.Site.Params.Baseurl }}
+          <a class="nav-link{{if $active }} active{{end}}"
+            href="{{ with .Page }}{{ .RelPermalink }}{{ else }}{{ .URL | relLangURL }}{{ end }}" {{ if ne $url.Host
+            $baseurl.Host }}target="_blank" {{ end }}>
+            {{ with .Pre }}{{ $pre }}{{ end }}
+            <span{{if $active }} class="active mr-1" {{ end }}>{{ .Name }}</span>
+              {{ with .Post }}{{ $post }}{{ end }}
+          </a>
+        </li>
+        {{ if not $insertDone }}
+        <!-- 插入的部分 -->
+        <li class="nav-item dropdown d-lg-block community_after ">
+          {{ partial "navbar-community-selector.html" $p }}
+        </li>
+        {{ $insertDone = true }}
+        {{ end }}
+        {{ end }}
+        {{ end }}
+        {{ if .Site.Params.versions }}
+        <li class="nav-item dropdown mx-2 d-none d-lg-block">
+          {{ partial "navbar-version-selector.html" . }}
+        </li>
+        {{ end }}
+        <li class="nav-item dropdown d-lg-block">
+          {{ partial "navbar-ecosystem-selector.html" . }}
+        </li>
+      </ul>
+    </div>
+    <div class="td-navbar-nav-scroll menu_navbar_language_change">
+      <ul class="navbar-nav mt-2 mt-lg-0 language_change_btn_pc">
+        {{ if (gt (len .Site.Home.Translations) 0) }}
+        <li class="nav-item d-lg-block">
+          {{ partial "navbar-lang-selector.html" . }}
+        </li>
+        {{ end }}
+        <li class="nav-item d-lg-block">
+          <div class="nav-item d-none d-lg-block">{{ partial "search-input.html" . }}</div>
+        </li>
+      </ul>
+      <ul class="navbar-nav mt-lg-0 language_change_btn_mobile">
+        <button type="button" data-toggle="collapse" data-target="#main_navbar" aria-controls="main_navbar"
+          aria-expanded="false" aria-label="Toggle navigation" style="border: 0px;margin-right: 16px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-menu-app"
+            viewBox="0 0 16 16">
+            <path
+              d="M0 1.5A1.5 1.5 0 0 1 1.5 0h2A1.5 1.5 0 0 1 5 1.5v2A1.5 1.5 0 0 1 3.5 5h-2A1.5 1.5 0 0 1 0 3.5zM1.5 1a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5zM0 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm1 3v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2zm14-1V8a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v2zM2 8.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0 4a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5" />
+          </svg>
+        </button>
+        {{ if (gt (len .Translations) 0) }}
+        <li class="nav-item d-lg-block" style="background-color: #DDDEE4; ">
+          <div class="nav-tabs" id="languageTab" role="tablist">
+            {{ range .Translations }}
+            <a class="nav-item nav-link" href="{{ .RelPermalink }}" role="tab" style="padding:4px;">
+              {{ .Language.LanguageName }}
+            </a>
+            {{ end }}
+          </div>
+        </li>
+        {{ end }}
+        <li class="nav-item">
+          <div class="nav-item d-block">{{ partial "search-input.html" . }}</div>
+        </li>
+      </ul>
+
+      <a class="btn btn-dark ml-2 github-btn"
+        href="https://github.com/apache/dubbo/">GITHUB</a>
+    </div>
+
+  </div>
 </nav>
+<div class="collapse navbar-collapse mobile_navbar_menu" id="main_navbar">
+  {{ partial "navbar-menu-list-mobile.html" . }}
+</div>
+
+<style>
+  .navbar-parent {
+    justify-content: center;
+    background-color: #F4F4F6 !important;
+  }
+
+  .container-navbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @media only screen and (min-width: 768px) {
+      width: 85.125rem;
+    }
+  }
+
+  .github-btn {
+    width: 120px;
+    height: 40px;
+    border-radius: 32px;
+    padding-top: 11px;
+    color: #F4F4F6;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: normal;
+    display: none;
+
+    @media only screen and (min-width: 768px) {
+      display: inline-block;
+    }
+  }
+
+  .menu_navbar_list {
+    display: none;
+
+    @media only screen and (min-width: 768px) {
+      display: flex;
+    }
+  }
+
+  .menu_navbar_language_change {
+    .language_change_btn_pc {
+      display: none;
+    }
+
+    .language_change_btn_mobile {
+      display: flex;
+    }
+
+    @media only screen and (min-width: 768px) {
+      .language_change_btn_mobile {
+        display: none;
+      }
+
+      .language_change_btn_pc {
+        display: flex;
+      }
+
+    }
+  }
+
+  .community_after {
+    position: relative;
+    padding-right: 8px;
+  }
+
+  .community_after::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 100%;
+    width: 1px;
+    height: 16px;
+    background-color: #8FA8A6;
+
+  }
+
+  .mobile_navbar_menu {
+    top: 64px;
+    position: fixed;
+    z-index: 99999999;
+    background: #F4F4F6;
+    width: 100vw;
+    padding-left: 20px;
+    padding-bottom: 20px;
+  }
+</style>

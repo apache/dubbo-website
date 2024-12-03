@@ -49,7 +49,7 @@ Zipkin 会将 trace 相关的信息在调用链路上传递，并在每个调用
 
 ## 在 Dubbo 中使用
 
-由于 [Brave](https://github.com/openzipkin/brave) 对 Dubbo 已经主动做了支持，在 Dubbo 中集成基于 Zipkin 的链路追踪变的十分简单。下面会按照 Brave 中关于 [Dubbo RPC 支持的指引](https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo-rpc/README.md)来说明如何在 Dubbo 中使用 Zipkin。
+由于 [Brave](https://github.com/openzipkin/brave) 对 Dubbo 已经主动做了支持，在 Dubbo 中集成基于 Zipkin 的链路追踪变的十分简单。下面会按照 Brave 中关于 [Dubbo RPC 支持的指引](https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/README.md)来说明如何在 Dubbo 中使用 Zipkin。
 
 ### 安装 Zipkin Server
 
@@ -164,7 +164,7 @@ o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 9411 (htt
 
 其中：
 
-1. 引入 brave-instrumentation-dubbo-rpc，brave 对 dubbo 的支持：https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo-rpc/README.md
+1. 引入 brave-instrumentation-dubbo-rpc，brave 对 dubbo 的支持：https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/README.md
 2. 引入 brave-spring-beans，brave 对 spring bean 的支持：https://github.com/openzipkin/brave/blob/master/spring-beans/README.md
 3. 引入 brave-context-slf4j，brave 对 SLF4J 的支持，可以在 MDC 中使用 traceId 和 spanId：https://github.com/openzipkin/brave/blob/master/context/slf4j/README.md
 4. 引入 zipkin-sender-okhttp3，使用 okhttp3 上报数据：https://github.com/openzipkin/zipkin-reporter-java
@@ -600,6 +600,6 @@ $ mvn exec:java -Dexec.mainClass=com.alibaba.dubbo.samples.client.Application
 
 本文介绍了链路追踪的基本概念以及 Zipkin 的基本用法，然后用 Dubbo 构建了一条最简单的调用链路，并引入了 Zipkin 做全链路追踪。由于 Zipkin 对 Dubbo 做了很好的支持，整个集成的过程还是十分简单明了的。
 
-Zipkin 对 Dubbo 的支持是构建在 Dubbo 的 filter 扩展机制上的，有兴趣的读者可以通过 https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo-rpc/src/main/java/brave/dubbo/rpc/TracingFilter.java 了解其实现细节。
+Zipkin 对 Dubbo 的支持是构建在 Dubbo 的 filter 扩展机制上的，有兴趣的读者可以通过 https://github.com/openzipkin/brave/blob/master/instrumentation/dubbo/src/main/java/brave/dubbo/TracingFilter.java 了解其实现细节。
 
-本文中涉及的例子可以从 https://github.com/dubbo/dubbo-samples 中的 "dubbo-samples-zipkin" 子模块中获取。另外，spring-cloud-sleth 2.0 中开始 [正式支持 Dubbo](https://cloud.spring.io/spring-cloud-static/spring-cloud-sleuth/2.0.2.RELEASE/single/spring-cloud-sleuth.html#_dubbo_rpc_support)，相关的文章和例子后续计划提供。
+本文中涉及的例子可以从 https://github.com/dubbo/dubbo-samples 中的 "dubbo-samples-zipkin" 子模块中获取。另外，spring-cloud-sleth 2.0 中开始正式支持 Dubbo，相关的文章和例子后续计划提供。

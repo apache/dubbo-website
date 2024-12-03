@@ -42,7 +42,7 @@ dubbo:
     owner: zhaoyunxing
     organization: dubbo-go 
     metadata-type: local # 元数据上报方式，默认为本地
-  metadata-report: # 元数据上报配置, 不包含此字段则不开启元数据上报，应用级服务发现依赖此字段，参考例子：https://github.com/apache/dubbo-go-samples/tree/master/registry/servicediscovery
+  metadata-report: # 元数据上报配置, 不包含此字段则不开启元数据上报，应用级服务发现依赖此字段，参考例子：https://github.com/apache/dubbo-go-samples/tree/45a0d843b54e4922c240900e63516176cc7da4f6/registry/servicediscovery
     protocol: nacos # 元数据上报方式，支持nacos/zookeeper 
     address: 127.0.0.1:8848 
     username: ""
@@ -50,10 +50,10 @@ dubbo:
     timeout: "3s"
     group: "dubbo"
   protocols:
-    tripleProtocol: # triple协议定义，参考例子https://github.com/apache/dubbo-go-samples/tree/master/rpc/tri
+    tripleProtocol: # triple协议定义，参考例子https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/tri
       name: tri # 网络协议，支持tri/dubbo/jsonrpc/grpc
       port: 20001
-    dubboProtocol:  # dubbo协议定义，参考例子https://github.com/apache/dubbo-go-samples/tree/master/rpc/dubbo
+    dubboProtocol:  # dubbo协议定义，参考例子https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/rpc/dubbo
       name: dubbo
       port: 20000
       params: # dubbo 传输层配置，此字段不配置则使用协议默认值
@@ -77,7 +77,7 @@ dubbo:
           wait-timeout: 1s
           max-msg-len: 1024000
           session-name: client
-  config-center: # 配置中心，参考例子：https://github.com/apache/dubbo-go-samples/tree/master/configcenter
+  config-center: # 配置中心，参考例子：https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/configcenter
     protocol: nacos # 支持 nacos/zookeeper/apollo
     address: 127.0.0.1:8848
     group: dubbo
@@ -86,7 +86,7 @@ dubbo:
     params:
       username: nacos
       password: 123456
-  registries: # 注册中心配置，参考例子 https://github.com/apache/dubbo-go-samples/tree/master/metrics
+  registries: # 注册中心配置，参考例子 https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/metrics
     zk:
       protocol: zookeeper
       timeout: 3s
@@ -118,7 +118,7 @@ dubbo:
         protocol-ids: tripleProtocol # 使用上面定义的协议id
         serialization: protobuf # pb 序列化方式
         interface: com.apache.dubbo.sample.basic.TripleService # 接口名，需要与客户端一致
-  logger: # 日志配置，参考例子：https://github.com/apache/dubbo-go-samples/tree/master/logger
+  logger: # 日志配置，参考例子：https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/logger
     zap-config:
       level: info # 日志级别
     lumberjack-config: 
@@ -128,7 +128,7 @@ dubbo:
       maxBackups: 5
       localTime: true
       compress: false
-   metrics: # 数据上报配置，参考例子：https://github.com/apache/dubbo-go-samples/tree/master/metrics
+   metrics: # 数据上报配置，参考例子：https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/metrics
      enable: true # 数据上报开关，默认开启
      path: /custom-metrics-path # 拉模式数据上报本地监听path 默认/metrics
      port: 9091 # 拉模式数据上报本地监听端口，默认9090
@@ -221,7 +221,7 @@ rc := config.NewRootConfigBuilder().
 
 Dubbo-go 服务框架支持将配置文件 'dubbogo.yml' 的内容预先放入配置中心，再通过配置注册中心的地址。在本地 dubbogo.yml 配置文件内只需写入配置中心的信息即可，目前支持作为配置中心的中间件有：apollo、[Nacos](https://nacos.io/)、zookeeper
 
-可参考[配置中心Samples](https://github.com/apache/dubbo-go-samples/tree/master/configcenter)，凡是正确配置了config-center 配置的服务，都会优先从配置中心加载整个配置文件。
+可参考[配置中心Samples](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/configcenter)，凡是正确配置了config-center 配置的服务，都会优先从配置中心加载整个配置文件。
 
 ```yaml
 dubbo:

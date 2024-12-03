@@ -10,14 +10,9 @@ type: docs
 weight: 2
 ---
 
-
-
-
-
-
 ## 1 预备工作
 - 了解 [Dubbo 基本开发步骤](/zh-cn/overview/mannual/java-sdk/quick-start/spring-boot/)
-- 参考 [Nacos快速入门](https://nacos.io/zh-cn/docs/quick-start.html) 启动 Nacos server
+- 参考 [Nacos](/zh-cn/overview/reference/integrations/nacos/) 启动 Nacos server
 
 > 当Dubbo使用`3.0.0`及以上版本时，需要使用Nacos `2.0.0`及以上版本
 
@@ -28,7 +23,7 @@ Dubbo 融合 Nacos 成为元数据中心的操作步骤非常简单，大致分�
 ### 2.1 增加 Maven 依赖
 如果项目已经启用 Nacos 作为注册中心，则无需增加任何额外配置。
 
-如果未启用 Nacos 注册中心，则请参考 [为注册中心增加 Nacos 依赖](../../registry/nacos/#21-增加依赖)。
+如果未启用 Nacos 注册中心，则请参考 [为注册中心增加 Nacos 依赖](/zh-cn/overview/mannual/java-sdk/reference-manual/registry/nacos/#12-nacos-版本)。
 
 ### 2.2 启用 Nacos 配置中心
 ```xml

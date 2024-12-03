@@ -1,0 +1,138 @@
+---
+description: 快速部署Dubbo应用
+linkTitle: 部署Dubbo应用
+title: 快速部署Dubbo应用
+type: docs
+weight: 3
+---
+
+在上一篇文章中，我们从头创建了一个 Dubbo 应用并详细介绍了它的代码结构，接下来，我们将学习部署这个 Dubbo 应用。
+
+本文将以 Kubernetes 集群作为基础环境来讲解 Dubbo 应用的部署，部署架构如下图所示：
+
+<img alt="Dubbo+Kubernetes+Nacos 部署架构图" src="/imgs/v3/quickstart/nacos-kubernetes-deployment.png" style="max-width:600px;">
+
+{{% alert title="注意" color="info" %}}
+在实际使用中，部署环境可能变化多样，包括 Kubernetes Service、服务网格(Service Mesh)、虚拟机等多种部署模式，请参考 [部署文档](../../tasks/deploy/) 了解更多详细内容。
+{{% /alert %}}
+
+## 前置条件
+Dubbo 社区提供了工具和解决方案来简化整个 Kubernetes 环境的打包与部署过程，所以开始前我们需要先安装相关工具。
+
+1. 安装 dubboctl（如尚未安装）
+    ```sh
+    curl -L https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/release/downloadDubbo.sh | sh -
+
+    cd dubbo-$version
+    export PATH=$PWD/bin:$PATH
+    ```
+
+
+## 部署应用
+
+### 初始化微服务集群
+
+1. dubboctl 安装完成之后，接下来通过以下命令初始化微服务部署环境
+
+    ```sh
+    dubboctl manifest install --profile=demo
+    ```
+
+    作为演示目的，以上命令会一键安装 Zookeeper、Dubbo Control Plane、Prometheus、Grafana、Zipkin、Ingress 等组件，关于 `--profile=demo` 更多解释及配置请参见文档说明。
+
+2. 检查环境准备就绪
+
+    ```sh
+    kubectl get services -n dubbo-system
+    ```
+
+3. 最后，为目标 kubernetes namespace 开启自动注入模式，以便应用部署后能够自动连接到刚刚安装的 Zookeeper 注册中心等组件。
+
+    ```shell
+    kubectl label namespace dubbo-demo dubbo-injection=enabled --overwrite
+    ```
+
+### 部署 Dubbo 应用
+
+接下来我们为之前创建的应用打包镜像（请确保本地安装有 Docker 环境并且已经启动 Docker 进程），在应用根目录分别运行以下命令：
+
+```shell
+dubboctl build --dockerfile=./Dockerfile
+```
+
+`build` 命令会将源码打包为镜像，并推送到远端仓库，取决于网络情况，可能需要一定时间等待命令执行完成。
+
+接下来，我们需要生成部署应用的 Kubernetes 资源文件，运行以下命令：
+```shell
+dubboctl deploy
+```
+
+`deploy` 命令会使用刚刚 `build` 打包的镜像生成 Kubernetes 资源清单。命令执行成功后，在当前目录看到生成的 `kube.yaml` 文件，其中包括 deployment、service 等 kubernetes 资源定义。
+
+
+{{% alert title="注意" color="warning" %}}
+本地构建可能会花费比较长时间，如您本地构建遇到问题，也可以使用以下命令跳过 `build` 过程。
+
+```sh
+dubboctl deploy --image=apache/dubbo-demo:quickstart_0.1
+# `--image` 指定使用官方预先准备好的示例镜像
+```
+{{% /alert %}}
+
+接下来，将应用部署到 Kubernetes 环境。
+
+```shell
+kubectl apply -f ./kube.yaml
+```
+
+检查部署状态
+```shell
+kubectl get services -n dubbo-demo
+```
+
+## 访问应用
+部署成功后，可以通过以下方式检查应用状态。
+
+{{< tabpane text=true >}}
+{{< tab header="请根据情况选择：" disabled=true />}}
+{{% tab header="本地 Kubernetes 集群" lang="en" %}}
+<br/>
+
+1. 如果使用的本地 Kubernetes 集群，请使用以下方式访问应用验证部署状态：
+
+    ```shell
+    dubboctl dashboard admin
+    ```
+
+2. 以上命令会自动打开 admin 控制台，如果在您的环境下没有打开，请使用浏览器访问以下地址：
+
+    http://localhost:38080/admin
+
+3. 通过 triple 协议，可以继续测试 Dubbo 服务，执行以下命令进行端口映射：
+
+    ```shell
+    kubectl port-forward <pod-name> 50051:50051
+    ```
+
+4. 通过 curl 访问服务：
+
+    ```shell
+    curl \
+        --header "Content-Type: application/json" \
+        --data '["Dubbo"]' \
+        http://localhost:50051/com.example.demo.dubbo.api.DemoService/sayHello/
+    ```
+
+{{% /tab %}}
+
+{{% tab header="阿里云ACK" lang="zh-cn" %}}
+<br/>
+
+对于云上托管的哦 Kubernetes 集群，可以使用以下方式验证，这里以阿里云 ACK 集群为例：
+
+ACK ingerss-controller 的访问方式......
+
+{{% /tab %}}
+{{< /tabpane >}}
+
+

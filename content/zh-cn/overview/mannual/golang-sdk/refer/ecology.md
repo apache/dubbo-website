@@ -5,19 +5,35 @@ aliases:
 description: Dubbo-go 生态组件
 title: 生态组件
 type: docs
-weight: 3
+weight: 1
 ---
 
-
-
-
-
-
-### Dubbo-go / Dubbo-go 3.0 
+### Dubbo-go
 
 [github.com/apache/dubbo-go](https://github.com/apache/dubbo-go) 
 
- Apache Dubbo Go 语言实现，架起 Java 和 Golang 之间的桥梁。
+Apache Dubbo Go 语言实现主仓库
+
+### Dubbo-go-samples
+
+[github.com/apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples)
+
+dubbo-go 的使用示例：
+* config-api: 使用 API 进行配置初始化
+* configcenter: 使用不同的配置中心，目前支持三种：zookeeper、apollo、和 nacos
+* context: 如何使用上下文传递 attachment
+* direct: 直连模式
+* game: 游戏服务例子
+* generic: 泛化调用
+* rpc: RPC 调用例子, 包含 Triple、Dubbo等协议以及跨语言/gRPC互通示例
+* helloworld: RPC调用入门例子
+* logger: 日志例子
+* registry: 展示与不同注册中心的对接，包含了 zk、nacos、etcd
+* metrics: 数据上报
+* filter: 使用提供filter和自定义filter的例子
+* registry/servicediscovery：应用级服务发现例子
+* router: 路由例子
+* tracing: 链路追踪例子
 
 ### Dubbo-go-pixiu
 
@@ -41,15 +57,8 @@ Dubbo-go-hessian2 是一个Go语言 hessian2 序列化协议库
 
 [github.com/dubbogo/tools](https://github.com/dubbogo/tools)
 
-Dubbogo-tools 包括
-
-- dubbo-cli 工具
+包括
+- dubbo-cli 工具（废弃）
 - imports-formatter Go语言 imports 块格式化工具
 - protoc-gen-triple PB编译插件
 - protoc-gen-dubbo3grpc PB编译插件
-
-### Triple-go
-
-[github.com/dubbogo/triple](https://github.com/dubbogo/triple)
-
-Triple-go 为 Go 语言实现的 Triple (Dubbo3) 网络协议库，基于 HTTP2 协议。

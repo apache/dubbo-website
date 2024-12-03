@@ -4,9 +4,9 @@ aliases:
     - /zh/contribution-guidelines/
 description: 联系社区，Dubbo 社区贡献指南
 linkTitle: 联系社区
-menu:
-    main:
-        weight: 40
+# menu:
+#     main:
+#         weight: 40
 title: 联系社区
 type: docs
 ---
