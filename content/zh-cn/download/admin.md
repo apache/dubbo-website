@@ -5,5 +5,5 @@ description: Admin
 manualLinkRelref: ./#admin
 title: Admin
 type: docs
-weight: 50
+weight: 60
 ---

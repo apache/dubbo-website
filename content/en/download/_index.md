@@ -17,7 +17,7 @@ Download the Apache Dubbo Release archive.
 
 ## Verify
 
-You can follow the [steps](https://www.apache.org/info/verification) here, and use the [KEYS](https://downloads.apache.org/dubbo/KEYS) file to verify the download.
+You can follow the [steps](https://www.apache.org/info/verification) here, and use the [KEYS](https://www.apache.org/dyn/closer.lua/dubbo/KEYS) file to verify the download.
 
 ## Releases
 
