@@ -5,5 +5,5 @@ description: Pixiu
 manualLinkRelref: ./#pixiu
 title: Pixiu
 type: docs
-weight: 70
+weight: 80
 ---

@@ -4,14 +4,14 @@ aliases:
 description: SPI Extensions
 title: SPI Extensions
 type: docs
-weight: 60
+weight: 70
 ---
 
 
 
 ## 验证
 
-可以按照这里的[步骤](https://www.apache.org/info/verification), 利用[KEYS](https://downloads.apache.org/dubbo/KEYS)文件来验证下载。
+可以按照这里的[步骤](https://www.apache.org/info/verification), 利用[KEYS](https://www.apache.org/dyn/closer.lua/dubbo/KEYS)文件来验证下载。
 
 > GitHub: https://github.com/apache/dubbo-spi-extensions \
 > 发布说明: https://github.com/apache/dubbo-spi-extensions/releases

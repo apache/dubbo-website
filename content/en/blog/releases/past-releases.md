@@ -11,7 +11,7 @@ description: >
 
 ## Verification  
 
-You can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://downloads.apache.org/dubbo/KEYS) file to verify the download files.
+You can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://www.apache.org/dyn/closer.lua/dubbo/KEYS) file to verify the download files.
 
 ## Apache Dubbo
 
