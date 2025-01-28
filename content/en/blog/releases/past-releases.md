@@ -11,7 +11,7 @@ description: >
 
 ## Verification  
 
-You can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://www.apache.org/dyn/closer.lua/dubbo/KEYS) file to verify the download files.
+You can follow these [procedures](https://www.apache.org/info/verification) and the [KEYS](https://downloads.apache.org/dubbo/KEYS) file to verify the download files.
 
 ## Apache Dubbo
 
@@ -21,20 +21,20 @@ You can follow these [procedures](https://www.apache.org/info/verification) and 
 ### 3.2.0-beta.3 (2022-12-22)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/3.2.0-beta.3/apache-dubbo-3.2.0-beta.3-src.zip.sha512)
 
 ### 3.1.3 (2022-12-22)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/3.1.4/apache-dubbo-3.1.4-src.zip.sha512)
 
 ### 2.7.19 (2022-12-13)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/2.7.19/apache-dubbo-2.7.19-src.zip.sha512)
 
 ### 3.2.0-beta.2 (2022-11-28)
 
@@ -69,8 +69,8 @@ You can follow these [procedures](https://www.apache.org/info/verification) and 
 ### 3.0.12 (2022-09-29)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/3.0.12/apache-dubbo-3.0.12-src.zip.sha512)
 
 ### 2.7.18 (2022-09-29)
 
@@ -147,8 +147,8 @@ You can follow these [procedures](https://www.apache.org/info/verification) and 
 ### 2.6.12 (2021-12-29)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.6.12/apache-dubbo-v-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/2.6.12/apache-dubbo-v-src.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip.sha512)
 
 ### 3.0.4 (2021-10-24)
 
@@ -291,20 +291,20 @@ You can follow these [procedures](https://www.apache.org/info/verification) and 
 ### 2.6.7 (2019-07-15)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/2.6.7/apache-dubbo-2.6.7-source-release.zip.sha512)
 * [binary](https://www.apache.org/dyn/closer.lua/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/2.6.7/apache-dubbo-2.6.7-bin-release.zip.sha512)
 
 ### 2.6.6 (2019-03-07)
 
 * [source](https://www.apache.org/dyn/closer.lua/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-source-release.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-source-release.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-source-release.zip.sha512)
+  [asc](https://downloads.apache.org/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-source-release.zip.asc) |
+  [sha512](https://downloads.apache.org/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-source-release.zip.sha512)
 * [binary](https://www.apache.org/dyn/closer.lua/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-bin-release.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-bin-release.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-bin-release.zip.sha512)
+  [asc](https://downloads.apache.org/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-bin-release.zip.asc) |
+  [sha512](https://downloads.apache.org/incubator/dubbo/2.6.6/apache-dubbo-incubating-2.6.6-bin-release.zip.sha512)
 
 ### 2.6.5 (2018-11-23)
 
@@ -350,11 +350,11 @@ You can follow these [procedures](https://www.apache.org/info/verification) and 
 ### 2.7.1 (2019-04-09)
 
 * [source](https://www.apache.org/dyn/closer.lua/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip.sha512)
+  [asc](https://downloads.apache.org/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip.asc) |
+  [sha512](https://downloads.apache.org/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-source-release.zip.sha512)
 * [binary](https://www.apache.org/dyn/closer.lua/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip.sha512)
+  [asc](https://downloads.apache.org/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip.asc) |
+  [sha512](https://downloads.apache.org/incubator/dubbo/spring-boot-project/2.7.1/apache-dubbo-spring-boot-project-incubating-2.7.1-bin-release.zip.sha512)
 
 ### 2.7.0 (2019-02-14)
 
