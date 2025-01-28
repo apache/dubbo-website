@@ -11,7 +11,7 @@ weight: 70
 
 ## 验证
 
-可以按照这里的[步骤](https://www.apache.org/info/verification), 利用[KEYS](https://www.apache.org/dyn/closer.lua/dubbo/KEYS)文件来验证下载。
+可以按照这里的[步骤](https://www.apache.org/info/verification), 利用[KEYS](https://downloads.apache.org/dubbo/KEYS)文件来验证下载。
 
 > GitHub: https://github.com/apache/dubbo-spi-extensions \
 > 发布说明: https://github.com/apache/dubbo-spi-extensions/releases
@@ -21,8 +21,8 @@ weight: 70
 #### Source Release
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip) |
-  [asc](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.asc) |
-  [sha512](https://www.apache.org/dyn/closer.lua/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.asc) |
+  [sha512](https://downloads.apache.org/dubbo/dubbo-spi-extensions/1.0.2/apache-dubbo-extensions-1.0.2-src.zip.sha512)
 
 #### Maven Release
 
