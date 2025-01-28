@@ -47,8 +47,8 @@ Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分
 
 介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：
 
-- 建立连接：connected，主要是的职责是在channel记录read、write的时间，以及处理建立连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（onconnect），即在该操作中执行。
-- 断开连接：disconnected，主要是的职责是在channel移除read、write的时间，以及处理端开连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（ondisconnect），即在该操作中执行。
+- 建立连接：connected，主要是的职责是在channel记录read、write的次数，以及处理建立连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（onconnect），即在该操作中执行。
+- 断开连接：disconnected，主要是的职责是在channel移除read、write的时间，以及处理断开连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（ondisconnect），即在该操作中执行。
 - 发送消息：sent，包括发送请求和发送响应。记录write的时间。
 - 接收消息：received，包括接收请求和接收响应。记录read的时间。
 - 异常捕获：caught，用于处理在channel上发生的各类异常。
