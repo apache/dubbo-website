@@ -18,10 +18,17 @@ This guide will help you get started with Dubbo in Python with a simple working 
 
 ## 2. Install Dubbo-Python
 
-```bash
-git clone https://github.com/apache/dubbo-python.git
-cd dubbo-python && pip install .
-```
+- Install Directly
+
+   ```sh
+   pip install apache-dubbo
+   ```
+- Install from source
+
+   ```sh
+   git clone https://github.com/apache/dubbo-python.git
+   cd dubbo-python && pip install .
+   ```
 
 ## 3. Build a Dubbo Service
 
