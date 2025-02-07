@@ -20,10 +20,20 @@ weight: 1
 
 ## 2 安装Dubbo-python
 
-```python
-git clone https://github.com/apache/dubbo-python.git
-cd dubbo-python && pip install .
-```
+- 直接安装
+
+  ```sh
+  pip install apache-dubbo
+  ```
+
+- 从源码安装
+
+  ```sh
+  git clone https://github.com/apache/dubbo-python.git
+  cd dubbo-python && pip install .
+  ```
+
+  
 
 ## 3 构建Dubbo服务
 
