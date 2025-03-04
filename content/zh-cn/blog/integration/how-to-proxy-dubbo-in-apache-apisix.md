@@ -120,7 +120,7 @@ public class ApisixServiceImpl implements ApisixService {
 在 `dubbo-samples-gateway-apisix-dubbo` 目录，运行以下命令启动应用（或者选择使用 IDE 启动应用）：
 
 ```shell
-$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+$ git clone -b master --depth 1 https://github.com/apache/dubbo-samples
 $ cd dubbo-samples/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-dubbo
 
 $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.gateway.apisix.dubbo.provider.ProviderApplication"

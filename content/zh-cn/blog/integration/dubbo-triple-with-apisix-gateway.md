@@ -62,7 +62,7 @@ dubbo:
 下载源码：
 
 ```shell
-$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+$ git clone -b master --depth 1 https://github.com/apache/dubbo-samples
 $ cd dubbo-samples/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-triple
 ```
 

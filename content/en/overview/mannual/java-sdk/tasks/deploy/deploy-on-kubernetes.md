@@ -30,7 +30,7 @@ We still take the project in [Quick Start]() as an example to demonstrate the sp
 
 First, clone the sample project locally:
 ```shell
-$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+$ git clone -b master --depth 1 https://github.com/apache/dubbo-samples
 ````
 
 Switch to the example directory:
