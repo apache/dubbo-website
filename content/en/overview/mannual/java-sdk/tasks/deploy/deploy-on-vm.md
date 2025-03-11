@@ -21,7 +21,7 @@ We will continue to use the project in [Quick Start]() as an example to demonstr
 
 Clone the sample project locally:
 ```shell
-$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+$ git clone -b master --depth 1 https://github.com/apache/dubbo-samples
 ````
 
 Switch to the sample directory:

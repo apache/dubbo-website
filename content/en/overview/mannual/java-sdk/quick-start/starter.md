@@ -21,7 +21,7 @@ Create a Dubbo microservice application by accessing <a href="https://start.dubb
 You can also download the official pre-prepared sample project directly:
 
 ```shell
-$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+$ git clone -b master --depth 1 https://github.com/apache/dubbo-samples
 $ cd dubbo-samples/11-quickstart
 ````
 {{% /alert %}}

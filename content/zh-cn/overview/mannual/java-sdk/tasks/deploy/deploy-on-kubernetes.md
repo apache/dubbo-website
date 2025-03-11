@@ -31,7 +31,7 @@ $ dubboctl install --profile=demo
 
 首先，克隆示例项目到本地：
 ```shell
-$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+$ git clone -b master --depth 1 https://github.com/apache/dubbo-samples
 ````
 
 切换到示例目录：

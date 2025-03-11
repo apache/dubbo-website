@@ -118,7 +118,7 @@ In the above code, `ApisixServiceImpl` will print the received `httpRequestConte
 In the `dubbo-samples-gateway-apisix-dubbo` directory, run the following command to start the application (or choose to start the application using an IDE):
 
 ```shell
-$ git clone -b main --depth 1 https://github.com/apache/dubbo-samples
+$ git clone -b master --depth 1 https://github.com/apache/dubbo-samples
 $ cd dubbo-samples/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-apisix/dubbo-samples-gateway-apisix-dubbo
 
 $ mvn compile exec:java -Dexec.mainClass="org.apache.dubbo.samples.gateway.apisix.dubbo.provider.ProviderApplication"
