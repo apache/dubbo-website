@@ -316,10 +316,10 @@ DEBUG .d.r.h.AbstractServerHttpChannelObserver :  [DUBBO] Http response headers 
 ```java
 // Dubbo http req/resp
 HttpRequest request = RpcContext.getServiceContext().getRequest(HttpRequest.class);
-HttpResponse response = RpcContext.getServiceContext().getRequest(HttpResponse.class);
+HttpResponse response = RpcContext.getServiceContext().getResponse(HttpResponse.class);
 // Servlet http req/resp
 HttpServletRequest request = RpcContext.getServiceContext().getRequest(HttpServletRequest.class);
-HttpServletResponse response = RpcContext.getServiceContext().getRequest(HttpServletResponse.class);
+HttpServletResponse response = RpcContext.getServiceContext().getResponse(HttpServletResponse.class);
 ```
 
 拿到request之后，通过 attribute
@@ -449,7 +449,7 @@ toPayload();
 - 获取 HttpResponse 后自定义，实例代码：
 
 ```java
-HttpResponse response = RpcContext.getServiceContext().getRequest(HttpResponse.class);
+HttpResponse response = RpcContext.getServiceContext().getResponse(HttpResponse.class);
 
 response.
 
