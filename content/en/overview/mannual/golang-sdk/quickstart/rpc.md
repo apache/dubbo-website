@@ -28,7 +28,7 @@ Since we are using Protocol Buffer, we first need to install the relevant code g
 
     ```shell
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-    go install github.com/dubbogo/protoc-gen-go-triple/v3@v3.0.2
+    go install github.com/dubbogo/protoc-gen-go-triple/v3@v3.0.3
     ```
 
     Make sure `protoc-gen-go` and `protoc-gen-go-triple` are in your `PATH`. You can verify this with `which protoc-gen-go`. If that command does not work, please execute the following commands:
