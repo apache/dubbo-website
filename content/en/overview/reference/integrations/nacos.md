@@ -36,7 +36,7 @@ startup.cmd -m standalone
 
 #### Verify Nacos Started Normally
 
-Access the console via the browser at the following link: http://127.0.0.1:8848/nacos/
+Access the console via the browser at the following link: http://127.0.0.1:8080/index.html
 
 ## Docker
 To start Nacos using Docker, please ensure you have properly <a href="https://docs.docker.com/engine/install/" target="_blank">installed Docker</a> on your local machine.
