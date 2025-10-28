@@ -13,7 +13,7 @@ weight: 3
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href="/en/docs/v2.7/user/quick-start/">Quick start</a>
+                    <a href="/zh-cn/docsv2.7/user/quick-start/">Quick start</a>
                 </h4>
                 <p>Dubbo Java SDK</p>
             </div>

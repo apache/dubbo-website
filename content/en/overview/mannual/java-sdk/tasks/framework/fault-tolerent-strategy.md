@@ -1,6 +1,6 @@
 ---
 aliases:
-    - /en/docsv2.7/user/examples/fault-tolerent-strategy/
+    - /zh-cn/docsv2.7/user/examples/fault-tolerent-strategy/
     - /en/overview/mannual/java-sdk/advanced-features-and-usage/service/fault-tolerent-strategy/
 description: Fault tolerance solutions provided by Dubbo when cluster calls fail
 linkTitle: Cluster Fault Tolerance (Retry)

@@ -119,7 +119,7 @@ Version 2.7 has also made significant strides in performance optimization, with 
 
 ![filter](/imgs/blog/filter.png) 
 
-   In terms of optimizing the consumer thread model, applications that consume a large number of services, like gateway applications, see a significant improvement in system stability and performance. The overall working principle diagram after optimization is shown below; specific analyses can be referenced in the previously published article: [“Consumer Thread Pool Model”](/en/docsv2.7/user/examples/consumer-threadpool/)
+   In terms of optimizing the consumer thread model, applications that consume a large number of services, like gateway applications, see a significant improvement in system stability and performance. The overall working principle diagram after optimization is shown below; specific analyses can be referenced in the previously published article: [“Consumer Thread Pool Model”](/zh-cn/docsv2.7/user/examples/consumer-threadpool/)
 
    Old thread model working principle:
 
