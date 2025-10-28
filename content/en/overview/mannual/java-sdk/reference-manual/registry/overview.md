@@ -36,7 +36,7 @@ For cluster format addresses, you can use the backup parameter:
 In versions 3.3.0 and later, the registry is optional. However, in versions prior to 3.3.0, Dubbo applications must specify registry configuration, even if the registry is not enabled (it can be set to an empty address: address='N/A').
 {{% /alert %}}
 
-Each registry component has its unique configurations to control namespaces, groups, authentication, etc. For more details, refer to the [Registry Configuration Reference Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties/#registry) or extend through parameters.
+Each registry component has its unique configurations to control namespaces, groups, authentication, etc. For more details, refer to the [Registry Configuration Reference Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties/registry) or extend through parameters.
 
 ## Configuration Center and Metadata Center
 The configuration center and metadata center are components that Dubbo relies on to implement advanced service governance capabilities, such as traffic control rules. Compared to the registry, the configurations for these two components are typically optional.

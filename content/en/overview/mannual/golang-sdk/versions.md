@@ -23,15 +23,15 @@ View documentation for versions 3.1.x and earlier:
 
 | Go | Dubbo-go     | protoc-gen-go-triple   |  Description                  |
 | :--: | ------------ | -------------------- | -------------------- |
-|   1.16   | <a href="" target="_blank">v3.1.1</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>     |   Please refer to the README for instructions on generating service stub code compatible with older versions           |
-|   1.16   | <a href="" target="_blank">v3.1.0</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               | Please refer to the README for instructions on generating service stub code compatible with older versions      |
-|   1.16   | <a href="" target="_blank">v3.0.4</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               | Please refer to the README for instructions on generating service stub code compatible with older versions  |
-|   1.16   | <a href="" target="_blank">v3.0.3</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               | Please refer to the README for instructions on generating service stub code compatible with older versions  |
-|   1.16   | <a href="" target="_blank">v3.0.2</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               |  Please refer to the README for instructions on generating service stub code compatible with older versions |
-|   1.16   | <a href="" target="_blank">v3.0.1</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               |  Please refer to the README for instructions on generating service stub code compatible with older versions |
-|   1.16   | <a href="" target="_blank">v3.0.0</a>       | <a href="https://github.com/dubbogo/dubbogo-cli" target="_blank">v1.0.5</a>               |                      |
-|   1.16   | <a href="" target="_blank">v3.0.0-rc4-1</a> | <a href="https://github.com/dubbogo/dubbogo-cli" target="_blank">v1.0.2</a>               |                      |
-|   1.16   | <a href="" target="_blank">v3.0.0-rc3</a>   | <a href="https://github.com/dubbogo/dubbogo-cli" target="_blank">v1.0.0</a>               |                      |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.1.1</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>     |   Please refer to the README for instructions on generating service stub code compatible with older versions           |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.1.0</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               | Please refer to the README for instructions on generating service stub code compatible with older versions      |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.0.4</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               | Please refer to the README for instructions on generating service stub code compatible with older versions  |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.0.3</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               | Please refer to the README for instructions on generating service stub code compatible with older versions  |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.0.2</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               |  Please refer to the README for instructions on generating service stub code compatible with older versions |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.0.1</a>       | <a href="https://github.com/dubbogo/protoc-gen-go-triple/" target="_blank">v3.0.0</a>               |  Please refer to the README for instructions on generating service stub code compatible with older versions |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.0.0</a>       | <a href="https://github.com/dubbogo/dubbogo-cli" target="_blank">v1.0.5</a>               |                      |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.0.0-rc4-1</a> | <a href="https://github.com/dubbogo/dubbogo-cli" target="_blank">v1.0.2</a>               |                      |
+|   1.16   | <a href="https://github.com/apache/dubbo-go" target="_blank">v3.0.0-rc3</a>   | <a href="https://github.com/dubbogo/dubbogo-cli" target="_blank">v1.0.0</a>               |                      |
 
 ### 1.x
 

@@ -109,7 +109,7 @@ dubbo-go 的可视化指标采集遵循 Apache Dubbo 定义的 [metrics 指标�
 #### 全链路追踪
 dubbo-go 支持通过 Open Telemetry 接入 Zipkin、Jaeger、Skywalking 等全链路追踪系统。
 
-具体启用方式请参考使用手册中的 [全链路追踪](../tutorial/tracing/)。
+具体启用方式请参考使用手册中的 [全链路追踪](./tutorial/observability/tracing/)。
 
 #### 流量管控
 dubbo-go 实现的流量治理规则完全遵循 Dubbo 框架设计的流量治理能力，可以通过以下链接了解更多详情：

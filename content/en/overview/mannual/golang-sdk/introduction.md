@@ -102,7 +102,7 @@ For specific enabling methods, please refer to the usage manual [Observability](
 #### Full-Link Tracing
 Dubbo-go supports full-link tracing systems like Zipkin, Jaeger, and Skywalking via OpenTelemetry.
 
-For specific enabling methods, please refer to the usage manual [Tracing](../tutorial/tracing/).
+For specific enabling methods, please refer to the usage manual [Tracing](./tutorial/observability/tracing/).
 
 #### Traffic Control
 The traffic governance rules implemented by dubbo-go fully comply with Dubbo framework-designed traffic governance capabilities. More details can be found through the following links:
