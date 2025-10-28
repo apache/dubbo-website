@@ -7,13 +7,13 @@ description: >
 ---
 
 This includes the complete transcripts of the speeches and highlights from the event. For more PPTs and video recordings, please follow the "apachedubbo" WeChat official account.
-* [Realizing Full Connectivity of Web, Mobile, and Backend Microservices Based on Triple Protocol](/en/blog/2023/10/07/基于-triple-实现-web-移动端后端全面打通/)
-* [Step-by-Step Guide to Deploying Dubbo Applications on Kubernetes - Best Practices for Apache Dubbo & Kubernetes](/en/blog/2023/10/07/手把手教你部署dubbo应用到kubernetes-apache-dubbo-kubernetes-最佳实践/)
-* [Exploration and Practice of Cloud-Native Observability in Apache Dubbo](/en/blog/2023/10/07/apache-dubbo-云原生可观测性的探索与实践/)
-* [Best Practices for Opensergo & Dubbo Microservices Governance](/en/blog/2023/10/07/opensergo-dubbo-微服务治理最佳实践/)
-* [One-Stop Distributed Transaction Solution under Seata Microservices Architecture](/en/blog/2023/10/07/seata-微服务架构下的一站式分布式事务解决方案/)
-* [10x Startup Speed Improvement: Deep Dive into Apache Dubbo - Static GraalVM Native Image](/en/blog/2023/10/07/启动速度提升10倍apache-dubbo-静态化-graalvm-native-image-深度解析/)
-* [Hybrid Cloud Data Cross-Network Practice Based on Dubbo by Government Procurement Cloud](/en/blog/2023/10/07/政采云基于dubbo的混合云数据跨网实践/)
+* [Realizing Full Connectivity of Web, Mobile, and Backend Microservices Based on Triple Protocol](/zh-cn/blog/2023/10/07/基于-triple-实现-web-移动端后端全面打通/)
+* [Step-by-Step Guide to Deploying Dubbo Applications on Kubernetes - Best Practices for Apache Dubbo & Kubernetes](/zh-cn/blog/2023/10/07/手把手教你部署dubbo应用到kubernetes-apache-dubbo-kubernetes-最佳实践/)
+* [Exploration and Practice of Cloud-Native Observability in Apache Dubbo](/zh-cn/blog/2023/10/07/apache-dubbo-云原生可观测性的探索与实践/)
+* [Best Practices for Opensergo & Dubbo Microservices Governance](/zh-cn/blog/2023/10/07/opensergo-dubbo-微服务治理最佳实践/)
+* [One-Stop Distributed Transaction Solution under Seata Microservices Architecture](/zh-cn/blog/2023/10/07/seata-微服务架构下的一站式分布式事务解决方案/)
+* [10x Startup Speed Improvement: Deep Dive into Apache Dubbo - Static GraalVM Native Image](/zh-cn/blog/2023/10/07/启动速度提升10倍apache-dubbo-静态化-graalvm-native-image-深度解析/)
+* [Hybrid Cloud Data Cross-Network Practice Based on Dubbo by Government Procurement Cloud](/zh-cn/blog/2023/10/07/政采云基于dubbo的混合云数据跨网实践/)
 * Distributed Construction and Transformation Practice of Industrial and Commercial Bank of China
 
 ![dubbo-members-justin](/imgs/blog/2023/8/apachecon-summary/dubbo-members-justin.jpg)
