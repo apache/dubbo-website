@@ -618,7 +618,7 @@ Regardless of whether you are using Spring Boot, XML, annotations, or APIs to wr
 | warmup| java.lang.Integer| Warm-up period for the service.| | |
 | weight| java.lang.Integer| The service weight.| | |
 
-### dubbo.registry
+### dubbo.registry {#dubbo.registry}
 **Class:** `org.apache.dubbo.config.RegistryConfig`
 
 |Key|Type|Description|Default value|Deprecation|
