@@ -55,7 +55,7 @@ dubbo:
 
 ## Deploy Application
 
-1. Download and start Nacos [locally](/en/overview/reference/integrations/nacos#Local-Download).
+1. Download and start Nacos [locally](/en/overview/reference/integrations/nacos#local-download).
 
 2. Run the following command to start the Dubbo application.
 
@@ -147,5 +147,5 @@ curl -i http://127.0.0.1:9080/org.apache.dubbo.samples.gateway.apisix.DemoServic
 
 ### REST Mode
 
-If you find the HTTP port `/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/` not friendly enough for gateway access, refer to [Publishing REST Style HTTP Interfaces for Triple Protocol](/en/overview/mannual/java-sdk/tasks/gateway/triple#REST-Style-Interface).
+If you find the HTTP port `/org.apache.dubbo.samples.gateway.apisix.DemoService/sayHello/` not friendly enough for gateway access, refer to [Publishing REST Style HTTP Interfaces for Triple Protocol](/en/overview/mannual/java-sdk/tasks/gateway/triple#rest-style-interface).
 
