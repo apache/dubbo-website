@@ -55,7 +55,7 @@ For the format of `address`, please refer to [Nacos Registry - Enable Configurat
 
 ## 3 Advanced Configuration
 
-For complete configuration parameters, please refer to [metadata-report-config](../../config/properties/#metadata-report-config).
+For complete configuration parameters, please refer to [metadata-report-config](../../config/properties#metadata-report-config).
 
 ## 4 Working Principle
 
