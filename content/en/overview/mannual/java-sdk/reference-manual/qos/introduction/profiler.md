@@ -17,7 +17,7 @@ The performance sampling feature can detect the time consumption at various poin
 
 This feature is divided into two modes: `simple profiler` and `detail profiler`. The `simple profiler` mode is enabled by default, while the `detail profiler` mode is disabled by default. The `detail profiler` collects additional information such as processing time for each filter and specific time consumption on protocols, compared to the `simple profiler`. If long processing times are found within the Dubbo framework while in `simple profiler`, the `detail profiler` can be enabled for better issue diagnosis.
 
-> [Request Time Sampling](../../../advanced-features-and-usage/performance/profiler/)
+> [Request Time Sampling](/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/profiler/)
 
 ### enableSimpleProfiler Command
 
