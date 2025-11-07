@@ -20,7 +20,7 @@ weight: 3
 ### 2.1 Adding Maven Dependency
 If the project has already enabled Zookeeper as the registry center, no additional configuration is needed.
 
-If Zookeeper is not used as the registry center, please refer to [Add Zookeeper-related dependencies for the registry center](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#11-add-maven-dependency).
+If Zookeeper is not used as the registry center, please refer to [Add Zookeeper-related dependencies for the registry center](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#AddMavenDependencies).
 
 ### 2.2 Enable Zookeeper Configuration Center
 ```xml

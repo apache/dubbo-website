@@ -14,7 +14,7 @@ weight: 3
 This example demonstrates how Zookeeper is used as a registration center for automatic service discovery, based on a Spring Boot application. You can view the [full example code](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper).
 
 ## 1 Basic Configuration
-### 1.1 Add Maven Dependencies
+### 1.1 Add Maven Dependencies {AddMavenDependencies}
 Add dependencies like dubbo and zookeeper. The `dubbo-spring-boot-starter` will automatically add Zookeeper-related client dependencies for the application, reducing the cost of using Zookeeper. If you encounter version compatibility issues, you can also choose to add Curator, Zookeeper Client, and other dependencies manually.
 
 For Spring Boot applications, you can use the following dependencies:
