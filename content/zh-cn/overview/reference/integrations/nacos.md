@@ -36,7 +36,7 @@ startup.cmd -m standalone
 
 #### 验证 nacos 正常启动
 
-通过浏览器访问以下链接打开控制台：http://127.0.0.1:8848/nacos/
+通过浏览器访问以下链接打开控制台：http://127.0.0.1:8080/index.html
 
 ## docker
 下载 nacos-docker 项目。
