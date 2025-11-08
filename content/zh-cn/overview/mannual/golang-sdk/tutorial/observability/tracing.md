@@ -8,18 +8,18 @@ weight: 3
 
 Dubbo-go 支持基于 [OpenTelemetry](https://opentelemetry.io/) 标准的全链路追踪埋点，同时支持通过以下 exporter 导出到不同的 tracing 后端系统。
 
-- [Stdout exporter](./stdout)
-- [Jaeger exporter](./jaeger)
-- [Zipkin exporter](./zipkin)
-- [OTLP-HTTP exporter](./otlp-http)
-- [OTLP-gRPC exporter](./otlp-grpc)
+- [Stdout exporter](https://opentelemetry.io/docs/specs/otel/logs/sdk_exporters/stdout/)
+- [Jaeger exporter](https://opentelemetry.io/docs/languages/js/exporters/#jaeger)
+- [Zipkin exporter](https://opentelemetry.io/docs/languages/js/exporters/#zipkin)
+- [OTLP-HTTP exporter](https://opentelemetry.io/docs/languages/js/exporters/#use-otlp-exporter-with-httpjson-or-httpprotobuf)
+- [OTLP-gRPC exporter](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/)
 
 ## 使用方式
 
-请注意，仅支持通过 `dubbo.NewInstance` 方式创建 dubbo 应用时开启 tracing 功能，也就是我们快速开始中提到的 [微服务应用模式]()，对于 [轻量 RPC API]() 暂时不支持开启 tracing。
+请注意，仅支持通过 `dubbo.NewInstance` 方式创建 dubbo 应用时开启 tracing 功能，也就是我们快速开始中提到的`微服务应用模式`，对于`轻量 RPC API`暂时不支持开启 tracing。
 
 ## 示例详解
-可在此查看  <a href="https://github.com/apache/dubbo-go-samples/tree/main/otel" target="_blank">完整示例源码地址</a>。
+可在此查看完整示例[源码](https://github.com/apache/dubbo-go-samples/tree/main/otel)地址。
 
 使用 `dubbo.WithTracing()` 开启 tracing，可以通过多个参数控制 tracing 行为：
 

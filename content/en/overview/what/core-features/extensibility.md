@@ -120,6 +120,6 @@ The following examples demonstrate how to extend Dubbo to solve practical proble
 This document lists some commonly used extension points in Dubbo, but there are many more extension points available for flexible customization. The extension definitions and configuration methods also vary across different language SDKs. Below are the extension point manuals for Dubbo SDKs.
 
 * [Java Extension Point Manual](../../mannual/java-sdk/reference-manual/spi/description/)
-* [Go Extension Point Manual](../../mannual/golang-sdk/preface/design/aop_and_extension/)
+* [Go Extension Point Manual](../../mannual/golang-sdk/refer/sourcecode/aop_and_extension.md)
 
 It seems like you haven't pasted the Markdown content yet. Please provide the content you need translated, and I'll handle the translation while adhering to the specified rules.

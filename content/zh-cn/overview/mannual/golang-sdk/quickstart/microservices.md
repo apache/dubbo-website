@@ -16,9 +16,7 @@ weight: 2
 
 ## 快速运行示例
 ### 下载示例源码
-我们在 <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
-
-你可以 <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">下载示例zip包并解压</a>，或者克隆仓库：
+我们在 [apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples/) 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples

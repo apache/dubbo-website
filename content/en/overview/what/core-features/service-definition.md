@@ -89,7 +89,7 @@ public class Consumer {
 
 The above is a procedural explanation of Dubbo microservice development. For detailed guidance steps in actual development, please refer to:
 * [Java Microservice Development Quick Start](../../quickstart/java)
-* [Go Microservice Development Quick Start](../../quickstart/go)
+* [Go Microservice Development Quick Start](../../mannual/golang-sdk/quickstart)
 * [Rust Microservice Development Quick Start](../../quickstart/rust)
 * [Node.js Microservice Development Quick Start](https://github.com/apache/dubbo-js)
 
