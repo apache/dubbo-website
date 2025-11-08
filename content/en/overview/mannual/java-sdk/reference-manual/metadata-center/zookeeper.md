@@ -20,7 +20,7 @@ weight: 3
 ### 2.1 Adding Maven Dependency
 If the project has already enabled Zookeeper as the registry center, no additional configuration is needed.
 
-If Zookeeper is not used as the registry center, please refer to [Add Zookeeper-related dependencies for the registry center](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#AddMavenDependencies).
+If Zookeeper is not used as the registry center, please refer to [Add Zookeeper-related dependencies for the registry center](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#11-add-maven-dependencies).
 
 ### 2.2 Enable Zookeeper Configuration Center
 ```xml
@@ -48,11 +48,11 @@ MetadataReportConfig metadataConfig = new MetadataReportConfig();
 metadataConfig.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-For the format of `address`, please refer to [zookeeper register center - Enable Configuration](../../registry/zookeeper#22-configure-and-enable-zookeeper)
+For the format of `address`, please refer to [zookeeper register center - Enable Configuration](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#13-configure-and-enable-zookeeper)
 
 ## 3 Advanced Configuration
 
-For complete configuration parameters, please refer to [metadata-report-config](/en/overview/mannual/java-sdk/reference-manual/config/properties/#dubbometadata-report).
+For complete configuration parameters, please refer to [metadata-report-config](/en/overview/mannual/java-sdk/reference-manual/config/properties#dubbometadata-report).
 
 ## 4 Working Principle
 
