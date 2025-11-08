@@ -364,7 +364,7 @@ Regardless of whether you are using Spring Boot, XML, annotations, or APIs to wr
 | validation| java.lang.String| Enable JSR303 standard annotation validation for method parameters.| | |
 | version| java.lang.String| Version of the remote service referenced by the consumer/provider.| | |
 
-### dubbo.metadata-report {#metadata-report-config #dubbometadata-report}
+### dubbo.metadata-report {#dubbometadata-report}
 **Class:** `org.apache.dubbo.config.MetadataReportConfig`
 
 |Key|Type|Description|Default value|Deprecation|
