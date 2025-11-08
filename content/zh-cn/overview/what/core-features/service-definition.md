@@ -89,7 +89,7 @@ public class Consumer {
 
 以上是 Dubbo 微服务开发的流程性说明，实际开发的详细指导步骤请参见：
 * [Java 微服务开发入门](../../quickstart/java)
-* [Go 微服务开发入门](../../quickstart/go)
+* [Go 微服务开发入门](../../mannual/golang-sdk/quickstart)
 * [Rust 微服务开发入门](../../quickstart/rust)
 * [Node.js 微服务开发入门](https://github.com/apache/dubbo-js)
 

@@ -95,14 +95,14 @@ The types of registries supported by dubbo-go are as follows. Please refer to th
 | Polaris       | polaris                            |
 
 #### Observability
-Dubbo-go's observable metric collection follows the [metrics specification](https://dubbo.apache.org/en/docs/overview/reference/Metrics/standard_metrics/) defined by Apache Dubbo. The most common method is to export to Prometheus and visualize via Grafana.
+Dubbo-go's observable metric collection follows the [metrics specification](/en/overview/reference/Metrics/standard_metrics/) defined by Apache Dubbo. The most common method is to export to Prometheus and visualize via Grafana.
 
-For specific enabling methods, please refer to the usage manual [Observability](../tutorial/observability/).
+For specific enabling methods, please refer to the usage manual [Observability](./tutorial/observability/).
 
 #### Full-Link Tracing
 Dubbo-go supports full-link tracing systems like Zipkin, Jaeger, and Skywalking via OpenTelemetry.
 
-For specific enabling methods, please refer to the usage manual [Tracing](./tutorial/observability/tracing/).
+For specific enabling methods, please refer to the usage manual [Tracing](./tutorial/observability/tracing.md).
 
 #### Traffic Control
 The traffic governance rules implemented by dubbo-go fully comply with Dubbo framework-designed traffic governance capabilities. More details can be found through the following links:

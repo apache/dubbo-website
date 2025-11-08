@@ -64,7 +64,7 @@ Dubbo 提供的是一种 Client-Based 的服务发现机制，依赖第三方注
 Dubbo 服务发现扩展了多种注册中心组件支持，如 Nacos、Zookeeper、Consul、Redis、kubernetes 等，可以通过配置切换不同实现，同时还支持鉴权、命名空间隔离等配置。具体配置方式请查看 SDK 文档
 
 * [Java](../../mannual/java-sdk/reference-manual/registry)
-* [Golang](../../mannual/golang-sdk/tutorial/develop/registry)
+* [Golang](../../mannual/golang-sdk/refer/sourcecode/registry.md)
 * [Rust](../../mannual/rust-sdk/)
 
 Dubbo 还支持一个应用内配置多注册中心的情形如双注册、双订阅等，这对于实现不同集群地址数据互通、集群迁移等场景非常有用处，我们将在未来文档中添加 `最佳实践` 对这部分内容进行示例说明。
