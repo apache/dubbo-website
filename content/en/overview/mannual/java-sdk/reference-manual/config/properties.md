@@ -21,7 +21,7 @@ weight: 6
 
 | JVM Parameter | Example Value | Description |
 | --- | --- | --- |
-| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo supports specifying [all configuration items](aaa) in the JVM parameter format. Here, `config` refers to items such as application, registry, protocol, and `property` refers to specific properties within each configuration item. |
+| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo supports specifying all configuration items in the JVM parameter format. Here, `config` refers to items such as application, registry, protocol, and `property` refers to specific properties within each configuration item. |
 | dubbo.resolve.file | -Ddubbo.resolve.file=/home/ken/.../dubbo-resolve.properties | Specifies the direct connection URL for each interface in the file, e.g., org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx |
 | org.graalvm.nativeimage.imagecode | | [https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java](https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java) |
 | dubbo.properties.file | -Ddubbo.properties.file=foo.properties | Specifies the properties configuration file path, which can be an absolute path or a classpath-relative path. Default value is `dubbo.properties`. |
@@ -60,7 +60,7 @@ weight: 6
 
 | Environment Variable | Example Value | Description |
 | --- | --- | --- |
-| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo supports specifying [all configuration items](aaa) as environment variables. `CONFIG-NAME` refers to items such as application, registry, protocol, and `PROPERTY` refers to specific properties within each item. |
+| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo supports specifying all configuration items as environment variables. `CONFIG-NAME` refers to items such as application, registry, protocol, and `PROPERTY` refers to specific properties within each item. |
 | DUBBO_DEFAULT_SERIALIZATION | DUBBO_DEFAULT_SERIALIZATION="hessian2" | Sets the default serialization method for the framework, e.g., `hessian2`, `fastjson2`, `msgpack`. |
 | DUBBO2_COMPACT_ENABLE | DUBBO2_COMPAT_ENABLE="true" |  |
 | DUBBO_ENV_KEYS | DUBBO_LABELS="tag1=value1; tag2=value2" | `tag1=value1` will be reported as an additional parameter to the URL, serving as a system environment variable for instance tagging, etc. |
@@ -364,7 +364,7 @@ Regardless of whether you are using Spring Boot, XML, annotations, or APIs to wr
 | validation| java.lang.String| Enable JSR303 standard annotation validation for method parameters.| | |
 | version| java.lang.String| Version of the remote service referenced by the consumer/provider.| | |
 
-### dubbo.metadata-report {#metadata-report-config}
+### dubbo.metadata-report {#metadata-report-config #dubbometadata-report}
 **Class:** `org.apache.dubbo.config.MetadataReportConfig`
 
 |Key|Type|Description|Default value|Deprecation|
