@@ -16,7 +16,9 @@ In this example, we will continue to use Protobuf to develop the microservice ap
 
 ## Quick Run Example
 ### Download Example Source Code
-We maintain a series of dubbo-go usage examples in the [apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples/) repository to help users quickly learn how to use dubbo-go.
+We maintain a series of dubbo-go usage examples in the <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> repository to help users quickly learn how to use dubbo-go.
+
+You can <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">download the example zip package and extract it</a>, or clone the repository:
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples
