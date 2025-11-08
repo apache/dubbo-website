@@ -96,7 +96,7 @@ Dubbo 支持在服务提供者一侧配置默认的负载均衡策略，这样�
 
 同一个应用内支持配置不同的服务使用不同的负载均衡策略，支持为同一服务的不同方法配置不同的负载均衡策略。
 
-具体配置方式参加以下多语言实现
+具体配置方式参见以下多语言实现
 
 * [Java](../../mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/#使用方式)
 * [Golang](../../mannual/golang-sdk/)
