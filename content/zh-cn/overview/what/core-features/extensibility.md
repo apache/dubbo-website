@@ -120,4 +120,4 @@ Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis 等元数据中心实现。
 本文列出了 Dubbo 常用的一些扩展点，但还有大量的扩展点可供灵活定制，并且不同语言 sdk 的扩展定义和配置方式上也存在差异，以下是 Dubbo SDK 的扩展点手册。
 
 * [Java 扩展点手册](../../mannual/java-sdk/reference-manual/spi/description/)
-* [Go 扩展点手册](../../mannual/golang-sdk/preface/design/aop_and_extension/)
+* [Go 扩展点手册](../../mannual/golang-sdk/refer/sourcecode/aop_and_extension.md)

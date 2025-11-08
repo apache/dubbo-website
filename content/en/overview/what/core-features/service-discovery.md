@@ -64,7 +64,7 @@ The complete workflow is shown in the figure above. First, the consumer receives
 Dubbo service discovery extends support for multiple registry components such as Nacos, Zookeeper, Consul, Redis, Kubernetes, etc. You can switch between different implementations through configuration, and it also supports configurations like authentication and namespace isolation. For specific configuration methods, please refer to the SDK documentation:
 
 * [Java](../../mannual/java-sdk/reference-manual/registry)
-* [Golang](../../mannual/golang-sdk/tutorial/develop/registry)
+* [Golang](../../mannual/golang-sdk/refer/sourcecode/registry.md)
 * [Rust](../../mannual/rust-sdk/)
 
 Dubbo also supports scenarios where multiple registries are configured within an application, such as dual registration and dual subscription. This is very useful for scenarios like intercommunication of different cluster addresses and cluster migration. We will add examples of `Best Practices` for this part in future documentation.

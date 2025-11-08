@@ -8,18 +8,18 @@ weight: 3
 
 Dubbo-go supports end-to-end tracing based on the [OpenTelemetry](https://opentelemetry.io/) standard, while also supporting export to different tracing backend systems through the following exporters.
 
-- [Stdout exporter](./stdout)
-- [Jaeger exporter](./jaeger)
-- [Zipkin exporter](./zipkin)
-- [OTLP-HTTP exporter](./otlp-http)
-- [OTLP-gRPC exporter](./otlp-grpc)
+- [Stdout exporter](https://opentelemetry.io/docs/specs/otel/logs/sdk_exporters/stdout/)
+- [Jaeger exporter](https://opentelemetry.io/docs/languages/js/exporters/#jaeger)
+- [Zipkin exporter](https://opentelemetry.io/docs/languages/js/exporters/#zipkin)
+- [OTLP-HTTP exporter](https://opentelemetry.io/docs/languages/js/exporters/#use-otlp-exporter-with-httpjson-or-httpprotobuf)
+- [OTLP-gRPC exporter](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/)
 
 ## Usage
 
-Please note that tracing functionality is only enabled when creating the Dubbo application via `dubbo.NewInstance`, which is the [microservice application mode]() mentioned in our quick start. The [lightweight RPC API]() does not currently support enabling tracing.
+Please note that tracing functionality is only enabled when creating the Dubbo application via `dubbo.NewInstance`, which is the `microservice application mode` mentioned in our quick start. The `lightweight RPC API` does not currently support enabling tracing.
 
 ## Example Explanation
-You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/otel" target="_blank">full example source code here</a>.
+You can view the full example source code [here](https://github.com/apache/dubbo-go-samples/tree/main/otel).
 
 Enable tracing using `dubbo.WithTracing()`, and you can control tracing behavior with multiple parameters:
 

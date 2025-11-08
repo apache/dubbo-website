@@ -23,7 +23,7 @@ weight: 3
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href="/en/docs/v3.0/languages/golang/quick-start/">Quick start</a>
+                    <a href="/en/overview/mannual/golang-sdk/quickstart">Quick start</a>
                 </h4>
                 <p>Dubbo Golang SDK</p>
             </div>
