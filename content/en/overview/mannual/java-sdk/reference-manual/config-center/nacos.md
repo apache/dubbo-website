@@ -14,14 +14,14 @@ weight: 3
 * Understand [Basic Development Steps of Dubbo](/en/overview/mannual/java-sdk/quick-start/starter/)
 * Install and start [Nacos](/en/overview/reference/integrations/nacos/)
 
-> When Dubbo uses version `3.0.0` or above, Nacos version `2.0.0` or above is required. Please refer to [nacos registry]( /en/overview/mannual/java-sdk/reference-manual/registry/nacos#12-nacos-version) for Nacos version compatibility.
+> When Dubbo uses version `3.0.0` or above, Nacos version `2.0.0` or above is required. Please refer to [nacos registry]( /en/overview/mannual/java-sdk/reference-manual/registry/nacos#Nacos-Version) for Nacos version compatibility.
 
 ## 2 Instructions
 
 ### 2.1 Add Maven Dependency
 If the project has already enabled Nacos as a registry, no additional configuration is required.
 
-If Nacos registry is not enabled, please refer to [Add Nacos dependency for registry](/en/overview/mannual/java-sdk/reference-manual/registry/nacos#11-add-dependency).
+If Nacos registry is not enabled, please refer to [Add Nacos dependency for registry](/en/overview/mannual/java-sdk/reference-manual/registry/nacos#11-Add-Dependency).
 
 ### 2.2 Enable Nacos Configuration Center
 ```xml
@@ -52,7 +52,7 @@ configCenter.setAddress("nacos://127.0.0.1:8848");
 For `address` format, please refer to [Nacos Registry - Enable Configuration](../../registry/nacos#22-configure-and-enable-nacos)
 
 ## 3 Advanced Configuration
-To enable authentication, please refer to [Nacos Registry - Enable Authentication](../../registry/nacos#31-authentication)
+To enable authentication, please refer to [Nacos Registry - Enable Authentication](../../registry/nacos#22-configure-and-enable-nacos)
 
 ### 3.1 Externalized Configuration
 #### 3.1.1 Global Externalized Configuration

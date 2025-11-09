@@ -39,7 +39,7 @@ dubbo:
 * [**dubbo.provider** - `org.apache.dubbo.config.ProviderConfig`](../../properties#dubboprovider)
 * [**dubbo.registry** - `org.apache.dubbo.config.RegistryConfig`](../../properties#dubbo.registry)
 * [**dubbo.metrics** - `org.apache.dubbo.config.MetricsConfig`](../../properties#dubbometrics)
-* [**dubbo.tracing** - `org.apache.dubbo.config.TracingConfig`](../../properties#dubbotracing)
+* [**dubbo.tracing** - `org.apache.dubbo.config.TracingConfig`](../../properties#dubbo.tracing)
 * [**dubbo.ssl** - `org.apache.dubbo.config.SslConfig`](../../properties#dubbossl)
 * ~~[**dubbo.monitor** - `org.apache.dubbo.config.MonitorConfig`](../../properties#dubbomonitor)~~
 * ~~[**dubbo.module** - `org.apache.dubbo.config.ModuleConfig`](../../properties#dubbomodule)~~

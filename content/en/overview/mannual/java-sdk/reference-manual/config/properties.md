@@ -260,7 +260,7 @@ Regardless of whether you are using Spring Boot, XML, annotations, or APIs to wr
 | trust-serialize-class-level| java.lang.Integer| The trust level for serialized classes.| | |
 | version| java.lang.String| The application version.| | |
 
-### dubbo.config-center
+### dubbo.config-center {#config-center}
 **Class:** `org.apache.dubbo.config.ConfigCenterConfig`
 
 |Key|Type|Description|Default value|Deprecation|

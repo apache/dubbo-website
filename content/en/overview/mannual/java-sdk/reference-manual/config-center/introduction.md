@@ -13,7 +13,7 @@ weight: 1
 
 The Config Center in Dubbo has two main responsibilities:
 
-1. [Externalized Configuration](/en/overview/mannual/java-sdk/reference-manual/config/principle/#33-Externalized-Configuration): Centralized storage for startup configurations (simplified as external storage of dubbo.properties).
+1. [Externalized Configuration](/en/overview/mannual/java-sdk/reference-manual/config/principle#33-external-configuration): Centralized storage for startup configurations (simplified as external storage of dubbo.properties).
 2. Storage of traffic governance rules.
 
 Please refer to specific extension implementations to learn how to enable the Config Center.
