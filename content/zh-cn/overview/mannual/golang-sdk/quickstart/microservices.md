@@ -127,7 +127,7 @@ ins, err := dubbo.NewInstance(
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/rpc/streaming" >}}'>服务发现与负载均衡</a>
+                     <a href='{{< relref "../tutorial/service-discovery" >}}'>服务发现与负载均衡</a>
                 </h4>
                 <p>更多关于 Nacos、Zookeeper 等服务发现的使用方式，负载均衡策略配置等。</p>
             </div>
@@ -137,7 +137,7 @@ ins, err := dubbo.NewInstance(
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/service-discovery" >}}'>流量管控</a>
+                     <a href='{{< relref "../tutorial/traffic" >}}'>流量管控</a>
                 </h4>
                 <p>学习如何实现按比例流量分配、金丝雀发布、调整超时时间、流量灰度、服务降级等流量管控。</p>
             </div>
@@ -147,7 +147,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>监控服务状态</a>
+					 <a href='{{< relref "../tutorial/observability" >}}'>监控服务状态</a>
 				</h4>
 				<p>开启 Metrics 采集，通过 Prometheus、Grafana 可视化查看应用、服务、示例状态。</p>
 			</div>
@@ -157,7 +157,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>全链路追踪</a>
+					 <a href='{{< relref "../tutorial/observability" >}}'>全链路追踪</a>
 				</h4>
 				<p>开启 OpenTelemetry 全链路追踪。</p>
 			</div>
@@ -167,7 +167,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>网关 HTTP 接入</a>
+					 <a href='{{< relref "../tutorial/gateway" >}}'>网关 HTTP 接入</a>
 				</h4>
 				<p>如何使用 Higress、Nginx 等网关产品，将前端 http 流量（北向流量）接入后端 dubbo-go 微服务集群。</p>
 			</div>
@@ -177,7 +177,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>分布式事务</a>
+					 <a href='{{< relref "../tutorial/transaction" >}}'>分布式事务</a>
 				</h4>
 				<p>使用 Apache Seata 作为分布式事务解决方案，解决分布式数据一致性问题。</p>
 			</div>

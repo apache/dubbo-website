@@ -129,7 +129,7 @@ If you want to add more service governance capabilities to the application, plea
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/rpc/streaming" >}}'>Service Discovery and Load Balancing</a>
+                     <a href='{{< relref "../tutorial/service-discovery" >}}'>Service Discovery and Load Balancing</a>
                 </h4>
                 <p>More about using service discovery with Nacos, Zookeeper, etc., and configuring load balancing strategies.</p>
             </div>
@@ -139,7 +139,7 @@ If you want to add more service governance capabilities to the application, plea
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/service-discovery" >}}'>Traffic Control</a>
+                     <a href='{{< relref "../tutorial/traffic" >}}'>Traffic Control</a>
                 </h4>
                 <p>Learn how to achieve proportional traffic distribution, canary releases, adjust timeout settings, traffic grayscale, and service degradation.</p>
             </div>
@@ -149,7 +149,7 @@ If you want to add more service governance capabilities to the application, plea
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Monitoring Service Status</a>
+					 <a href='{{< relref "../tutorial/observability" >}}'>Monitoring Service Status</a>
 				</h4>
 				<p>Enable metrics collection and visualize application, service, and example statuses via Prometheus and Grafana.</p>
 			</div>
@@ -159,7 +159,7 @@ If you want to add more service governance capabilities to the application, plea
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Full Link Tracing</a>
+					 <a href='{{< relref "../tutorial/observability" >}}'>Full Link Tracing</a>
 				</h4>
 				<p>Enable OpenTelemetry full link tracing.</p>
 			</div>
@@ -169,7 +169,7 @@ If you want to add more service governance capabilities to the application, plea
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Gateway HTTP Access</a>
+					 <a href='{{< relref "../tutorial/gateway" >}}'>Gateway HTTP Access</a>
 				</h4>
 				<p>How to use gateway products like Higress, Nginx, etc., to connect front-end HTTP traffic (northbound traffic) to the back-end dubbo-go microservices cluster.</p>
 			</div>
@@ -179,7 +179,7 @@ If you want to add more service governance capabilities to the application, plea
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>Distributed Transactions</a>
+					 <a href='{{< relref "../tutorial/transaction" >}}'>Distributed Transactions</a>
 				</h4>
 				<p>Use Apache Seata as a distributed transaction solution to address distributed data consistency issues.</p>
 			</div>
