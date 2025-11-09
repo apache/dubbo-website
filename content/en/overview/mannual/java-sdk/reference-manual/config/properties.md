@@ -82,7 +82,7 @@ weight: 6
 
 Regardless of whether you are using Spring Boot, XML, annotations, or APIs to write Dubbo applications, you can refer to the table below to understand the specific meaning of each configuration item.
 
-### dubbo.tracing.baggage.correlation
+### dubbo.tracing.baggage.correlation {#dubbo.tracing.baggage.correlation}
 **Class:** `org.apache.dubbo.config.nested.BaggageConfig$Correlation`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -698,7 +698,7 @@ Regardless of whether you are using Spring Boot, XML, annotations, or APIs to wr
 | server-trust-cert-collection-path| java.lang.String| Path to the server&#x27;s trust certificate collection file.| | |
 | server-trust-cert-collection-path-stream| java.io.InputStream| Input stream for the server&#x27;s trust certificate collection (if provided).| | |
 
-### dubbo.tracing
+### dubbo.tracing {#dubbo.tracing}
 **Class:** `org.apache.dubbo.config.TracingConfig`
 
 |Key|Type|Description|Default value|Deprecation|
