@@ -36,7 +36,7 @@ Please check [advanced studies - communication protocols] for specific examples 
 
 ### Protobuf
 
-Defining services using Protobuf (IDL) is **suitable for development teams that currently or in the future have cross-language requirements. The same IDL service can be used for Java/Go/Node.js, but it has a higher learning cost**.
+Defining services using Protobuf (IDL) is suitable for development teams that currently or in the future have cross-language requirements. The same IDL service can be used for Java/Go/Node.js, but it has a higher learning cost.
 
 ```Protobuf
 syntax = "proto3";

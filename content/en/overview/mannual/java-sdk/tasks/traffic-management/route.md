@@ -35,7 +35,7 @@ We need to deploy the rules to the running Dubbo SDK. In the Dubbo system, this 
 A zk/nacos distributes a rule, and the Dubbo instance receives the rule push. During the RPC call, rules are applied to filter, selecting a subset of addresses to call.
 
 {{% alert title="Note" color="info" %}}
-In the traditional Nacos/Zookeeper microservice deployment scheme, the routing rule configuration center stores and forwards to the Dubbo SDK. However, in Kubernetes Service or service mesh scenarios, the storage and push mechanisms for routing rules may change. For specifics, please refer to [Kubernetes Best Practices]().
+In the traditional Nacos/Zookeeper microservice deployment scheme, the routing rule configuration center stores and forwards to the Dubbo SDK. However, in Kubernetes Service or service mesh scenarios, the storage and push mechanisms for routing rules may change. For specifics, please refer to `Kubernetes Best Practices`.
 {{% /alert %}}
 
 At this point, if we send a request to the xxx service,

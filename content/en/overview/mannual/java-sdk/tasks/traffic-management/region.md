@@ -18,7 +18,7 @@ When applications are deployed across multiple different data centers/regions, c
 ## Before You Begin
 
 * `Deploy the Shop Marketplace Project`
-* Deploy and open [Dubbo Admin](/en/overview/mannual/control-plane/architectur)
+* Deploy and open [Dubbo Admin](/en/overview/mannual/control-plane/architecture)
 
 ## Task Details
 

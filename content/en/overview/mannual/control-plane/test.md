@@ -18,7 +18,7 @@ The service testing feature is usually provided for developers of Dubbo services
 ### Prepare Test Cases
 1. Start the test case
 
-    You can refer to [Quick Start](../../../mannual/java-sdk/quickstart/) to start a simple Dubbo service. For service testing, you only need to start the provider.
+   You can refer to [Quick Start](../../../quickstart/java/) to start a simple Dubbo service. For service testing, you only need to start the provider.
 
 2. Query Services
 

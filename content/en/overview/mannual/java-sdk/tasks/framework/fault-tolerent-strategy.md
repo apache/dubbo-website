@@ -24,7 +24,7 @@ Node relationships:
 
 ## Cluster Fault Tolerance Modes
 
-You can extend the cluster fault tolerance strategy. See: [Cluster Extension](/en/overview/mannual/java-sdk/reference-manual/spi/description/cluster.md)
+You can extend the cluster fault tolerance strategy. See: [Cluster Extension](/en/overview/mannual/java-sdk/reference-manual/spi/description/cluster)
 
 ### Failover Cluster
 

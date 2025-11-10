@@ -47,7 +47,7 @@ Configure pre-stop
 
 Through Dubbo3's SPI mechanism, multiple "probes" are internally implemented based on Dubbo3 QOS operations module's HTTP services, enabling container probes to obtain corresponding probe states within the application. Moreover, the SPI implementation mechanism also facilitates users to extend internal "probes," making the entire application lifecycle more effectively governed.
 
-**Three Probes Corresponding SPI Interfaces**
+Three Probes Corresponding SPI Interfaces
 
 -   livenessProbe:  `org.apache.dubbo.qos.probe.LivenessProbe`
 -   readinessProbe:  `org.apache.dubbo.qos.probe.ReadinessProbe`

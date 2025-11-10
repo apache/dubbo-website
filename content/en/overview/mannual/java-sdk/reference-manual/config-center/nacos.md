@@ -101,7 +101,7 @@ dubbo
 For the configuration center, `group` and `namespace` should be consistent across the company (cluster) and avoid different values for different applications.
 
 ### 3.3 Nacos Extended Configuration
-For more Nacos sdk/server supported parameter configurations, refer to [Nacos Registry - More Configurations](../../registry/nacoss)
+For more Nacos sdk/server supported parameter configurations, refer to [Nacos Registry - More Configurations](../../registry/nacos)
 
 ## 4 Traffic Governance Rules
 For Nacos, all traffic governance rules and externalized configurations should be globally visible, thus applications in the same logical cluster must use the same namespace and group. The default value for namespace is `public` and the default value for group is `dubbo`. Applications must not modify the namespace and group without maintaining global consistency.
