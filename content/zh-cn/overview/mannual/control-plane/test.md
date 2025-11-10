@@ -18,7 +18,7 @@ working_in_progress: true
 ### 准备用例
 1. 启动用例
 
-    可以参考 [快速开始](../../../quickstart/java/) 启动一个简单的 Dubbo 服务，对于服务测试来说，只需要启动 provider 即可。
+    可以参考 [快速开始](../../../mannual/java-sdk/quickstart/) 启动一个简单的 Dubbo 服务，对于服务测试来说，只需要启动 provider 即可。
 
 2. 查询服务
 
