@@ -14,7 +14,7 @@ weight: 3
 This example demonstrates how Zookeeper is used as a registration center for automatic service discovery, based on a Spring Boot application. You can view the [full example code](https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-zookeeper).
 
 ## 1 Basic Configuration
-### 1.1 Add Maven Dependencies 
+### 1.1 Add Maven Dependencies {#11-Add-Maven-dependencies}
 Add dependencies like dubbo and zookeeper. The `dubbo-spring-boot-starter` will automatically add Zookeeper-related client dependencies for the application, reducing the cost of using Zookeeper. If you encounter version compatibility issues, you can also choose to add Curator, Zookeeper Client, and other dependencies manually.
 
 For Spring Boot applications, you can use the following dependencies:
@@ -82,7 +82,7 @@ Dubbo provides a helper management component for Zookeeper dependencies, allowin
 {{% /alert %}}
 
 
-### 1.3 Configure and Enable Zookeeper
+### 1.3 Configure and Enable Zookeeper {#13-Configure-and-enable-Zookeeper}
 ```yaml
 # application.yml
 dubbo
@@ -108,7 +108,7 @@ Protocols and addresses can also be configured separately, such as
 `<dubbo:registry protocol="zookeeper" address="10.20.153.10:2181,10.20.153.11:2181,10.20.153.12:2181" />`
 
 ## 2 Advanced Configuration
-### 2.1 Authentication and Authorization
+### 2.1 Authentication and Authorization {#21-Authentication-and-authorization}
 
 If Zookeeper has authentication enabled, Dubbo supports specifying the username and password for identity verification.
 

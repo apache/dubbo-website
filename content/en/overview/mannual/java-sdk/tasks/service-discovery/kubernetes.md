@@ -17,5 +17,5 @@ In the previous two sections, we discussed two registration center patterns: Nac
 
 In this mode, service discovery aligns with the user's deployment and operation tasks. Users define standard Kubernetes Services and Deployments, deploying them to Kubernetes. The Control Plane then monitors the APISERVER resources and interacts with the SDK processes to form a complete service discovery system.
 
-For specific practical cases of using Kubernetes as a registry, please refer to the section on [Kubernetes Service Deployment]() for more details.
+For specific practical cases of using Kubernetes as a registry, please refer to the section on `Kubernetes Service Deployment` for more details.
 

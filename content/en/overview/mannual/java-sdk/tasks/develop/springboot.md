@@ -182,7 +182,7 @@ public class ProviderConfiguration {
 ```
 
 #### Supplementing Configuration Through dubbo.properties
-For scenarios using `DubboService` or `DubboReference`, additional configuration can be provided by adding a dubbo.properties file under the project's resources directory. [Specific format](../principle/) has more detailed explanations here.
+For scenarios using `DubboService` or `DubboReference`, additional configuration can be provided by adding a dubbo.properties file under the project's resources directory. [Specific format](/en/overview/mannual/java-sdk/reference-manual/config/principle) has more detailed explanations here.
 
 ```properties
 dubbo.service.org.apache.dubbo.springboot.demo.DemoService.timeout=5000

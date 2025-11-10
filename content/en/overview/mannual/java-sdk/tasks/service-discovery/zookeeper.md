@@ -166,7 +166,7 @@ dubbo
    session: 60 * 1000 * # Session timeout, default 60s
 ```
 
-The Zookeeper registry center also supports other control parameters, see the [Registry Configuration Handbook](../../config/properties#registry)
+The Zookeeper registry center also supports other control parameters, see the [Registry Configuration Handbook](../../config/properties#dubbo.registry)
 
 ## 3 Working Principle
 In the previous section, we explained the difference between application-level service discovery and interface-level service discovery. In the Zookeeper implementation, their storage structures also differ significantly. Overall, the Zookeeper registry center implementation supports the following high availability capabilities:

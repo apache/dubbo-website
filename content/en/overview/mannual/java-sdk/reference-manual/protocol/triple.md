@@ -21,7 +21,7 @@ Please refer to other parts of the documentation for the [triple protocol specif
 When using the triple protocol, developers can define RPC services using either `Java Interface` or `Protobuf (IDL)`. Both definitions have equal protocol capabilities and only affect the programming experience and serialization methods, with the choice of development model depending on the user's business background.
 
 ### Java Interface
-**Suitable for Dubbo veteran users and development teams without cross-language requirements, with the advantage of low learning costs. `Dubbo2 legacy users can switch to this protocol at no cost`.
+Suitable for Dubbo veteran users and development teams without cross-language requirements, with the advantage of low learning costs. `Dubbo2 legacy users can switch to this protocol at no cost`.
 
 Service definition example:
 ```java

@@ -204,5 +204,4 @@ The application-level service discovery "service name" is the application name.
 
 ### 3.4 Heartbeat Detection
 
-### 3.5
 

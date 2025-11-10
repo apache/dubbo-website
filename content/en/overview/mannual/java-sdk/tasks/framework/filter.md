@@ -34,7 +34,7 @@ As shown in the figure above, the Dubbo proxy automatically loads Filter impleme
 public interface Filter extends BaseFilter {}
 ```
 
-The default activation status of a Filter can be set in the definition using the `@Activate` annotation, as shown in the following definition, which indicates that this Filter is automatically enabled when executing RPC requests on the provider side (not enabled on the consumer side). The `@Activate` annotation supports various conditional controls, including enabling it when a specific class is present in the classpath, or when certain parameter values are present in the URL, more details can be referenced in [SPI Extension Activate Introduction]().
+The default activation status of a Filter can be set in the definition using the `@Activate` annotation, as shown in the following definition, which indicates that this Filter is automatically enabled when executing RPC requests on the provider side (not enabled on the consumer side). The `@Activate` annotation supports various conditional controls, including enabling it when a specific class is present in the classpath, or when certain parameter values are present in the URL, more details can be referenced in `SPI Extension Activate Introduction`.
 
 ```java
 @Activate(group = PROVIDER)
@@ -129,5 +129,5 @@ public interface ClusterFilter extends BaseFilter {}
 
 ### Extend Filter
 
-Refer to [Usage Tutorial - Custom Extensions]() for specific examples.
+Refer to `Usage Tutorial - Custom Extensions` for specific examples.
 
