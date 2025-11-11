@@ -35,8 +35,8 @@ Dubbo's extensibility allows the Dubbo project to be conveniently divided into s
 ## Microservice Ecosystem Based on Extension Points
 Numerous extension points and abstractions are the foundation for Dubbo to interface with many microservice ecosystem components and achieve microservice governance capabilities.
 
-* [Full-Link Tracing](../../tasks/observability/tracing/)
-* [Data Consistency](../../tasks/ecosystem/transaction/)
+* [Full-Link Tracing](/en/overview/mannual/java-sdk/tasks/observability/tracing/tracing)
+* `Data Consistency`
 * [Rate Limiting and Degradation](../../core-features/traffic/circuit-breaking/)
 
 Dubbo's SDK implementations in various languages adopt the "microkernel + plugin" design pattern. Almost all core nodes in the process are defined as extension points. The components released by the official team are also released in the form of extension point implementations. Therefore, Dubbo can treat all official and third-party component extensions equally.
@@ -98,7 +98,7 @@ The registry is the foundation for Dubbo's service discovery capabilities. Dubbo
 By supporting Consul and Eureka, Dubbo also achieves address and communication layer interoperability with the Spring Cloud ecosystem, making it easier for users to deploy Dubbo and Spring Cloud simultaneously or migrate from Spring Cloud to Dubbo.
 
 ### Config Center
-The configuration center is a key component for users to dynamically control Dubbo's behavior. All rules issued in the [Traffic Management](../../tasks/traffic-management) tasks are first sent to the configuration center for storage. Dubbo instances then listen for changes in the configuration center, receive routing rules, and achieve traffic control behavior.
+The configuration center is a key component for users to dynamically control Dubbo's behavior. All rules issued in the [Traffic Management](/en/overview/mannual/java-sdk/tasks/traffic-management/) tasks are first sent to the configuration center for storage. Dubbo instances then listen for changes in the configuration center, receive routing rules, and achieve traffic control behavior.
 
 Dubbo officially supports configuration centers like Zookeeper, Nacos, Etcd, Redis, and Apollo.
 
@@ -111,10 +111,10 @@ Dubbo officially supports metadata centers like Zookeeper, Nacos, Etcd, and Redi
 
 The following examples demonstrate how to extend Dubbo to solve practical problems. You can follow the examples to learn.
 
-* [Custom RPC Protocol](../../tasks/extensibility/protocol/)
-* [Custom Traffic Routing Rules](../../tasks/extensibility/router/)
-* [Custom Registry](../../tasks/extensibility/registry/)
-* [Custom Interceptor](../../tasks/extensibility/filter/)
+* [Custom RPC Protocol](/en/overview/mannual/java-sdk/tasks/extensibility/protocol/)
+* [Custom Traffic Routing Rules](/en/overview/mannual/java-sdk/tasks/extensibility/router/)
+* [Custom Registry](/en/overview/mannual/java-sdk/tasks/extensibility/registry/)
+* [Custom Interceptor](/en/overview/mannual/java-sdk/tasks/extensibility/filter/)
 
 ## More Extension Points
 This document lists some commonly used extension points in Dubbo, but there are many more extension points available for flexible customization. The extension definitions and configuration methods also vary across different language SDKs. Below are the extension point manuals for Dubbo SDKs.

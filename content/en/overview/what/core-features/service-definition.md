@@ -88,9 +88,9 @@ public class Consumer {
 ```
 
 The above is a procedural explanation of Dubbo microservice development. For detailed guidance steps in actual development, please refer to:
-* [Java Microservice Development Quick Start](../../mannual/java-sdk/quickstart)
+* [Java Microservice Development Quick Start](../../mannual/java-sdk/quick-start)
 * [Go Microservice Development Quick Start](../../mannual/golang-sdk/quickstart)
-* [Rust Microservice Development Quick Start](../../mannual/rust-sdk/quickstart)
+* [Rust Microservice Development Quick Start](../../mannual/rust-sdk/quick-start)
 * [Node.js Microservice Development Quick Start](https://github.com/apache/dubbo-js)
 
 ## Deployment
@@ -109,7 +109,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-Deploy and open the [Dubbo Admin Console](../../tasks/deploy/), where you can see the service deployment and call data of the cluster.
+Deploy and open the `Dubbo Admin Console`, where you can see the service deployment and call data of the cluster.
 
 ![Admin](/imgs/v3/what/admin.png)
 

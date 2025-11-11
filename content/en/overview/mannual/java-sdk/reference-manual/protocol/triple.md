@@ -68,7 +68,7 @@ public interface Greeter extends org.apache.dubbo.rpc.model.DubboStub {
 }
 ```
 
-The Protobuf mode supports serialization modes of Protobuf Binary and Protobuf JSON. Lastly, please check [advanced studies - communication protocols] for specific examples of `Protobuf (IDL) + Triple protocol`.
+The Protobuf mode supports serialization modes of Protobuf Binary and Protobuf JSON. Lastly, please check `advanced studies - communication protocols` for specific examples of `Protobuf (IDL) + Triple protocol`.
 
 #### 3. Which programming model should I use, and how to choose?
 
