@@ -124,7 +124,7 @@ Both the client and server stream processing are application-specific. Since the
 For specific examples of Streaming, please refer to [Streaming communication](/en/overview/mannual/java-sdk/tasks/protocols/triple/streaming).
 
 ## REST Support
-By adding annotations to the Java interface, REST-style triple services can be published. A specific code example can be found <a href="" target="_blank">here</a>.
+By adding annotations to the Java interface, REST-style triple services can be published. A specific code example can be found here.
 
 {{% alert title="Stream Semantics Guarantee" color="info" %}}
 Currently, the REST protocol only supports the `Java Interface` service definition model, unlike Dubbo and the triple protocol. In REST scenarios, we need to add annotations to the Interface, supporting both Spring MVC and JAX_RS annotations.

@@ -39,6 +39,6 @@ As shown in the figure above, Dubbo Consumer relies on three downstream Dubbo se
 Dubbo has achieved service circuit breaking and degradation capabilities by integrating mainstream frameworks in the industry.
 
 * [Sentinel](/en/overview/mannual/java-sdk/tasks/rate-limit/sentinel/)
-* [Hystrix](/en/overview/mannual/java-sdk/tasks/rate-limit/hystrix/)
-* [Resilience4J](/en/overview/mannual/java-sdk/tasks/rate-limit/resilience4j/)
+* `Hystrix`
+* `Resilience4J`
 

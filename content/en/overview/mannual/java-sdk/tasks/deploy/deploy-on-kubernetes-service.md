@@ -8,7 +8,7 @@ title: Deploying Dubbo Applications to a Virtual Machine Environment
 type: docs
 weight: 3
 ---
-This model maps Dubbo Service to the concept of <a target="_blank" href="">Kubernetes Service</a>, eliminating the need for traditional registries like Nacos, with the Kubernetes APISERVER taking on the role of the registry.
+This model maps Dubbo Service to the concept of `Kubernetes Service`, eliminating the need for traditional registries like Nacos, with the Kubernetes APISERVER taking on the role of the registry.
 
 <img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes-service.png" style="max-width:650px;height:auto;" />
 
