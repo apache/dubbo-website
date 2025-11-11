@@ -61,13 +61,13 @@ gRPC is an open-source communication protocol based on HTTP/2 by Google. As ment
 
 Using the gRPC protocol within the Dubbo framework (gRPC over Dubbo Framework) is a highly efficient and lightweight choice. It allows you to use the native gRPC protocol for communication while avoiding the complexity of secondary customization and development based on gRPC (secondary development and customization of gRPC is an unavoidable step confirmed by many enterprises after large-scale practice. The Dubbo framework completes this step for developers, allowing them to use gRPC in the simplest way).
 
-[gRPC over Dubbo Example](/en/overview/mannual/java-sdk/tasks/protocols/grpc/)
+[gRPC over Dubbo Example](/en/overview/mannual/java-sdk/tasks/protocols/triple/grpc)
 
 ## REST
 A common communication pattern in the microservice field is HTTP + JSON. Some mainstream microservice frameworks like Spring Cloud and Microprofile default to this communication pattern. Dubbo also provides support for HTTP-based programming and communication patterns.
 
-* [HTTP over Dubbo Example](/en/overview/mannual/java-sdk/tasks/protocols/web/)
-* [Dubbo and Spring Cloud Interoperability](/en/overview/mannual/java-sdk/tasks/protocols/springcloud/)
+* `HTTP over Dubbo Example`
+* `Dubbo and Spring Cloud Interoperability`
 
 ## Other Communication Protocols
 In addition to the protocols introduced above, you can also run the following protocols on top of Dubbo. For Dubbo, you only need to change a simple configuration line to switch the underlying service communication protocol, without affecting other peripheral APIs and governance capabilities.
