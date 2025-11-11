@@ -18,7 +18,7 @@ The extension mechanism in Dubbo is similar to the <a href="https://www.baeldung
 * Adds [IOC](#23-ioc-mechanism), [AOP](#24-aop-mechanism) capabilities.
 * Adds sorting capabilities.
 * Adds conditional activation capabilities.
-* Provides a series of more flexible APIs, such as [getting all SPI extension implementations](./#21-getting-all-extension-implementations), [querying a specific extension implementation by name](./#211-getting-all-extensions), querying extensions by type, and querying extension implementations that match conditions.
+* Provides a series of more flexible APIs, such as `getting all SPI extension implementations`, `querying a specific extension implementation by name`, querying extensions by type, and querying extension implementations that match conditions.
 
 ### 1.1 Definition of SPI
 

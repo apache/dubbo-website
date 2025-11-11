@@ -15,8 +15,8 @@ Automatic address discovery and load balancing mechanisms have many advantages; 
 
 ## Before You Begin
 
-* [Deploy the Shop Mall Project](../#deploy-the-shop-mall-project)
-* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
+* `Deploy the Shop Mall Project`
+* Deploy and open [Dubbo Admin](/en/overview/mannual/control-plane/architecture)
 
 ## Task Details
 

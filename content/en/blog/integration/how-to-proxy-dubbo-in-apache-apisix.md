@@ -11,7 +11,7 @@ aliases:
 ---
 
 {{% alert title="Note" color="warning" %}}
-This article is only applicable to the Dubbo protocol communication scenario. If you are a Dubbo3 user, it is recommended to use the triple protocol. Please refer to [Using Apache APISIX to Proxy Dubbo Services (Triple Protocol)](/en/blog/2024/04/22/using-apache-apisix-to-proxy-dubbo-services-triple-protocol/) for specific examples.
+This article is only applicable to the Dubbo protocol communication scenario. If you are a Dubbo3 user, it is recommended to use the triple protocol. Please refer to [Using Apache APISIX to Proxy Dubbo Services (Triple Protocol)](/en/blog/2024/04/22/use-apache-apisix-to-proxy-dubbo-services-triple-protocol/) for specific examples.
 {{% /alert %}}
 
 [Apache APISIX](https://apisix.apache.org/) is a top-level open-source project of the Apache Software Foundation and the most active open-source gateway project currently. As a dynamic, real-time, high-performance open-source API gateway, Apache APISIX provides rich traffic management features such as load balancing, dynamic upstream, gray release, service circuit breaking, authentication, and observability.

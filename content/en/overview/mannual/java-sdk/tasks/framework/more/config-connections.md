@@ -71,7 +71,7 @@ Consumers can send requests to the provider before the provider is ready to rece
 ## Use Cases
 Sticky connections are used for stateful services, allowing clients to always invoke the same provider unless that provider is down.
 
-Sticky connections will automatically enable [lazy connect](../lazy-connect) to reduce the number of long connections.
+Sticky connections will automatically enable `lazy connect` to reduce the number of long connections.
 
 ## Usage
 ```xml

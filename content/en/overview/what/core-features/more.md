@@ -12,7 +12,7 @@ weight: 11
 As a microservices framework closely related to application development and aimed at providing enterprise-level service governance capabilities for microservice clusters, Dubbo also offers many advanced features, covering service invocation behavior control, service diagnosis and tuning, service governance, and more.
 
 There may be slight differences in feature implementation and configuration methods across different language SDKs. For specific feature lists and usage, please refer to the following documents:
-* [Java](../../mannual/java-sdk/advanced-features-and-usage/)
+* [Java](../../mannual/java-sdk/reference-manual/)
 * [Golang](../../mannual/golang-sdk/tutorial/)
 
 ## Controlling Service Invocation Behavior

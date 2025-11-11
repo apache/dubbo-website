@@ -250,6 +250,6 @@ The content described in this article applies only to the versions of the triple
 {{% /alert %}}
 
 ## Reference Links
-* [Use Apache APISIX to Proxy Triple Protocol Traffic](/en/blog/2024/04/22/using-apache-apisix-to-proxy-dubbo-service-triple-protocol/)
+* `Use Apache APISIX to Proxy Triple Protocol Traffic`
 * [Higress Achieves Microservice Discovery and Routing Configuration Based on HTTP Protocol](https://higress.io/en/docs/user/spring-cloud)
 

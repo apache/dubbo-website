@@ -32,14 +32,14 @@ dubbo:
 
 ### dubbo
 * [**dubbo.application** - `org.apache.dubbo.config.ApplicationConfig`](../../properties#dubboapplication)
-* [**dubbo.config-center** - `org.apache.dubbo.config.ConfigCenterConfig`](../../properties#dubboconfig-center)
+* [**dubbo.config-center** - `org.apache.dubbo.config.ConfigCenterConfig`](../../properties#config-center)
 * [**dubbo.consumer** - `org.apache.dubbo.config.ConsumerConfig`](../../properties#dubboconsumer)
 * [**dubbo.metadata-report** - `org.apache.dubbo.config.MetadataReportConfig`](../../properties#dubbometadata-report)
 * [**dubbo.protocol** - `org.apache.dubbo.config.ProtocolConfig`](../../properties#dubboprotocol)
 * [**dubbo.provider** - `org.apache.dubbo.config.ProviderConfig`](../../properties#dubboprovider)
-* [**dubbo.registry** - `org.apache.dubbo.config.RegistryConfig`](../../properties#dubboregistry)
+* [**dubbo.registry** - `org.apache.dubbo.config.RegistryConfig`](../../properties#dubbo.registry)
 * [**dubbo.metrics** - `org.apache.dubbo.config.MetricsConfig`](../../properties#dubbometrics)
-* [**dubbo.tracing** - `org.apache.dubbo.config.TracingConfig`](../../properties#dubbotracing)
+* [**dubbo.tracing** - `org.apache.dubbo.config.TracingConfig`](../../properties#dubbo.tracing)
 * [**dubbo.ssl** - `org.apache.dubbo.config.SslConfig`](../../properties#dubbossl)
 * ~~[**dubbo.monitor** - `org.apache.dubbo.config.MonitorConfig`](../../properties#dubbomonitor)~~
 * ~~[**dubbo.module** - `org.apache.dubbo.config.ModuleConfig`](../../properties#dubbomodule)~~
@@ -52,7 +52,7 @@ dubbo:
 * [**dubbo.metrics.prometheus.pushgateway** - `org.apache.dubbo.config.nested.PrometheusConfig$Pushgateway`](../../properties#dubbometricsprometheuspushgateway)
 
 ### dubbo.tracing
-* [**dubbo.tracing.baggage.correlation** - `org.apache.dubbo.config.nested.BaggageConfig$Correlation`](../../properties#dubbotracingbaggage.correlation)
+* [**dubbo.tracing.baggage.correlation** - `org.apache.dubbo.config.nested.BaggageConfig$Correlation`](../../properties#dubbo.tracing.baggage.correlation)
 * [**dubbo.tracing.tracing-exporter.otlp-config** - `org.apache.dubbo.config.nested.ExporterConfig$OtlpConfig`](../../properties#dubbotracingtracing-exporterotlp-config)
 * [**dubbo.tracing.tracing-exporter.zipkin-config** - `org.apache.dubbo.config.nested.ExporterConfig$ZipkinConfig`](../../properties#dubbotracingtracing-exporterzipkin-config)
 * [**dubbo.tracing.baggage** - `org.apache.dubbo.config.nested.BaggageConfig`](../../properties#dubbotracingbaggage)
@@ -89,7 +89,7 @@ Here is the list of starters provided by the Dubbo official community (version 3
 
 {{% alert title="Note" color="info" %}}
 * For the versions of third-party components compatible with each starter, please refer to the [Component Version Mapping Table](/en/overview/mannual/java-sdk/versions/).
-* Each starter has corresponding application.yml configuration items; please refer to the above [Configuration Items List](./#Configuration%20Example) for detailed usage.
+* Each starter has corresponding application.yml configuration items; please refer to the above `Configuration Items List` for detailed usage.
 {{% /alert %}}
 
 

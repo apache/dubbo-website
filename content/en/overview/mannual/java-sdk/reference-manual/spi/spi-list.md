@@ -8,7 +8,7 @@ weight: 2
 
 Dubbo defines many extension points within the framework, so **when you find that the official library cannot meet business needs and wish to provide customization for the Dubbo framework, please first refer to the following extension point definitions to see if you can achieve non-intrusive customization of the Dubbo framework by providing extension implementations**.
 
-For specific information, please refer to the [Summary of Dubbo SPI Extension Definitions](./#extension-summary) below this article.
+For specific information, please refer to the `Summary of Dubbo SPI Extension Definitions` below this article.
 
 <img src="/imgs/v3/concepts/extension-use.png" style="max-width:600px;height:auto;">
 

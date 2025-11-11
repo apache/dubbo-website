@@ -51,7 +51,7 @@ kubectl -n dubbo-demo get deployments
 ## View Grafana Visualization Panel
 
 After the sample program starts, it will automatically simulate service calls; just wait a bit to see metrics visualized in Grafana.
-1. If Grafana was installed via the [Dubbo Admin Panel](../../../reference/admin/architecture/), access the Admin console and find the Grafana monitoring entry in the left menu.
+1. If Grafana was installed via the [Dubbo Admin Panel](/en/overview/mannual/control-plane/architecture), access the Admin console and find the Grafana monitoring entry in the left menu.
 
 2. If Grafana is a standalone installation, access the Grafana console directly:
 

@@ -27,7 +27,7 @@ The above is a code example of starting a Dubbo RPC Server. The `DubboBootstrap`
 
 The official recommendation is to use `DubboBootstrap.start()` as the centralized entry for application startup, but to facilitate the separate publication of some services after the process starts, the Dubbo framework also allows directly calling `ServiceConfig.export()` or `ReferenceConfig.refer()` methods to publish individual services. In this case, Service/Reference will register with the default DubboBootstrap instance, similar to calling `DubboBootstrap.service(...).start()`.
 
-Below are some components commonly used in development. For a complete component definition and detailed parameter description, please refer to the [Reference Manual - Configuration Items Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties/#Configuration%20Manual):
+Below are some components commonly used in development. For a complete component definition and detailed parameter description, please refer to the [Reference Manual - Configuration Items Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties):
 
 | API Component | Globally Unique | Core Methods or Properties | Description |
 | --- | --- | --- | --- |

@@ -8,7 +8,7 @@ title: Deploying Dubbo Applications to a Virtual Machine Environment
 type: docs
 weight: 3
 ---
-This model maps Dubbo Service to the concept of <a target="_blank" href="">Kubernetes Service</a>, eliminating the need for traditional registries like Nacos, with the Kubernetes APISERVER taking on the role of the registry.
+This model maps Dubbo Service to the concept of `Kubernetes Service`, eliminating the need for traditional registries like Nacos, with the Kubernetes APISERVER taking on the role of the registry.
 
 <img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes-service.png" style="max-width:650px;height:auto;" />
 
@@ -47,7 +47,7 @@ Configure pre-stop
 
 Through Dubbo3's SPI mechanism, multiple "probes" are internally implemented based on Dubbo3 QOS operations module's HTTP services, enabling container probes to obtain corresponding probe states within the application. Moreover, the SPI implementation mechanism also facilitates users to extend internal "probes," making the entire application lifecycle more effectively governed.
 
-**Three Probes Corresponding SPI Interfaces**
+Three Probes Corresponding SPI Interfaces
 
 -   livenessProbe:  `org.apache.dubbo.qos.probe.LivenessProbe`
 -   readinessProbe:  `org.apache.dubbo.qos.probe.ReadinessProbe`

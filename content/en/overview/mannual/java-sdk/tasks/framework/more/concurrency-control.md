@@ -23,7 +23,7 @@ Allow for smoother scaling of services when demand increases.
 
 Ensure services remain reliable and stable during peak usage times.
 
-This method requires users to accurately evaluate in advance the concurrency level the system can handle, and accurately assessing system capacity is not an easy task. Therefore, Dubbo also provides an adaptive flow control mode that automatically identifies system health based on system load and implements flow control protection. You can [view the documentation here](../adaptive-concurrency-control).
+This method requires users to accurately evaluate in advance the concurrency level the system can handle, and accurately assessing system capacity is not an easy task. Therefore, Dubbo also provides an adaptive flow control mode that automatically identifies system health based on system load and implements flow control protection. You can [view the documentation here](/en/overview/mannual/java-sdk/tasks/rate-limit/adaptive-concurrency-control).
 
 ## Usage
 ### Example 1

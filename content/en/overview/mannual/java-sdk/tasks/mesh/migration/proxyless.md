@@ -65,7 +65,7 @@ The server configuration registers the Istio address as the registration center,
 
 We recommend setting the `protocol` to tri (fully compatible with grpc) for a better experience within the Istio environment.
 
-To allow Kubernetes to be aware of the application's status, the `qosAcceptForeignIp` parameter needs to be configured for Kubernetes to obtain the correct application status, [aligning the lifecycle](/en/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/).
+To allow Kubernetes to be aware of the application's status, the `qosAcceptForeignIp` parameter needs to be configured for Kubernetes to obtain the correct application status, `aligning the lifecycle`.
 
 ```properties
 dubbo.application.name=dubbo-samples-xds-provider

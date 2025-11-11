@@ -86,5 +86,5 @@ dubbo>
 ```
 
 #### Note:
-For cases where logs are empty due to incompatibility with the logging framework, you can refer to [Log Framework Adaptation and Runtime Management](../../others/logger-management/) to dynamically modify the log output framework.
+For cases where logs are empty due to incompatibility with the logging framework, you can refer to [Log Framework Adaptation and Runtime Management](/en/overview/mannual/java-sdk/reference-manual/qos/introduction/logger-management) to dynamically modify the log output framework.
 

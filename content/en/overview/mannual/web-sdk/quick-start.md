@@ -13,13 +13,13 @@ Based on the Triple protocol defined by Dubbo3, you can easily write browser and
 
 Dubbo-js released its first alpha version supporting the Dubbo3 protocol in September, which can fundamentally change the architecture and communication patterns of microservices' front and back end, allowing you to directly access backend Dubbo RPC services from a browser page or web server.
 
-![dubbo-web.png](/imgs/v3/web/web-1.png)
+[//]: # (![dubbo-web.png]&#40;/imgs/v3/web/web-1.png&#41;)
 
 # Browser Web Application Example
 
 This example demonstrates how to use dubbo-js to develop a web application running in a browser, where the web page will call backend services developed in dubbo node.js to generate page content. This example shows both IDL and non-IDL coding modes.
 
-![dubbo-web.png](/imgs/v3/web/web-2.png)
+[//]: # (![dubbo-web.png]&#40;/imgs/v3/web/web-2.png&#41;)
 
 ## IDL Mode
 

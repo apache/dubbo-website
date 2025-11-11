@@ -53,7 +53,7 @@ weight: 1
 {{% alert title="Dubbo3 相关的 Spring、Spring Boot 版本升级说明" color="warning" %}}
 Dubbo3 支持的 Spring、Spring Boot 版本兼容范围非常广：
 * 既支持 Spring 3.x ~ Spring 5.x 相关版本，同时也支持 Spring Boot 1.x ~ Spring Boot 2.x 版本。如果遇到应用无法升级高版本 Spring、Spring Boot 的情况下，可排掉 `dubbo-spring-boot-starter` 或 `dubbo` 中传递的高版本 Spring 依赖，指定项目可接受的 Spring 版本依赖即可。
-* Spring Boot 3.x 和 Spring 6 版本由于需要 JDK 17 及以上版本，请参考 [Dubbo Spring Boot 手册]() 了解详情。
+* Spring Boot 3.x 和 Spring 6 版本由于需要 JDK 17 及以上版本，请参考 `Dubbo Spring Boot 手册` 了解详情。
 {{% /alert %}}
 
 ### 步骤二：升级其它组件依赖
@@ -126,7 +126,7 @@ Dubbo3 支持的 Spring、Spring Boot 版本兼容范围非常广：
 	除了注册中心之外，如果您有用到 Dubbo 的其它特性并且依赖第三方组件支持此特性，则您需要根据具体情况升级相应的组件版本，以确保组件能配合 Dubbo3 工作。
 
 {{% alert title="查看依赖的三方组件版本" color="info" %}}
-目的是确认项目中的三方依赖可以与 Dubbo3 正常工作（保持API兼容性）。正常来说，Dubbo 应用中并不会有非常多的第三方组件依赖，所以只要按需确认即可，另外，您可以参考 [Dubbo3 版本依赖的组件版本]() 确认合适的组件版本。
+目的是确认项目中的三方依赖可以与 Dubbo3 正常工作（保持API兼容性）。正常来说，Dubbo 应用中并不会有非常多的第三方组件依赖，所以只要按需确认即可，另外，您可以参考 `Dubbo3 版本依赖的组件版本` 确认合适的组件版本。
 {{% /alert %}}
 
 ### 步骤三：兼容性检查

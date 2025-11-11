@@ -220,7 +220,7 @@ Through the above 2 steps, we have already added a LoadBalance implementation na
 ```xml
 <dubbo:reference id="helloService" interface="com.dubbo.spi.demo.api.IHelloService" loadbalance="demo" />
 ```
-Configure <loadbalance="demo"> in [dubbo:reference](dubbo:reference) at consumer part.
+Configure <loadbalance="demo"> in `dubbo:reference` at consumer part.
 
 ### 7.4 launch Dubbo
 

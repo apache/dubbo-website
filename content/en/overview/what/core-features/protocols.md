@@ -43,7 +43,7 @@ In terms of programming and communication models, the Triple protocol supports t
 * Bidirectional Streaming
 
 Development Practices
-* For using the Triple protocol, refer to [Triple Protocol Development Tasks](../../tasks/protocols/triple/) or [Java SDK Example Documentation](../../mannual/java-sdk/reference-manual/protocol/triple/)
+* For using the Triple protocol, refer to [Triple Protocol Development Tasks](/en/overview/mannual/java-sdk/tasks/protocols/triple/) or [Java SDK Example Documentation](../../mannual/java-sdk/reference-manual/protocol/triple/)
 * [Triple Design Ideas and Protocol Specifications](../../reference/protocols/triple/)
 
 ## Dubbo2
@@ -51,7 +51,7 @@ The Dubbo2 protocol is an RPC communication protocol built on top of the TCP tra
 
 The Dubbo2 protocol also has built-in HTTP support, so you can use curl to quickly verify or debug services during the development phase.
 
-* [Dubbo2 Protocol Development Tasks](../../tasks/protocols/dubbo/)
+* [Dubbo2 Protocol Development Tasks](/en/overview/mannual/java-sdk/tasks/protocols/dubbo/)
 * [Dubbo2 Design Concepts and Protocol Specifications](../../reference/protocols/tcp/)
 
 ## gRPC
@@ -61,13 +61,13 @@ gRPC is an open-source communication protocol based on HTTP/2 by Google. As ment
 
 Using the gRPC protocol within the Dubbo framework (gRPC over Dubbo Framework) is a highly efficient and lightweight choice. It allows you to use the native gRPC protocol for communication while avoiding the complexity of secondary customization and development based on gRPC (secondary development and customization of gRPC is an unavoidable step confirmed by many enterprises after large-scale practice. The Dubbo framework completes this step for developers, allowing them to use gRPC in the simplest way).
 
-[gRPC over Dubbo Example](../../tasks/protocols/grpc/)
+[gRPC over Dubbo Example](/en/overview/mannual/java-sdk/tasks/protocols/triple/grpc)
 
 ## REST
 A common communication pattern in the microservice field is HTTP + JSON. Some mainstream microservice frameworks like Spring Cloud and Microprofile default to this communication pattern. Dubbo also provides support for HTTP-based programming and communication patterns.
 
-* [HTTP over Dubbo Example](../../tasks/protocols/web/)
-* [Dubbo and Spring Cloud Interoperability](../../tasks/protocols/springcloud/)
+* `HTTP over Dubbo Example`
+* `Dubbo and Spring Cloud Interoperability`
 
 ## Other Communication Protocols
 In addition to the protocols introduced above, you can also run the following protocols on top of Dubbo. For Dubbo, you only need to change a simple configuration line to switch the underlying service communication protocol, without affecting other peripheral APIs and governance capabilities.
@@ -83,4 +83,4 @@ For the configuration and usage methods of the above protocols, including how to
 * [Rust](../../mannual/rust-sdk/)
 
 ## Custom Extensions
-In addition to the communication protocols supported by the official version above, Dubbo supports extending new protocol support. For details, please refer to [Tasks - Extensibility - Protocol](../../tasks/extensibility/protocol/)
+In addition to the communication protocols supported by the official version above, Dubbo supports extending new protocol support. For details, please refer to [Tasks - Extensibility - Protocol](/en/overview/mannual/java-sdk/tasks/extensibility/protocol)

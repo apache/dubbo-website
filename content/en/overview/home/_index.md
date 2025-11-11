@@ -31,7 +31,7 @@ content:
           links:
             - "[Service Discovery & Configuration & Metadata Center](/overview/mannual/java-sdk/reference-manual/registry/)"
             - "[HTTP Gateway](../tasks/ecosystem/gateway/)"
-            - "[Ensuring Data Consistency](../tasks/ecosystem/transaction/)"
+            - "[Ensuring Data Consistency](/en/overview/mannual/golang-sdk/tutorial/transaction/)"
             - "[Full-link Tracing](../tasks/observability/tracing/)"
             - "[Custom Extensions](../tasks/extensibility/)"
         - name: "SDK Reference Manual"
@@ -69,5 +69,5 @@ Follow the content below to quickly understand the features, advantages, and bes
 <br/>
 <br/>
 
-{{% docs/document_box %}}
+[//]: # ({{% docs/document_box %}})
 

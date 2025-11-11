@@ -20,7 +20,7 @@ weight: 3
 ### 2.1 Adding Maven Dependency
 If the project has already enabled Zookeeper as the registry center, no additional configuration is needed.
 
-If Zookeeper is not used as the registry center, please refer to [Add Zookeeper-related dependencies for the registry center](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-add-maven-dependency).
+If Zookeeper is not used as the registry center, please refer to [Add Zookeeper-related dependencies for the registry center](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#11-Add-Maven-dependencies).
 
 ### 2.2 Enable Zookeeper Configuration Center
 ```xml
@@ -48,15 +48,15 @@ MetadataReportConfig metadataConfig = new MetadataReportConfig();
 metadataConfig.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-For the format of `address`, please refer to [zookeeper register center - Enable Configuration](../../registry/zookeeper/#22-configure-and-enable-zookeeper)
+For the format of `address`, please refer to [zookeeper register center - Enable Configuration](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#13-Configure-and-enable-Zookeeper)
 
 ## 3 Advanced Configuration
 
-For complete configuration parameters, please refer to [metadata-report-config](/en/overview/mannual/java-sdk/reference-manual/config/properties/#dubbometadata-report).
+For complete configuration parameters, please refer to [metadata-report-config](/en/overview/mannual/java-sdk/reference-manual/config/properties#dubbometadata-report).
 
 ## 4 Working Principle
 
-### 4.1 [Service Operation Metadata](../overview/#2-service-operation-metadata)
+### 4.1 [Service Operation Metadata](../overview#2-service-operation-metadata)
 
 Zookeeper stores data based on a tree structure, and its metadata information is located at the following nodes:
 ```text
@@ -106,7 +106,7 @@ dataLength = 219
 numChildren = 0
 ```
 
-### 4.2 [Address Discovery - Interface-Application Name Mapping](../overview/#11-interface---application-mapping-relationship)
+### 4.2 [Address Discovery - Interface-Application Name Mapping](../overview#11-interface---application-mapping-relationship)
 In Dubbo 3.0, the service introspection mechanism is used by default to achieve service discovery. For service introspection, you can refer to [Service Introspection](https://mercyblitz.github.io/2020/05/11/Apache-Dubbo-%E6%9C%8D%E5%8A%A1%E8%87%AA%E7%9C%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/)
 
 In short, the service introspection mechanism needs to find the corresponding application name through the interface name. This relationship can be one-to-many, meaning a service name may correspond to multiple different application names. In 3.0, the metadata center provides this mapping capability.
