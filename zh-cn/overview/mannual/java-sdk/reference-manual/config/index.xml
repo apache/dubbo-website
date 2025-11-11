@@ -1,492 +1,492 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>配置手册 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/</link><description>Recent content in 配置手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo Maven Plugin 的配置方式</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/maven-plugin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/maven-plugin/</guid><description>&lt;p>本文主要讲解 Dubbo Maven Plugin 的配置方式。&lt;/p>
-&lt;p>当前 Dubbo Maven Plugin 支持以下功能：&lt;/p>
-&lt;ul>
-&lt;li>Dubbo Maven Plugin For Protobuf：生成 Dubbo 服务接口的 Stub 代码&lt;/li>
-&lt;li>Dubbo Maven Plugin For Native Image：基于 AOT 机制，生成 Native Image 必要的 Metadata 信息&lt;/li>
-&lt;/ul>
-&lt;h2 id="dubbo-maven-plugin-for-protobuf">Dubbo Maven Plugin For Protobuf&lt;/h2>
-&lt;h3 id="如何使用-dubbo-maven-plugin-生成-protobuf-stub-代码">如何使用 Dubbo Maven Plugin 生成 Protobuf Stub 代码&lt;/h3>
-&lt;h4 id="1-编写-proto-文件">1. 编写 .proto 文件&lt;/h4>
-&lt;p>greeter.proto&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_multiple_files &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_outer_classname &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;DemoServiceProto&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> objc_class_prefix &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;DEMOSRV&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> demoservice;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The demo service definition.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">service&lt;/span> DemoService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> SayHello (HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (HelloReply) {}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The request message containing the user&amp;#39;s name.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloRequest&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The response message containing the greetings
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloReply&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-引入-dubbo-maven-plugin-依赖">2. 引入 dubbo-maven-plugin 依赖&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>compile&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="3-生成文件示例">3. 生成文件示例&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/*
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Licensed to the Apache Software Foundation (ASF) under one or more
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * contributor license agreements. See the NOTICE file distributed with
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * this work for additional information regarding copyright ownership.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * The ASF licenses this file to You under the Apache License, Version 2.0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * (the &amp;#34;License&amp;#34;); you may not use this file except in compliance with
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * the License. You may obtain a copy of the License at
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * http://www.apache.org/licenses/LICENSE-2.0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Unless required by applicable law or agreed to in writing, software
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * See the License for the specific language governing permissions and
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * limitations under the License.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.demo;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.concurrent.CompletableFuture;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.concurrent.atomic.AtomicBoolean;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceDubbo&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> AtomicBoolean registered &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> AtomicBoolean();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> init() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> clazz &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> clazz &lt;span style="color:#719e07">=&lt;/span> Class.forName(DemoServiceDubbo.class.getName());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (registered.compareAndSet(&lt;span style="color:#cb4b16">false&lt;/span>, &lt;span style="color:#cb4b16">true&lt;/span>)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.common.serialize.protobuf.support.ProtobufUtils.marshaller(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.demo.HelloReply.getDefaultInstance());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.common.serialize.protobuf.support.ProtobufUtils.marshaller(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.demo.HelloRequest.getDefaultInstance());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (ClassNotFoundException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// ignore&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> clazz;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">DemoServiceDubbo&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> String SERVICE_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Code generated for Dubbo
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">IDemoService&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> org.apache.dubbo.rpc.model.DubboStub {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">static&lt;/span> Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;&lt;/span> clazz &lt;span style="color:#719e07">=&lt;/span> init();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> org.apache.dubbo.demo.HelloReply &lt;span style="color:#268bd2">sayHello&lt;/span>(org.apache.dubbo.demo.HelloRequest request);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>org.apache.dubbo.demo.HelloReply&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>(org.apache.dubbo.demo.HelloRequest request);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置列表">配置列表&lt;/h3>
-&lt;p>Dubbo Maven Plugin For Protobuf 支持以下配置：&lt;/p></description></item><item><title>配置工作原理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle/</guid><description>&lt;p>本文主要讲解 Dubbo 配置相关的 API 与工作原理，学习 Dubbo 的多种配置源、每种配置源的具体配置方式、不同配置源之间的优先级与覆盖关系。&lt;/p>
-&lt;h2 id="实现原理">实现原理&lt;/h2>
-&lt;p>为了更好地管理各种配置，Dubbo 抽象了一套结构化的配置组件，各组件总体以用途划分，分别控制不同作用域的行为。&lt;/p>
-&lt;p>&lt;img alt="dubbo-config" src="https://dubbo.apache.org/imgs/user/dubbo-config.jpg">&lt;/p>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">组件名称&lt;/th>
- &lt;th style="text-align: left">描述&lt;/th>
- &lt;th style="text-align: left">范围&lt;/th>
- &lt;th style="text-align: left">是否必须配置&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">application&lt;/td>
- &lt;td style="text-align: left">指定应用名等应用级别相关信息&lt;/td>
- &lt;td style="text-align: left">一个应用内只允许出现一个&lt;/td>
- &lt;td style="text-align: left">必选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">service&lt;/td>
- &lt;td style="text-align: left">声明普通接口或实现类为 Dubbo 服务&lt;/td>
- &lt;td style="text-align: left">一个应用内可以有 0 到多个 service&lt;/td>
- &lt;td style="text-align: left">service/reference 至少一种&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">reference&lt;/td>
- &lt;td style="text-align: left">声明普通接口为 Dubbo 服务&lt;/td>
- &lt;td style="text-align: left">一个应用内可以有 0 到多个 reference&lt;/td>
- &lt;td style="text-align: left">service/reference 至少一种&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">protocol&lt;/td>
- &lt;td style="text-align: left">要暴露的 RPC 协议及相关配置如端口号等&lt;/td>
- &lt;td style="text-align: left">一个应用可配置多个，一个 protocol 可作用于一组 service&amp;amp;reference&lt;/td>
- &lt;td style="text-align: left">可选，默认 dubbo&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">registry&lt;/td>
- &lt;td style="text-align: left">注册中心类型、地址及相关配置&lt;/td>
- &lt;td style="text-align: left">一个应用内可配置多个，一个 registry 可作用于一组 service&amp;amp;reference&lt;/td>
- &lt;td style="text-align: left">必选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">config-center&lt;/td>
- &lt;td style="text-align: left">配置中心类型、地址及相关配置&lt;/td>
- &lt;td style="text-align: left">一个应用内可配置多个，所有服务共享&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">metadata-report&lt;/td>
- &lt;td style="text-align: left">元数据中心类型、地址及相关配置&lt;/td>
- &lt;td style="text-align: left">一个应用内可配置多个，所有服务共享&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">consumer&lt;/td>
- &lt;td style="text-align: left">reference 间共享的默认配置&lt;/td>
- &lt;td style="text-align: left">一个应用内可配置多个，一个 consumer 可作用于一组 reference&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">provider&lt;/td>
- &lt;td style="text-align: left">service 间共享的默认配置&lt;/td>
- &lt;td style="text-align: left">一个应用内可配置多个，一个 provider 可作用于一组 service&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">monitor&lt;/td>
- &lt;td style="text-align: left">监控系统类型及地址&lt;/td>
- &lt;td style="text-align: left">一个应用内只允许配置一个&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">metrics&lt;/td>
- &lt;td style="text-align: left">数据采集模块相关配置&lt;/td>
- &lt;td style="text-align: left">一个应用内只允许配置一个&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">ssl&lt;/td>
- &lt;td style="text-align: left">ssl/tls 安全链接相关的证书等配置&lt;/td>
- &lt;td style="text-align: left">一个应用内只允许配置一个&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">method&lt;/td>
- &lt;td style="text-align: left">指定方法级的配置&lt;/td>
- &lt;td style="text-align: left">service 和 reference 的子配置&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">argument&lt;/td>
- &lt;td style="text-align: left">某个方法的参数配置&lt;/td>
- &lt;td style="text-align: left">method的子配置&lt;/td>
- &lt;td style="text-align: left">可选&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;blockquote>
-&lt;p>从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/#rpc%E8%B0%83%E7%94%A8">Blog&lt;/a>。&lt;/p></description></item><item><title>配置项参考手册</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/</guid><description>&lt;h2 id="jvm-d-参数">JVM(-D) 参数&lt;/h2>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">JVM 参数&lt;/th>
- &lt;th style="text-align: left">示例值&lt;/th>
- &lt;th style="text-align: left">说明&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.{config-name}.{property}&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.application.name=&amp;ldquo;dubbo-demo&amp;rdquo;&lt;br/>&lt;br/>-Ddubbo.registry.address=&amp;ldquo;nacos://host:port&amp;rdquo;&lt;br/>&lt;br/>-Ddubbo.protocol.port=&amp;ldquo;20880&amp;rdquo;&lt;br/>&lt;br/>&amp;hellip;&amp;hellip;&lt;/td>
- &lt;td style="text-align: left">Dubbo支持 &lt;a href="aaa">所有的配置项&lt;/a> 以JVM参数格式指定。其中&lt;code>config&lt;/code> 是指如 application、registry、protocol 等配置项，而&lt;code>property&lt;/code>则是指每个配置项中的具体属性。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.resolve.file&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.resolve.file=/home/ken/&amp;hellip;/dubbo-resolve.properties&lt;/td>
- &lt;td style="text-align: left">在文件中指定每个接口的直连地址url，如：org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.graalvm.nativeimage.imagecode&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java&lt;/a>&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.properties.file&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.properties.file=foo.properties&lt;/td>
- &lt;td style="text-align: left">指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.jstack-dump.max-line&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.jstack-dump.max-line=20&lt;/td>
- &lt;td style="text-align: left">Dubbo 支持自动打印调用堆栈，这个参数可以控制堆栈行数，如示例中只会打印前20行堆栈&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.json-framework.prefer&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.json-framework.prefer=gson&lt;/td>
- &lt;td style="text-align: left">设置框架中 json 序列化的具体实现，目前可选实现有 &lt;code>fastjson2&lt;/code>、&lt;code>fastjson&lt;/code>、&lt;code>gson&lt;/code>、&lt;code>jackson&lt;/code>。默认情况，框架会自动查找可用实现，以上按顺序优先级依次降低&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.network.interface.ignored&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.network.interface.ignored=eth1,eth2&lt;/td>
- &lt;td style="text-align: left">在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于排除某些网卡&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.network.interface.preferred&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.network.interface.ignored=eth0&lt;/td>
- &lt;td style="text-align: left">在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于指定一个特定网卡&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">sun.rmi.transport.tcp.responseTimeout&lt;/td>
- &lt;td style="text-align: left">-Dsun.rmi.transport.tcp.responseTimeout=5000&lt;/td>
- &lt;td style="text-align: left">用于设置 RMI 协议下的超时时间，单位ms&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">env&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">Apollo 配置中心特有参数&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">app.id&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">Apollo 配置中心特有参数&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">apollo.cluster&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">Apollo 配置中心特有参数&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">apollo.meta&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">Apollo 配置中心特有参数&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.mapping.cache.filePath&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.mapping.cache.filePath=~/.dubbo/mapping/&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>接口-应用&lt;/code>映射关系缓存文件，通常用于服务发现。文件绝对路径地址&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.mapping.cache.fileName&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.mapping.cache.fileName=dubbo-mapping&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>接口-应用&lt;/code>映射关系缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-mapping.dubbo.cache&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.mapping.cache.entrySize&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.mapping.cache.maxFileSize=300&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>接口-应用&lt;/code>映射关系缓存文件，通常用于服务发现。文件名中内容最大条目数限制&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.mapping.cache.maxFileSize&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.mapping.cache.maxFileSize=104857600&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>接口-应用&lt;/code>映射关系缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.meta.cache.filePath&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.meta.cache.filePath=~/.dubbo/meta/&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>metadata元数据&lt;/code>缓存文件，通常用于服务发现。文件绝对路径地址&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.meta.cache.fileName&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.meta.cache.fileName=dubbo-meta&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>metadata元数据&lt;/code>缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-meta.dubbo.cache&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.meta.cache.entrySize&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.meta.cache.maxFileSize=300&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>metadata元数据&lt;/code>缓存文件，通常用于服务发现。文件名中内容最大条目数限制&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.meta.cache.maxFileSize&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.meta.cache.maxFileSize=104857600&lt;/td>
- &lt;td style="text-align: left">用于设置&lt;code>metadata元数据&lt;/code>缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.application.use-secure-random-request-id&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.application.use-secure-random-request-id=true&lt;/td>
- &lt;td style="text-align: left">设置每次 rpc 调用 request id 的生成规则，是不是用随机值。如不设置则使用递增值。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.protocol.default-close-timeout&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.protocol.default-close-timeout=10000&lt;/td>
- &lt;td style="text-align: left">设置 tcp server 关闭等待时间，单位毫秒ms&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.protocol.default-heartbeat&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.protocol.default-heartbeat=10000&lt;/td>
- &lt;td style="text-align: left">设置发起心跳 heartbeat 的间隔，单位毫秒ms&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.hessian.allowNonSerializable&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">是否允许对没有实现 Serializable 接口的类进行序列化，对hessian序列化有效&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.application.hessian2.whitelist&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.application.hessian2.whitelist=true&lt;/td>
- &lt;td style="text-align: left">设置是否启用白名单机制，对hessian序列化有效。如果设置 true，则继续配置下面的 allow 规则；否则，配置 deny 规则&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.application.hessian2.allow&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.application.hessian2.allow=org.apache.dubbo.&lt;em>;com.company.&lt;/em>&lt;/td>
- &lt;td style="text-align: left">如果设置 true，则继续配置配置 allow 规则，参见文档说明&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.application.hessian2.deny&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.application.hessian2.deny=org.apache.dubbo.&lt;em>;io.commons.&lt;/em>&lt;/td>
- &lt;td style="text-align: left">如果设置 false，则继续配置配置 deny 规则，参见文档说明&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.application.manual-register&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.application.manual-register=true&lt;/td>
- &lt;td style="text-align: left">设置之后，所有服务都不会被自动注册到注册中心，直到用户调用 online 等命令手动完成注册&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.compact.enable&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.migration-file.enable&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.migration-file.enable=true&lt;/td>
- &lt;td style="text-align: left">在往应用级地址发现迁移时，是否启用规则文件读取&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.migration.file&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.migration.file=dubbo-migration.yaml&lt;/td>
- &lt;td style="text-align: left">指定往应用级地址发现迁移的规则文件路径，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.application.logger&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.application.logger=slf4j&lt;/td>
- &lt;td style="text-align: left">设置dubbo框架使用的日志组件，设置后，dubbo框架自身的日志将打印到这里（不影响应用自身）；目前支持的 slf4j、log4j、log4j2 等，设置之后须确保相应的组件依赖已经加入应用。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.properties.file&lt;/td>
- &lt;td style="text-align: left">-Ddubbo.properties.file=foo.properties&lt;/td>
- &lt;td style="text-align: left">指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h2 id="环境变量">环境变量&lt;/h2>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">环境变量&lt;/th>
- &lt;th style="text-align: left">示例值&lt;/th>
- &lt;th style="text-align: left">说明&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_{CONFIG-NAME}.{PROPERTY}&lt;/td>
- &lt;td style="text-align: left">DUBBO_APPLICATION_NAME=&amp;ldquo;dubbo-demo&amp;rdquo;&lt;br/>&lt;br/>DUBBO_REGISTRY_ADDRESS=&amp;ldquo;nacos://host:port&amp;rdquo;&lt;br/>&lt;br/>DUBBO_PROTOCOL_PORT=&amp;ldquo;20880&amp;rdquo;&lt;br/>&lt;br/>&amp;hellip;&amp;hellip;&lt;/td>
- &lt;td style="text-align: left">Dubbo支持&lt;a href="aaa">所有的配置项&lt;/a>以环境变量格式指定。其中&lt;code>CONFIG-NAME&lt;/code> 是指如 application、registry、protocol 等配置项，而 &lt;code>PROPERTY&lt;/code>则是指每个配置项中的具体属性。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_DEFAULT_SERIALIZATION&lt;/td>
- &lt;td style="text-align: left">DUBBO_DEFAULT_SERIALIZATION=&amp;ldquo;hessan2&amp;rdquo;&lt;/td>
- &lt;td style="text-align: left">设置框架的默认序列化方式，如hessian2、fastjson2、msgpack等&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO2_COMPACT_ENABLE&lt;/td>
- &lt;td style="text-align: left">DUBBO2_COMPAT_ENABLE=&amp;ldquo;true&amp;rdquo;&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_ENV_KEYS&lt;/td>
- &lt;td style="text-align: left">DUBBO_LABELS=&amp;ldquo;tag1=value1; tag2=value2&amp;rdquo;&lt;/td>
- &lt;td style="text-align: left">&lt;code>tag1=value1&lt;/code>会作为附加参数上报到地址 URL，作为系统环境变量可用于为实例打标等。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_LABELS&lt;/td>
- &lt;td style="text-align: left">DUBBO_ENV_KEYS=&amp;ldquo;DUBBO_TAG1, DUBBO_TAG2&amp;rdquo;&lt;/td>
- &lt;td style="text-align: left">Dubbo 会读取 &lt;code>DUBBO_TAG1&lt;/code>、&lt;code>DUBBO_TAG2&lt;/code>两个环境变量，并将读取的值 value &lt;code>DUBBO_TAG1=value&lt;/code> 作为附加参数上报到地址 URL。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">POD_NAMESPACE&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">用于 Kubernetes Service 场景，指定命名空间&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">CLUSTER_DOMAIN&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">用于 Kubernetes Service 场景，指定集群名称，默认 default&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_IP_TO_REGISTRY&lt;/td>
- &lt;td style="text-align: left">DUBBO_IP_TO_REGISTRY=30.123.45.187&lt;/td>
- &lt;td style="text-align: left">指定注册到注册中心 URL 中的 ip 地址&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_PORT_TO_REGISTRY&lt;/td>
- &lt;td style="text-align: left">DUBBO_PORT_TO_REGISTRY=20880&lt;/td>
- &lt;td style="text-align: left">指定注册到注册中心 URL 中的 port 端口号&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_{PROTOCOL}_PORT_TO_REGISTRY&lt;/td>
- &lt;td style="text-align: left">DUBBO_DUBBO_IP_TO_REGISTRY=30.123.45.187&lt;br/>&lt;br/>DUBBO_TRI_IP_TO_REGISTRY=30.123.45.187&lt;/td>
- &lt;td style="text-align: left">指定注册到注册中心 URL 中的 ip 地址，可以为不同协议指定不同 ip&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_{PROTOCOL}_PORT_TO_REGISTRY&lt;/td>
- &lt;td style="text-align: left">DUBBO_DUBBO_PORT_TO_REGISTRY=20880&lt;br/>&lt;br/>DUBBO_TRI_PORT_TO_REGISTRY=50051&lt;/td>
- &lt;td style="text-align: left">指定注册到注册中心 URL 中的 port 端口，可以为不同协议指定不同 port&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_IP_TO_BIND&lt;/td>
- &lt;td style="text-align: left">DUBBO_IP_TO_BIND=30.123.45.187&lt;/td>
- &lt;td style="text-align: left">指定 tcp 监听绑定的 ip 地址&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_PORT_TO_BIND&lt;/td>
- &lt;td style="text-align: left">DUBBO_PORT_TO_BIND=20880&lt;/td>
- &lt;td style="text-align: left">指定 tcp 监听绑定的 port 端口&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_{PROTOCOL}_IP_TO_BIND&lt;/td>
- &lt;td style="text-align: left">DUBBO_DUBBO_IP_TO_BIND=30.123.45.187&lt;br/>&lt;br/>DUBBO_TRI_IP_TO_BIND=30.123.45.187&lt;/td>
- &lt;td style="text-align: left">指定 tcp 监听绑定的 ip 地址，可以为不同协议指定不同 ip&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">DUBBO_{PROTOCOL}_PORT_TO_BIND&lt;/td>
- &lt;td style="text-align: left">DUBBO_DUBBO_PORT_TO_BIND=20880&lt;br/>&lt;br/>DUBBO_TRI_PORT_TO_BIND=50051&lt;/td>
- &lt;td style="text-align: left">指定 tcp 监听绑定的 port 端口，可以为不同协议指定不同 port&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.properties.file&lt;/td>
- &lt;td style="text-align: left">dubbo.properties.file=foo.properties&lt;/td>
- &lt;td style="text-align: left">指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">dubbo.migration.file&lt;/td>
- &lt;td style="text-align: left">dubbo.migration.file=dubbo-migration.yaml&lt;/td>
- &lt;td style="text-align: left">指定应用级地址发现的迁移规则的文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h2 id="配置项手册">配置项手册&lt;/h2>
-&lt;p>不论您是使用 Spring Boot、XML、注解还是 API 编写 Dubbo 应用，都可以通过以下表格参考每一项的具体含义。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>配置手册 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/</link><description>Recent content in 配置手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo Maven Plugin 的配置方式</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/maven-plugin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/maven-plugin/</guid><description>&lt;p&gt;本文主要讲解 Dubbo Maven Plugin 的配置方式。&lt;/p&gt;
+&lt;p&gt;当前 Dubbo Maven Plugin 支持以下功能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dubbo Maven Plugin For Protobuf：生成 Dubbo 服务接口的 Stub 代码&lt;/li&gt;
+&lt;li&gt;Dubbo Maven Plugin For Native Image：基于 AOT 机制，生成 Native Image 必要的 Metadata 信息&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="dubbo-maven-plugin-for-protobuf"&gt;Dubbo Maven Plugin For Protobuf&lt;/h2&gt;
+&lt;h3 id="如何使用-dubbo-maven-plugin-生成-protobuf-stub-代码"&gt;如何使用 Dubbo Maven Plugin 生成 Protobuf Stub 代码&lt;/h3&gt;
+&lt;h4 id="1-编写-proto-文件"&gt;1. 编写 .proto 文件&lt;/h4&gt;
+&lt;p&gt;greeter.proto&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-protobuf" data-lang="protobuf"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;syntax &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;proto3&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; java_multiple_files &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; java_package &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.demo&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; java_outer_classname &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;DemoServiceProto&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; objc_class_prefix &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;DEMOSRV&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; demoservice;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// The demo service definition.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;service&lt;/span&gt; DemoService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; SayHello (HelloRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (HelloReply) {}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// The request message containing the user&amp;#39;s name.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloRequest&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// The response message containing the greetings
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloReply&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; &lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="2-引入-dubbo-maven-plugin-依赖"&gt;2. 引入 dubbo-maven-plugin 依赖&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.dubbo&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo-maven-plugin&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;${dubbo.version}&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goal&amp;gt;&lt;/span&gt;compile&lt;span style="color:#268bd2"&gt;&amp;lt;/goal&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="3-生成文件示例"&gt;3. 生成文件示例&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;/*
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Licensed to the Apache Software Foundation (ASF) under one or more
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * contributor license agreements. See the NOTICE file distributed with
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * this work for additional information regarding copyright ownership.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * The ASF licenses this file to You under the Apache License, Version 2.0
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * (the &amp;#34;License&amp;#34;); you may not use this file except in compliance with
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * the License. You may obtain a copy of the License at
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * http://www.apache.org/licenses/LICENSE-2.0
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Unless required by applicable law or agreed to in writing, software
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS,
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * See the License for the specific language governing permissions and
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * limitations under the License.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo.demo;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.concurrent.CompletableFuture;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.concurrent.atomic.AtomicBoolean;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;final&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoServiceDubbo&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#268bd2"&gt;final&lt;/span&gt; AtomicBoolean registered &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; AtomicBoolean();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; Class&lt;span style="color:#719e07"&gt;&amp;lt;?&amp;gt;&lt;/span&gt; init() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Class&lt;span style="color:#719e07"&gt;&amp;lt;?&amp;gt;&lt;/span&gt; clazz &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;try&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; clazz &lt;span style="color:#719e07"&gt;=&lt;/span&gt; Class.forName(DemoServiceDubbo.class.getName());
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (registered.compareAndSet(&lt;span style="color:#cb4b16"&gt;false&lt;/span&gt;, &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;)) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; org.apache.dubbo.common.serialize.protobuf.support.ProtobufUtils.marshaller(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; org.apache.dubbo.demo.HelloReply.getDefaultInstance());
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; org.apache.dubbo.common.serialize.protobuf.support.ProtobufUtils.marshaller(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; org.apache.dubbo.demo.HelloRequest.getDefaultInstance());
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } &lt;span style="color:#719e07"&gt;catch&lt;/span&gt; (ClassNotFoundException e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// ignore&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; clazz;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoServiceDubbo&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#268bd2"&gt;final&lt;/span&gt; String SERVICE_NAME &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Code generated for Dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;IDemoService&lt;/span&gt; &lt;span style="color:#268bd2"&gt;extends&lt;/span&gt; org.apache.dubbo.rpc.model.DubboStub {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; Class&lt;span style="color:#719e07"&gt;&amp;lt;?&amp;gt;&lt;/span&gt; clazz &lt;span style="color:#719e07"&gt;=&lt;/span&gt; init();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; org.apache.dubbo.demo.HelloReply &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(org.apache.dubbo.demo.HelloRequest request);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;org.apache.dubbo.demo.HelloReply&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHelloAsync&lt;/span&gt;(org.apache.dubbo.demo.HelloRequest request);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="配置列表"&gt;配置列表&lt;/h3&gt;
+&lt;p&gt;Dubbo Maven Plugin For Protobuf 支持以下配置：&lt;/p&gt;</description></item><item><title>配置工作原理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle/</guid><description>&lt;p&gt;本文主要讲解 Dubbo 配置相关的 API 与工作原理，学习 Dubbo 的多种配置源、每种配置源的具体配置方式、不同配置源之间的优先级与覆盖关系。&lt;/p&gt;
+&lt;h2 id="实现原理"&gt;实现原理&lt;/h2&gt;
+&lt;p&gt;为了更好地管理各种配置，Dubbo 抽象了一套结构化的配置组件，各组件总体以用途划分，分别控制不同作用域的行为。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/dubbo-config.jpg" alt="dubbo-config"&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;组件名称&lt;/th&gt;
+ &lt;th&gt;描述&lt;/th&gt;
+ &lt;th&gt;范围&lt;/th&gt;
+ &lt;th&gt;是否必须配置&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;application&lt;/td&gt;
+ &lt;td&gt;指定应用名等应用级别相关信息&lt;/td&gt;
+ &lt;td&gt;一个应用内只允许出现一个&lt;/td&gt;
+ &lt;td&gt;必选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;service&lt;/td&gt;
+ &lt;td&gt;声明普通接口或实现类为 Dubbo 服务&lt;/td&gt;
+ &lt;td&gt;一个应用内可以有 0 到多个 service&lt;/td&gt;
+ &lt;td&gt;service/reference 至少一种&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;reference&lt;/td&gt;
+ &lt;td&gt;声明普通接口为 Dubbo 服务&lt;/td&gt;
+ &lt;td&gt;一个应用内可以有 0 到多个 reference&lt;/td&gt;
+ &lt;td&gt;service/reference 至少一种&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;protocol&lt;/td&gt;
+ &lt;td&gt;要暴露的 RPC 协议及相关配置如端口号等&lt;/td&gt;
+ &lt;td&gt;一个应用可配置多个，一个 protocol 可作用于一组 service&amp;amp;reference&lt;/td&gt;
+ &lt;td&gt;可选，默认 dubbo&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;registry&lt;/td&gt;
+ &lt;td&gt;注册中心类型、地址及相关配置&lt;/td&gt;
+ &lt;td&gt;一个应用内可配置多个，一个 registry 可作用于一组 service&amp;amp;reference&lt;/td&gt;
+ &lt;td&gt;必选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;config-center&lt;/td&gt;
+ &lt;td&gt;配置中心类型、地址及相关配置&lt;/td&gt;
+ &lt;td&gt;一个应用内可配置多个，所有服务共享&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;metadata-report&lt;/td&gt;
+ &lt;td&gt;元数据中心类型、地址及相关配置&lt;/td&gt;
+ &lt;td&gt;一个应用内可配置多个，所有服务共享&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;consumer&lt;/td&gt;
+ &lt;td&gt;reference 间共享的默认配置&lt;/td&gt;
+ &lt;td&gt;一个应用内可配置多个，一个 consumer 可作用于一组 reference&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;provider&lt;/td&gt;
+ &lt;td&gt;service 间共享的默认配置&lt;/td&gt;
+ &lt;td&gt;一个应用内可配置多个，一个 provider 可作用于一组 service&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;monitor&lt;/td&gt;
+ &lt;td&gt;监控系统类型及地址&lt;/td&gt;
+ &lt;td&gt;一个应用内只允许配置一个&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;metrics&lt;/td&gt;
+ &lt;td&gt;数据采集模块相关配置&lt;/td&gt;
+ &lt;td&gt;一个应用内只允许配置一个&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ssl&lt;/td&gt;
+ &lt;td&gt;ssl/tls 安全链接相关的证书等配置&lt;/td&gt;
+ &lt;td&gt;一个应用内只允许配置一个&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;method&lt;/td&gt;
+ &lt;td&gt;指定方法级的配置&lt;/td&gt;
+ &lt;td&gt;service 和 reference 的子配置&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;argument&lt;/td&gt;
+ &lt;td&gt;某个方法的参数配置&lt;/td&gt;
+ &lt;td&gt;method的子配置&lt;/td&gt;
+ &lt;td&gt;可选&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;从实现原理层面，最终 Dubbo 所有的配置项都会被组装到 URL 中，以 URL 为载体在后续的启动、RPC 调用过程中传递，进而控制框架行为。如想了解更多，请参照 Dubbo 源码解析系列文档或 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/#rpc%E8%B0%83%E7%94%A8"&gt;Blog&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>配置项参考手册</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/</guid><description>&lt;h2 id="jvm-d-参数"&gt;JVM(-D) 参数&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;JVM 参数&lt;/th&gt;
+ &lt;th&gt;示例值&lt;/th&gt;
+ &lt;th&gt;说明&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.{config-name}.{property}&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.application.name=&amp;ldquo;dubbo-demo&amp;rdquo;&lt;br/&gt;&lt;br/&gt;-Ddubbo.registry.address=&amp;ldquo;nacos://host:port&amp;rdquo;&lt;br/&gt;&lt;br/&gt;-Ddubbo.protocol.port=&amp;ldquo;20880&amp;rdquo;&lt;br/&gt;&lt;br/&gt;&amp;hellip;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;Dubbo支持 &lt;a href="aaa"&gt;所有的配置项&lt;/a&gt; 以JVM参数格式指定。其中&lt;code&gt;config&lt;/code&gt; 是指如 application、registry、protocol 等配置项，而&lt;code&gt;property&lt;/code&gt;则是指每个配置项中的具体属性。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.resolve.file&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.resolve.file=/home/ken/&amp;hellip;/dubbo-resolve.properties&lt;/td&gt;
+ &lt;td&gt;在文件中指定每个接口的直连地址url，如：org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.graalvm.nativeimage.imagecode&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java"&gt;https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java&lt;/a&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.properties.file&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.properties.file=foo.properties&lt;/td&gt;
+ &lt;td&gt;指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.jstack-dump.max-line&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.jstack-dump.max-line=20&lt;/td&gt;
+ &lt;td&gt;Dubbo 支持自动打印调用堆栈，这个参数可以控制堆栈行数，如示例中只会打印前20行堆栈&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.json-framework.prefer&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.json-framework.prefer=gson&lt;/td&gt;
+ &lt;td&gt;设置框架中 json 序列化的具体实现，目前可选实现有 &lt;code&gt;fastjson2&lt;/code&gt;、&lt;code&gt;fastjson&lt;/code&gt;、&lt;code&gt;gson&lt;/code&gt;、&lt;code&gt;jackson&lt;/code&gt;。默认情况，框架会自动查找可用实现，以上按顺序优先级依次降低&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.network.interface.ignored&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.network.interface.ignored=eth1,eth2&lt;/td&gt;
+ &lt;td&gt;在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于排除某些网卡&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.network.interface.preferred&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.network.interface.ignored=eth0&lt;/td&gt;
+ &lt;td&gt;在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于指定一个特定网卡&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;sun.rmi.transport.tcp.responseTimeout&lt;/td&gt;
+ &lt;td&gt;-Dsun.rmi.transport.tcp.responseTimeout=5000&lt;/td&gt;
+ &lt;td&gt;用于设置 RMI 协议下的超时时间，单位ms&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;env&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;Apollo 配置中心特有参数&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;app.id&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;Apollo 配置中心特有参数&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;apollo.cluster&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;Apollo 配置中心特有参数&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;apollo.meta&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;Apollo 配置中心特有参数&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.mapping.cache.filePath&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.mapping.cache.filePath=~/.dubbo/mapping/&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;接口-应用&lt;/code&gt;映射关系缓存文件，通常用于服务发现。文件绝对路径地址&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.mapping.cache.fileName&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.mapping.cache.fileName=dubbo-mapping&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;接口-应用&lt;/code&gt;映射关系缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-mapping.dubbo.cache&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.mapping.cache.entrySize&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.mapping.cache.maxFileSize=300&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;接口-应用&lt;/code&gt;映射关系缓存文件，通常用于服务发现。文件名中内容最大条目数限制&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.mapping.cache.maxFileSize&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.mapping.cache.maxFileSize=104857600&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;接口-应用&lt;/code&gt;映射关系缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.meta.cache.filePath&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.meta.cache.filePath=~/.dubbo/meta/&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;metadata元数据&lt;/code&gt;缓存文件，通常用于服务发现。文件绝对路径地址&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.meta.cache.fileName&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.meta.cache.fileName=dubbo-meta&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;metadata元数据&lt;/code&gt;缓存文件，通常用于服务发现。文件名，如此示例最终会读取和存储在文件 dubbo-meta.dubbo.cache&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.meta.cache.entrySize&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.meta.cache.maxFileSize=300&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;metadata元数据&lt;/code&gt;缓存文件，通常用于服务发现。文件名中内容最大条目数限制&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.meta.cache.maxFileSize&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.meta.cache.maxFileSize=104857600&lt;/td&gt;
+ &lt;td&gt;用于设置&lt;code&gt;metadata元数据&lt;/code&gt;缓存文件，通常用于服务发现。文件最大占用空间限制，单位byte&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.application.use-secure-random-request-id&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.application.use-secure-random-request-id=true&lt;/td&gt;
+ &lt;td&gt;设置每次 rpc 调用 request id 的生成规则，是不是用随机值。如不设置则使用递增值。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.protocol.default-close-timeout&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.protocol.default-close-timeout=10000&lt;/td&gt;
+ &lt;td&gt;设置 tcp server 关闭等待时间，单位毫秒ms&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.protocol.default-heartbeat&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.protocol.default-heartbeat=10000&lt;/td&gt;
+ &lt;td&gt;设置发起心跳 heartbeat 的间隔，单位毫秒ms&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.hessian.allowNonSerializable&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;是否允许对没有实现 Serializable 接口的类进行序列化，对hessian序列化有效&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.application.hessian2.whitelist&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.application.hessian2.whitelist=true&lt;/td&gt;
+ &lt;td&gt;设置是否启用白名单机制，对hessian序列化有效。如果设置 true，则继续配置下面的 allow 规则；否则，配置 deny 规则&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.application.hessian2.allow&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.application.hessian2.allow=org.apache.dubbo.&lt;em&gt;;com.company.&lt;/em&gt;&lt;/td&gt;
+ &lt;td&gt;如果设置 true，则继续配置配置 allow 规则，参见文档说明&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.application.hessian2.deny&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.application.hessian2.deny=org.apache.dubbo.&lt;em&gt;;io.commons.&lt;/em&gt;&lt;/td&gt;
+ &lt;td&gt;如果设置 false，则继续配置配置 deny 规则，参见文档说明&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.application.manual-register&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.application.manual-register=true&lt;/td&gt;
+ &lt;td&gt;设置之后，所有服务都不会被自动注册到注册中心，直到用户调用 online 等命令手动完成注册&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.compact.enable&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.migration-file.enable&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.migration-file.enable=true&lt;/td&gt;
+ &lt;td&gt;在往应用级地址发现迁移时，是否启用规则文件读取&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.migration.file&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.migration.file=dubbo-migration.yaml&lt;/td&gt;
+ &lt;td&gt;指定往应用级地址发现迁移的规则文件路径，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.application.logger&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.application.logger=slf4j&lt;/td&gt;
+ &lt;td&gt;设置dubbo框架使用的日志组件，设置后，dubbo框架自身的日志将打印到这里（不影响应用自身）；目前支持的 slf4j、log4j、log4j2 等，设置之后须确保相应的组件依赖已经加入应用。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.properties.file&lt;/td&gt;
+ &lt;td&gt;-Ddubbo.properties.file=foo.properties&lt;/td&gt;
+ &lt;td&gt;指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="环境变量"&gt;环境变量&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;环境变量&lt;/th&gt;
+ &lt;th&gt;示例值&lt;/th&gt;
+ &lt;th&gt;说明&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_{CONFIG-NAME}.{PROPERTY}&lt;/td&gt;
+ &lt;td&gt;DUBBO_APPLICATION_NAME=&amp;ldquo;dubbo-demo&amp;rdquo;&lt;br/&gt;&lt;br/&gt;DUBBO_REGISTRY_ADDRESS=&amp;ldquo;nacos://host:port&amp;rdquo;&lt;br/&gt;&lt;br/&gt;DUBBO_PROTOCOL_PORT=&amp;ldquo;20880&amp;rdquo;&lt;br/&gt;&lt;br/&gt;&amp;hellip;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;Dubbo支持&lt;a href="aaa"&gt;所有的配置项&lt;/a&gt;以环境变量格式指定。其中&lt;code&gt;CONFIG-NAME&lt;/code&gt; 是指如 application、registry、protocol 等配置项，而 &lt;code&gt;PROPERTY&lt;/code&gt;则是指每个配置项中的具体属性。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_DEFAULT_SERIALIZATION&lt;/td&gt;
+ &lt;td&gt;DUBBO_DEFAULT_SERIALIZATION=&amp;ldquo;hessan2&amp;rdquo;&lt;/td&gt;
+ &lt;td&gt;设置框架的默认序列化方式，如hessian2、fastjson2、msgpack等&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO2_COMPACT_ENABLE&lt;/td&gt;
+ &lt;td&gt;DUBBO2_COMPAT_ENABLE=&amp;ldquo;true&amp;rdquo;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_ENV_KEYS&lt;/td&gt;
+ &lt;td&gt;DUBBO_LABELS=&amp;ldquo;tag1=value1; tag2=value2&amp;rdquo;&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;tag1=value1&lt;/code&gt;会作为附加参数上报到地址 URL，作为系统环境变量可用于为实例打标等。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_LABELS&lt;/td&gt;
+ &lt;td&gt;DUBBO_ENV_KEYS=&amp;ldquo;DUBBO_TAG1, DUBBO_TAG2&amp;rdquo;&lt;/td&gt;
+ &lt;td&gt;Dubbo 会读取 &lt;code&gt;DUBBO_TAG1&lt;/code&gt;、&lt;code&gt;DUBBO_TAG2&lt;/code&gt;两个环境变量，并将读取的值 value &lt;code&gt;DUBBO_TAG1=value&lt;/code&gt; 作为附加参数上报到地址 URL。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;POD_NAMESPACE&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;用于 Kubernetes Service 场景，指定命名空间&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;CLUSTER_DOMAIN&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;用于 Kubernetes Service 场景，指定集群名称，默认 default&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_IP_TO_REGISTRY&lt;/td&gt;
+ &lt;td&gt;DUBBO_IP_TO_REGISTRY=30.123.45.187&lt;/td&gt;
+ &lt;td&gt;指定注册到注册中心 URL 中的 ip 地址&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_PORT_TO_REGISTRY&lt;/td&gt;
+ &lt;td&gt;DUBBO_PORT_TO_REGISTRY=20880&lt;/td&gt;
+ &lt;td&gt;指定注册到注册中心 URL 中的 port 端口号&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_{PROTOCOL}_PORT_TO_REGISTRY&lt;/td&gt;
+ &lt;td&gt;DUBBO_DUBBO_IP_TO_REGISTRY=30.123.45.187&lt;br/&gt;&lt;br/&gt;DUBBO_TRI_IP_TO_REGISTRY=30.123.45.187&lt;/td&gt;
+ &lt;td&gt;指定注册到注册中心 URL 中的 ip 地址，可以为不同协议指定不同 ip&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_{PROTOCOL}_PORT_TO_REGISTRY&lt;/td&gt;
+ &lt;td&gt;DUBBO_DUBBO_PORT_TO_REGISTRY=20880&lt;br/&gt;&lt;br/&gt;DUBBO_TRI_PORT_TO_REGISTRY=50051&lt;/td&gt;
+ &lt;td&gt;指定注册到注册中心 URL 中的 port 端口，可以为不同协议指定不同 port&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_IP_TO_BIND&lt;/td&gt;
+ &lt;td&gt;DUBBO_IP_TO_BIND=30.123.45.187&lt;/td&gt;
+ &lt;td&gt;指定 tcp 监听绑定的 ip 地址&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_PORT_TO_BIND&lt;/td&gt;
+ &lt;td&gt;DUBBO_PORT_TO_BIND=20880&lt;/td&gt;
+ &lt;td&gt;指定 tcp 监听绑定的 port 端口&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_{PROTOCOL}_IP_TO_BIND&lt;/td&gt;
+ &lt;td&gt;DUBBO_DUBBO_IP_TO_BIND=30.123.45.187&lt;br/&gt;&lt;br/&gt;DUBBO_TRI_IP_TO_BIND=30.123.45.187&lt;/td&gt;
+ &lt;td&gt;指定 tcp 监听绑定的 ip 地址，可以为不同协议指定不同 ip&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;DUBBO_{PROTOCOL}_PORT_TO_BIND&lt;/td&gt;
+ &lt;td&gt;DUBBO_DUBBO_PORT_TO_BIND=20880&lt;br/&gt;&lt;br/&gt;DUBBO_TRI_PORT_TO_BIND=50051&lt;/td&gt;
+ &lt;td&gt;指定 tcp 监听绑定的 port 端口，可以为不同协议指定不同 port&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.properties.file&lt;/td&gt;
+ &lt;td&gt;dubbo.properties.file=foo.properties&lt;/td&gt;
+ &lt;td&gt;指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;dubbo.migration.file&lt;/td&gt;
+ &lt;td&gt;dubbo.migration.file=dubbo-migration.yaml&lt;/td&gt;
+ &lt;td&gt;指定应用级地址发现的迁移规则的文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo-migration.yaml&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="配置项手册"&gt;配置项手册&lt;/h2&gt;
+&lt;p&gt;不论您是使用 Spring Boot、XML、注解还是 API 编写 Dubbo 应用，都可以通过以下表格参考每一项的具体含义。&lt;/p&gt;</description></item></channel></rss>

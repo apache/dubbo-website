@@ -1,38 +1,38 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hystrix on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/hystrix/</link><description>Recent content in Hystrix on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Fri, 13 Sep 2024 15:29:11 +0800</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/hystrix/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Hystrix 对 Dubbo 服务进行熔断限流保护</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-hystrix-%E5%AF%B9-dubbo-%E6%9C%8D%E5%8A%A1%E8%BF%9B%E8%A1%8C%E7%86%94%E6%96%AD%E9%99%90%E6%B5%81%E4%BF%9D%E6%8A%A4/</link><pubDate>Thu, 14 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-hystrix-%E5%AF%B9-dubbo-%E6%9C%8D%E5%8A%A1%E8%BF%9B%E8%A1%8C%E7%86%94%E6%96%AD%E9%99%90%E6%B5%81%E4%BF%9D%E6%8A%A4/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。&lt;/p>
-&lt;p>本文介绍在spring应用里，怎么把 Dubbo 和 Hystrix 结合起来使用。&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="spring-boot应用">Spring Boot应用&lt;/h2>
-&lt;p>Demo 地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix&lt;/a>&lt;/p>
-&lt;h3 id="生成dubbo集成spring-boot的应用">生成dubbo集成spring boot的应用&lt;/h3>
-&lt;p>对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： &lt;a href="http://start.dubbo.apache.org/bootstrap.html/">http://start.dubbo.apache.org/bootstrap.html/&lt;/a>&lt;/p>
-&lt;h3 id="配置spring-cloud-starter-netflix-hystrix">配置spring-cloud-starter-netflix-hystrix&lt;/h3>
-&lt;p>spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.cloud&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-cloud-starter-netflix-hystrix&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.4.4.RELEASE&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在Application类上增加&lt;code>@EnableHystrix&lt;/code>来启用hystrix starter：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableHystrix&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderApplication&lt;/span> {
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置provider端">配置Provider端&lt;/h3>
-&lt;p>在Dubbo的Provider上增加&lt;code>@HystrixCommand&lt;/code>配置，这样子调用就会经过Hystrix代理。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixCommand&lt;/span>(commandProperties &lt;span style="color:#719e07">=&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;circuitBreaker.requestVolumeThreshold&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;execution.isolation.thread.timeoutInMilliseconds&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span>) })
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// System.out.println(&amp;#34;async provider received: &amp;#34; + name);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// return &amp;#34;annotation: hello, &amp;#34; + name;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(&lt;span style="color:#2aa198">&amp;#34;Exception to show hystrix enabled.&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置consumer端">配置Consumer端&lt;/h3>
-&lt;p>对于Consumer端，则可以增加一层method调用，并在method上配置&lt;code>@HystrixCommand&lt;/code>。当调用出错时，会走到&lt;code>fallbackMethod = &amp;quot;reliable&amp;quot;&lt;/code>的调用里。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hystrix on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/hystrix/</link><description>Recent content in Hystrix on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Fri, 13 Sep 2024 15:29:11 +0800</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/hystrix/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Hystrix 对 Dubbo 服务进行熔断限流保护</title><link>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-hystrix-%E5%AF%B9-dubbo-%E6%9C%8D%E5%8A%A1%E8%BF%9B%E8%A1%8C%E7%86%94%E6%96%AD%E9%99%90%E6%B5%81%E4%BF%9D%E6%8A%A4/</link><pubDate>Thu, 14 Dec 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/12/14/%E4%BD%BF%E7%94%A8-hystrix-%E5%AF%B9-dubbo-%E6%9C%8D%E5%8A%A1%E8%BF%9B%E8%A1%8C%E7%86%94%E6%96%AD%E9%99%90%E6%B5%81%E4%BF%9D%E6%8A%A4/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。&lt;/p&gt;
+&lt;p&gt;本文介绍在spring应用里，怎么把 Dubbo 和 Hystrix 结合起来使用。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/Netflix/Hystrix"&gt;https://github.com/Netflix/Hystrix&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo"&gt;https://github.com/apache/dubbo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="spring-boot应用"&gt;Spring Boot应用&lt;/h2&gt;
+&lt;p&gt;Demo 地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix"&gt;https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="生成dubbo集成spring-boot的应用"&gt;生成dubbo集成spring boot的应用&lt;/h3&gt;
+&lt;p&gt;对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： &lt;a href="http://start.dubbo.apache.org/bootstrap.html/"&gt;http://start.dubbo.apache.org/bootstrap.html/&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="配置spring-cloud-starter-netflix-hystrix"&gt;配置spring-cloud-starter-netflix-hystrix&lt;/h3&gt;
+&lt;p&gt;spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.springframework.cloud&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;spring-cloud-starter-netflix-hystrix&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.4.4.RELEASE&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后在Application类上增加&lt;code&gt;@EnableHystrix&lt;/code&gt;来启用hystrix starter：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@SpringBootApplication&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@EnableHystrix&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;ProviderApplication&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="配置provider端"&gt;配置Provider端&lt;/h3&gt;
+&lt;p&gt;在Dubbo的Provider上增加&lt;code&gt;@HystrixCommand&lt;/code&gt;配置，这样子调用就会经过Hystrix代理。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@Service&lt;/span&gt;(version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; HelloService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@HystrixCommand&lt;/span&gt;(commandProperties &lt;span style="color:#719e07"&gt;=&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@HystrixProperty&lt;/span&gt;(name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;circuitBreaker.requestVolumeThreshold&amp;#34;&lt;/span&gt;, value &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;10&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@HystrixProperty&lt;/span&gt;(name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;execution.isolation.thread.timeoutInMilliseconds&amp;#34;&lt;/span&gt;, value &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;2000&amp;#34;&lt;/span&gt;) })
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// System.out.println(&amp;#34;async provider received: &amp;#34; + name);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// return &amp;#34;annotation: hello, &amp;#34; + name;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; RuntimeException(&lt;span style="color:#2aa198"&gt;&amp;#34;Exception to show hystrix enabled.&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="配置consumer端"&gt;配置Consumer端&lt;/h3&gt;
+&lt;p&gt;对于Consumer端，则可以增加一层method调用，并在method上配置&lt;code&gt;@HystrixCommand&lt;/code&gt;。当调用出错时，会走到&lt;code&gt;fallbackMethod = &amp;quot;reliable&amp;quot;&lt;/code&gt;的调用里。&lt;/p&gt;</description></item></channel></rss>

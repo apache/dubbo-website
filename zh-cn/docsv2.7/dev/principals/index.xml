@@ -1,141 +1,141 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>设计原则 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/</link><description>Recent content in 设计原则 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/index.xml" rel="self" type="application/rss+xml"/><item><title>魔鬼在细节</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/code-detail/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/code-detail/</guid><description>&lt;p>最近一直担心如果 Dubbo 分布式服务框架维护人员增多或变更，会出现质量的下降的问题， 我在想，有没有什么规则是需要大家共同遵守的。根据平时写代码时的一习惯，总结了以下在写代码过程中，尤其是框架代码，要时刻牢记的细节。可能下面要讲的这些，大家都会觉得很简单，很基础，但要做到时刻牢记。在每一行代码中都考虑这些因素，是需要很大耐心的， 大家经常说，魔鬼在细节中，确实如此。&lt;/p>
-&lt;h2 id="防止空指针和下标越界">防止空指针和下标越界&lt;/h2>
-&lt;p>这是我最不喜欢看到的异常，尤其在核心框架中，我更愿看到信息详细的参数不合法异常。这也是一个编写健壮程序的开发人员，在写每一行代码都应在潜意识中防止的异常。基本上要能确保每一次写完的代码，在不测试的情况下，都不会出现这两个异常才算合格。&lt;/p>
-&lt;h2 id="保证线程安全性和可见性">保证线程安全性和可见性&lt;/h2>
-&lt;p>对于框架的开发人员，对线程安全性和可见性的深入理解是最基本的要求。需要开发人员，在写每一行代码时都应在潜意识中确保其正确性。因为这种代码，在小并发下做功能测试时，会显得很正常。但在高并发下就会出现莫明其妙的问题，而且场景很难重现，极难排查。&lt;/p>
-&lt;h2 id="尽早失败和前置断言">尽早失败和前置断言&lt;/h2>
-&lt;p>尽早失败也应该成为潜意识，在有传入参数和状态变化时，均在入口处全部断言。一个不合法的值和状态，在第一时间就应报错，而不是等到要用时才报错。因为等到要用时，可能前面已经修改其它相关状态，而在程序中很少有人去处理回滚逻辑。这样报错后，其实内部状态可能已经混乱，极易在一个隐蔽分支上引发程序不可恢复。&lt;/p>
-&lt;h2 id="分离可靠操作和不可靠操作">分离可靠操作和不可靠操作&lt;/h2>
-&lt;p>这里的可靠是狭义的指是否会抛出异常或引起状态不一致，比如，写入一个线程安全的 Map，可以认为是可靠的，而写入数据库等，可以认为是不可靠的。开发人员必须在写每一行代码时，都注意它的可靠性与否，在代码中尽量划分开，并对失败做异常处理，并为容错，自我保护，自动恢复或切换等补偿逻辑提供清晰的切入点，保证后续增加的代码不至于放错位置，而导致原先的容错处理陷入混乱。&lt;/p>
-&lt;h2 id="异常防御但不忽略异常">异常防御，但不忽略异常&lt;/h2>
-&lt;p>这里讲的异常防御，指的是对非必须途径上的代码进行最大限度的容忍，包括程序上的 BUG，比如：获取程序的版本号，会通过扫描 Manifest 和 jar 包名称抓取版本号，这个逻辑是辅助性的，但代码却不少，初步测试也没啥问题，但应该在整个 getVersion() 中加上一个全函数的 try-catch 打印错误日志，并返回基本版本，因为 getVersion() 可能存在未知特定场景异常，或被其他的开发人员误修改逻辑(但一般人员不会去掉 try-catch)，而如果它抛出异常会导致主流程异常，这是我们不希望看到的。但这里要控制个度，不要随意 try-catch，更不要无声无息的吃掉异常。&lt;/p>
-&lt;h2 id="缩小可变域和尽量-final">缩小可变域和尽量 final&lt;/h2>
-&lt;p>如果一个类可以成为不变类(Immutable Class)，就优先将它设计成不变类。不变类有天然的并发共享优势，减少同步或复制，而且可以有效帮忙分析线程安全的范围。就算是可变类，对于从构造函数传入的引用，在类中持有时，最好将字段 final，以免被中途误修改引用。不要以为这个字段是私有的，这个类的代码都是我自己写的，不会出现对这个字段的重新赋值。要考虑的一个因素是，这个代码可能被其他人修改，他不知道你的这个弱约定，final 就是一个不变契约。&lt;/p>
-&lt;h2 id="降低修改时的误解性不埋雷">降低修改时的误解性，不埋雷&lt;/h2>
-&lt;p>前面不停的提到代码被其他人修改，这也开发人员要随时紧记的。这个其他人包括未来的自己，你要总想着这个代码可能会有人去改它。我应该给修改的人一点什么提示，让他知道我现在的设计意图，而不要在程序里面加潜规则，或埋一些容易忽视的雷，比如：你用 null 表示不可用，size 等于 0 表示黑名单，这就是一个雷，下一个修改者，包括你自己，都不会记得有这样的约定，可能后面为了改某个其它 BUG，不小心改到了这里，直接引爆故障。对于这个例子，一个原则就是永远不要区分 null 引用和 empty 值。&lt;/p>
-&lt;h2 id="提高代码的可测性">提高代码的可测性&lt;/h2>
-&lt;p>这里的可测性主要指 Mock 的容易程度，和测试的隔离性。至于测试的自动性，可重复性，非偶然性，无序性，完备性(全覆盖)，轻量性(可快速执行)，一般开发人员，加上 JUnit 等工具的辅助基本都能做到，也能理解它的好处，只是工作量问题。这里要特别强调的是测试用例的单一性(只测目标类本身)和隔离性(不传染失败)。现在的测试代码，过于强调完备性，大量重复交叉测试，看起来没啥坏处，但测试代码越多，维护代价越高。经常出现的问题是，修改一行代码或加一个判断条件，引起 100 多个测试用例不通过。时间一紧，谁有这个闲功夫去改这么多形态各异的测试用例？久而久之，这个测试代码就已经不能真实反应代码现在的状况，很多时候会被迫绕过。最好的情况是，修改一行代码，有且只有一行测试代码不通过。如果修改了代码而测试用例还能通过，那也不行，表示测试没有覆盖到。另外，可 Mock 性是隔离的基础，把间接依赖的逻辑屏蔽掉。可 Mock 性的一个最大的杀手就是静态方法，尽量少用。&lt;/p></description></item><item><title>配置设计</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/configuration/</guid><description>&lt;p>Dubbo 现在的设计是完全无侵入，也就是使用者只依赖于配置契约。经过多个版本的发展，为了满足各种需求场景，配置越来越多。为了保持兼容，配置只增不减，里面潜伏着各种风格，约定，规则。新版本也将配置做了一次调整，将想到的一些记在这，备忘。&lt;/p>
-&lt;h2 id="配置分类">配置分类&lt;/h2>
-&lt;p>首先，配置的用途是有多种的，大致可以分为：&lt;/p>
-&lt;ol start="0">
-&lt;li>环境配置，比如：连接数，超时等配置。&lt;/li>
-&lt;li>描述配置，比如：服务接口描述，服务版本等。&lt;/li>
-&lt;li>扩展配置，比如：协议扩展，策略扩展等。&lt;/li>
-&lt;/ol>
-&lt;h2 id="配置格式">配置格式&lt;/h2>
-&lt;p>通常环境配置，用 properties 配置会比较方便，因为都是一些离散的简单值，用 key-value 配置可以减少配置的学习成本。&lt;/p>
-&lt;p>而描述配置，通常信息比较多，甚至有层次关系，用 xml 配置会比较方便，因为树结构的配置表现力更强。如果非常复杂，也可以考虑自定义 DSL 做为配置。有时候这类配置也可以用 Annotation 代替， 因为这些配置和业务逻辑相关，放在代码里也是合理的。&lt;/p>
-&lt;p>另外扩展配置，可能不尽相同。如果只是策略接口实现类替换，可以考虑 properties 等结构。如果有复杂的生命周期管理，可能需要 XML 等配置。有时候扩展会通过注册接口的方式提供。&lt;/p>
-&lt;h2 id="配置加载">配置加载&lt;/h2>
-&lt;p>对于环境配置，在 java 世界里，比较常规的做法，是在 classpath 下约定一个以项目为名称的 properties 配置，比如：log4j.properties，velocity.properties等。产品在初始化时，自动从 classpath 下加载该配置。我们平台的很多项目也使用类似策略，如：dubbo.properties，comsat.xml 等。这样有它的优势，就是基于约定，简化了用户对配置加载过程的干预。但同样有它的缺点，当 classpath 存在同样的配置时，可能误加载，以及在 ClassLoader 隔离时，可能找不到配置，并且，当用户希望将配置放到统一的目录时，不太方便。&lt;/p>
-&lt;p>而对于描述配置，因为要参与业务逻辑，通常会嵌到应用的生命周期管理中。现在使用 spring 的项目越来越多，直接使用 spring 配置的比较普遍，而且 spring 允许自定义 schema，配置简化后很方便。当然，也有它的缺点，就是强依赖 spring，可以提编程接口做了配套方案。&lt;/p>
-&lt;p>在 Dubbo 既存在描述配置也有环境配置。一部分用 spring 的 schema 做配置加载，一部分从 classpath 扫描 properties 做配置加载。在新版本中做了一个优先级约定，统一以 spring 的 schema 驱动配置加载，dubbo.properties作为配置补充。&lt;/p>
-&lt;p>同时，在 Spring 的场景下，除了使用 schema 外，还支持完全以 application.properties 的方式配置：&lt;/p></description></item><item><title>防痴呆设计</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/dummy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/dummy/</guid><description>&lt;p>最近有点痴呆，因为解决了太多的痴呆问题。服务框架实施面越来越广，已有 50 多个项目在使用，每天都要去帮应用查问题，来来回回，发现大部分都是配置错误，或者重复的文件或类，或者网络不通等，所以准备在新版本中加入防痴呆设计。估且这么叫吧，可能很简单，但对排错速度还是有点帮助，希望能抛砖引玉，也希望大家多给力，想出更多的防范措施共享出来。&lt;/p>
-&lt;h2 id="检查重复的jar包">检查重复的jar包&lt;/h2>
-&lt;p>最痴呆的问题，就是有多个版本的相同jar包，会出现新版本的 A 类，调用了旧版本的 B 类，而且和JVM加载顺序有关，问题带有偶然性，误导性，遇到这种莫名其妙的问题，最头疼，所以，第一条，先把它防住，在每个 jar 包中挑一个一定会加载的类，加上重复类检查，给个示例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">static&lt;/span> { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Duplicate.checkDuplicate(Xxx.class); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>} 
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>检查重复工具类：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Duplicate&lt;/span> { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">Duplicate&lt;/span>() {} 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">checkDuplicate&lt;/span>(Class cls) { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> checkDuplicate(cls.getName().replace(&lt;span style="color:#2aa198">&amp;#39;.&amp;#39;&lt;/span>, &lt;span style="color:#2aa198">&amp;#39;/&amp;#39;&lt;/span>) &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;.class&amp;#34;&lt;/span>); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">checkDuplicate&lt;/span>(String path) { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 在ClassPath搜文件 &lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Enumeration urls &lt;span style="color:#719e07">=&lt;/span> Thread.currentThread().getContextClassLoader().getResources(path); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Set files &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashSet(); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">while&lt;/span> (urls.hasMoreElements()) { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> URL url &lt;span style="color:#719e07">=&lt;/span> urls.nextElement(); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (url &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String file &lt;span style="color:#719e07">=&lt;/span> url.getFile(); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (file &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> file.length() &lt;span style="color:#719e07">&amp;gt;&lt;/span> 0) { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> files.add(file); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 如果有多个，就表示重复 &lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (files.size() &lt;span style="color:#719e07">&amp;gt;&lt;/span> 1) { 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.error(&lt;span style="color:#2aa198">&amp;#34;Duplicate class &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> path &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; in &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> files.size() &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; jar &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> files); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Throwable e) { &lt;span style="color:#586e75">// 防御性容错 &lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.error(e.getMessage(), e); 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>} 
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="检查重复的配置文件">检查重复的配置文件&lt;/h2>
-&lt;p>配置文件加载错，也是经常碰到的问题。用户通常会和你说：“我配置的很正确啊，不信我发给你看下，但就是报错”。然后查一圈下来，原来他发过来的配置根本没加载，平台很多产品都会在 classpath 下放一个约定的配置，如果项目中有多个，通常会取JVM加载的第一个，为了不被这么低级的问题折腾，和上面的重复jar包一样，在配置加载的地方，加上：&lt;/p></description></item><item><title>谈谈扩充式扩展与增量式扩展</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/expansibility/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/expansibility/</guid><description>&lt;p>我们平台的产品越来越多，产品的功能也越来越多。平台的产品为了适应各 BU 和部门以及产品线的需求，势必会将很多不相干的功能凑在一起，客户可以选择性的使用。为了兼容更多的需求，每个产品，每个框架，都在不停的扩展，而我们经常会选择一些扩展的扩展方式，也就是将新旧功能扩展成一个通用实现。我想讨论是，有些情况下也可以考虑增量式的扩展方式，也就是保留原功能的简单性，新功能独立实现。我最近一直做分布式服务框架的开发，就拿我们项目中的问题开涮吧。&lt;/p>
-&lt;p>比如：远程调用框架，肯定少不了序列化功能，功能很简单，就是把流转成对象，对象转成流。但因有些地方可能会使用 osgi，这样序列化时，IO 所在的 ClassLoader 可能和业务方的 ClassLoader 是隔离的。需要将流转换成 byte[] 数组，然后传给业务方的 ClassLoader 进行序列化。为了适应 osgi 需求，把原来非 osgi 与 osgi 的场景扩展了一下，这样，不管是不是 osgi 环境，都先将流转成 byte[] 数组，拷贝一次。然而，大部分场景都用不上 osgi，却为 osgi 付出了代价。而如果采用增量式扩展方式，非 osgi 的代码原封不动，再加一个 osgi 的实现，要用 osgi 的时候，直接依赖 osgi 实现即可。&lt;/p>
-&lt;p>再比如：最开始，远程服务都是基于接口方法，进行透明化调用的。这样，扩展接口就是， invoke(Method method, Object[] args)，后来，有了无接口调用的需求，就是没有接口方法也能调用，并将 POJO 对象都转换成 Map 表示。因为 Method 对象是不能直接 new 出来的，我们不自觉选了一个扩展式扩展，把扩展接口改成了 invoke(String methodName, String[] parameterTypes, String returnTypes, Object[] args)，导致不管是不是无接口调用，都得把 parameterTypes 从 Class[] 转成 String[]。如果选用增量式扩展，应该是保持原有接口不变，增加一个 GeneralService 接口，里面有一个通用的 invoke() 方法，和其它正常业务上的接口一样的调用方式，扩展接口也不用变，只是 GeneralServiceImpl 的 invoke() 实现会将收到的调用转给目标接口，这样就能将新功能增量到旧功能上，并保持原来结构的简单性。&lt;/p>
-&lt;p>再再比如：无状态消息发送，很简单，序列化一个对象发过去就行。后来有了同步消息发送需求，需要一个 Request/Response 进行配对，采用扩展式扩展，自然想到，无状态消息其实是一个没有 Response 的 Request，所以在 Request 里加一个 boolean 状态，表示要不要返回 Response。如果再来一个会话消息发送需求，那就再加一个 Session 交互，然后发现，原来同步消息发送是会话消息的一种特殊情况，所有场景都传 Session，不需要 Session 的地方无视即可。&lt;/p></description></item><item><title>扩展点重构</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/extension/</guid><description>&lt;p>随着服务化的推广，网站对Dubbo服务框架的需求逐渐增多，Dubbo 的现有开发人员能实现的需求有限，很多需求都被 delay，而网站的同学也希望参与进来，加上领域的推动，所以平台计划将部分项目对公司内部开放，让大家一起来实现，Dubbo 为试点项目之一。&lt;/p>
-&lt;p>既然要开放，那 Dubbo 就要留一些扩展点，让参与者尽量黑盒扩展，而不是白盒的修改代码，否则分支，质量，合并，冲突都会很难管理。&lt;/p>
-&lt;p>先看一下 Dubbo 现有的设计：&lt;/p>
-&lt;p>&lt;img alt="design-step-1" src="https://dubbo.apache.org/imgs/dev/design-step1.png">&lt;/p>
-&lt;p>这里面虽然有部分扩展接口，但并不能很好的协作，而且扩展点的加载和配置都没有统一处理，所以下面对它进行重构。&lt;/p>
-&lt;h2 id="第一步微核心插件式平等对待第三方">第一步，微核心，插件式，平等对待第三方&lt;/h2>
-&lt;p>即然要扩展，扩展点的加载方式，首先要统一，微核心+插件式，是比较能达到 OCP 原则的思路。&lt;/p>
-&lt;p>由一个插件生命周期管理容器，构成微核心，核心不包括任何功能，这样可以确保所有功能都能被替换，并且，框架作者能做到的功能，扩展者也一定要能做到，以保证平等对待第三方，所以，框架自身的功能也要用插件的方式实现，不能有任何硬编码。&lt;/p>
-&lt;p>通常微核心都会采用 Factory、IoC、OSGi 等方式管理插件生命周期。考虑 Dubbo 的适用面，不想强依赖 Spring 等 IoC 容器。自已造一个小的 IoC 容器，也觉得有点过度设计，所以打算采用最简单的 Factory 方式管理插件。&lt;/p>
-&lt;p>最终决定采用的是 JDK 标准的 SPI 扩展机制，参见：&lt;code>java.util.ServiceLoader &lt;/code>，也就是扩展者在 jar 包的 &lt;code>META-INF/services/&lt;/code> 目录下放置与接口同名的文本文件，内容为接口实现类名，多个实现类名用换行符分隔。比如，需要扩展 Dubbo 的协议，只需在 xxx.jar 中放置文件：&lt;code>META-INF/services/org.apache.dubbo.rpc.Protocol&lt;/code>，内容为 &lt;code>com.alibaba.xxx.XxxProtocol&lt;/code>。Dubbo 通过 ServiceLoader 扫描到所有 Protocol 实现。&lt;/p>
-&lt;p>并约定所有插件，都必须标注：&lt;code>@Extension(&amp;quot;name&amp;quot;)&lt;/code>，作为加载后的标识性名称，用于配置选择。&lt;/p>
-&lt;h2 id="第二步每个扩展点只封装一个变化因子最大化复用">第二步，每个扩展点只封装一个变化因子，最大化复用&lt;/h2>
-&lt;p>每个扩展点的实现者，往往都只是关心一件事，现在的扩展点，并没有完全分离。比如：Failover, Route, LoadBalance, Directory 没有完全分开，全由 RoutingInvokerGroup 写死了。&lt;/p>
-&lt;p>再比如，协议扩展，扩展者可能只是想替换序列化方式，或者只替换传输方式，并且 Remoting 和 Http 也能复用序列化等实现。这样，需为传输方式，客户端实现，服务器端实现，协议头解析，数据序列化，都留出不同扩展点。&lt;/p>
-&lt;p>拆分后，设计如下：&lt;/p>
-&lt;p>&lt;img alt="design-step-2" src="https://dubbo.apache.org/imgs/dev/design-step2.png">&lt;/p>
-&lt;h2 id="第三步全管道式设计框架自身逻辑均使用截面拦截实现">第三步，全管道式设计，框架自身逻辑，均使用截面拦截实现&lt;/h2>
-&lt;p>现在很多的逻辑，都是放在基类中实现，然后通过模板方法回调子类的实现，包括：local, mock, generic, echo, token, accesslog, monitor, count, limit 等等，可以全部拆分使用 Filter 实现，每个功能都是调用链上的一环。 比如：(基类模板方法)&lt;/p></description></item><item><title>一些设计上的基本常识</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/general-knowledge/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/general-knowledge/</guid><description>&lt;p>最近给团队新人讲了一些设计上的常识，可能会对其它的新人也有些帮助，把暂时想到的几条，先记在这里。&lt;/p>
-&lt;h2 id="api-与-spi-分离">API 与 SPI 分离&lt;/h2>
-&lt;p>框架或组件通常有两类客户，一个是使用者，一个是扩展者。API (Application Programming Interface) 是给使用者用的，而 SPI (Service Provide Interface) 是给扩展者用的。在设计时，尽量把它们隔离开，而不要混在一起。也就是说，使用者是看不到扩展者写的实现的。&lt;/p>
-&lt;p>比如：一个 Web 框架，它有一个 API 接口叫 Action，里面有个 execute() 方法，是给使用者用来写业务逻辑的。然后，Web 框架有一个 SPI 接口给扩展者控制输出方式，比如用 velocity 模板输出还是用 json 输出等。如果这个 Web 框架使用一个都继承 Action 的 VelocityAction 和一个 JsonAction 做为扩展方式，要用 velocity 模板输出的就继承 VelocityAction，要用 json 输出的就继承 JsonAction，这就是 API 和 SPI 没有分离的反面例子，SPI 接口混在了 API 接口中。&lt;/p>
-&lt;p>&lt;img alt="mix-api-spi" src="https://dubbo.apache.org/imgs/dev/mix-api-spi.jpg">&lt;/p>
-&lt;p>合理的方式是，有一个单独的 Renderer 接口，有 VelocityRenderer 和 JsonRenderer 实现，Web 框架将 Action 的输出转交给 Renderer 接口做渲染输出。&lt;/p>
-&lt;p>&lt;img alt="seperate-api-spi" src="https://dubbo.apache.org/imgs/dev/seperate-api-spi.jpg">&lt;/p>
-&lt;h2 id="服务域实体域会话域分离">服务域/实体域/会话域分离&lt;/h2>
-&lt;p>任何框架或组件，总会有核心领域模型，比如：Spring 的 Bean，Struts 的 Action，Dubbo 的 Service，Napoli 的 Queue 等等。这个核心领域模型及其组成部分称为实体域，它代表着我们要操作的目标本身。实体域通常是线程安全的，不管是通过不变类，同步状态，或复制的方式。&lt;/p></description></item><item><title>设计实现的健壮性</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/robustness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/robustness/</guid><description>&lt;p>Dubbo 作为远程服务暴露、调用和治理的解决方案，是应用运转的经络，其本身实现健壮性的重要程度是不言而喻的。&lt;/p>
-&lt;p>这里列出一些 Dubbo 用到的原则和方法。&lt;/p>
-&lt;h2 id="日志">日志&lt;/h2>
-&lt;p>日志是发现问题、查看问题一个最常用的手段。日志质量往往被忽视，没有日志使用上的明确约定。重视 Log 的使用，提高 Log 的信息浓度。日志过多、过于混乱，会导致有用的信息被淹没。&lt;/p>
-&lt;p>要有效利用这个工具要注意：&lt;/p>
-&lt;h3 id="严格约定warnerror级别记录的内容">严格约定WARN、ERROR级别记录的内容&lt;/h3>
-&lt;ul>
-&lt;li>WARN 表示可以恢复的问题，无需人工介入。&lt;/li>
-&lt;li>ERROR 表示需要人工介入问题。&lt;/li>
-&lt;/ul>
-&lt;p>有了这样的约定，监管系统发现日志文件的中出现 ERROR 字串就报警，又尽量减少了发生。过多的报警会让人疲倦，使人对报警失去警惕性，使 ERROR 日志失去意义。再辅以人工定期查看 WARN 级别信息，以评估系统的“亚健康”程度。&lt;/p>
-&lt;h3 id="日志中尽量多的收集关键信息">日志中，尽量多的收集关键信息&lt;/h3>
-&lt;p>哪些是关键信息呢？&lt;/p>
-&lt;ul>
-&lt;li>出问题时的现场信息，即排查问题要用到的信息。如服务调用失败时，要给出使用 Dubbo 的版本、服务提供者的 IP、使用的是哪个注册中心；调用的是哪个服务、哪个方法等等。这些信息如果不给出，那么事后人工收集的，问题过后现场可能已经不能复原，加大排查问题的难度。&lt;/li>
-&lt;li>如果可能，给出问题的原因和解决方法。这让维护和问题解决变得简单，而不是寻求精通者（往往是实现者）的帮助。&lt;/li>
-&lt;/ul>
-&lt;h3 id="同一个或是一类问题不要重复记录多次">同一个或是一类问题不要重复记录多次&lt;/h3>
-&lt;p>同一个或是一类异常日志连续出现几十遍的情况，还是常常能看到的。人眼很容易漏掉淹没在其中不一样的重要日志信息。要尽量避免这种情况。在可以预见会出现的情况，有必要加一些逻辑来避免。&lt;/p>
-&lt;p>如为一个问题准备一个标志，出问题后打日志后设置标志，避免重复打日志。问题恢复后清除标志。&lt;/p>
-&lt;p>虽然有点麻烦，但是这样做保证日志信息浓度，让监控更有效。&lt;/p>
-&lt;h2 id="界限设置">界限设置&lt;/h2>
-&lt;p>资源是有限的，CPU、内存、IO 等等。不要因为外部的请求、数据不受限的而崩溃。&lt;/p>
-&lt;h3 id="线程池exectorservice的大小和饱和策略">线程池(ExectorService)的大小和饱和策略&lt;/h3>
-&lt;p>Server 端用于处理请求的 ExectorService 设置上限。ExecutorService 的任务等待队列使用有限队列，避免资源耗尽。当任务等待队列饱和时，选择一个合适的饱和策略。这样保证平滑劣化。&lt;/p>
-&lt;p>在 Dubbo 中，饱和策略是丢弃数据，等待结果也只是请求的超时。&lt;/p>
-&lt;p>达到饱和时，说明已经达到服务提供方的负荷上限，要在饱和策略的操作中日志记录这个问题，以发出监控警报。记得注意不要重复多次记录哦。（注意，缺省的饱和策略不会有这些附加的操作。）根据警报的频率，已经决定扩容调整等等，避免系统问题被忽略。&lt;/p>
-&lt;h3 id="集合容量">集合容量&lt;/h3>
-&lt;p>如果确保进入集合的元素是可控的且是足够少，则可以放心使用。这是大部分的情况。如果不能保证，则使用有有界的集合。当到达界限时，选择一个合适的丢弃策略。&lt;/p>
-&lt;h2 id="容错-重试-恢复">容错-重试-恢复&lt;/h2>
-&lt;p>高可用组件要容忍其依赖组件的失败。&lt;/p>
-&lt;h3 id="dubbo-的服务注册中心">Dubbo 的服务注册中心&lt;/h3>
-&lt;p>目前服务注册中心使用了数据库来保存服务提供者和消费者的信息。注册中心集群不同注册中心也通过数据库来进行同步数据，以感知其它注册中心上提供者的变化。注册中心会在内存中保存一份提供者和消费者数据，数据库不可用时，注册中心独立对外提供服务以保证正常运转，只是拿不到其它注册中心的数据。当数据库恢复时，重试逻辑会将内存中修改的数据写回数据库，并拿到数据库中新数据。&lt;/p>
-&lt;h3 id="服务的消费者">服务的消费者&lt;/h3>
-&lt;p>服务消费者从注册中心拿到提供者列表后，会保存提供者列表到内存和磁盘文件中。这样注册中心宕机后消费者可以正常运转，甚至可以在注册中心宕机过程中重启消费者。消费者启动时，发现注册中心不可用，会读取保存在磁盘文件中提供者列表。重试逻辑保证注册中心恢复后，更新信息。&lt;/p>
-&lt;h2 id="重试延迟策略">重试延迟策略&lt;/h2>
-&lt;p>上一点的子问题。Dubbo 中碰到有两个相关的场景。&lt;/p>
-&lt;h3 id="数据库上的活锁">数据库上的活锁&lt;/h3>
-&lt;p>注册中心会定时更新数据库一条记录的时间戳，这样集群中其它的注册中心感知它是存活。过期注册中心和它的相关数据 会被清除。数据库正常时，这个机制运行良好。但是数据库负荷高时，其上的每个操作都会很慢。这就出现：&lt;/p>
-&lt;p>A 注册中心认为 B 过期，删除 B 的数据。 B 发现自己的数据没有了，重新写入自己的数据的反复操作。这些反复的操作又加重了数据库的负荷，恶化问题。&lt;/p></description></item><item><title/><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/introduction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/introduction/</guid><description>&lt;h1 id="设计原则">设计原则&lt;/h1>
-&lt;p>本章节的设计原则摘录自梁飞在 javaeye 上发表的系列文章。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>设计原则 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/</link><description>Recent content in 设计原则 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/index.xml" rel="self" type="application/rss+xml"/><item><title>魔鬼在细节</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/code-detail/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/code-detail/</guid><description>&lt;p&gt;最近一直担心如果 Dubbo 分布式服务框架维护人员增多或变更，会出现质量的下降的问题， 我在想，有没有什么规则是需要大家共同遵守的。根据平时写代码时的一习惯，总结了以下在写代码过程中，尤其是框架代码，要时刻牢记的细节。可能下面要讲的这些，大家都会觉得很简单，很基础，但要做到时刻牢记。在每一行代码中都考虑这些因素，是需要很大耐心的， 大家经常说，魔鬼在细节中，确实如此。&lt;/p&gt;
+&lt;h2 id="防止空指针和下标越界"&gt;防止空指针和下标越界&lt;/h2&gt;
+&lt;p&gt;这是我最不喜欢看到的异常，尤其在核心框架中，我更愿看到信息详细的参数不合法异常。这也是一个编写健壮程序的开发人员，在写每一行代码都应在潜意识中防止的异常。基本上要能确保每一次写完的代码，在不测试的情况下，都不会出现这两个异常才算合格。&lt;/p&gt;
+&lt;h2 id="保证线程安全性和可见性"&gt;保证线程安全性和可见性&lt;/h2&gt;
+&lt;p&gt;对于框架的开发人员，对线程安全性和可见性的深入理解是最基本的要求。需要开发人员，在写每一行代码时都应在潜意识中确保其正确性。因为这种代码，在小并发下做功能测试时，会显得很正常。但在高并发下就会出现莫明其妙的问题，而且场景很难重现，极难排查。&lt;/p&gt;
+&lt;h2 id="尽早失败和前置断言"&gt;尽早失败和前置断言&lt;/h2&gt;
+&lt;p&gt;尽早失败也应该成为潜意识，在有传入参数和状态变化时，均在入口处全部断言。一个不合法的值和状态，在第一时间就应报错，而不是等到要用时才报错。因为等到要用时，可能前面已经修改其它相关状态，而在程序中很少有人去处理回滚逻辑。这样报错后，其实内部状态可能已经混乱，极易在一个隐蔽分支上引发程序不可恢复。&lt;/p&gt;
+&lt;h2 id="分离可靠操作和不可靠操作"&gt;分离可靠操作和不可靠操作&lt;/h2&gt;
+&lt;p&gt;这里的可靠是狭义的指是否会抛出异常或引起状态不一致，比如，写入一个线程安全的 Map，可以认为是可靠的，而写入数据库等，可以认为是不可靠的。开发人员必须在写每一行代码时，都注意它的可靠性与否，在代码中尽量划分开，并对失败做异常处理，并为容错，自我保护，自动恢复或切换等补偿逻辑提供清晰的切入点，保证后续增加的代码不至于放错位置，而导致原先的容错处理陷入混乱。&lt;/p&gt;
+&lt;h2 id="异常防御但不忽略异常"&gt;异常防御，但不忽略异常&lt;/h2&gt;
+&lt;p&gt;这里讲的异常防御，指的是对非必须途径上的代码进行最大限度的容忍，包括程序上的 BUG，比如：获取程序的版本号，会通过扫描 Manifest 和 jar 包名称抓取版本号，这个逻辑是辅助性的，但代码却不少，初步测试也没啥问题，但应该在整个 getVersion() 中加上一个全函数的 try-catch 打印错误日志，并返回基本版本，因为 getVersion() 可能存在未知特定场景异常，或被其他的开发人员误修改逻辑(但一般人员不会去掉 try-catch)，而如果它抛出异常会导致主流程异常，这是我们不希望看到的。但这里要控制个度，不要随意 try-catch，更不要无声无息的吃掉异常。&lt;/p&gt;
+&lt;h2 id="缩小可变域和尽量-final"&gt;缩小可变域和尽量 final&lt;/h2&gt;
+&lt;p&gt;如果一个类可以成为不变类(Immutable Class)，就优先将它设计成不变类。不变类有天然的并发共享优势，减少同步或复制，而且可以有效帮忙分析线程安全的范围。就算是可变类，对于从构造函数传入的引用，在类中持有时，最好将字段 final，以免被中途误修改引用。不要以为这个字段是私有的，这个类的代码都是我自己写的，不会出现对这个字段的重新赋值。要考虑的一个因素是，这个代码可能被其他人修改，他不知道你的这个弱约定，final 就是一个不变契约。&lt;/p&gt;
+&lt;h2 id="降低修改时的误解性不埋雷"&gt;降低修改时的误解性，不埋雷&lt;/h2&gt;
+&lt;p&gt;前面不停的提到代码被其他人修改，这也开发人员要随时紧记的。这个其他人包括未来的自己，你要总想着这个代码可能会有人去改它。我应该给修改的人一点什么提示，让他知道我现在的设计意图，而不要在程序里面加潜规则，或埋一些容易忽视的雷，比如：你用 null 表示不可用，size 等于 0 表示黑名单，这就是一个雷，下一个修改者，包括你自己，都不会记得有这样的约定，可能后面为了改某个其它 BUG，不小心改到了这里，直接引爆故障。对于这个例子，一个原则就是永远不要区分 null 引用和 empty 值。&lt;/p&gt;
+&lt;h2 id="提高代码的可测性"&gt;提高代码的可测性&lt;/h2&gt;
+&lt;p&gt;这里的可测性主要指 Mock 的容易程度，和测试的隔离性。至于测试的自动性，可重复性，非偶然性，无序性，完备性(全覆盖)，轻量性(可快速执行)，一般开发人员，加上 JUnit 等工具的辅助基本都能做到，也能理解它的好处，只是工作量问题。这里要特别强调的是测试用例的单一性(只测目标类本身)和隔离性(不传染失败)。现在的测试代码，过于强调完备性，大量重复交叉测试，看起来没啥坏处，但测试代码越多，维护代价越高。经常出现的问题是，修改一行代码或加一个判断条件，引起 100 多个测试用例不通过。时间一紧，谁有这个闲功夫去改这么多形态各异的测试用例？久而久之，这个测试代码就已经不能真实反应代码现在的状况，很多时候会被迫绕过。最好的情况是，修改一行代码，有且只有一行测试代码不通过。如果修改了代码而测试用例还能通过，那也不行，表示测试没有覆盖到。另外，可 Mock 性是隔离的基础，把间接依赖的逻辑屏蔽掉。可 Mock 性的一个最大的杀手就是静态方法，尽量少用。&lt;/p&gt;</description></item><item><title>配置设计</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/configuration/</guid><description>&lt;p&gt;Dubbo 现在的设计是完全无侵入，也就是使用者只依赖于配置契约。经过多个版本的发展，为了满足各种需求场景，配置越来越多。为了保持兼容，配置只增不减，里面潜伏着各种风格，约定，规则。新版本也将配置做了一次调整，将想到的一些记在这，备忘。&lt;/p&gt;
+&lt;h2 id="配置分类"&gt;配置分类&lt;/h2&gt;
+&lt;p&gt;首先，配置的用途是有多种的，大致可以分为：&lt;/p&gt;
+&lt;ol start="0"&gt;
+&lt;li&gt;环境配置，比如：连接数，超时等配置。&lt;/li&gt;
+&lt;li&gt;描述配置，比如：服务接口描述，服务版本等。&lt;/li&gt;
+&lt;li&gt;扩展配置，比如：协议扩展，策略扩展等。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="配置格式"&gt;配置格式&lt;/h2&gt;
+&lt;p&gt;通常环境配置，用 properties 配置会比较方便，因为都是一些离散的简单值，用 key-value 配置可以减少配置的学习成本。&lt;/p&gt;
+&lt;p&gt;而描述配置，通常信息比较多，甚至有层次关系，用 xml 配置会比较方便，因为树结构的配置表现力更强。如果非常复杂，也可以考虑自定义 DSL 做为配置。有时候这类配置也可以用 Annotation 代替， 因为这些配置和业务逻辑相关，放在代码里也是合理的。&lt;/p&gt;
+&lt;p&gt;另外扩展配置，可能不尽相同。如果只是策略接口实现类替换，可以考虑 properties 等结构。如果有复杂的生命周期管理，可能需要 XML 等配置。有时候扩展会通过注册接口的方式提供。&lt;/p&gt;
+&lt;h2 id="配置加载"&gt;配置加载&lt;/h2&gt;
+&lt;p&gt;对于环境配置，在 java 世界里，比较常规的做法，是在 classpath 下约定一个以项目为名称的 properties 配置，比如：log4j.properties，velocity.properties等。产品在初始化时，自动从 classpath 下加载该配置。我们平台的很多项目也使用类似策略，如：dubbo.properties，comsat.xml 等。这样有它的优势，就是基于约定，简化了用户对配置加载过程的干预。但同样有它的缺点，当 classpath 存在同样的配置时，可能误加载，以及在 ClassLoader 隔离时，可能找不到配置，并且，当用户希望将配置放到统一的目录时，不太方便。&lt;/p&gt;
+&lt;p&gt;而对于描述配置，因为要参与业务逻辑，通常会嵌到应用的生命周期管理中。现在使用 spring 的项目越来越多，直接使用 spring 配置的比较普遍，而且 spring 允许自定义 schema，配置简化后很方便。当然，也有它的缺点，就是强依赖 spring，可以提编程接口做了配套方案。&lt;/p&gt;
+&lt;p&gt;在 Dubbo 既存在描述配置也有环境配置。一部分用 spring 的 schema 做配置加载，一部分从 classpath 扫描 properties 做配置加载。在新版本中做了一个优先级约定，统一以 spring 的 schema 驱动配置加载，dubbo.properties作为配置补充。&lt;/p&gt;
+&lt;p&gt;同时，在 Spring 的场景下，除了使用 schema 外，还支持完全以 application.properties 的方式配置：&lt;/p&gt;</description></item><item><title>防痴呆设计</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/dummy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/dummy/</guid><description>&lt;p&gt;最近有点痴呆，因为解决了太多的痴呆问题。服务框架实施面越来越广，已有 50 多个项目在使用，每天都要去帮应用查问题，来来回回，发现大部分都是配置错误，或者重复的文件或类，或者网络不通等，所以准备在新版本中加入防痴呆设计。估且这么叫吧，可能很简单，但对排错速度还是有点帮助，希望能抛砖引玉，也希望大家多给力，想出更多的防范措施共享出来。&lt;/p&gt;
+&lt;h2 id="检查重复的jar包"&gt;检查重复的jar包&lt;/h2&gt;
+&lt;p&gt;最痴呆的问题，就是有多个版本的相同jar包，会出现新版本的 A 类，调用了旧版本的 B 类，而且和JVM加载顺序有关，问题带有偶然性，误导性，遇到这种莫名其妙的问题，最头疼，所以，第一条，先把它防住，在每个 jar 包中挑一个一定会加载的类，加上重复类检查，给个示例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;static&lt;/span&gt; { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Duplicate.checkDuplicate(Xxx.class); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;} 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;检查重复工具类：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;final&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;Duplicate&lt;/span&gt; { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;Duplicate&lt;/span&gt;() {} 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;checkDuplicate&lt;/span&gt;(Class cls) { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; checkDuplicate(cls.getName().replace(&lt;span style="color:#2aa198"&gt;&amp;#39;.&amp;#39;&lt;/span&gt;, &lt;span style="color:#2aa198"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;) &lt;span style="color:#719e07"&gt;+&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;.class&amp;#34;&lt;/span&gt;); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;checkDuplicate&lt;/span&gt;(String path) { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;try&lt;/span&gt; { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 在ClassPath搜文件 &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Enumeration urls &lt;span style="color:#719e07"&gt;=&lt;/span&gt; Thread.currentThread().getContextClassLoader().getResources(path); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Set files &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; HashSet(); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;while&lt;/span&gt; (urls.hasMoreElements()) { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; URL url &lt;span style="color:#719e07"&gt;=&lt;/span&gt; urls.nextElement(); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (url &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;) { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String file &lt;span style="color:#719e07"&gt;=&lt;/span&gt; url.getFile(); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (file &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; file.length() &lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; 0) { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; files.add(file); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 如果有多个，就表示重复 &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (files.size() &lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; 1) { 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; logger.error(&lt;span style="color:#2aa198"&gt;&amp;#34;Duplicate class &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; path &lt;span style="color:#719e07"&gt;+&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34; in &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; files.size() &lt;span style="color:#719e07"&gt;+&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34; jar &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; files); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } &lt;span style="color:#719e07"&gt;catch&lt;/span&gt; (Throwable e) { &lt;span style="color:#586e75"&gt;// 防御性容错 &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; logger.error(e.getMessage(), e); 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;} 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="检查重复的配置文件"&gt;检查重复的配置文件&lt;/h2&gt;
+&lt;p&gt;配置文件加载错，也是经常碰到的问题。用户通常会和你说：“我配置的很正确啊，不信我发给你看下，但就是报错”。然后查一圈下来，原来他发过来的配置根本没加载，平台很多产品都会在 classpath 下放一个约定的配置，如果项目中有多个，通常会取JVM加载的第一个，为了不被这么低级的问题折腾，和上面的重复jar包一样，在配置加载的地方，加上：&lt;/p&gt;</description></item><item><title>谈谈扩充式扩展与增量式扩展</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/expansibility/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/expansibility/</guid><description>&lt;p&gt;我们平台的产品越来越多，产品的功能也越来越多。平台的产品为了适应各 BU 和部门以及产品线的需求，势必会将很多不相干的功能凑在一起，客户可以选择性的使用。为了兼容更多的需求，每个产品，每个框架，都在不停的扩展，而我们经常会选择一些扩展的扩展方式，也就是将新旧功能扩展成一个通用实现。我想讨论是，有些情况下也可以考虑增量式的扩展方式，也就是保留原功能的简单性，新功能独立实现。我最近一直做分布式服务框架的开发，就拿我们项目中的问题开涮吧。&lt;/p&gt;
+&lt;p&gt;比如：远程调用框架，肯定少不了序列化功能，功能很简单，就是把流转成对象，对象转成流。但因有些地方可能会使用 osgi，这样序列化时，IO 所在的 ClassLoader 可能和业务方的 ClassLoader 是隔离的。需要将流转换成 byte[] 数组，然后传给业务方的 ClassLoader 进行序列化。为了适应 osgi 需求，把原来非 osgi 与 osgi 的场景扩展了一下，这样，不管是不是 osgi 环境，都先将流转成 byte[] 数组，拷贝一次。然而，大部分场景都用不上 osgi，却为 osgi 付出了代价。而如果采用增量式扩展方式，非 osgi 的代码原封不动，再加一个 osgi 的实现，要用 osgi 的时候，直接依赖 osgi 实现即可。&lt;/p&gt;
+&lt;p&gt;再比如：最开始，远程服务都是基于接口方法，进行透明化调用的。这样，扩展接口就是， invoke(Method method, Object[] args)，后来，有了无接口调用的需求，就是没有接口方法也能调用，并将 POJO 对象都转换成 Map 表示。因为 Method 对象是不能直接 new 出来的，我们不自觉选了一个扩展式扩展，把扩展接口改成了 invoke(String methodName, String[] parameterTypes, String returnTypes, Object[] args)，导致不管是不是无接口调用，都得把 parameterTypes 从 Class[] 转成 String[]。如果选用增量式扩展，应该是保持原有接口不变，增加一个 GeneralService 接口，里面有一个通用的 invoke() 方法，和其它正常业务上的接口一样的调用方式，扩展接口也不用变，只是 GeneralServiceImpl 的 invoke() 实现会将收到的调用转给目标接口，这样就能将新功能增量到旧功能上，并保持原来结构的简单性。&lt;/p&gt;
+&lt;p&gt;再再比如：无状态消息发送，很简单，序列化一个对象发过去就行。后来有了同步消息发送需求，需要一个 Request/Response 进行配对，采用扩展式扩展，自然想到，无状态消息其实是一个没有 Response 的 Request，所以在 Request 里加一个 boolean 状态，表示要不要返回 Response。如果再来一个会话消息发送需求，那就再加一个 Session 交互，然后发现，原来同步消息发送是会话消息的一种特殊情况，所有场景都传 Session，不需要 Session 的地方无视即可。&lt;/p&gt;</description></item><item><title>扩展点重构</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/extension/</guid><description>&lt;p&gt;随着服务化的推广，网站对Dubbo服务框架的需求逐渐增多，Dubbo 的现有开发人员能实现的需求有限，很多需求都被 delay，而网站的同学也希望参与进来，加上领域的推动，所以平台计划将部分项目对公司内部开放，让大家一起来实现，Dubbo 为试点项目之一。&lt;/p&gt;
+&lt;p&gt;既然要开放，那 Dubbo 就要留一些扩展点，让参与者尽量黑盒扩展，而不是白盒的修改代码，否则分支，质量，合并，冲突都会很难管理。&lt;/p&gt;
+&lt;p&gt;先看一下 Dubbo 现有的设计：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/dev/design-step1.png" alt="design-step-1"&gt;&lt;/p&gt;
+&lt;p&gt;这里面虽然有部分扩展接口，但并不能很好的协作，而且扩展点的加载和配置都没有统一处理，所以下面对它进行重构。&lt;/p&gt;
+&lt;h2 id="第一步微核心插件式平等对待第三方"&gt;第一步，微核心，插件式，平等对待第三方&lt;/h2&gt;
+&lt;p&gt;即然要扩展，扩展点的加载方式，首先要统一，微核心+插件式，是比较能达到 OCP 原则的思路。&lt;/p&gt;
+&lt;p&gt;由一个插件生命周期管理容器，构成微核心，核心不包括任何功能，这样可以确保所有功能都能被替换，并且，框架作者能做到的功能，扩展者也一定要能做到，以保证平等对待第三方，所以，框架自身的功能也要用插件的方式实现，不能有任何硬编码。&lt;/p&gt;
+&lt;p&gt;通常微核心都会采用 Factory、IoC、OSGi 等方式管理插件生命周期。考虑 Dubbo 的适用面，不想强依赖 Spring 等 IoC 容器。自已造一个小的 IoC 容器，也觉得有点过度设计，所以打算采用最简单的 Factory 方式管理插件。&lt;/p&gt;
+&lt;p&gt;最终决定采用的是 JDK 标准的 SPI 扩展机制，参见：&lt;code&gt;java.util.ServiceLoader &lt;/code&gt;，也就是扩展者在 jar 包的 &lt;code&gt;META-INF/services/&lt;/code&gt; 目录下放置与接口同名的文本文件，内容为接口实现类名，多个实现类名用换行符分隔。比如，需要扩展 Dubbo 的协议，只需在 xxx.jar 中放置文件：&lt;code&gt;META-INF/services/org.apache.dubbo.rpc.Protocol&lt;/code&gt;，内容为 &lt;code&gt;com.alibaba.xxx.XxxProtocol&lt;/code&gt;。Dubbo 通过 ServiceLoader 扫描到所有 Protocol 实现。&lt;/p&gt;
+&lt;p&gt;并约定所有插件，都必须标注：&lt;code&gt;@Extension(&amp;quot;name&amp;quot;)&lt;/code&gt;，作为加载后的标识性名称，用于配置选择。&lt;/p&gt;
+&lt;h2 id="第二步每个扩展点只封装一个变化因子最大化复用"&gt;第二步，每个扩展点只封装一个变化因子，最大化复用&lt;/h2&gt;
+&lt;p&gt;每个扩展点的实现者，往往都只是关心一件事，现在的扩展点，并没有完全分离。比如：Failover, Route, LoadBalance, Directory 没有完全分开，全由 RoutingInvokerGroup 写死了。&lt;/p&gt;
+&lt;p&gt;再比如，协议扩展，扩展者可能只是想替换序列化方式，或者只替换传输方式，并且 Remoting 和 Http 也能复用序列化等实现。这样，需为传输方式，客户端实现，服务器端实现，协议头解析，数据序列化，都留出不同扩展点。&lt;/p&gt;
+&lt;p&gt;拆分后，设计如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/dev/design-step2.png" alt="design-step-2"&gt;&lt;/p&gt;
+&lt;h2 id="第三步全管道式设计框架自身逻辑均使用截面拦截实现"&gt;第三步，全管道式设计，框架自身逻辑，均使用截面拦截实现&lt;/h2&gt;
+&lt;p&gt;现在很多的逻辑，都是放在基类中实现，然后通过模板方法回调子类的实现，包括：local, mock, generic, echo, token, accesslog, monitor, count, limit 等等，可以全部拆分使用 Filter 实现，每个功能都是调用链上的一环。 比如：(基类模板方法)&lt;/p&gt;</description></item><item><title>一些设计上的基本常识</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/general-knowledge/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/general-knowledge/</guid><description>&lt;p&gt;最近给团队新人讲了一些设计上的常识，可能会对其它的新人也有些帮助，把暂时想到的几条，先记在这里。&lt;/p&gt;
+&lt;h2 id="api-与-spi-分离"&gt;API 与 SPI 分离&lt;/h2&gt;
+&lt;p&gt;框架或组件通常有两类客户，一个是使用者，一个是扩展者。API (Application Programming Interface) 是给使用者用的，而 SPI (Service Provide Interface) 是给扩展者用的。在设计时，尽量把它们隔离开，而不要混在一起。也就是说，使用者是看不到扩展者写的实现的。&lt;/p&gt;
+&lt;p&gt;比如：一个 Web 框架，它有一个 API 接口叫 Action，里面有个 execute() 方法，是给使用者用来写业务逻辑的。然后，Web 框架有一个 SPI 接口给扩展者控制输出方式，比如用 velocity 模板输出还是用 json 输出等。如果这个 Web 框架使用一个都继承 Action 的 VelocityAction 和一个 JsonAction 做为扩展方式，要用 velocity 模板输出的就继承 VelocityAction，要用 json 输出的就继承 JsonAction，这就是 API 和 SPI 没有分离的反面例子，SPI 接口混在了 API 接口中。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/dev/mix-api-spi.jpg" alt="mix-api-spi"&gt;&lt;/p&gt;
+&lt;p&gt;合理的方式是，有一个单独的 Renderer 接口，有 VelocityRenderer 和 JsonRenderer 实现，Web 框架将 Action 的输出转交给 Renderer 接口做渲染输出。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/dev/seperate-api-spi.jpg" alt="seperate-api-spi"&gt;&lt;/p&gt;
+&lt;h2 id="服务域实体域会话域分离"&gt;服务域/实体域/会话域分离&lt;/h2&gt;
+&lt;p&gt;任何框架或组件，总会有核心领域模型，比如：Spring 的 Bean，Struts 的 Action，Dubbo 的 Service，Napoli 的 Queue 等等。这个核心领域模型及其组成部分称为实体域，它代表着我们要操作的目标本身。实体域通常是线程安全的，不管是通过不变类，同步状态，或复制的方式。&lt;/p&gt;</description></item><item><title>设计实现的健壮性</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/robustness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/robustness/</guid><description>&lt;p&gt;Dubbo 作为远程服务暴露、调用和治理的解决方案，是应用运转的经络，其本身实现健壮性的重要程度是不言而喻的。&lt;/p&gt;
+&lt;p&gt;这里列出一些 Dubbo 用到的原则和方法。&lt;/p&gt;
+&lt;h2 id="日志"&gt;日志&lt;/h2&gt;
+&lt;p&gt;日志是发现问题、查看问题一个最常用的手段。日志质量往往被忽视，没有日志使用上的明确约定。重视 Log 的使用，提高 Log 的信息浓度。日志过多、过于混乱，会导致有用的信息被淹没。&lt;/p&gt;
+&lt;p&gt;要有效利用这个工具要注意：&lt;/p&gt;
+&lt;h3 id="严格约定warnerror级别记录的内容"&gt;严格约定WARN、ERROR级别记录的内容&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;WARN 表示可以恢复的问题，无需人工介入。&lt;/li&gt;
+&lt;li&gt;ERROR 表示需要人工介入问题。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;有了这样的约定，监管系统发现日志文件的中出现 ERROR 字串就报警，又尽量减少了发生。过多的报警会让人疲倦，使人对报警失去警惕性，使 ERROR 日志失去意义。再辅以人工定期查看 WARN 级别信息，以评估系统的“亚健康”程度。&lt;/p&gt;
+&lt;h3 id="日志中尽量多的收集关键信息"&gt;日志中，尽量多的收集关键信息&lt;/h3&gt;
+&lt;p&gt;哪些是关键信息呢？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;出问题时的现场信息，即排查问题要用到的信息。如服务调用失败时，要给出使用 Dubbo 的版本、服务提供者的 IP、使用的是哪个注册中心；调用的是哪个服务、哪个方法等等。这些信息如果不给出，那么事后人工收集的，问题过后现场可能已经不能复原，加大排查问题的难度。&lt;/li&gt;
+&lt;li&gt;如果可能，给出问题的原因和解决方法。这让维护和问题解决变得简单，而不是寻求精通者（往往是实现者）的帮助。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="同一个或是一类问题不要重复记录多次"&gt;同一个或是一类问题不要重复记录多次&lt;/h3&gt;
+&lt;p&gt;同一个或是一类异常日志连续出现几十遍的情况，还是常常能看到的。人眼很容易漏掉淹没在其中不一样的重要日志信息。要尽量避免这种情况。在可以预见会出现的情况，有必要加一些逻辑来避免。&lt;/p&gt;
+&lt;p&gt;如为一个问题准备一个标志，出问题后打日志后设置标志，避免重复打日志。问题恢复后清除标志。&lt;/p&gt;
+&lt;p&gt;虽然有点麻烦，但是这样做保证日志信息浓度，让监控更有效。&lt;/p&gt;
+&lt;h2 id="界限设置"&gt;界限设置&lt;/h2&gt;
+&lt;p&gt;资源是有限的，CPU、内存、IO 等等。不要因为外部的请求、数据不受限的而崩溃。&lt;/p&gt;
+&lt;h3 id="线程池exectorservice的大小和饱和策略"&gt;线程池(ExectorService)的大小和饱和策略&lt;/h3&gt;
+&lt;p&gt;Server 端用于处理请求的 ExectorService 设置上限。ExecutorService 的任务等待队列使用有限队列，避免资源耗尽。当任务等待队列饱和时，选择一个合适的饱和策略。这样保证平滑劣化。&lt;/p&gt;
+&lt;p&gt;在 Dubbo 中，饱和策略是丢弃数据，等待结果也只是请求的超时。&lt;/p&gt;
+&lt;p&gt;达到饱和时，说明已经达到服务提供方的负荷上限，要在饱和策略的操作中日志记录这个问题，以发出监控警报。记得注意不要重复多次记录哦。（注意，缺省的饱和策略不会有这些附加的操作。）根据警报的频率，已经决定扩容调整等等，避免系统问题被忽略。&lt;/p&gt;
+&lt;h3 id="集合容量"&gt;集合容量&lt;/h3&gt;
+&lt;p&gt;如果确保进入集合的元素是可控的且是足够少，则可以放心使用。这是大部分的情况。如果不能保证，则使用有有界的集合。当到达界限时，选择一个合适的丢弃策略。&lt;/p&gt;
+&lt;h2 id="容错-重试-恢复"&gt;容错-重试-恢复&lt;/h2&gt;
+&lt;p&gt;高可用组件要容忍其依赖组件的失败。&lt;/p&gt;
+&lt;h3 id="dubbo-的服务注册中心"&gt;Dubbo 的服务注册中心&lt;/h3&gt;
+&lt;p&gt;目前服务注册中心使用了数据库来保存服务提供者和消费者的信息。注册中心集群不同注册中心也通过数据库来进行同步数据，以感知其它注册中心上提供者的变化。注册中心会在内存中保存一份提供者和消费者数据，数据库不可用时，注册中心独立对外提供服务以保证正常运转，只是拿不到其它注册中心的数据。当数据库恢复时，重试逻辑会将内存中修改的数据写回数据库，并拿到数据库中新数据。&lt;/p&gt;
+&lt;h3 id="服务的消费者"&gt;服务的消费者&lt;/h3&gt;
+&lt;p&gt;服务消费者从注册中心拿到提供者列表后，会保存提供者列表到内存和磁盘文件中。这样注册中心宕机后消费者可以正常运转，甚至可以在注册中心宕机过程中重启消费者。消费者启动时，发现注册中心不可用，会读取保存在磁盘文件中提供者列表。重试逻辑保证注册中心恢复后，更新信息。&lt;/p&gt;
+&lt;h2 id="重试延迟策略"&gt;重试延迟策略&lt;/h2&gt;
+&lt;p&gt;上一点的子问题。Dubbo 中碰到有两个相关的场景。&lt;/p&gt;
+&lt;h3 id="数据库上的活锁"&gt;数据库上的活锁&lt;/h3&gt;
+&lt;p&gt;注册中心会定时更新数据库一条记录的时间戳，这样集群中其它的注册中心感知它是存活。过期注册中心和它的相关数据 会被清除。数据库正常时，这个机制运行良好。但是数据库负荷高时，其上的每个操作都会很慢。这就出现：&lt;/p&gt;
+&lt;p&gt;A 注册中心认为 B 过期，删除 B 的数据。 B 发现自己的数据没有了，重新写入自己的数据的反复操作。这些反复的操作又加重了数据库的负荷，恶化问题。&lt;/p&gt;</description></item><item><title/><link>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/introduction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/dev/principals/introduction/</guid><description>&lt;h1 id="设计原则"&gt;设计原则&lt;/h1&gt;
+&lt;p&gt;本章节的设计原则摘录自梁飞在 javaeye 上发表的系列文章。&lt;/p&gt;</description></item></channel></rss>

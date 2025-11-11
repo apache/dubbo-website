@@ -1,53 +1,53 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo Aot on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/dubbo-aot/</link><description>Recent content in Dubbo Aot on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 21 Nov 2023 16:23:18 +0800</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/dubbo-aot/index.xml" rel="self" type="application/rss+xml"/><item><title>启动速度提升10倍：Apache Dubbo 静态化 GraalVM Native Image 深度解析</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E6%8F%90%E5%8D%8710%E5%80%8Dapache-dubbo-%E9%9D%99%E6%80%81%E5%8C%96-graalvm-native-image-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E6%8F%90%E5%8D%8710%E5%80%8Dapache-dubbo-%E9%9D%99%E6%80%81%E5%8C%96-graalvm-native-image-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid><description>&lt;p>摘要：本文整理自杭州有赞科技有限公司中间件技术专家、Apache Dubbo PMC华钟明在 Community Over Code 2023 大会上的分享。本篇内容主要分为五个部分：&lt;/p>
-&lt;ul>
-&lt;li>一、GraalVM 直面Java应用在云时代的挑战&lt;/li>
-&lt;li>二、Dubbo 享受 AOT 带来的技术红利&lt;/li>
-&lt;li>三、Dubbo Native Image 的实践和示例&lt;/li>
-&lt;li>四、Dubbo 集成 Native Image 的原理和思考&lt;/li>
-&lt;li>五、Dubbo 在 Native Image 技术的未来规划&lt;/li>
-&lt;/ul>
-&lt;h2 id="一graalvm-直面java应用在云时代的挑战">一、GraalVM 直面Java应用在云时代的挑战&lt;/h2>
-&lt;p>&lt;img alt="dubbo-graalvm-native-image" src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img.png">&lt;/p>
-&lt;p>云计算时代比较显著的特点包括：&lt;/p>
-&lt;ul>
-&lt;li>基于云计算的基础设施，Java应用能够在云计算的基础设施上快速、轻松、高效的做到弹性。&lt;/li>
-&lt;li>基于容器化技术，系统资源切分的更加细，资源的利用率也更高了。&lt;/li>
-&lt;li>基于云计算的开发平台，让应用部署的更加容易，更加敏捷。&lt;/li>
-&lt;/ul>
-&lt;p>那么在云计算时代，Java应用存在哪些问题呢？&lt;/p>
-&lt;ul>
-&lt;li>冷启动速度较慢。&lt;/li>
-&lt;li>应用预热时间过长，无法立即达到性能峰值。&lt;/li>
-&lt;li>内存、CPU等系统资源占用高。&lt;/li>
-&lt;li>Java构建的应用程序繁重，执行还需要具备JDK环境。&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="dubbo-graalvm-native-image" src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_1.png">&lt;/p>
-&lt;p>在Serverless场景上，Java的问题会尤为突出，因为Serverless不仅能简化开发场景和开发体验，还能做到极致的弹性，甚至是秒级的弹性。&lt;/p>
-&lt;p>上图是Datalog统计的Fast和AWS两个产品。Java语言虽然更流行，但相较于Python和Node.JS，它的占比还是比较低的。Java本身在Serverless层面，比如在做容器的调度、镜像的下载的时候，启动时间、冷启动的时间、预热时间等等，都会影响Serverless场景下它弹性扩容的时间。&lt;/p>
-&lt;p>&lt;img alt="dubbo-graalvm-native-image" src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_2.png">&lt;/p>
-&lt;p>下面介绍一下GraalVM，它是可以把Java应用提前编译到独立的二进制包内，这些二进制包相对于跑在JVM上它可以更小，更快的启动，不需要预热就能够达到极限的峰值，还可以减少内存和CPU的占比。&lt;/p>
-&lt;p>可以看到它的介绍和Java语言的应用所涉及到的问题都一一对应。GraalVM应该算是JDK的&amp;quot;超集&amp;quot;，除了包含完整的JDK发行版本外，还有GraalVM Compiler、Native image、Truffle等，甚至还涉及到多语言汇编的能力。&lt;/p>
-&lt;p>总结一下，GraalVM本身涉及两部分，JIT和AOT。&lt;/p>
-&lt;ul>
-&lt;li>JIT，是在编译后的class文件、字节码文件，它会在运行时把它翻译成机器码。&lt;/li>
-&lt;li>AOT， 它和JIT的区别是，它在编译期就能把字节码直接转化为机器码，无需在运行时再去处理。所以它的CPU和内存会相对更低。&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="dubbo-graalvm-native-image" src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_3.png">&lt;/p>
-&lt;p>上图左侧是一张Java生命周期的全景图。可以看到，它从JVM的启动，再到Java的main函数的启动，再到Java的应用预热，再到它的稳定期，最后到达效果，这是Java完整的生命周期的呈现。&lt;/p>
-&lt;p>而AOT的区别在于，它没有红色的VM。另外，JIT相对于AOT而言是没有的，也没有浅绿色的解释器。所以AOT对于JIT来说，只有内加载，GC以及它能够瞬间达到应用的稳定期。&lt;/p>
-&lt;p>根据右侧的图可以看出：&lt;/p>
-&lt;ul>
-&lt;li>AOT的启动耗时相对较低，内存损耗和它打出来的二进制包相对较小。&lt;/li>
-&lt;li>JIT因为有及时编译的效果，所以现在极限的分值比AOT要好，比如它的极限吞吐量比AOT好。&lt;/li>
-&lt;/ul>
-&lt;h2 id="二dubbo-享受-aot-带来的技术红利">二、Dubbo 享受 AOT 带来的技术红利&lt;/h2>
-&lt;ol>
-&lt;li>多产物形态&lt;/li>
-&lt;/ol>
-&lt;p>&lt;img alt="dubbo-graalvm-native-image.png" src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_4.png">&lt;/p>
-&lt;p>我们在编码之后，Soft Code的产物形态新增了。&lt;/p>
-&lt;p>第一种是我们传统认知上的Jar包形态，比如mvn、clean、package。第二种是Docker Image，它能轻松的帮我们直接打到镜像里面去，不用写dockerfile等文件。第三种是我们集成GraalVM后新产生的一种Native可执行文件的形态。这种形态无需JDK的环境就能启动，它能像GO一样把二进制文件直接启动。&lt;/p>
-&lt;ol start="2">
-&lt;li>启动耗时大幅降低&lt;/li>
-&lt;/ol>
-&lt;p>&lt;img alt="dubbo-graalvm-native-image" src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_5.png">&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo Aot on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/dubbo-aot/</link><description>Recent content in Dubbo Aot on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 21 Nov 2023 16:23:18 +0800</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/dubbo-aot/index.xml" rel="self" type="application/rss+xml"/><item><title>启动速度提升10倍：Apache Dubbo 静态化 GraalVM Native Image 深度解析</title><link>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E6%8F%90%E5%8D%8710%E5%80%8Dapache-dubbo-%E9%9D%99%E6%80%81%E5%8C%96-graalvm-native-image-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link><pubDate>Sat, 07 Oct 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%90%AF%E5%8A%A8%E9%80%9F%E5%BA%A6%E6%8F%90%E5%8D%8710%E5%80%8Dapache-dubbo-%E9%9D%99%E6%80%81%E5%8C%96-graalvm-native-image-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid><description>&lt;p&gt;摘要：本文整理自杭州有赞科技有限公司中间件技术专家、Apache Dubbo PMC华钟明在 Community Over Code 2023 大会上的分享。本篇内容主要分为五个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一、GraalVM 直面Java应用在云时代的挑战&lt;/li&gt;
+&lt;li&gt;二、Dubbo 享受 AOT 带来的技术红利&lt;/li&gt;
+&lt;li&gt;三、Dubbo Native Image 的实践和示例&lt;/li&gt;
+&lt;li&gt;四、Dubbo 集成 Native Image 的原理和思考&lt;/li&gt;
+&lt;li&gt;五、Dubbo 在 Native Image 技术的未来规划&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="一graalvm-直面java应用在云时代的挑战"&gt;一、GraalVM 直面Java应用在云时代的挑战&lt;/h2&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img.png" alt="dubbo-graalvm-native-image"&gt;&lt;/p&gt;
+&lt;p&gt;云计算时代比较显著的特点包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;基于云计算的基础设施，Java应用能够在云计算的基础设施上快速、轻松、高效的做到弹性。&lt;/li&gt;
+&lt;li&gt;基于容器化技术，系统资源切分的更加细，资源的利用率也更高了。&lt;/li&gt;
+&lt;li&gt;基于云计算的开发平台，让应用部署的更加容易，更加敏捷。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;那么在云计算时代，Java应用存在哪些问题呢？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;冷启动速度较慢。&lt;/li&gt;
+&lt;li&gt;应用预热时间过长，无法立即达到性能峰值。&lt;/li&gt;
+&lt;li&gt;内存、CPU等系统资源占用高。&lt;/li&gt;
+&lt;li&gt;Java构建的应用程序繁重，执行还需要具备JDK环境。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_1.png" alt="dubbo-graalvm-native-image"&gt;&lt;/p&gt;
+&lt;p&gt;在Serverless场景上，Java的问题会尤为突出，因为Serverless不仅能简化开发场景和开发体验，还能做到极致的弹性，甚至是秒级的弹性。&lt;/p&gt;
+&lt;p&gt;上图是Datalog统计的Fast和AWS两个产品。Java语言虽然更流行，但相较于Python和Node.JS，它的占比还是比较低的。Java本身在Serverless层面，比如在做容器的调度、镜像的下载的时候，启动时间、冷启动的时间、预热时间等等，都会影响Serverless场景下它弹性扩容的时间。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_2.png" alt="dubbo-graalvm-native-image"&gt;&lt;/p&gt;
+&lt;p&gt;下面介绍一下GraalVM，它是可以把Java应用提前编译到独立的二进制包内，这些二进制包相对于跑在JVM上它可以更小，更快的启动，不需要预热就能够达到极限的峰值，还可以减少内存和CPU的占比。&lt;/p&gt;
+&lt;p&gt;可以看到它的介绍和Java语言的应用所涉及到的问题都一一对应。GraalVM应该算是JDK的&amp;quot;超集&amp;quot;，除了包含完整的JDK发行版本外，还有GraalVM Compiler、Native image、Truffle等，甚至还涉及到多语言汇编的能力。&lt;/p&gt;
+&lt;p&gt;总结一下，GraalVM本身涉及两部分，JIT和AOT。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;JIT，是在编译后的class文件、字节码文件，它会在运行时把它翻译成机器码。&lt;/li&gt;
+&lt;li&gt;AOT， 它和JIT的区别是，它在编译期就能把字节码直接转化为机器码，无需在运行时再去处理。所以它的CPU和内存会相对更低。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_3.png" alt="dubbo-graalvm-native-image"&gt;&lt;/p&gt;
+&lt;p&gt;上图左侧是一张Java生命周期的全景图。可以看到，它从JVM的启动，再到Java的main函数的启动，再到Java的应用预热，再到它的稳定期，最后到达效果，这是Java完整的生命周期的呈现。&lt;/p&gt;
+&lt;p&gt;而AOT的区别在于，它没有红色的VM。另外，JIT相对于AOT而言是没有的，也没有浅绿色的解释器。所以AOT对于JIT来说，只有内加载，GC以及它能够瞬间达到应用的稳定期。&lt;/p&gt;
+&lt;p&gt;根据右侧的图可以看出：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AOT的启动耗时相对较低，内存损耗和它打出来的二进制包相对较小。&lt;/li&gt;
+&lt;li&gt;JIT因为有及时编译的效果，所以现在极限的分值比AOT要好，比如它的极限吞吐量比AOT好。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="二dubbo-享受-aot-带来的技术红利"&gt;二、Dubbo 享受 AOT 带来的技术红利&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;多产物形态&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_4.png" alt="dubbo-graalvm-native-image.png"&gt;&lt;/p&gt;
+&lt;p&gt;我们在编码之后，Soft Code的产物形态新增了。&lt;/p&gt;
+&lt;p&gt;第一种是我们传统认知上的Jar包形态，比如mvn、clean、package。第二种是Docker Image，它能轻松的帮我们直接打到镜像里面去，不用写dockerfile等文件。第三种是我们集成GraalVM后新产生的一种Native可执行文件的形态。这种形态无需JDK的环境就能启动，它能像GO一样把二进制文件直接启动。&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;启动耗时大幅降低&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/2023/8/apachecon-scripts/native/img_5.png" alt="dubbo-graalvm-native-image"&gt;&lt;/p&gt;</description></item></channel></rss>

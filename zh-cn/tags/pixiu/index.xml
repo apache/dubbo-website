@@ -1,53 +1,53 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pixiu on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/pixiu/</link><description>Recent content in Pixiu on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 23 Feb 2023 11:00:42 +0800</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/pixiu/index.xml" rel="self" type="application/rss+xml"/><item><title>谈谈Pixiu的Filter</title><link>https://dubbo.apache.org/zh-cn/blog/2022/02/19/%E8%B0%88%E8%B0%88pixiu%E7%9A%84filter/</link><pubDate>Sat, 19 Feb 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/02/19/%E8%B0%88%E8%B0%88pixiu%E7%9A%84filter/</guid><description>&lt;h2 id="filter的生命周期">&lt;strong>Filter的生命周期&lt;/strong>&lt;/h2>
-&lt;p>Pixiu作为一个面向云原生的gateway，通过简单的配置即可代理Http to Dubbo 2、Tripe甚至是Spring Cloud的请求。那Filter是怎样运行的呢？&lt;/p>
-&lt;p>首先&lt;strong>Filter Plugin&lt;/strong>向&lt;strong>Filter Manager&lt;/strong>注册自己**，&lt;strong>然后&lt;/strong>Filter Manager&lt;strong>根据配置创建好&lt;/strong>Filter Factory&lt;strong>并持有它们，等待请求来临时，&lt;strong>Manager&lt;/strong>创建一个一次性的用于此次请求的Filter Chain，然后利用&lt;/strong>Factory&lt;strong>创建好&lt;/strong>Decode/Encode Filter&lt;strong>并把它们加入链中，然后按照顺序去运行Decode Filter，然后去请求&lt;/strong>Upstream**，拿到Response再反向运行Encode Filter，让Filter可以访问到Response。&lt;/p>
-&lt;p>几个关键的概念：&lt;/p>
-&lt;p>&lt;strong>Filter Manager&lt;/strong>&lt;/p>
-&lt;blockquote>
-&lt;p>Filter的Manger。。。&lt;/p>
-&lt;/blockquote>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// FilterManager manage filters
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> FilterManager &lt;span style="color:#268bd2">struct&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filters &lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]HttpFilterFactory
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filtersArray []&lt;span style="color:#719e07">*&lt;/span>HttpFilterFactory
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Filter Plugin&lt;/strong>：定义了Filter的（唯一的）名字和描述如何去创建一个Filter Factory。&lt;/p>
-&lt;blockquote>
-&lt;p>其实结合Filter Factory的定义，可以认为Plugin是Filter Factory的Factory&lt;/p>
-&lt;/blockquote>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// HttpFilterPlugin describe plugin
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>HttpFilterPlugin &lt;span style="color:#268bd2">interface&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Kind returns the unique kind name to represent itself.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Kind&lt;/span>() &lt;span style="color:#dc322f">string&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// CreateFilterFactory return the filter factory
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">CreateFilterFactory&lt;/span>() (HttpFilterFactory, &lt;span style="color:#dc322f">error&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Filter Factory&lt;/strong>：定义了Filter自身的配置，并且在请求来临时创建真实的Filter并把它添加到FilterChain中&lt;/p>
-&lt;blockquote>
-&lt;ul>
-&lt;li>Config() 的目的是能让Filter Manager能够有机会把配置交给Factory（此时golang泛型还没有落地）&lt;/li>
-&lt;li>Apply() 在配置被注入到Factory后，有机会对config做一些检查和提前做一些初始化的工作&lt;/li>
-&lt;li>PrepareFilterChain() 创建Filter并加入Filter Chain&lt;/li>
-&lt;/ul>
-&lt;/blockquote>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// HttpFilterFactory describe http filter
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>HttpFilterFactory &lt;span style="color:#268bd2">interface&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Config Expose the config so that Filter Manger can inject it, so it must be a pointer
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Config&lt;/span>() &lt;span style="color:#268bd2">interface&lt;/span>{}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Apply After the config is injected, check it or make it to default
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Apply&lt;/span>() &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// PrepareFilterChain create filter and append it to FilterChain
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">//
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Be Careful !!! Do not pass the Factory&amp;#39;s config pointer to the Filter instance,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Factory&amp;#39;s config may be updated by FilterManager
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">PrepareFilterChain&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>http.HttpContext, chain FilterChain) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>Decode/Encode Filter：&lt;strong>Filter分为两个部分，&lt;strong>Decode&lt;/strong>在实际请求&lt;/strong>Upstream&lt;/strong>之前，所以可以做一些鉴权、限流，把请求在gateway层拦截掉。&lt;strong>Eecode&lt;/strong>则运行在获得&lt;strong>Upstream&lt;/strong>的Response之后，所以可以对返回Log甚至修改Response。&lt;/p></description></item><item><title>Dubbo 跨语言调用神兽：dubbo-go-pixiu</title><link>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</link><pubDate>Wed, 25 Aug 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</guid><description>&lt;h2 id="pixiu-是什么">Pixiu 是什么&lt;/h2>
-&lt;p>在回答 Pixiu 是什么之前，我们简单解释一下 Dubbo 是什么。Dubbo 是一个开源的高性能 RPC 框架，有着丰富的服务治理能力以及优秀的扩展能力。Dubbo 更扩展出 Dubbo-go【1】，为用户提供了 Golang 的 Dubbo 解决方案，打通了两种语言之间的隔阂，使 Dubbo 更加贴近云原生。&lt;/p>
-&lt;p>Dubbo-go 作为 Golang 服务，实现与 Dubbo 服务之间的相互调用。然而，在日常使用场景中，用户往往有把 Dubbo 服务以 RESTful 风格向外暴露的需求同时也要兼顾内部 Dubbo 调用。为了解决这种场景，作为 Dubbo API 网关的 Pixiu【2】 (中文: 貔貅， 曾用名 dubbo-go-proxy) 便应运而生。之所以采用 Pixiu 这个名称，是因为 Java 同类产品 Zuul 的意象是一个西方怪兽，Pixiu 作为一个国产产品，就用了我们中国的一个类似的神兽貔貅作为项目名称。也同时表达了 Dubbo 社区希望扩展出一整套云原生生态链的决心。&lt;/p>
-&lt;p>目前 Dubbo 多语言生态，发展最好的自然是 Java，其次是 Golang，其他语言都差强人意。dubbo-go-pixiu 项目是一个基于 dubbo-go 发展起来的项目，目前接口协议层支持的是七层的 HTTP 请求调用，计划在未来的 0.5 版本中支持 gRPC 请求调用，其另外一个使命是作为一种新的 dubbo 多语言解决方案。&lt;/p>
-&lt;h2 id="为什么使用-pixiu">为什么使用 Pixiu&lt;/h2>
-&lt;p>Pixiu 是基于 Dubbogo 的云原生、高性能、可扩展的微服务 API 网关。作为一款网关产品，Pixiu 帮助用户轻松创建、发布、维护、监控和保护任意规模的 API ，接受和处理成千上万个并发 API 调用，包括流量管理、 CORS 支持、授权和访问控制、限制、监控，以及 API 版本管理。除此以外，作为 Dubbo 的衍生产品，Pixiu 可以帮助 Dubbo 用户进行协议转换，实现跨系统、跨协议的服务能力互通。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pixiu on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/pixiu/</link><description>Recent content in Pixiu on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 23 Feb 2023 11:00:42 +0800</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/pixiu/index.xml" rel="self" type="application/rss+xml"/><item><title>谈谈Pixiu的Filter</title><link>https://dubbo.apache.org/zh-cn/blog/2022/02/19/%E8%B0%88%E8%B0%88pixiu%E7%9A%84filter/</link><pubDate>Sat, 19 Feb 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/02/19/%E8%B0%88%E8%B0%88pixiu%E7%9A%84filter/</guid><description>&lt;h2 id="filter的生命周期"&gt;&lt;strong&gt;Filter的生命周期&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Pixiu作为一个面向云原生的gateway，通过简单的配置即可代理Http to Dubbo 2、Tripe甚至是Spring Cloud的请求。那Filter是怎样运行的呢？&lt;/p&gt;
+&lt;p&gt;首先&lt;strong&gt;Filter Plugin&lt;/strong&gt;向&lt;strong&gt;Filter Manager&lt;/strong&gt;注册自己**，&lt;strong&gt;然后&lt;/strong&gt;Filter Manager&lt;strong&gt;根据配置创建好&lt;/strong&gt;Filter Factory&lt;strong&gt;并持有它们，等待请求来临时，&lt;strong&gt;Manager&lt;/strong&gt;创建一个一次性的用于此次请求的Filter Chain，然后利用&lt;/strong&gt;Factory&lt;strong&gt;创建好&lt;/strong&gt;Decode/Encode Filter&lt;strong&gt;并把它们加入链中，然后按照顺序去运行Decode Filter，然后去请求&lt;/strong&gt;Upstream**，拿到Response再反向运行Encode Filter，让Filter可以访问到Response。&lt;/p&gt;
+&lt;p&gt;几个关键的概念：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Filter Manager&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Filter的Manger。。。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// FilterManager manage filters&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; FilterManager &lt;span style="color:#268bd2"&gt;struct&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filters &lt;span style="color:#268bd2"&gt;map&lt;/span&gt;[&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;]HttpFilterFactory
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filtersArray []&lt;span style="color:#719e07"&gt;*&lt;/span&gt;HttpFilterFactory
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Filter Plugin&lt;/strong&gt;：定义了Filter的（唯一的）名字和描述如何去创建一个Filter Factory。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;其实结合Filter Factory的定义，可以认为Plugin是Filter Factory的Factory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// HttpFilterPlugin describe plugin&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;HttpFilterPlugin &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// Kind returns the unique kind name to represent itself.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;Kind&lt;/span&gt;() &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// CreateFilterFactory return the filter factory&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;CreateFilterFactory&lt;/span&gt;() (HttpFilterFactory, &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Filter Factory&lt;/strong&gt;：定义了Filter自身的配置，并且在请求来临时创建真实的Filter并把它添加到FilterChain中&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;Config() 的目的是能让Filter Manager能够有机会把配置交给Factory（此时golang泛型还没有落地）&lt;/li&gt;
+&lt;li&gt;Apply() 在配置被注入到Factory后，有机会对config做一些检查和提前做一些初始化的工作&lt;/li&gt;
+&lt;li&gt;PrepareFilterChain() 创建Filter并加入Filter Chain&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// HttpFilterFactory describe http filter&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;HttpFilterFactory &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// Config Expose the config so that Filter Manger can inject it, so it must be a pointer&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;Config&lt;/span&gt;() &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt;{}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// Apply After the config is injected, check it or make it to default&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;Apply&lt;/span&gt;() &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// PrepareFilterChain create filter and append it to FilterChain&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; // Be Careful !!! Do not pass the Factory&amp;#39;s config pointer to the Filter instance,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// Factory&amp;#39;s config may be updated by FilterManager&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;PrepareFilterChain&lt;/span&gt;(ctx &lt;span style="color:#719e07"&gt;*&lt;/span&gt;http.HttpContext, chain FilterChain) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Decode/Encode Filter：&lt;strong&gt;Filter分为两个部分，&lt;strong&gt;Decode&lt;/strong&gt;在实际请求&lt;/strong&gt;Upstream&lt;/strong&gt;之前，所以可以做一些鉴权、限流，把请求在gateway层拦截掉。&lt;strong&gt;Eecode&lt;/strong&gt;则运行在获得&lt;strong&gt;Upstream&lt;/strong&gt;的Response之后，所以可以对返回Log甚至修改Response。&lt;/p&gt;</description></item><item><title>Dubbo 跨语言调用神兽：dubbo-go-pixiu</title><link>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</link><pubDate>Wed, 25 Aug 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</guid><description>&lt;h2 id="pixiu-是什么"&gt;Pixiu 是什么&lt;/h2&gt;
+&lt;p&gt;在回答 Pixiu 是什么之前，我们简单解释一下 Dubbo 是什么。Dubbo 是一个开源的高性能 RPC 框架，有着丰富的服务治理能力以及优秀的扩展能力。Dubbo 更扩展出 Dubbo-go【1】，为用户提供了 Golang 的 Dubbo 解决方案，打通了两种语言之间的隔阂，使 Dubbo 更加贴近云原生。&lt;/p&gt;
+&lt;p&gt;Dubbo-go 作为 Golang 服务，实现与 Dubbo 服务之间的相互调用。然而，在日常使用场景中，用户往往有把 Dubbo 服务以 RESTful 风格向外暴露的需求同时也要兼顾内部 Dubbo 调用。为了解决这种场景，作为 Dubbo API 网关的 Pixiu【2】 (中文: 貔貅， 曾用名 dubbo-go-proxy) 便应运而生。之所以采用 Pixiu 这个名称，是因为 Java 同类产品 Zuul 的意象是一个西方怪兽，Pixiu 作为一个国产产品，就用了我们中国的一个类似的神兽貔貅作为项目名称。也同时表达了 Dubbo 社区希望扩展出一整套云原生生态链的决心。&lt;/p&gt;
+&lt;p&gt;目前 Dubbo 多语言生态，发展最好的自然是 Java，其次是 Golang，其他语言都差强人意。dubbo-go-pixiu 项目是一个基于 dubbo-go 发展起来的项目，目前接口协议层支持的是七层的 HTTP 请求调用，计划在未来的 0.5 版本中支持 gRPC 请求调用，其另外一个使命是作为一种新的 dubbo 多语言解决方案。&lt;/p&gt;
+&lt;h2 id="为什么使用-pixiu"&gt;为什么使用 Pixiu&lt;/h2&gt;
+&lt;p&gt;Pixiu 是基于 Dubbogo 的云原生、高性能、可扩展的微服务 API 网关。作为一款网关产品，Pixiu 帮助用户轻松创建、发布、维护、监控和保护任意规模的 API ，接受和处理成千上万个并发 API 调用，包括流量管理、 CORS 支持、授权和访问控制、限制、监控，以及 API 版本管理。除此以外，作为 Dubbo 的衍生产品，Pixiu 可以帮助 Dubbo 用户进行协议转换，实现跨系统、跨协议的服务能力互通。&lt;/p&gt;</description></item></channel></rss>

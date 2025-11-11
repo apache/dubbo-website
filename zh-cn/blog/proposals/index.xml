@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>技术方案 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/blog/proposals/</link><description>Recent content in 技术方案 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>[Google Paper] 面向云时代的应用开发新模式</title><link>https://dubbo.apache.org/zh-cn/blog/2023/05/26/google-paper-%E9%9D%A2%E5%90%91%E4%BA%91%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E6%96%B0%E6%A8%A1%E5%BC%8F/</link><pubDate>Fri, 26 May 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/05/26/google-paper-%E9%9D%A2%E5%90%91%E4%BA%91%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E6%96%B0%E6%A8%A1%E5%BC%8F/</guid><description>&lt;blockquote>
-&lt;p>本文翻译自发表在以下地址的论文：https://serviceweaver.dev/assets/docs/hotos23_vision_paper.pdf&lt;/p>
-&lt;/blockquote>
-&lt;blockquote>
-&lt;p>原文作者(Authors): Sanjay Ghemawat, Robert Grandl, Srdjan Petrovic, Michael Whittaker, Parveen Patel, Ivan Posva, Amin Vahdat&lt;/p>
-&lt;p>转载或发布请遵循原文许可：
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>技术方案 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/blog/proposals/</link><description>Recent content in 技术方案 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>[Google Paper] 面向云时代的应用开发新模式</title><link>https://dubbo.apache.org/zh-cn/blog/2023/05/26/google-paper-%E9%9D%A2%E5%90%91%E4%BA%91%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E6%96%B0%E6%A8%A1%E5%BC%8F/</link><pubDate>Fri, 26 May 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/05/26/google-paper-%E9%9D%A2%E5%90%91%E4%BA%91%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E6%96%B0%E6%A8%A1%E5%BC%8F/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;本文翻译自发表在以下地址的论文：https://serviceweaver.dev/assets/docs/hotos23_vision_paper.pdf&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;原文作者(Authors): Sanjay Ghemawat, Robert Grandl, Srdjan Petrovic, Michael Whittaker, Parveen Patel, Ivan Posva, Amin Vahdat&lt;/p&gt;
+&lt;p&gt;转载或发布请遵循原文许可：
 Permission to make digital or hard copies of part or all of this work for
 personal or classroom use is granted without fee provided that copies are
 not made or distributed for profit or commercial advantage and that copies
@@ -12,162 +12,162 @@ the owner/author(s).
 HOTOS ’23, June 22–24, 2023, Providence, RI, USA
 © 2023 Copyright held by the owner/author(s).
 ACM ISBN 979-8-4007-0195-5/23/06.
-&lt;a href="https://doi.org/10.1145/3593856.3595909">https://doi.org/10.1145/3593856.3595909&lt;/a>&lt;/p></description></item><item><title>指标埋点</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/20/%E6%8C%87%E6%A0%87%E5%9F%8B%E7%82%B9/</link><pubDate>Mon, 20 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/20/%E6%8C%87%E6%A0%87%E5%9F%8B%E7%82%B9/</guid><description>&lt;h1 id="概述">概述&lt;/h1>
-&lt;h2 id="1-指标接入说明">1. 指标接入说明&lt;/h2>
-&lt;h2 id="2-指标体系设计">2. 指标体系设计&lt;/h2>
-&lt;p>Dubbo的指标体系，总共涉及三块，指标收集、本地聚合、指标推送&lt;/p>
-&lt;ul>
-&lt;li>指标收集：将Dubbo内部需要监控的指标推送至统一的Collector中进行存储&lt;/li>
-&lt;li>本地聚合：指标收集获取的均为基础指标，而一些分位数指标则需通过本地聚合计算得出&lt;/li>
-&lt;li>指标推送：收集和聚合后的指标通过一定的方式推送至第三方服务器，目前只涉及Prometheus&lt;/li>
-&lt;/ul>
-&lt;h2 id="3-结构设计">3. 结构设计&lt;/h2>
-&lt;ul>
-&lt;li>移除原来与 Metrics 相关的类&lt;/li>
-&lt;li>创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类&lt;/li>
-&lt;li>使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换&lt;/li>
-&lt;/ul>
-&lt;h2 id="4-数据流转">4. 数据流转&lt;/h2>
-&lt;p>&lt;img alt="img.png" src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dataflow.png">&lt;/p>
-&lt;h2 id="5-目标">5. 目标&lt;/h2>
-&lt;p>指标接口将提供一个 MetricsService，该 Service 不仅提供柔性服务所的接口级数据，也提供所有指标的查询方式，其中方法级指标的查询的接口可按如下方式声明&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Default {@link MetricsService} extension name.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String DEFAULT_EXTENSION_NAME &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;default&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * The contract version of {@link MetricsService}, the future update must make sure compatible.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String VERSION &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by prefixes
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface and prefixes
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(String serviceUniqueName, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Get metrics by interface、method and prefixes
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param methodName methodName
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param parameterTypes method parameter types
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @param categories categories
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return metrics - key=MetricCategory value=MetricsEntityList
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsEntity&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getMetricsByCategories&lt;/span>(String serviceUniqueName, String methodName, Class&lt;span style="color:#719e07">&amp;lt;?&amp;gt;[]&lt;/span> parameterTypes, List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCategory&lt;span style="color:#719e07">&amp;gt;&lt;/span> categories);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中 MetricsCategory 设计如下:&lt;/p></description></item><item><title>Dubbo3 应用级服务发现设计</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</guid><description>&lt;h2 id="objective">Objective&lt;/h2>
-&lt;ul>
-&lt;li>显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。&lt;/li>
-&lt;li>适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。&lt;/li>
-&lt;/ul>
-&lt;h2 id="background">Background&lt;/h2>
-&lt;p>&lt;img alt="interface-arc" src="https://dubbo.apache.org/imgs/blog/proposals/discovery/arc.png">&lt;/p>
-&lt;p>我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。&lt;/p>
-&lt;p>在这个过程中：&lt;/p>
-&lt;ul>
-&lt;li>每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；&lt;/li>
-&lt;li>注册中心通过这个 key 对 provider 实例地址进行聚合；&lt;/li>
-&lt;li>Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="interface-data1" src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data1.png">&lt;/p>
-&lt;p>这里，我们对接口级地址发现的内部数据结构进行详细分析。&lt;/p>
-&lt;p>首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。&lt;/p>
-&lt;p>然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。&lt;/p>
-&lt;p>&lt;img alt="interface-data2" src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data2.png">&lt;/p>
-&lt;p>这里把 URL 地址数据划分成了几份：&lt;/p>
-&lt;ul>
-&lt;li>首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体&lt;/li>
-&lt;li>其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明&lt;/li>
-&lt;li>下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。&lt;/li>
-&lt;li>最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。&lt;/li>
-&lt;/ul>
-&lt;p>结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：&lt;/p></description></item><item><title>启发式流控制</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</guid><description>&lt;h1 id="整体介绍">整体介绍&lt;/h1>
-&lt;p>本文所说的柔性服务主要是指&lt;strong>consumer端的负载均衡&lt;/strong>和&lt;strong>provider端的限流&lt;/strong>两个功能。在之前的dubbo版本中，&lt;/p>
-&lt;ul>
-&lt;li>负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。&lt;/li>
-&lt;li>限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。&lt;/li>
-&lt;/ul>
-&lt;p>我们针对这些存在的问题进行了改进。&lt;/p>
-&lt;h2 id="负载均衡">负载均衡&lt;/h2>
-&lt;h3 id="使用介绍">使用介绍&lt;/h3>
-&lt;p>在原本的dubbo版本中，有五种负载均衡的方案供选择，他们分别是 &lt;code>Random&lt;/code>、&lt;code>ShortestResponse&lt;/code>、&lt;code>RoundRobin&lt;/code>、&lt;code>LeastActive&lt;/code> 和 &lt;code>ConsistentHash&lt;/code>。其中除 &lt;code>ShortestResponse&lt;/code> 和 &lt;code>LeastActive&lt;/code> 外，其他的几种方案主要是考虑选择时的公平性和稳定性。&lt;/p>
-&lt;p>对于 &lt;code>ShortestResponse&lt;/code> 来说，其设计目的是从所有备选的 provider 中选择 response 时间最短的以提高系统整体的吞吐量。然而存在两个问题：&lt;/p>
-&lt;ol>
-&lt;li>在大多数的场景下，不同provider的response时长没有非常明显的区别，此时该算法会退化为随机选择。&lt;/li>
-&lt;li>response的时间长短有时也并不能代表机器的吞吐能力。对于 &lt;code>LeastActive&lt;/code> 来说，其认为应该将流量尽可能分配到当前并发处理任务较少的机器上。但是其同样存在和 &lt;code>ShortestResponse&lt;/code> 类似的问题，即这并不能单独代表机器的吞吐能力。&lt;/li>
-&lt;/ol>
-&lt;p>基于以上分析，我们提出了两种新的负载均衡算法。一种是同样基于公平性考虑的单纯 &lt;code>P2C&lt;/code> 算法，另一种是基于自适应的方法 &lt;code>adaptive&lt;/code>，其试图自适应的衡量 provider 端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。&lt;/p>
-&lt;h4 id="总体效果">总体效果&lt;/h4>
-&lt;p>对于负载均衡部分的有效性实验在两个不同的情况下进行的，分别是提供端机器配置比较均衡和提供端机器配置差距较大的情况。&lt;/p>
-&lt;p>&lt;img alt="image.png" src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1675265258687-c3df68a8-80e0-4311-816c-63480494850c.png">&lt;/p>
-&lt;p>&lt;img alt="image.png" src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png">&lt;/p>
-&lt;h4 id="使用方法">使用方法&lt;/h4>
-&lt;p>使用方法与原本的负载均衡方法相同。只需要在consumer端将&amp;quot;loadbalance&amp;quot;设置为&amp;quot;p2c&amp;quot;或者&amp;quot;adaptive&amp;quot;即可。&lt;/p>
-&lt;h4 id="代码结构">代码结构&lt;/h4>
-&lt;p>负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。&lt;/p>
-&lt;h3 id="原理介绍">原理介绍&lt;/h3>
-&lt;h4 id="p2c算法">P2C算法&lt;/h4>
-&lt;p>Power of Two Choice算法简单但是经典，主要思路如下：&lt;/p>
-&lt;ol>
-&lt;li>对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。&lt;/li>
-&lt;li>比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。&lt;/li>
-&lt;/ol>
-&lt;h4 id="adaptive算法">adaptive算法&lt;/h4>
-&lt;p>&lt;a href="https://github.com/apache/dubbo/pull/10745">代码的github地址&lt;/a>&lt;/p>
-&lt;h5 id="相关指标">相关指标&lt;/h5>
-&lt;ol>
-&lt;li>
-&lt;p>cpuLoad
-&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/26808016bc7f1ee83ab425e308074f17.svg">。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>rt
-rt为一次rpc调用所用的时间，单位为毫秒。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>timeout
-timeout为本次rpc调用超时剩余的时间，单位为毫秒。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>weight
-weight是设置的服务权重。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>currentProviderTime
-provider端在计算cpuLoad时的时间，单位是毫秒&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>currentTime
-currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>multiple
-&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/b60f036bd026b92129df8a6476922cc8.svg">&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>lastLatency
-&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/f2abbc771049cf4f3e492e93a258d699.svg">&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/8fb1af970b995232ebed2764a5706aab.svg">&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>beta
-平滑参数，默认为0.5&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>ewma
-lastLatency的平滑值&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/c26fdbae56f3a06c46434ae91185a3d6.svg">&lt;/p></description></item></channel></rss>
+&lt;a href="https://doi.org/10.1145/3593856.3595909"&gt;https://doi.org/10.1145/3593856.3595909&lt;/a&gt;&lt;/p&gt;</description></item><item><title>指标埋点</title><link>https://dubbo.apache.org/zh-cn/blog/2023/02/20/%E6%8C%87%E6%A0%87%E5%9F%8B%E7%82%B9/</link><pubDate>Mon, 20 Feb 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/02/20/%E6%8C%87%E6%A0%87%E5%9F%8B%E7%82%B9/</guid><description>&lt;h1 id="概述"&gt;概述&lt;/h1&gt;
+&lt;h2 id="1-指标接入说明"&gt;1. 指标接入说明&lt;/h2&gt;
+&lt;h2 id="2-指标体系设计"&gt;2. 指标体系设计&lt;/h2&gt;
+&lt;p&gt;Dubbo的指标体系，总共涉及三块，指标收集、本地聚合、指标推送&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;指标收集：将Dubbo内部需要监控的指标推送至统一的Collector中进行存储&lt;/li&gt;
+&lt;li&gt;本地聚合：指标收集获取的均为基础指标，而一些分位数指标则需通过本地聚合计算得出&lt;/li&gt;
+&lt;li&gt;指标推送：收集和聚合后的指标通过一定的方式推送至第三方服务器，目前只涉及Prometheus&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="3-结构设计"&gt;3. 结构设计&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;移除原来与 Metrics 相关的类&lt;/li&gt;
+&lt;li&gt;创建新模块 dubbo-metrics/dubbo-metrics-api、dubbo-metrics/dubbo-metrics-prometheus，MetricsConfig 作为该模块的配置类&lt;/li&gt;
+&lt;li&gt;使用micrometer，在Collector中使用基本类型代表指标，如Long、Double等，并在dubbo-metrics-api中引入micrometer，由micrometer对内部指标进行转换&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="4-数据流转"&gt;4. 数据流转&lt;/h2&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/java-sdk/observability/dataflow.png" alt="img.png"&gt;&lt;/p&gt;
+&lt;h2 id="5-目标"&gt;5. 目标&lt;/h2&gt;
+&lt;p&gt;指标接口将提供一个 MetricsService，该 Service 不仅提供柔性服务所的接口级数据，也提供所有指标的查询方式，其中方法级指标的查询的接口可按如下方式声明&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;MetricsService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Default {@link MetricsService} extension name.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String DEFAULT_EXTENSION_NAME &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;default&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * The contract version of {@link MetricsService}, the future update must make sure compatible.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String VERSION &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Get metrics by prefixes
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @param categories categories
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Map&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCategory, List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsEntity&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;getMetricsByCategories&lt;/span&gt;(List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCategory&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; categories);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Get metrics by interface and prefixes
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @param categories categories
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Map&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCategory, List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsEntity&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;getMetricsByCategories&lt;/span&gt;(String serviceUniqueName, List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCategory&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; categories);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Get metrics by interface、method and prefixes
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @param serviceUniqueName serviceUniqueName (eg.group/interfaceName:version)
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @param methodName methodName
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @param parameterTypes method parameter types
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @param categories categories
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @return metrics - key=MetricCategory value=MetricsEntityList
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Map&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCategory, List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsEntity&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;getMetricsByCategories&lt;/span&gt;(String serviceUniqueName, String methodName, Class&lt;span style="color:#719e07"&gt;&amp;lt;?&amp;gt;[]&lt;/span&gt; parameterTypes, List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCategory&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; categories);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其中 MetricsCategory 设计如下:&lt;/p&gt;</description></item><item><title>Dubbo3 应用级服务发现设计</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</guid><description>&lt;h2 id="objective"&gt;Objective&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。&lt;/li&gt;
+&lt;li&gt;适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/arc.png" alt="interface-arc"&gt;&lt;/p&gt;
+&lt;p&gt;我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。&lt;/p&gt;
+&lt;p&gt;在这个过程中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；&lt;/li&gt;
+&lt;li&gt;注册中心通过这个 key 对 provider 实例地址进行聚合；&lt;/li&gt;
+&lt;li&gt;Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data1.png" alt="interface-data1"&gt;&lt;/p&gt;
+&lt;p&gt;这里，我们对接口级地址发现的内部数据结构进行详细分析。&lt;/p&gt;
+&lt;p&gt;首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。&lt;/p&gt;
+&lt;p&gt;然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/discovery/interface-data2.png" alt="interface-data2"&gt;&lt;/p&gt;
+&lt;p&gt;这里把 URL 地址数据划分成了几份：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体&lt;/li&gt;
+&lt;li&gt;其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明&lt;/li&gt;
+&lt;li&gt;下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。&lt;/li&gt;
+&lt;li&gt;最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：&lt;/p&gt;</description></item><item><title>启发式流控制</title><link>https://dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2023/01/30/%E5%90%AF%E5%8F%91%E5%BC%8F%E6%B5%81%E6%8E%A7%E5%88%B6/</guid><description>&lt;h1 id="整体介绍"&gt;整体介绍&lt;/h1&gt;
+&lt;p&gt;本文所说的柔性服务主要是指&lt;strong&gt;consumer端的负载均衡&lt;/strong&gt;和&lt;strong&gt;provider端的限流&lt;/strong&gt;两个功能。在之前的dubbo版本中，&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;负载均衡部分更多的考虑的是公平性原则，即consumer端尽可能平等的从provider中作出选择，在某些情况下表现并不够理想。&lt;/li&gt;
+&lt;li&gt;限流部分只提供了静态的限流方案，需要用户对provider端设置静态的最大并发值，然而该值的合理选取对用户来讲并不容易。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我们针对这些存在的问题进行了改进。&lt;/p&gt;
+&lt;h2 id="负载均衡"&gt;负载均衡&lt;/h2&gt;
+&lt;h3 id="使用介绍"&gt;使用介绍&lt;/h3&gt;
+&lt;p&gt;在原本的dubbo版本中，有五种负载均衡的方案供选择，他们分别是 &lt;code&gt;Random&lt;/code&gt;、&lt;code&gt;ShortestResponse&lt;/code&gt;、&lt;code&gt;RoundRobin&lt;/code&gt;、&lt;code&gt;LeastActive&lt;/code&gt; 和 &lt;code&gt;ConsistentHash&lt;/code&gt;。其中除 &lt;code&gt;ShortestResponse&lt;/code&gt; 和 &lt;code&gt;LeastActive&lt;/code&gt; 外，其他的几种方案主要是考虑选择时的公平性和稳定性。&lt;/p&gt;
+&lt;p&gt;对于 &lt;code&gt;ShortestResponse&lt;/code&gt; 来说，其设计目的是从所有备选的 provider 中选择 response 时间最短的以提高系统整体的吞吐量。然而存在两个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;在大多数的场景下，不同provider的response时长没有非常明显的区别，此时该算法会退化为随机选择。&lt;/li&gt;
+&lt;li&gt;response的时间长短有时也并不能代表机器的吞吐能力。对于 &lt;code&gt;LeastActive&lt;/code&gt; 来说，其认为应该将流量尽可能分配到当前并发处理任务较少的机器上。但是其同样存在和 &lt;code&gt;ShortestResponse&lt;/code&gt; 类似的问题，即这并不能单独代表机器的吞吐能力。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;基于以上分析，我们提出了两种新的负载均衡算法。一种是同样基于公平性考虑的单纯 &lt;code&gt;P2C&lt;/code&gt; 算法，另一种是基于自适应的方法 &lt;code&gt;adaptive&lt;/code&gt;，其试图自适应的衡量 provider 端机器的吞吐能力，然后将流量尽可能分配到吞吐能力高的机器上，以提高系统整体的性能。&lt;/p&gt;
+&lt;h4 id="总体效果"&gt;总体效果&lt;/h4&gt;
+&lt;p&gt;对于负载均衡部分的有效性实验在两个不同的情况下进行的，分别是提供端机器配置比较均衡和提供端机器配置差距较大的情况。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1675265258687-c3df68a8-80e0-4311-816c-63480494850c.png" alt="image.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/1675265271198-5b045ced-8524-42a2-8b34-d7edbbd1f232.png" alt="image.png"&gt;&lt;/p&gt;
+&lt;h4 id="使用方法"&gt;使用方法&lt;/h4&gt;
+&lt;p&gt;使用方法与原本的负载均衡方法相同。只需要在consumer端将&amp;quot;loadbalance&amp;quot;设置为&amp;quot;p2c&amp;quot;或者&amp;quot;adaptive&amp;quot;即可。&lt;/p&gt;
+&lt;h4 id="代码结构"&gt;代码结构&lt;/h4&gt;
+&lt;p&gt;负载均衡部分的算法实现只需要在原本负载均衡框架内继承 LoadBalance接口即可。&lt;/p&gt;
+&lt;h3 id="原理介绍"&gt;原理介绍&lt;/h3&gt;
+&lt;h4 id="p2c算法"&gt;P2C算法&lt;/h4&gt;
+&lt;p&gt;Power of Two Choice算法简单但是经典，主要思路如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;对于每次调用，从可用的provider列表中做两次随机选择，选出两个节点providerA和providerB。&lt;/li&gt;
+&lt;li&gt;比较providerA和providerB两个节点，选择其“当前正在处理的连接数”较小的那个节点。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id="adaptive算法"&gt;adaptive算法&lt;/h4&gt;
+&lt;p&gt;&lt;a href="https://github.com/apache/dubbo/pull/10745"&gt;代码的github地址&lt;/a&gt;&lt;/p&gt;
+&lt;h5 id="相关指标"&gt;相关指标&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;cpuLoad
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/26808016bc7f1ee83ab425e308074f17.svg" alt="img"&gt;。该指标在provider端机器获得，并通过invocation的attachment传递给consumer端。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;rt
+rt为一次rpc调用所用的时间，单位为毫秒。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;timeout
+timeout为本次rpc调用超时剩余的时间，单位为毫秒。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;weight
+weight是设置的服务权重。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;currentProviderTime
+provider端在计算cpuLoad时的时间，单位是毫秒&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;currentTime
+currentTime为最后一次计算load时的时间，初始化为currentProviderTime，单位是毫秒。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;multiple
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/b60f036bd026b92129df8a6476922cc8.svg" alt="img"&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;lastLatency
+&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/f2abbc771049cf4f3e492e93a258d699.svg" alt="img"&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/8fb1af970b995232ebed2764a5706aab.svg" alt="img"&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;beta
+平滑参数，默认为0.5&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ewma
+lastLatency的平滑值&lt;img src="https://dubbo.apache.org/imgs/blog/proposals/heuristic-flow-control/c26fdbae56f3a06c46434ae91185a3d6.svg" alt="img"&gt;&lt;/p&gt;</description></item></channel></rss>

@@ -1,160 +1,160 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>部署应用 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/</link><description>Recent content in 部署应用 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/index.xml" rel="self" type="application/rss+xml"/><item><title>部署 Istio 环境</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/istio/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/istio/</guid><description>&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
-&lt;ul>
-&lt;li>docker、helm、kubectl 环境已安装。&lt;/li>
-&lt;li>dubbo-go cli 工具和依赖工具已安装&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-部署-istio-环境">2. 部署 Istio 环境&lt;/h2>
-&lt;ol>
-&lt;li>使用helm 安装 istio 基础 CRD 和 istiod 组件。也可以参考 &lt;a href="https://istio.io/">Istio 文档&lt;/a> 使用 istioctl 安装。&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ helm repo add istio https://istio-release.storage.googleapis.com/charts
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ kubectl create namespace istio-system
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istio-base istio/base -n istio-system
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ helm install istiod istio/istiod --namespace istio-system
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>
-&lt;p>删除istio 水平扩展资源&lt;/p>
-&lt;p>*目前 dubbo-go 依赖单个 istiod 实例进行服务发现。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ kubectl delete hpa istiod -n istio-system
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>安装完成后，可以在 istio-system 命名空间下看到一个 istiod pod 在正常运行。&lt;/p></description></item><item><title>Istio 环境部署 Dubbo-go 应用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/deploy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/deploy/</guid><description>&lt;p>在本章节中，我们将使用应用模板快速创建一组 Dubbo-go Server和 Client 端应用，部署在 Istio 集群中；观察、调试和验证服务发现和调用成功。&lt;/p>
-&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
-&lt;ul>
-&lt;li>dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。&lt;/li>
-&lt;li>docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）&lt;/li>
-&lt;li>&lt;a href="../istio/">任务【istio 环境部署】&lt;/a> 已完成&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-开发-server-端-dubbo-go-应用">2. 开发 server 端 Dubbo-go 应用&lt;/h2>
-&lt;h3 id="21-使用-dubbogo-cli-创建项目模板">2.1 使用 dubbogo-cli 创建项目模板&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-plain" data-lang="plain">&lt;span style="display:flex;">&lt;span>$ mkdir mesh-app-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd mesh-app-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp . 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ tree .
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── api.proto
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── build
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── Dockerfile
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── chart
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── app
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── Chart.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── templates
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── _helpers.tpl
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── deployment.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ ├── service.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── serviceaccount.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── values.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── nacos_env
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── Chart.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── templates
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── _helpers.tpl
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── deployment.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── service.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── values.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── app.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── conf
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── dubbogo.yaml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── pkg
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── service.go
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>生成项目包括几个目录：&lt;/p></description></item><item><title>流量管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/traffic_management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/traffic_management/</guid><description>&lt;p>在本节中，我们将延续上一个任务&lt;a href="../deploy/">【在 Istio 环境部署 Dubbo-go 应用】&lt;/a>。&lt;/p>
-&lt;p>在之前的任务中，我们在集群中部署了一组 Dubbo-go Server和 Client 端应用，验证了服务发现和调用成功。在本节中，我们将创建新版本的 Server 端应用。通过配置 VirtualService 和 DestinationRule ，实现路由管理，和流量转移能力&lt;/p>
-&lt;h2 id="1-准备工作">1. 准备工作&lt;/h2>
-&lt;ul>
-&lt;li>dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。&lt;/li>
-&lt;li>docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）&lt;/li>
-&lt;li>任务&lt;a href="../deploy/">【在 Istio 环境部署 Dubbo-go 应用】&lt;/a>已完成&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-开发多版本dubbo-go-应用">2. 开发多版本Dubbo-go 应用。&lt;/h2>
-&lt;h3 id="21-使用-dubbogo-cli-创建另一个项目模板">2.1 使用 dubbogo-cli 创建另一个项目模板&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ dubbogo-cli newApp . 
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="22-开发和部署客户端-dubbo-go-应用-v2">2.2 开发和部署客户端 Dubbo-go 应用 v2：&lt;/h3>
-&lt;h4 id="编写业务逻辑">编写业务逻辑&lt;/h4>
-&lt;ul>
-&lt;li>修改 package/service/service.go 的实现方法，返回版本号为 v2.0.0&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (s &lt;span style="color:#719e07">*&lt;/span>GreeterServerImpl) &lt;span style="color:#268bd2">SayHello&lt;/span>(ctx context.Context, in &lt;span style="color:#719e07">*&lt;/span>api.HelloRequest) (&lt;span style="color:#719e07">*&lt;/span>api.User, &lt;span style="color:#dc322f">error&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>api.User{Name: &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> in.Name, Id: &lt;span style="color:#2aa198">&amp;#34;v2.0.0&amp;#34;&lt;/span>}, &lt;span style="color:#cb4b16">nil&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>
-&lt;p>修改如下配置文件，使用xds协议作为注册中心，加载名为 GreeterServerImpl 的服务结构。&lt;/p>
-&lt;p>conf/dubbogo.yaml&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">xds&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: xds
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: istiod.istio-system.svc.cluster.local:15010
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">triple&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: tri
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">GreeterServerImpl&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span> &lt;span style="color:#586e75"># read from stub&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>至此，应用开发完成。&lt;/p></description></item><item><title>无代理服务网格</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/proxyless_service_mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/proxyless_service_mesh/</guid><description>&lt;h2 id="1-什么是-proxyless-service-mesh-无代理服务网格-">1. 什么是 Proxyless Service-Mesh (无代理服务网格) ?&lt;/h2>
-&lt;h3 id="11-service-mesh-简析">1.1 Service Mesh 简析&lt;/h3>
-&lt;p>Istio 是当今最流行的开源服务网格。它由控制平面和数据平面构成，其架构如下，图片摘自 &lt;a href="https://istio.io/">istio官网&lt;/a>&lt;/p>
-&lt;p>&lt;img alt="使用 Istio 后" src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/service-mesh.svg">&lt;/p>
-&lt;p>位于图中下半部分的控制平面负责配置、服务信息、证书等资源的下发。位于上半部分的数据平面关注业务之间的通信流量；传统服务网格通过代理的方式拦截所有的业务网络流量，代理需要感知到控制平面下发的配置资源，从而按照要求控制网络流量的走向。&lt;/p>
-&lt;p>在 Istiod 环境中，其控制平面是一个名为 istiod 的进程，网络代理是 envoy 。istiod 通过监听 K8S 资源 例如Service、Endpoint 等，获取服务信息，并将这些资源统一通过 XDS 协议下发给位于数据平面的网络代理。envoy 是一个独立的进程，以 sidecar（边车）的形式伴随业务应用 Pod 运行，他与应用进程共用同一个主机网络，并通过修改路由表的方式，劫持业务应用的网络流量。&lt;/p>
-&lt;p>Service Mesh 可以解决微服务场景下的众多问题，随着集群规模的扩大与业务复杂度的增长，基于原生 k8s 的容器编排方案将会难以应付，开发人员不得不面对巨大的服务治理挑战。而 Service Mesh 很好地解决了这一问题，它将服务治理需求封装在了控制平面与代理中，业务开发人员只需要关注于业务逻辑。在应用部署之后，只需要运维人员通过修改配置，即可实现例如故障恢复、负载均衡、灰度发布等功能，这极大地提高了研发和迭代效率。&lt;/p>
-&lt;p>Istio 的 sidecar 通过容器注入的形式伴随业务应用进程的整个生命周期，对于业务应用是毫无侵入的，这解决了业务应用可迁移、多语言、基础架构耦合等问题。但这也带来了高资源消耗、请求时延增长的问题。&lt;/p>
-&lt;p>Service 为服务治理提供了一个很好的思路，将基础架构与业务逻辑解耦，让应用开发人员只需关注业务。另一方面，由于 sidecar 的弊端，我们可以考虑使用 sdk 的形式，来替代 sidecar 支撑起数据平面。&lt;/p>
-&lt;h3 id="12-proxyless-service-mesh">1.2 Proxyless Service-Mesh&lt;/h3>
-&lt;p>无代理服务网格，是近几年提出的一个新的概念，isito、gRPC、brpc 等开源社区都在这一方向进行了探索和实践。无代理服务网格框架以 SDK 的形式被业务应用引入，负责服务之间的通信、治理。来自控制平面的配置直接下发至服务框架，由服务框架代替上述 sidecar 的功能。&lt;/p>
-&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/894c0e52-9d34-4490-b49b-24973ef4aabc.png">&lt;/p>
-&lt;p>服务框架（SDK）的主要能力可以概括为以下三点：&lt;/p>
-&lt;ol>
-&lt;li>对接控制平面，监听配置资源。&lt;/li>
-&lt;li>对接应用，为开发者提供方便的接口。&lt;/li>
-&lt;li>对接网络，根据资源变动，响应流量规则。&lt;/li>
-&lt;/ol>
-&lt;h3 id="13-proxyless-的优缺点">1.3 Proxyless 的优缺点&lt;/h3>
-&lt;p>优点：&lt;/p></description></item><item><title>优雅下线</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/graceful_shutdown/</guid><description>&lt;h1 id="优雅下线">优雅下线&lt;/h1>
-&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者扩缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。
-因此，优雅下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力、传统服务治理能力的基础之上，应当提供服务下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。&lt;/p>
-&lt;h2 id="特性说明">特性说明&lt;/h2>
-&lt;p>在一次完整的RPC调用过程中，中间服务往往充当服务提供者和服务消费者两个角色。中间服务在接收到来自上游服务的请求之后，处理请求得到结果返回给上游服务，然后根据需要调用下游服务提供的接口使用下游服务。因此优雅下线功能需要兼顾服务作为服务提供者和服务消费者两侧的稳定性，具体可以分为以下几步：&lt;/p>
-&lt;ol>
-&lt;li>向注册中心进行反注册，销毁在注册中心注册的服务信息&lt;/li>
-&lt;li>作为服务提供者，要等待一段时间，保证客户端成功更新服务信息以及上游任务请求处理完毕，然后拒绝接收新的请求&lt;/li>
-&lt;li>作为服务消费者，要等待一段时间，保证使用下游服务的请求得到响应，然后取消对注册中心的订阅&lt;/li>
-&lt;li>销毁对下游任务的引用，销毁对外提供服务暴露的端口&lt;/li>
-&lt;li>执行用户的自定义回调操作&lt;/li>
-&lt;/ol>
-&lt;p>通过以上步骤，可以保证dubbo-go服务实例安全平稳停止，不对进行中的业务产生影响。&lt;/p>
-&lt;blockquote>
-&lt;p>注意：取消对注册中心的订阅不能在步骤1中执行，这是因为中间服务对下游服务发送请求的时候可能存在下游服务信息的变动&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>对dubbo-go实例使用&lt;code>kill pid&lt;/code>命令停止实例&lt;/p>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>以下是在yaml配置文件中，用户可以自定义的配置&lt;/p>
-&lt;ul>
-&lt;li>作为服务提供者，dubbo-go实例下线时需要等待客户端成功更新服务信息，这段时间在配置中对应的字段为consumer-update-wait-time，默认3s&lt;/li>
-&lt;li>作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求暂未处理完毕，需要等待上游任务请求处理完毕。作为服务消费者，dubbo-go实例需要等待对下游的请求收到回复。这段时间在配置中对应的字段为step-timeout，默认3s&lt;/li>
-&lt;li>作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求已经处理完毕，需要等待一段窗口时间，如果在窗口时间内没有接收到新的请求，再执行后续步骤。这段时间在配置中对应的字段为offline-request-window-timeout，默认0s&lt;/li>
-&lt;li>用户可以自定义是否开启优雅下线功能，在配置中对应的字段为internal-signal，默认开启。&lt;/li>
-&lt;li>dubbo-go实例在优雅下线过程中可能因为异常导致卡死，在配置中可以配置超时时间，实例在超时之后强制关闭。这在配置中对应的字段为timeout，默认60s&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">shutdown&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout:60
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> step-timeout:3
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> consumer-update-wait-time:3
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> internal-signal:true
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> offline-request-window-timeout:0
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>此外，如果用户希望在下线逻辑彻底结束后，执行一些自定义的回调操作，可以使用如下代码&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>extension.&lt;span style="color:#268bd2">AddCustomShutdownCallback&lt;/span>(&lt;span style="color:#268bd2">func&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// 用户自定义操作
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>})
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="参考资料">参考资料&lt;/h2>
-&lt;p>&lt;a href="https://developer.aliyun.com/article/860775">【Dubbo-go 优雅上下线的设计与实践】&lt;/a>&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>部署应用 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/</link><description>Recent content in 部署应用 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/index.xml" rel="self" type="application/rss+xml"/><item><title>部署 Istio 环境</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/istio/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/istio/</guid><description>&lt;h2 id="1-准备工作"&gt;1. 准备工作&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;docker、helm、kubectl 环境已安装。&lt;/li&gt;
+&lt;li&gt;dubbo-go cli 工具和依赖工具已安装&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-部署-istio-环境"&gt;2. 部署 Istio 环境&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;使用helm 安装 istio 基础 CRD 和 istiod 组件。也可以参考 &lt;a href="https://istio.io/"&gt;Istio 文档&lt;/a&gt; 使用 istioctl 安装。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ helm repo add istio https://istio-release.storage.googleapis.com/charts
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ kubectl create namespace istio-system
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ helm install istio-base istio/base -n istio-system
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ helm install istiod istio/istiod --namespace istio-system
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;
+&lt;p&gt;删除istio 水平扩展资源&lt;/p&gt;
+&lt;p&gt;*目前 dubbo-go 依赖单个 istiod 实例进行服务发现。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ kubectl delete hpa istiod -n istio-system
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;安装完成后，可以在 istio-system 命名空间下看到一个 istiod pod 在正常运行。&lt;/p&gt;</description></item><item><title>Istio 环境部署 Dubbo-go 应用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/deploy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/deploy/</guid><description>&lt;p&gt;在本章节中，我们将使用应用模板快速创建一组 Dubbo-go Server和 Client 端应用，部署在 Istio 集群中；观察、调试和验证服务发现和调用成功。&lt;/p&gt;
+&lt;h2 id="1-准备工作"&gt;1. 准备工作&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。&lt;/li&gt;
+&lt;li&gt;docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）&lt;/li&gt;
+&lt;li&gt;&lt;a href="../istio/"&gt;任务【istio 环境部署】&lt;/a&gt; 已完成&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-开发-server-端-dubbo-go-应用"&gt;2. 开发 server 端 Dubbo-go 应用&lt;/h2&gt;
+&lt;h3 id="21-使用-dubbogo-cli-创建项目模板"&gt;2.1 使用 dubbogo-cli 创建项目模板&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-plain" data-lang="plain"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ mkdir mesh-app-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ cd mesh-app-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ dubbogo-cli newApp . 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ tree .
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── Makefile
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── api
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ └── api.proto
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── build
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ └── Dockerfile
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── chart
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ ├── app
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ ├── Chart.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ ├── templates
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ │ ├── _helpers.tpl
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ │ ├── deployment.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ │ ├── service.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ │ └── serviceaccount.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ └── values.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ └── nacos_env
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ ├── Chart.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ ├── templates
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ ├── _helpers.tpl
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ ├── deployment.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ │ └── service.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ └── values.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── cmd
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ └── app.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── conf
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ └── dubbogo.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── go.mod
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;├── go.sum
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;└── pkg
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; └── service
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; └── service.go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;生成项目包括几个目录：&lt;/p&gt;</description></item><item><title>流量管理</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/traffic_management/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/traffic_management/</guid><description>&lt;p&gt;在本节中，我们将延续上一个任务&lt;a href="../deploy/"&gt;【在 Istio 环境部署 Dubbo-go 应用】&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;在之前的任务中，我们在集群中部署了一组 Dubbo-go Server和 Client 端应用，验证了服务发现和调用成功。在本节中，我们将创建新版本的 Server 端应用。通过配置 VirtualService 和 DestinationRule ，实现路由管理，和流量转移能力&lt;/p&gt;
+&lt;h2 id="1-准备工作"&gt;1. 准备工作&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。&lt;/li&gt;
+&lt;li&gt;docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）&lt;/li&gt;
+&lt;li&gt;任务&lt;a href="../deploy/"&gt;【在 Istio 环境部署 Dubbo-go 应用】&lt;/a&gt;已完成&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-开发多版本dubbo-go-应用"&gt;2. 开发多版本Dubbo-go 应用。&lt;/h2&gt;
+&lt;h3 id="21-使用-dubbogo-cli-创建另一个项目模板"&gt;2.1 使用 dubbogo-cli 创建另一个项目模板&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ dubbogo-cli newApp . 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="22-开发和部署客户端-dubbo-go-应用-v2"&gt;2.2 开发和部署客户端 Dubbo-go 应用 v2：&lt;/h3&gt;
+&lt;h4 id="编写业务逻辑"&gt;编写业务逻辑&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;修改 package/service/service.go 的实现方法，返回版本号为 v2.0.0&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (s &lt;span style="color:#719e07"&gt;*&lt;/span&gt;GreeterServerImpl) &lt;span style="color:#268bd2"&gt;SayHello&lt;/span&gt;(ctx context.Context, in &lt;span style="color:#719e07"&gt;*&lt;/span&gt;api.HelloRequest) (&lt;span style="color:#719e07"&gt;*&lt;/span&gt;api.User, &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;api.User{Name: &lt;span style="color:#2aa198"&gt;&amp;#34;Hello &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; in.Name, Id: &lt;span style="color:#2aa198"&gt;&amp;#34;v2.0.0&amp;#34;&lt;/span&gt;}, &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;修改如下配置文件，使用xds协议作为注册中心，加载名为 GreeterServerImpl 的服务结构。&lt;/p&gt;
+&lt;p&gt;conf/dubbogo.yaml&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;registries&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;xds&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: xds
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: istiod.istio-system.svc.cluster.local:15010
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocols&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;triple&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: tri
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;provider&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;services&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;GreeterServerImpl&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;&amp;#34;&lt;/span&gt; &lt;span style="color:#586e75"&gt;# read from stub&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;至此，应用开发完成。&lt;/p&gt;</description></item><item><title>无代理服务网格</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/proxyless_service_mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/proxyless_service_mesh/</guid><description>&lt;h2 id="1-什么是-proxyless-service-mesh-无代理服务网格-"&gt;1. 什么是 Proxyless Service-Mesh (无代理服务网格) ?&lt;/h2&gt;
+&lt;h3 id="11-service-mesh-简析"&gt;1.1 Service Mesh 简析&lt;/h3&gt;
+&lt;p&gt;Istio 是当今最流行的开源服务网格。它由控制平面和数据平面构成，其架构如下，图片摘自 &lt;a href="https://istio.io/"&gt;istio官网&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/service-mesh.svg" alt="使用 Istio 后"&gt;&lt;/p&gt;
+&lt;p&gt;位于图中下半部分的控制平面负责配置、服务信息、证书等资源的下发。位于上半部分的数据平面关注业务之间的通信流量；传统服务网格通过代理的方式拦截所有的业务网络流量，代理需要感知到控制平面下发的配置资源，从而按照要求控制网络流量的走向。&lt;/p&gt;
+&lt;p&gt;在 Istiod 环境中，其控制平面是一个名为 istiod 的进程，网络代理是 envoy 。istiod 通过监听 K8S 资源 例如Service、Endpoint 等，获取服务信息，并将这些资源统一通过 XDS 协议下发给位于数据平面的网络代理。envoy 是一个独立的进程，以 sidecar（边车）的形式伴随业务应用 Pod 运行，他与应用进程共用同一个主机网络，并通过修改路由表的方式，劫持业务应用的网络流量。&lt;/p&gt;
+&lt;p&gt;Service Mesh 可以解决微服务场景下的众多问题，随着集群规模的扩大与业务复杂度的增长，基于原生 k8s 的容器编排方案将会难以应付，开发人员不得不面对巨大的服务治理挑战。而 Service Mesh 很好地解决了这一问题，它将服务治理需求封装在了控制平面与代理中，业务开发人员只需要关注于业务逻辑。在应用部署之后，只需要运维人员通过修改配置，即可实现例如故障恢复、负载均衡、灰度发布等功能，这极大地提高了研发和迭代效率。&lt;/p&gt;
+&lt;p&gt;Istio 的 sidecar 通过容器注入的形式伴随业务应用进程的整个生命周期，对于业务应用是毫无侵入的，这解决了业务应用可迁移、多语言、基础架构耦合等问题。但这也带来了高资源消耗、请求时延增长的问题。&lt;/p&gt;
+&lt;p&gt;Service 为服务治理提供了一个很好的思路，将基础架构与业务逻辑解耦，让应用开发人员只需关注业务。另一方面，由于 sidecar 的弊端，我们可以考虑使用 sdk 的形式，来替代 sidecar 支撑起数据平面。&lt;/p&gt;
+&lt;h3 id="12-proxyless-service-mesh"&gt;1.2 Proxyless Service-Mesh&lt;/h3&gt;
+&lt;p&gt;无代理服务网格，是近几年提出的一个新的概念，isito、gRPC、brpc 等开源社区都在这一方向进行了探索和实践。无代理服务网格框架以 SDK 的形式被业务应用引入，负责服务之间的通信、治理。来自控制平面的配置直接下发至服务框架，由服务框架代替上述 sidecar 的功能。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/mesh/proxyless_service_mesh/894c0e52-9d34-4490-b49b-24973ef4aabc.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;服务框架（SDK）的主要能力可以概括为以下三点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;对接控制平面，监听配置资源。&lt;/li&gt;
+&lt;li&gt;对接应用，为开发者提供方便的接口。&lt;/li&gt;
+&lt;li&gt;对接网络，根据资源变动，响应流量规则。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="13-proxyless-的优缺点"&gt;1.3 Proxyless 的优缺点&lt;/h3&gt;
+&lt;p&gt;优点：&lt;/p&gt;</description></item><item><title>优雅下线</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deploy2/graceful_shutdown/</guid><description>&lt;h1 id="优雅下线"&gt;优雅下线&lt;/h1&gt;
+&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者扩缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。
+因此，优雅下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力、传统服务治理能力的基础之上，应当提供服务下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。&lt;/p&gt;
+&lt;h2 id="特性说明"&gt;特性说明&lt;/h2&gt;
+&lt;p&gt;在一次完整的RPC调用过程中，中间服务往往充当服务提供者和服务消费者两个角色。中间服务在接收到来自上游服务的请求之后，处理请求得到结果返回给上游服务，然后根据需要调用下游服务提供的接口使用下游服务。因此优雅下线功能需要兼顾服务作为服务提供者和服务消费者两侧的稳定性，具体可以分为以下几步：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;向注册中心进行反注册，销毁在注册中心注册的服务信息&lt;/li&gt;
+&lt;li&gt;作为服务提供者，要等待一段时间，保证客户端成功更新服务信息以及上游任务请求处理完毕，然后拒绝接收新的请求&lt;/li&gt;
+&lt;li&gt;作为服务消费者，要等待一段时间，保证使用下游服务的请求得到响应，然后取消对注册中心的订阅&lt;/li&gt;
+&lt;li&gt;销毁对下游任务的引用，销毁对外提供服务暴露的端口&lt;/li&gt;
+&lt;li&gt;执行用户的自定义回调操作&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;通过以上步骤，可以保证dubbo-go服务实例安全平稳停止，不对进行中的业务产生影响。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注意：取消对注册中心的订阅不能在步骤1中执行，这是因为中间服务对下游服务发送请求的时候可能存在下游服务信息的变动&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="使用场景"&gt;使用场景&lt;/h2&gt;
+&lt;p&gt;对dubbo-go实例使用&lt;code&gt;kill pid&lt;/code&gt;命令停止实例&lt;/p&gt;
+&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
+&lt;p&gt;以下是在yaml配置文件中，用户可以自定义的配置&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;作为服务提供者，dubbo-go实例下线时需要等待客户端成功更新服务信息，这段时间在配置中对应的字段为consumer-update-wait-time，默认3s&lt;/li&gt;
+&lt;li&gt;作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求暂未处理完毕，需要等待上游任务请求处理完毕。作为服务消费者，dubbo-go实例需要等待对下游的请求收到回复。这段时间在配置中对应的字段为step-timeout，默认3s&lt;/li&gt;
+&lt;li&gt;作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求已经处理完毕，需要等待一段窗口时间，如果在窗口时间内没有接收到新的请求，再执行后续步骤。这段时间在配置中对应的字段为offline-request-window-timeout，默认0s&lt;/li&gt;
+&lt;li&gt;用户可以自定义是否开启优雅下线功能，在配置中对应的字段为internal-signal，默认开启。&lt;/li&gt;
+&lt;li&gt;dubbo-go实例在优雅下线过程中可能因为异常导致卡死，在配置中可以配置超时时间，实例在超时之后强制关闭。这在配置中对应的字段为timeout，默认60s&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;shutdown&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; timeout:60
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; step-timeout:3
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; consumer-update-wait-time:3
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; internal-signal:true
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; offline-request-window-timeout:0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此外，如果用户希望在下线逻辑彻底结束后，执行一些自定义的回调操作，可以使用如下代码&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;extension.&lt;span style="color:#268bd2"&gt;AddCustomShutdownCallback&lt;/span&gt;(&lt;span style="color:#268bd2"&gt;func&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// 用户自定义操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="参考资料"&gt;参考资料&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://developer.aliyun.com/article/860775"&gt;【Dubbo-go 优雅上下线的设计与实践】&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>

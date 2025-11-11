@@ -1,588 +1,588 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>生态 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/%E7%94%9F%E6%80%81/</link><description>Recent content in 生态 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 11 Mar 2025 08:03:41 +0530</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/%E7%94%9F%E6%80%81/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Apache APISIX 代理 Dubbo 服务 (dubbo 协议)</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</link><pubDate>Thu, 25 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</guid><description>&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>生态 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/%E7%94%9F%E6%80%81/</link><description>Recent content in 生态 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 11 Mar 2025 08:03:41 +0530</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/%E7%94%9F%E6%80%81/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Apache APISIX 代理 Dubbo 服务 (dubbo 协议)</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</link><pubDate>Thu, 25 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2024/04/22/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1triple%E5%8D%8F%E8%AE%AE/">使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a> 学习具体示例。
+ 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2024/04/22/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1triple%E5%8D%8F%E8%AE%AE/"&gt;使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a&gt; 学习具体示例。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;p>&lt;a href="https://apisix.apache.org/">Apache APISIX&lt;/a> 是 Apache 软件基金会的顶级开源项目，也是当前最活跃的开源网关项目。作为一个动态、实时、高性能的开源 API 网关，Apache APISIX 提供了负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等丰富的流量管理功能。&lt;/p>
-&lt;p>Apache APISIX 基于开源项目 tengine/mod_dubbo 模块为 Apache Dubbo 服务配备了HTTP 网关能力。通过 dubbo-proxy 插件，可以轻松地将 Dubbo Service 发布为 HTTP 服务。&lt;/p>
-&lt;p>&lt;img alt="架构图" src="https://dubbo.apache.org/imgs/blog/apisix-plugin/1.png">&lt;/p>
-&lt;h2 id="入门篇">入门篇&lt;/h2>
-&lt;h3 id="安装-apisix">安装 APISIX&lt;/h3>
-&lt;p>本文档使用 Docker 安装 APISIX。确保本地先安装 &lt;a href="https://www.docker.com/">Docker&lt;/a> 和 &lt;a href="https://docs.docker.com/compose/">Docker Compose&lt;/a>。&lt;/p>
-&lt;p>首先，下载 &lt;a href="https://github.com/apache/apisix-docker">apisix-docker&lt;/a> 仓库。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ git clone https://github.com/apache/apisix-docker.git
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> apisix-docker/example
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于本示例要接入到 Nacos 注册中心，因此 &lt;code>apisix-docker/example&lt;/code> 目录下安装用的 &lt;code>docker-compose.yaml&lt;/code>，添加如下内容：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: nacos/nacos-server:v2.1.1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">container_name&lt;/span>: nacos-standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">environment&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - PREFER_HOST_MODE=hostname
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - MODE=standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;8848:8848&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;9848:9848&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">networks&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">apisix&lt;/span>:
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 config.yaml 文件中增加 nacos 注册中心配置：&lt;/p></description></item><item><title>如何通过 Higress 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Mon, 01 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;p&gt;&lt;a href="https://apisix.apache.org/"&gt;Apache APISIX&lt;/a&gt; 是 Apache 软件基金会的顶级开源项目，也是当前最活跃的开源网关项目。作为一个动态、实时、高性能的开源 API 网关，Apache APISIX 提供了负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等丰富的流量管理功能。&lt;/p&gt;
+&lt;p&gt;Apache APISIX 基于开源项目 tengine/mod_dubbo 模块为 Apache Dubbo 服务配备了HTTP 网关能力。通过 dubbo-proxy 插件，可以轻松地将 Dubbo Service 发布为 HTTP 服务。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/apisix-plugin/1.png" alt="架构图"&gt;&lt;/p&gt;
+&lt;h2 id="入门篇"&gt;入门篇&lt;/h2&gt;
+&lt;h3 id="安装-apisix"&gt;安装 APISIX&lt;/h3&gt;
+&lt;p&gt;本文档使用 Docker 安装 APISIX。确保本地先安装 &lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; 和 &lt;a href="https://docs.docker.com/compose/"&gt;Docker Compose&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;首先，下载 &lt;a href="https://github.com/apache/apisix-docker"&gt;apisix-docker&lt;/a&gt; 仓库。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ git clone https://github.com/apache/apisix-docker.git
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ &lt;span style="color:#b58900"&gt;cd&lt;/span&gt; apisix-docker/example
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;由于本示例要接入到 Nacos 注册中心，因此 &lt;code&gt;apisix-docker/example&lt;/code&gt; 目录下安装用的 &lt;code&gt;docker-compose.yaml&lt;/code&gt;，添加如下内容：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;nacos&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;image&lt;/span&gt;: nacos/nacos-server:v2.1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;container_name&lt;/span&gt;: nacos-standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;environment&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - PREFER_HOST_MODE=hostname
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - MODE=standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;ports&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#2aa198"&gt;&amp;#34;8848:8848&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#2aa198"&gt;&amp;#34;9848:9848&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;networks&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;apisix&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在 config.yaml 文件中增加 nacos 注册中心配置：&lt;/p&gt;</description></item><item><title>如何通过 Higress 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Mon, 01 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，具体可参见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/">使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a> 学习具体示例。
+ 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，具体可参见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/"&gt;使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a&gt; 学习具体示例。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;p>Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过配置协议转换，可以将一个Dubbo服务以HTTP接口暴露出来，从而用HTTP请求实现对Dubbo接口的调用。本文将通过一个示例来介绍如何用Higress配置HTTP到Dubbo的协议转换。该示例会引导您轻松地部署一个Nacos server和一个Dubbo服务，然后通过Ingress将HTTP请求转发到注册在Nacos上的Dubbo服务，并通过Higress的协议转换能力完成对Dubbo服务的HTTP调用。&lt;/p>
-&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/http-to-dubbo.png"/>
-&lt;p>以下是一个使用 &lt;code>Higress + dubbo协议 + Nacos注册中心&lt;/code> 的完整示例：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo">dubbo-samples-gateway-higress-dubbo&lt;/a>。&lt;/p>
-&lt;h2 id="前提条件">前提条件&lt;/h2>
-&lt;ol>
-&lt;li>已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm">Higress安装部署文档&lt;/a>。&lt;/li>
-&lt;/ol>
-&lt;h2 id="部署nacos和dubbo服务">部署Nacos和Dubbo服务&lt;/h2>
-&lt;p>首先在K8s集群中apply以下资源，以部署一个Nacos注册中心，同时通过K8s service将这个Nacos server暴露出来。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Nacos Server配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">env&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: MODE
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: nacos/nacos-server:v2.2.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">imagePullPolicy&lt;/span>: Always
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">containerPort&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dnsPolicy&lt;/span>: ClusterFirst
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">restartPolicy&lt;/span>: Always
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Nacos Server Service配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: TCP
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">targetPort&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: ClusterIP
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 K8s 集群中 apply 以下资源，以部署一个Dubbo服务，该 Dubbo 服务将注册到上述的 Naocs 中（你可以选择重新打包，我们接下来直接使用社区提前准备好的镜像包）。&lt;/p></description></item><item><title>如何通过 Apache ShenYu 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Wed, 04 May 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png">&lt;/p>
-&lt;h2 id="1-介绍">1. 介绍&lt;/h2>
-&lt;ul>
-&lt;li>Apache ShenYu&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/shenyu.png">&lt;/p>
-&lt;p>&lt;a href="https://shenyu.apache.org/zh/docs/index">Apache ShenYu(Incubating)&lt;/a> 是一个异步的，高性能的，跨语言的，响应式的 &lt;code>API&lt;/code> 网关。兼容各种主流框架体系，支持热插拔，用户可以定制化开发，满足用户各种场景的现状和未来需求，经历过大规模场景的锤炼。&lt;/p>
-&lt;p>2021年5月，&lt;code>ShenYu&lt;/code>捐献给 &lt;code>Apache&lt;/code> 软件基金会，Apache 基金会全票通过，顺利进入孵化器。&lt;/p>
-&lt;ul>
-&lt;li>Apache Dubbo&lt;/li>
-&lt;/ul>
-&lt;p>&lt;code>Apache Dubbo&lt;/code> 是一款微服务开发框架，它提供了 &lt;code>RPC&lt;/code> 通信 与 微服务治理 两大关键能力。这意味着，使用 &lt;code>Dubbo&lt;/code> 开发的微服务，将具备相互之间的远程发现与通信能力， 同时利用 Dubbo 提供的丰富服务治理能力，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。同时 &lt;code>Dubbo&lt;/code> 是高度可扩展的，用户几乎可以在任意功能点去定制自己的实现，以改变框架的默认行为来满足自己的业务需求。&lt;/p>
-&lt;h2 id="2-dubbo快速开始">2. Dubbo快速开始&lt;/h2>
-&lt;p>本小节介绍如何将&lt;code>Dubbo&lt;/code>服务接入到&lt;code>ShenYu&lt;/code>网关，您可以直接在工程下找到本小节的&lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo">示例代码&lt;/a> 。&lt;/p>
-&lt;h3 id="21-启动shenyu-admin">2.1 启动shenyu-admin&lt;/h3>
-&lt;p>&lt;code>shenyu-admin&lt;/code>是&lt;code>Apache ShenYu&lt;/code>后台管理系统， 启动的方式有多种，本文通过 &lt;code>[本地部署](https://shenyu.apache.org/zh/docs/deployment/deployment-local)&lt;/code> 的方式启动。启动成功后，需要在基础配置&lt;code>-&amp;gt;&lt;/code>插件管理中，把&lt;code>dubbo&lt;/code> 插件设置为开启，并设置你的注册地址，请确保注册中心已经开启。&lt;/p>
-&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/dubbo-enable-zh.png">&lt;/p>
-&lt;h3 id="22-启动shenyu网关">2.2 启动shenyu网关&lt;/h3>
-&lt;p>在这里通过 &lt;a href="https://github.com/apache/incubator-shenyu/tree/master/shenyu-bootstrap">源码&lt;/a> 的方式启动，直接运行&lt;code>shenyu-bootstrap&lt;/code>中的&lt;code>ShenyuBootstrapApplication&lt;/code>。&lt;/p>
-&lt;p>在启动前，请确保网关已经引入相关依赖。如果客户端是&lt;code>apache dubbo&lt;/code>，注册中心使用&lt;code>zookeeper&lt;/code>，请参考如下配置：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> apache shenyu apache dubbo plugin start&lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.shenyu&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>shenyu&lt;span style="color:#719e07">-&lt;/span>spring&lt;span style="color:#719e07">-&lt;/span>boot&lt;span style="color:#719e07">-&lt;/span>starter&lt;span style="color:#719e07">-&lt;/span>plugin&lt;span style="color:#719e07">-&lt;/span>apache&lt;span style="color:#719e07">-&lt;/span>dubbo&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>${project.version}&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>dubbo&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>2.7.5&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> Dubbo zookeeper registry dependency start &lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>curator&lt;span style="color:#719e07">-&lt;/span>client&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>4.0.1&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>exclusions&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>exclusion&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>log4j&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>log4j&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>exclusion&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>exclusions&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>curator&lt;span style="color:#719e07">-&lt;/span>framework&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>4.0.1&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>curator&lt;span style="color:#719e07">-&lt;/span>recipes&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>4.0.1&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> Dubbo zookeeper registry dependency end &lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> apache dubbo plugin end&lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23-启动shenyu-examples-dubbo">2.3 启动shenyu-examples-dubbo&lt;/h3>
-&lt;p>以官网提供的例子为例 &lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo">shenyu-examples-dubbo&lt;/a> 。 假如&lt;code>dubbo&lt;/code>服务定义如下：&lt;/p></description></item><item><title>分布式事务框架 seata-golang 通信模型详解</title><link>https://dubbo.apache.org/zh-cn/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</guid><description>&lt;h2 id="简介">简介&lt;/h2>
-&lt;p>Java 的世界里，大家广泛使用一个高性能网络通信框架 —— netty，很多 RPC 框架都是基于 netty 来实现的。在 golang 的世界里，getty 也是一个类似 netty 的高性能网络通信库。getty 最初由 dubbo-go 项目负责人于雨开发，作为底层通信库在 dubbo-go 中使用。随着 dubbo-go 捐献给 apache 基金会，在社区小伙伴的共同努力下，getty 也最终进入到 apache 这个大家庭，并改名 dubbo-getty。&lt;/p>
-&lt;p>18 年的时候，我在公司里实践微服务，当时遇到最大的问题就是分布式事务问题。同年，阿里在社区开源他们的分布式事务解决方案，我也很快关注到这个项目，起初还叫 fescar，后来更名 seata。由于我对开源技术很感兴趣，加了很多社区群，当时也很关注 dubbo-go 这个项目，在里面默默潜水。随着对 seata 的了解，逐渐萌生了做一个 go 版本的分布式事务框架的想法。&lt;/p>
-&lt;p>要做一个 golang 版的分布式事务框架，首先需要解决的一个问题就是如何实现 RPC 通信。dubbo-go 就是摆在眼前很好的一个例子，遂开始研究 dubbo-go 的底层 getty。&lt;/p>
-&lt;h2 id="如何基于-getty-实现-rpc-通信">如何基于 getty 实现 RPC 通信&lt;/h2>
-&lt;p>getty 框架的整体模型图如下：&lt;/p>
-&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/dubbo-go/seata/p1.webp">&lt;/p>
-&lt;p>下面结合相关代码，详述 seata-golang 的 RPC 通信过程。&lt;/p>
-&lt;h3 id="1-建立连接">1. 建立连接&lt;/h3>
-&lt;p>实现 RPC 通信，首先要建立网络连接，这里先从 client.go 开始看起。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (c &lt;span style="color:#719e07">*&lt;/span>client) &lt;span style="color:#268bd2">connect&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">var&lt;/span> (
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> err &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss Session
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 建立一个 session 连接
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ss = c.&lt;span style="color:#268bd2">dial&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> ss &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// client has been closed
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">break&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> err = c.&lt;span style="color:#268bd2">newSession&lt;/span>(ss)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 收发报文
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ss.(&lt;span style="color:#719e07">*&lt;/span>session).&lt;span style="color:#268bd2">run&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 此处省略部分代码
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">break&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// don&amp;#39;t distinguish between tcp connection and websocket connection. Because
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// gorilla/websocket/conn.go:(Conn)Close also invoke net.Conn.Close()
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ss.&lt;span style="color:#268bd2">Conn&lt;/span>().&lt;span style="color:#268bd2">Close&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>connect()&lt;/code> 方法通过 &lt;code>dial()&lt;/code> 方法得到了一个 session 连接，进入 &lt;code>dial()&lt;/code> 方法：&lt;/p></description></item><item><title>使用Apache Skywalking (Incubator) 做分布式跟踪</title><link>https://dubbo.apache.org/zh-cn/blog/2019/08/11/%E4%BD%BF%E7%94%A8apache-skywalking-incubator-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</link><pubDate>Sun, 11 Aug 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/08/11/%E4%BD%BF%E7%94%A8apache-skywalking-incubator-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</guid><description>&lt;h2 id="apache-skywalkingincubator简介">Apache Skywalking(Incubator)简介&lt;/h2>
-&lt;p>&lt;a href="https://github.com/apache/skywalking">Apache Skywalking(Incubator)&lt;/a> 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM系统。&lt;a href="https://github.com/apache/skywalking">Apache Skywalking(Incubator)&lt;/a>通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。&lt;a href="https://github.com/apache/skywalking">Apache Skywalking (Incubating)&lt;/a>目前支持多种语言，其中包括&lt;a href="https://github.com/apache/skywalking">Java&lt;/a>，&lt;a href="https://github.com/OpenSkywalking/skywalking-netcore">.Net Core&lt;/a>，&lt;a href="https://github.com/OpenSkywalking/skywalking-nodejs">Node.js&lt;/a>和&lt;a href="https://github.com/SkyAPM/go2sky">Go&lt;/a>语言。&lt;/p>
-&lt;p>目前Skywalking已经支持从6个可视化维度剖析分布式系统的运行情况。总览视图是应用和组件的全局视图，其中包括组件和应用数量，应用的告警波动，慢服务列表以及应用吞吐量；拓扑图从应用依赖关系出发，展现整个应用的拓扑关系；应用视图则是从单个应用的角度，展现应用的上下游关系，TopN的服务和服务器，JVM的相关信息以及对应的主机信息。服务视图关注单个服务入口的运行情况以及此服务的上下游依赖关系，依赖度，帮助用户针对单个服务的优化和监控；调用链展现了调用的单次请求经过的所有埋点以及每个埋点的执行时长；告警视图根据配置阈值针对应用、服务器、服务进行实时告警。&lt;/p>
-&lt;h2 id="dubbo与apache-skywalkingincubator">Dubbo与Apache Skywalking(Incubator)&lt;/h2>
-&lt;h3 id="编写dubbo示例程序">编写Dubbo示例程序&lt;/h3>
-&lt;p>Dubbo实例程序已上传到&lt;a href="https://github.com/SkywalkingTest/dubbo-trace-example">Github仓库&lt;/a>中。方便大家下载使用。&lt;/p>
-&lt;h4 id="api工程">API工程&lt;/h4>
-&lt;p>服务接口：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.skywalking.demo.interfaces;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public &lt;span style="color:#268bd2">interface&lt;/span> HelloService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="dubbo服务提供工程">Dubbo服务提供工程&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.skywalking.demo.provider;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@&lt;span style="color:#268bd2">Service&lt;/span>(version = &lt;span style="color:#2aa198">&amp;#34;${demo.service.version}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	application = &lt;span style="color:#2aa198">&amp;#34;${dubbo.application.id}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	protocol = &lt;span style="color:#2aa198">&amp;#34;${dubbo.protocol.id}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	registry = &lt;span style="color:#2aa198">&amp;#34;${dubbo.registry.id}&amp;#34;&lt;/span>, timeout = &lt;span style="color:#2aa198">60000&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public class HelloServiceImpl implements HelloService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	public String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		LockSupport.&lt;span style="color:#268bd2">parkNanos&lt;/span>(TimeUnit.SECONDS.&lt;span style="color:#268bd2">toNanos&lt;/span>(&lt;span style="color:#2aa198">1&lt;/span>));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="consumer工程">Consumer工程&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.skywalking.demo.consumer;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@RestController
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>public class ConsumerController {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	private static &lt;span style="color:#dc322f">int&lt;/span> COUNT = &lt;span style="color:#2aa198">0&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	@&lt;span style="color:#268bd2">Reference&lt;/span>(version = &lt;span style="color:#2aa198">&amp;#34;${demo.service.version}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		application = &lt;span style="color:#2aa198">&amp;#34;${dubbo.application.id}&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		url = &lt;span style="color:#2aa198">&amp;#34;dubbo://localhost:20880&amp;#34;&lt;/span>, timeout = &lt;span style="color:#2aa198">60000&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	private HelloService helloService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	@&lt;span style="color:#268bd2">GetMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/sayHello/{name}&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	public String &lt;span style="color:#268bd2">sayHello&lt;/span>(@&lt;span style="color:#268bd2">PathVariable&lt;/span>(name = &lt;span style="color:#2aa198">&amp;#34;name&amp;#34;&lt;/span>) String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#719e07">if&lt;/span> ((COUNT&lt;span style="color:#719e07">++&lt;/span>) &lt;span style="color:#719e07">%&lt;/span> &lt;span style="color:#2aa198">3&lt;/span> &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>){
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>			throw new &lt;span style="color:#268bd2">RuntimeException&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		LockSupport.&lt;span style="color:#268bd2">parkNanos&lt;/span>(TimeUnit.SECONDS.&lt;span style="color:#268bd2">toNanos&lt;/span>(&lt;span style="color:#2aa198">2&lt;/span>));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#719e07">return&lt;/span> helloService.&lt;span style="color:#268bd2">sayHello&lt;/span>(name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="部署apache-skywalkingincubator">部署Apache Skywalking(Incubator)&lt;/h3>
-&lt;p>Apache Skywalking(Incubator）共提供两种部署模式：单节点模式和集群模式，以下为单节点模式部署步骤，集群模式部署详情参考&lt;a href="https://skywalking.apache.org/docs/main/next/en/setup/backend/backend-setup/">文档&lt;/a>。&lt;/p></description></item><item><title>当Dubbo遇上Arthas：排查问题的实践</title><link>https://dubbo.apache.org/zh-cn/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</guid><description>&lt;p>Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用户。&lt;/p>
-&lt;ul>
-&lt;li>Github: &lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
-&lt;li>文档：http://dubbo.apache.org/zh-cn/&lt;/li>
-&lt;/ul>
-&lt;p>Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。&lt;/p>
-&lt;ul>
-&lt;li>Github: &lt;a href="https://github.com/alibaba/arthas">https://github.com/alibaba/arthas&lt;/a>&lt;/li>
-&lt;li>文档：https://arthas.aliyun.com/doc/&lt;/li>
-&lt;li>Arthas开源交流QQ群: 916328269&lt;/li>
-&lt;li>Arthas开源交流钉钉群: 21965291&lt;/li>
-&lt;/ul>
-&lt;p>当Dubbo遇上Arthas，会碰撞出什么样的火花呢？下面来分享Arthas排查Dubbo问题的一些经验。&lt;/p>
-&lt;h3 id="dubbo-arthas-demo">dubbo-arthas-demo&lt;/h3>
-&lt;p>下面的排查分享基于这个&lt;code>dubbo-arthas-demo&lt;/code>，非常简单的一个应用，浏览器请求从Spring MVC到Dubbo Client，再发送到Dubbo Server。&lt;/p>
-&lt;p>Demo里有两个spring boot应用，可以先启动&lt;code>server-demo&lt;/code>，再启动&lt;code>client-demo&lt;/code>。&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/hengyunabc/dubbo-arthas-demo">https://github.com/hengyunabc/dubbo-arthas-demo&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span> /user/{id} -&amp;gt; UserService -&amp;gt; UserServiceImpl 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Browser Dubbo Client Dubbo Server
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Client端：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@RestController&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserController&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">@Reference&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">private&lt;/span> UserService userService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">@GetMapping&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;/user/{id}&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUserById&lt;/span>(&lt;span style="color:#268bd2">@PathVariable&lt;/span> Integer id) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#719e07">return&lt;/span> userService.findUser(id);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Server端：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">UserServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> UserService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">public&lt;/span> User &lt;span style="color:#268bd2">findUser&lt;/span>(&lt;span style="color:#dc322f">int&lt;/span> id) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#719e07">if&lt;/span> (id &lt;span style="color:#719e07">&amp;lt;&lt;/span> 1) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>			&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException(&lt;span style="color:#2aa198">&amp;#34;user id &amp;lt; 1, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#719e07">for&lt;/span> (User user : users) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>			&lt;span style="color:#719e07">if&lt;/span> (user.getId() &lt;span style="color:#719e07">==&lt;/span> id) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>				&lt;span style="color:#719e07">return&lt;/span> user;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>			}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(&lt;span style="color:#2aa198">&amp;#34;Can not find user, id: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> id);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="arthas快速开始">Arthas快速开始&lt;/h3>
-&lt;ul>
-&lt;li>&lt;a href="https://arthas.aliyun.com/doc/install-detail.html">https://arthas.aliyun.com/doc/install-detail.html&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ wget https://arthas.aliyun.com/arthas-boot.jar
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ java -jar arthas-boot.jar
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动后，会列出所有的java进程，选择1，然后回车，就会连接上&lt;code>ServerDemoApplication&lt;/code>&lt;/p></description></item><item><title>如何使用Seata保证Dubbo微服务间的一致性</title><link>https://dubbo.apache.org/zh-cn/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</link><pubDate>Thu, 17 Jan 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</guid><description>&lt;h2 id="案例">案例&lt;/h2>
-&lt;p>用户采购商品业务，整个业务包含3个微服务:&lt;/p>
-&lt;ul>
-&lt;li>库存服务: 扣减给定商品的库存数量。&lt;/li>
-&lt;li>订单服务: 根据采购请求生成订单。&lt;/li>
-&lt;li>账户服务: 用户账户金额扣减。&lt;/li>
-&lt;/ul>
-&lt;h3 id="业务结构图">业务结构图&lt;/h3>
-&lt;p>&lt;img alt="Architecture" src="https://dubbo.apache.org/imgs/blog/fescar/fescar-1.png">&lt;/p>
-&lt;h3 id="storageservice">StorageService&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">StorageService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 扣除存储数量
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deduct&lt;/span>(String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> count);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="orderservice">OrderService&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">OrderService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 创建订单
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Order &lt;span style="color:#268bd2">create&lt;/span>(String userId, String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> orderCount);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="accountservice">AccountService&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">AccountService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 从用户账户中借出
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">debit&lt;/span>(String userId, &lt;span style="color:#dc322f">int&lt;/span> money);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="主要的业务逻辑">主要的业务逻辑：&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">BusinessServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> BusinessService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> StorageService storageService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> OrderService orderService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 采购
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">purchase&lt;/span>(String userId, String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> orderCount) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> storageService.deduct(commodityCode, orderCount);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> orderService.create(userId, commodityCode, orderCount);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StorageServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> StorageService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> StorageDAO storageDAO;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deduct&lt;/span>(String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> count) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Storage storage &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Storage();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> storage.setCount(count);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> storage.setCommodityCode(commodityCode);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> storageDAO.update(storage);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">OrderServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> OrderService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> OrderDAO orderDAO;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> AccountService accountService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Order &lt;span style="color:#268bd2">create&lt;/span>(String userId, String commodityCode, &lt;span style="color:#dc322f">int&lt;/span> orderCount) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> orderMoney &lt;span style="color:#719e07">=&lt;/span> calculate(commodityCode, orderCount);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> accountService.debit(userId, orderMoney);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Order order &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Order();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.userId &lt;span style="color:#719e07">=&lt;/span> userId;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.commodityCode &lt;span style="color:#719e07">=&lt;/span> commodityCode;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.count &lt;span style="color:#719e07">=&lt;/span> orderCount;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> order.money &lt;span style="color:#719e07">=&lt;/span> orderMoney;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> orderDAO.insert(order);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="seata-分布式事务解决方案">Seata 分布式事务解决方案&lt;/h2>
-&lt;p>&lt;img alt="undefined" src="https://dubbo.apache.org/imgs/blog/fescar/fescar-2.png">&lt;/p></description></item><item><title>新版 Dubbo Admin 介绍</title><link>https://dubbo.apache.org/zh-cn/blog/2019/01/07/%E6%96%B0%E7%89%88-dubbo-admin-%E4%BB%8B%E7%BB%8D/</link><pubDate>Mon, 07 Jan 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/01/07/%E6%96%B0%E7%89%88-dubbo-admin-%E4%BB%8B%E7%BB%8D/</guid><description>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>github: https://github.com/apache/dubbo-ops
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Dubbo Admin之前的版本过于老旧，也长期疏于维护，因此在去年年中的时候，对该项目进行了一次重构，项目结构上的变化如下：&lt;/p>
-&lt;ul>
-&lt;li>将后端框架从webx替换成spring boot&lt;/li>
-&lt;li>前端采用Vue和Vuetify.js作为开发框架&lt;/li>
-&lt;li>移除velocity模板&lt;/li>
-&lt;li>集成swagger，提供api管理功能&lt;/li>
-&lt;/ul>
-&lt;p>当前版本的Dubbo Admin包含了之前版本中的绝大部分功能，包括服务治理，服务查询等，同时支持了Dubbo2.7中服务治理的新特性。&lt;/p>
-&lt;h2 id="配置规范">配置规范&lt;/h2>
-&lt;p>由于在Dubbo2.7中，配置中心和注册中心做了分离，并且增加了元数据中心，因此Dubbo Admin的配置方式也做了更新，&lt;code>application.properties&lt;/code>中的配置如下:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>admin.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">zookeeper://127.0.0.1:2181&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.config-center&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">zookeeper://127.0.0.1:2181&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.metadata-report.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">zookeeper://127.0.0.1:2181&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以和Dubbo2.7一样，在配置中心指定元数据和注册中心的地址，以zookeeper为例，配置的路径和内容如下:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># /dubbo/config/dubbo/dubbo.properties&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.registry.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">zookeeper://127.0.0.1:2181&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.metadata-report.address&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">zookeeper://127.0.0.1:2181&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>配置中心里的地址会覆盖掉本地&lt;code>application.properties&lt;/code>的配置&lt;/p>
-&lt;h2 id="功能介绍">功能介绍&lt;/h2>
-&lt;p>功能上，主要延续了之前版本的功能，包括服务查询和服务治理，2.7版本在服务治理的功能上有了很大的改进，这些改进也大部分都会以Dubbo Admin作为入口来体现。&lt;/p>
-&lt;h3 id="标签路由">标签路由&lt;/h3>
-&lt;p>标签路由是Dubbo2.7引入的新功能，配置以应用作为维度，给不同的服务器打上不同名字的标签，配置如下图所示：&lt;/p>
-&lt;p>&lt;img alt="tag" src="https://dubbo.apache.org/imgs/blog/admin/route.jpg">&lt;/p>
-&lt;p>调用的时候，客户端可以通过&lt;code>setAttachment&lt;/code>的方式，来设置不同的标签名称，比如本例中，&lt;code>setAttachment(tag1)&lt;/code>，客户端的选址范围就在如图所示的三台机器中，可以通过这种方式来实现流量隔离，灰度发布等功能。&lt;/p>
-&lt;h3 id="应用级别的服务治理">应用级别的服务治理&lt;/h3>
-&lt;p>在Dubbo2.6及更早版本中，所有的服务治理规则都只针对服务粒度，如果要把某条规则作用到应用粒度上，需要为应用下的所有服务配合相同的规则，变更，删除的时候也需要对应的操作，这样的操作很不友好，因此Dubbo2.7版本中增加了应用粒度的服务治理操作，对于条件路由(包括黑白名单)，动态配置(包括权重，负载均衡)都可以做应用级别的配置：&lt;/p>
-&lt;p>&lt;img alt="condition" src="https://dubbo.apache.org/imgs/blog/admin/conditionRoute.jpg">&lt;/p>
-&lt;p>上图是条件路由的配置，可以按照应用名，服务名两个维度来填写，也可以按照这两个维度来查询。&lt;/p>
-&lt;p>&lt;img alt="weight" src="https://dubbo.apache.org/imgs/blog/admin/weight.jpg">&lt;/p>
-&lt;p>条件路由，标签路由和动态配置都采用了&lt;code>yaml&lt;/code>格式的文本编写，其他的规则配置还是采用了表单的形式。&lt;/p>
-&lt;h4 id="关于兼容性">关于兼容性&lt;/h4>
-&lt;p>Dubbo2.6到Dubbo2.7，服务治理发生了比较大的变化，Dubbo Admin兼容两个版本的用法：&lt;/p>
-&lt;ul>
-&lt;li>对于服务级别的配置，会按照Dubbo2.6(URL)和Dubbo2.7(配置文件)两种格式进行写入，保证Dubbo2.6的客户端能够正确读取，解析规则&lt;/li>
-&lt;li>对于应用级别的配置，包括标签路由，只会按照Dubbo2.7的格式进行写入，因为Dubbo2.6无此功能，不需要做向前兼容。&lt;/li>
-&lt;li>Dubbo Admin只会按照Dubbo2.7的格式进行配置读取，因此，所有在Dubbo Admin上做的配置都可以被读到，但是之前遗留的，Dubbo2.6格式的URL无法被读取。&lt;/li>
-&lt;li>对于同一个应用或者服务，每种规则只能够配置一条，否则新的会覆盖旧的。&lt;/li>
-&lt;/ul>
-&lt;h3 id="配置管理">配置管理&lt;/h3>
-&lt;p>配置管理也是配合Dubbo2.7新增的功能，在Dubbo2.7中，增加了全局和应用维度的配置，&lt;/p>
-&lt;ul>
-&lt;li>全局配置：&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="config" src="https://dubbo.apache.org/imgs/blog/admin/config.jpg">&lt;/p>
-&lt;p>全局配置里可以指定注册中心，元数据中心的地址，服务端和客户端的超时时间等，这些配置在全局内生效。除了配置写入，也可以用来查看。如果使用zookeeper作为注册中心和元数据中心，还可以看到配置文件所在位置的目录结构。&lt;/p>
-&lt;ul>
-&lt;li>应用， 服务配置&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="appConfig" src="https://dubbo.apache.org/imgs/blog/admin/appConfig.jpg">&lt;/p>
-&lt;p>应用级别的配置可以为应用或者应用内的服务指定配置，在服务维度上，需要区分提供者和消费者。&lt;code>dubbo.reference.{serviceName}&lt;/code>表示作为该服务消费者的配置，&lt;code>dubbo.provider.{servcieName}&lt;/code>表示作为该服务提供者的配置。优先级服务 &amp;gt; 应用 &amp;gt; 全局。其中注册中心和元数据中心的地址，只能在全局配置中指定，这也是Dubbo2.7中推荐的使用方式。&lt;/p>
-&lt;h3 id="元数据和服务测试">元数据和服务测试&lt;/h3>
-&lt;p>元数据是Dubbo2.7中新引入的元素，主要的使用场景就在Dubbo Admin中，主要体现在两个地方：&lt;/p>
-&lt;ul>
-&lt;li>服务详情展示：&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="metadata" src="https://dubbo.apache.org/imgs/blog/admin/metadata.jpg">&lt;/p>
-&lt;p>跟之前版本相比，Dubbo2.7中增加了对服务方法完整签名的记录，因此服务详情中也增加了方法信息的详情，可以看到方法名，方法参数列表以及返回值信息。&lt;/p>
-&lt;ul>
-&lt;li>服务测试：&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="test" src="https://dubbo.apache.org/imgs/blog/admin/test.jpg">&lt;/p>
-&lt;p>更重要的，元数据为服务测试提供了数据基础，可以在页面上调用真实的服务提供者，方便测试，也不需要为了调用服务去搭建一套Dubbo环境以及编写消费端代码。&lt;/p></description></item><item><title>Dubbo 融合 Nacos 成为注册中心</title><link>https://dubbo.apache.org/zh-cn/blog/2018/11/07/dubbo-%E8%9E%8D%E5%90%88-nacos-%E6%88%90%E4%B8%BA%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</link><pubDate>Wed, 07 Nov 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/11/07/dubbo-%E8%9E%8D%E5%90%88-nacos-%E6%88%90%E4%B8%BA%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</guid><description>&lt;p>Nacos 作为 Dubbo 生态系统中重要的注册中心实现，其中 &lt;a href="https://github.com/apache/dubbo/tree/master/dubbo-registry/dubbo-registry-nacos">&lt;code>dubbo-registry-nacos&lt;/code>&lt;/a> 则是 Dubbo 融合 Nacos 注册中心的实现。&lt;/p>
-&lt;h2 id="预备工作">预备工作&lt;/h2>
-&lt;p>当您将 &lt;a href="https://github.com/apache/dubbo/tree/master/dubbo-registry/dubbo-registry-nacos">&lt;code>dubbo-registry-nacos&lt;/code>&lt;/a> 整合到您的 Dubbo 工程之前，请确保后台已经启动 Nacos 服务。如果您尚且不熟悉 Nacos 的基本使用的话，可先行参考 &lt;a href="https://nacos.io/en-us/docs/quick-start.html">Nacos 快速入门&lt;/a>：https://nacos.io/en-us/docs/quick-start.html。建议使用 Nacos &lt;code>0.6.1&lt;/code> 以上的版本。&lt;/p>
-&lt;h2 id="快速上手">快速上手&lt;/h2>
-&lt;p>Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤可分为“增加 Maven 依赖”以及“配置注册中心“。&lt;/p>
-&lt;h3 id="增加-maven-依赖">增加 Maven 依赖&lt;/h3>
-&lt;p>首先，您需要 &lt;code>dubbo-registry-nacos&lt;/code> 的 Maven 依赖添加到您的项目中 &lt;code>pom.xml&lt;/code> 文件中，并且强烈地推荐您使用 Dubbo &lt;code>2.6.5&lt;/code>：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Dubbo Nacos registry dependency --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-registry-nacos&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.0.2&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Keep latest Nacos client version --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.nacos&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>nacos-client&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>[0.6.1,)&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Dubbo dependency --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>2.6.5&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- Alibaba Spring Context extension --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.spring&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-context-support&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.0.2&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependencies&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当项目中添加 &lt;code>dubbo-registry-nacos&lt;/code> 后，您无需显示地编程实现服务发现和注册逻辑，实际实现由该三方包提供，接下来配置 Naocs 注册中心。&lt;/p></description></item><item><title>Spring应用快速集成Dubbo + Hystrix</title><link>https://dubbo.apache.org/zh-cn/blog/2018/08/22/spring%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E9%9B%86%E6%88%90dubbo--hystrix/</link><pubDate>Wed, 22 Aug 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/08/22/spring%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E9%9B%86%E6%88%90dubbo--hystrix/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。&lt;/p>
-&lt;p>Dubbo是Alibaba开源的，目前国内最流行的java rpc框架。&lt;/p>
-&lt;p>本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/Netflix/Hystrix">https://github.com/Netflix/Hystrix&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo">https://github.com/apache/dubbo&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="spring-boot应用">Spring Boot应用&lt;/h2>
-&lt;p>Demo地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix">https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix&lt;/a>&lt;/p>
-&lt;h3 id="生成dubbo集成spring-boot的应用">生成dubbo集成spring boot的应用&lt;/h3>
-&lt;p>对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： &lt;a href="http://start.dubbo.io/">http://start.dubbo.io/&lt;/a>&lt;/p>
-&lt;h3 id="配置spring-cloud-starter-netflix-hystrix">配置spring-cloud-starter-netflix-hystrix&lt;/h3>
-&lt;p>spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.cloud&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-cloud-starter-netflix-hystrix&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.4.4.RELEASE&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在Application类上增加&lt;code>@EnableHystrix&lt;/code>来启用hystrix starter：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@EnableHystrix&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ProviderApplication&lt;/span> {
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置provider端">配置Provider端&lt;/h3>
-&lt;p>在Dubbo的Provider上增加&lt;code>@HystrixCommand&lt;/code>配置，这样子调用就会经过Hystrix代理。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Service&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixCommand&lt;/span>(commandProperties &lt;span style="color:#719e07">=&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;circuitBreaker.requestVolumeThreshold&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span>),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@HystrixProperty&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;execution.isolation.thread.timeoutInMilliseconds&amp;#34;&lt;/span>, value &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;2000&amp;#34;&lt;/span>) })
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// System.out.println(&amp;#34;async provider received: &amp;#34; + name);&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// return &amp;#34;annotation: hello, &amp;#34; + name;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RuntimeException(&lt;span style="color:#2aa198">&amp;#34;Exception to show hystrix enabled.&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置consumer端">配置Consumer端&lt;/h3>
-&lt;p>对于Consumer端，则可以增加一层method调用，并在method上配置&lt;code>@HystrixCommand&lt;/code>。当调用出错时，会走到&lt;code>fallbackMethod = &amp;quot;reliable&amp;quot;&lt;/code>的调用里。&lt;/p></description></item><item><title>在 Dubbo 应用中使用 Zookeeper</title><link>https://dubbo.apache.org/zh-cn/blog/2018/08/07/%E5%9C%A8-dubbo-%E5%BA%94%E7%94%A8%E4%B8%AD%E4%BD%BF%E7%94%A8-zookeeper/</link><pubDate>Tue, 07 Aug 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/08/07/%E5%9C%A8-dubbo-%E5%BA%94%E7%94%A8%E4%B8%AD%E4%BD%BF%E7%94%A8-zookeeper/</guid><description>&lt;h2 id="zookeeper-介绍">Zookeeper 介绍&lt;/h2>
-&lt;h3 id="基本概念">基本概念&lt;/h3>
-&lt;p>在现代的分布式应用中，往往会出现节点和节点之间的协调问题，其中就包括了：选主、集群管理、分布式锁、分布式配置管理、统一命名服务、状态同步等诉求。&lt;a href="https://zookeeper.apache.org">Apache Zookeeper&lt;/a>，正如它的名字所暗示的那样，&lt;em>动物园管理员&lt;/em>，就是为了解决这些诉求的一个分布式协调服务框架。&lt;/p>
-&lt;p>为了保证高可用，ZooKeeper 本身也可以部署成集群模式，称之为 &lt;em>ZooKeeper ensemble&lt;/em>。ZooKeeper 集群中始终确保其中的一台为 leader 的角色，并通过 &lt;em>ZAB (Zookeeper Atomic Broadcast Protocol) &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>&lt;/em> 协议确保所有节点上的信息的一致。客户端可以访问集群中的任何一台进行读写操作，而不用担心数据出现不一致的现象。&lt;/p>
-&lt;p>&lt;img alt="Diagram shows client-server architecture of ZooKeeper" src="https://dubbo.apache.org/imgs/blog/zk-emsemble.png">
-&lt;em>Image Credit : ebook -Zookeeper-Distributed Process Coordination from O&amp;rsquo;Reilly&lt;/em>&lt;/p>
-&lt;p>Zookeeper 中的数据存储方式与传统的 UNIX 文件系统相似，节点按照树状结构来组织，其中，节点被称之为 &lt;em>znodes (ZooKeeper data nodes)&lt;/em>&lt;/p>
-&lt;p>&lt;img alt="zk-tree" src="https://dubbo.apache.org/imgs/blog/zk-tree.png">
-&lt;em>Image Credit : ebook -Zookeeper-Distributed Process Coordination from O&amp;rsquo;Reilly&lt;/em>&lt;/p>
-&lt;h3 id="基本用法">基本用法&lt;/h3>
-&lt;p>可以通过直接下载的方式 &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>安装并运行 Zookeeper ，在 Mac 上也可以通过 Homebrew &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup> &lt;code>brew install zookeeper&lt;/code> 来安装，考虑到通用性，本文采用 docker 的方式来运行 Zookeeper。如果没有安装 docker，请先准备好 docker 环境 &lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>。&lt;/p>
-&lt;h4 id="1-启动-zookeeper">1. 启动 Zookeeper&lt;/h4>
-&lt;p>执行命令将 Zookeeper 运行在 docker 容器中&lt;/p></description></item><item><title>Sentinel 为 Dubbo 服务保驾护航</title><link>https://dubbo.apache.org/zh-cn/blog/2018/07/27/sentinel-%E4%B8%BA-dubbo-%E6%9C%8D%E5%8A%A1%E4%BF%9D%E9%A9%BE%E6%8A%A4%E8%88%AA/</link><pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/07/27/sentinel-%E4%B8%BA-dubbo-%E6%9C%8D%E5%8A%A1%E4%BF%9D%E9%A9%BE%E6%8A%A4%E8%88%AA/</guid><description>&lt;p>在复杂的生产环境下可能部署着成千上万的 Dubbo 服务实例，流量持续不断地进入，服务之间进行相互调用。但是分布式系统中可能会因流量激增、系统负载过高、网络延迟等一系列问题，导致某些服务不可用，如果不进行相应的控制可能导致级联故障，影响服务的可用性，因此如何对流量进行合理的控制，成为保障服务稳定性的关键。&lt;/p>
-&lt;p>&lt;a href="https://github.com/alibaba/Sentinel">Sentinel&lt;/a> 是阿里中间件团队开源的，面向分布式服务架构的轻量级流量控制产品，主要以流量为切入点，从&lt;strong>流量控制&lt;/strong>、&lt;strong>熔断降级&lt;/strong>、&lt;strong>系统负载保护&lt;/strong>等多个维度来帮助用户保护服务的稳定性。本文将基于 Dubbo，看看 Sentinel 是如何进行流量控制的，并且提供 Dubbo 整合 Sentinel 的最佳实践。&lt;/p>
-&lt;h2 id="快速接入-sentinel">快速接入 Sentinel&lt;/h2>
-&lt;p>Sentinel 意为&lt;strong>哨兵&lt;/strong>，这个命名形象的诠释了 Sentinel 在分布式系统中的工作角色和重要性。以 Sentinel 在 Dubbo 生态系统中的作用为例，Dubbo 的核心模块包括注册中心、服务提供方、服务消费方（服务调用方）和监控四个模块。Sentinel 通过对服务提供方和服务消费方的限流来进一步提升服务的可用性。接下来我们看看 Sentinel 对服务提供方和服务消费方限流的技术实现方式。&lt;/p>
-&lt;p>&lt;img alt="Dubbo Arch" src="https://dubbo.apache.org/imgs/architecture.png">&lt;/p>
-&lt;p>Sentinel 提供了与 Dubbo 适配的模块 – &lt;a href="https://github.com/dubbo/dubbo-sentinel-support">Sentinel Dubbo Adapter&lt;/a>，包括针对服务提供方的过滤器和服务消费方的过滤器（Filter）。使用时我们只需引入以下模块（以 Maven 为例）：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.csp&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>sentinel-dubbo-adapter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>x.y.z&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>引入此依赖后，Dubbo 的服务接口和方法（包括调用端和服务端）就会成为 Sentinel 中的资源，在配置了规则后就可以自动享受到 Sentinel 的防护能力。同时提供了灵活的配置选项，例如若不希望开启 Sentinel Dubbo Adapter 中的某个 Filter，可以手动关闭对应的 Filter。&lt;/p>
-&lt;p>接入 Sentinel Dubbo Adapter 后，即使未配置规则，Sentinel 也会对相应的 Dubbo 服务的调用信息进行统计。那么我们怎么知道 Sentinel 接入成功了呢？这时候就要请出一大利器 —— Sentinel 控制台了。&lt;/p>
-&lt;h2 id="限流必备---监控管理">限流必备 - 监控管理&lt;/h2>
-&lt;p>流量具有很强的实时性，之所以需要限流，是因为我们无法对流量的到来作出精确的预判，不然的话我们完全可以通过弹性的计算资源来处理，所以这时候为了保证限流的准确性，限流框架的监控功能就非常重要了。&lt;/p></description></item><item><title>使用Pinpoint做分布式跟踪</title><link>https://dubbo.apache.org/zh-cn/blog/2018/07/12/%E4%BD%BF%E7%94%A8pinpoint%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</link><pubDate>Thu, 12 Jul 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/07/12/%E4%BD%BF%E7%94%A8pinpoint%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</guid><description>&lt;p>在使用Dubbo进行服务化或者整合应用后，假设某个服务后台日志显示有异常，这个服务又被多个应用调用的情况下，我们通常很难判断是哪个应用调用的，问题的起因是什么，因此我们需要一套分布式跟踪系统来快速定位问题，Pinpoint可以帮助我们快速定位问题（当然，解决方案也不止这一种）。&lt;/p>
-&lt;h2 id="什么是pinpoint">什么是Pinpoint&lt;/h2>
-&lt;blockquote>
-&lt;p>摘自&lt;a href="https://skyao.gitbooks.io/learning-pinpoint/content/index.html">Pinpoint学习笔记&lt;/a>&lt;/p>
-&lt;/blockquote>
-&lt;p>&lt;a href="https://github.com/naver/pinpoint">Pinpoint&lt;/a>是一个开源的 APM (Application Performance Management/应用性能管理)工具，用于基于java的大规模分布式系统。
-仿照Google Dapper，Pinpoint通过跟踪分布式应用之间的调用来提供解决方案，以帮助分析系统的总体结构和内部模块之间如何相互联系。&lt;/p>
-&lt;blockquote>
-&lt;p>注：对于各个模块之间的通讯英文原文中用的是transaction一词，但是我觉得如果翻译为&amp;quot;事务&amp;quot;容易引起误解，所以替换为&amp;quot;交互&amp;quot;或者&amp;quot;调用&amp;quot;这种比较直白的字眼。&lt;/p>
-&lt;/blockquote>
-&lt;p>在使用上力图简单高效：&lt;/p>
-&lt;ul>
-&lt;li>安装agent，不需要修改哪怕一行代码&lt;/li>
-&lt;li>最小化性能损失&lt;/li>
-&lt;/ul>
-&lt;h3 id="服务器地图servermap">服务器地图(ServerMap)&lt;/h3>
-&lt;p>通过可视化分布式系统的模块和他们之间的相互联系来理解系统拓扑。点击某个节点会展示这个模块的详情，比如它当前的状态和请求数量。&lt;/p>
-&lt;h3 id="实时活动线程图表realtime-active-thread-chart">实时活动线程图表(Realtime Active Thread Chart)&lt;/h3>
-&lt;p>实时监控应用内部的活动线程。&lt;/p>
-&lt;h3 id="请求应答分布图表requestresponse-scatter-chart">请求/应答分布图表(Request/Response Scatter Chart)&lt;/h3>
-&lt;p>长期可视化请求数量和应答模式来定位潜在问题。通过在图表上拉拽可以选择请求查看更多的详细信息。&lt;/p>
-&lt;h3 id="调用栈callstack">调用栈(CallStack)&lt;/h3>
-&lt;p>在分布式环境中为每个调用生成代码级别的可视图，在单个视图中定位瓶颈和失败点。&lt;/p>
-&lt;h3 id="巡查inspector">巡查(Inspector)&lt;/h3>
-&lt;p>查看应用上的其他详细信息，比如CPU使用率，内存/垃圾回收，TPS，和JVM参数。&lt;/p>
-&lt;h3 id="支持模块">支持模块&lt;/h3>
-&lt;ul>
-&lt;li>JDK 6+&lt;/li>
-&lt;li>Tomcat 6/7/8, Jetty 8/9, JBoss EAP 6, Resin 4, Websphere 6/7/8, Vertx 3.3/3.4/3.5&lt;/li>
-&lt;li>Spring, Spring Boot (Embedded Tomcat, Jetty)&lt;/li>
-&lt;li>Apache HTTP Client 3.x/4.x, JDK HttpConnector, GoogleHttpClient, OkHttpClient, NingAsyncHttpClient&lt;/li>
-&lt;li>Thrift Client, Thrift Service, DUBBO PROVIDER, DUBBO CONSUMER&lt;/li>
-&lt;li>ActiveMQ, RabbitMQ&lt;/li>
-&lt;li>MySQL, Oracle, MSSQL, CUBRID,POSTGRESQL, MARIA&lt;/li>
-&lt;li>Arcus, Memcached, Redis, CASSANDRA&lt;/li>
-&lt;li>iBATIS, MyBatis&lt;/li>
-&lt;li>DBCP, DBCP2, HIKARICP&lt;/li>
-&lt;li>gson, Jackson, Json Lib&lt;/li>
-&lt;li>log4j, Logback&lt;/li>
-&lt;li>自定义模块&lt;/li>
-&lt;/ul>
-&lt;h2 id="pinpoint与dubbo的结合">Pinpoint与Dubbo的结合&lt;/h2>
-&lt;h3 id="启动pinpoint">启动Pinpoint&lt;/h3>
-&lt;p>参考Pinpoint的&lt;a href="https://pinpoint-apm.github.io/pinpoint/quickstart.html">Quick start&lt;/a>搭建环境（不需要启动TestApp）&lt;/p></description></item><item><title>在 Dubbo 中使用 Zipkin</title><link>https://dubbo.apache.org/zh-cn/blog/2018/06/17/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-zipkin/</link><pubDate>Sun, 17 Jun 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/06/17/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-zipkin/</guid><description>&lt;p>随着业务的发展，应用的规模不断的扩大，传统的应用架构无法满足诉求，服务化架构改造势在必行，以 Dubbo 为代表的分布式服务框架成为了服务化改造架构中的基石。随着微服务理念逐渐被大众接受，应用进一步向更细粒度拆分，并且，不同的应用由不同的开发团队独立负责，整个分布式系统变得十分复杂。没有人能够清晰及时的知道当前系统整体的依赖关系。当出现问题时，也无法及时知道具体是链路上的哪个环节出了问题。&lt;/p>
-&lt;p>在这个背景下，Google 发表了 &lt;a href="https://ai.google/research/pubs/pub36356">Dapper&lt;/a> 的论文，描述了如何通过一个分布式追踪系统解决上述问题。基于该论文，各大互联网公司实现并部署了自己的分布式追踪系统，其中比较出名的有阿里巴巴的 EagleEye。本文中提到的 Zipkin 是 Twitter 公司开源的分布式追踪系统。下面会详细介绍如何在 Dubbo 中使用 Zipkin 来实现分布式追踪。&lt;/p>
-&lt;h2 id="zipkin-简介">Zipkin 简介&lt;/h2>
-&lt;p>Zipkin 是基于 &lt;a href="https://ai.google/research/pubs/pub36356">Dapper&lt;/a> 论文实现，由 Twitter 开源的分布式追踪系统，通过收集分布式服务执行时间的信息来达到追踪服务调用链路、以及分析服务执行延迟等目的。&lt;/p>
-&lt;h3 id="zipkin-架构">Zipkin 架构&lt;/h3>
-&lt;p>&lt;img alt="Zipkin architecture" src="https://dubbo.apache.org/imgs/blog/zipkin-architecture.png">&lt;/p>
-&lt;p>Collector 收集器、Storage 存储、API、UI 用户界面等几部分构成了 Zipkin Server 部分，对应于 GitHub 上 &lt;a href="https://github.com/openzipkin/zipkin">openzipkin/zipkin&lt;/a> 这个项目。而收集应用中调用的耗时信息并将其上报的组件与应用共生，并拥有各个语言的实现版本，其中 Java 的实现是 GitHub 上 &lt;a href="https://github.com/openzipkin/brave">openzipkin/brave&lt;/a>。除了 Java 客户端实现之外，openzipkin 还提供了许多其他语言的实现，其中包括了 go、php、JavaScript、.net、ruby 等，具体列表可以参阅 Zipkin 的 &lt;a href="https://zipkin.io/pages/tracers_instrumentation.html">Exiting instrumentations&lt;/a>。&lt;/p>
-&lt;h3 id="zipkin-的工作过程">Zipkin 的工作过程&lt;/h3>
-&lt;p>当用户发起一次调用时，Zipkin 的客户端会在入口处为整条调用链路生成一个全局唯一的 trace id，并为这条链路中的每一次分布式调用生成一个 span id。span 与 span 之间可以有父子嵌套关系，代表分布式调用中的上下游关系。span 和 span 之间可以是兄弟关系，代表当前调用下的两次子调用。一个 trace 由一组 span 组成，可以看成是由 trace 为根节点，span 为若干个子节点的一棵树。&lt;/p>
-&lt;p>&lt;img alt="Related image" src="https://dubbo.apache.org/imgs/blog/trace-sample.png">&lt;/p></description></item></channel></rss>
+&lt;p&gt;Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过配置协议转换，可以将一个Dubbo服务以HTTP接口暴露出来，从而用HTTP请求实现对Dubbo接口的调用。本文将通过一个示例来介绍如何用Higress配置HTTP到Dubbo的协议转换。该示例会引导您轻松地部署一个Nacos server和一个Dubbo服务，然后通过Ingress将HTTP请求转发到注册在Nacos上的Dubbo服务，并通过Higress的协议转换能力完成对Dubbo服务的HTTP调用。&lt;/p&gt;
+&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/http-to-dubbo.png"/&gt;
+&lt;p&gt;以下是一个使用 &lt;code&gt;Higress + dubbo协议 + Nacos注册中心&lt;/code&gt; 的完整示例：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo"&gt;dubbo-samples-gateway-higress-dubbo&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm"&gt;Higress安装部署文档&lt;/a&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="部署nacos和dubbo服务"&gt;部署Nacos和Dubbo服务&lt;/h2&gt;
+&lt;p&gt;首先在K8s集群中apply以下资源，以部署一个Nacos注册中心，同时通过K8s service将这个Nacos server暴露出来。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# Nacos Server配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;apiVersion&lt;/span&gt;: apps/v1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;kind&lt;/span&gt;: Deployment
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;metadata&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;spec&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;replicas&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;selector&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;matchLabels&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;app&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;template&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;metadata&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;labels&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;app&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;spec&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;containers&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;env&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: MODE
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;value&lt;/span&gt;: standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;image&lt;/span&gt;: nacos/nacos-server:v2.2.0
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;imagePullPolicy&lt;/span&gt;: Always
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;ports&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;containerPort&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8848&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;dnsPolicy&lt;/span&gt;: ClusterFirst
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;restartPolicy&lt;/span&gt;: Always
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# Nacos Server Service配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;---
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;apiVersion&lt;/span&gt;: v1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;kind&lt;/span&gt;: Service
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;metadata&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;spec&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;ports&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8848&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: TCP
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;targetPort&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8848&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;selector&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;app&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;type&lt;/span&gt;: ClusterIP
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在 K8s 集群中 apply 以下资源，以部署一个Dubbo服务，该 Dubbo 服务将注册到上述的 Naocs 中（你可以选择重新打包，我们接下来直接使用社区提前准备好的镜像包）。&lt;/p&gt;</description></item><item><title>如何通过 Apache ShenYu 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Wed, 04 May 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png" alt="img"&gt;&lt;/p&gt;
+&lt;h2 id="1-介绍"&gt;1. 介绍&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Apache ShenYu&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/shenyu.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://shenyu.apache.org/zh/docs/index"&gt;Apache ShenYu(Incubating)&lt;/a&gt; 是一个异步的，高性能的，跨语言的，响应式的 &lt;code&gt;API&lt;/code&gt; 网关。兼容各种主流框架体系，支持热插拔，用户可以定制化开发，满足用户各种场景的现状和未来需求，经历过大规模场景的锤炼。&lt;/p&gt;
+&lt;p&gt;2021年5月，&lt;code&gt;ShenYu&lt;/code&gt;捐献给 &lt;code&gt;Apache&lt;/code&gt; 软件基金会，Apache 基金会全票通过，顺利进入孵化器。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Apache Dubbo&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;Apache Dubbo&lt;/code&gt; 是一款微服务开发框架，它提供了 &lt;code&gt;RPC&lt;/code&gt; 通信 与 微服务治理 两大关键能力。这意味着，使用 &lt;code&gt;Dubbo&lt;/code&gt; 开发的微服务，将具备相互之间的远程发现与通信能力， 同时利用 Dubbo 提供的丰富服务治理能力，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。同时 &lt;code&gt;Dubbo&lt;/code&gt; 是高度可扩展的，用户几乎可以在任意功能点去定制自己的实现，以改变框架的默认行为来满足自己的业务需求。&lt;/p&gt;
+&lt;h2 id="2-dubbo快速开始"&gt;2. Dubbo快速开始&lt;/h2&gt;
+&lt;p&gt;本小节介绍如何将&lt;code&gt;Dubbo&lt;/code&gt;服务接入到&lt;code&gt;ShenYu&lt;/code&gt;网关，您可以直接在工程下找到本小节的&lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo"&gt;示例代码&lt;/a&gt; 。&lt;/p&gt;
+&lt;h3 id="21-启动shenyu-admin"&gt;2.1 启动shenyu-admin&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;shenyu-admin&lt;/code&gt;是&lt;code&gt;Apache ShenYu&lt;/code&gt;后台管理系统， 启动的方式有多种，本文通过 &lt;code&gt;[本地部署](https://shenyu.apache.org/zh/docs/deployment/deployment-local)&lt;/code&gt; 的方式启动。启动成功后，需要在基础配置&lt;code&gt;-&amp;gt;&lt;/code&gt;插件管理中，把&lt;code&gt;dubbo&lt;/code&gt; 插件设置为开启，并设置你的注册地址，请确保注册中心已经开启。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/dubbo-enable-zh.png" alt="img"&gt;&lt;/p&gt;
+&lt;h3 id="22-启动shenyu网关"&gt;2.2 启动shenyu网关&lt;/h3&gt;
+&lt;p&gt;在这里通过 &lt;a href="https://github.com/apache/incubator-shenyu/tree/master/shenyu-bootstrap"&gt;源码&lt;/a&gt; 的方式启动，直接运行&lt;code&gt;shenyu-bootstrap&lt;/code&gt;中的&lt;code&gt;ShenyuBootstrapApplication&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;在启动前，请确保网关已经引入相关依赖。如果客户端是&lt;code&gt;apache dubbo&lt;/code&gt;，注册中心使用&lt;code&gt;zookeeper&lt;/code&gt;，请参考如下配置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; apache shenyu apache dubbo plugin start&lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.shenyu&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;shenyu&lt;span style="color:#719e07"&gt;-&lt;/span&gt;spring&lt;span style="color:#719e07"&gt;-&lt;/span&gt;boot&lt;span style="color:#719e07"&gt;-&lt;/span&gt;starter&lt;span style="color:#719e07"&gt;-&lt;/span&gt;plugin&lt;span style="color:#719e07"&gt;-&lt;/span&gt;apache&lt;span style="color:#719e07"&gt;-&lt;/span&gt;dubbo&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;${project.version}&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.dubbo&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;dubbo&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;2.7.5&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; Dubbo zookeeper registry dependency start &lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.curator&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;curator&lt;span style="color:#719e07"&gt;-&lt;/span&gt;client&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;4.0.1&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;exclusions&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;exclusion&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;log4j&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;log4j&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;exclusion&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;exclusions&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.curator&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;curator&lt;span style="color:#719e07"&gt;-&lt;/span&gt;framework&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;4.0.1&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.curator&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;curator&lt;span style="color:#719e07"&gt;-&lt;/span&gt;recipes&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;4.0.1&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; Dubbo zookeeper registry dependency end &lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; apache dubbo plugin end&lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="23-启动shenyu-examples-dubbo"&gt;2.3 启动shenyu-examples-dubbo&lt;/h3&gt;
+&lt;p&gt;以官网提供的例子为例 &lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo"&gt;shenyu-examples-dubbo&lt;/a&gt; 。 假如&lt;code&gt;dubbo&lt;/code&gt;服务定义如下：&lt;/p&gt;</description></item><item><title>分布式事务框架 seata-golang 通信模型详解</title><link>https://dubbo.apache.org/zh-cn/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</link><pubDate>Fri, 15 Jan 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/01/15/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%A1%86%E6%9E%B6-seata-golang-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</guid><description>&lt;h2 id="简介"&gt;简介&lt;/h2&gt;
+&lt;p&gt;Java 的世界里，大家广泛使用一个高性能网络通信框架 —— netty，很多 RPC 框架都是基于 netty 来实现的。在 golang 的世界里，getty 也是一个类似 netty 的高性能网络通信库。getty 最初由 dubbo-go 项目负责人于雨开发，作为底层通信库在 dubbo-go 中使用。随着 dubbo-go 捐献给 apache 基金会，在社区小伙伴的共同努力下，getty 也最终进入到 apache 这个大家庭，并改名 dubbo-getty。&lt;/p&gt;
+&lt;p&gt;18 年的时候，我在公司里实践微服务，当时遇到最大的问题就是分布式事务问题。同年，阿里在社区开源他们的分布式事务解决方案，我也很快关注到这个项目，起初还叫 fescar，后来更名 seata。由于我对开源技术很感兴趣，加了很多社区群，当时也很关注 dubbo-go 这个项目，在里面默默潜水。随着对 seata 的了解，逐渐萌生了做一个 go 版本的分布式事务框架的想法。&lt;/p&gt;
+&lt;p&gt;要做一个 golang 版的分布式事务框架，首先需要解决的一个问题就是如何实现 RPC 通信。dubbo-go 就是摆在眼前很好的一个例子，遂开始研究 dubbo-go 的底层 getty。&lt;/p&gt;
+&lt;h2 id="如何基于-getty-实现-rpc-通信"&gt;如何基于 getty 实现 RPC 通信&lt;/h2&gt;
+&lt;p&gt;getty 框架的整体模型图如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/dubbo-go/seata/p1.webp" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;下面结合相关代码，详述 seata-golang 的 RPC 通信过程。&lt;/p&gt;
+&lt;h3 id="1-建立连接"&gt;1. 建立连接&lt;/h3&gt;
+&lt;p&gt;实现 RPC 通信，首先要建立网络连接，这里先从 client.go 开始看起。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (c &lt;span style="color:#719e07"&gt;*&lt;/span&gt;client) &lt;span style="color:#268bd2"&gt;connect&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;var&lt;/span&gt; (
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; err &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ss Session
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; )
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;for&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 建立一个 session 连接&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ss = c.&lt;span style="color:#268bd2"&gt;dial&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; ss &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// client has been closed&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;break&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; err = c.&lt;span style="color:#268bd2"&gt;newSession&lt;/span&gt;(ss)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 收发报文&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ss.(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;session).&lt;span style="color:#268bd2"&gt;run&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 此处省略部分代码&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;break&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// don&amp;#39;t distinguish between tcp connection and websocket connection. Because&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// gorilla/websocket/conn.go:(Conn)Close also invoke net.Conn.Close()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ss.&lt;span style="color:#268bd2"&gt;Conn&lt;/span&gt;().&lt;span style="color:#268bd2"&gt;Close&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;connect()&lt;/code&gt; 方法通过 &lt;code&gt;dial()&lt;/code&gt; 方法得到了一个 session 连接，进入 &lt;code&gt;dial()&lt;/code&gt; 方法：&lt;/p&gt;</description></item><item><title>使用Apache Skywalking (Incubator) 做分布式跟踪</title><link>https://dubbo.apache.org/zh-cn/blog/2019/08/11/%E4%BD%BF%E7%94%A8apache-skywalking-incubator-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</link><pubDate>Sun, 11 Aug 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/08/11/%E4%BD%BF%E7%94%A8apache-skywalking-incubator-%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</guid><description>&lt;h2 id="apache-skywalkingincubator简介"&gt;Apache Skywalking(Incubator)简介&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://github.com/apache/skywalking"&gt;Apache Skywalking(Incubator)&lt;/a&gt; 专门为微服务架构和云原生架构系统而设计并且支持分布式链路追踪的APM系统。&lt;a href="https://github.com/apache/skywalking"&gt;Apache Skywalking(Incubator)&lt;/a&gt;通过加载探针的方式收集应用调用链路信息，并对采集的调用链路信息进行分析，生成应用间关系和服务间关系以及服务指标。&lt;a href="https://github.com/apache/skywalking"&gt;Apache Skywalking (Incubating)&lt;/a&gt;目前支持多种语言，其中包括&lt;a href="https://github.com/apache/skywalking"&gt;Java&lt;/a&gt;，&lt;a href="https://github.com/OpenSkywalking/skywalking-netcore"&gt;.Net Core&lt;/a&gt;，&lt;a href="https://github.com/OpenSkywalking/skywalking-nodejs"&gt;Node.js&lt;/a&gt;和&lt;a href="https://github.com/SkyAPM/go2sky"&gt;Go&lt;/a&gt;语言。&lt;/p&gt;
+&lt;p&gt;目前Skywalking已经支持从6个可视化维度剖析分布式系统的运行情况。总览视图是应用和组件的全局视图，其中包括组件和应用数量，应用的告警波动，慢服务列表以及应用吞吐量；拓扑图从应用依赖关系出发，展现整个应用的拓扑关系；应用视图则是从单个应用的角度，展现应用的上下游关系，TopN的服务和服务器，JVM的相关信息以及对应的主机信息。服务视图关注单个服务入口的运行情况以及此服务的上下游依赖关系，依赖度，帮助用户针对单个服务的优化和监控；调用链展现了调用的单次请求经过的所有埋点以及每个埋点的执行时长；告警视图根据配置阈值针对应用、服务器、服务进行实时告警。&lt;/p&gt;
+&lt;h2 id="dubbo与apache-skywalkingincubator"&gt;Dubbo与Apache Skywalking(Incubator)&lt;/h2&gt;
+&lt;h3 id="编写dubbo示例程序"&gt;编写Dubbo示例程序&lt;/h3&gt;
+&lt;p&gt;Dubbo实例程序已上传到&lt;a href="https://github.com/SkywalkingTest/dubbo-trace-example"&gt;Github仓库&lt;/a&gt;中。方便大家下载使用。&lt;/p&gt;
+&lt;h4 id="api工程"&gt;API工程&lt;/h4&gt;
+&lt;p&gt;服务接口：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.skywalking.demo.interfaces;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;public &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; HelloService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="dubbo服务提供工程"&gt;Dubbo服务提供工程&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.skywalking.demo.provider;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;@&lt;span style="color:#268bd2"&gt;Service&lt;/span&gt;(version = &lt;span style="color:#2aa198"&gt;&amp;#34;${demo.service.version}&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	application = &lt;span style="color:#2aa198"&gt;&amp;#34;${dubbo.application.id}&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	protocol = &lt;span style="color:#2aa198"&gt;&amp;#34;${dubbo.protocol.id}&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	registry = &lt;span style="color:#2aa198"&gt;&amp;#34;${dubbo.registry.id}&amp;#34;&lt;/span&gt;, timeout = &lt;span style="color:#2aa198"&gt;60000&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;public class HelloServiceImpl implements HelloService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	public String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		LockSupport.&lt;span style="color:#268bd2"&gt;parkNanos&lt;/span&gt;(TimeUnit.SECONDS.&lt;span style="color:#268bd2"&gt;toNanos&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;1&lt;/span&gt;));
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;Hello, &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; name;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="consumer工程"&gt;Consumer工程&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.skywalking.demo.consumer;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;@RestController
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;public class ConsumerController {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	private static &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; COUNT = &lt;span style="color:#2aa198"&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	@&lt;span style="color:#268bd2"&gt;Reference&lt;/span&gt;(version = &lt;span style="color:#2aa198"&gt;&amp;#34;${demo.service.version}&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		application = &lt;span style="color:#2aa198"&gt;&amp;#34;${dubbo.application.id}&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		url = &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo://localhost:20880&amp;#34;&lt;/span&gt;, timeout = &lt;span style="color:#2aa198"&gt;60000&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	private HelloService helloService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	@&lt;span style="color:#268bd2"&gt;GetMapping&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;/sayHello/{name}&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	public String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(@&lt;span style="color:#268bd2"&gt;PathVariable&lt;/span&gt;(name = &lt;span style="color:#2aa198"&gt;&amp;#34;name&amp;#34;&lt;/span&gt;) String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;if&lt;/span&gt; ((COUNT&lt;span style="color:#719e07"&gt;++&lt;/span&gt;) &lt;span style="color:#719e07"&gt;%&lt;/span&gt; &lt;span style="color:#2aa198"&gt;3&lt;/span&gt; &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#2aa198"&gt;0&lt;/span&gt;){
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			throw new &lt;span style="color:#268bd2"&gt;RuntimeException&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		LockSupport.&lt;span style="color:#268bd2"&gt;parkNanos&lt;/span&gt;(TimeUnit.SECONDS.&lt;span style="color:#268bd2"&gt;toNanos&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;2&lt;/span&gt;));
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;return&lt;/span&gt; helloService.&lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="部署apache-skywalkingincubator"&gt;部署Apache Skywalking(Incubator)&lt;/h3&gt;
+&lt;p&gt;Apache Skywalking(Incubator）共提供两种部署模式：单节点模式和集群模式，以下为单节点模式部署步骤，集群模式部署详情参考&lt;a href="https://skywalking.apache.org/docs/main/next/en/setup/backend/backend-setup/"&gt;文档&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>当Dubbo遇上Arthas：排查问题的实践</title><link>https://dubbo.apache.org/zh-cn/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</link><pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/02/02/%E5%BD%93dubbo%E9%81%87%E4%B8%8Aarthas%E6%8E%92%E6%9F%A5%E9%97%AE%E9%A2%98%E7%9A%84%E5%AE%9E%E8%B7%B5/</guid><description>&lt;p&gt;Apache Dubbo是Alibaba开源的高性能RPC框架，在国内有非常多的用户。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Github: &lt;a href="https://github.com/apache/dubbo"&gt;https://github.com/apache/dubbo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;文档：http://dubbo.apache.org/zh-cn/&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Arthas是Alibaba开源的应用诊断利器，9月份开源以来，Github Star数三个月超过6000。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Github: &lt;a href="https://github.com/alibaba/arthas"&gt;https://github.com/alibaba/arthas&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;文档：https://arthas.aliyun.com/doc/&lt;/li&gt;
+&lt;li&gt;Arthas开源交流QQ群: 916328269&lt;/li&gt;
+&lt;li&gt;Arthas开源交流钉钉群: 21965291&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当Dubbo遇上Arthas，会碰撞出什么样的火花呢？下面来分享Arthas排查Dubbo问题的一些经验。&lt;/p&gt;
+&lt;h3 id="dubbo-arthas-demo"&gt;dubbo-arthas-demo&lt;/h3&gt;
+&lt;p&gt;下面的排查分享基于这个&lt;code&gt;dubbo-arthas-demo&lt;/code&gt;，非常简单的一个应用，浏览器请求从Spring MVC到Dubbo Client，再发送到Dubbo Server。&lt;/p&gt;
+&lt;p&gt;Demo里有两个spring boot应用，可以先启动&lt;code&gt;server-demo&lt;/code&gt;，再启动&lt;code&gt;client-demo&lt;/code&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/hengyunabc/dubbo-arthas-demo"&gt;https://github.com/hengyunabc/dubbo-arthas-demo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; /user/{id} -&amp;gt; UserService -&amp;gt; UserServiceImpl 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Browser Dubbo Client Dubbo Server
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Client端：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@RestController&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;UserController&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;@Reference&lt;/span&gt;(version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; UserService userService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;@GetMapping&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;/user/{id}&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; User &lt;span style="color:#268bd2"&gt;findUserById&lt;/span&gt;(&lt;span style="color:#268bd2"&gt;@PathVariable&lt;/span&gt; Integer id) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;return&lt;/span&gt; userService.findUser(id);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Server端：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@Service&lt;/span&gt;(version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;UserServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; UserService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; User &lt;span style="color:#268bd2"&gt;findUser&lt;/span&gt;(&lt;span style="color:#dc322f"&gt;int&lt;/span&gt; id) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;if&lt;/span&gt; (id &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt; 1) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			&lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; IllegalArgumentException(&lt;span style="color:#2aa198"&gt;&amp;#34;user id &amp;lt; 1, id: &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; id);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;for&lt;/span&gt; (User user : users) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			&lt;span style="color:#719e07"&gt;if&lt;/span&gt; (user.getId() &lt;span style="color:#719e07"&gt;==&lt;/span&gt; id) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;				&lt;span style="color:#719e07"&gt;return&lt;/span&gt; user;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; RuntimeException(&lt;span style="color:#2aa198"&gt;&amp;#34;Can not find user, id: &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; id);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="arthas快速开始"&gt;Arthas快速开始&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://arthas.aliyun.com/doc/install-detail.html"&gt;https://arthas.aliyun.com/doc/install-detail.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ wget https://arthas.aliyun.com/arthas-boot.jar
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ java -jar arthas-boot.jar
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;启动后，会列出所有的java进程，选择1，然后回车，就会连接上&lt;code&gt;ServerDemoApplication&lt;/code&gt;&lt;/p&gt;</description></item><item><title>如何使用Seata保证Dubbo微服务间的一致性</title><link>https://dubbo.apache.org/zh-cn/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</link><pubDate>Thu, 17 Jan 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/01/17/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8seata%E4%BF%9D%E8%AF%81dubbo%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%97%B4%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</guid><description>&lt;h2 id="案例"&gt;案例&lt;/h2&gt;
+&lt;p&gt;用户采购商品业务，整个业务包含3个微服务:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;库存服务: 扣减给定商品的库存数量。&lt;/li&gt;
+&lt;li&gt;订单服务: 根据采购请求生成订单。&lt;/li&gt;
+&lt;li&gt;账户服务: 用户账户金额扣减。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="业务结构图"&gt;业务结构图&lt;/h3&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/fescar/fescar-1.png" alt="Architecture"&gt;&lt;/p&gt;
+&lt;h3 id="storageservice"&gt;StorageService&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;StorageService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 扣除存储数量
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;deduct&lt;/span&gt;(String commodityCode, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; count);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="orderservice"&gt;OrderService&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;OrderService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 创建订单
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Order &lt;span style="color:#268bd2"&gt;create&lt;/span&gt;(String userId, String commodityCode, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; orderCount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="accountservice"&gt;AccountService&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;AccountService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 从用户账户中借出
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;debit&lt;/span&gt;(String userId, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; money);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="主要的业务逻辑"&gt;主要的业务逻辑：&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;BusinessServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; BusinessService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; StorageService storageService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; OrderService orderService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 采购
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;purchase&lt;/span&gt;(String userId, String commodityCode, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; orderCount) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; storageService.deduct(commodityCode, orderCount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; orderService.create(userId, commodityCode, orderCount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;StorageServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; StorageService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; StorageDAO storageDAO;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;deduct&lt;/span&gt;(String commodityCode, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; count) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Storage storage &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; Storage();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; storage.setCount(count);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; storage.setCommodityCode(commodityCode);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; storageDAO.update(storage);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;OrderServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; OrderService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; OrderDAO orderDAO;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; AccountService accountService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; Order &lt;span style="color:#268bd2"&gt;create&lt;/span&gt;(String userId, String commodityCode, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; orderCount) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; orderMoney &lt;span style="color:#719e07"&gt;=&lt;/span&gt; calculate(commodityCode, orderCount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; accountService.debit(userId, orderMoney);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Order order &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; Order();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; order.userId &lt;span style="color:#719e07"&gt;=&lt;/span&gt; userId;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; order.commodityCode &lt;span style="color:#719e07"&gt;=&lt;/span&gt; commodityCode;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; order.count &lt;span style="color:#719e07"&gt;=&lt;/span&gt; orderCount;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; order.money &lt;span style="color:#719e07"&gt;=&lt;/span&gt; orderMoney;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; orderDAO.insert(order);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="seata-分布式事务解决方案"&gt;Seata 分布式事务解决方案&lt;/h2&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/fescar/fescar-2.png" alt="undefined"&gt;&lt;/p&gt;</description></item><item><title>新版 Dubbo Admin 介绍</title><link>https://dubbo.apache.org/zh-cn/blog/2019/01/07/%E6%96%B0%E7%89%88-dubbo-admin-%E4%BB%8B%E7%BB%8D/</link><pubDate>Mon, 07 Jan 2019 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2019/01/07/%E6%96%B0%E7%89%88-dubbo-admin-%E4%BB%8B%E7%BB%8D/</guid><description>&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;github: https://github.com/apache/dubbo-ops
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Dubbo Admin之前的版本过于老旧，也长期疏于维护，因此在去年年中的时候，对该项目进行了一次重构，项目结构上的变化如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将后端框架从webx替换成spring boot&lt;/li&gt;
+&lt;li&gt;前端采用Vue和Vuetify.js作为开发框架&lt;/li&gt;
+&lt;li&gt;移除velocity模板&lt;/li&gt;
+&lt;li&gt;集成swagger，提供api管理功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当前版本的Dubbo Admin包含了之前版本中的绝大部分功能，包括服务治理，服务查询等，同时支持了Dubbo2.7中服务治理的新特性。&lt;/p&gt;
+&lt;h2 id="配置规范"&gt;配置规范&lt;/h2&gt;
+&lt;p&gt;由于在Dubbo2.7中，配置中心和注册中心做了分离，并且增加了元数据中心，因此Dubbo Admin的配置方式也做了更新，&lt;code&gt;application.properties&lt;/code&gt;中的配置如下:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-properties" data-lang="properties"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;admin.registry.address&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;zookeeper://127.0.0.1:2181&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;admin.config-center&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;zookeeper://127.0.0.1:2181&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;admin.metadata-report.address&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;zookeeper://127.0.0.1:2181&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;也可以和Dubbo2.7一样，在配置中心指定元数据和注册中心的地址，以zookeeper为例，配置的路径和内容如下:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-properties" data-lang="properties"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# /dubbo/config/dubbo/dubbo.properties&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo.registry.address&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;zookeeper://127.0.0.1:2181&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo.metadata-report.address&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;zookeeper://127.0.0.1:2181&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;配置中心里的地址会覆盖掉本地&lt;code&gt;application.properties&lt;/code&gt;的配置&lt;/p&gt;
+&lt;h2 id="功能介绍"&gt;功能介绍&lt;/h2&gt;
+&lt;p&gt;功能上，主要延续了之前版本的功能，包括服务查询和服务治理，2.7版本在服务治理的功能上有了很大的改进，这些改进也大部分都会以Dubbo Admin作为入口来体现。&lt;/p&gt;
+&lt;h3 id="标签路由"&gt;标签路由&lt;/h3&gt;
+&lt;p&gt;标签路由是Dubbo2.7引入的新功能，配置以应用作为维度，给不同的服务器打上不同名字的标签，配置如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/admin/route.jpg" alt="tag"&gt;&lt;/p&gt;
+&lt;p&gt;调用的时候，客户端可以通过&lt;code&gt;setAttachment&lt;/code&gt;的方式，来设置不同的标签名称，比如本例中，&lt;code&gt;setAttachment(tag1)&lt;/code&gt;，客户端的选址范围就在如图所示的三台机器中，可以通过这种方式来实现流量隔离，灰度发布等功能。&lt;/p&gt;
+&lt;h3 id="应用级别的服务治理"&gt;应用级别的服务治理&lt;/h3&gt;
+&lt;p&gt;在Dubbo2.6及更早版本中，所有的服务治理规则都只针对服务粒度，如果要把某条规则作用到应用粒度上，需要为应用下的所有服务配合相同的规则，变更，删除的时候也需要对应的操作，这样的操作很不友好，因此Dubbo2.7版本中增加了应用粒度的服务治理操作，对于条件路由(包括黑白名单)，动态配置(包括权重，负载均衡)都可以做应用级别的配置：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/admin/conditionRoute.jpg" alt="condition"&gt;&lt;/p&gt;
+&lt;p&gt;上图是条件路由的配置，可以按照应用名，服务名两个维度来填写，也可以按照这两个维度来查询。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/admin/weight.jpg" alt="weight"&gt;&lt;/p&gt;
+&lt;p&gt;条件路由，标签路由和动态配置都采用了&lt;code&gt;yaml&lt;/code&gt;格式的文本编写，其他的规则配置还是采用了表单的形式。&lt;/p&gt;
+&lt;h4 id="关于兼容性"&gt;关于兼容性&lt;/h4&gt;
+&lt;p&gt;Dubbo2.6到Dubbo2.7，服务治理发生了比较大的变化，Dubbo Admin兼容两个版本的用法：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于服务级别的配置，会按照Dubbo2.6(URL)和Dubbo2.7(配置文件)两种格式进行写入，保证Dubbo2.6的客户端能够正确读取，解析规则&lt;/li&gt;
+&lt;li&gt;对于应用级别的配置，包括标签路由，只会按照Dubbo2.7的格式进行写入，因为Dubbo2.6无此功能，不需要做向前兼容。&lt;/li&gt;
+&lt;li&gt;Dubbo Admin只会按照Dubbo2.7的格式进行配置读取，因此，所有在Dubbo Admin上做的配置都可以被读到，但是之前遗留的，Dubbo2.6格式的URL无法被读取。&lt;/li&gt;
+&lt;li&gt;对于同一个应用或者服务，每种规则只能够配置一条，否则新的会覆盖旧的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="配置管理"&gt;配置管理&lt;/h3&gt;
+&lt;p&gt;配置管理也是配合Dubbo2.7新增的功能，在Dubbo2.7中，增加了全局和应用维度的配置，&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;全局配置：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/admin/config.jpg" alt="config"&gt;&lt;/p&gt;
+&lt;p&gt;全局配置里可以指定注册中心，元数据中心的地址，服务端和客户端的超时时间等，这些配置在全局内生效。除了配置写入，也可以用来查看。如果使用zookeeper作为注册中心和元数据中心，还可以看到配置文件所在位置的目录结构。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;应用， 服务配置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/admin/appConfig.jpg" alt="appConfig"&gt;&lt;/p&gt;
+&lt;p&gt;应用级别的配置可以为应用或者应用内的服务指定配置，在服务维度上，需要区分提供者和消费者。&lt;code&gt;dubbo.reference.{serviceName}&lt;/code&gt;表示作为该服务消费者的配置，&lt;code&gt;dubbo.provider.{servcieName}&lt;/code&gt;表示作为该服务提供者的配置。优先级服务 &amp;gt; 应用 &amp;gt; 全局。其中注册中心和元数据中心的地址，只能在全局配置中指定，这也是Dubbo2.7中推荐的使用方式。&lt;/p&gt;
+&lt;h3 id="元数据和服务测试"&gt;元数据和服务测试&lt;/h3&gt;
+&lt;p&gt;元数据是Dubbo2.7中新引入的元素，主要的使用场景就在Dubbo Admin中，主要体现在两个地方：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;服务详情展示：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/admin/metadata.jpg" alt="metadata"&gt;&lt;/p&gt;
+&lt;p&gt;跟之前版本相比，Dubbo2.7中增加了对服务方法完整签名的记录，因此服务详情中也增加了方法信息的详情，可以看到方法名，方法参数列表以及返回值信息。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;服务测试：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/admin/test.jpg" alt="test"&gt;&lt;/p&gt;
+&lt;p&gt;更重要的，元数据为服务测试提供了数据基础，可以在页面上调用真实的服务提供者，方便测试，也不需要为了调用服务去搭建一套Dubbo环境以及编写消费端代码。&lt;/p&gt;</description></item><item><title>Dubbo 融合 Nacos 成为注册中心</title><link>https://dubbo.apache.org/zh-cn/blog/2018/11/07/dubbo-%E8%9E%8D%E5%90%88-nacos-%E6%88%90%E4%B8%BA%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</link><pubDate>Wed, 07 Nov 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/11/07/dubbo-%E8%9E%8D%E5%90%88-nacos-%E6%88%90%E4%B8%BA%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/</guid><description>&lt;p&gt;Nacos 作为 Dubbo 生态系统中重要的注册中心实现，其中 &lt;a href="https://github.com/apache/dubbo/tree/master/dubbo-registry/dubbo-registry-nacos"&gt;&lt;code&gt;dubbo-registry-nacos&lt;/code&gt;&lt;/a&gt; 则是 Dubbo 融合 Nacos 注册中心的实现。&lt;/p&gt;
+&lt;h2 id="预备工作"&gt;预备工作&lt;/h2&gt;
+&lt;p&gt;当您将 &lt;a href="https://github.com/apache/dubbo/tree/master/dubbo-registry/dubbo-registry-nacos"&gt;&lt;code&gt;dubbo-registry-nacos&lt;/code&gt;&lt;/a&gt; 整合到您的 Dubbo 工程之前，请确保后台已经启动 Nacos 服务。如果您尚且不熟悉 Nacos 的基本使用的话，可先行参考 &lt;a href="https://nacos.io/en-us/docs/quick-start.html"&gt;Nacos 快速入门&lt;/a&gt;：https://nacos.io/en-us/docs/quick-start.html。建议使用 Nacos &lt;code&gt;0.6.1&lt;/code&gt; 以上的版本。&lt;/p&gt;
+&lt;h2 id="快速上手"&gt;快速上手&lt;/h2&gt;
+&lt;p&gt;Dubbo 融合 Nacos 成为注册中心的操作步骤非常简单，大致步骤可分为“增加 Maven 依赖”以及“配置注册中心“。&lt;/p&gt;
+&lt;h3 id="增加-maven-依赖"&gt;增加 Maven 依赖&lt;/h3&gt;
+&lt;p&gt;首先，您需要 &lt;code&gt;dubbo-registry-nacos&lt;/code&gt; 的 Maven 依赖添加到您的项目中 &lt;code&gt;pom.xml&lt;/code&gt; 文件中，并且强烈地推荐您使用 Dubbo &lt;code&gt;2.6.5&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependencies&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- Dubbo Nacos registry dependency --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.alibaba&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo-registry-nacos&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.0.2&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- Keep latest Nacos client version --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.alibaba.nacos&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;nacos-client&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;[0.6.1,)&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- Dubbo dependency --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.alibaba&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;2.6.5&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- Alibaba Spring Context extension --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.alibaba.spring&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;spring-context-support&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.0.2&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependencies&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;当项目中添加 &lt;code&gt;dubbo-registry-nacos&lt;/code&gt; 后，您无需显示地编程实现服务发现和注册逻辑，实际实现由该三方包提供，接下来配置 Naocs 注册中心。&lt;/p&gt;</description></item><item><title>Spring应用快速集成Dubbo + Hystrix</title><link>https://dubbo.apache.org/zh-cn/blog/2018/08/22/spring%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E9%9B%86%E6%88%90dubbo--hystrix/</link><pubDate>Wed, 22 Aug 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/08/22/spring%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E9%9B%86%E6%88%90dubbo--hystrix/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能。&lt;/p&gt;
+&lt;p&gt;Dubbo是Alibaba开源的，目前国内最流行的java rpc框架。&lt;/p&gt;
+&lt;p&gt;本文介绍在spring应用里，怎么把Dubbo和Hystrix结合起来使用。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/Netflix/Hystrix"&gt;https://github.com/Netflix/Hystrix&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo"&gt;https://github.com/apache/dubbo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="spring-boot应用"&gt;Spring Boot应用&lt;/h2&gt;
+&lt;p&gt;Demo地址： &lt;a href="https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix"&gt;https://github.com/dubbo/dubbo-samples/tree/master/4-governance/dubbo-samples-spring-boot-hystrix&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="生成dubbo集成spring-boot的应用"&gt;生成dubbo集成spring boot的应用&lt;/h3&gt;
+&lt;p&gt;对于不熟悉dubbo 集成spring boot应用的同学，可以在这里直接生成dubbo + spring boot的工程： &lt;a href="http://start.dubbo.io/"&gt;http://start.dubbo.io/&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="配置spring-cloud-starter-netflix-hystrix"&gt;配置spring-cloud-starter-netflix-hystrix&lt;/h3&gt;
+&lt;p&gt;spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.springframework.cloud&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;spring-cloud-starter-netflix-hystrix&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.4.4.RELEASE&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后在Application类上增加&lt;code&gt;@EnableHystrix&lt;/code&gt;来启用hystrix starter：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@SpringBootApplication&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@EnableHystrix&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;ProviderApplication&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="配置provider端"&gt;配置Provider端&lt;/h3&gt;
+&lt;p&gt;在Dubbo的Provider上增加&lt;code&gt;@HystrixCommand&lt;/code&gt;配置，这样子调用就会经过Hystrix代理。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@Service&lt;/span&gt;(version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; HelloService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@HystrixCommand&lt;/span&gt;(commandProperties &lt;span style="color:#719e07"&gt;=&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@HystrixProperty&lt;/span&gt;(name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;circuitBreaker.requestVolumeThreshold&amp;#34;&lt;/span&gt;, value &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;10&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@HystrixProperty&lt;/span&gt;(name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;execution.isolation.thread.timeoutInMilliseconds&amp;#34;&lt;/span&gt;, value &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;2000&amp;#34;&lt;/span&gt;) })
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// System.out.println(&amp;#34;async provider received: &amp;#34; + name);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// return &amp;#34;annotation: hello, &amp;#34; + name;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; RuntimeException(&lt;span style="color:#2aa198"&gt;&amp;#34;Exception to show hystrix enabled.&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="配置consumer端"&gt;配置Consumer端&lt;/h3&gt;
+&lt;p&gt;对于Consumer端，则可以增加一层method调用，并在method上配置&lt;code&gt;@HystrixCommand&lt;/code&gt;。当调用出错时，会走到&lt;code&gt;fallbackMethod = &amp;quot;reliable&amp;quot;&lt;/code&gt;的调用里。&lt;/p&gt;</description></item><item><title>在 Dubbo 应用中使用 Zookeeper</title><link>https://dubbo.apache.org/zh-cn/blog/2018/08/07/%E5%9C%A8-dubbo-%E5%BA%94%E7%94%A8%E4%B8%AD%E4%BD%BF%E7%94%A8-zookeeper/</link><pubDate>Tue, 07 Aug 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/08/07/%E5%9C%A8-dubbo-%E5%BA%94%E7%94%A8%E4%B8%AD%E4%BD%BF%E7%94%A8-zookeeper/</guid><description>&lt;h2 id="zookeeper-介绍"&gt;Zookeeper 介绍&lt;/h2&gt;
+&lt;h3 id="基本概念"&gt;基本概念&lt;/h3&gt;
+&lt;p&gt;在现代的分布式应用中，往往会出现节点和节点之间的协调问题，其中就包括了：选主、集群管理、分布式锁、分布式配置管理、统一命名服务、状态同步等诉求。&lt;a href="https://zookeeper.apache.org"&gt;Apache Zookeeper&lt;/a&gt;，正如它的名字所暗示的那样，&lt;em&gt;动物园管理员&lt;/em&gt;，就是为了解决这些诉求的一个分布式协调服务框架。&lt;/p&gt;
+&lt;p&gt;为了保证高可用，ZooKeeper 本身也可以部署成集群模式，称之为 &lt;em&gt;ZooKeeper ensemble&lt;/em&gt;。ZooKeeper 集群中始终确保其中的一台为 leader 的角色，并通过 &lt;em&gt;ZAB (Zookeeper Atomic Broadcast Protocol) &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/em&gt; 协议确保所有节点上的信息的一致。客户端可以访问集群中的任何一台进行读写操作，而不用担心数据出现不一致的现象。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/zk-emsemble.png" alt="Diagram shows client-server architecture of ZooKeeper"&gt;
+&lt;em&gt;Image Credit : ebook -Zookeeper-Distributed Process Coordination from O&amp;rsquo;Reilly&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Zookeeper 中的数据存储方式与传统的 UNIX 文件系统相似，节点按照树状结构来组织，其中，节点被称之为 &lt;em&gt;znodes (ZooKeeper data nodes)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/zk-tree.png" alt="zk-tree"&gt;
+&lt;em&gt;Image Credit : ebook -Zookeeper-Distributed Process Coordination from O&amp;rsquo;Reilly&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="基本用法"&gt;基本用法&lt;/h3&gt;
+&lt;p&gt;可以通过直接下载的方式 &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref"&gt;2&lt;/a&gt;&lt;/sup&gt;安装并运行 Zookeeper ，在 Mac 上也可以通过 Homebrew &lt;sup id="fnref:3"&gt;&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref"&gt;3&lt;/a&gt;&lt;/sup&gt; &lt;code&gt;brew install zookeeper&lt;/code&gt; 来安装，考虑到通用性，本文采用 docker 的方式来运行 Zookeeper。如果没有安装 docker，请先准备好 docker 环境 &lt;sup id="fnref:4"&gt;&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref"&gt;4&lt;/a&gt;&lt;/sup&gt;。&lt;/p&gt;
+&lt;h4 id="1-启动-zookeeper"&gt;1. 启动 Zookeeper&lt;/h4&gt;
+&lt;p&gt;执行命令将 Zookeeper 运行在 docker 容器中&lt;/p&gt;</description></item><item><title>Sentinel 为 Dubbo 服务保驾护航</title><link>https://dubbo.apache.org/zh-cn/blog/2018/07/27/sentinel-%E4%B8%BA-dubbo-%E6%9C%8D%E5%8A%A1%E4%BF%9D%E9%A9%BE%E6%8A%A4%E8%88%AA/</link><pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/07/27/sentinel-%E4%B8%BA-dubbo-%E6%9C%8D%E5%8A%A1%E4%BF%9D%E9%A9%BE%E6%8A%A4%E8%88%AA/</guid><description>&lt;p&gt;在复杂的生产环境下可能部署着成千上万的 Dubbo 服务实例，流量持续不断地进入，服务之间进行相互调用。但是分布式系统中可能会因流量激增、系统负载过高、网络延迟等一系列问题，导致某些服务不可用，如果不进行相应的控制可能导致级联故障，影响服务的可用性，因此如何对流量进行合理的控制，成为保障服务稳定性的关键。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/alibaba/Sentinel"&gt;Sentinel&lt;/a&gt; 是阿里中间件团队开源的，面向分布式服务架构的轻量级流量控制产品，主要以流量为切入点，从&lt;strong&gt;流量控制&lt;/strong&gt;、&lt;strong&gt;熔断降级&lt;/strong&gt;、&lt;strong&gt;系统负载保护&lt;/strong&gt;等多个维度来帮助用户保护服务的稳定性。本文将基于 Dubbo，看看 Sentinel 是如何进行流量控制的，并且提供 Dubbo 整合 Sentinel 的最佳实践。&lt;/p&gt;
+&lt;h2 id="快速接入-sentinel"&gt;快速接入 Sentinel&lt;/h2&gt;
+&lt;p&gt;Sentinel 意为&lt;strong&gt;哨兵&lt;/strong&gt;，这个命名形象的诠释了 Sentinel 在分布式系统中的工作角色和重要性。以 Sentinel 在 Dubbo 生态系统中的作用为例，Dubbo 的核心模块包括注册中心、服务提供方、服务消费方（服务调用方）和监控四个模块。Sentinel 通过对服务提供方和服务消费方的限流来进一步提升服务的可用性。接下来我们看看 Sentinel 对服务提供方和服务消费方限流的技术实现方式。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/architecture.png" alt="Dubbo Arch"&gt;&lt;/p&gt;
+&lt;p&gt;Sentinel 提供了与 Dubbo 适配的模块 – &lt;a href="https://github.com/dubbo/dubbo-sentinel-support"&gt;Sentinel Dubbo Adapter&lt;/a&gt;，包括针对服务提供方的过滤器和服务消费方的过滤器（Filter）。使用时我们只需引入以下模块（以 Maven 为例）：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.alibaba.csp&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;sentinel-dubbo-adapter&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;x.y.z&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;引入此依赖后，Dubbo 的服务接口和方法（包括调用端和服务端）就会成为 Sentinel 中的资源，在配置了规则后就可以自动享受到 Sentinel 的防护能力。同时提供了灵活的配置选项，例如若不希望开启 Sentinel Dubbo Adapter 中的某个 Filter，可以手动关闭对应的 Filter。&lt;/p&gt;
+&lt;p&gt;接入 Sentinel Dubbo Adapter 后，即使未配置规则，Sentinel 也会对相应的 Dubbo 服务的调用信息进行统计。那么我们怎么知道 Sentinel 接入成功了呢？这时候就要请出一大利器 —— Sentinel 控制台了。&lt;/p&gt;
+&lt;h2 id="限流必备---监控管理"&gt;限流必备 - 监控管理&lt;/h2&gt;
+&lt;p&gt;流量具有很强的实时性，之所以需要限流，是因为我们无法对流量的到来作出精确的预判，不然的话我们完全可以通过弹性的计算资源来处理，所以这时候为了保证限流的准确性，限流框架的监控功能就非常重要了。&lt;/p&gt;</description></item><item><title>使用Pinpoint做分布式跟踪</title><link>https://dubbo.apache.org/zh-cn/blog/2018/07/12/%E4%BD%BF%E7%94%A8pinpoint%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</link><pubDate>Thu, 12 Jul 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/07/12/%E4%BD%BF%E7%94%A8pinpoint%E5%81%9A%E5%88%86%E5%B8%83%E5%BC%8F%E8%B7%9F%E8%B8%AA/</guid><description>&lt;p&gt;在使用Dubbo进行服务化或者整合应用后，假设某个服务后台日志显示有异常，这个服务又被多个应用调用的情况下，我们通常很难判断是哪个应用调用的，问题的起因是什么，因此我们需要一套分布式跟踪系统来快速定位问题，Pinpoint可以帮助我们快速定位问题（当然，解决方案也不止这一种）。&lt;/p&gt;
+&lt;h2 id="什么是pinpoint"&gt;什么是Pinpoint&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;摘自&lt;a href="https://skyao.gitbooks.io/learning-pinpoint/content/index.html"&gt;Pinpoint学习笔记&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://github.com/naver/pinpoint"&gt;Pinpoint&lt;/a&gt;是一个开源的 APM (Application Performance Management/应用性能管理)工具，用于基于java的大规模分布式系统。
+仿照Google Dapper，Pinpoint通过跟踪分布式应用之间的调用来提供解决方案，以帮助分析系统的总体结构和内部模块之间如何相互联系。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注：对于各个模块之间的通讯英文原文中用的是transaction一词，但是我觉得如果翻译为&amp;quot;事务&amp;quot;容易引起误解，所以替换为&amp;quot;交互&amp;quot;或者&amp;quot;调用&amp;quot;这种比较直白的字眼。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在使用上力图简单高效：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;安装agent，不需要修改哪怕一行代码&lt;/li&gt;
+&lt;li&gt;最小化性能损失&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="服务器地图servermap"&gt;服务器地图(ServerMap)&lt;/h3&gt;
+&lt;p&gt;通过可视化分布式系统的模块和他们之间的相互联系来理解系统拓扑。点击某个节点会展示这个模块的详情，比如它当前的状态和请求数量。&lt;/p&gt;
+&lt;h3 id="实时活动线程图表realtime-active-thread-chart"&gt;实时活动线程图表(Realtime Active Thread Chart)&lt;/h3&gt;
+&lt;p&gt;实时监控应用内部的活动线程。&lt;/p&gt;
+&lt;h3 id="请求应答分布图表requestresponse-scatter-chart"&gt;请求/应答分布图表(Request/Response Scatter Chart)&lt;/h3&gt;
+&lt;p&gt;长期可视化请求数量和应答模式来定位潜在问题。通过在图表上拉拽可以选择请求查看更多的详细信息。&lt;/p&gt;
+&lt;h3 id="调用栈callstack"&gt;调用栈(CallStack)&lt;/h3&gt;
+&lt;p&gt;在分布式环境中为每个调用生成代码级别的可视图，在单个视图中定位瓶颈和失败点。&lt;/p&gt;
+&lt;h3 id="巡查inspector"&gt;巡查(Inspector)&lt;/h3&gt;
+&lt;p&gt;查看应用上的其他详细信息，比如CPU使用率，内存/垃圾回收，TPS，和JVM参数。&lt;/p&gt;
+&lt;h3 id="支持模块"&gt;支持模块&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;JDK 6+&lt;/li&gt;
+&lt;li&gt;Tomcat 6/7/8, Jetty 8/9, JBoss EAP 6, Resin 4, Websphere 6/7/8, Vertx 3.3/3.4/3.5&lt;/li&gt;
+&lt;li&gt;Spring, Spring Boot (Embedded Tomcat, Jetty)&lt;/li&gt;
+&lt;li&gt;Apache HTTP Client 3.x/4.x, JDK HttpConnector, GoogleHttpClient, OkHttpClient, NingAsyncHttpClient&lt;/li&gt;
+&lt;li&gt;Thrift Client, Thrift Service, DUBBO PROVIDER, DUBBO CONSUMER&lt;/li&gt;
+&lt;li&gt;ActiveMQ, RabbitMQ&lt;/li&gt;
+&lt;li&gt;MySQL, Oracle, MSSQL, CUBRID,POSTGRESQL, MARIA&lt;/li&gt;
+&lt;li&gt;Arcus, Memcached, Redis, CASSANDRA&lt;/li&gt;
+&lt;li&gt;iBATIS, MyBatis&lt;/li&gt;
+&lt;li&gt;DBCP, DBCP2, HIKARICP&lt;/li&gt;
+&lt;li&gt;gson, Jackson, Json Lib&lt;/li&gt;
+&lt;li&gt;log4j, Logback&lt;/li&gt;
+&lt;li&gt;自定义模块&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="pinpoint与dubbo的结合"&gt;Pinpoint与Dubbo的结合&lt;/h2&gt;
+&lt;h3 id="启动pinpoint"&gt;启动Pinpoint&lt;/h3&gt;
+&lt;p&gt;参考Pinpoint的&lt;a href="https://pinpoint-apm.github.io/pinpoint/quickstart.html"&gt;Quick start&lt;/a&gt;搭建环境（不需要启动TestApp）&lt;/p&gt;</description></item><item><title>在 Dubbo 中使用 Zipkin</title><link>https://dubbo.apache.org/zh-cn/blog/2018/06/17/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-zipkin/</link><pubDate>Sun, 17 Jun 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/06/17/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-zipkin/</guid><description>&lt;p&gt;随着业务的发展，应用的规模不断的扩大，传统的应用架构无法满足诉求，服务化架构改造势在必行，以 Dubbo 为代表的分布式服务框架成为了服务化改造架构中的基石。随着微服务理念逐渐被大众接受，应用进一步向更细粒度拆分，并且，不同的应用由不同的开发团队独立负责，整个分布式系统变得十分复杂。没有人能够清晰及时的知道当前系统整体的依赖关系。当出现问题时，也无法及时知道具体是链路上的哪个环节出了问题。&lt;/p&gt;
+&lt;p&gt;在这个背景下，Google 发表了 &lt;a href="https://ai.google/research/pubs/pub36356"&gt;Dapper&lt;/a&gt; 的论文，描述了如何通过一个分布式追踪系统解决上述问题。基于该论文，各大互联网公司实现并部署了自己的分布式追踪系统，其中比较出名的有阿里巴巴的 EagleEye。本文中提到的 Zipkin 是 Twitter 公司开源的分布式追踪系统。下面会详细介绍如何在 Dubbo 中使用 Zipkin 来实现分布式追踪。&lt;/p&gt;
+&lt;h2 id="zipkin-简介"&gt;Zipkin 简介&lt;/h2&gt;
+&lt;p&gt;Zipkin 是基于 &lt;a href="https://ai.google/research/pubs/pub36356"&gt;Dapper&lt;/a&gt; 论文实现，由 Twitter 开源的分布式追踪系统，通过收集分布式服务执行时间的信息来达到追踪服务调用链路、以及分析服务执行延迟等目的。&lt;/p&gt;
+&lt;h3 id="zipkin-架构"&gt;Zipkin 架构&lt;/h3&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/zipkin-architecture.png" alt="Zipkin architecture"&gt;&lt;/p&gt;
+&lt;p&gt;Collector 收集器、Storage 存储、API、UI 用户界面等几部分构成了 Zipkin Server 部分，对应于 GitHub 上 &lt;a href="https://github.com/openzipkin/zipkin"&gt;openzipkin/zipkin&lt;/a&gt; 这个项目。而收集应用中调用的耗时信息并将其上报的组件与应用共生，并拥有各个语言的实现版本，其中 Java 的实现是 GitHub 上 &lt;a href="https://github.com/openzipkin/brave"&gt;openzipkin/brave&lt;/a&gt;。除了 Java 客户端实现之外，openzipkin 还提供了许多其他语言的实现，其中包括了 go、php、JavaScript、.net、ruby 等，具体列表可以参阅 Zipkin 的 &lt;a href="https://zipkin.io/pages/tracers_instrumentation.html"&gt;Exiting instrumentations&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id="zipkin-的工作过程"&gt;Zipkin 的工作过程&lt;/h3&gt;
+&lt;p&gt;当用户发起一次调用时，Zipkin 的客户端会在入口处为整条调用链路生成一个全局唯一的 trace id，并为这条链路中的每一次分布式调用生成一个 span id。span 与 span 之间可以有父子嵌套关系，代表分布式调用中的上下游关系。span 和 span 之间可以是兄弟关系，代表当前调用下的两次子调用。一个 trace 由一组 span 组成，可以看成是由 trace 为根节点，span 为若干个子节点的一棵树。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/trace-sample.png" alt="Related image"&gt;&lt;/p&gt;</description></item></channel></rss>

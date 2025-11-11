@@ -1,141 +1,141 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>开发者指南 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/</link><description>Recent content in 开发者指南 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Pixiu Filter体系介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/filter-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/filter-extension/</guid><description>&lt;h2 id="怎样编写一个filter">&lt;strong>怎样编写一个Filter&lt;/strong>&lt;/h2>
-&lt;p>&lt;code>更详细的信息，请移步Blog《谈谈Pixiu的Filter》&lt;/code>&lt;/p>
-&lt;p>我们来尝试写一个简单的Filter，这个Filter将会有简单的配置，在Decode阶段把请求的Body Log出来，并翻转后作为Mock的返回值。最后在Encode阶段根据配置把返回值Log出来。&lt;/p>
-&lt;p>1.首先创建一个Filter&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> DemoFilter &lt;span style="color:#268bd2">struct&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logPrefix &lt;span style="color:#dc322f">string&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Decode阶段，发生在调用Upstream之前
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilter) &lt;span style="color:#268bd2">Decode&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext) filter.FilterStatus {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> body, _ &lt;span style="color:#719e07">:=&lt;/span> ioutil.&lt;span style="color:#268bd2">ReadAll&lt;/span>(ctx.Request.Body)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;request body: %s&amp;#34;&lt;/span>, body)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//reverse res str
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> runes &lt;span style="color:#719e07">:=&lt;/span> []&lt;span style="color:#b58900">rune&lt;/span>(&lt;span style="color:#b58900">string&lt;/span>(body))
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> i &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#2aa198">0&lt;/span>; i &amp;lt; &lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">/&lt;/span>&lt;span style="color:#2aa198">2&lt;/span>; i &lt;span style="color:#719e07">+=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> runes[i], runes[&lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">-&lt;/span>i] = runes[&lt;span style="color:#b58900">len&lt;/span>(runes)&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#2aa198">1&lt;/span>&lt;span style="color:#719e07">-&lt;/span>i], runes[i]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> reverse &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#b58900">string&lt;/span>(runes)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//mock response
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> ctx.&lt;span style="color:#268bd2">SendLocalReply&lt;/span>(&lt;span style="color:#2aa198">200&lt;/span>, []&lt;span style="color:#b58900">byte&lt;/span>(reverse))
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> filter.Stop
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Encode阶段，此时可以获取到Upstream的Response
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> (f &lt;span style="color:#719e07">*&lt;/span>DemoFilter) &lt;span style="color:#268bd2">Encode&lt;/span>(ctx &lt;span style="color:#719e07">*&lt;/span>contexthttp.HttpContext) filter.FilterStatus {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res &lt;span style="color:#719e07">:=&lt;/span> ctx.SourceResp.(&lt;span style="color:#dc322f">string&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;%s: %s&amp;#34;&lt;/span>, f.logPrefix, res)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> filter.Continue
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>2.创建Filter Factory&lt;/p></description></item><item><title>dubbo-pilot Control Plane 部署</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/</guid><description>&lt;ul>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#target">1.总体目标&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#basic">2.基本流程&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#detail">3.详细步骤&lt;/a>
-&lt;ul>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#env">3.1 环境要求&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#native_deploy">3.2 istio 本地部署&lt;/a>
-&lt;ul>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#nbuild">3.2.1 编译&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#ndeploy">3.2.2 部署 &amp;amp; debug&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#docker_deploy">3.3 istio 容器部署&lt;/a>
-&lt;ul>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#dbuild">3.3.1 编译&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#ddeploy">3.3.2 部署 &amp;amp; debug&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="target">1 总体目标&lt;/h2>
-&lt;ul>
-&lt;li>控制面编译和镜像构建&lt;/li>
-&lt;li>使用 istioctl 在 kubernetes 环境部署&lt;/li>
-&lt;li>如何对控制面程序 debug&lt;/li>
-&lt;/ul>
-&lt;h2 id="basic">2 基本流程&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>开发者指南 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/</link><description>Recent content in 开发者指南 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Pixiu Filter体系介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/filter-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/filter-extension/</guid><description>&lt;h2 id="怎样编写一个filter"&gt;&lt;strong&gt;怎样编写一个Filter&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;更详细的信息，请移步Blog《谈谈Pixiu的Filter》&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;我们来尝试写一个简单的Filter，这个Filter将会有简单的配置，在Decode阶段把请求的Body Log出来，并翻转后作为Mock的返回值。最后在Encode阶段根据配置把返回值Log出来。&lt;/p&gt;
+&lt;p&gt;1.首先创建一个Filter&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; DemoFilter &lt;span style="color:#268bd2"&gt;struct&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; logPrefix &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// Decode阶段，发生在调用Upstream之前&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (f &lt;span style="color:#719e07"&gt;*&lt;/span&gt;DemoFilter) &lt;span style="color:#268bd2"&gt;Decode&lt;/span&gt;(ctx &lt;span style="color:#719e07"&gt;*&lt;/span&gt;contexthttp.HttpContext) filter.FilterStatus {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; body, _ &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; ioutil.&lt;span style="color:#268bd2"&gt;ReadAll&lt;/span&gt;(ctx.Request.Body)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; logger.&lt;span style="color:#268bd2"&gt;Infof&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;request body: %s&amp;#34;&lt;/span&gt;, body)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;//reverse res str&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; runes &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; []&lt;span style="color:#b58900"&gt;rune&lt;/span&gt;(&lt;span style="color:#b58900"&gt;string&lt;/span&gt;(body))
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;for&lt;/span&gt; i &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;0&lt;/span&gt;; i &amp;lt; &lt;span style="color:#b58900"&gt;len&lt;/span&gt;(runes)&lt;span style="color:#719e07"&gt;/&lt;/span&gt;&lt;span style="color:#2aa198"&gt;2&lt;/span&gt;; i &lt;span style="color:#719e07"&gt;+=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; runes[i], runes[&lt;span style="color:#b58900"&gt;len&lt;/span&gt;(runes)&lt;span style="color:#719e07"&gt;-&lt;/span&gt;&lt;span style="color:#2aa198"&gt;1&lt;/span&gt;&lt;span style="color:#719e07"&gt;-&lt;/span&gt;i] = runes[&lt;span style="color:#b58900"&gt;len&lt;/span&gt;(runes)&lt;span style="color:#719e07"&gt;-&lt;/span&gt;&lt;span style="color:#2aa198"&gt;1&lt;/span&gt;&lt;span style="color:#719e07"&gt;-&lt;/span&gt;i], runes[i]
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; reverse &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; &lt;span style="color:#b58900"&gt;string&lt;/span&gt;(runes)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;//mock response&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ctx.&lt;span style="color:#268bd2"&gt;SendLocalReply&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;200&lt;/span&gt;, []&lt;span style="color:#b58900"&gt;byte&lt;/span&gt;(reverse))
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; filter.Stop
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// Encode阶段，此时可以获取到Upstream的Response&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (f &lt;span style="color:#719e07"&gt;*&lt;/span&gt;DemoFilter) &lt;span style="color:#268bd2"&gt;Encode&lt;/span&gt;(ctx &lt;span style="color:#719e07"&gt;*&lt;/span&gt;contexthttp.HttpContext) filter.FilterStatus {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; res &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; ctx.SourceResp.(&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; logger.&lt;span style="color:#268bd2"&gt;Infof&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;%s: %s&amp;#34;&lt;/span&gt;, f.logPrefix, res)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; filter.Continue
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;2.创建Filter Factory&lt;/p&gt;</description></item><item><title>dubbo-pilot Control Plane 部署</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/</guid><description>&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#target"&gt;1.总体目标&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#basic"&gt;2.基本流程&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#detail"&gt;3.详细步骤&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#env"&gt;3.1 环境要求&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#native_deploy"&gt;3.2 istio 本地部署&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#nbuild"&gt;3.2.1 编译&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#ndeploy"&gt;3.2.2 部署 &amp;amp; debug&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#docker_deploy"&gt;3.3 istio 容器部署&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#dbuild"&gt;3.3.1 编译&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/dubbo-pilot/#ddeploy"&gt;3.3.2 部署 &amp;amp; debug&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="target"&gt;1 总体目标&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;控制面编译和镜像构建&lt;/li&gt;
+&lt;li&gt;使用 istioctl 在 kubernetes 环境部署&lt;/li&gt;
+&lt;li&gt;如何对控制面程序 debug&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="basic"&gt;2 基本流程&lt;/h2&gt;
 这个例子将演示如何在编译 dubbo-pilot 控制平面并在 kubernetes 环境下如何使用 istioctl 进行部署
-&lt;ol>
-&lt;li>本地启动控制平面，对 dubbo-pilot 进行启动和 debug&lt;/li>
-&lt;li>使用 istioctl 在 k8s 环境启动和 debug&lt;/li>
-&lt;/ol>
-&lt;h2 id="detail">3 详细步骤&lt;/h2>
-&lt;h3 id="env">3.1 环境要求&lt;/h3>
-&lt;ul>
-&lt;li>Golang&lt;/li>
-&lt;li>Docker&lt;/li>
-&lt;li>Minikube/Kind&lt;/li>
-&lt;li>Kubectl&lt;/li>
-&lt;li>Dlv&lt;/li>
-&lt;/ul>
-&lt;h3 id="native_deploy">3.2 本地部署&lt;/h3>
-&lt;h4 id="nbuild">3.2.1 编译&lt;/h4>
-&lt;ol>
-&lt;li>编译 docker-builder&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span style="display:flex;">&lt;span>cd dubbo&lt;span style="color:#719e07">-&lt;/span>go&lt;span style="color:#719e07">-&lt;/span>pixiu&lt;span style="color:#719e07">/&lt;/span>tools&lt;span style="color:#719e07">/&lt;/span>docker&lt;span style="color:#719e07">-&lt;/span>builder &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> go install
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker&lt;span style="color:#719e07">-&lt;/span>builder &lt;span style="color:#719e07">-&lt;/span>h:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Builds Istio docker images
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Usage:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [flags]
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Flags:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>architecures strings architectures to build (default [linux&lt;span style="color:#719e07">/&lt;/span>amd64])
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>base&lt;span style="color:#719e07">-&lt;/span>version string base version to use (default &lt;span style="color:#2aa198">&amp;#34;latest&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>builder string type of builder to use&lt;span style="color:#719e07">.&lt;/span> options are crane &lt;span style="color:#719e07">or&lt;/span> docker (default &lt;span style="color:#2aa198">&amp;#34;docker&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">-&lt;/span>h, &lt;span style="color:#719e07">--&lt;/span>help help &lt;span style="color:#719e07">for&lt;/span> this command
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>hub strings docker hub(s) (default [localhost:&lt;span style="color:#2aa198">5000&lt;/span>])
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>istio&lt;span style="color:#719e07">-&lt;/span>version string istio version to use (default &lt;span style="color:#2aa198">&amp;#34;1.14-dev&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>kind&lt;span style="color:#719e07">-&lt;/span>&lt;span style="color:#b58900">load&lt;/span> kind cluster to &lt;span style="color:#b58900">load&lt;/span> into
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>no&lt;span style="color:#719e07">-&lt;/span>cache disable caching
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>no&lt;span style="color:#719e07">-&lt;/span>clobber &lt;span style="color:#719e07">do&lt;/span> &lt;span style="color:#719e07">not&lt;/span> allow pushing images that already exist
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>proxy&lt;span style="color:#719e07">-&lt;/span>version string proxy version to use (default &lt;span style="color:#2aa198">&amp;#34;7ae8e27f274b33dc2f4d83100aea5971ed6698d3&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>push push targets to registry
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>save save targets to tar&lt;span style="color:#719e07">.&lt;/span>gz
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>tag strings docker tag(s) (default [latest])
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>targets strings targets to build (default [app,app_sidecar_centos_7,app_sidecar_debian_11,app_sidecar_ubuntu_jammy,app_sidecar_ubuntu_xenial,ext&lt;span style="color:#719e07">-&lt;/span>authz,install&lt;span style="color:#719e07">-&lt;/span>cni,istioctl,operator,pilot,proxyv2])
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>variants strings variants to build (default [default])
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">--&lt;/span>version show build version
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>使用 docker-builder 自动编译 &amp;amp;&amp;amp; 构建镜像&lt;/li>
-&lt;/ol>
-&lt;p>编译 istioctl&lt;/p></description></item><item><title>Trie 前缀树介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/trie/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/trie/</guid><description>&lt;h1 id="简介">简介&lt;/h1>
-&lt;p>&lt;img alt="image.png" src="https://dubbo.apache.org/imgs/pixiu/trie-1.png">&lt;br />网关的核心之一是路由逻辑，决定一个请求需要经过怎样的加工，被转发到哪个下行服务。&lt;br />其中 80% 的路由需求表达都以 URL 为基础。需要描述清楚具有某个特征的 URL 或者 URL 集合对应怎样的一系列下游处理策略。&lt;/p>
-&lt;p>例如，&amp;rsquo;/test/&lt;strong>&amp;rsquo; 开头的 URL 路由到测试环境集群，&amp;rsquo;/release/user/&lt;/strong>&amp;rsquo; 开头的 URL 会被路由到正式环境的 user 服务集群。&lt;/p>
-&lt;p>同时网关作为所有请求的入口，每一毫秒的延时都会做用在全量的业务下，在 mesh 场景下，延时还会随着调用链路的加深，被倍数放大。按照生产环境业务相应 &amp;lt;=7 毫秒的标准来看，规则匹配的性能要求也是十分苛刻的。一定不能随着规则数目的增加而性能退化。&lt;/p>
-&lt;h1 id="使用介绍">使用介绍&lt;/h1>
-&lt;p>仅从使用方的角度阐述 pixiu 的配置文件如何描述 URL 相关的路由规则。（下面，我们介绍一下如何配置 URL 路由规则）&lt;br />如下是一份 pixiu 的 api 配置文件，这份配置文件会被解析后生成一份对应的内存模型，作为 pixiu 路由相关配置的初始状态。之后由 RDS 协议修改解析后得到的内存模型，实现路由逻辑动态生效的效果。RDS 协议（RDS：xDS 协议下描述路由规则的部分）相关内容是后话不详细阐述。我们把注意力聚焦到resource部分。&lt;br />resource 下 path 部分就是上文阐述的，URL 相关的路由描述。意思是满足 path 描述特征的 URL 会被成功匹配。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>name: server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>description: server sample
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>resources:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - path: &amp;#39;/api/v&lt;span style="color:#2aa198">1&lt;/span>/test-dubbo/user/name/:name&amp;#39;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type: restful
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> description: user
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> methods:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - httpVerb: GET
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> enable: &lt;span style="color:#cb4b16">true&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout: &lt;span style="color:#2aa198">1000&lt;/span>ms
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> inboundRequest:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> requestType: http
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> uri:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: name
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> required: &lt;span style="color:#cb4b16">true&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> integrationRequest:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> requestType: dubbo
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> mappingParams:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: uri.name
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> mapTo: &lt;span style="color:#2aa198">0&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> mapType: &lt;span style="color:#2aa198">&amp;#34;string&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> applicationName: &lt;span style="color:#2aa198">&amp;#34;UserProvider&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> interface: &lt;span style="color:#2aa198">&amp;#34;com.dubbogo.server.UserService&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> method: &lt;span style="color:#2aa198">&amp;#34;GetUserByName&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> group: &lt;span style="color:#2aa198">&amp;#34;test&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> version: &lt;span style="color:#2aa198">1.0&lt;/span>.&lt;span style="color:#2aa198">0&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> clusterName: &lt;span style="color:#2aa198">&amp;#34;test_dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>被匹配后的请求会被转化成 dubbo 协议转发到 test_dubbo 集群调用 com.dubbogo.server.UserService 下的 GetUserByName 服务。&lt;br />我们继续聚焦到如下范围：&lt;/p></description></item></channel></rss>
+&lt;ol&gt;
+&lt;li&gt;本地启动控制平面，对 dubbo-pilot 进行启动和 debug&lt;/li&gt;
+&lt;li&gt;使用 istioctl 在 k8s 环境启动和 debug&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="detail"&gt;3 详细步骤&lt;/h2&gt;
+&lt;h3 id="env"&gt;3.1 环境要求&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Golang&lt;/li&gt;
+&lt;li&gt;Docker&lt;/li&gt;
+&lt;li&gt;Minikube/Kind&lt;/li&gt;
+&lt;li&gt;Kubectl&lt;/li&gt;
+&lt;li&gt;Dlv&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="native_deploy"&gt;3.2 本地部署&lt;/h3&gt;
+&lt;h4 id="nbuild"&gt;3.2.1 编译&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;编译 docker-builder&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cd dubbo&lt;span style="color:#719e07"&gt;-&lt;/span&gt;go&lt;span style="color:#719e07"&gt;-&lt;/span&gt;pixiu&lt;span style="color:#719e07"&gt;/&lt;/span&gt;tools&lt;span style="color:#719e07"&gt;/&lt;/span&gt;docker&lt;span style="color:#719e07"&gt;-&lt;/span&gt;builder &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; go install
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker&lt;span style="color:#719e07"&gt;-&lt;/span&gt;builder &lt;span style="color:#719e07"&gt;-&lt;/span&gt;h:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Builds Istio docker images
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Usage:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; [flags]
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Flags:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;architecures strings architectures to build (default [linux&lt;span style="color:#719e07"&gt;/&lt;/span&gt;amd64])
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;base&lt;span style="color:#719e07"&gt;-&lt;/span&gt;version string base version to use (default &lt;span style="color:#2aa198"&gt;&amp;#34;latest&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;builder string type of builder to use&lt;span style="color:#719e07"&gt;.&lt;/span&gt; options are crane &lt;span style="color:#719e07"&gt;or&lt;/span&gt; docker (default &lt;span style="color:#2aa198"&gt;&amp;#34;docker&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;-&lt;/span&gt;h, &lt;span style="color:#719e07"&gt;--&lt;/span&gt;help help &lt;span style="color:#719e07"&gt;for&lt;/span&gt; this command
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;hub strings docker hub(s) (default [localhost:&lt;span style="color:#2aa198"&gt;5000&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;istio&lt;span style="color:#719e07"&gt;-&lt;/span&gt;version string istio version to use (default &lt;span style="color:#2aa198"&gt;&amp;#34;1.14-dev&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;kind&lt;span style="color:#719e07"&gt;-&lt;/span&gt;&lt;span style="color:#b58900"&gt;load&lt;/span&gt; kind cluster to &lt;span style="color:#b58900"&gt;load&lt;/span&gt; into
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;no&lt;span style="color:#719e07"&gt;-&lt;/span&gt;cache disable caching
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;no&lt;span style="color:#719e07"&gt;-&lt;/span&gt;clobber &lt;span style="color:#719e07"&gt;do&lt;/span&gt; &lt;span style="color:#719e07"&gt;not&lt;/span&gt; allow pushing images that already exist
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;proxy&lt;span style="color:#719e07"&gt;-&lt;/span&gt;version string proxy version to use (default &lt;span style="color:#2aa198"&gt;&amp;#34;7ae8e27f274b33dc2f4d83100aea5971ed6698d3&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;push push targets to registry
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;save save targets to tar&lt;span style="color:#719e07"&gt;.&lt;/span&gt;gz
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;tag strings docker tag(s) (default [latest])
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;targets strings targets to build (default [app,app_sidecar_centos_7,app_sidecar_debian_11,app_sidecar_ubuntu_jammy,app_sidecar_ubuntu_xenial,ext&lt;span style="color:#719e07"&gt;-&lt;/span&gt;authz,install&lt;span style="color:#719e07"&gt;-&lt;/span&gt;cni,istioctl,operator,pilot,proxyv2])
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;variants strings variants to build (default [default])
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;--&lt;/span&gt;version show build version
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;使用 docker-builder 自动编译 &amp;amp;&amp;amp; 构建镜像&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;编译 istioctl&lt;/p&gt;</description></item><item><title>Trie 前缀树介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/trie/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/dev/trie/</guid><description>&lt;h1 id="简介"&gt;简介&lt;/h1&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/pixiu/trie-1.png" alt="image.png"&gt;&lt;br /&gt;网关的核心之一是路由逻辑，决定一个请求需要经过怎样的加工，被转发到哪个下行服务。&lt;br /&gt;其中 80% 的路由需求表达都以 URL 为基础。需要描述清楚具有某个特征的 URL 或者 URL 集合对应怎样的一系列下游处理策略。&lt;/p&gt;
+&lt;p&gt;例如，&amp;rsquo;/test/&lt;strong&gt;&amp;rsquo; 开头的 URL 路由到测试环境集群，&amp;rsquo;/release/user/&lt;/strong&gt;&amp;rsquo; 开头的 URL 会被路由到正式环境的 user 服务集群。&lt;/p&gt;
+&lt;p&gt;同时网关作为所有请求的入口，每一毫秒的延时都会做用在全量的业务下，在 mesh 场景下，延时还会随着调用链路的加深，被倍数放大。按照生产环境业务相应 &amp;lt;=7 毫秒的标准来看，规则匹配的性能要求也是十分苛刻的。一定不能随着规则数目的增加而性能退化。&lt;/p&gt;
+&lt;h1 id="使用介绍"&gt;使用介绍&lt;/h1&gt;
+&lt;p&gt;仅从使用方的角度阐述 pixiu 的配置文件如何描述 URL 相关的路由规则。（下面，我们介绍一下如何配置 URL 路由规则）&lt;br /&gt;如下是一份 pixiu 的 api 配置文件，这份配置文件会被解析后生成一份对应的内存模型，作为 pixiu 路由相关配置的初始状态。之后由 RDS 协议修改解析后得到的内存模型，实现路由逻辑动态生效的效果。RDS 协议（RDS：xDS 协议下描述路由规则的部分）相关内容是后话不详细阐述。我们把注意力聚焦到resource部分。&lt;br /&gt;resource 下 path 部分就是上文阐述的，URL 相关的路由描述。意思是满足 path 描述特征的 URL 会被成功匹配。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;name: server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;description: server sample
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;resources:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - path: &amp;#39;/api/v&lt;span style="color:#2aa198"&gt;1&lt;/span&gt;/test-dubbo/user/name/:name&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; type: restful
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; description: user
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; methods:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - httpVerb: GET
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; enable: &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; timeout: &lt;span style="color:#2aa198"&gt;1000&lt;/span&gt;ms
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; inboundRequest:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; requestType: http
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; uri:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: name
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; required: &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; integrationRequest:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; requestType: dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; mappingParams:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: uri.name
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; mapTo: &lt;span style="color:#2aa198"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; mapType: &lt;span style="color:#2aa198"&gt;&amp;#34;string&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; applicationName: &lt;span style="color:#2aa198"&gt;&amp;#34;UserProvider&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; interface: &lt;span style="color:#2aa198"&gt;&amp;#34;com.dubbogo.server.UserService&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; method: &lt;span style="color:#2aa198"&gt;&amp;#34;GetUserByName&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; group: &lt;span style="color:#2aa198"&gt;&amp;#34;test&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; version: &lt;span style="color:#2aa198"&gt;1.0&lt;/span&gt;.&lt;span style="color:#2aa198"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; clusterName: &lt;span style="color:#2aa198"&gt;&amp;#34;test_dubbo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;被匹配后的请求会被转化成 dubbo 协议转发到 test_dubbo 集群调用 com.dubbogo.server.UserService 下的 GetUserByName 服务。&lt;br /&gt;我们继续聚焦到如下范围：&lt;/p&gt;</description></item></channel></rss>

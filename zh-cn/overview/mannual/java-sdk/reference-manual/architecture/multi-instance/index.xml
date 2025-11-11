@@ -1,157 +1,157 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>多实例部署 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/</link><description>Recent content in 多实例部署 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/index.xml" rel="self" type="application/rss+xml"/><item><title>多实例部署的设计理念</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/multi-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/multi-instance/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>Java 提供的静态变量（static field）能力可以将持有对象引用的行为绑定到类上面来，这给开发者提供了巨大的便利。注入单例模式、工厂模式等设计模式的实现方案都依赖了静态变量的功能。通过使用静态变量，开发者可以在任何时间、任何地点简单地获取到所需要的对象信息。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Test&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> Object obj;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Test.obj &lt;span style="color:#719e07">=&lt;/span> xxx;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在一直以来的 Dubbo 框架开发中，静态变量受到了广泛地应用，诸如使用一个全局共享的 ConfigManager 来存储全局配置信息、ServiceRepository 来存储服务信息，不论从中心化管理配置或者是参数获取的便利性的角度来说，这种设计都是最佳的。在 Dubbo 2.7 以前的所有版本，Dubbo 所需要的运行时配置信息都通过全局静态变量获取，通过 RPC 服务三元组（interface + version + group）的方式进行唯一定位。&lt;/p>
-&lt;p>但是随着 Dubbo 用户基数的不断扩大以及在阿里集团内由 Dubbo 作为内核的 HSF3 框架都对原来的这种设计模式提出了挑战。&lt;/p>
-&lt;p>对于开源用户，社区收到的诉求主要包括以下几点：&lt;/p>
-&lt;ol>
-&lt;li>在同一个应用内能够创建多个三元组一样的订阅。这个行为在 Dubbo 2.7 中虽然没有做强限制，但是由于 Dubbo 很多参数是取自全局的，而这个获取的索引使用的就是三元组。如果用户创建了两个三元组一样的订阅，他们的参数会被相互覆盖，地址推送等功能也会收到很大的影响。&lt;/li>
-&lt;li>Java 提供了自定义 ClassLoader 的机制可以自定义指定类的加载器来源，但是对于 Dubbo 来说并没有去支持多 ClassLoader 的场景，在动态代理生成和序列化场景下都不支持 ClassLoader 切换的行为。&lt;/li>
-&lt;li>Dubbo 众多的测试用例都共享了同一份配置信息，导致在进行单元测试的时候极为容易造成环境污染的问题。&lt;/li>
-&lt;/ol>
-&lt;p>对于阿里集团内大规模落地来说，我们遇到的问题主要有：&lt;/p>
-&lt;ol>
-&lt;li>阿里集团内有众多的中间件框架，这些框架提供了各种各样的类加载方式，同时业务方期望在同一应用内的配置等信息是相互隔离的。&lt;/li>
-&lt;li>一些业务方的定制逻辑需要支持动态热部署的模式，具体体现在动态对某个虚拟环境进行销毁，这需要 Dubbo 内的生命周期管理更加完善。&lt;/li>
-&lt;li>集团内有多个对 Spring 容器进行定制化开发的框架，需要 Dubbo 能够支持多个 Spring Context 独立管理生命周期的场景。&lt;/li>
-&lt;/ol>
-&lt;p>基于众多的这些原因，在八月初的时候我们决定对 Dubbo 的生命周期进行重构，经过一个月的紧张开发，目前社区版本已经完整支持了多实例化的功能，Dubbo 的生命周期也变得更加清晰。&lt;/p></description></item><item><title>多实例相关的模型与概念定义</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/model/</guid><description>&lt;h2 id="dubbo-架构">Dubbo 架构&lt;/h2>
-&lt;p>JVM —— 虚拟机层
-目的：Dubbo 框架之间完全隔离（端口不能复用）&lt;/p>
-&lt;p>Dubbo Framework —— 框架层
-目的：将需要全局缓存的进行复用（端口、序列化等）&lt;/p>
-&lt;p>Application —— 应用层
-目的：隔离应用之间的信息，包括注册中心、配置中心、元数据中心&lt;/p>
-&lt;p>Services —— 模块层
-目的：提供热加载能力，可以按 ClassLoader、Spring Context 进行隔离上下文&lt;/p>
-&lt;h2 id="dubbo-概念对齐">Dubbo 概念对齐&lt;/h2>
-&lt;ol>
-&lt;li>DubboBoorstrap
-&lt;ol>
-&lt;li>需要拆分 export/refer services、ServiceInstance、Metadata/Config 等 Client&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>ConfigManager
-&lt;ol>
-&lt;li>需要拆分应用级配置信息、模块级配置信息&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>ApplicationModel
-&lt;ol>
-&lt;li>实际存储应用层信息，持有到 ConfigManager 应用级配置信息的引用&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>ConsumerModel
-&lt;ol>
-&lt;li>实际存储接口信息，由 ModuleModel 持有引用&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>ProviderModel
-&lt;ol>
-&lt;li>实际存储接口信息，由 ModuleModel 持有引用&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>ExtensionLoader
-&lt;ol>
-&lt;li>需要根据不同层级 load 出不同的实例对象&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>Registry
-&lt;ol>
-&lt;li>应用级别共享，需要确保多实例订阅正常（考虑单元化场景）&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>Router / Filter
-&lt;ol>
-&lt;li>模块级别共享&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>Protocol / Remoting
-&lt;ol>
-&lt;li>框架级别共享，复用 IO，多应用间贡献&lt;/li>
-&lt;/ol>
-&lt;/li>
-&lt;li>Metadata&lt;/li>
-&lt;li>应用级别共享，考虑应用级服务发现&lt;/li>
-&lt;li>QoS&lt;/li>
-&lt;li>框架级别共享，与 IO 有关&lt;/li>
-&lt;li>Serialization&lt;/li>
-&lt;li>框架级别共享，与 IO 有关&lt;/li>
-&lt;li>ConfigCenter&lt;/li>
-&lt;li>应用级别贡献&lt;/li>
-&lt;li>ModuleModel（新）&lt;/li>
-&lt;li>实际存储模块层信息，持有接口级信息&lt;/li>
-&lt;li>FrameworkModel（新）&lt;/li>
-&lt;li>实际存储框架层信息&lt;/li>
-&lt;/ol>
-&lt;h2 id="配置存储梳理">配置存储梳理&lt;/h2>
-&lt;h3 id="frameworkmodel">FrameworkModel&lt;/h3>
-&lt;p>Qos、Protocol、Remoting、Serialization、ExtensionLoader&lt;/p></description></item><item><title>多实例启动流程与模块依赖关系</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/workflow/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/workflow/</guid><description>&lt;p>1、应用启动流程
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>多实例部署 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/</link><description>Recent content in 多实例部署 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/index.xml" rel="self" type="application/rss+xml"/><item><title>多实例部署的设计理念</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/multi-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/multi-instance/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;Java 提供的静态变量（static field）能力可以将持有对象引用的行为绑定到类上面来，这给开发者提供了巨大的便利。注入单例模式、工厂模式等设计模式的实现方案都依赖了静态变量的功能。通过使用静态变量，开发者可以在任何时间、任何地点简单地获取到所需要的对象信息。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;Test&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; Object obj;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Test.obj &lt;span style="color:#719e07"&gt;=&lt;/span&gt; xxx;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在一直以来的 Dubbo 框架开发中，静态变量受到了广泛地应用，诸如使用一个全局共享的 ConfigManager 来存储全局配置信息、ServiceRepository 来存储服务信息，不论从中心化管理配置或者是参数获取的便利性的角度来说，这种设计都是最佳的。在 Dubbo 2.7 以前的所有版本，Dubbo 所需要的运行时配置信息都通过全局静态变量获取，通过 RPC 服务三元组（interface + version + group）的方式进行唯一定位。&lt;/p&gt;
+&lt;p&gt;但是随着 Dubbo 用户基数的不断扩大以及在阿里集团内由 Dubbo 作为内核的 HSF3 框架都对原来的这种设计模式提出了挑战。&lt;/p&gt;
+&lt;p&gt;对于开源用户，社区收到的诉求主要包括以下几点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;在同一个应用内能够创建多个三元组一样的订阅。这个行为在 Dubbo 2.7 中虽然没有做强限制，但是由于 Dubbo 很多参数是取自全局的，而这个获取的索引使用的就是三元组。如果用户创建了两个三元组一样的订阅，他们的参数会被相互覆盖，地址推送等功能也会收到很大的影响。&lt;/li&gt;
+&lt;li&gt;Java 提供了自定义 ClassLoader 的机制可以自定义指定类的加载器来源，但是对于 Dubbo 来说并没有去支持多 ClassLoader 的场景，在动态代理生成和序列化场景下都不支持 ClassLoader 切换的行为。&lt;/li&gt;
+&lt;li&gt;Dubbo 众多的测试用例都共享了同一份配置信息，导致在进行单元测试的时候极为容易造成环境污染的问题。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;对于阿里集团内大规模落地来说，我们遇到的问题主要有：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;阿里集团内有众多的中间件框架，这些框架提供了各种各样的类加载方式，同时业务方期望在同一应用内的配置等信息是相互隔离的。&lt;/li&gt;
+&lt;li&gt;一些业务方的定制逻辑需要支持动态热部署的模式，具体体现在动态对某个虚拟环境进行销毁，这需要 Dubbo 内的生命周期管理更加完善。&lt;/li&gt;
+&lt;li&gt;集团内有多个对 Spring 容器进行定制化开发的框架，需要 Dubbo 能够支持多个 Spring Context 独立管理生命周期的场景。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;基于众多的这些原因，在八月初的时候我们决定对 Dubbo 的生命周期进行重构，经过一个月的紧张开发，目前社区版本已经完整支持了多实例化的功能，Dubbo 的生命周期也变得更加清晰。&lt;/p&gt;</description></item><item><title>多实例相关的模型与概念定义</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/model/</guid><description>&lt;h2 id="dubbo-架构"&gt;Dubbo 架构&lt;/h2&gt;
+&lt;p&gt;JVM —— 虚拟机层
+目的：Dubbo 框架之间完全隔离（端口不能复用）&lt;/p&gt;
+&lt;p&gt;Dubbo Framework —— 框架层
+目的：将需要全局缓存的进行复用（端口、序列化等）&lt;/p&gt;
+&lt;p&gt;Application —— 应用层
+目的：隔离应用之间的信息，包括注册中心、配置中心、元数据中心&lt;/p&gt;
+&lt;p&gt;Services —— 模块层
+目的：提供热加载能力，可以按 ClassLoader、Spring Context 进行隔离上下文&lt;/p&gt;
+&lt;h2 id="dubbo-概念对齐"&gt;Dubbo 概念对齐&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;DubboBoorstrap
+&lt;ol&gt;
+&lt;li&gt;需要拆分 export/refer services、ServiceInstance、Metadata/Config 等 Client&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;ConfigManager
+&lt;ol&gt;
+&lt;li&gt;需要拆分应用级配置信息、模块级配置信息&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;ApplicationModel
+&lt;ol&gt;
+&lt;li&gt;实际存储应用层信息，持有到 ConfigManager 应用级配置信息的引用&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;ConsumerModel
+&lt;ol&gt;
+&lt;li&gt;实际存储接口信息，由 ModuleModel 持有引用&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;ProviderModel
+&lt;ol&gt;
+&lt;li&gt;实际存储接口信息，由 ModuleModel 持有引用&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;ExtensionLoader
+&lt;ol&gt;
+&lt;li&gt;需要根据不同层级 load 出不同的实例对象&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Registry
+&lt;ol&gt;
+&lt;li&gt;应用级别共享，需要确保多实例订阅正常（考虑单元化场景）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Router / Filter
+&lt;ol&gt;
+&lt;li&gt;模块级别共享&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Protocol / Remoting
+&lt;ol&gt;
+&lt;li&gt;框架级别共享，复用 IO，多应用间贡献&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Metadata&lt;/li&gt;
+&lt;li&gt;应用级别共享，考虑应用级服务发现&lt;/li&gt;
+&lt;li&gt;QoS&lt;/li&gt;
+&lt;li&gt;框架级别共享，与 IO 有关&lt;/li&gt;
+&lt;li&gt;Serialization&lt;/li&gt;
+&lt;li&gt;框架级别共享，与 IO 有关&lt;/li&gt;
+&lt;li&gt;ConfigCenter&lt;/li&gt;
+&lt;li&gt;应用级别贡献&lt;/li&gt;
+&lt;li&gt;ModuleModel（新）&lt;/li&gt;
+&lt;li&gt;实际存储模块层信息，持有接口级信息&lt;/li&gt;
+&lt;li&gt;FrameworkModel（新）&lt;/li&gt;
+&lt;li&gt;实际存储框架层信息&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="配置存储梳理"&gt;配置存储梳理&lt;/h2&gt;
+&lt;h3 id="frameworkmodel"&gt;FrameworkModel&lt;/h3&gt;
+&lt;p&gt;Qos、Protocol、Remoting、Serialization、ExtensionLoader&lt;/p&gt;</description></item><item><title>多实例启动流程与模块依赖关系</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/workflow/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/workflow/</guid><description>&lt;p&gt;1、应用启动流程
 初始化应用配置，启动内部模块，启动其它模块。
 应用启动方式包括：DubboBootstrap.start(), ApplicationModel.getDeployer().start()
-&lt;img alt="Dubbo start process.svg" src="https://cdn.nlark.com/yuque/0/2021/svg/2391732/1634895625292-99fdac6f-3371-4147-9ad5-9428296cb083.svg#clientId=u82d0d5c2-bff3-4&amp;from=drop&amp;id=u8db161d3&amp;originHeight=2594&amp;originWidth=1050&amp;originalType=binary&amp;ratio=1&amp;size=64242&amp;status=done&amp;style=none&amp;taskId=u8976fa81-5bc5-469a-ab4a-b4cda12cd6d">
+&lt;img src="https://cdn.nlark.com/yuque/0/2021/svg/2391732/1634895625292-99fdac6f-3371-4147-9ad5-9428296cb083.svg#clientId=u82d0d5c2-bff3-4&amp;amp;from=drop&amp;amp;id=u8db161d3&amp;amp;originHeight=2594&amp;amp;originWidth=1050&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;size=64242&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u8976fa81-5bc5-469a-ab4a-b4cda12cd6d" alt="Dubbo start process.svg"&gt;
 2、模块启动流程
 上图中从ModuleDeployer.start() 开始，自动初始化应用配置，启动内部模块，然后启动当前模块。
-模块启动方式包括：&lt;/p>
-&lt;ol>
-&lt;li>Spring context 加载dubbo xml配置或者注解&lt;/li>
-&lt;li>手工启动模块：ModuleModel.getDeployer().start()&lt;/li>
-&lt;/ol>
-&lt;p>3、服务接口API方式启动
-ServiceConfig.export() 或者 ReferenceConfig.get() 先自动启动module，然后执行export/refer服务接口&lt;/p></description></item><item><title>多实例让源码开发更复杂，学习如何正确的扩展 SPI 实现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop/</guid><description>&lt;p>本文对Dubbo 3多实例改造后编码相关变化进行一个简单的总结。&lt;/p>
-&lt;h3 id="层次模型">层次模型&lt;/h3>
-&lt;p>从只有ApplicationModel，新增 ScopeModel/FrameworkModel/ModuleModel 表达多实例的层次模型。
-&lt;img alt="image.png" src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630663265196-0c9e3746-3f62-406b-93d6-7d971ee3e96a.png#clientId=u53624b84-1e3c-4&amp;from=paste&amp;height=302&amp;id=udc7e6f69&amp;originHeight=604&amp;originWidth=1378&amp;originalType=binary&amp;ratio=1&amp;size=132247&amp;status=done&amp;style=none&amp;taskId=u06713196-e7be-483c-8762-6bbc756f336&amp;width=689">
-每个ScopeModel实例都会创建并绑定属于自己的重要成员：&lt;/p>
-&lt;ul>
-&lt;li>ExtensionDirector&lt;/li>
-&lt;li>BeanFactory&lt;/li>
-&lt;li>ServiceRepository&lt;/li>
-&lt;/ul>
-&lt;p>ScopeModel 作为最基础的模型，可以在SPI/Bean/URL 等持有和传递。&lt;/p>
-&lt;h3 id="spi扩展">SPI扩展&lt;/h3>
-&lt;h4 id="extensionscope">ExtensionScope&lt;/h4>
-&lt;p>SPI 注解添加scope属性，标记其所属的作用域。
-&lt;img alt="image.png" src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630664482020-9d35e6de-17f7-4334-8506-3af362c03de0.png#clientId=u53624b84-1e3c-4&amp;from=paste&amp;height=249&amp;id=u6c288d3d&amp;originHeight=498&amp;originWidth=930&amp;originalType=binary&amp;ratio=1&amp;size=197493&amp;status=done&amp;style=none&amp;taskId=u56167d63-ab53-4cdb-bb10-723d0c97663&amp;width=465">
-ExtensionScope 与层次模型对应关系：&lt;/p>
-&lt;ul>
-&lt;li>FRAMEWORK&lt;/li>
-&lt;li>APPLICATION&lt;/li>
-&lt;li>MODULE&lt;/li>
-&lt;/ul>
-&lt;p>�&lt;/p>
-&lt;h4 id="extensiondirector">ExtensionDirector&lt;/h4>
-&lt;p>新增ExtensionDirector用于实现多层级的spi管理及依赖注入。&lt;/p>
-&lt;p>ExtensionDirector spi extension 创建流程如下：
-&lt;img alt="image.png" src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630664388603-d12d4002-65ea-43b9-b5c9-c0d7204b22b1.png#clientId=u53624b84-1e3c-4&amp;from=paste&amp;height=303&amp;id=uf804edd7&amp;originHeight=606&amp;originWidth=616&amp;originalType=binary&amp;ratio=1&amp;size=71595&amp;status=done&amp;style=none&amp;taskId=u4944881d-0195-4a23-bdfe-346819db997&amp;width=308">&lt;/p>
-&lt;ul>
-&lt;li>每个SPI 只能在匹配的Scope的ExtensionDirector上创建，目的是实现层级之间共享实例和正确注入依赖对象。即APPLICATION scope的SPI必定在ApplicationModel绑定的ExtensionDirector上创建，FRAMEWORK scope的SPI必定在FrameworkModel绑定的ExtensionDirector上创建。&lt;/li>
-&lt;li>可见性与scope作用范围相关，这里的可见性是是否能直接注入依赖。即FRAMEWORK scope的SPI可以在FRAMEWORK/APPLICATION/MODULE 都可见，而 APPLICATION scope的SPI只能在APPLICATION/MODULE 可见。&lt;/li>
-&lt;li>不可见的SPI需要通过上下文来获取，如可以通过URL传递ScopeModel，可以解决在FRAMEWORK spi访问 APPLICATION spi。&lt;/li>
-&lt;/ul>
-&lt;p>Scope 作用范围如下图：
+模块启动方式包括：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Spring context 加载dubbo xml配置或者注解&lt;/li&gt;
+&lt;li&gt;手工启动模块：ModuleModel.getDeployer().start()&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;3、服务接口API方式启动
+ServiceConfig.export() 或者 ReferenceConfig.get() 先自动启动module，然后执行export/refer服务接口&lt;/p&gt;</description></item><item><title>多实例让源码开发更复杂，学习如何正确的扩展 SPI 实现</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop/</guid><description>&lt;p&gt;本文对Dubbo 3多实例改造后编码相关变化进行一个简单的总结。&lt;/p&gt;
+&lt;h3 id="层次模型"&gt;层次模型&lt;/h3&gt;
+&lt;p&gt;从只有ApplicationModel，新增 ScopeModel/FrameworkModel/ModuleModel 表达多实例的层次模型。
+&lt;img src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630663265196-0c9e3746-3f62-406b-93d6-7d971ee3e96a.png#clientId=u53624b84-1e3c-4&amp;amp;from=paste&amp;amp;height=302&amp;amp;id=udc7e6f69&amp;amp;originHeight=604&amp;amp;originWidth=1378&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;size=132247&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u06713196-e7be-483c-8762-6bbc756f336&amp;amp;width=689" alt="image.png"&gt;
+每个ScopeModel实例都会创建并绑定属于自己的重要成员：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ExtensionDirector&lt;/li&gt;
+&lt;li&gt;BeanFactory&lt;/li&gt;
+&lt;li&gt;ServiceRepository&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ScopeModel 作为最基础的模型，可以在SPI/Bean/URL 等持有和传递。&lt;/p&gt;
+&lt;h3 id="spi扩展"&gt;SPI扩展&lt;/h3&gt;
+&lt;h4 id="extensionscope"&gt;ExtensionScope&lt;/h4&gt;
+&lt;p&gt;SPI 注解添加scope属性，标记其所属的作用域。
+&lt;img src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630664482020-9d35e6de-17f7-4334-8506-3af362c03de0.png#clientId=u53624b84-1e3c-4&amp;amp;from=paste&amp;amp;height=249&amp;amp;id=u6c288d3d&amp;amp;originHeight=498&amp;amp;originWidth=930&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;size=197493&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u56167d63-ab53-4cdb-bb10-723d0c97663&amp;amp;width=465" alt="image.png"&gt;
+ExtensionScope 与层次模型对应关系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;FRAMEWORK&lt;/li&gt;
+&lt;li&gt;APPLICATION&lt;/li&gt;
+&lt;li&gt;MODULE&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;�&lt;/p&gt;
+&lt;h4 id="extensiondirector"&gt;ExtensionDirector&lt;/h4&gt;
+&lt;p&gt;新增ExtensionDirector用于实现多层级的spi管理及依赖注入。&lt;/p&gt;
+&lt;p&gt;ExtensionDirector spi extension 创建流程如下：
+&lt;img src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630664388603-d12d4002-65ea-43b9-b5c9-c0d7204b22b1.png#clientId=u53624b84-1e3c-4&amp;amp;from=paste&amp;amp;height=303&amp;amp;id=uf804edd7&amp;amp;originHeight=606&amp;amp;originWidth=616&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;size=71595&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=u4944881d-0195-4a23-bdfe-346819db997&amp;amp;width=308" alt="image.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每个SPI 只能在匹配的Scope的ExtensionDirector上创建，目的是实现层级之间共享实例和正确注入依赖对象。即APPLICATION scope的SPI必定在ApplicationModel绑定的ExtensionDirector上创建，FRAMEWORK scope的SPI必定在FrameworkModel绑定的ExtensionDirector上创建。&lt;/li&gt;
+&lt;li&gt;可见性与scope作用范围相关，这里的可见性是是否能直接注入依赖。即FRAMEWORK scope的SPI可以在FRAMEWORK/APPLICATION/MODULE 都可见，而 APPLICATION scope的SPI只能在APPLICATION/MODULE 可见。&lt;/li&gt;
+&lt;li&gt;不可见的SPI需要通过上下文来获取，如可以通过URL传递ScopeModel，可以解决在FRAMEWORK spi访问 APPLICATION spi。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Scope 作用范围如下图：
 上层对象可以注入本层及下层的SPI/Bean对象，下层对象不能注入上层的SPI/Bean对象。
-&lt;img alt="image.png" src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630665762212-fcc5e99d-2966-46cd-84ae-9257c4a216c9.png#clientId=u53624b84-1e3c-4&amp;from=paste&amp;height=188&amp;id=u6c2bf0b8&amp;originHeight=376&amp;originWidth=1290&amp;originalType=binary&amp;ratio=1&amp;size=68138&amp;status=done&amp;style=none&amp;taskId=ub349222b-17af-4734-b744-dfd2f297930&amp;width=645">&lt;/p>
-&lt;h3 id="bean托管">Bean托管&lt;/h3>
-&lt;p>新增ScopeBeanFactory用于内部Bean托管，支持在多个不同模块中共享一个实例对象。
+&lt;img src="https://cdn.nlark.com/yuque/0/2021/png/2391732/1630665762212-fcc5e99d-2966-46cd-84ae-9257c4a216c9.png#clientId=u53624b84-1e3c-4&amp;amp;from=paste&amp;amp;height=188&amp;amp;id=u6c2bf0b8&amp;amp;originHeight=376&amp;amp;originWidth=1290&amp;amp;originalType=binary&amp;amp;ratio=1&amp;amp;size=68138&amp;amp;status=done&amp;amp;style=none&amp;amp;taskId=ub349222b-17af-4734-b744-dfd2f297930&amp;amp;width=645" alt="image.png"&gt;&lt;/p&gt;
+&lt;h3 id="bean托管"&gt;Bean托管&lt;/h3&gt;
+&lt;p&gt;新增ScopeBeanFactory用于内部Bean托管，支持在多个不同模块中共享一个实例对象。
 ScopeBeanFactory 也支持scope，注入规则与ExtensionDirector相同。
-用法请参考：FrameworkStatusReportService、RemoteMetadataServiceImpl、MetadataReportInstance&lt;/p>
-&lt;h3 id="servicerepository">ServiceRepository&lt;/h3>
-&lt;p>将原来的ServiceRepository拆分为3个类，分别对应3个层次的模型。
+用法请参考：FrameworkStatusReportService、RemoteMetadataServiceImpl、MetadataReportInstance&lt;/p&gt;
+&lt;h3 id="servicerepository"&gt;ServiceRepository&lt;/h3&gt;
+&lt;p&gt;将原来的ServiceRepository拆分为3个类，分别对应3个层次的模型。
 FrameworkServiceRepository
 �ServiceRepository
 ModuleServiceRepository
 �
-将服务接口信息ProviderModel/ConsumerModel/ServiceDescriptor 注册到ModuleServiceRepository 中，同时在FrameworkServiceRepository 保存一份映射，用于根据请求查找对应的服务接口模型。&lt;/p>
-&lt;h3 id="编码变化总结">编码变化总结&lt;/h3>
-&lt;h4 id="1如何获取applicationmodel及应用数据">1、如何获取ApplicationModel及应用数据&lt;/h4>
-&lt;p>原方法：ApplicationModel 提供了一系列静态方法用于获取共享应用实例的数据&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>ApplicationModel.getConfigManager()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ApplicationModel.getEnvironment()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ApplicationModel.getServiceRepository()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ApplicationModel.getExecutorRepository()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ApplicationModel.getName()
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>新办法：先找到ApplicationModel实例，然后通过实例的方法获取数据&lt;/p></description></item></channel></rss>
+将服务接口信息ProviderModel/ConsumerModel/ServiceDescriptor 注册到ModuleServiceRepository 中，同时在FrameworkServiceRepository 保存一份映射，用于根据请求查找对应的服务接口模型。&lt;/p&gt;
+&lt;h3 id="编码变化总结"&gt;编码变化总结&lt;/h3&gt;
+&lt;h4 id="1如何获取applicationmodel及应用数据"&gt;1、如何获取ApplicationModel及应用数据&lt;/h4&gt;
+&lt;p&gt;原方法：ApplicationModel 提供了一系列静态方法用于获取共享应用实例的数据&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ApplicationModel.getConfigManager()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ApplicationModel.getEnvironment()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ApplicationModel.getServiceRepository()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ApplicationModel.getExecutorRepository()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ApplicationModel.getName()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;新办法：先找到ApplicationModel实例，然后通过实例的方法获取数据&lt;/p&gt;</description></item></channel></rss>

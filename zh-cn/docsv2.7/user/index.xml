@@ -1,1215 +1,1215 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>用户文档 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/</link><description>Recent content in 用户文档 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/docsv2.7/user/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/quick-start/</guid><description>&lt;p>Dubbo 采用全 Spring 配置方式，透明化接入应用，对应用没有任何 API 侵入，只需用 Spring 加载 Dubbo 的配置即可，Dubbo 基于 &lt;a href="https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/xsd-configuration.html">Spring 的 Schema 扩展&lt;/a> 进行加载。&lt;/p>
-&lt;p>如果不想使用 Spring 配置，可以通过 &lt;a href="../configuration/api">API 的方式&lt;/a> 进行调用。&lt;/p>
-&lt;h2 id="服务提供者">服务提供者&lt;/h2>
-&lt;p>完整安装步骤，请参见：&lt;a href="../../admin/install/provider-demo">示例提供者安装&lt;/a>&lt;/p>
-&lt;h3 id="定义服务接口">定义服务接口&lt;/h3>
-&lt;p>DemoService.java &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.demo;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DemoService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="在服务提供方实现接口">在服务提供方实现接口&lt;/h3>
-&lt;p>DemoServiceImpl.java &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.demo.provider;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.demo.DemoService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;Hello &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="用-spring-配置声明暴露服务">用 Spring 配置声明暴露服务&lt;/h3>
-&lt;p>provider.xml：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 提供方应用信息，用于计算依赖关系 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;hello-world-app&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 使用multicast广播注册中心暴露服务地址 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;multicast://224.5.6.7:1234&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 用dubbo协议在20880端口暴露服务 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;20880&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 声明需要暴露的服务接口 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 和本地bean一样实现服务 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.demo.provider.DemoServiceImpl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="加载-spring-配置">加载 Spring 配置&lt;/h3>
-&lt;p>Provider.java：&lt;/p></description></item><item><title>基本依赖</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/dependencies/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/dependencies/</guid><description>&lt;h3 id="必须依赖">必须依赖&lt;/h3>
-&lt;p>JDK 1.6+ &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>&lt;/p>
-&lt;h3 id="缺省依赖">缺省依赖&lt;/h3>
-&lt;p>通过 &lt;code>mvn dependency:tree &amp;gt; dep.log&lt;/code> 命令分析，Dubbo 缺省依赖以下三方库：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>[INFO] +- com.alibaba:dubbo:jar:2.5.9-SNAPSHOT:compile
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] | +- org.springframework:spring-context:jar:4.3.10.RELEASE:compile
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] | +- org.javassist:javassist:jar:3.21.0-GA:compile
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>[INFO] | \- org.jboss.netty:netty:jar:3.2.5.Final:compile
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里所有依赖都是按照 Dubbo 缺省配置选的，这些缺省值是基于稳定性和性能考虑的。&lt;/p>
-&lt;ul>
-&lt;li>javassist.jar &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>: 如果 &lt;code>&amp;lt;dubbo:provider proxy=&amp;quot;jdk&amp;quot; /&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:consumer proxy=&amp;quot;jdk&amp;quot; /&amp;gt;&lt;/code>，以及 &lt;code>&amp;lt;dubbo:application compiler=&amp;quot;jdk&amp;quot; /&amp;gt;&lt;/code>，则不需要。&lt;/li>
-&lt;li>spring-context.jar &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>: 如果用 &lt;code>ServiceConfig&lt;/code> 和 &lt;code>ReferenceConfig&lt;/code> 的 API 调用，则不需要。&lt;/li>
-&lt;li>netty.jar &lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>: 如果 &lt;code>&amp;lt;dubbo:protocol server=&amp;quot;mina&amp;quot;/&amp;gt;&lt;/code> 或 &lt;code>&amp;lt;dubbo:protocol server=&amp;quot;grizzly&amp;quot;/&amp;gt;&lt;/code>，则换成 mina.jar 或 grizzly.jar。如果 &lt;code>&amp;lt;protocol name=&amp;quot;rmi&amp;quot;/&amp;gt;&lt;/code>，则不需要。&lt;/li>
-&lt;/ul>
-&lt;h3 id="可选依赖">可选依赖&lt;/h3>
-&lt;p>以下依赖，在主动配置使用相应实现策略时用到，需自行加入依赖。&lt;/p>
-&lt;ul>
-&lt;li>netty-all 4.0.35.Final&lt;/li>
-&lt;li>mina: 1.1.7&lt;/li>
-&lt;li>grizzly: 2.1.4&lt;/li>
-&lt;li>httpclient: 4.5.3&lt;/li>
-&lt;li>hessian_lite: 3.2.1-fixed&lt;/li>
-&lt;li>fastjson: 1.2.31&lt;/li>
-&lt;li>zookeeper: 3.4.9&lt;/li>
-&lt;li>jedis: 2.9.0&lt;/li>
-&lt;li>xmemcached: 1.3.6&lt;/li>
-&lt;li>hessian: 4.0.38&lt;/li>
-&lt;li>jetty: 6.1.26&lt;/li>
-&lt;li>hibernate-validator: 5.4.1.Final&lt;/li>
-&lt;li>zkclient: 0.2&lt;/li>
-&lt;li>curator: 2.12.0&lt;/li>
-&lt;li>cxf: 3.0.14&lt;/li>
-&lt;li>thrift: 0.8.0&lt;/li>
-&lt;li>servlet: 3.0 &lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>&lt;/li>
-&lt;li>validation-api: 1.1.0.GA &lt;sup id="fnref1:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>&lt;/li>
-&lt;li>jcache: 1.0.0 &lt;sup id="fnref2:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>&lt;/li>
-&lt;li>javax.el: 3.0.1-b08 &lt;sup id="fnref3:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>&lt;/li>
-&lt;li>kryo: 4.0.1&lt;/li>
-&lt;li>kryo-serializers: 0.42&lt;/li>
-&lt;li>fst: 2.48-jdk-6&lt;/li>
-&lt;li>resteasy: 3.0.19.Final&lt;/li>
-&lt;li>tomcat-embed-core: 8.0.11&lt;/li>
-&lt;li>slf4j: 1.7.25&lt;/li>
-&lt;li>log4j: 1.2.16&lt;/li>
-&lt;/ul>
-&lt;div class="footnotes" role="doc-endnotes">
-&lt;hr>
-&lt;ol>
-&lt;li id="fn:1">
-&lt;p>理论上 Dubbo 可以只依赖 JDK，不依赖于任何三方库运行，只需配置使用 JDK 相关实现策略&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p></description></item><item><title>成熟度</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/maturity/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/maturity/</guid><description>&lt;h3 id="功能成熟度">功能成熟度&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">并发控制&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">并发控制&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">连接控制&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">连接数控制&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">直连提供者&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">点对点直连服务提供方，用于测试&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">测试环境使用&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">分组聚合&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">分组聚合返回值，用于菜单聚合等服务&lt;/td>
- &lt;td style="text-align: left">特殊场景使用&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">参数验证&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">参数验证，JSR303验证框架集成&lt;/td>
- &lt;td style="text-align: left">对性能有影响&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">LaiWang&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">结果缓存&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">结果缓存，用于加速请求&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">泛化引用&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">泛化调用，无需业务接口类进行远程调用，用于测试平台，开放网关桥接等&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">泛化实现&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">泛化实现，无需业务接口类实现任意接口，用于Mock平台&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">回声测试&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">回声测试&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">隐式传参&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">附加参数&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">异步调用&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">不可靠异步调用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">本地调用&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">本地调用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">参数回调&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">参数回调&lt;/td>
- &lt;td style="text-align: left">特殊场景使用&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">Registry&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">事件通知&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">事件通知，在远程调用执行前后触发&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">本地存根&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">在客户端执行部分逻辑&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">本地伪装&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">伪造返回结果，可在失败时执行，或直接执行，用于服务降级&lt;/td>
- &lt;td style="text-align: left">需注册中心支持&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">延迟暴露&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">延迟暴露服务，用于等待应用加载warmup数据，或等待spring加载完成&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">延迟连接&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">延迟建立连接，调用时建立&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">Registry&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">粘滞连接&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">粘滞连接，总是向同一个提供方发起请求，除非此提供方挂掉，再切换到另一台&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">Registry&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">令牌验证&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">令牌验证，用于服务授权&lt;/td>
- &lt;td style="text-align: left">需注册中心支持&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">路由规则&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">动态决定调用关系&lt;/td>
- &lt;td style="text-align: left">需注册中心支持&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">配置规则&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">动态下发配置，实现功能的开关&lt;/td>
- &lt;td style="text-align: left">需注册中心支持&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">访问日志&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">访问日志，用于记录调用信息&lt;/td>
- &lt;td style="text-align: left">本地存储，影响性能，受磁盘大小限制&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">分布式事务&lt;/td>
- &lt;td style="text-align: left">Research&lt;/td>
- &lt;td style="text-align: left">JTA/XA三阶段提交事务&lt;/td>
- &lt;td style="text-align: left">不稳定&lt;/td>
- &lt;td style="text-align: left">不可用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="策略成熟度">策略成熟度&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Zookeeper注册中心&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">支持基于网络的集群方式，有广泛周边开源产品，建议使用dubbo-2.3.3以上版本（推荐使用）&lt;/td>
- &lt;td style="text-align: left">依赖于Zookeeper的稳定性&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Redis注册中心&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">支持基于客户端双写的集群方式，性能高&lt;/td>
- &lt;td style="text-align: left">要求服务器时间同步，用于检查心跳过期脏数据&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Multicast注册中心&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">去中心化，不需要安装注册中心&lt;/td>
- &lt;td style="text-align: left">依赖于网络拓扑和路由，跨机房有风险&lt;/td>
- &lt;td style="text-align: left">小规模应用或开发测试环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Simple注册中心&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">Dogfooding，注册中心本身也是一个标准的RPC服务&lt;/td>
- &lt;td style="text-align: left">没有集群支持，可能单点故障&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Simple监控中心&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">支持JFreeChart统计报表&lt;/td>
- &lt;td style="text-align: left">没有集群支持，可能单点故障，但故障后不影响RPC运行&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Dubbo协议&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">采用NIO复用单一长连接，并使用线程池并发处理请求，减少握手和加大并发效率，性能较好（推荐使用）&lt;/td>
- &lt;td style="text-align: left">在大文件传输时，单一连接会成为瓶颈&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Rmi协议&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">可与原生RMI互操作，基于TCP协议&lt;/td>
- &lt;td style="text-align: left">偶尔会连接失败，需重建Stub&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Hessian协议&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">可与原生Hessian互操作，基于HTTP协议&lt;/td>
- &lt;td style="text-align: left">需hessian.jar支持，http短连接的开销大&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Netty Transporter&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">JBoss的NIO框架，性能较好（推荐使用）&lt;/td>
- &lt;td style="text-align: left">一次请求派发两种事件，需屏蔽无用事件&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Mina Transporter&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">老牌NIO框架，稳定&lt;/td>
- &lt;td style="text-align: left">待发送消息队列派发不及时，大压力下，会出现FullGC&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Grizzly Transporter&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">Sun的NIO框架，应用于GlassFish服务器中&lt;/td>
- &lt;td style="text-align: left">线程池不可扩展，Filter不能拦截下一Filter&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Hessian Serialization&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">性能较好，多语言支持（推荐使用）&lt;/td>
- &lt;td style="text-align: left">Hessian的各版本兼容性不好，可能和应用使用的Hessian冲突，Dubbo内嵌了hessian3.2.1的源码&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Dubbo Serialization&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">通过不传送POJO的类元信息，在大量POJO传输时，性能较好&lt;/td>
- &lt;td style="text-align: left">当参数对象增加字段时，需外部文件声明&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Json Serialization&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">纯文本，可跨语言解析，缺省采用FastJson解析&lt;/td>
- &lt;td style="text-align: left">性能较差&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Java Serialization&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">Java原生支持&lt;/td>
- &lt;td style="text-align: left">性能较差&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Javassist ProxyFactory&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">通过字节码生成代替反射，性能比较好（推荐使用）&lt;/td>
- &lt;td style="text-align: left">依赖于javassist.jar包，占用JVM的Perm内存，Perm可能要设大一些：java -XX:PermSize=128m&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Jdk ProxyFactory&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">JDK原生支持&lt;/td>
- &lt;td style="text-align: left">性能较差&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Failover Cluster&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">失败自动切换，当出现失败，重试其它服务器，通常用于读操作（推荐使用）&lt;/td>
- &lt;td style="text-align: left">重试会带来更长延迟&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Failfast Cluster&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">快速失败，只发起一次调用，失败立即报错,通常用于非幂等性的写操作&lt;/td>
- &lt;td style="text-align: left">如果有机器正在重启，可能会出现调用失败&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Failsafe Cluster&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">失败安全，出现异常时，直接忽略，通常用于写入审计日志等操作&lt;/td>
- &lt;td style="text-align: left">调用信息丢失&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Monitor&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Failback Cluster&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">失败自动恢复，后台记录失败请求，定时重发，通常用于消息通知操作&lt;/td>
- &lt;td style="text-align: left">不可靠，重启丢失&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Registry&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Forking Cluster&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">并行调用多个服务器，只要一个成功即返回，通常用于实时性要求较高的读操作&lt;/td>
- &lt;td style="text-align: left">需要浪费更多服务资源&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Broadcast Cluster&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">广播调用所有提供者，逐个调用，任意一台报错则报错，通常用于更新提供方本地状态&lt;/td>
- &lt;td style="text-align: left">速度慢，任意一台报错则报错&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Random LoadBalance&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">随机，按权重设置随机概率（推荐使用）&lt;/td>
- &lt;td style="text-align: left">在一个截面上碰撞的概率高，重试时，可能出现瞬间压力不均&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">RoundRobin LoadBalance&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">轮询，按公约后的权重设置轮询比率&lt;/td>
- &lt;td style="text-align: left">存在慢的机器累积请求问题，极端情况可能产生雪崩&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">LeastActive LoadBalance&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差，使慢的机器收到更少请求&lt;/td>
- &lt;td style="text-align: left">不支持权重，在容量规划时，不能通过权重把压力导向一台机器压测容量&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">ConsistentHash LoadBalance&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">一致性Hash，相同参数的请求总是发到同一提供者，当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动&lt;/td>
- &lt;td style="text-align: left">压力分摊不均&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">条件路由规则&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">基于条件表达式的路由规则，功能简单易用&lt;/td>
- &lt;td style="text-align: left">有些复杂多分支条件情况，规则很难描述&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">脚本路由规则&lt;/td>
- &lt;td style="text-align: left">Tested&lt;/td>
- &lt;td style="text-align: left">基于脚本引擎的路由规则，功能强大&lt;/td>
- &lt;td style="text-align: left">没有运行沙箱，脚本能力过于强大，可能成为后门&lt;/td>
- &lt;td style="text-align: left">试用&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">Feature&lt;/th>
- &lt;th style="text-align: left">Maturity&lt;/th>
- &lt;th style="text-align: left">Strength&lt;/th>
- &lt;th style="text-align: left">Problem&lt;/th>
- &lt;th style="text-align: left">Advise&lt;/th>
- &lt;th style="text-align: left">User&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Spring Container&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">自动加载META-INF/spring目录下的所有Spring配置&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Jetty Container&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">启动一个内嵌Jetty，用于汇报状态&lt;/td>
- &lt;td style="text-align: left">大量访问页面时，会影响服务器的线程和内存&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Log4j Container&lt;/td>
- &lt;td style="text-align: left">Stable&lt;/td>
- &lt;td style="text-align: left">自动配置log4j的配置，在多进程启动时，自动给日志文件按进程分目录&lt;/td>
- &lt;td style="text-align: left">用户不能控制log4j的配置，不灵活&lt;/td>
- &lt;td style="text-align: left">可用于生产环境&lt;/td>
- &lt;td style="text-align: left">Alibaba&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table></description></item><item><title>服务化最佳实践</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/best-practice/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/best-practice/</guid><description>&lt;h2 id="分包">分包&lt;/h2>
-&lt;p>建议将服务接口、服务模型、服务异常等均放在 API 包中，因为服务模型和异常也是 API 的一部分，这样做也符合分包原则：重用发布等价原则(REP)，共同重用原则(CRP)。&lt;/p>
-&lt;p>如果需要，也可以考虑在 API 包中放置一份 Spring 的引用配置，这样使用方只需在 Spring 加载过程中引用此配置即可。配置建议放在模块的包目录下，以免冲突，如：&lt;code>com/alibaba/china/xxx/dubbo-reference.xml&lt;/code>。&lt;/p>
-&lt;h2 id="粒度">粒度&lt;/h2>
-&lt;p>服务接口尽可能大粒度，每个服务方法应代表一个功能，而不是某功能的一个步骤，否则将面临分布式事务问题，Dubbo 暂未提供分布式事务支持。&lt;/p>
-&lt;p>服务接口建议以业务场景为单位划分，并对相近业务做抽象，防止接口数量爆炸。&lt;/p>
-&lt;p>不建议使用过于抽象的通用接口，如：&lt;code>Map query(Map)&lt;/code>，这样的接口没有明确语义，会给后期维护带来不便。&lt;/p>
-&lt;h2 id="版本">版本&lt;/h2>
-&lt;p>每个接口都应定义版本号，为后续不兼容升级提供可能，如： &lt;code>&amp;lt;dubbo:service interface=&amp;quot;com.xxx.XxxService&amp;quot; version=&amp;quot;1.0&amp;quot; /&amp;gt;&lt;/code>。&lt;/p>
-&lt;p>建议使用两位版本号，因为第三位版本号通常表示兼容升级，只有不兼容时才需要变更服务版本。&lt;/p>
-&lt;p>当不兼容时，先升级一半提供者为新版本，再将消费者全部升为新版本，然后将剩下的一半提供者升为新版本。&lt;/p>
-&lt;h2 id="兼容性">兼容性&lt;/h2>
-&lt;p>服务接口增加方法，或服务模型增加字段，可向后兼容，删除方法或删除字段，将不兼容，枚举类型新增字段也不兼容，需通过变更版本号升级。&lt;/p>
-&lt;p>各协议的兼容性不同，参见：&lt;a href="../references/protocol/">服务协议&lt;/a>&lt;/p>
-&lt;h2 id="枚举值">枚举值&lt;/h2>
-&lt;p>如果是完备集，可以用 &lt;code>Enum&lt;/code>，比如：&lt;code>ENABLE&lt;/code>, &lt;code>DISABLE&lt;/code>。&lt;/p>
-&lt;p>如果是业务种类，以后明显会有类型增加，不建议用 &lt;code>Enum&lt;/code>，可以用 &lt;code>String&lt;/code> 代替。&lt;/p>
-&lt;p>如果是在返回值中用了 &lt;code>Enum&lt;/code>，并新增了 &lt;code>Enum&lt;/code> 值，建议先升级服务消费方，这样服务提供方不会返回新值。&lt;/p>
-&lt;p>如果是在传入参数中用了 &lt;code>Enum&lt;/code>，并新增了 &lt;code>Enum&lt;/code> 值，建议先升级服务提供方，这样服务消费方不会传入新值。&lt;/p>
-&lt;h2 id="序列化">序列化&lt;/h2>
-&lt;p>服务参数及返回值建议使用 POJO 对象，即通过 &lt;code>setter&lt;/code>, &lt;code>getter&lt;/code> 方法表示属性的对象。&lt;/p>
-&lt;p>服务参数及返回值不建议使用接口，因为数据模型抽象的意义不大，并且序列化需要接口实现类的元信息，并不能起到隐藏实现的意图。&lt;/p>
-&lt;p>服务参数及返回值都必须是&lt;a href="https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_value">传值调用&lt;/a>，而不能是&lt;a href="https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_reference">传引用调用&lt;/a>，消费方和提供方的参数或返回值引用并不是同一个，只是值相同，Dubbo 不支持引用远程对象。&lt;/p>
-&lt;h2 id="异常">异常&lt;/h2>
-&lt;p>建议使用异常汇报错误，而不是返回错误码，异常信息能携带更多信息，并且语义更友好。&lt;/p>
-&lt;p>如果担心性能问题，在必要时，可以通过 override 掉异常类的 &lt;code>fillInStackTrace()&lt;/code> 方法为空方法，使其不拷贝栈信息。&lt;/p>
-&lt;p>查询方法不建议抛出 checked 异常，否则调用方在查询时将过多的 &lt;code>try...catch&lt;/code>，并且不能进行有效处理。&lt;/p>
-&lt;p>服务提供方不应将 DAO 或 SQL 等异常抛给消费方，应在服务实现中对消费方不关心的异常进行包装，否则可能出现消费方无法反序列化相应异常。&lt;/p></description></item><item><title>推荐用法</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/recommend/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/recommend/</guid><description>&lt;h2 id="在-provider-端尽量多配置-consumer-端属性">在 Provider 端尽量多配置 Consumer 端属性&lt;/h2>
-&lt;p>原因如下：&lt;/p>
-&lt;ul>
-&lt;li>作为服务的提供方，比服务消费方更清楚服务的性能参数，如调用的超时时间、合理的重试次数等&lt;/li>
-&lt;li>在 Provider 端配置后，Consumer 端不配置则会使用 Provider 端的配置，即 Provider 端的配置可以作为 Consumer 的缺省值 &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>。否则，Consumer 会使用 Consumer 端的全局设置，这对于 Provider 是不可控的，并且往往是不合理的&lt;/li>
-&lt;/ul>
-&lt;p>Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一开始就思考 Provider 端的服务特点和服务质量等问题。&lt;/p>
-&lt;p>示例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.HelloService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout=&lt;span style="color:#2aa198">&amp;#34;300&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;random&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.alibaba.hello.api.WorldService&amp;#34;&lt;/span> version=&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;helloService&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout=&lt;span style="color:#2aa198">&amp;#34;300&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;random&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;0&amp;#34;&lt;/span> &lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;findAllPerson&amp;#34;&lt;/span> timeout=&lt;span style="color:#2aa198">&amp;#34;10000&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;9&amp;#34;&lt;/span> loadbalance=&lt;span style="color:#2aa198">&amp;#34;leastactive&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;5&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>建议在 Provider 端配置的 Consumer 端属性有：&lt;/p>
-&lt;ol>
-&lt;li>&lt;code>timeout&lt;/code>：方法调用的超时时间&lt;/li>
-&lt;li>&lt;code>retries&lt;/code>：失败重试次数，缺省是 2 &lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>&lt;/li>
-&lt;li>&lt;code>loadbalance&lt;/code>：负载均衡算法 &lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>，缺省是随机 &lt;code>random&lt;/code>。还可以配置轮询 &lt;code>roundrobin&lt;/code>、最不活跃优先 &lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup> &lt;code>leastactive&lt;/code> 和一致性哈希 &lt;code>consistenthash&lt;/code> 等&lt;/li>
-&lt;li>&lt;code>actives&lt;/code>：消费者端的最大并发调用限制，即当 Consumer 对一个服务的并发调用到上限后，新调用会阻塞直到超时，在方法上配置 &lt;code>dubbo:method&lt;/code> 则针对该方法进行并发限制，在接口上配置 &lt;code>dubbo:service&lt;/code>，则针对该服务进行并发限制&lt;/li>
-&lt;/ol>
-&lt;p>详细配置说明请参考：&lt;a href="../references/xml/">Dubbo配置参考手册&lt;/a>&lt;/p></description></item><item><title>容量规划</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/capacity-plan/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/capacity-plan/</guid><description>&lt;p>以下数据供参考：&lt;/p>
-&lt;h2 id="使用-dubbo-的会员服务项目">使用 Dubbo 的会员服务项目&lt;/h2>
-&lt;ul>
-&lt;li>每天接收 4 亿次远程调用&lt;/li>
-&lt;li>使用 12 台网站标配机器提供服务（8 核 CPU，8G 内存）&lt;/li>
-&lt;li>平均负载在 1 以下（对于 8 核 CPU 负载很低）&lt;/li>
-&lt;li>平均响应时间 2.3 到 2.5 毫秒，网络开销约占 1.5 到 1.6 毫秒（和数据包大小有关）&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用-dubbo-的产品授权服务项目">使用 Dubbo 的产品授权服务项目&lt;/h2>
-&lt;ul>
-&lt;li>每天接收 3 亿次远程调用&lt;/li>
-&lt;li>使用 8 台网站标配机器提供服务（8 核CPU，8G 内存）&lt;/li>
-&lt;li>平均负载在 1 以下（对于 8 核 CPU 负载很低）&lt;/li>
-&lt;li>平均响应时间 1.4 到 2.8 毫秒，网络开销约占 1.0 到 1.1 毫秒（和数据包大小有关）&lt;/li>
-&lt;/ul></description></item><item><title>性能测试报告</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/perf-test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/perf-test/</guid><description>&lt;h2 id="测试说明">测试说明&lt;/h2>
-&lt;ol>
-&lt;li>本次性能测试，测试了 dubbo 2.0 所有支持的协议在不同大小和数据类型下的表现，并与 dubbo 1.0 进行了对比。&lt;/li>
-&lt;li>整体性能相比 1.0 有了提升，平均提升 10%，使用 dubbo 2.0 新增的 dubbo 序列化还能获得 10%~50% 的性能提升，详见下面的性能数据。&lt;/li>
-&lt;li>稳定性测试中由于将底层通信框架从 mina 换成 netty，old 区对象的增长大大减少，50 小时运行，增长不到 200m，无 fullgc。&lt;/li>
-&lt;li>存在的问题：在 50k 数据的时候 2.0 性能不如 1.0，怀疑可能是缓冲区设置的问题，下版本会进一步确认。&lt;/li>
-&lt;/ol>
-&lt;h2 id="测试环境">测试环境&lt;/h2>
-&lt;h3 id="硬件部署与参数调整">硬件部署与参数调整&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">机型&lt;/th>
- &lt;th style="text-align: left">CPU&lt;/th>
- &lt;th style="text-align: left">内存&lt;/th>
- &lt;th style="text-align: left">网络&lt;/th>
- &lt;th style="text-align: left">磁盘&lt;/th>
- &lt;th style="text-align: left">内核&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">Tecal BH620&lt;/td>
- &lt;td style="text-align: left">model name : Intel(R) Xeon(R) CPU E5520 @ 2.27GHz cache size : 8192 KB processor_count : 16&lt;/td>
- &lt;td style="text-align: left">Total System Memory: 6G Hardware Memory Info: Size: 4096MB&lt;/td>
- &lt;td style="text-align: left">eth0: Link is up at 1000 Mbps, full duplex. peth0: Link is up at 1000 Mbps, full duplex.&lt;/td>
- &lt;td style="text-align: left">/dev/sda: 597.9 GB&lt;/td>
- &lt;td style="text-align: left">2.6.18-128.el5xen x86_64&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="软件架构">软件架构&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">软件名称及版本&lt;/th>
- &lt;th style="text-align: left">关键参数&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">java version &amp;ldquo;1.6.0_18&amp;rdquo; Java(TM) SE Runtime Environment (build 1.6.0_18-b07) Java HotSpot(TM) 64-Bit Server VM (build 16.0-b13, mixed mode)&lt;/td>
- &lt;td style="text-align: left">-server -Xmx2g -Xms2g -Xmn256m -XX:PermSize=128m -Xss256k -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">jboss-4.0.5.GA&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">httpd-2.0.61&lt;/td>
- &lt;td style="text-align: left">KeepAlive On MaxKeepAliveRequests 100000 KeepAliveTimeout 180 MaxRequestsPerChild 1000000 &lt;IfModule worker.c> StartServers 5 MaxClients 1024 MinSpareThreads 25 MaxSpareThreads 75 ThreadsPerChild 64 ThreadLimit 128 ServerLimit 16 &lt;/IfModule>&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h2 id="测试目的">测试目的&lt;/h2>
-&lt;h3 id="期望性能指标量化">期望性能指标(量化)&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">场景名称&lt;/th>
- &lt;th style="text-align: left">对应指标名称&lt;/th>
- &lt;th style="text-align: left">期望值范围&lt;/th>
- &lt;th style="text-align: left">实际值&lt;/th>
- &lt;th style="text-align: left">是否满足期望(是/否)&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">1k数据&lt;/td>
- &lt;td style="text-align: left">响应时间&lt;/td>
- &lt;td style="text-align: left">0.9ms&lt;/td>
- &lt;td style="text-align: left">0.79ms&lt;/td>
- &lt;td style="text-align: left">是&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">1k数据&lt;/td>
- &lt;td style="text-align: left">TPS&lt;/td>
- &lt;td style="text-align: left">10000&lt;/td>
- &lt;td style="text-align: left">11994&lt;/td>
- &lt;td style="text-align: left">是&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="期望运行状况非量化可选">期望运行状况(非量化，可选)&lt;/h3>
-&lt;ul>
-&lt;li>2.0 性能不低于 1.0, 2.0 和 1.0 互调用的性能无明显下降。 除了 50k string 其余皆通过&lt;/li>
-&lt;li>JVM 内存运行稳定，无 OOM，堆内存中无不合理的大对象的占用。通过&lt;/li>
-&lt;li>CPU、内存、网络、磁盘、文件句柄占用平稳。通过&lt;/li>
-&lt;li>无频繁线程锁，线程数平稳。通过&lt;/li>
-&lt;li>业务线程负载均衡。通过&lt;/li>
-&lt;/ul>
-&lt;h2 id="测试脚本">测试脚本&lt;/h2>
-&lt;ol start="0">
-&lt;li>
-&lt;p>性能测试场景（10 并发）&lt;/p></description></item><item><title>测试覆盖率报告</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/coveragence/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/coveragence/</guid><description>&lt;ul>
-&lt;li>v2.0 Codecov报表 , 从 2017-12-29 后开始统计
-测试覆盖率为 : &lt;a href="https://codecov.io/gh/apache/dubbo">&lt;img alt="codecov" src="https://codecov.io/gh/apache/dubbo/branch/master/graph/badge.svg">&lt;/a> , 可以从 &lt;a href="https://codecov.io/gh/apache/dubbo">https://codecov.io/gh/apache/dubbo&lt;/a> 页面得到覆盖率报表&lt;/li>
-&lt;li>v1.0 基于 &lt;code>2.0.12&lt;/code> 版本，统计于 2012-02-03&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="//imgs/user/code-quality1.jpg" src="https://dubbo.apache.org/imgs/user/code-quality1.jpg">&lt;/p>
-&lt;p>&lt;img alt="//imgs/user/code-quality5.jpg" src="https://dubbo.apache.org/imgs/user/code-quality5.jpg">&lt;/p>
-&lt;p>&lt;img alt="//imgs/user/code-coverage.jpg" src="https://dubbo.apache.org/imgs/user/code-coverage.jpg">&lt;/p>
-&lt;p>&lt;img alt="//imgs/user/code-tendency.jpg" src="https://dubbo.apache.org/imgs/user/code-tendency.jpg">&lt;/p>
-&lt;p>&lt;img alt="//imgs/user/code-dependency.jpg" src="https://dubbo.apache.org/imgs/user/code-dependency.jpg">&lt;/p></description></item><item><title>基准测试工具包</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/benchmark-tool/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/benchmark-tool/</guid><description>&lt;ul>
-&lt;li>下载源码： git clone &lt;a href="https://github.com/apache/dubbo.git">https://github.com/apache/dubbo.git&lt;/a>&lt;/li>
-&lt;li>编译benchmark: cd dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install&lt;/li>
-&lt;li>解压 benchmark压缩包： dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz&lt;/li>
-&lt;/ul>
-&lt;p>阅读ReadMe.txt（内容如下，请以压缩包内的为准）&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>新建一个benchmark工程，如demo.benchmark&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>导入自己服务的接口api包和dubbo.benchmark.jar(解压dubbo.benchmark.tar.gz，在lib目录下)&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>新建一个类，实现AbstractClientRunnable&lt;/p>
-&lt;ul>
-&lt;li>实现父类的构造函数&lt;/li>
-&lt;li>实现invoke方法，通过serviceFactory创建本地接口代理，并实现自己的业务逻辑，如下&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">invoke&lt;/span>(ServiceFactory serviceFactory) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DemoService demoService &lt;span style="color:#719e07">=&lt;/span> (DemoService) serviceFactory.get(DemoService.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> demoService.sendRequest(&lt;span style="color:#2aa198">&amp;#34;hello&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>将自己的benchmark工程打成jar包,如demo.benchmark.jar&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>将demo.benchmark.jar 和服务的api包放到dubbo.benchmark/lib目录下&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>配置dubbo.properties&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>运行run.bat(windows)或run.sh(linux)&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;p>如想测试dubbo的不同版本，直接替换lib下的dubbo的jar包即可。&lt;/p></description></item><item><title>开发 REST 应用</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/rest/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/rest/</guid><description>&lt;div class="pageinfo pageinfo-primary">
-&lt;p>作者：沈理&lt;/p>
-&lt;p>文档版权：&lt;a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0许可证 署名-禁止演绎&lt;/a>&lt;/p>
-&lt;p>本文篇幅较长，因为REST本身涉及面较多。另外，本文参照 Spring 等的文档风格，不仅仅局限于框架用法的阐述，同时也努力呈现框架的设计理念和优良应用的架构思想。
-对于想粗略了解 dubbo 和 REST 的人，只需浏览 概述 至 标准Java REST API：JAX-RS简介 几节即可。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>用户文档 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/</link><description>Recent content in 用户文档 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/docsv2.7/user/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/quick-start/</guid><description>&lt;p&gt;Dubbo 采用全 Spring 配置方式，透明化接入应用，对应用没有任何 API 侵入，只需用 Spring 加载 Dubbo 的配置即可，Dubbo 基于 &lt;a href="https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/xsd-configuration.html"&gt;Spring 的 Schema 扩展&lt;/a&gt; 进行加载。&lt;/p&gt;
+&lt;p&gt;如果不想使用 Spring 配置，可以通过 &lt;a href="../configuration/api"&gt;API 的方式&lt;/a&gt; 进行调用。&lt;/p&gt;
+&lt;h2 id="服务提供者"&gt;服务提供者&lt;/h2&gt;
+&lt;p&gt;完整安装步骤，请参见：&lt;a href="../../admin/install/provider-demo"&gt;示例提供者安装&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="定义服务接口"&gt;定义服务接口&lt;/h3&gt;
+&lt;p&gt;DemoService.java &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo.demo;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="在服务提供方实现接口"&gt;在服务提供方实现接口&lt;/h3&gt;
+&lt;p&gt;DemoServiceImpl.java &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref"&gt;2&lt;/a&gt;&lt;/sup&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo.demo.provider;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.demo.DemoService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; DemoService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;Hello &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; name;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="用-spring-配置声明暴露服务"&gt;用 Spring 配置声明暴露服务&lt;/h3&gt;
+&lt;p&gt;provider.xml：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;beans&lt;/span&gt; xmlns=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xmlns:xsi=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xmlns:dubbo=&lt;span style="color:#2aa198"&gt;&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xsi:schemaLocation=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 提供方应用信息，用于计算依赖关系 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:application&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;hello-world-app&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 使用multicast广播注册中心暴露服务地址 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;multicast://224.5.6.7:1234&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 用dubbo协议在20880端口暴露服务 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:protocol&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo&amp;#34;&lt;/span&gt; port=&lt;span style="color:#2aa198"&gt;&amp;#34;20880&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 声明需要暴露的服务接口 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.demo.DemoService&amp;#34;&lt;/span&gt; ref=&lt;span style="color:#2aa198"&gt;&amp;#34;demoService&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 和本地bean一样实现服务 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;bean&lt;/span&gt; id=&lt;span style="color:#2aa198"&gt;&amp;#34;demoService&amp;#34;&lt;/span&gt; class=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.demo.provider.DemoServiceImpl&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/beans&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="加载-spring-配置"&gt;加载 Spring 配置&lt;/h3&gt;
+&lt;p&gt;Provider.java：&lt;/p&gt;</description></item><item><title>基本依赖</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/dependencies/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/dependencies/</guid><description>&lt;h3 id="必须依赖"&gt;必须依赖&lt;/h3&gt;
+&lt;p&gt;JDK 1.6+ &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;h3 id="缺省依赖"&gt;缺省依赖&lt;/h3&gt;
+&lt;p&gt;通过 &lt;code&gt;mvn dependency:tree &amp;gt; dep.log&lt;/code&gt; 命令分析，Dubbo 缺省依赖以下三方库：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[INFO] +- com.alibaba:dubbo:jar:2.5.9-SNAPSHOT:compile
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[INFO] | +- org.springframework:spring-context:jar:4.3.10.RELEASE:compile
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[INFO] | +- org.javassist:javassist:jar:3.21.0-GA:compile
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[INFO] | \- org.jboss.netty:netty:jar:3.2.5.Final:compile
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这里所有依赖都是按照 Dubbo 缺省配置选的，这些缺省值是基于稳定性和性能考虑的。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;javassist.jar &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref"&gt;2&lt;/a&gt;&lt;/sup&gt;: 如果 &lt;code&gt;&amp;lt;dubbo:provider proxy=&amp;quot;jdk&amp;quot; /&amp;gt;&lt;/code&gt; 或 &lt;code&gt;&amp;lt;dubbo:consumer proxy=&amp;quot;jdk&amp;quot; /&amp;gt;&lt;/code&gt;，以及 &lt;code&gt;&amp;lt;dubbo:application compiler=&amp;quot;jdk&amp;quot; /&amp;gt;&lt;/code&gt;，则不需要。&lt;/li&gt;
+&lt;li&gt;spring-context.jar &lt;sup id="fnref:3"&gt;&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref"&gt;3&lt;/a&gt;&lt;/sup&gt;: 如果用 &lt;code&gt;ServiceConfig&lt;/code&gt; 和 &lt;code&gt;ReferenceConfig&lt;/code&gt; 的 API 调用，则不需要。&lt;/li&gt;
+&lt;li&gt;netty.jar &lt;sup id="fnref:4"&gt;&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref"&gt;4&lt;/a&gt;&lt;/sup&gt;: 如果 &lt;code&gt;&amp;lt;dubbo:protocol server=&amp;quot;mina&amp;quot;/&amp;gt;&lt;/code&gt; 或 &lt;code&gt;&amp;lt;dubbo:protocol server=&amp;quot;grizzly&amp;quot;/&amp;gt;&lt;/code&gt;，则换成 mina.jar 或 grizzly.jar。如果 &lt;code&gt;&amp;lt;protocol name=&amp;quot;rmi&amp;quot;/&amp;gt;&lt;/code&gt;，则不需要。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="可选依赖"&gt;可选依赖&lt;/h3&gt;
+&lt;p&gt;以下依赖，在主动配置使用相应实现策略时用到，需自行加入依赖。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;netty-all 4.0.35.Final&lt;/li&gt;
+&lt;li&gt;mina: 1.1.7&lt;/li&gt;
+&lt;li&gt;grizzly: 2.1.4&lt;/li&gt;
+&lt;li&gt;httpclient: 4.5.3&lt;/li&gt;
+&lt;li&gt;hessian_lite: 3.2.1-fixed&lt;/li&gt;
+&lt;li&gt;fastjson: 1.2.31&lt;/li&gt;
+&lt;li&gt;zookeeper: 3.4.9&lt;/li&gt;
+&lt;li&gt;jedis: 2.9.0&lt;/li&gt;
+&lt;li&gt;xmemcached: 1.3.6&lt;/li&gt;
+&lt;li&gt;hessian: 4.0.38&lt;/li&gt;
+&lt;li&gt;jetty: 6.1.26&lt;/li&gt;
+&lt;li&gt;hibernate-validator: 5.4.1.Final&lt;/li&gt;
+&lt;li&gt;zkclient: 0.2&lt;/li&gt;
+&lt;li&gt;curator: 2.12.0&lt;/li&gt;
+&lt;li&gt;cxf: 3.0.14&lt;/li&gt;
+&lt;li&gt;thrift: 0.8.0&lt;/li&gt;
+&lt;li&gt;servlet: 3.0 &lt;sup id="fnref:5"&gt;&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref"&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;li&gt;validation-api: 1.1.0.GA &lt;sup id="fnref1:5"&gt;&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref"&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;li&gt;jcache: 1.0.0 &lt;sup id="fnref2:5"&gt;&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref"&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;li&gt;javax.el: 3.0.1-b08 &lt;sup id="fnref3:5"&gt;&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref"&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;li&gt;kryo: 4.0.1&lt;/li&gt;
+&lt;li&gt;kryo-serializers: 0.42&lt;/li&gt;
+&lt;li&gt;fst: 2.48-jdk-6&lt;/li&gt;
+&lt;li&gt;resteasy: 3.0.19.Final&lt;/li&gt;
+&lt;li&gt;tomcat-embed-core: 8.0.11&lt;/li&gt;
+&lt;li&gt;slf4j: 1.7.25&lt;/li&gt;
+&lt;li&gt;log4j: 1.2.16&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="footnotes" role="doc-endnotes"&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id="fn:1"&gt;
+&lt;p&gt;理论上 Dubbo 可以只依赖 JDK，不依赖于任何三方库运行，只需配置使用 JDK 相关实现策略&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink"&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;</description></item><item><title>成熟度</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/maturity/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/maturity/</guid><description>&lt;h3 id="功能成熟度"&gt;功能成熟度&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;并发控制&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;并发控制&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;连接控制&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;连接数控制&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;直连提供者&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;点对点直连服务提供方，用于测试&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;测试环境使用&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;分组聚合&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;分组聚合返回值，用于菜单聚合等服务&lt;/td&gt;
+ &lt;td&gt;特殊场景使用&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;参数验证&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;参数验证，JSR303验证框架集成&lt;/td&gt;
+ &lt;td&gt;对性能有影响&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;LaiWang&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;结果缓存&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;结果缓存，用于加速请求&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;泛化引用&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;泛化调用，无需业务接口类进行远程调用，用于测试平台，开放网关桥接等&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;泛化实现&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;泛化实现，无需业务接口类实现任意接口，用于Mock平台&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;回声测试&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;回声测试&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;隐式传参&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;附加参数&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;异步调用&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;不可靠异步调用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;本地调用&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;本地调用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;参数回调&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;参数回调&lt;/td&gt;
+ &lt;td&gt;特殊场景使用&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;Registry&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;事件通知&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;事件通知，在远程调用执行前后触发&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;本地存根&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;在客户端执行部分逻辑&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;本地伪装&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;伪造返回结果，可在失败时执行，或直接执行，用于服务降级&lt;/td&gt;
+ &lt;td&gt;需注册中心支持&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;延迟暴露&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;延迟暴露服务，用于等待应用加载warmup数据，或等待spring加载完成&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;延迟连接&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;延迟建立连接，调用时建立&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;Registry&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;粘滞连接&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;粘滞连接，总是向同一个提供方发起请求，除非此提供方挂掉，再切换到另一台&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;Registry&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;令牌验证&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;令牌验证，用于服务授权&lt;/td&gt;
+ &lt;td&gt;需注册中心支持&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;路由规则&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;动态决定调用关系&lt;/td&gt;
+ &lt;td&gt;需注册中心支持&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;配置规则&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;动态下发配置，实现功能的开关&lt;/td&gt;
+ &lt;td&gt;需注册中心支持&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;访问日志&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;访问日志，用于记录调用信息&lt;/td&gt;
+ &lt;td&gt;本地存储，影响性能，受磁盘大小限制&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;分布式事务&lt;/td&gt;
+ &lt;td&gt;Research&lt;/td&gt;
+ &lt;td&gt;JTA/XA三阶段提交事务&lt;/td&gt;
+ &lt;td&gt;不稳定&lt;/td&gt;
+ &lt;td&gt;不可用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="策略成熟度"&gt;策略成熟度&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Zookeeper注册中心&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;支持基于网络的集群方式，有广泛周边开源产品，建议使用dubbo-2.3.3以上版本（推荐使用）&lt;/td&gt;
+ &lt;td&gt;依赖于Zookeeper的稳定性&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Redis注册中心&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;支持基于客户端双写的集群方式，性能高&lt;/td&gt;
+ &lt;td&gt;要求服务器时间同步，用于检查心跳过期脏数据&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Multicast注册中心&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;去中心化，不需要安装注册中心&lt;/td&gt;
+ &lt;td&gt;依赖于网络拓扑和路由，跨机房有风险&lt;/td&gt;
+ &lt;td&gt;小规模应用或开发测试环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Simple注册中心&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;Dogfooding，注册中心本身也是一个标准的RPC服务&lt;/td&gt;
+ &lt;td&gt;没有集群支持，可能单点故障&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Simple监控中心&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;支持JFreeChart统计报表&lt;/td&gt;
+ &lt;td&gt;没有集群支持，可能单点故障，但故障后不影响RPC运行&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Dubbo协议&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;采用NIO复用单一长连接，并使用线程池并发处理请求，减少握手和加大并发效率，性能较好（推荐使用）&lt;/td&gt;
+ &lt;td&gt;在大文件传输时，单一连接会成为瓶颈&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Rmi协议&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;可与原生RMI互操作，基于TCP协议&lt;/td&gt;
+ &lt;td&gt;偶尔会连接失败，需重建Stub&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Hessian协议&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;可与原生Hessian互操作，基于HTTP协议&lt;/td&gt;
+ &lt;td&gt;需hessian.jar支持，http短连接的开销大&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Netty Transporter&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;JBoss的NIO框架，性能较好（推荐使用）&lt;/td&gt;
+ &lt;td&gt;一次请求派发两种事件，需屏蔽无用事件&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Mina Transporter&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;老牌NIO框架，稳定&lt;/td&gt;
+ &lt;td&gt;待发送消息队列派发不及时，大压力下，会出现FullGC&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Grizzly Transporter&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;Sun的NIO框架，应用于GlassFish服务器中&lt;/td&gt;
+ &lt;td&gt;线程池不可扩展，Filter不能拦截下一Filter&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Hessian Serialization&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;性能较好，多语言支持（推荐使用）&lt;/td&gt;
+ &lt;td&gt;Hessian的各版本兼容性不好，可能和应用使用的Hessian冲突，Dubbo内嵌了hessian3.2.1的源码&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Dubbo Serialization&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;通过不传送POJO的类元信息，在大量POJO传输时，性能较好&lt;/td&gt;
+ &lt;td&gt;当参数对象增加字段时，需外部文件声明&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Json Serialization&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;纯文本，可跨语言解析，缺省采用FastJson解析&lt;/td&gt;
+ &lt;td&gt;性能较差&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Java Serialization&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;Java原生支持&lt;/td&gt;
+ &lt;td&gt;性能较差&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Javassist ProxyFactory&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;通过字节码生成代替反射，性能比较好（推荐使用）&lt;/td&gt;
+ &lt;td&gt;依赖于javassist.jar包，占用JVM的Perm内存，Perm可能要设大一些：java -XX:PermSize=128m&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Jdk ProxyFactory&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;JDK原生支持&lt;/td&gt;
+ &lt;td&gt;性能较差&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Failover Cluster&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;失败自动切换，当出现失败，重试其它服务器，通常用于读操作（推荐使用）&lt;/td&gt;
+ &lt;td&gt;重试会带来更长延迟&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Failfast Cluster&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;快速失败，只发起一次调用，失败立即报错,通常用于非幂等性的写操作&lt;/td&gt;
+ &lt;td&gt;如果有机器正在重启，可能会出现调用失败&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Failsafe Cluster&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;失败安全，出现异常时，直接忽略，通常用于写入审计日志等操作&lt;/td&gt;
+ &lt;td&gt;调用信息丢失&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Monitor&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Failback Cluster&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;失败自动恢复，后台记录失败请求，定时重发，通常用于消息通知操作&lt;/td&gt;
+ &lt;td&gt;不可靠，重启丢失&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Registry&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Forking Cluster&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;并行调用多个服务器，只要一个成功即返回，通常用于实时性要求较高的读操作&lt;/td&gt;
+ &lt;td&gt;需要浪费更多服务资源&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Broadcast Cluster&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;广播调用所有提供者，逐个调用，任意一台报错则报错，通常用于更新提供方本地状态&lt;/td&gt;
+ &lt;td&gt;速度慢，任意一台报错则报错&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Random LoadBalance&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;随机，按权重设置随机概率（推荐使用）&lt;/td&gt;
+ &lt;td&gt;在一个截面上碰撞的概率高，重试时，可能出现瞬间压力不均&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;RoundRobin LoadBalance&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;轮询，按公约后的权重设置轮询比率&lt;/td&gt;
+ &lt;td&gt;存在慢的机器累积请求问题，极端情况可能产生雪崩&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;LeastActive LoadBalance&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差，使慢的机器收到更少请求&lt;/td&gt;
+ &lt;td&gt;不支持权重，在容量规划时，不能通过权重把压力导向一台机器压测容量&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;ConsistentHash LoadBalance&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;一致性Hash，相同参数的请求总是发到同一提供者，当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动&lt;/td&gt;
+ &lt;td&gt;压力分摊不均&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;条件路由规则&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;基于条件表达式的路由规则，功能简单易用&lt;/td&gt;
+ &lt;td&gt;有些复杂多分支条件情况，规则很难描述&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;脚本路由规则&lt;/td&gt;
+ &lt;td&gt;Tested&lt;/td&gt;
+ &lt;td&gt;基于脚本引擎的路由规则，功能强大&lt;/td&gt;
+ &lt;td&gt;没有运行沙箱，脚本能力过于强大，可能成为后门&lt;/td&gt;
+ &lt;td&gt;试用&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Feature&lt;/th&gt;
+ &lt;th&gt;Maturity&lt;/th&gt;
+ &lt;th&gt;Strength&lt;/th&gt;
+ &lt;th&gt;Problem&lt;/th&gt;
+ &lt;th&gt;Advise&lt;/th&gt;
+ &lt;th&gt;User&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Spring Container&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;自动加载META-INF/spring目录下的所有Spring配置&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Jetty Container&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;启动一个内嵌Jetty，用于汇报状态&lt;/td&gt;
+ &lt;td&gt;大量访问页面时，会影响服务器的线程和内存&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Log4j Container&lt;/td&gt;
+ &lt;td&gt;Stable&lt;/td&gt;
+ &lt;td&gt;自动配置log4j的配置，在多进程启动时，自动给日志文件按进程分目录&lt;/td&gt;
+ &lt;td&gt;用户不能控制log4j的配置，不灵活&lt;/td&gt;
+ &lt;td&gt;可用于生产环境&lt;/td&gt;
+ &lt;td&gt;Alibaba&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;</description></item><item><title>服务化最佳实践</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/best-practice/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/best-practice/</guid><description>&lt;h2 id="分包"&gt;分包&lt;/h2&gt;
+&lt;p&gt;建议将服务接口、服务模型、服务异常等均放在 API 包中，因为服务模型和异常也是 API 的一部分，这样做也符合分包原则：重用发布等价原则(REP)，共同重用原则(CRP)。&lt;/p&gt;
+&lt;p&gt;如果需要，也可以考虑在 API 包中放置一份 Spring 的引用配置，这样使用方只需在 Spring 加载过程中引用此配置即可。配置建议放在模块的包目录下，以免冲突，如：&lt;code&gt;com/alibaba/china/xxx/dubbo-reference.xml&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="粒度"&gt;粒度&lt;/h2&gt;
+&lt;p&gt;服务接口尽可能大粒度，每个服务方法应代表一个功能，而不是某功能的一个步骤，否则将面临分布式事务问题，Dubbo 暂未提供分布式事务支持。&lt;/p&gt;
+&lt;p&gt;服务接口建议以业务场景为单位划分，并对相近业务做抽象，防止接口数量爆炸。&lt;/p&gt;
+&lt;p&gt;不建议使用过于抽象的通用接口，如：&lt;code&gt;Map query(Map)&lt;/code&gt;，这样的接口没有明确语义，会给后期维护带来不便。&lt;/p&gt;
+&lt;h2 id="版本"&gt;版本&lt;/h2&gt;
+&lt;p&gt;每个接口都应定义版本号，为后续不兼容升级提供可能，如： &lt;code&gt;&amp;lt;dubbo:service interface=&amp;quot;com.xxx.XxxService&amp;quot; version=&amp;quot;1.0&amp;quot; /&amp;gt;&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;建议使用两位版本号，因为第三位版本号通常表示兼容升级，只有不兼容时才需要变更服务版本。&lt;/p&gt;
+&lt;p&gt;当不兼容时，先升级一半提供者为新版本，再将消费者全部升为新版本，然后将剩下的一半提供者升为新版本。&lt;/p&gt;
+&lt;h2 id="兼容性"&gt;兼容性&lt;/h2&gt;
+&lt;p&gt;服务接口增加方法，或服务模型增加字段，可向后兼容，删除方法或删除字段，将不兼容，枚举类型新增字段也不兼容，需通过变更版本号升级。&lt;/p&gt;
+&lt;p&gt;各协议的兼容性不同，参见：&lt;a href="../references/protocol/"&gt;服务协议&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="枚举值"&gt;枚举值&lt;/h2&gt;
+&lt;p&gt;如果是完备集，可以用 &lt;code&gt;Enum&lt;/code&gt;，比如：&lt;code&gt;ENABLE&lt;/code&gt;, &lt;code&gt;DISABLE&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;如果是业务种类，以后明显会有类型增加，不建议用 &lt;code&gt;Enum&lt;/code&gt;，可以用 &lt;code&gt;String&lt;/code&gt; 代替。&lt;/p&gt;
+&lt;p&gt;如果是在返回值中用了 &lt;code&gt;Enum&lt;/code&gt;，并新增了 &lt;code&gt;Enum&lt;/code&gt; 值，建议先升级服务消费方，这样服务提供方不会返回新值。&lt;/p&gt;
+&lt;p&gt;如果是在传入参数中用了 &lt;code&gt;Enum&lt;/code&gt;，并新增了 &lt;code&gt;Enum&lt;/code&gt; 值，建议先升级服务提供方，这样服务消费方不会传入新值。&lt;/p&gt;
+&lt;h2 id="序列化"&gt;序列化&lt;/h2&gt;
+&lt;p&gt;服务参数及返回值建议使用 POJO 对象，即通过 &lt;code&gt;setter&lt;/code&gt;, &lt;code&gt;getter&lt;/code&gt; 方法表示属性的对象。&lt;/p&gt;
+&lt;p&gt;服务参数及返回值不建议使用接口，因为数据模型抽象的意义不大，并且序列化需要接口实现类的元信息，并不能起到隐藏实现的意图。&lt;/p&gt;
+&lt;p&gt;服务参数及返回值都必须是&lt;a href="https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_value"&gt;传值调用&lt;/a&gt;，而不能是&lt;a href="https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_reference"&gt;传引用调用&lt;/a&gt;，消费方和提供方的参数或返回值引用并不是同一个，只是值相同，Dubbo 不支持引用远程对象。&lt;/p&gt;
+&lt;h2 id="异常"&gt;异常&lt;/h2&gt;
+&lt;p&gt;建议使用异常汇报错误，而不是返回错误码，异常信息能携带更多信息，并且语义更友好。&lt;/p&gt;
+&lt;p&gt;如果担心性能问题，在必要时，可以通过 override 掉异常类的 &lt;code&gt;fillInStackTrace()&lt;/code&gt; 方法为空方法，使其不拷贝栈信息。&lt;/p&gt;
+&lt;p&gt;查询方法不建议抛出 checked 异常，否则调用方在查询时将过多的 &lt;code&gt;try...catch&lt;/code&gt;，并且不能进行有效处理。&lt;/p&gt;
+&lt;p&gt;服务提供方不应将 DAO 或 SQL 等异常抛给消费方，应在服务实现中对消费方不关心的异常进行包装，否则可能出现消费方无法反序列化相应异常。&lt;/p&gt;</description></item><item><title>推荐用法</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/recommend/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/recommend/</guid><description>&lt;h2 id="在-provider-端尽量多配置-consumer-端属性"&gt;在 Provider 端尽量多配置 Consumer 端属性&lt;/h2&gt;
+&lt;p&gt;原因如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;作为服务的提供方，比服务消费方更清楚服务的性能参数，如调用的超时时间、合理的重试次数等&lt;/li&gt;
+&lt;li&gt;在 Provider 端配置后，Consumer 端不配置则会使用 Provider 端的配置，即 Provider 端的配置可以作为 Consumer 的缺省值 &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;。否则，Consumer 会使用 Consumer 端的全局设置，这对于 Provider 是不可控的，并且往往是不合理的&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Provider 端尽量多配置 Consumer 端的属性，让 Provider 的实现者一开始就思考 Provider 端的服务特点和服务质量等问题。&lt;/p&gt;
+&lt;p&gt;示例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;com.alibaba.hello.api.HelloService&amp;#34;&lt;/span&gt; version=&lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt; ref=&lt;span style="color:#2aa198"&gt;&amp;#34;helloService&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; timeout=&lt;span style="color:#2aa198"&gt;&amp;#34;300&amp;#34;&lt;/span&gt; retries=&lt;span style="color:#2aa198"&gt;&amp;#34;2&amp;#34;&lt;/span&gt; loadbalance=&lt;span style="color:#2aa198"&gt;&amp;#34;random&amp;#34;&lt;/span&gt; actives=&lt;span style="color:#2aa198"&gt;&amp;#34;0&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;com.alibaba.hello.api.WorldService&amp;#34;&lt;/span&gt; version=&lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt; ref=&lt;span style="color:#2aa198"&gt;&amp;#34;helloService&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; timeout=&lt;span style="color:#2aa198"&gt;&amp;#34;300&amp;#34;&lt;/span&gt; retries=&lt;span style="color:#2aa198"&gt;&amp;#34;2&amp;#34;&lt;/span&gt; loadbalance=&lt;span style="color:#2aa198"&gt;&amp;#34;random&amp;#34;&lt;/span&gt; actives=&lt;span style="color:#2aa198"&gt;&amp;#34;0&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:method&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;findAllPerson&amp;#34;&lt;/span&gt; timeout=&lt;span style="color:#2aa198"&gt;&amp;#34;10000&amp;#34;&lt;/span&gt; retries=&lt;span style="color:#2aa198"&gt;&amp;#34;9&amp;#34;&lt;/span&gt; loadbalance=&lt;span style="color:#2aa198"&gt;&amp;#34;leastactive&amp;#34;&lt;/span&gt; actives=&lt;span style="color:#2aa198"&gt;&amp;#34;5&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;建议在 Provider 端配置的 Consumer 端属性有：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;timeout&lt;/code&gt;：方法调用的超时时间&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;retries&lt;/code&gt;：失败重试次数，缺省是 2 &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;loadbalance&lt;/code&gt;：负载均衡算法 &lt;sup id="fnref:3"&gt;&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref"&gt;3&lt;/a&gt;&lt;/sup&gt;，缺省是随机 &lt;code&gt;random&lt;/code&gt;。还可以配置轮询 &lt;code&gt;roundrobin&lt;/code&gt;、最不活跃优先 &lt;sup id="fnref:4"&gt;&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref"&gt;4&lt;/a&gt;&lt;/sup&gt; &lt;code&gt;leastactive&lt;/code&gt; 和一致性哈希 &lt;code&gt;consistenthash&lt;/code&gt; 等&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;actives&lt;/code&gt;：消费者端的最大并发调用限制，即当 Consumer 对一个服务的并发调用到上限后，新调用会阻塞直到超时，在方法上配置 &lt;code&gt;dubbo:method&lt;/code&gt; 则针对该方法进行并发限制，在接口上配置 &lt;code&gt;dubbo:service&lt;/code&gt;，则针对该服务进行并发限制&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;详细配置说明请参考：&lt;a href="../references/xml/"&gt;Dubbo配置参考手册&lt;/a&gt;&lt;/p&gt;</description></item><item><title>容量规划</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/capacity-plan/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/capacity-plan/</guid><description>&lt;p&gt;以下数据供参考：&lt;/p&gt;
+&lt;h2 id="使用-dubbo-的会员服务项目"&gt;使用 Dubbo 的会员服务项目&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;每天接收 4 亿次远程调用&lt;/li&gt;
+&lt;li&gt;使用 12 台网站标配机器提供服务（8 核 CPU，8G 内存）&lt;/li&gt;
+&lt;li&gt;平均负载在 1 以下（对于 8 核 CPU 负载很低）&lt;/li&gt;
+&lt;li&gt;平均响应时间 2.3 到 2.5 毫秒，网络开销约占 1.5 到 1.6 毫秒（和数据包大小有关）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用-dubbo-的产品授权服务项目"&gt;使用 Dubbo 的产品授权服务项目&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;每天接收 3 亿次远程调用&lt;/li&gt;
+&lt;li&gt;使用 8 台网站标配机器提供服务（8 核CPU，8G 内存）&lt;/li&gt;
+&lt;li&gt;平均负载在 1 以下（对于 8 核 CPU 负载很低）&lt;/li&gt;
+&lt;li&gt;平均响应时间 1.4 到 2.8 毫秒，网络开销约占 1.0 到 1.1 毫秒（和数据包大小有关）&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>性能测试报告</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/perf-test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/perf-test/</guid><description>&lt;h2 id="测试说明"&gt;测试说明&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;本次性能测试，测试了 dubbo 2.0 所有支持的协议在不同大小和数据类型下的表现，并与 dubbo 1.0 进行了对比。&lt;/li&gt;
+&lt;li&gt;整体性能相比 1.0 有了提升，平均提升 10%，使用 dubbo 2.0 新增的 dubbo 序列化还能获得 10%~50% 的性能提升，详见下面的性能数据。&lt;/li&gt;
+&lt;li&gt;稳定性测试中由于将底层通信框架从 mina 换成 netty，old 区对象的增长大大减少，50 小时运行，增长不到 200m，无 fullgc。&lt;/li&gt;
+&lt;li&gt;存在的问题：在 50k 数据的时候 2.0 性能不如 1.0，怀疑可能是缓冲区设置的问题，下版本会进一步确认。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="测试环境"&gt;测试环境&lt;/h2&gt;
+&lt;h3 id="硬件部署与参数调整"&gt;硬件部署与参数调整&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;机型&lt;/th&gt;
+ &lt;th&gt;CPU&lt;/th&gt;
+ &lt;th&gt;内存&lt;/th&gt;
+ &lt;th&gt;网络&lt;/th&gt;
+ &lt;th&gt;磁盘&lt;/th&gt;
+ &lt;th&gt;内核&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Tecal BH620&lt;/td&gt;
+ &lt;td&gt;model name : Intel(R) Xeon(R) CPU E5520 @ 2.27GHz cache size : 8192 KB processor_count : 16&lt;/td&gt;
+ &lt;td&gt;Total System Memory: 6G Hardware Memory Info: Size: 4096MB&lt;/td&gt;
+ &lt;td&gt;eth0: Link is up at 1000 Mbps, full duplex. peth0: Link is up at 1000 Mbps, full duplex.&lt;/td&gt;
+ &lt;td&gt;/dev/sda: 597.9 GB&lt;/td&gt;
+ &lt;td&gt;2.6.18-128.el5xen x86_64&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="软件架构"&gt;软件架构&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;软件名称及版本&lt;/th&gt;
+ &lt;th&gt;关键参数&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;java version &amp;ldquo;1.6.0_18&amp;rdquo; Java(TM) SE Runtime Environment (build 1.6.0_18-b07) Java HotSpot(TM) 64-Bit Server VM (build 16.0-b13, mixed mode)&lt;/td&gt;
+ &lt;td&gt;-server -Xmx2g -Xms2g -Xmn256m -XX:PermSize=128m -Xss256k -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;jboss-4.0.5.GA&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;httpd-2.0.61&lt;/td&gt;
+ &lt;td&gt;KeepAlive On MaxKeepAliveRequests 100000 KeepAliveTimeout 180 MaxRequestsPerChild 1000000 &lt;IfModule worker.c&gt; StartServers 5 MaxClients 1024 MinSpareThreads 25 MaxSpareThreads 75 ThreadsPerChild 64 ThreadLimit 128 ServerLimit 16 &lt;/IfModule&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="测试目的"&gt;测试目的&lt;/h2&gt;
+&lt;h3 id="期望性能指标量化"&gt;期望性能指标(量化)&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;场景名称&lt;/th&gt;
+ &lt;th&gt;对应指标名称&lt;/th&gt;
+ &lt;th&gt;期望值范围&lt;/th&gt;
+ &lt;th&gt;实际值&lt;/th&gt;
+ &lt;th&gt;是否满足期望(是/否)&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;1k数据&lt;/td&gt;
+ &lt;td&gt;响应时间&lt;/td&gt;
+ &lt;td&gt;0.9ms&lt;/td&gt;
+ &lt;td&gt;0.79ms&lt;/td&gt;
+ &lt;td&gt;是&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;1k数据&lt;/td&gt;
+ &lt;td&gt;TPS&lt;/td&gt;
+ &lt;td&gt;10000&lt;/td&gt;
+ &lt;td&gt;11994&lt;/td&gt;
+ &lt;td&gt;是&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="期望运行状况非量化可选"&gt;期望运行状况(非量化，可选)&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;2.0 性能不低于 1.0, 2.0 和 1.0 互调用的性能无明显下降。 除了 50k string 其余皆通过&lt;/li&gt;
+&lt;li&gt;JVM 内存运行稳定，无 OOM，堆内存中无不合理的大对象的占用。通过&lt;/li&gt;
+&lt;li&gt;CPU、内存、网络、磁盘、文件句柄占用平稳。通过&lt;/li&gt;
+&lt;li&gt;无频繁线程锁，线程数平稳。通过&lt;/li&gt;
+&lt;li&gt;业务线程负载均衡。通过&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="测试脚本"&gt;测试脚本&lt;/h2&gt;
+&lt;ol start="0"&gt;
+&lt;li&gt;
+&lt;p&gt;性能测试场景（10 并发）&lt;/p&gt;</description></item><item><title>测试覆盖率报告</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/coveragence/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/coveragence/</guid><description>&lt;ul&gt;
+&lt;li&gt;v2.0 Codecov报表 , 从 2017-12-29 后开始统计
+测试覆盖率为 : &lt;a href="https://codecov.io/gh/apache/dubbo"&gt;&lt;img src="https://codecov.io/gh/apache/dubbo/branch/master/graph/badge.svg" alt="codecov"&gt;&lt;/a&gt; , 可以从 &lt;a href="https://codecov.io/gh/apache/dubbo"&gt;https://codecov.io/gh/apache/dubbo&lt;/a&gt; 页面得到覆盖率报表&lt;/li&gt;
+&lt;li&gt;v1.0 基于 &lt;code&gt;2.0.12&lt;/code&gt; 版本，统计于 2012-02-03&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/code-quality1.jpg" alt="//imgs/user/code-quality1.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/code-quality5.jpg" alt="//imgs/user/code-quality5.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/code-coverage.jpg" alt="//imgs/user/code-coverage.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/code-tendency.jpg" alt="//imgs/user/code-tendency.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/code-dependency.jpg" alt="//imgs/user/code-dependency.jpg"&gt;&lt;/p&gt;</description></item><item><title>基准测试工具包</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/benchmark-tool/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/benchmark-tool/</guid><description>&lt;ul&gt;
+&lt;li&gt;下载源码： git clone &lt;a href="https://github.com/apache/dubbo.git"&gt;https://github.com/apache/dubbo.git&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;编译benchmark: cd dubbo/dubbo-test/dubbo-test-benchmark; mvn clean install&lt;/li&gt;
+&lt;li&gt;解压 benchmark压缩包： dubbo/dubbo-test/dubbo-test-benchmark/target/dubbo-test-benchmark-2.6.2-SNAPSHOT.tar.gz&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;阅读ReadMe.txt（内容如下，请以压缩包内的为准）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;新建一个benchmark工程，如demo.benchmark&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;导入自己服务的接口api包和dubbo.benchmark.jar(解压dubbo.benchmark.tar.gz，在lib目录下)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;新建一个类，实现AbstractClientRunnable&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;实现父类的构造函数&lt;/li&gt;
+&lt;li&gt;实现invoke方法，通过serviceFactory创建本地接口代理，并实现自己的业务逻辑，如下&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; Object &lt;span style="color:#268bd2"&gt;invoke&lt;/span&gt;(ServiceFactory serviceFactory) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; DemoService demoService &lt;span style="color:#719e07"&gt;=&lt;/span&gt; (DemoService) serviceFactory.get(DemoService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; demoService.sendRequest(&lt;span style="color:#2aa198"&gt;&amp;#34;hello&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;将自己的benchmark工程打成jar包,如demo.benchmark.jar&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;将demo.benchmark.jar 和服务的api包放到dubbo.benchmark/lib目录下&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;配置dubbo.properties&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;运行run.bat(windows)或run.sh(linux)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如想测试dubbo的不同版本，直接替换lib下的dubbo的jar包即可。&lt;/p&gt;</description></item><item><title>开发 REST 应用</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/rest/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/rest/</guid><description>&lt;div class="pageinfo pageinfo-primary"&gt;
+&lt;p&gt;作者：沈理&lt;/p&gt;
+&lt;p&gt;文档版权：&lt;a href="http://www.apache.org/licenses/LICENSE-2.0"&gt;Apache 2.0许可证 署名-禁止演绎&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;本文篇幅较长，因为REST本身涉及面较多。另外，本文参照 Spring 等的文档风格，不仅仅局限于框架用法的阐述，同时也努力呈现框架的设计理念和优良应用的架构思想。
+对于想粗略了解 dubbo 和 REST 的人，只需浏览 概述 至 标准Java REST API：JAX-RS简介 几节即可。&lt;/p&gt;
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;h2 id="目录">目录&lt;/h2>
-&lt;ul>
-&lt;li>概述&lt;/li>
-&lt;li>REST的优点&lt;/li>
-&lt;li>应用场景&lt;/li>
-&lt;li>快速入门&lt;/li>
-&lt;li>标准Java REST API：JAX-RS简介&lt;/li>
-&lt;li>REST服务提供端详解
-&lt;ul>
-&lt;li>HTTP POST/GET的实现&lt;/li>
-&lt;li>Annotation放在接口类还是实现类&lt;/li>
-&lt;li>JSON、XML等多数据格式的支持&lt;/li>
-&lt;li>中文字符支持&lt;/li>
-&lt;li>XML数据格式的额外要求&lt;/li>
-&lt;li>定制序列化&lt;/li>
-&lt;li>配置REST Server的实现&lt;/li>
-&lt;li>获取上下文（Context）信息&lt;/li>
-&lt;li>配置端口号和Context Path&lt;/li>
-&lt;li>配置线程数和IO线程数&lt;/li>
-&lt;li>配置长连接&lt;/li>
-&lt;li>配置最大的HTTP连接数&lt;/li>
-&lt;li>配置每个消费端的超时时间和HTTP连接数&lt;/li>
-&lt;li>GZIP数据压缩&lt;/li>
-&lt;li>用Annotation取代部分Spring XML配置&lt;/li>
-&lt;li>添加自定义的Filter、Interceptor等&lt;/li>
-&lt;li>添加自定义的Exception处理&lt;/li>
-&lt;li>配置HTTP日志输出&lt;/li>
-&lt;li>输入参数的校验&lt;/li>
-&lt;li>是否应该透明发布REST服务&lt;/li>
-&lt;li>Dubbo的REST提供端在被调用时使用header&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>REST服务消费端详解
-&lt;ul>
-&lt;li>场景1：非dubbo的消费端调用dubbo的REST服务&lt;/li>
-&lt;li>场景2：dubbo消费端调用dubbo的REST服务&lt;/li>
-&lt;li>场景3：dubbo的消费端调用非dubbo的REST服务&lt;/li>
-&lt;li>Dubbo的消费端在调用REST服务时配置自定义header&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>Dubbo中JAX-RS的限制&lt;/li>
-&lt;li>REST常见问题解答（REST FAQ）
-&lt;ul>
-&lt;li>Dubbo REST的服务能和Dubbo注册中心、监控中心集成吗？&lt;/li>
-&lt;li>Dubbo REST中如何实现负载均衡和容错（failover）？&lt;/li>
-&lt;li>JAX-RS中重载的方法能够映射到同一URL地址吗？&lt;/li>
-&lt;li>JAX-RS中作POST的方法能够接收多个参数吗？&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>Dubbo当前体系可能的不足之处（与REST相关的）
-&lt;ul>
-&lt;li>RpcContext的侵入性&lt;/li>
-&lt;li>Protocol配置的局限性&lt;/li>
-&lt;li>XML命名不符合spring规范&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>REST最佳实践&lt;/li>
-&lt;li>性能基准测试
-&lt;ul>
-&lt;li>测试环境&lt;/li>
-&lt;li>测试脚本&lt;/li>
-&lt;li>测试结果&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>扩展讨论
-&lt;ul>
-&lt;li>REST与Thrift、Protobuf等的对比&lt;/li>
-&lt;li>REST与传统WebServices的对比&lt;/li>
-&lt;li>JAX-RS与Spring MVC的对比&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>未来&lt;/li>
-&lt;/ul>
-&lt;h2 id="概述">概述&lt;/h2>
-&lt;p>dubbo支持多种远程调用方式，例如dubbo RPC（二进制序列化 + tcp协议）、http invoker（二进制序列化 + http协议，至少在开源版本没发现对文本序列化的支持）、hessian（二进制序列化 + http协议）、WebServices （文本序列化 + http协议）等等，但缺乏对当今特别流行的REST风格远程调用（文本序列化 + http协议）的支持。&lt;/p></description></item><item><title>简单监控</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/simple-monitor/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/simple-monitor/</guid><description>&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">Warning&lt;/h4>
+&lt;h2 id="目录"&gt;目录&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;概述&lt;/li&gt;
+&lt;li&gt;REST的优点&lt;/li&gt;
+&lt;li&gt;应用场景&lt;/li&gt;
+&lt;li&gt;快速入门&lt;/li&gt;
+&lt;li&gt;标准Java REST API：JAX-RS简介&lt;/li&gt;
+&lt;li&gt;REST服务提供端详解
+&lt;ul&gt;
+&lt;li&gt;HTTP POST/GET的实现&lt;/li&gt;
+&lt;li&gt;Annotation放在接口类还是实现类&lt;/li&gt;
+&lt;li&gt;JSON、XML等多数据格式的支持&lt;/li&gt;
+&lt;li&gt;中文字符支持&lt;/li&gt;
+&lt;li&gt;XML数据格式的额外要求&lt;/li&gt;
+&lt;li&gt;定制序列化&lt;/li&gt;
+&lt;li&gt;配置REST Server的实现&lt;/li&gt;
+&lt;li&gt;获取上下文（Context）信息&lt;/li&gt;
+&lt;li&gt;配置端口号和Context Path&lt;/li&gt;
+&lt;li&gt;配置线程数和IO线程数&lt;/li&gt;
+&lt;li&gt;配置长连接&lt;/li&gt;
+&lt;li&gt;配置最大的HTTP连接数&lt;/li&gt;
+&lt;li&gt;配置每个消费端的超时时间和HTTP连接数&lt;/li&gt;
+&lt;li&gt;GZIP数据压缩&lt;/li&gt;
+&lt;li&gt;用Annotation取代部分Spring XML配置&lt;/li&gt;
+&lt;li&gt;添加自定义的Filter、Interceptor等&lt;/li&gt;
+&lt;li&gt;添加自定义的Exception处理&lt;/li&gt;
+&lt;li&gt;配置HTTP日志输出&lt;/li&gt;
+&lt;li&gt;输入参数的校验&lt;/li&gt;
+&lt;li&gt;是否应该透明发布REST服务&lt;/li&gt;
+&lt;li&gt;Dubbo的REST提供端在被调用时使用header&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;REST服务消费端详解
+&lt;ul&gt;
+&lt;li&gt;场景1：非dubbo的消费端调用dubbo的REST服务&lt;/li&gt;
+&lt;li&gt;场景2：dubbo消费端调用dubbo的REST服务&lt;/li&gt;
+&lt;li&gt;场景3：dubbo的消费端调用非dubbo的REST服务&lt;/li&gt;
+&lt;li&gt;Dubbo的消费端在调用REST服务时配置自定义header&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Dubbo中JAX-RS的限制&lt;/li&gt;
+&lt;li&gt;REST常见问题解答（REST FAQ）
+&lt;ul&gt;
+&lt;li&gt;Dubbo REST的服务能和Dubbo注册中心、监控中心集成吗？&lt;/li&gt;
+&lt;li&gt;Dubbo REST中如何实现负载均衡和容错（failover）？&lt;/li&gt;
+&lt;li&gt;JAX-RS中重载的方法能够映射到同一URL地址吗？&lt;/li&gt;
+&lt;li&gt;JAX-RS中作POST的方法能够接收多个参数吗？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Dubbo当前体系可能的不足之处（与REST相关的）
+&lt;ul&gt;
+&lt;li&gt;RpcContext的侵入性&lt;/li&gt;
+&lt;li&gt;Protocol配置的局限性&lt;/li&gt;
+&lt;li&gt;XML命名不符合spring规范&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;REST最佳实践&lt;/li&gt;
+&lt;li&gt;性能基准测试
+&lt;ul&gt;
+&lt;li&gt;测试环境&lt;/li&gt;
+&lt;li&gt;测试脚本&lt;/li&gt;
+&lt;li&gt;测试结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;扩展讨论
+&lt;ul&gt;
+&lt;li&gt;REST与Thrift、Protobuf等的对比&lt;/li&gt;
+&lt;li&gt;REST与传统WebServices的对比&lt;/li&gt;
+&lt;li&gt;JAX-RS与Spring MVC的对比&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;未来&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="概述"&gt;概述&lt;/h2&gt;
+&lt;p&gt;dubbo支持多种远程调用方式，例如dubbo RPC（二进制序列化 + tcp协议）、http invoker（二进制序列化 + http协议，至少在开源版本没发现对文本序列化的支持）、hessian（二进制序列化 + http协议）、WebServices （文本序列化 + http协议）等等，但缺乏对当今特别流行的REST风格远程调用（文本序列化 + http协议）的支持。&lt;/p&gt;</description></item><item><title>简单监控</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/simple-monitor/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/simple-monitor/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;Warning&lt;/h4&gt;
 
  监控中心也是一个标准的 Dubbo 服务，可以通过注册中心发现，也可以直连。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;ol>
-&lt;li>
-&lt;p>暴露一个简单监控中心服务到注册中心: (如果是用安装包，不需要自己写这个配置，如果是自己实现监控中心，则需要)&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 当前应用信息配置 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;simple-monitor&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 连接注册中心配置 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;127.0.0.1:9090&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 暴露服务协议配置 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;7070&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 暴露服务配置 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.monitor.MonitorService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;monitorService&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;monitorService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.monitor.simple.SimpleMonitorService&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>通过注册中心发现监控中心服务:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:monitor&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;registry&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者在 dubbo.properties 配置：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.monitor.protocol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">registry&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>暴露一个简单监控中心服务，但不注册到注册中心: (如果是用安装包，不需要自己写这个配置，如果是自己实现监控中心，则需要)&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;beans&lt;/span> xmlns=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:xsi=&lt;span style="color:#2aa198">&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xmlns:dubbo=&lt;span style="color:#2aa198">&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> xsi:schemaLocation=&lt;span style="color:#2aa198">&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 当前应用信息配置 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;simple-monitor&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 暴露服务协议配置 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> port=&lt;span style="color:#2aa198">&amp;#34;7070&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">&amp;lt;!-- 暴露服务配置 --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.monitor.MonitorService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;monitorService&amp;#34;&lt;/span> registry=&lt;span style="color:#2aa198">&amp;#34;N/A&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;bean&lt;/span> id=&lt;span style="color:#2aa198">&amp;#34;monitorService&amp;#34;&lt;/span> class=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.monitor.simple.SimpleMonitorService&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/beans&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>直连监控中心服务&lt;/p></description></item><item><title>Kryo 和 FST 序列化</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/serialization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/serialization/</guid><description>&lt;h2 id="目录">目录&lt;/h2>
-&lt;ul>
-&lt;li>序列化漫谈&lt;/li>
-&lt;li>启用Kryo和FST&lt;/li>
-&lt;li>注册被序列化类&lt;/li>
-&lt;li>无参构造函数和Serializable接口&lt;/li>
-&lt;li>序列化性能分析与测试
-&lt;ul>
-&lt;li>测试环境&lt;/li>
-&lt;li>测试脚本&lt;/li>
-&lt;li>Dubbo RPC中不同序列化生成字节大小比较&lt;/li>
-&lt;li>Dubbo RPC中不同序列化响应时间和吞吐量对比&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>未来&lt;/li>
-&lt;/ul>
-&lt;h2 id="序列化漫谈">序列化漫谈&lt;/h2>
-&lt;p>dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用，简单的说：&lt;/p>
-&lt;ul>
-&lt;li>长连接：避免了每次调用新建TCP连接，提高了调用的响应速度&lt;/li>
-&lt;li>多路复用：单个TCP连接可交替传输多个请求和响应的消息，降低了连接的等待闲置时间，从而减少了同样并发数下的网络连接数，提高了系统吞吐量。&lt;/li>
-&lt;/ul>
-&lt;p>dubbo RPC主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。&lt;/p>
-&lt;p>而序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。&lt;/p>
-&lt;p>在dubbo RPC中，同时支持多种序列化方式，例如：&lt;/p>
-&lt;ol>
-&lt;li>dubbo序列化：阿里尚未开发成熟的高效java序列化实现，阿里不建议在生产环境使用它&lt;/li>
-&lt;li>hessian2序列化：hessian是一种跨语言的高效二进制序列化方式。但这里实际不是原生的hessian2序列化，而是阿里修改过的hessian lite，它是dubbo RPC默认启用的序列化方式&lt;/li>
-&lt;li>json序列化：目前有两种实现，一种是采用的阿里的fastjson库，另一种是采用dubbo中自己实现的简单json库，但其实现都不是特别成熟，而且json这种文本序列化性能一般不如上面两种二进制序列化。&lt;/li>
-&lt;li>java序列化：主要是采用JDK自带的Java序列化实现，性能很不理想。&lt;/li>
-&lt;/ol>
-&lt;p>在通常情况下，这四种主要序列化方式的性能从上到下依次递减。对于dubbo RPC这种追求高性能的远程调用方式来说，实际上只有1、2两种高效序列化方式比较般配，而第1个dubbo序列化由于还不成熟，所以实际只剩下2可用，所以dubbo RPC默认采用hessian2序列化。&lt;/p>
-&lt;p>但hessian是一个比较老的序列化实现了，而且它是跨语言的，所以不是单独针对java进行优化的。而dubbo RPC实际上完全是一种Java to Java的远程调用，其实没有必要采用跨语言的序列化方式（当然肯定也不排斥跨语言的序列化）。&lt;/p>
-&lt;p>最近几年，各种新的高效序列化方式层出不穷，不断刷新序列化性能的上限，最典型的包括：&lt;/p>
-&lt;ul>
-&lt;li>专门针对Java语言的：Kryo，FST等等&lt;/li>
-&lt;li>跨语言的：Protostuff，ProtoBuf，Thrift，Avro，MsgPack等等&lt;/li>
-&lt;/ul>
-&lt;p>这些序列化方式的性能多数都显著优于hessian2（甚至包括尚未成熟的dubbo序列化）。&lt;/p>
-&lt;p>有鉴于此，我们为dubbo引入Kryo和FST这两种高效Java序列化实现，来逐步取代hessian2。&lt;/p>
-&lt;p>其中，Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。而FST是一种较新的序列化实现，目前还缺乏足够多的成熟使用案例，但我认为它还是非常有前途的。&lt;/p>
-&lt;p>在面向生产环境的应用中，我建议目前更优先选择Kryo。&lt;/p>
-&lt;h2 id="启用kryo和fst">启用Kryo和FST&lt;/h2>
-&lt;p>使用Kryo和FST非常简单，只需要在dubbo RPC的XML配置中添加一个属性即可：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;kryo&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:protocol&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span> serialization=&lt;span style="color:#2aa198">&amp;#34;fst&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="注册被序列化类">注册被序列化类&lt;/h2>
-&lt;p>要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，例如，我们可以实现如下回调接口：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">SerializationOptimizerImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> SerializationOptimizer {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Collection&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">getSerializableClasses&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span> classes &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> LinkedList&lt;span style="color:#719e07">&amp;lt;&lt;/span>Class&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(BidRequest.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(BidResponse.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(Device.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(Geo.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(Impression.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classes.add(SeatBid.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> classes;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>然后在XML配置中添加：&lt;/p></description></item><item><title/><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/new-features-in-a-glance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/new-features-in-a-glance/</guid><description>&lt;h1 id="dubbo-版本发布及新特性速览">Dubbo 版本发布及新特性速览&lt;/h1>
-&lt;h2 id="版本速览">版本速览&lt;/h2>
-&lt;p>Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，&lt;/p>
-&lt;ul>
-&lt;li>2.6.x 主要以 bugfix 和少量 enhancements 为主，因此能完全保证稳定性&lt;/li>
-&lt;li>2.7.x 作为社区的主要开发版本，得到持续更新并增加了大量新 feature 和优化，同时也带来了一些稳定性挑战&lt;/li>
-&lt;/ul>
-&lt;h3 id="27x-版本">2.7.x 版本&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;/th>
- &lt;th style="text-align: left">版本&lt;/th>
- &lt;th style="text-align: left">重要功能&lt;/th>
- &lt;th style="text-align: left">升级建议&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">1&lt;/td>
- &lt;td style="text-align: left">2.7.6&lt;/td>
- &lt;td style="text-align: left">bugfix of 2.7.5&lt;br /> 服务鉴权&lt;/td>
- &lt;td style="text-align: left">&lt;strong>推荐生产使用&lt;/strong>&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">2&lt;/td>
- &lt;td style="text-align: left">2.7.5&lt;/td>
- &lt;td style="text-align: left">服务自省&lt;br />HTTP/2（gRPC） &lt;br />Protobuf &lt;br />TLS&lt;br />性能优化&lt;br />&lt;br />&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5">https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5&lt;/a>&lt;/td>
- &lt;td style="text-align: left">不建议大规模生产使用&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">3&lt;/td>
- &lt;td style="text-align: left">2.7.4.1&lt;/td>
- &lt;td style="text-align: left">&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.4.1">bugfixes and enhancements of 2.7.3&lt;/a>&lt;/td>
- &lt;td style="text-align: left">&lt;strong>推荐生产使用&lt;/strong>&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">4&lt;/td>
- &lt;td style="text-align: left">2.7.3&lt;/td>
- &lt;td style="text-align: left">&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.3">bigfixes of and enhancements of 2.7.2&lt;/a>&lt;/td>
- &lt;td style="text-align: left">&lt;strong>推荐生产使用&lt;/strong>&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">5&lt;/td>
- &lt;td style="text-align: left">2.7.2&lt;/td>
- &lt;td style="text-align: left">&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.2">bigfixes of and enhancements of 2.7.1&lt;/a>&lt;/td>
- &lt;td style="text-align: left">不建议大规模生产使用&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">6&lt;/td>
- &lt;td style="text-align: left">2.7.1&lt;/td>
- &lt;td style="text-align: left">&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.1">bigfixes of and enhancements of 2.7.0&lt;/a>&lt;/td>
- &lt;td style="text-align: left">不建议大规模生产使用&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">7&lt;/td>
- &lt;td style="text-align: left">2.7.0&lt;/td>
- &lt;td style="text-align: left">异步编程模型 - 消费端/提供端异步&lt;br />服务治理规则增强&lt;br />简化的注册模型&lt;br />配置中心、元数据中心&lt;br />package 重构&lt;br />&lt;br />&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0">https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0&lt;/a>&lt;/td>
- &lt;td style="text-align: left">beta 版本，2.6.x 重构后首个版本&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="26x-及之前版本">2.6.x 及之前版本&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;/th>
- &lt;th style="text-align: left">版本&lt;/th>
- &lt;th style="text-align: left">重要功能&lt;/th>
- &lt;th style="text-align: left">升级建议&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">1&lt;/td>
- &lt;td style="text-align: left">2.6.x&lt;/td>
- &lt;td style="text-align: left">bugfix&lt;/td>
- &lt;td style="text-align: left">建议持续升级最新版本，所有版本生产可用&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">2&lt;/td>
- &lt;td style="text-align: left">2.5.x&lt;/td>
- &lt;td style="text-align: left">停止维护&lt;/td>
- &lt;td style="text-align: left">建议升级最新 2.6.x 版本&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">3&lt;/td>
- &lt;td style="text-align: left">2.4.x 及之前&lt;/td>
- &lt;td style="text-align: left">停止维护&lt;/td>
- &lt;td style="text-align: left">建议升级最新 2.6.x 版本&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h2 id="值得关注的新特性">值得关注的新特性&lt;/h2>
-&lt;ul>
-&lt;li>Dubbo 云原生计划（敬请期待&amp;hellip;）&lt;/li>
-&lt;li>Kubernetes Native Service Discovery（敬请期待&amp;hellip;）&lt;/li>
-&lt;li>&lt;a href="../references/protocol/grpc/">gRPC (HTTP/2) 协议&lt;/a>&lt;/li>
-&lt;li>&lt;a href="../examples/protobuf-idl/">使用 Protobuf 定义 Dubbo 服务&lt;/a>&lt;/li>
-&lt;li>&lt;a href="../examples/tls/">TLS 安全传输&lt;/a>&lt;/li>
-&lt;li>实例级服务发现&lt;/li>
-&lt;li>&lt;a href="../examples/auth/">服务鉴权&lt;/a>&lt;/li>
-&lt;li>性能优化
-&lt;ul>
-&lt;li>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2020/05/18/dubbo-java-2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/">调用链路提升 30%&lt;/a>&lt;/li>
-&lt;li>&lt;a href="../examples/consumer-threadpool/">消费端线程模型&lt;/a>&lt;/li>
-&lt;li>地址推送链路&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="热门文章列表">热门文章列表&lt;/h2>
-&lt;p>&lt;a href="https://dubbo.apache.org/zh-cn/blog/2020/05/11/%E4%BB%8E-2019-%E5%88%B0-2020apache-dubbo-%E5%B9%B4%E5%BA%A6%E5%9B%9E%E9%A1%BE%E4%B8%8E%E6%80%BB%E7%BB%93/">从 2019 到 2020，Apache Dubbo 年度总结&lt;/a>&lt;br>
-&lt;a href="https://dubbo.apache.org/zh-cn/blog/2020/05/18/dubbo-java-2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/">Dubbo 2.7.5 里程碑版本发布&lt;/a>&lt;br>
-&lt;a href="https://dubbo.apache.org/zh-cn/blog/2019/10/28/dubbo-%E5%9C%A8%E8%B7%A8%E8%AF%AD%E8%A8%80%E5%92%8C%E5%8D%8F%E8%AE%AE%E7%A9%BF%E9%80%8F%E6%80%A7%E6%96%B9%E5%90%91%E4%B8%8A%E7%9A%84%E6%8E%A2%E7%B4%A2%E6%94%AF%E6%8C%81-http/2-grpc-%E5%92%8C-protobuf/">Dubbo 在协议与多语言方向的探索：支持 gRPC、Protobuf&lt;/a>&lt;/p></description></item></channel></rss>
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;暴露一个简单监控中心服务到注册中心: (如果是用安装包，不需要自己写这个配置，如果是自己实现监控中心，则需要)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;beans&lt;/span&gt; xmlns=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xmlns:xsi=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xmlns:dubbo=&lt;span style="color:#2aa198"&gt;&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xsi:schemaLocation=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 当前应用信息配置 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:application&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;simple-monitor&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 连接注册中心配置 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;127.0.0.1:9090&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 暴露服务协议配置 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:protocol&lt;/span&gt; port=&lt;span style="color:#2aa198"&gt;&amp;#34;7070&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 暴露服务配置 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.monitor.MonitorService&amp;#34;&lt;/span&gt; ref=&lt;span style="color:#2aa198"&gt;&amp;#34;monitorService&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;bean&lt;/span&gt; id=&lt;span style="color:#2aa198"&gt;&amp;#34;monitorService&amp;#34;&lt;/span&gt; class=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.monitor.simple.SimpleMonitorService&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/beans&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;通过注册中心发现监控中心服务:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:monitor&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;registry&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或者在 dubbo.properties 配置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-properties" data-lang="properties"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo.monitor.protocol&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;registry&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;暴露一个简单监控中心服务，但不注册到注册中心: (如果是用安装包，不需要自己写这个配置，如果是自己实现监控中心，则需要)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;beans&lt;/span&gt; xmlns=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.springframework.org/schema/beans&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xmlns:xsi=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xmlns:dubbo=&lt;span style="color:#2aa198"&gt;&amp;#34;http://dubbo.apache.org/schema/dubbo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; xsi:schemaLocation=&lt;span style="color:#2aa198"&gt;&amp;#34;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 当前应用信息配置 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:application&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;simple-monitor&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 暴露服务协议配置 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:protocol&lt;/span&gt; port=&lt;span style="color:#2aa198"&gt;&amp;#34;7070&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;&amp;lt;!-- 暴露服务配置 --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.monitor.MonitorService&amp;#34;&lt;/span&gt; ref=&lt;span style="color:#2aa198"&gt;&amp;#34;monitorService&amp;#34;&lt;/span&gt; registry=&lt;span style="color:#2aa198"&gt;&amp;#34;N/A&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;bean&lt;/span&gt; id=&lt;span style="color:#2aa198"&gt;&amp;#34;monitorService&amp;#34;&lt;/span&gt; class=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.monitor.simple.SimpleMonitorService&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/beans&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;直连监控中心服务&lt;/p&gt;</description></item><item><title>Kryo 和 FST 序列化</title><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/serialization/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/serialization/</guid><description>&lt;h2 id="目录"&gt;目录&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;序列化漫谈&lt;/li&gt;
+&lt;li&gt;启用Kryo和FST&lt;/li&gt;
+&lt;li&gt;注册被序列化类&lt;/li&gt;
+&lt;li&gt;无参构造函数和Serializable接口&lt;/li&gt;
+&lt;li&gt;序列化性能分析与测试
+&lt;ul&gt;
+&lt;li&gt;测试环境&lt;/li&gt;
+&lt;li&gt;测试脚本&lt;/li&gt;
+&lt;li&gt;Dubbo RPC中不同序列化生成字节大小比较&lt;/li&gt;
+&lt;li&gt;Dubbo RPC中不同序列化响应时间和吞吐量对比&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;未来&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="序列化漫谈"&gt;序列化漫谈&lt;/h2&gt;
+&lt;p&gt;dubbo RPC是dubbo体系中最核心的一种高性能、高吞吐量的远程调用方式，我喜欢称之为多路复用的TCP长连接调用，简单的说：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;长连接：避免了每次调用新建TCP连接，提高了调用的响应速度&lt;/li&gt;
+&lt;li&gt;多路复用：单个TCP连接可交替传输多个请求和响应的消息，降低了连接的等待闲置时间，从而减少了同样并发数下的网络连接数，提高了系统吞吐量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;dubbo RPC主要用于两个dubbo系统之间作远程调用，特别适合高并发、小数据的互联网场景。&lt;/p&gt;
+&lt;p&gt;而序列化对于远程调用的响应速度、吞吐量、网络带宽消耗等同样也起着至关重要的作用，是我们提升分布式系统性能的最关键因素之一。&lt;/p&gt;
+&lt;p&gt;在dubbo RPC中，同时支持多种序列化方式，例如：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;dubbo序列化：阿里尚未开发成熟的高效java序列化实现，阿里不建议在生产环境使用它&lt;/li&gt;
+&lt;li&gt;hessian2序列化：hessian是一种跨语言的高效二进制序列化方式。但这里实际不是原生的hessian2序列化，而是阿里修改过的hessian lite，它是dubbo RPC默认启用的序列化方式&lt;/li&gt;
+&lt;li&gt;json序列化：目前有两种实现，一种是采用的阿里的fastjson库，另一种是采用dubbo中自己实现的简单json库，但其实现都不是特别成熟，而且json这种文本序列化性能一般不如上面两种二进制序列化。&lt;/li&gt;
+&lt;li&gt;java序列化：主要是采用JDK自带的Java序列化实现，性能很不理想。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在通常情况下，这四种主要序列化方式的性能从上到下依次递减。对于dubbo RPC这种追求高性能的远程调用方式来说，实际上只有1、2两种高效序列化方式比较般配，而第1个dubbo序列化由于还不成熟，所以实际只剩下2可用，所以dubbo RPC默认采用hessian2序列化。&lt;/p&gt;
+&lt;p&gt;但hessian是一个比较老的序列化实现了，而且它是跨语言的，所以不是单独针对java进行优化的。而dubbo RPC实际上完全是一种Java to Java的远程调用，其实没有必要采用跨语言的序列化方式（当然肯定也不排斥跨语言的序列化）。&lt;/p&gt;
+&lt;p&gt;最近几年，各种新的高效序列化方式层出不穷，不断刷新序列化性能的上限，最典型的包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;专门针对Java语言的：Kryo，FST等等&lt;/li&gt;
+&lt;li&gt;跨语言的：Protostuff，ProtoBuf，Thrift，Avro，MsgPack等等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些序列化方式的性能多数都显著优于hessian2（甚至包括尚未成熟的dubbo序列化）。&lt;/p&gt;
+&lt;p&gt;有鉴于此，我们为dubbo引入Kryo和FST这两种高效Java序列化实现，来逐步取代hessian2。&lt;/p&gt;
+&lt;p&gt;其中，Kryo是一种非常成熟的序列化实现，已经在Twitter、Groupon、Yahoo以及多个著名开源项目（如Hive、Storm）中广泛的使用。而FST是一种较新的序列化实现，目前还缺乏足够多的成熟使用案例，但我认为它还是非常有前途的。&lt;/p&gt;
+&lt;p&gt;在面向生产环境的应用中，我建议目前更优先选择Kryo。&lt;/p&gt;
+&lt;h2 id="启用kryo和fst"&gt;启用Kryo和FST&lt;/h2&gt;
+&lt;p&gt;使用Kryo和FST非常简单，只需要在dubbo RPC的XML配置中添加一个属性即可：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:protocol&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo&amp;#34;&lt;/span&gt; serialization=&lt;span style="color:#2aa198"&gt;&amp;#34;kryo&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:protocol&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo&amp;#34;&lt;/span&gt; serialization=&lt;span style="color:#2aa198"&gt;&amp;#34;fst&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="注册被序列化类"&gt;注册被序列化类&lt;/h2&gt;
+&lt;p&gt;要让Kryo和FST完全发挥出高性能，最好将那些需要被序列化的类注册到dubbo系统中，例如，我们可以实现如下回调接口：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;SerializationOptimizerImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; SerializationOptimizer {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; Collection&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Class&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;getSerializableClasses&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Class&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; classes &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; LinkedList&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Class&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; classes.add(BidRequest.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; classes.add(BidResponse.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; classes.add(Device.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; classes.add(Geo.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; classes.add(Impression.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; classes.add(SeatBid.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; classes;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后在XML配置中添加：&lt;/p&gt;</description></item><item><title/><link>https://dubbo.apache.org/zh-cn/docsv2.7/user/new-features-in-a-glance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docsv2.7/user/new-features-in-a-glance/</guid><description>&lt;h1 id="dubbo-版本发布及新特性速览"&gt;Dubbo 版本发布及新特性速览&lt;/h1&gt;
+&lt;h2 id="版本速览"&gt;版本速览&lt;/h2&gt;
+&lt;p&gt;Dubbo 社区目前主力维护的有 2.6.x 和 2.7.x 两大版本，其中，&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2.6.x 主要以 bugfix 和少量 enhancements 为主，因此能完全保证稳定性&lt;/li&gt;
+&lt;li&gt;2.7.x 作为社区的主要开发版本，得到持续更新并增加了大量新 feature 和优化，同时也带来了一些稳定性挑战&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="27x-版本"&gt;2.7.x 版本&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;/th&gt;
+ &lt;th&gt;版本&lt;/th&gt;
+ &lt;th&gt;重要功能&lt;/th&gt;
+ &lt;th&gt;升级建议&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;1&lt;/td&gt;
+ &lt;td&gt;2.7.6&lt;/td&gt;
+ &lt;td&gt;bugfix of 2.7.5&lt;br /&gt; 服务鉴权&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;推荐生产使用&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;2&lt;/td&gt;
+ &lt;td&gt;2.7.5&lt;/td&gt;
+ &lt;td&gt;服务自省&lt;br /&gt;HTTP/2（gRPC） &lt;br /&gt;Protobuf &lt;br /&gt;TLS&lt;br /&gt;性能优化&lt;br /&gt;&lt;br /&gt;&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5"&gt;https://github.com/apache/dubbo/releases/tag/dubbo-2.7.5&lt;/a&gt;&lt;/td&gt;
+ &lt;td&gt;不建议大规模生产使用&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;2.7.4.1&lt;/td&gt;
+ &lt;td&gt;&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.4.1"&gt;bugfixes and enhancements of 2.7.3&lt;/a&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;推荐生产使用&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;4&lt;/td&gt;
+ &lt;td&gt;2.7.3&lt;/td&gt;
+ &lt;td&gt;&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.3"&gt;bigfixes of and enhancements of 2.7.2&lt;/a&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;strong&gt;推荐生产使用&lt;/strong&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;5&lt;/td&gt;
+ &lt;td&gt;2.7.2&lt;/td&gt;
+ &lt;td&gt;&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.2"&gt;bigfixes of and enhancements of 2.7.1&lt;/a&gt;&lt;/td&gt;
+ &lt;td&gt;不建议大规模生产使用&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;6&lt;/td&gt;
+ &lt;td&gt;2.7.1&lt;/td&gt;
+ &lt;td&gt;&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.1"&gt;bigfixes of and enhancements of 2.7.0&lt;/a&gt;&lt;/td&gt;
+ &lt;td&gt;不建议大规模生产使用&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;7&lt;/td&gt;
+ &lt;td&gt;2.7.0&lt;/td&gt;
+ &lt;td&gt;异步编程模型 - 消费端/提供端异步&lt;br /&gt;服务治理规则增强&lt;br /&gt;简化的注册模型&lt;br /&gt;配置中心、元数据中心&lt;br /&gt;package 重构&lt;br /&gt;&lt;br /&gt;&lt;a href="https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0"&gt;https://github.com/apache/dubbo/releases/tag/dubbo-2.7.0&lt;/a&gt;&lt;/td&gt;
+ &lt;td&gt;beta 版本，2.6.x 重构后首个版本&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="26x-及之前版本"&gt;2.6.x 及之前版本&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;/th&gt;
+ &lt;th&gt;版本&lt;/th&gt;
+ &lt;th&gt;重要功能&lt;/th&gt;
+ &lt;th&gt;升级建议&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;1&lt;/td&gt;
+ &lt;td&gt;2.6.x&lt;/td&gt;
+ &lt;td&gt;bugfix&lt;/td&gt;
+ &lt;td&gt;建议持续升级最新版本，所有版本生产可用&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;2&lt;/td&gt;
+ &lt;td&gt;2.5.x&lt;/td&gt;
+ &lt;td&gt;停止维护&lt;/td&gt;
+ &lt;td&gt;建议升级最新 2.6.x 版本&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;2.4.x 及之前&lt;/td&gt;
+ &lt;td&gt;停止维护&lt;/td&gt;
+ &lt;td&gt;建议升级最新 2.6.x 版本&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="值得关注的新特性"&gt;值得关注的新特性&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Dubbo 云原生计划（敬请期待&amp;hellip;）&lt;/li&gt;
+&lt;li&gt;Kubernetes Native Service Discovery（敬请期待&amp;hellip;）&lt;/li&gt;
+&lt;li&gt;&lt;a href="../references/protocol/grpc/"&gt;gRPC (HTTP/2) 协议&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="../examples/protobuf-idl/"&gt;使用 Protobuf 定义 Dubbo 服务&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="../examples/tls/"&gt;TLS 安全传输&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;实例级服务发现&lt;/li&gt;
+&lt;li&gt;&lt;a href="../examples/auth/"&gt;服务鉴权&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;性能优化
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/zh-cn/blog/2020/05/18/dubbo-java-2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/"&gt;调用链路提升 30%&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="../examples/consumer-threadpool/"&gt;消费端线程模型&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;地址推送链路&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="热门文章列表"&gt;热门文章列表&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://dubbo.apache.org/zh-cn/blog/2020/05/11/%E4%BB%8E-2019-%E5%88%B0-2020apache-dubbo-%E5%B9%B4%E5%BA%A6%E5%9B%9E%E9%A1%BE%E4%B8%8E%E6%80%BB%E7%BB%93/"&gt;从 2019 到 2020，Apache Dubbo 年度总结&lt;/a&gt;&lt;br&gt;
+&lt;a href="https://dubbo.apache.org/zh-cn/blog/2020/05/18/dubbo-java-2.7.5-%E5%8A%9F%E8%83%BD%E8%A7%A3%E6%9E%90/"&gt;Dubbo 2.7.5 里程碑版本发布&lt;/a&gt;&lt;br&gt;
+&lt;a href="https://dubbo.apache.org/zh-cn/blog/2019/10/28/dubbo-%E5%9C%A8%E8%B7%A8%E8%AF%AD%E8%A8%80%E5%92%8C%E5%8D%8F%E8%AE%AE%E7%A9%BF%E9%80%8F%E6%80%A7%E6%96%B9%E5%90%91%E4%B8%8A%E7%9A%84%E6%8E%A2%E7%B4%A2%E6%94%AF%E6%8C%81-http/2-grpc-%E5%92%8C-protobuf/"&gt;Dubbo 在协议与多语言方向的探索：支持 gRPC、Protobuf&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>

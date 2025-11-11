@@ -1,74 +1,74 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>如何准备 Apache Release on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/</link><description>Recent content in 如何准备 Apache Release on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/contact/committer/release-guide/index.xml" rel="self" type="application/rss+xml"/><item><title>通用 Release 流程</title><link>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/common/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/common/</guid><description>&lt;h2 id="理解-apache-发布的内容和流程">理解 Apache 发布的内容和流程&lt;/h2>
-&lt;p>总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。&lt;/p>
-&lt;p>请参考以下链接，找到更多关于 ASF 的发布指南:&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="http://www.apache.org/dev/release-publishing">Apache Release Guide&lt;/a>&lt;/li>
-&lt;li>&lt;a href="http://www.apache.org/dev/release.html">Apache Release Policy&lt;/a>&lt;/li>
-&lt;li>&lt;a href="http://www.apache.org/dev/publishing-maven-artifacts.html">Maven Release Info&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="发布流程">发布流程&lt;/h2>
-&lt;h3 id="1-准备分支">1. 准备分支&lt;/h3>
-&lt;p>从主干分支拉取新分支作为发布分支，如现在要发布 &lt;code>${release_version}&lt;/code> 版本，则从开发分支拉出新分支 &lt;code>${release_version}-release&lt;/code>，此后&lt;code>${release_version}&lt;/code> Release Candidates 涉及的修改及打标签等都在&lt;code>${release_version}-release&lt;/code>分支进行，最终发布完成后合入主干分支。&lt;/p>
-&lt;p>例：如 Java SDK 需要发布 &lt;code>3.0.10&lt;/code> 版本，从 &lt;code>3.0&lt;/code> 分支拉出新分支 &lt;code>3.0.10-release&lt;/code>，并在此分支提交从 Snapshot 替换为 &lt;code>3.0.10&lt;/code> 版本号的 commit。&lt;/p>
-&lt;h3 id="2-github-打标签并发布-pre-release-状态">2. Github 打标签并发布 Pre Release 状态&lt;/h3>
-&lt;p>在对应 GitHub 仓库中基于 &lt;code>${release_version}-release&lt;/code> 分支，打标签 &lt;code>${release_version}-release&lt;/code>，填写 Release Note 并发布 Pre Release 状态。（&lt;strong>不允许在投票流程正式通过前把 Release 状态置为正式发布状态&lt;/strong>）&lt;/p></description></item><item><title>Java SDK Release 流程</title><link>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/java-sdk/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/java-sdk/</guid><description>&lt;h2 id="理解-apache-发布的内容和流程">理解 Apache 发布的内容和流程&lt;/h2>
-&lt;p>总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。&lt;/p>
-&lt;p>请参考以下链接，找到更多关于 ASF 的发布指南:&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="http://www.apache.org/dev/release-publishing">Apache Release Guide&lt;/a>&lt;/li>
-&lt;li>&lt;a href="http://www.apache.org/dev/release.html">Apache Release Policy&lt;/a>&lt;/li>
-&lt;li>&lt;a href="http://www.apache.org/dev/publishing-maven-artifacts.html">Maven Release Info&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="本地构建环境准备">本地构建环境准备&lt;/h2>
-&lt;p>主要包括签名工具、Maven 仓库认证相关准备&lt;/p>
-&lt;h3 id="安装gpg">安装GPG&lt;/h3>
-&lt;p>详细文档请参见&lt;a href="https://www.gnupg.org/download/index.html">这里&lt;/a>, Mac OS 下配置如下&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ brew install gpg
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ gpg --version &lt;span style="color:#586e75">#检查版本，应该为2.x&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="用gpg生成key">用gpg生成key&lt;/h3>
-&lt;p>根据提示，生成 key&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ gpg --full-gen-key
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>gpg &lt;span style="color:#719e07">(&lt;/span>GnuPG&lt;span style="color:#719e07">)&lt;/span> 2.0.12; Copyright &lt;span style="color:#719e07">(&lt;/span>C&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#2aa198">2009&lt;/span> Free Software Foundation, Inc.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>This is free software: you are free to change and redistribute it.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>There is NO WARRANTY, to the extent permitted by law.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please &lt;span style="color:#719e07">select&lt;/span> what kind of key you want:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>1&lt;span style="color:#719e07">)&lt;/span> RSA and RSA &lt;span style="color:#719e07">(&lt;/span>default&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>2&lt;span style="color:#719e07">)&lt;/span> DSA and Elgamal
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>3&lt;span style="color:#719e07">)&lt;/span> DSA &lt;span style="color:#719e07">(&lt;/span>sign only&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">(&lt;/span>4&lt;span style="color:#719e07">)&lt;/span> RSA &lt;span style="color:#719e07">(&lt;/span>sign only&lt;span style="color:#719e07">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Your selection? &lt;span style="color:#2aa198">1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>RSA keys may be between &lt;span style="color:#2aa198">1024&lt;/span> and &lt;span style="color:#2aa198">4096&lt;/span> bits long.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>What keysize &lt;span style="color:#719e07">do&lt;/span> you want? &lt;span style="color:#719e07">(&lt;/span>2048&lt;span style="color:#719e07">)&lt;/span> &lt;span style="color:#2aa198">4096&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Requested keysize is &lt;span style="color:#2aa198">4096&lt;/span> bits
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Please specify how long the key should be valid.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">0&lt;/span> &lt;span style="color:#719e07">=&lt;/span> key does not expire
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt; &lt;span style="color:#719e07">=&lt;/span> key expires in n days
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt;w &lt;span style="color:#719e07">=&lt;/span> key expires in n weeks
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt;m &lt;span style="color:#719e07">=&lt;/span> key expires in n months
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;lt;n&amp;gt;y &lt;span style="color:#719e07">=&lt;/span> key expires in n years
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key is valid &lt;span style="color:#719e07">for&lt;/span>? &lt;span style="color:#719e07">(&lt;/span>0&lt;span style="color:#719e07">)&lt;/span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Key does not expire at all
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Is this correct? &lt;span style="color:#719e07">(&lt;/span>y/N&lt;span style="color:#719e07">)&lt;/span> y
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>GnuPG needs to construct a user ID to identify your key.
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Real name: Robert Burrell Donkin
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Email address: rdonkin@apache.org
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Comment: CODE SIGNING KEY
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You selected this USER-ID:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;Robert Burrell Donkin (CODE SIGNING KEY) &amp;lt;rdonkin@apache.org&amp;gt;&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Change &lt;span style="color:#719e07">(&lt;/span>N&lt;span style="color:#719e07">)&lt;/span>ame, &lt;span style="color:#719e07">(&lt;/span>C&lt;span style="color:#719e07">)&lt;/span>omment, &lt;span style="color:#719e07">(&lt;/span>E&lt;span style="color:#719e07">)&lt;/span>mail or &lt;span style="color:#719e07">(&lt;/span>O&lt;span style="color:#719e07">)&lt;/span>kay/&lt;span style="color:#719e07">(&lt;/span>Q&lt;span style="color:#719e07">)&lt;/span>uit? O
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>You need a Passphrase to protect your secret key. &lt;span style="color:#586e75"># 填入密码，以后打包过程中会经常用到&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="查看-key-id">查看 key id&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>$ gpg --list-keys
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>pub rsa4096/28681CB1 2018-04-26 &lt;span style="color:#586e75"># 28681CB1就是key id&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>uid &lt;span style="color:#719e07">[&lt;/span>ultimate&lt;span style="color:#719e07">]&lt;/span> liujun &lt;span style="color:#719e07">(&lt;/span>apache-dubbo&lt;span style="color:#719e07">)&lt;/span> &amp;lt;liujun@apache.org&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sub rsa4096/D3D6984B 2018-04-26
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 通过key id发送public key到keyserver&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，为相互之间是自动同步的，选任意一个都可以。&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>PS: 上文bash中两个server地址均无法打开，可以使用直接使用网页上传:
-&lt;code>https://keyserver.ubuntu.com/&lt;/code>&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>如何准备 Apache Release on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/</link><description>Recent content in 如何准备 Apache Release on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/contact/committer/release-guide/index.xml" rel="self" type="application/rss+xml"/><item><title>通用 Release 流程</title><link>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/common/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/common/</guid><description>&lt;h2 id="理解-apache-发布的内容和流程"&gt;理解 Apache 发布的内容和流程&lt;/h2&gt;
+&lt;p&gt;总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。&lt;/p&gt;
+&lt;p&gt;请参考以下链接，找到更多关于 ASF 的发布指南:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.apache.org/dev/release-publishing"&gt;Apache Release Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.apache.org/dev/release.html"&gt;Apache Release Policy&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.apache.org/dev/publishing-maven-artifacts.html"&gt;Maven Release Info&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="发布流程"&gt;发布流程&lt;/h2&gt;
+&lt;h3 id="1-准备分支"&gt;1. 准备分支&lt;/h3&gt;
+&lt;p&gt;从主干分支拉取新分支作为发布分支，如现在要发布 &lt;code&gt;${release_version}&lt;/code&gt; 版本，则从开发分支拉出新分支 &lt;code&gt;${release_version}-release&lt;/code&gt;，此后&lt;code&gt;${release_version}&lt;/code&gt; Release Candidates 涉及的修改及打标签等都在&lt;code&gt;${release_version}-release&lt;/code&gt;分支进行，最终发布完成后合入主干分支。&lt;/p&gt;
+&lt;p&gt;例：如 Java SDK 需要发布 &lt;code&gt;3.0.10&lt;/code&gt; 版本，从 &lt;code&gt;3.0&lt;/code&gt; 分支拉出新分支 &lt;code&gt;3.0.10-release&lt;/code&gt;，并在此分支提交从 Snapshot 替换为 &lt;code&gt;3.0.10&lt;/code&gt; 版本号的 commit。&lt;/p&gt;
+&lt;h3 id="2-github-打标签并发布-pre-release-状态"&gt;2. Github 打标签并发布 Pre Release 状态&lt;/h3&gt;
+&lt;p&gt;在对应 GitHub 仓库中基于 &lt;code&gt;${release_version}-release&lt;/code&gt; 分支，打标签 &lt;code&gt;${release_version}-release&lt;/code&gt;，填写 Release Note 并发布 Pre Release 状态。（&lt;strong&gt;不允许在投票流程正式通过前把 Release 状态置为正式发布状态&lt;/strong&gt;）&lt;/p&gt;</description></item><item><title>Java SDK Release 流程</title><link>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/java-sdk/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/contact/committer/release-guide/java-sdk/</guid><description>&lt;h2 id="理解-apache-发布的内容和流程"&gt;理解 Apache 发布的内容和流程&lt;/h2&gt;
+&lt;p&gt;总的来说，Source Release 是 Apache 关注的重点，也是发布的必须内容；而 Binary Release 是可选项，Dubbo 可以选择是否发布二进制包到 Apache 仓库或者发布到 Maven 中央仓库。&lt;/p&gt;
+&lt;p&gt;请参考以下链接，找到更多关于 ASF 的发布指南:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.apache.org/dev/release-publishing"&gt;Apache Release Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.apache.org/dev/release.html"&gt;Apache Release Policy&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.apache.org/dev/publishing-maven-artifacts.html"&gt;Maven Release Info&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="本地构建环境准备"&gt;本地构建环境准备&lt;/h2&gt;
+&lt;p&gt;主要包括签名工具、Maven 仓库认证相关准备&lt;/p&gt;
+&lt;h3 id="安装gpg"&gt;安装GPG&lt;/h3&gt;
+&lt;p&gt;详细文档请参见&lt;a href="https://www.gnupg.org/download/index.html"&gt;这里&lt;/a&gt;, Mac OS 下配置如下&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ brew install gpg
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ gpg --version &lt;span style="color:#586e75"&gt;#检查版本，应该为2.x&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="用gpg生成key"&gt;用gpg生成key&lt;/h3&gt;
+&lt;p&gt;根据提示，生成 key&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ gpg --full-gen-key
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;gpg &lt;span style="color:#719e07"&gt;(&lt;/span&gt;GnuPG&lt;span style="color:#719e07"&gt;)&lt;/span&gt; 2.0.12; Copyright &lt;span style="color:#719e07"&gt;(&lt;/span&gt;C&lt;span style="color:#719e07"&gt;)&lt;/span&gt; &lt;span style="color:#2aa198"&gt;2009&lt;/span&gt; Free Software Foundation, Inc.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;This is free software: you are free to change and redistribute it.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;There is NO WARRANTY, to the extent permitted by law.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Please &lt;span style="color:#719e07"&gt;select&lt;/span&gt; what kind of key you want:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;(&lt;/span&gt;1&lt;span style="color:#719e07"&gt;)&lt;/span&gt; RSA and RSA &lt;span style="color:#719e07"&gt;(&lt;/span&gt;default&lt;span style="color:#719e07"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;(&lt;/span&gt;2&lt;span style="color:#719e07"&gt;)&lt;/span&gt; DSA and Elgamal
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;(&lt;/span&gt;3&lt;span style="color:#719e07"&gt;)&lt;/span&gt; DSA &lt;span style="color:#719e07"&gt;(&lt;/span&gt;sign only&lt;span style="color:#719e07"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;(&lt;/span&gt;4&lt;span style="color:#719e07"&gt;)&lt;/span&gt; RSA &lt;span style="color:#719e07"&gt;(&lt;/span&gt;sign only&lt;span style="color:#719e07"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Your selection? &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;RSA keys may be between &lt;span style="color:#2aa198"&gt;1024&lt;/span&gt; and &lt;span style="color:#2aa198"&gt;4096&lt;/span&gt; bits long.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;What keysize &lt;span style="color:#719e07"&gt;do&lt;/span&gt; you want? &lt;span style="color:#719e07"&gt;(&lt;/span&gt;2048&lt;span style="color:#719e07"&gt;)&lt;/span&gt; &lt;span style="color:#2aa198"&gt;4096&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Requested keysize is &lt;span style="color:#2aa198"&gt;4096&lt;/span&gt; bits
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Please specify how long the key should be valid.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;0&lt;/span&gt; &lt;span style="color:#719e07"&gt;=&lt;/span&gt; key does not expire
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &amp;lt;n&amp;gt; &lt;span style="color:#719e07"&gt;=&lt;/span&gt; key expires in n days
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &amp;lt;n&amp;gt;w &lt;span style="color:#719e07"&gt;=&lt;/span&gt; key expires in n weeks
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &amp;lt;n&amp;gt;m &lt;span style="color:#719e07"&gt;=&lt;/span&gt; key expires in n months
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &amp;lt;n&amp;gt;y &lt;span style="color:#719e07"&gt;=&lt;/span&gt; key expires in n years
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Key is valid &lt;span style="color:#719e07"&gt;for&lt;/span&gt;? &lt;span style="color:#719e07"&gt;(&lt;/span&gt;0&lt;span style="color:#719e07"&gt;)&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Key does not expire at all
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Is this correct? &lt;span style="color:#719e07"&gt;(&lt;/span&gt;y/N&lt;span style="color:#719e07"&gt;)&lt;/span&gt; y
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;GnuPG needs to construct a user ID to identify your key.
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Real name: Robert Burrell Donkin
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Email address: rdonkin@apache.org
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Comment: CODE SIGNING KEY
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;You selected this USER-ID:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;Robert Burrell Donkin (CODE SIGNING KEY) &amp;lt;rdonkin@apache.org&amp;gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Change &lt;span style="color:#719e07"&gt;(&lt;/span&gt;N&lt;span style="color:#719e07"&gt;)&lt;/span&gt;ame, &lt;span style="color:#719e07"&gt;(&lt;/span&gt;C&lt;span style="color:#719e07"&gt;)&lt;/span&gt;omment, &lt;span style="color:#719e07"&gt;(&lt;/span&gt;E&lt;span style="color:#719e07"&gt;)&lt;/span&gt;mail or &lt;span style="color:#719e07"&gt;(&lt;/span&gt;O&lt;span style="color:#719e07"&gt;)&lt;/span&gt;kay/&lt;span style="color:#719e07"&gt;(&lt;/span&gt;Q&lt;span style="color:#719e07"&gt;)&lt;/span&gt;uit? O
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;You need a Passphrase to protect your secret key. &lt;span style="color:#586e75"&gt;# 填入密码，以后打包过程中会经常用到&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="查看-key-id"&gt;查看 key id&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ gpg --list-keys
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;pub rsa4096/28681CB1 2018-04-26 &lt;span style="color:#586e75"&gt;# 28681CB1就是key id&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;uid &lt;span style="color:#719e07"&gt;[&lt;/span&gt;ultimate&lt;span style="color:#719e07"&gt;]&lt;/span&gt; liujun &lt;span style="color:#719e07"&gt;(&lt;/span&gt;apache-dubbo&lt;span style="color:#719e07"&gt;)&lt;/span&gt; &amp;lt;liujun@apache.org&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;sub rsa4096/D3D6984B 2018-04-26
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# 通过key id发送public key到keyserver&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，为相互之间是自动同步的，选任意一个都可以。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;PS: 上文bash中两个server地址均无法打开，可以使用直接使用网页上传:
+&lt;code&gt;https://keyserver.ubuntu.com/&lt;/code&gt;&lt;/p&gt;</description></item></channel></rss>

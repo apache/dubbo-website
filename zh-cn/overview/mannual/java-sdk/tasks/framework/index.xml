@@ -1,387 +1,387 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo 作为轻量 RPC 框架解决组件通信问题 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/</link><description>Recent content in Dubbo 作为轻量 RPC 框架解决组件通信问题 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/index.xml" rel="self" type="application/rss+xml"/><item><title>使用轻量的 Java SDK 开发 RPC Server 和 Client</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/lightweight-rpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/lightweight-rpc/</guid><description>&lt;p>本示例演示如何使用轻量 Dubbo SDK 开发 RPC Server 与 Client，示例使用 Java Interface 方式定义、发布和访问 RPC 服务，底层使用 Triple 协议通信。本示例完整代码请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank">dubbo-samples&lt;/a>。&lt;/p>
-&lt;p>基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Java SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p>
-&lt;h2 id="maven-依赖">Maven 依赖&lt;/h2>
-&lt;p>在基于 Dubbo RPC 编码之前，您只需要在项目添加一个非常轻量的 &lt;code>dubbo&lt;/code>依赖包即可，以 Maven 为例：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- 为了避免 Netty 依赖冲突，您也可以是选择使用 dubbo-shaded 版本！--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!--
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;dependency&amp;gt;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;artifactId&amp;gt;dubbo-shaded&amp;lt;/artifactId&amp;gt;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> &amp;lt;version&amp;gt;3.3.0&amp;lt;/version&amp;gt;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;/dependency&amp;gt;
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="定义服务">定义服务&lt;/h2>
-&lt;p>定义一个名为 &lt;code>DemoService&lt;/code>的标准 Java 接口作为 Dubbo 服务（Dubbo 还支持&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/">基于 IDL 的服务定义模式&lt;/a>）。&lt;/p></description></item><item><title>消费端线程模型，提供者端线程模型</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/threading-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/threading-model/</guid><description>&lt;h2 id="消费端线程模型">消费端线程模型&lt;/h2>
-&lt;p>对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 &lt;a href="https://github.com/apache/dubbo/issues/2013">Need a limited Threadpool in consumer side #2013&lt;/a>&lt;/p>
-&lt;p>改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。&lt;/p>
-&lt;p>&lt;strong>老的线程池模型&lt;/strong>&lt;/p>
-&lt;p>&lt;img alt="消费端线程池.png" src="https://dubbo.apache.org/imgs/user/consumer-threadpool0.png">&lt;/p>
-&lt;p>我们重点关注 Consumer 部分：&lt;/p>
-&lt;ol>
-&lt;li>业务线程发出请求，拿到一个 Future 实例。&lt;/li>
-&lt;li>业务线程紧接着调用 future.get 阻塞等待业务结果返回。&lt;/li>
-&lt;li>当业务数据返回后，交由独立的 Consumer 端线程池进行反序列化等处理，并调用 future.set 将反序列化后的业务结果置回。&lt;/li>
-&lt;li>业务线程拿到结果直接返回&lt;/li>
-&lt;/ol>
-&lt;p>&lt;strong>当前线程池模型&lt;/strong>&lt;/p>
-&lt;p>&lt;img alt="消费端线程池新.png" src="https://dubbo.apache.org/imgs/user/consumer-threadpool1.png">&lt;/p>
-&lt;ol>
-&lt;li>业务线程发出请求，拿到一个 Future 实例。&lt;/li>
-&lt;li>在调用 future.get() 之前，先调用 ThreadlessExecutor.wait()，wait 会使业务线程在一个阻塞队列上等待，直到队列中被加入元素。&lt;/li>
-&lt;li>当业务数据返回后，生成一个 Runnable Task 并放入 ThreadlessExecutor 队列&lt;/li>
-&lt;li>业务线程将 Task 取出并在本线程中执行：反序列化业务数据并 set 到 Future。&lt;/li>
-&lt;li>业务线程拿到结果直接返回&lt;/li>
-&lt;/ol>
-&lt;p>这样，相比于老的线程池模型，由业务线程自己负责监测并解析返回结果，免去了额外的消费端线程池开销。&lt;/p>
-&lt;h2 id="提供端线程模型">提供端线程模型&lt;/h2>
-&lt;p>Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。&lt;/p>
-&lt;h3 id="dubbo协议">Dubbo协议&lt;/h3>
-&lt;p>介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：&lt;/p>
-&lt;ul>
-&lt;li>建立连接：connected，主要是的职责是在channel记录read、write的次数，以及处理建立连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（onconnect），即在该操作中执行。&lt;/li>
-&lt;li>断开连接：disconnected，主要是的职责是在channel移除read、write的时间，以及处理断开连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（ondisconnect），即在该操作中执行。&lt;/li>
-&lt;li>发送消息：sent，包括发送请求和发送响应。记录write的时间。&lt;/li>
-&lt;li>接收消息：received，包括接收请求和接收响应。记录read的时间。&lt;/li>
-&lt;li>异常捕获：caught，用于处理在channel上发生的各类异常。&lt;/li>
-&lt;/ul>
-&lt;p>Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Provider线程模型可以分为五类，也就是AllDispatcher、DirectDispatcher、MessageOnlyDispatcher、ExecutionDispatcher、ConnectionOrderedDispatcher。&lt;/p>
-&lt;h4 id="配置方式">配置方式&lt;/h4>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">线程模型&lt;/th>
- &lt;th style="text-align: left">配置值&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">All Dispatcher&lt;/td>
- &lt;td style="text-align: left">all&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Direct Dispatcher&lt;/td>
- &lt;td style="text-align: left">direct&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Execution Dispatcher&lt;/td>
- &lt;td style="text-align: left">execution&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Message Only Dispatcher&lt;/td>
- &lt;td style="text-align: left">message&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">Connection Ordered Dispatcher&lt;/td>
- &lt;td style="text-align: left">connection&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;p>拿 application.yaml 的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher&lt;/p></description></item><item><title>使用 Filter 过滤器动态拦截请求（request）或响应（response）</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/filter/</guid><description>&lt;p>Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。&lt;/p>
-&lt;p>Filter 工作原理如下图所示：&lt;/p>
-&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/framework/filter.png"/>
-&lt;p>可以通过 Filter 实现的一些典型能力如下：&lt;/p>
-&lt;ul>
-&lt;li>记录请求参数、响应结果等到日志文件&lt;/li>
-&lt;li>为 RPC 请求添加认证或校验逻辑&lt;/li>
-&lt;li>在发送或执行请求之前，格式化请求体或 header 参数&lt;/li>
-&lt;li>压缩响应结果&lt;/li>
-&lt;li>对请求数据进行埋点，统计调用耗时、成功、失败次数等&lt;/li>
-&lt;li>监测并发执行的请求数量，实现限流降级能力&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>如上图所示，Dubbo 代理会自动加载 Filter 实现并将它们组装到调用链路。Filter 是一个标准的 SPI 定义，框架按照一定的激活规则自动加载 Filter 实现。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SPI&lt;/span>(scope &lt;span style="color:#719e07">=&lt;/span> ExtensionScope.MODULE)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">Filter&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> BaseFilter {}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Filter 的默认激活状态可在定义中通过 &lt;code>@Activate&lt;/code> 注解设置，如以下定义表示该 Filter 在提供者端执行 RPC 请求时自动开启（在消费端不开启）。&lt;code>@Activate&lt;/code> 支持多种条件控制，包括 classpath 下有某个类的定义时开启，URL 中有哪个参数值时开启等，具体可参见 &lt;a href="https://dubbo.apache.org/zh-cn/">SPI 扩展 Activate 介绍&lt;/a>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Activate&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> PROVIDER)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AccessLogFilter&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Filter {}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="关闭自动加载">关闭自动加载&lt;/h3>
-&lt;p>如想关闭某个 filter 加载，在不修改 Filter 定义的情况下，可通过以下几种配置关闭。&lt;/p>
-&lt;p>全局关闭 filter，所有 rpc 调用均不启用 filter&lt;/p></description></item><item><title>为服务调用指定 timeout 超时时间</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/timeout/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/timeout/</guid><description>&lt;p>为 RPC 调用设置超时时间可以提升集群整体稳定性，避免无限等待响应结果导致的资源占用（比如大量长期无响应的请求占用线程池等）。在调用没有响应的情况下，比如 5s 之后，Dubbo 框架就会自动终止调用等待过程（抛出 TimeoutException），释放此次调用占用的资源。&lt;/p>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>有多种方式可以配置 rpc 调用超时时间，从粗粒度的全局默认值，到特定服务、特定方法级别的独立配置：&lt;/p>
-&lt;p>配置全局默认超时时间为 5s（不配置的情况下，所有服务的默认超时时间是 1s）。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: &lt;span style="color:#2aa198">5000&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在消费端，指定 DemoService 服务调用的超时时间为 5s&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboReference&lt;/span>(timeout&lt;span style="color:#719e07">=&lt;/span>5000)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> DemoService demoService;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在提供端，指定 DemoService 服务调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(timeout&lt;span style="color:#719e07">=&lt;/span>5000)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService{}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在消费端，指定 DemoService sayHello 方法调用的超时时间为 5s&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboReference&lt;/span>(methods &lt;span style="color:#719e07">=&lt;/span> {&lt;span style="color:#268bd2">@Method&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, timeout &lt;span style="color:#719e07">=&lt;/span> 5000)})
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> DemoService demoService;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在提供端，指定 DemoService sayHello 方法调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(methods &lt;span style="color:#719e07">=&lt;/span> {&lt;span style="color:#268bd2">@Method&lt;/span>(name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>, timeout &lt;span style="color:#719e07">=&lt;/span> 5000)})
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DemoService{}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上配置形式的优先级从高到低依次为：&lt;code>方法级别配置 &amp;gt; 服务级别配置 &amp;gt; 全局配置 &amp;gt; 默认值&lt;/code>。&lt;/p>
-&lt;h2 id="deadline-机制">Deadline 机制&lt;/h2>
-&lt;img style="max-width:600px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/framework/timeout.png"/>
-&lt;p>我们来分析一下以上调用链路以及可能出现的超时情况：&lt;/p>
-&lt;ul>
-&lt;li>A 调用 B 设置了超时时间 5s，因此 &lt;code>B -&amp;gt; C -&amp;gt; D&lt;/code> 总计耗时不应该超过 5s，否则 A 就会收到超时异常&lt;/li>
-&lt;li>在任何情形下，只要 A 等待 5s 没有收到响应，整个调用链路就可以被终止了（如果此时 C 正在运行，则 &lt;code>C -&amp;gt; D&lt;/code> 就没有发起的意义了）&lt;/li>
-&lt;li>理论上 &lt;code>B -&amp;gt; C&lt;/code>、&lt;code>C -&amp;gt; D&lt;/code> 都有自己独立的超时时间设置，超时计时也是独立计算的，它们不知道 A 作为调用发起方是否超时&lt;/li>
-&lt;/ul>
-&lt;p>在 Dubbo 框架中，&lt;code>A -&amp;gt; B&lt;/code> 的调用就像一个开关，一旦启动，在任何情形下整个 &lt;code>A -&amp;gt; B -&amp;gt; C -&amp;gt; D&lt;/code> 调用链路都会被完整执行下去，即便调用方 A 已经超时，后续的调用动作仍会继续。这在一些场景下是没有意义的，尤其是链路较长的情况下会带来不必要的资源消耗，deadline 就是设计用来解决这个问题，通过在调用链路中传递 deadline（deadline初始值等于超时时间，随着时间流逝而减少）可以确保调用链路只在有效期内执行，deadline 消耗殆尽之后，调用链路中其他尚未执行的任务将被取消。&lt;/p></description></item><item><title>异步调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/async/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/async/</guid><description>&lt;p>Dubbo 异步调用分为 Provider 端异步调用和 Consumer 端异步两种模式。&lt;/p>
-&lt;ul>
-&lt;li>Consumer 端异步是指发起 RPC 调用后立即返回，调用线程继续处理其他业务逻辑，当响应结果返回后通过回调函数通知消费端结果。&lt;/li>
-&lt;li>Provider 端异步执行将阻塞的业务从 Dubbo 内部线程池切换到业务自定义线程，避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。&lt;/li>
-&lt;/ul>
-&lt;p>以下是消费端 consumer 异步调用的工作示例图：&lt;/p>
-&lt;p>&lt;img alt="/user-guide/images/future.jpg" src="https://dubbo.apache.org/imgs/user/future.jpg">&lt;/p>
-&lt;p>Provider 端异步执行和 Consumer 端异步调用是相互独立的，你可以任意正交组合两端配置。&lt;/p>
-&lt;ul>
-&lt;li>Consumer同步 - Provider同步&lt;/li>
-&lt;li>Consumer异步 - Provider同步&lt;/li>
-&lt;li>Consumer同步 - Provider异步&lt;/li>
-&lt;li>Consumer异步 - Provider异步&lt;/li>
-&lt;/ul>
-&lt;p>本文档演示的完整示例源码请参见：&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-simple-boot">Consumer 服务调用异步&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-provider">Provider 服务执行异步&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-original-future">定义 CompletableFuture 方法签名的服务&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="provider异步">Provider异步&lt;/h2>
-&lt;h3 id="1-使用completablefuture">1 使用CompletableFuture&lt;/h3>
-&lt;p>接口定义：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">AsyncService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 同步调用方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">invoke&lt;/span>(String param);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 异步调用方法
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">asyncInvoke&lt;/span>(String param);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务实现：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AsyncServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> AsyncService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">invoke&lt;/span>(String param) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> time &lt;span style="color:#719e07">=&lt;/span> ThreadLocalRandom.current().nextLong(1000);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.sleep(time);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringBuilder s &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> s.append(&lt;span style="color:#2aa198">&amp;#34;AsyncService invoke param:&amp;#34;&lt;/span>).append(param).append(&lt;span style="color:#2aa198">&amp;#34;,sleep:&amp;#34;&lt;/span>).append(time);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> s.toString();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">catch&lt;/span> (InterruptedException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.currentThread().interrupt();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">asyncInvoke&lt;/span>(String param) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 建议为supplyAsync提供自定义线程池&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> CompletableFuture.supplyAsync(() &lt;span style="color:#719e07">-&amp;gt;&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Do something&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">long&lt;/span> time &lt;span style="color:#719e07">=&lt;/span> ThreadLocalRandom.current().nextLong(1000);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.sleep(time);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringBuilder s &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> s.append(&lt;span style="color:#2aa198">&amp;#34;AsyncService asyncInvoke param:&amp;#34;&lt;/span>).append(param).append(&lt;span style="color:#2aa198">&amp;#34;,sleep:&amp;#34;&lt;/span>).append(time);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> s.toString();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (InterruptedException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Thread.currentThread().interrupt();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 return CompletableFuture.supplyAsync() ，业务执行已从 Dubbo 线程切换到业务线程，避免了对 Dubbo 线程池的阻塞。&lt;/p></description></item><item><title>版本与分组</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/version_group/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/version_group/</guid><description>&lt;p>Dubbo服务中，接口并不能唯一确定一个服务，只有 &lt;code>接口+分组+版本号&lt;/code> 的三元组才能唯一确定一个服务。&lt;/p>
-&lt;ul>
-&lt;li>当同一个接口针对不同的业务场景、不同的使用需求或者不同的功能模块等场景，可使用服务分组来区分不同的实现方式。同时，这些不同实现所提供的服务是可并存的，也支持互相调用。&lt;/li>
-&lt;li>当接口实现需要升级又要保留原有实现的情况下，即出现不兼容升级时，我们可以使用不同版本号进行区分。&lt;/li>
-&lt;/ul>
-&lt;p>本文示例完整源码可在以下链接查看：&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-group">dubbo-samples-group&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-version">dubbo-samples-version&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge">dubbo-samples-merge&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>使用 @DubboService 注解，配置 &lt;code>group&lt;/code> 参数和 &lt;code>version&lt;/code> 参数：&lt;/p>
-&lt;p>接口定义：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">DevelopService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">invoke&lt;/span>(String param);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口实现1：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;group1&amp;#34;&lt;/span>, version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DevelopProviderServiceV1&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DevelopService{
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">invoke&lt;/span>(String param) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringBuilder s &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> s.append(&lt;span style="color:#2aa198">&amp;#34;ServiceV1 param:&amp;#34;&lt;/span>).append(param);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> s.toString();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接口实现2：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(group &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;group2&amp;#34;&lt;/span>, version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;2.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DevelopProviderServiceV2&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> DevelopService{
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">invoke&lt;/span>(String param) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringBuilder s &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> StringBuilder();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> s.append(&lt;span style="color:#2aa198">&amp;#34;ServiceV2 param:&amp;#34;&lt;/span>).append(param);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> s.toString();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>客户端接口调用：&lt;/p>
-&lt;blockquote>
-&lt;p>使用 @DubboReference 注解，添加 group 参数和 version 参数&lt;/p></description></item><item><title>调用链路传递隐式参数</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/attachment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/attachment/</guid><description>&lt;p>在不修改方法签名与参数定义的情况下，可以通过 &lt;code>RpcContext&lt;/code> 上的 &lt;code>setAttachment&lt;/code> 和 &lt;code>getAttachment&lt;/code> 在服务消费方和提供方之间进行参数的隐式传递。隐式参数传递支持以下两个方向：&lt;/p>
-&lt;ul>
-&lt;li>从消费方到提供方，也就是在请求发起时，在方法参数之外通过 attachment 传递附加参数。&lt;/li>
-&lt;li>从提供方到消费方，也就是在响应结果返回时，在响应结果之外通过 attachment 传递附加参数。&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>理解隐式参数传递的最直接方式 http header，它的工作方式与 http header 完全一致，在 GET 或 POST 请求体之外可以传递任意多个 header 参数&lt;/strong>。在实现原理上，对于不同的协议，attachment 的实现方式略有不同：&lt;/p>
-&lt;ul>
-&lt;li>对于 triple 协议，attachment 会转换为标准的 http header 进行传输。&lt;/li>
-&lt;li>对于 dubbo 协议，attachment 是编码在协议体的固定位置进行传输，具体请参见 dubbo 协议规范。&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="/user-guide/images/context.png" src="https://dubbo.apache.org/imgs/user/context.png">&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo 作为轻量 RPC 框架解决组件通信问题 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/</link><description>Recent content in Dubbo 作为轻量 RPC 框架解决组件通信问题 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/index.xml" rel="self" type="application/rss+xml"/><item><title>使用轻量的 Java SDK 开发 RPC Server 和 Client</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/lightweight-rpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/lightweight-rpc/</guid><description>&lt;p&gt;本示例演示如何使用轻量 Dubbo SDK 开发 RPC Server 与 Client，示例使用 Java Interface 方式定义、发布和访问 RPC 服务，底层使用 Triple 协议通信。本示例完整代码请参见 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/1-basic/dubbo-samples-api" target="_blank"&gt;dubbo-samples&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Java SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p&gt;
+&lt;h2 id="maven-依赖"&gt;Maven 依赖&lt;/h2&gt;
+&lt;p&gt;在基于 Dubbo RPC 编码之前，您只需要在项目添加一个非常轻量的 &lt;code&gt;dubbo&lt;/code&gt;依赖包即可，以 Maven 为例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.dubbo&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.3.0&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&amp;lt;!-- 为了避免 Netty 依赖冲突，您也可以是选择使用 dubbo-shaded 版本！--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&amp;lt;!--
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&amp;lt;dependency&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; &amp;lt;groupId&amp;gt;org.apache.dubbo&amp;lt;/groupId&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; &amp;lt;artifactId&amp;gt;dubbo-shaded&amp;lt;/artifactId&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; &amp;lt;version&amp;gt;3.3.0&amp;lt;/version&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&amp;lt;/dependency&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="定义服务"&gt;定义服务&lt;/h2&gt;
+&lt;p&gt;定义一个名为 &lt;code&gt;DemoService&lt;/code&gt;的标准 Java 接口作为 Dubbo 服务（Dubbo 还支持&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/"&gt;基于 IDL 的服务定义模式&lt;/a&gt;）。&lt;/p&gt;</description></item><item><title>消费端线程模型，提供者端线程模型</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/threading-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/threading-model/</guid><description>&lt;h2 id="消费端线程模型"&gt;消费端线程模型&lt;/h2&gt;
+&lt;p&gt;对 2.7.5 版本之前的 Dubbo 应用，尤其是一些消费端应用，当面临需要消费大量服务且并发数比较大的大流量场景时（典型如网关类场景），经常会出现消费端线程数分配过多的问题，具体问题讨论可参见 &lt;a href="https://github.com/apache/dubbo/issues/2013"&gt;Need a limited Threadpool in consumer side #2013&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;改进后的消费端线程池模型，通过复用业务端被阻塞的线程，很好的解决了这个问题。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;老的线程池模型&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/consumer-threadpool0.png" alt="消费端线程池.png"&gt;&lt;/p&gt;
+&lt;p&gt;我们重点关注 Consumer 部分：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;业务线程发出请求，拿到一个 Future 实例。&lt;/li&gt;
+&lt;li&gt;业务线程紧接着调用 future.get 阻塞等待业务结果返回。&lt;/li&gt;
+&lt;li&gt;当业务数据返回后，交由独立的 Consumer 端线程池进行反序列化等处理，并调用 future.set 将反序列化后的业务结果置回。&lt;/li&gt;
+&lt;li&gt;业务线程拿到结果直接返回&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;当前线程池模型&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/consumer-threadpool1.png" alt="消费端线程池新.png"&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;业务线程发出请求，拿到一个 Future 实例。&lt;/li&gt;
+&lt;li&gt;在调用 future.get() 之前，先调用 ThreadlessExecutor.wait()，wait 会使业务线程在一个阻塞队列上等待，直到队列中被加入元素。&lt;/li&gt;
+&lt;li&gt;当业务数据返回后，生成一个 Runnable Task 并放入 ThreadlessExecutor 队列&lt;/li&gt;
+&lt;li&gt;业务线程将 Task 取出并在本线程中执行：反序列化业务数据并 set 到 Future。&lt;/li&gt;
+&lt;li&gt;业务线程拿到结果直接返回&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这样，相比于老的线程池模型，由业务线程自己负责监测并解析返回结果，免去了额外的消费端线程池开销。&lt;/p&gt;
+&lt;h2 id="提供端线程模型"&gt;提供端线程模型&lt;/h2&gt;
+&lt;p&gt;Dubbo协议的和Triple协议目前的线程模型还并没有对齐，下面分开介绍Triple协议和Dubbo协议的线程模型。&lt;/p&gt;
+&lt;h3 id="dubbo协议"&gt;Dubbo协议&lt;/h3&gt;
+&lt;p&gt;介绍Dubbo协议的Provider端线程模型之前，先介绍Dubbo对channel上的操作抽象成了五种行为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;建立连接：connected，主要是的职责是在channel记录read、write的次数，以及处理建立连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（onconnect），即在该操作中执行。&lt;/li&gt;
+&lt;li&gt;断开连接：disconnected，主要是的职责是在channel移除read、write的时间，以及处理断开连接后的回调逻辑，比如dubbo支持在断开后自定义回调的hook（ondisconnect），即在该操作中执行。&lt;/li&gt;
+&lt;li&gt;发送消息：sent，包括发送请求和发送响应。记录write的时间。&lt;/li&gt;
+&lt;li&gt;接收消息：received，包括接收请求和接收响应。记录read的时间。&lt;/li&gt;
+&lt;li&gt;异常捕获：caught，用于处理在channel上发生的各类异常。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo框架的线程模型与以上这五种行为息息相关，Dubbo协议Provider线程模型可以分为五类，也就是AllDispatcher、DirectDispatcher、MessageOnlyDispatcher、ExecutionDispatcher、ConnectionOrderedDispatcher。&lt;/p&gt;
+&lt;h4 id="配置方式"&gt;配置方式&lt;/h4&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;线程模型&lt;/th&gt;
+ &lt;th&gt;配置值&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;All Dispatcher&lt;/td&gt;
+ &lt;td&gt;all&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Direct Dispatcher&lt;/td&gt;
+ &lt;td&gt;direct&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Execution Dispatcher&lt;/td&gt;
+ &lt;td&gt;execution&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Message Only Dispatcher&lt;/td&gt;
+ &lt;td&gt;message&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Connection Ordered Dispatcher&lt;/td&gt;
+ &lt;td&gt;connection&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;拿 application.yaml 的配置方式举例：在protocol下配置dispatcher: all，即可把dubbo协议的线程模型调整为All Dispatcher&lt;/p&gt;</description></item><item><title>使用 Filter 过滤器动态拦截请求（request）或响应（response）</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/filter/</guid><description>&lt;p&gt;Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。&lt;/p&gt;
+&lt;p&gt;Filter 工作原理如下图所示：&lt;/p&gt;
+&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/framework/filter.png"/&gt;
+&lt;p&gt;可以通过 Filter 实现的一些典型能力如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;记录请求参数、响应结果等到日志文件&lt;/li&gt;
+&lt;li&gt;为 RPC 请求添加认证或校验逻辑&lt;/li&gt;
+&lt;li&gt;在发送或执行请求之前，格式化请求体或 header 参数&lt;/li&gt;
+&lt;li&gt;压缩响应结果&lt;/li&gt;
+&lt;li&gt;对请求数据进行埋点，统计调用耗时、成功、失败次数等&lt;/li&gt;
+&lt;li&gt;监测并发执行的请求数量，实现限流降级能力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
+&lt;p&gt;如上图所示，Dubbo 代理会自动加载 Filter 实现并将它们组装到调用链路。Filter 是一个标准的 SPI 定义，框架按照一定的激活规则自动加载 Filter 实现。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@SPI&lt;/span&gt;(scope &lt;span style="color:#719e07"&gt;=&lt;/span&gt; ExtensionScope.MODULE)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;Filter&lt;/span&gt; &lt;span style="color:#268bd2"&gt;extends&lt;/span&gt; BaseFilter {}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Filter 的默认激活状态可在定义中通过 &lt;code&gt;@Activate&lt;/code&gt; 注解设置，如以下定义表示该 Filter 在提供者端执行 RPC 请求时自动开启（在消费端不开启）。&lt;code&gt;@Activate&lt;/code&gt; 支持多种条件控制，包括 classpath 下有某个类的定义时开启，URL 中有哪个参数值时开启等，具体可参见 &lt;a href=""&gt;SPI 扩展 Activate 介绍&lt;/a&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@Activate&lt;/span&gt;(group &lt;span style="color:#719e07"&gt;=&lt;/span&gt; PROVIDER)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;AccessLogFilter&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; Filter {}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="关闭自动加载"&gt;关闭自动加载&lt;/h3&gt;
+&lt;p&gt;如想关闭某个 filter 加载，在不修改 Filter 定义的情况下，可通过以下几种配置关闭。&lt;/p&gt;
+&lt;p&gt;全局关闭 filter，所有 rpc 调用均不启用 filter&lt;/p&gt;</description></item><item><title>为服务调用指定 timeout 超时时间</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/timeout/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/timeout/</guid><description>&lt;p&gt;为 RPC 调用设置超时时间可以提升集群整体稳定性，避免无限等待响应结果导致的资源占用（比如大量长期无响应的请求占用线程池等）。在调用没有响应的情况下，比如 5s 之后，Dubbo 框架就会自动终止调用等待过程（抛出 TimeoutException），释放此次调用占用的资源。&lt;/p&gt;
+&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
+&lt;p&gt;有多种方式可以配置 rpc 调用超时时间，从粗粒度的全局默认值，到特定服务、特定方法级别的独立配置：&lt;/p&gt;
+&lt;p&gt;配置全局默认超时时间为 5s（不配置的情况下，所有服务的默认超时时间是 1s）。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;provider&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;timeout&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;5000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在消费端，指定 DemoService 服务调用的超时时间为 5s&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboReference&lt;/span&gt;(timeout&lt;span style="color:#719e07"&gt;=&lt;/span&gt;5000)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; DemoService demoService;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在提供端，指定 DemoService 服务调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;(timeout&lt;span style="color:#719e07"&gt;=&lt;/span&gt;5000)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; DemoService{}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在消费端，指定 DemoService sayHello 方法调用的超时时间为 5s&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboReference&lt;/span&gt;(methods &lt;span style="color:#719e07"&gt;=&lt;/span&gt; {&lt;span style="color:#268bd2"&gt;@Method&lt;/span&gt;(name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;sayHello&amp;#34;&lt;/span&gt;, timeout &lt;span style="color:#719e07"&gt;=&lt;/span&gt; 5000)})
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; DemoService demoService;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在提供端，指定 DemoService sayHello 方法调用的超时时间为 5s（可作为所有消费端的默认值，如果消费端有指定则优先级更高）&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;(methods &lt;span style="color:#719e07"&gt;=&lt;/span&gt; {&lt;span style="color:#268bd2"&gt;@Method&lt;/span&gt;(name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;sayHello&amp;#34;&lt;/span&gt;, timeout &lt;span style="color:#719e07"&gt;=&lt;/span&gt; 5000)})
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; DemoService{}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;以上配置形式的优先级从高到低依次为：&lt;code&gt;方法级别配置 &amp;gt; 服务级别配置 &amp;gt; 全局配置 &amp;gt; 默认值&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="deadline-机制"&gt;Deadline 机制&lt;/h2&gt;
+&lt;img style="max-width:600px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/framework/timeout.png"/&gt;
+&lt;p&gt;我们来分析一下以上调用链路以及可能出现的超时情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A 调用 B 设置了超时时间 5s，因此 &lt;code&gt;B -&amp;gt; C -&amp;gt; D&lt;/code&gt; 总计耗时不应该超过 5s，否则 A 就会收到超时异常&lt;/li&gt;
+&lt;li&gt;在任何情形下，只要 A 等待 5s 没有收到响应，整个调用链路就可以被终止了（如果此时 C 正在运行，则 &lt;code&gt;C -&amp;gt; D&lt;/code&gt; 就没有发起的意义了）&lt;/li&gt;
+&lt;li&gt;理论上 &lt;code&gt;B -&amp;gt; C&lt;/code&gt;、&lt;code&gt;C -&amp;gt; D&lt;/code&gt; 都有自己独立的超时时间设置，超时计时也是独立计算的，它们不知道 A 作为调用发起方是否超时&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在 Dubbo 框架中，&lt;code&gt;A -&amp;gt; B&lt;/code&gt; 的调用就像一个开关，一旦启动，在任何情形下整个 &lt;code&gt;A -&amp;gt; B -&amp;gt; C -&amp;gt; D&lt;/code&gt; 调用链路都会被完整执行下去，即便调用方 A 已经超时，后续的调用动作仍会继续。这在一些场景下是没有意义的，尤其是链路较长的情况下会带来不必要的资源消耗，deadline 就是设计用来解决这个问题，通过在调用链路中传递 deadline（deadline初始值等于超时时间，随着时间流逝而减少）可以确保调用链路只在有效期内执行，deadline 消耗殆尽之后，调用链路中其他尚未执行的任务将被取消。&lt;/p&gt;</description></item><item><title>异步调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/async/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/async/</guid><description>&lt;p&gt;Dubbo 异步调用分为 Provider 端异步调用和 Consumer 端异步两种模式。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Consumer 端异步是指发起 RPC 调用后立即返回，调用线程继续处理其他业务逻辑，当响应结果返回后通过回调函数通知消费端结果。&lt;/li&gt;
+&lt;li&gt;Provider 端异步执行将阻塞的业务从 Dubbo 内部线程池切换到业务自定义线程，避免Dubbo线程池的过度占用，有助于避免不同服务间的互相影响。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;以下是消费端 consumer 异步调用的工作示例图：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/future.jpg" alt="/user-guide/images/future.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;Provider 端异步执行和 Consumer 端异步调用是相互独立的，你可以任意正交组合两端配置。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Consumer同步 - Provider同步&lt;/li&gt;
+&lt;li&gt;Consumer异步 - Provider同步&lt;/li&gt;
+&lt;li&gt;Consumer同步 - Provider异步&lt;/li&gt;
+&lt;li&gt;Consumer异步 - Provider异步&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;本文档演示的完整示例源码请参见：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-simple-boot"&gt;Consumer 服务调用异步&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-provider"&gt;Provider 服务执行异步&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-async/dubbo-samples-async-original-future"&gt;定义 CompletableFuture 方法签名的服务&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="provider异步"&gt;Provider异步&lt;/h2&gt;
+&lt;h3 id="1-使用completablefuture"&gt;1 使用CompletableFuture&lt;/h3&gt;
+&lt;p&gt;接口定义：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;AsyncService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 同步调用方法
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String &lt;span style="color:#268bd2"&gt;invoke&lt;/span&gt;(String param);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 异步调用方法
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;String&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;asyncInvoke&lt;/span&gt;(String param);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;服务实现：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;AsyncServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; AsyncService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;invoke&lt;/span&gt;(String param) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;try&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;long&lt;/span&gt; time &lt;span style="color:#719e07"&gt;=&lt;/span&gt; ThreadLocalRandom.current().nextLong(1000);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Thread.sleep(time);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; StringBuilder s &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; StringBuilder();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; s.append(&lt;span style="color:#2aa198"&gt;&amp;#34;AsyncService invoke param:&amp;#34;&lt;/span&gt;).append(param).append(&lt;span style="color:#2aa198"&gt;&amp;#34;,sleep:&amp;#34;&lt;/span&gt;).append(time);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; s.toString();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;catch&lt;/span&gt; (InterruptedException e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Thread.currentThread().interrupt();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;String&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;asyncInvoke&lt;/span&gt;(String param) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 建议为supplyAsync提供自定义线程池&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; CompletableFuture.supplyAsync(() &lt;span style="color:#719e07"&gt;-&amp;gt;&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;try&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// Do something&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;long&lt;/span&gt; time &lt;span style="color:#719e07"&gt;=&lt;/span&gt; ThreadLocalRandom.current().nextLong(1000);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Thread.sleep(time);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; StringBuilder s &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; StringBuilder();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; s.append(&lt;span style="color:#2aa198"&gt;&amp;#34;AsyncService asyncInvoke param:&amp;#34;&lt;/span&gt;).append(param).append(&lt;span style="color:#2aa198"&gt;&amp;#34;,sleep:&amp;#34;&lt;/span&gt;).append(time);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; s.toString();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } &lt;span style="color:#719e07"&gt;catch&lt;/span&gt; (InterruptedException e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Thread.currentThread().interrupt();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; });
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过 return CompletableFuture.supplyAsync() ，业务执行已从 Dubbo 线程切换到业务线程，避免了对 Dubbo 线程池的阻塞。&lt;/p&gt;</description></item><item><title>版本与分组</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/version_group/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/version_group/</guid><description>&lt;p&gt;Dubbo服务中，接口并不能唯一确定一个服务，只有 &lt;code&gt;接口+分组+版本号&lt;/code&gt; 的三元组才能唯一确定一个服务。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;当同一个接口针对不同的业务场景、不同的使用需求或者不同的功能模块等场景，可使用服务分组来区分不同的实现方式。同时，这些不同实现所提供的服务是可并存的，也支持互相调用。&lt;/li&gt;
+&lt;li&gt;当接口实现需要升级又要保留原有实现的情况下，即出现不兼容升级时，我们可以使用不同版本号进行区分。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;本文示例完整源码可在以下链接查看：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-group"&gt;dubbo-samples-group&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-version"&gt;dubbo-samples-version&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-merge"&gt;dubbo-samples-merge&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
+&lt;p&gt;使用 @DubboService 注解，配置 &lt;code&gt;group&lt;/code&gt; 参数和 &lt;code&gt;version&lt;/code&gt; 参数：&lt;/p&gt;
+&lt;p&gt;接口定义：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DevelopService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String &lt;span style="color:#268bd2"&gt;invoke&lt;/span&gt;(String param);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;接口实现1：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;(group &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;group1&amp;#34;&lt;/span&gt;, version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DevelopProviderServiceV1&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; DevelopService{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;invoke&lt;/span&gt;(String param) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; StringBuilder s &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; StringBuilder();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; s.append(&lt;span style="color:#2aa198"&gt;&amp;#34;ServiceV1 param:&amp;#34;&lt;/span&gt;).append(param);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; s.toString();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;接口实现2：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;(group &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;group2&amp;#34;&lt;/span&gt;, version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;2.0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DevelopProviderServiceV2&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; DevelopService{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;invoke&lt;/span&gt;(String param) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; StringBuilder s &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; StringBuilder();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; s.append(&lt;span style="color:#2aa198"&gt;&amp;#34;ServiceV2 param:&amp;#34;&lt;/span&gt;).append(param);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; s.toString();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;客户端接口调用：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;使用 @DubboReference 注解，添加 group 参数和 version 参数&lt;/p&gt;</description></item><item><title>调用链路传递隐式参数</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/attachment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/attachment/</guid><description>&lt;p&gt;在不修改方法签名与参数定义的情况下，可以通过 &lt;code&gt;RpcContext&lt;/code&gt; 上的 &lt;code&gt;setAttachment&lt;/code&gt; 和 &lt;code&gt;getAttachment&lt;/code&gt; 在服务消费方和提供方之间进行参数的隐式传递。隐式参数传递支持以下两个方向：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;从消费方到提供方，也就是在请求发起时，在方法参数之外通过 attachment 传递附加参数。&lt;/li&gt;
+&lt;li&gt;从提供方到消费方，也就是在响应结果返回时，在响应结果之外通过 attachment 传递附加参数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;理解隐式参数传递的最直接方式 http header，它的工作方式与 http header 完全一致，在 GET 或 POST 请求体之外可以传递任意多个 header 参数&lt;/strong&gt;。在实现原理上，对于不同的协议，attachment 的实现方式略有不同：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于 triple 协议，attachment 会转换为标准的 http header 进行传输。&lt;/li&gt;
+&lt;li&gt;对于 dubbo 协议，attachment 是编码在协议体的固定位置进行传输，具体请参见 dubbo 协议规范。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/context.png" alt="/user-guide/images/context.png"&gt;&lt;/p&gt;
 
 
-&lt;div class="alert alert-primary" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;div class="alert alert-primary" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- &lt;ul>
-&lt;li>在使用 triple 协议时，由于 http header 的限制，仅支持小写的 ascii 字符&lt;/li>
-&lt;li>path, group, version, dubbo, token, timeout 一些 key 是保留字段，传递 attachment 时应避免使用，尽量通过业务前缀等确保 key 的唯一性。&lt;/li>
-&lt;/ul>
+ &lt;ul&gt;
+&lt;li&gt;在使用 triple 协议时，由于 http header 的限制，仅支持小写的 ascii 字符&lt;/li&gt;
+&lt;li&gt;path, group, version, dubbo, token, timeout 一些 key 是保留字段，传递 attachment 时应避免使用，尽量通过业务前缀等确保 key 的唯一性。&lt;/li&gt;
+&lt;/ul&gt;
 
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;h2 id="消费端隐式参数">消费端隐式参数&lt;/h2>
-&lt;p>本文示例完整源码可在以下链接查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-attachment">dubbo-samples-attachment&lt;/a>&lt;/p>
-&lt;h3 id="设置隐式参数">设置隐式参数&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>RpcContext.getClientAttachment().setAttachment(&lt;span style="color:#2aa198">&amp;#34;index&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;1&amp;#34;&lt;/span>); &lt;span style="color:#586e75">// 隐式传参，后面的远程调用都会隐式将这些参数发送到服务器端，类似cookie，比如用于框架集成&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>xxxService.xxx(); &lt;span style="color:#586e75">// 远程调用&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// ...&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="读取隐式参数">读取隐式参数&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> XxxService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">xxx&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 获取客户端隐式传入的参数，比如用于框架集成&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String index &lt;span style="color:#719e07">=&lt;/span> RpcContext.getServerAttachment().getAttachment(&lt;span style="color:#2aa198">&amp;#34;index&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="提供端隐式参数">提供端隐式参数&lt;/h2>
-&lt;h3 id="设置隐式参数-1">设置隐式参数&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">XxxServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> XxxService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">xxx&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String index &lt;span style="color:#719e07">=&lt;/span> xxx;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> RpcContext.getServerContext().setAttachment(&lt;span style="color:#2aa198">&amp;#34;result&amp;#34;&lt;/span>, index);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="读取隐式参数-1">读取隐式参数&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>xxxService.xxx(); &lt;span style="color:#586e75">// 远程调用&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>String result &lt;span style="color:#719e07">=&lt;/span> RpcContext.getServerContext().getAttachment(&lt;span style="color:#2aa198">&amp;#34;result&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// ...&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;h2 id="消费端隐式参数"&gt;消费端隐式参数&lt;/h2&gt;
+&lt;p&gt;本文示例完整源码可在以下链接查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-attachment"&gt;dubbo-samples-attachment&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="设置隐式参数"&gt;设置隐式参数&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;RpcContext.getClientAttachment().setAttachment(&lt;span style="color:#2aa198"&gt;&amp;#34;index&amp;#34;&lt;/span&gt;, &lt;span style="color:#2aa198"&gt;&amp;#34;1&amp;#34;&lt;/span&gt;); &lt;span style="color:#586e75"&gt;// 隐式传参，后面的远程调用都会隐式将这些参数发送到服务器端，类似cookie，比如用于框架集成&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;xxxService.xxx(); &lt;span style="color:#586e75"&gt;// 远程调用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="读取隐式参数"&gt;读取隐式参数&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;XxxServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; XxxService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;xxx&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 获取客户端隐式传入的参数，比如用于框架集成&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String index &lt;span style="color:#719e07"&gt;=&lt;/span&gt; RpcContext.getServerAttachment().getAttachment(&lt;span style="color:#2aa198"&gt;&amp;#34;index&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="提供端隐式参数"&gt;提供端隐式参数&lt;/h2&gt;
+&lt;h3 id="设置隐式参数-1"&gt;设置隐式参数&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;XxxServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; XxxService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;xxx&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String index &lt;span style="color:#719e07"&gt;=&lt;/span&gt; xxx;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; RpcContext.getServerContext().setAttachment(&lt;span style="color:#2aa198"&gt;&amp;#34;result&amp;#34;&lt;/span&gt;, index);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="读取隐式参数-1"&gt;读取隐式参数&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;xxxService.xxx(); &lt;span style="color:#586e75"&gt;// 远程调用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;String result &lt;span style="color:#719e07"&gt;=&lt;/span&gt; RpcContext.getServerContext().getAttachment(&lt;span style="color:#2aa198"&gt;&amp;#34;result&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">参数透传问题&lt;/h4>
+&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;参数透传问题&lt;/h4&gt;
 
- &lt;p>请注意！&lt;code>setAttachment&lt;/code> 设置的 KV 对，在完成下面一次远程调用会被清空，即多次远程调用要多次设置！这一点与 Dubbo2 中的行为是不一致的！&lt;/p></description></item><item><title>集群容错</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/fault-tolerent-strategy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/fault-tolerent-strategy/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。&lt;/p>
-&lt;p>&lt;img alt="cluster" src="https://dubbo.apache.org/imgs/user/cluster.jpg">&lt;/p>
-&lt;p>各节点关系：&lt;/p>
-&lt;ul>
-&lt;li>这里的 &lt;code>Invoker&lt;/code> 是 &lt;code>Provider&lt;/code> 的一个可调用 &lt;code>Service&lt;/code> 的抽象，&lt;code>Invoker&lt;/code> 封装了 &lt;code>Provider&lt;/code> 地址及 &lt;code>Service&lt;/code> 接口信息&lt;/li>
-&lt;li>&lt;code>Directory&lt;/code> 代表多个 &lt;code>Invoker&lt;/code>，可以把它看成 &lt;code>List&amp;lt;Invoker&amp;gt;&lt;/code> ，但与 &lt;code>List&lt;/code> 不同的是，它的值可能是动态变化的，比如注册中心推送变更&lt;/li>
-&lt;li>&lt;code>Cluster&lt;/code> 将 &lt;code>Directory&lt;/code> 中的多个 &lt;code>Invoker&lt;/code> 伪装成一个 &lt;code>Invoker&lt;/code>，对上层透明，伪装过程包含了容错逻辑，调用失败后，重试另一个&lt;/li>
-&lt;li>&lt;code>Router&lt;/code> 负责从多个 &lt;code>Invoker&lt;/code> 中按路由规则选出子集，比如读写分离，应用隔离等&lt;/li>
-&lt;li>&lt;code>LoadBalance&lt;/code> 负责从多个 &lt;code>Invoker&lt;/code> 中选出具体的一个用于本次调用，选的过程包含了负载均衡算法，调用失败后，需要重选&lt;/li>
-&lt;/ul>
-&lt;h2 id="集群容错模式">集群容错模式&lt;/h2>
-&lt;p>可以自行扩展集群容错策略，参见：&lt;a href="../../../dev/impls/cluster">集群扩展&lt;/a>&lt;/p>
-&lt;h3 id="failover-cluster">Failover Cluster&lt;/h3>
-&lt;p>失败自动切换，当出现失败，重试其它服务器。通常用于读操作，但重试会带来更长延迟。可通过 &lt;code>retries=&amp;quot;2&amp;quot;&lt;/code> 来设置重试次数(不含第一次)。&lt;/p>
-&lt;p>重试次数配置如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:reference&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;findFoo&amp;#34;&lt;/span> retries=&lt;span style="color:#2aa198">&amp;#34;2&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:reference&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+ &lt;p&gt;请注意！&lt;code&gt;setAttachment&lt;/code&gt; 设置的 KV 对，在完成下面一次远程调用会被清空，即多次远程调用要多次设置！这一点与 Dubbo2 中的行为是不一致的！&lt;/p&gt;</description></item><item><title>集群容错</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/fault-tolerent-strategy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/fault-tolerent-strategy/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/user/cluster.jpg" alt="cluster"&gt;&lt;/p&gt;
+&lt;p&gt;各节点关系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;这里的 &lt;code&gt;Invoker&lt;/code&gt; 是 &lt;code&gt;Provider&lt;/code&gt; 的一个可调用 &lt;code&gt;Service&lt;/code&gt; 的抽象，&lt;code&gt;Invoker&lt;/code&gt; 封装了 &lt;code&gt;Provider&lt;/code&gt; 地址及 &lt;code&gt;Service&lt;/code&gt; 接口信息&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Directory&lt;/code&gt; 代表多个 &lt;code&gt;Invoker&lt;/code&gt;，可以把它看成 &lt;code&gt;List&amp;lt;Invoker&amp;gt;&lt;/code&gt; ，但与 &lt;code&gt;List&lt;/code&gt; 不同的是，它的值可能是动态变化的，比如注册中心推送变更&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Cluster&lt;/code&gt; 将 &lt;code&gt;Directory&lt;/code&gt; 中的多个 &lt;code&gt;Invoker&lt;/code&gt; 伪装成一个 &lt;code&gt;Invoker&lt;/code&gt;，对上层透明，伪装过程包含了容错逻辑，调用失败后，重试另一个&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Router&lt;/code&gt; 负责从多个 &lt;code&gt;Invoker&lt;/code&gt; 中按路由规则选出子集，比如读写分离，应用隔离等&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;LoadBalance&lt;/code&gt; 负责从多个 &lt;code&gt;Invoker&lt;/code&gt; 中选出具体的一个用于本次调用，选的过程包含了负载均衡算法，调用失败后，需要重选&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="集群容错模式"&gt;集群容错模式&lt;/h2&gt;
+&lt;p&gt;可以自行扩展集群容错策略，参见：&lt;a href="../../../dev/impls/cluster"&gt;集群扩展&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="failover-cluster"&gt;Failover Cluster&lt;/h3&gt;
+&lt;p&gt;失败自动切换，当出现失败，重试其它服务器。通常用于读操作，但重试会带来更长延迟。可通过 &lt;code&gt;retries=&amp;quot;2&amp;quot;&lt;/code&gt; 来设置重试次数(不含第一次)。&lt;/p&gt;
+&lt;p&gt;重试次数配置如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; retries=&lt;span style="color:#2aa198"&gt;&amp;#34;2&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:reference&lt;/span&gt; retries=&lt;span style="color:#2aa198"&gt;&amp;#34;2&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:reference&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:method&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;findFoo&amp;#34;&lt;/span&gt; retries=&lt;span style="color:#2aa198"&gt;&amp;#34;2&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dubbo:reference&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class="alert alert-primary" role="alert">
-&lt;h4 class="alert-heading">提示&lt;/h4>
+&lt;div class="alert alert-primary" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;提示&lt;/h4&gt;
 
  该配置为缺省配置
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;h3 id="failfast-cluster">Failfast Cluster&lt;/h3>
-&lt;p>快速失败，只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录。&lt;/p>
-&lt;h3 id="failsafe-cluster">Failsafe Cluster&lt;/h3>
-&lt;p>失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。&lt;/p></description></item><item><title>泛化调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/generic/</guid><description>&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;h3 id="failfast-cluster"&gt;Failfast Cluster&lt;/h3&gt;
+&lt;p&gt;快速失败，只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录。&lt;/p&gt;
+&lt;h3 id="failsafe-cluster"&gt;Failsafe Cluster&lt;/h3&gt;
+&lt;p&gt;失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。&lt;/p&gt;</description></item><item><title>泛化调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/framework/generic/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- 泛化调用适用于老版本 dubbo 通信协议，如果您使用的是 3.3 及之后版本的 triple 协议，请直接使用 triple 自带的 http application/json 能力直接发起服务调用，相关示例可参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/">网关接入说明&lt;/a>。
+ 泛化调用适用于老版本 dubbo 通信协议，如果您使用的是 3.3 及之后版本的 triple 协议，请直接使用 triple 自带的 http application/json 能力直接发起服务调用，相关示例可参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/"&gt;网关接入说明&lt;/a&gt;。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;p>泛化调用（客户端泛化调用）是指在调用方没有服务提供方 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。调用方没有接口及模型类元，知道服务的接口的全限定类名和方法名的情况下，可以通过泛化调用调用对应接口。&lt;/p>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>泛化调用可通过一个通用的 GenericService 接口对所有服务发起请求。典型使用场景如下：&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>网关服务：如果要搭建一个网关服务，那么服务网关要作为所有 RPC 服务的调用端。但是网关本身不应该依赖于服务提供方的接口 API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>测试平台：如果要搭建一个可以测试 RPC 调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的 RPC 服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口 API。所以需要泛化调用的支持。&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>本示例的完整源码请参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic/dubbo-samples-generic-call/">dubbo-samples-generic-call&lt;/a>。&lt;/p>
-&lt;p>示例中有以下 Dubbo 服务定义和实现&lt;/p>
-&lt;p>服务接口定义：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">HelloService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncComplex&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncGenericComplex&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>服务具体实现并发布：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">HelloServiceImpl&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> HelloService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;sayHello: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>String&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsync&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncComplex&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> CompletableFuture&lt;span style="color:#719e07">&amp;lt;&lt;/span>GenericType&lt;span style="color:#719e07">&amp;lt;&lt;/span>Person&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">sayHelloAsyncGenericComplex&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// ...&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="api-调用方式">API 调用方式&lt;/h3>
-&lt;p>针对以上 Dubbo 服务，我们可以通过泛化调用 API 直接发起调用。&lt;/p></description></item></channel></rss>
+&lt;p&gt;泛化调用（客户端泛化调用）是指在调用方没有服务提供方 API（SDK）的情况下，对服务方进行调用，并且可以正常拿到调用结果。调用方没有接口及模型类元，知道服务的接口的全限定类名和方法名的情况下，可以通过泛化调用调用对应接口。&lt;/p&gt;
+&lt;h2 id="使用场景"&gt;使用场景&lt;/h2&gt;
+&lt;p&gt;泛化调用可通过一个通用的 GenericService 接口对所有服务发起请求。典型使用场景如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;网关服务：如果要搭建一个网关服务，那么服务网关要作为所有 RPC 服务的调用端。但是网关本身不应该依赖于服务提供方的接口 API（这样会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以需要泛化调用的支持。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;测试平台：如果要搭建一个可以测试 RPC 调用的平台，用户输入分组名、接口、方法名等信息，就可以测试对应的 RPC 服务。那么由于同样的原因（即会导致每有一个新的服务发布，就需要修改网关的代码以及重新部署），所以平台本身不应该依赖于服务提供方的接口 API。所以需要泛化调用的支持。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
+&lt;p&gt;本示例的完整源码请参考 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-generic/dubbo-samples-generic-call/"&gt;dubbo-samples-generic-call&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;示例中有以下 Dubbo 服务定义和实现&lt;/p&gt;
+&lt;p&gt;服务接口定义：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;String&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHelloAsync&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Person&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHelloAsyncComplex&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;GenericType&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Person&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHelloAsyncGenericComplex&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;服务具体实现并发布：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloServiceImpl&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; HelloService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;sayHello: &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; name;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;String&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHelloAsync&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Person&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHelloAsyncComplex&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; CompletableFuture&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;GenericType&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Person&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHelloAsyncGenericComplex&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="api-调用方式"&gt;API 调用方式&lt;/h3&gt;
+&lt;p&gt;针对以上 Dubbo 服务，我们可以通过泛化调用 API 直接发起调用。&lt;/p&gt;</description></item></channel></rss>

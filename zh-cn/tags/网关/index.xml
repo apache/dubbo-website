@@ -1,149 +1,149 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>网关 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/%E7%BD%91%E5%85%B3/</link><description>Recent content in 网关 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 11 Mar 2025 08:03:41 +0530</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/%E7%BD%91%E5%85%B3/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Apache APISIX 代理 Dubbo 服务 (dubbo 协议)</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</link><pubDate>Thu, 25 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</guid><description>&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>网关 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/tags/%E7%BD%91%E5%85%B3/</link><description>Recent content in 网关 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 11 Mar 2025 08:03:41 +0530</lastBuildDate><atom:link href="https://dubbo.apache.org/zh-cn/tags/%E7%BD%91%E5%85%B3/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Apache APISIX 代理 Dubbo 服务 (dubbo 协议)</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</link><pubDate>Thu, 25 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/25/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1-dubbo-%E5%8D%8F%E8%AE%AE/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2024/04/22/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1triple%E5%8D%8F%E8%AE%AE/">使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a> 学习具体示例。
+ 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，可参见 &lt;a href="https://dubbo.apache.org/zh-cn/blog/2024/04/22/%E4%BD%BF%E7%94%A8-apache-apisix-%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1triple%E5%8D%8F%E8%AE%AE/"&gt;使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a&gt; 学习具体示例。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;p>&lt;a href="https://apisix.apache.org/">Apache APISIX&lt;/a> 是 Apache 软件基金会的顶级开源项目，也是当前最活跃的开源网关项目。作为一个动态、实时、高性能的开源 API 网关，Apache APISIX 提供了负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等丰富的流量管理功能。&lt;/p>
-&lt;p>Apache APISIX 基于开源项目 tengine/mod_dubbo 模块为 Apache Dubbo 服务配备了HTTP 网关能力。通过 dubbo-proxy 插件，可以轻松地将 Dubbo Service 发布为 HTTP 服务。&lt;/p>
-&lt;p>&lt;img alt="架构图" src="https://dubbo.apache.org/imgs/blog/apisix-plugin/1.png">&lt;/p>
-&lt;h2 id="入门篇">入门篇&lt;/h2>
-&lt;h3 id="安装-apisix">安装 APISIX&lt;/h3>
-&lt;p>本文档使用 Docker 安装 APISIX。确保本地先安装 &lt;a href="https://www.docker.com/">Docker&lt;/a> 和 &lt;a href="https://docs.docker.com/compose/">Docker Compose&lt;/a>。&lt;/p>
-&lt;p>首先，下载 &lt;a href="https://github.com/apache/apisix-docker">apisix-docker&lt;/a> 仓库。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ git clone https://github.com/apache/apisix-docker.git
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> apisix-docker/example
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于本示例要接入到 Nacos 注册中心，因此 &lt;code>apisix-docker/example&lt;/code> 目录下安装用的 &lt;code>docker-compose.yaml&lt;/code>，添加如下内容：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">nacos&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: nacos/nacos-server:v2.1.1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">container_name&lt;/span>: nacos-standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">environment&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - PREFER_HOST_MODE=hostname
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - MODE=standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;8848:8848&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#2aa198">&amp;#34;9848:9848&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">networks&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">apisix&lt;/span>:
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 config.yaml 文件中增加 nacos 注册中心配置：&lt;/p></description></item><item><title>如何通过 Higress 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Mon, 01 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;p&gt;&lt;a href="https://apisix.apache.org/"&gt;Apache APISIX&lt;/a&gt; 是 Apache 软件基金会的顶级开源项目，也是当前最活跃的开源网关项目。作为一个动态、实时、高性能的开源 API 网关，Apache APISIX 提供了负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等丰富的流量管理功能。&lt;/p&gt;
+&lt;p&gt;Apache APISIX 基于开源项目 tengine/mod_dubbo 模块为 Apache Dubbo 服务配备了HTTP 网关能力。通过 dubbo-proxy 插件，可以轻松地将 Dubbo Service 发布为 HTTP 服务。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/apisix-plugin/1.png" alt="架构图"&gt;&lt;/p&gt;
+&lt;h2 id="入门篇"&gt;入门篇&lt;/h2&gt;
+&lt;h3 id="安装-apisix"&gt;安装 APISIX&lt;/h3&gt;
+&lt;p&gt;本文档使用 Docker 安装 APISIX。确保本地先安装 &lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; 和 &lt;a href="https://docs.docker.com/compose/"&gt;Docker Compose&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;首先，下载 &lt;a href="https://github.com/apache/apisix-docker"&gt;apisix-docker&lt;/a&gt; 仓库。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ git clone https://github.com/apache/apisix-docker.git
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ &lt;span style="color:#b58900"&gt;cd&lt;/span&gt; apisix-docker/example
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;由于本示例要接入到 Nacos 注册中心，因此 &lt;code&gt;apisix-docker/example&lt;/code&gt; 目录下安装用的 &lt;code&gt;docker-compose.yaml&lt;/code&gt;，添加如下内容：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;nacos&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;image&lt;/span&gt;: nacos/nacos-server:v2.1.1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;container_name&lt;/span&gt;: nacos-standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;environment&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - PREFER_HOST_MODE=hostname
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - MODE=standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;ports&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#2aa198"&gt;&amp;#34;8848:8848&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#2aa198"&gt;&amp;#34;9848:9848&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;networks&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;apisix&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在 config.yaml 文件中增加 nacos 注册中心配置：&lt;/p&gt;</description></item><item><title>如何通过 Higress 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Mon, 01 Apr 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/04/01/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-higress-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，具体可参见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/">使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a> 学习具体示例。
+ 本文仅适用于 dubbo 协议通信场景。如果您是 Dubbo3 用户，建议您使用 triple 协议，具体可参见 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/gateway/triple/"&gt;使用 Apache APISIX 代理 Dubbo 服务（triple协议）&lt;/a&gt; 学习具体示例。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;p>Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过配置协议转换，可以将一个Dubbo服务以HTTP接口暴露出来，从而用HTTP请求实现对Dubbo接口的调用。本文将通过一个示例来介绍如何用Higress配置HTTP到Dubbo的协议转换。该示例会引导您轻松地部署一个Nacos server和一个Dubbo服务，然后通过Ingress将HTTP请求转发到注册在Nacos上的Dubbo服务，并通过Higress的协议转换能力完成对Dubbo服务的HTTP调用。&lt;/p>
-&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/http-to-dubbo.png"/>
-&lt;p>以下是一个使用 &lt;code>Higress + dubbo协议 + Nacos注册中心&lt;/code> 的完整示例：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo">dubbo-samples-gateway-higress-dubbo&lt;/a>。&lt;/p>
-&lt;h2 id="前提条件">前提条件&lt;/h2>
-&lt;ol>
-&lt;li>已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm">Higress安装部署文档&lt;/a>。&lt;/li>
-&lt;/ol>
-&lt;h2 id="部署nacos和dubbo服务">部署Nacos和Dubbo服务&lt;/h2>
-&lt;p>首先在K8s集群中apply以下资源，以部署一个Nacos注册中心，同时通过K8s service将这个Nacos server暴露出来。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Nacos Server配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: apps/v1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Deployment
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">replicas&lt;/span>: &lt;span style="color:#2aa198">1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">matchLabels&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">template&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">metadata&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">labels&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">spec&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">containers&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">env&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">name&lt;/span>: MODE
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">value&lt;/span>: standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">image&lt;/span>: nacos/nacos-server:v2.2.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">imagePullPolicy&lt;/span>: Always
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">containerPort&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dnsPolicy&lt;/span>: ClusterFirst
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">restartPolicy&lt;/span>: Always
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Nacos Server Service配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>---
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">apiVersion&lt;/span>: v1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">kind&lt;/span>: Service
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">metadata&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">spec&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">ports&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: TCP
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">targetPort&lt;/span>: &lt;span style="color:#2aa198">8848&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">selector&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">app&lt;/span>: nacos-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">type&lt;/span>: ClusterIP
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 K8s 集群中 apply 以下资源，以部署一个Dubbo服务，该 Dubbo 服务将注册到上述的 Naocs 中（你可以选择重新打包，我们接下来直接使用社区提前准备好的镜像包）。&lt;/p></description></item><item><title>如何通过 Apache ShenYu 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Wed, 04 May 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png">&lt;/p>
-&lt;h2 id="1-介绍">1. 介绍&lt;/h2>
-&lt;ul>
-&lt;li>Apache ShenYu&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/shenyu.png">&lt;/p>
-&lt;p>&lt;a href="https://shenyu.apache.org/zh/docs/index">Apache ShenYu(Incubating)&lt;/a> 是一个异步的，高性能的，跨语言的，响应式的 &lt;code>API&lt;/code> 网关。兼容各种主流框架体系，支持热插拔，用户可以定制化开发，满足用户各种场景的现状和未来需求，经历过大规模场景的锤炼。&lt;/p>
-&lt;p>2021年5月，&lt;code>ShenYu&lt;/code>捐献给 &lt;code>Apache&lt;/code> 软件基金会，Apache 基金会全票通过，顺利进入孵化器。&lt;/p>
-&lt;ul>
-&lt;li>Apache Dubbo&lt;/li>
-&lt;/ul>
-&lt;p>&lt;code>Apache Dubbo&lt;/code> 是一款微服务开发框架，它提供了 &lt;code>RPC&lt;/code> 通信 与 微服务治理 两大关键能力。这意味着，使用 &lt;code>Dubbo&lt;/code> 开发的微服务，将具备相互之间的远程发现与通信能力， 同时利用 Dubbo 提供的丰富服务治理能力，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。同时 &lt;code>Dubbo&lt;/code> 是高度可扩展的，用户几乎可以在任意功能点去定制自己的实现，以改变框架的默认行为来满足自己的业务需求。&lt;/p>
-&lt;h2 id="2-dubbo快速开始">2. Dubbo快速开始&lt;/h2>
-&lt;p>本小节介绍如何将&lt;code>Dubbo&lt;/code>服务接入到&lt;code>ShenYu&lt;/code>网关，您可以直接在工程下找到本小节的&lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo">示例代码&lt;/a> 。&lt;/p>
-&lt;h3 id="21-启动shenyu-admin">2.1 启动shenyu-admin&lt;/h3>
-&lt;p>&lt;code>shenyu-admin&lt;/code>是&lt;code>Apache ShenYu&lt;/code>后台管理系统， 启动的方式有多种，本文通过 &lt;code>[本地部署](https://shenyu.apache.org/zh/docs/deployment/deployment-local)&lt;/code> 的方式启动。启动成功后，需要在基础配置&lt;code>-&amp;gt;&lt;/code>插件管理中，把&lt;code>dubbo&lt;/code> 插件设置为开启，并设置你的注册地址，请确保注册中心已经开启。&lt;/p>
-&lt;p>&lt;img alt="img" src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/dubbo-enable-zh.png">&lt;/p>
-&lt;h3 id="22-启动shenyu网关">2.2 启动shenyu网关&lt;/h3>
-&lt;p>在这里通过 &lt;a href="https://github.com/apache/incubator-shenyu/tree/master/shenyu-bootstrap">源码&lt;/a> 的方式启动，直接运行&lt;code>shenyu-bootstrap&lt;/code>中的&lt;code>ShenyuBootstrapApplication&lt;/code>。&lt;/p>
-&lt;p>在启动前，请确保网关已经引入相关依赖。如果客户端是&lt;code>apache dubbo&lt;/code>，注册中心使用&lt;code>zookeeper&lt;/code>，请参考如下配置：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> apache shenyu apache dubbo plugin start&lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.shenyu&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>shenyu&lt;span style="color:#719e07">-&lt;/span>spring&lt;span style="color:#719e07">-&lt;/span>boot&lt;span style="color:#719e07">-&lt;/span>starter&lt;span style="color:#719e07">-&lt;/span>plugin&lt;span style="color:#719e07">-&lt;/span>apache&lt;span style="color:#719e07">-&lt;/span>dubbo&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>${project.version}&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>dubbo&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>2.7.5&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> Dubbo zookeeper registry dependency start &lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>curator&lt;span style="color:#719e07">-&lt;/span>client&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>4.0.1&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>exclusions&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>exclusion&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>log4j&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>log4j&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>exclusion&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>exclusions&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>curator&lt;span style="color:#719e07">-&lt;/span>framework&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>4.0.1&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>org.apache.curator&lt;span style="color:#719e07">&amp;lt;/&lt;/span>groupId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>curator&lt;span style="color:#719e07">-&lt;/span>recipes&lt;span style="color:#719e07">&amp;lt;/&lt;/span>artifactId&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>4.0.1&lt;span style="color:#719e07">&amp;lt;/&lt;/span>version&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;/&lt;/span>dependency&lt;span style="color:#719e07">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> Dubbo zookeeper registry dependency end &lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">&amp;lt;!--&lt;/span> apache dubbo plugin end&lt;span style="color:#719e07">--&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="23-启动shenyu-examples-dubbo">2.3 启动shenyu-examples-dubbo&lt;/h3>
-&lt;p>以官网提供的例子为例 &lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo">shenyu-examples-dubbo&lt;/a> 。 假如&lt;code>dubbo&lt;/code>服务定义如下：&lt;/p></description></item><item><title>Dubbo 跨语言调用神兽：dubbo-go-pixiu</title><link>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</link><pubDate>Wed, 25 Aug 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</guid><description>&lt;h2 id="pixiu-是什么">Pixiu 是什么&lt;/h2>
-&lt;p>在回答 Pixiu 是什么之前，我们简单解释一下 Dubbo 是什么。Dubbo 是一个开源的高性能 RPC 框架，有着丰富的服务治理能力以及优秀的扩展能力。Dubbo 更扩展出 Dubbo-go【1】，为用户提供了 Golang 的 Dubbo 解决方案，打通了两种语言之间的隔阂，使 Dubbo 更加贴近云原生。&lt;/p>
-&lt;p>Dubbo-go 作为 Golang 服务，实现与 Dubbo 服务之间的相互调用。然而，在日常使用场景中，用户往往有把 Dubbo 服务以 RESTful 风格向外暴露的需求同时也要兼顾内部 Dubbo 调用。为了解决这种场景，作为 Dubbo API 网关的 Pixiu【2】 (中文: 貔貅， 曾用名 dubbo-go-proxy) 便应运而生。之所以采用 Pixiu 这个名称，是因为 Java 同类产品 Zuul 的意象是一个西方怪兽，Pixiu 作为一个国产产品，就用了我们中国的一个类似的神兽貔貅作为项目名称。也同时表达了 Dubbo 社区希望扩展出一整套云原生生态链的决心。&lt;/p>
-&lt;p>目前 Dubbo 多语言生态，发展最好的自然是 Java，其次是 Golang，其他语言都差强人意。dubbo-go-pixiu 项目是一个基于 dubbo-go 发展起来的项目，目前接口协议层支持的是七层的 HTTP 请求调用，计划在未来的 0.5 版本中支持 gRPC 请求调用，其另外一个使命是作为一种新的 dubbo 多语言解决方案。&lt;/p>
-&lt;h2 id="为什么使用-pixiu">为什么使用 Pixiu&lt;/h2>
-&lt;p>Pixiu 是基于 Dubbogo 的云原生、高性能、可扩展的微服务 API 网关。作为一款网关产品，Pixiu 帮助用户轻松创建、发布、维护、监控和保护任意规模的 API ，接受和处理成千上万个并发 API 调用，包括流量管理、 CORS 支持、授权和访问控制、限制、监控，以及 API 版本管理。除此以外，作为 Dubbo 的衍生产品，Pixiu 可以帮助 Dubbo 用户进行协议转换，实现跨系统、跨协议的服务能力互通。&lt;/p></description></item></channel></rss>
+&lt;p&gt;Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过配置协议转换，可以将一个Dubbo服务以HTTP接口暴露出来，从而用HTTP请求实现对Dubbo接口的调用。本文将通过一个示例来介绍如何用Higress配置HTTP到Dubbo的协议转换。该示例会引导您轻松地部署一个Nacos server和一个Dubbo服务，然后通过Ingress将HTTP请求转发到注册在Nacos上的Dubbo服务，并通过Higress的协议转换能力完成对Dubbo服务的HTTP调用。&lt;/p&gt;
+&lt;img style="max-width:800px;height:auto;" src="https://dubbo.apache.org/imgs/v3/tasks/gateway/http-to-dubbo.png"/&gt;
+&lt;p&gt;以下是一个使用 &lt;code&gt;Higress + dubbo协议 + Nacos注册中心&lt;/code&gt; 的完整示例：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo"&gt;dubbo-samples-gateway-higress-dubbo&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm"&gt;Higress安装部署文档&lt;/a&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="部署nacos和dubbo服务"&gt;部署Nacos和Dubbo服务&lt;/h2&gt;
+&lt;p&gt;首先在K8s集群中apply以下资源，以部署一个Nacos注册中心，同时通过K8s service将这个Nacos server暴露出来。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# Nacos Server配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;apiVersion&lt;/span&gt;: apps/v1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;kind&lt;/span&gt;: Deployment
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;metadata&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;spec&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;replicas&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;selector&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;matchLabels&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;app&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;template&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;metadata&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;labels&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;app&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;spec&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;containers&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;env&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: MODE
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;value&lt;/span&gt;: standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;image&lt;/span&gt;: nacos/nacos-server:v2.2.0
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;imagePullPolicy&lt;/span&gt;: Always
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;ports&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;containerPort&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8848&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;dnsPolicy&lt;/span&gt;: ClusterFirst
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;restartPolicy&lt;/span&gt;: Always
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# Nacos Server Service配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;---
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;apiVersion&lt;/span&gt;: v1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;kind&lt;/span&gt;: Service
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;metadata&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;spec&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;ports&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8848&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: TCP
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;targetPort&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8848&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;selector&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;app&lt;/span&gt;: nacos-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;type&lt;/span&gt;: ClusterIP
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在 K8s 集群中 apply 以下资源，以部署一个Dubbo服务，该 Dubbo 服务将注册到上述的 Naocs 中（你可以选择重新打包，我们接下来直接使用社区提前准备好的镜像包）。&lt;/p&gt;</description></item><item><title>如何通过 Apache ShenYu 网关代理 Dubbo 服务</title><link>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</link><pubDate>Wed, 04 May 2022 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2022/05/04/%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87-apache-shenyu-%E7%BD%91%E5%85%B3%E4%BB%A3%E7%90%86-dubbo-%E6%9C%8D%E5%8A%A1/</guid><description>&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/ApacheShenYu-Dubbo-zh.png" alt="img"&gt;&lt;/p&gt;
+&lt;h2 id="1-介绍"&gt;1. 介绍&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Apache ShenYu&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/shenyu.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://shenyu.apache.org/zh/docs/index"&gt;Apache ShenYu(Incubating)&lt;/a&gt; 是一个异步的，高性能的，跨语言的，响应式的 &lt;code&gt;API&lt;/code&gt; 网关。兼容各种主流框架体系，支持热插拔，用户可以定制化开发，满足用户各种场景的现状和未来需求，经历过大规模场景的锤炼。&lt;/p&gt;
+&lt;p&gt;2021年5月，&lt;code&gt;ShenYu&lt;/code&gt;捐献给 &lt;code&gt;Apache&lt;/code&gt; 软件基金会，Apache 基金会全票通过，顺利进入孵化器。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Apache Dubbo&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;Apache Dubbo&lt;/code&gt; 是一款微服务开发框架，它提供了 &lt;code&gt;RPC&lt;/code&gt; 通信 与 微服务治理 两大关键能力。这意味着，使用 &lt;code&gt;Dubbo&lt;/code&gt; 开发的微服务，将具备相互之间的远程发现与通信能力， 同时利用 Dubbo 提供的丰富服务治理能力，可以实现诸如服务发现、负载均衡、流量调度等服务治理诉求。同时 &lt;code&gt;Dubbo&lt;/code&gt; 是高度可扩展的，用户几乎可以在任意功能点去定制自己的实现，以改变框架的默认行为来满足自己的业务需求。&lt;/p&gt;
+&lt;h2 id="2-dubbo快速开始"&gt;2. Dubbo快速开始&lt;/h2&gt;
+&lt;p&gt;本小节介绍如何将&lt;code&gt;Dubbo&lt;/code&gt;服务接入到&lt;code&gt;ShenYu&lt;/code&gt;网关，您可以直接在工程下找到本小节的&lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo"&gt;示例代码&lt;/a&gt; 。&lt;/p&gt;
+&lt;h3 id="21-启动shenyu-admin"&gt;2.1 启动shenyu-admin&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;shenyu-admin&lt;/code&gt;是&lt;code&gt;Apache ShenYu&lt;/code&gt;后台管理系统， 启动的方式有多种，本文通过 &lt;code&gt;[本地部署](https://shenyu.apache.org/zh/docs/deployment/deployment-local)&lt;/code&gt; 的方式启动。启动成功后，需要在基础配置&lt;code&gt;-&amp;gt;&lt;/code&gt;插件管理中，把&lt;code&gt;dubbo&lt;/code&gt; 插件设置为开启，并设置你的注册地址，请确保注册中心已经开启。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/shenyu-dubbo/dubbo-enable-zh.png" alt="img"&gt;&lt;/p&gt;
+&lt;h3 id="22-启动shenyu网关"&gt;2.2 启动shenyu网关&lt;/h3&gt;
+&lt;p&gt;在这里通过 &lt;a href="https://github.com/apache/incubator-shenyu/tree/master/shenyu-bootstrap"&gt;源码&lt;/a&gt; 的方式启动，直接运行&lt;code&gt;shenyu-bootstrap&lt;/code&gt;中的&lt;code&gt;ShenyuBootstrapApplication&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;在启动前，请确保网关已经引入相关依赖。如果客户端是&lt;code&gt;apache dubbo&lt;/code&gt;，注册中心使用&lt;code&gt;zookeeper&lt;/code&gt;，请参考如下配置：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; apache shenyu apache dubbo plugin start&lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.shenyu&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;shenyu&lt;span style="color:#719e07"&gt;-&lt;/span&gt;spring&lt;span style="color:#719e07"&gt;-&lt;/span&gt;boot&lt;span style="color:#719e07"&gt;-&lt;/span&gt;starter&lt;span style="color:#719e07"&gt;-&lt;/span&gt;plugin&lt;span style="color:#719e07"&gt;-&lt;/span&gt;apache&lt;span style="color:#719e07"&gt;-&lt;/span&gt;dubbo&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;${project.version}&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.dubbo&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;dubbo&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;2.7.5&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; Dubbo zookeeper registry dependency start &lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.curator&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;curator&lt;span style="color:#719e07"&gt;-&lt;/span&gt;client&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;4.0.1&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;exclusions&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;exclusion&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;log4j&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;log4j&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;exclusion&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;exclusions&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.curator&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;curator&lt;span style="color:#719e07"&gt;-&lt;/span&gt;framework&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;4.0.1&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;org.apache.curator&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;groupId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;curator&lt;span style="color:#719e07"&gt;-&lt;/span&gt;recipes&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;artifactId&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;4.0.1&lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;version&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;/&lt;/span&gt;dependency&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; Dubbo zookeeper registry dependency end &lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;!--&lt;/span&gt; apache dubbo plugin end&lt;span style="color:#719e07"&gt;--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="23-启动shenyu-examples-dubbo"&gt;2.3 启动shenyu-examples-dubbo&lt;/h3&gt;
+&lt;p&gt;以官网提供的例子为例 &lt;a href="https://github.com/apache/shenyu/tree/master/shenyu-examples/shenyu-examples-dubbo"&gt;shenyu-examples-dubbo&lt;/a&gt; 。 假如&lt;code&gt;dubbo&lt;/code&gt;服务定义如下：&lt;/p&gt;</description></item><item><title>Dubbo 跨语言调用神兽：dubbo-go-pixiu</title><link>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</link><pubDate>Wed, 25 Aug 2021 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2021/08/25/dubbo-%E8%B7%A8%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E7%A5%9E%E5%85%BDdubbo-go-pixiu/</guid><description>&lt;h2 id="pixiu-是什么"&gt;Pixiu 是什么&lt;/h2&gt;
+&lt;p&gt;在回答 Pixiu 是什么之前，我们简单解释一下 Dubbo 是什么。Dubbo 是一个开源的高性能 RPC 框架，有着丰富的服务治理能力以及优秀的扩展能力。Dubbo 更扩展出 Dubbo-go【1】，为用户提供了 Golang 的 Dubbo 解决方案，打通了两种语言之间的隔阂，使 Dubbo 更加贴近云原生。&lt;/p&gt;
+&lt;p&gt;Dubbo-go 作为 Golang 服务，实现与 Dubbo 服务之间的相互调用。然而，在日常使用场景中，用户往往有把 Dubbo 服务以 RESTful 风格向外暴露的需求同时也要兼顾内部 Dubbo 调用。为了解决这种场景，作为 Dubbo API 网关的 Pixiu【2】 (中文: 貔貅， 曾用名 dubbo-go-proxy) 便应运而生。之所以采用 Pixiu 这个名称，是因为 Java 同类产品 Zuul 的意象是一个西方怪兽，Pixiu 作为一个国产产品，就用了我们中国的一个类似的神兽貔貅作为项目名称。也同时表达了 Dubbo 社区希望扩展出一整套云原生生态链的决心。&lt;/p&gt;
+&lt;p&gt;目前 Dubbo 多语言生态，发展最好的自然是 Java，其次是 Golang，其他语言都差强人意。dubbo-go-pixiu 项目是一个基于 dubbo-go 发展起来的项目，目前接口协议层支持的是七层的 HTTP 请求调用，计划在未来的 0.5 版本中支持 gRPC 请求调用，其另外一个使命是作为一种新的 dubbo 多语言解决方案。&lt;/p&gt;
+&lt;h2 id="为什么使用-pixiu"&gt;为什么使用 Pixiu&lt;/h2&gt;
+&lt;p&gt;Pixiu 是基于 Dubbogo 的云原生、高性能、可扩展的微服务 API 网关。作为一款网关产品，Pixiu 帮助用户轻松创建、发布、维护、监控和保护任意规模的 API ，接受和处理成千上万个并发 API 调用，包括流量管理、 CORS 支持、授权和访问控制、限制、监控，以及 API 版本管理。除此以外，作为 Dubbo 的衍生产品，Pixiu 可以帮助 Dubbo 用户进行协议转换，实现跨系统、跨协议的服务能力互通。&lt;/p&gt;</description></item></channel></rss>

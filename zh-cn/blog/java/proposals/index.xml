@@ -1,104 +1,104 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>方案设计 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/blog/java/proposals/</link><description>Recent content in 方案设计 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/java/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>如果从接口级服务发现平滑迁移到应用级服务发现</title><link>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%A6%82%E6%9E%9C%E4%BB%8E%E6%8E%A5%E5%8F%A3%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%B9%B3%E6%BB%91%E8%BF%81%E7%A7%BB%E5%88%B0%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</link><pubDate>Mon, 13 May 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%A6%82%E6%9E%9C%E4%BB%8E%E6%8E%A5%E5%8F%A3%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%B9%B3%E6%BB%91%E8%BF%81%E7%A7%BB%E5%88%B0%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</guid><description>&lt;p>总体上来说，在地址注册与发现环节，&lt;code>3.x&lt;/code> 是完全兼容 &lt;code>2.x&lt;/code> 版本的，这意味着，用户可以选择将集群内任意数量的应用或机器升级到 &lt;code>3.x&lt;/code>，同时在这个过程中保持与 &lt;code>2.x&lt;/code> 版本的互操作性。&lt;/p>
-&lt;blockquote>
-&lt;p>如关心迁移背后工作原理，请参考 &lt;a href="../service-discovery-rule">迁移规则详情与工作原理&lt;/a>&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="1-快速升级步骤">1 快速升级步骤&lt;/h2>
-&lt;p>简单的修改 pom.xml 到最新版本就可以完成升级，如果要迁移到应用级地址，只需要调整开关控制 3.x 版本的默认行为。&lt;/p>
-&lt;ol>
-&lt;li>升级 Provider 应用到最新 3.x 版本依赖，配置双注册开关&lt;code>dubbo.application.register-mode=all&lt;/code>（建议通过全局配置中心设置，默认已自动开启），完成应用发布。&lt;/li>
-&lt;li>升级 Consumer 应用到最新 3.x 版本依赖，配置双订阅开关&lt;code>dubbo.application.service-discovery.migration=APPLICATION_FIRST&lt;/code>（建议通过全局配置中心设置，默认已自动开启），完成应用发布。&lt;/li>
-&lt;li>在确认 Provider 的上有 Consumer 全部完成应用级地址迁移后，Provider 切到应用级地址单注册。完成升级&lt;/li>
-&lt;/ol>
-&lt;p>以下是关于迁移流程的详细描述。&lt;/p>
-&lt;h2 id="2-provider-端升级过程详解">2 Provider 端升级过程详解&lt;/h2>
-&lt;p>在不改变任何 Dubbo 配置的情况下，可以将一个应用或实例升级到 3.x 版本，升级后的 Dubbo 实例会默保保证与 2.x 版本的兼容性，即会正常注册 2.x 格式的地址到注册中心，因此升级后的实例仍会对整个集群仍保持可见状态。&lt;/p>
-&lt;p>同时新的地址发现模型（注册应用级别的地址）也将会自动注册。&lt;/p>
-&lt;p>&lt;img alt="//imgs/v3/migration/provider-registration.png" src="https://dubbo.apache.org/imgs/v3/migration/provider-registration.png">&lt;/p>
-&lt;ol>
-&lt;li>全局开关&lt;/li>
-&lt;/ol>
-&lt;p>应用配置（可以通过配置文件或者 -D 指定）&lt;code>dubbo.application.register-mode&lt;/code> 为 instance（只注册应用级）、all（接口级+应用级均注册）开启全局的注册开关，配置此开关后，默认会向所有的注册中心中注册应用级的地址，供消费端服务发现使用。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># 双注册
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.register-mode=all
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># 仅应用级注册
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo.application.register-mode=instance
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 -D 参数，可以指定 provider 启动时的注册行为&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>-Ddubbo.application.register-mode=all
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># 可选值 interface、instance、all，默认是 all，即接口级地址、应用级地址都注册
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>另外，可以在配置中心修改全局默认行为，来控制所有 3.x 实例注册行为。其中，全局性开关的优先级低于 -D 参数。&lt;/p></description></item><item><title>应用级服务发现地址迁移规则说明</title><link>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%9C%B0%E5%9D%80%E8%BF%81%E7%A7%BB%E8%A7%84%E5%88%99%E8%AF%B4%E6%98%8E/</link><pubDate>Mon, 13 May 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%9C%B0%E5%9D%80%E8%BF%81%E7%A7%BB%E8%A7%84%E5%88%99%E8%AF%B4%E6%98%8E/</guid><description>&lt;h2 id="状态模型">状态模型&lt;/h2>
-&lt;p>在 Dubbo 3 之前地址注册模型是以接口级粒度注册到注册中心的，而 Dubbo 3 全新的应用级注册模型注册到注册中心的粒度是应用级的。从注册中心的实现上来说是几乎不一样的，这导致了对于从接口级注册模型获取到的 invokers 是无法与从应用级注册模型获取到的 invokers 进行合并的。为了帮助用户从接口级往应用级迁移，Dubbo 3 设计了 Migration 机制，基于三个状态的切换实现实际调用中地址模型的切换。&lt;/p>
-&lt;p>&lt;img alt="//imgs/v3/migration/migration-1.png" src="https://dubbo.apache.org/imgs/v3/migration/migration-1.png">&lt;/p>
-&lt;p>当前共存在三种状态，FORCE_INTERFACE（强制接口级），APPLICATION_FIRST（应用级优先）、FORCE_APPLICATION（强制应用级）。&lt;/p>
-&lt;p>FORCE_INTERFACE：只启用兼容模式下接口级服务发现的注册中心逻辑，调用流量 100% 走原有流程
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>方案设计 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/blog/java/proposals/</link><description>Recent content in 方案设计 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/blog/java/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>如果从接口级服务发现平滑迁移到应用级服务发现</title><link>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%A6%82%E6%9E%9C%E4%BB%8E%E6%8E%A5%E5%8F%A3%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%B9%B3%E6%BB%91%E8%BF%81%E7%A7%BB%E5%88%B0%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</link><pubDate>Mon, 13 May 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%A6%82%E6%9E%9C%E4%BB%8E%E6%8E%A5%E5%8F%A3%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%B9%B3%E6%BB%91%E8%BF%81%E7%A7%BB%E5%88%B0%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</guid><description>&lt;p&gt;总体上来说，在地址注册与发现环节，&lt;code&gt;3.x&lt;/code&gt; 是完全兼容 &lt;code&gt;2.x&lt;/code&gt; 版本的，这意味着，用户可以选择将集群内任意数量的应用或机器升级到 &lt;code&gt;3.x&lt;/code&gt;，同时在这个过程中保持与 &lt;code&gt;2.x&lt;/code&gt; 版本的互操作性。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如关心迁移背后工作原理，请参考 &lt;a href="../service-discovery-rule"&gt;迁移规则详情与工作原理&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="1-快速升级步骤"&gt;1 快速升级步骤&lt;/h2&gt;
+&lt;p&gt;简单的修改 pom.xml 到最新版本就可以完成升级，如果要迁移到应用级地址，只需要调整开关控制 3.x 版本的默认行为。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;升级 Provider 应用到最新 3.x 版本依赖，配置双注册开关&lt;code&gt;dubbo.application.register-mode=all&lt;/code&gt;（建议通过全局配置中心设置，默认已自动开启），完成应用发布。&lt;/li&gt;
+&lt;li&gt;升级 Consumer 应用到最新 3.x 版本依赖，配置双订阅开关&lt;code&gt;dubbo.application.service-discovery.migration=APPLICATION_FIRST&lt;/code&gt;（建议通过全局配置中心设置，默认已自动开启），完成应用发布。&lt;/li&gt;
+&lt;li&gt;在确认 Provider 的上有 Consumer 全部完成应用级地址迁移后，Provider 切到应用级地址单注册。完成升级&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;以下是关于迁移流程的详细描述。&lt;/p&gt;
+&lt;h2 id="2-provider-端升级过程详解"&gt;2 Provider 端升级过程详解&lt;/h2&gt;
+&lt;p&gt;在不改变任何 Dubbo 配置的情况下，可以将一个应用或实例升级到 3.x 版本，升级后的 Dubbo 实例会默保保证与 2.x 版本的兼容性，即会正常注册 2.x 格式的地址到注册中心，因此升级后的实例仍会对整个集群仍保持可见状态。&lt;/p&gt;
+&lt;p&gt;同时新的地址发现模型（注册应用级别的地址）也将会自动注册。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/v3/migration/provider-registration.png" alt="//imgs/v3/migration/provider-registration.png"&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;全局开关&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;应用配置（可以通过配置文件或者 -D 指定）&lt;code&gt;dubbo.application.register-mode&lt;/code&gt; 为 instance（只注册应用级）、all（接口级+应用级均注册）开启全局的注册开关，配置此开关后，默认会向所有的注册中心中注册应用级的地址，供消费端服务发现使用。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;# 双注册
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo.application.register-mode=all
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;# 仅应用级注册
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo.application.register-mode=instance
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过 -D 参数，可以指定 provider 启动时的注册行为&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;-Ddubbo.application.register-mode=all
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;# 可选值 interface、instance、all，默认是 all，即接口级地址、应用级地址都注册
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;另外，可以在配置中心修改全局默认行为，来控制所有 3.x 实例注册行为。其中，全局性开关的优先级低于 -D 参数。&lt;/p&gt;</description></item><item><title>应用级服务发现地址迁移规则说明</title><link>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%9C%B0%E5%9D%80%E8%BF%81%E7%A7%BB%E8%A7%84%E5%88%99%E8%AF%B4%E6%98%8E/</link><pubDate>Mon, 13 May 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E5%9C%B0%E5%9D%80%E8%BF%81%E7%A7%BB%E8%A7%84%E5%88%99%E8%AF%B4%E6%98%8E/</guid><description>&lt;h2 id="状态模型"&gt;状态模型&lt;/h2&gt;
+&lt;p&gt;在 Dubbo 3 之前地址注册模型是以接口级粒度注册到注册中心的，而 Dubbo 3 全新的应用级注册模型注册到注册中心的粒度是应用级的。从注册中心的实现上来说是几乎不一样的，这导致了对于从接口级注册模型获取到的 invokers 是无法与从应用级注册模型获取到的 invokers 进行合并的。为了帮助用户从接口级往应用级迁移，Dubbo 3 设计了 Migration 机制，基于三个状态的切换实现实际调用中地址模型的切换。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/v3/migration/migration-1.png" alt="//imgs/v3/migration/migration-1.png"&gt;&lt;/p&gt;
+&lt;p&gt;当前共存在三种状态，FORCE_INTERFACE（强制接口级），APPLICATION_FIRST（应用级优先）、FORCE_APPLICATION（强制应用级）。&lt;/p&gt;
+&lt;p&gt;FORCE_INTERFACE：只启用兼容模式下接口级服务发现的注册中心逻辑，调用流量 100% 走原有流程
 APPLICATION_FIRST：开启接口级、应用级双订阅，运行时根据阈值和灰度流量比例动态决定调用流量走向
-FORCE_APPLICATION：只启用新模式下应用级服务发现的注册中心逻辑，调用流量 100% 走应用级订阅的地址&lt;/p>
-&lt;h2 id="规则体说明">规则体说明&lt;/h2>
-&lt;p>规则采用 yaml 格式配置，具体配置下参考如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">key&lt;/span>: 消费者应用名（必填）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">step&lt;/span>: 状态名（必填）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">threshold&lt;/span>: 决策阈值（默认1.0）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">proportion&lt;/span>: 灰度比例（默认100）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">delay&lt;/span>: 延迟决策时间（默认0）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">force&lt;/span>: 强制切换（默认 false）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">interfaces&lt;/span>: 接口粒度配置（可选）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey: 接口名（接口 + &lt;/span>: + 版本号）（必填）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threshold&lt;/span>: 决策阈值
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">proportion&lt;/span>: 灰度比例
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: 延迟决策时间
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: 强制切换
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: 状态名（必填）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey: 接口名（接口 + &lt;/span>: + 版本号）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: 状态名
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">applications&lt;/span>: 应用粒度配置（可选）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#268bd2">serviceKey&lt;/span>: 应用名（消费的上游应用名）（必填）
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">threshold&lt;/span>: 决策阈值
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">proportion&lt;/span>: 灰度比例
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">delay&lt;/span>: 延迟决策时间
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">force&lt;/span>: 强制切换
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">step&lt;/span>: 状态名（必填）
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>key: 消费者应用名&lt;/li>
-&lt;li>step: 状态名（FORCE_INTERFACE、APPLICATION_FIRST、FORCE_APPLICATION）&lt;/li>
-&lt;li>threshold: 决策阈值（浮点数，具体含义参考后文）&lt;/li>
-&lt;li>proportion: 灰度比例（0～100，决定调用次数比例）&lt;/li>
-&lt;li>delay: 延迟决策时间（延迟决策的时间，实际等待时间为 1～2 倍 delay 时间，取决于注册中心第一次通知的时间，对于目前 Dubbo 的注册中心实现次配置项保留 0 即可）&lt;/li>
-&lt;li>force: 强制切换（对于 FORCE_INTERFACE、FORCE_APPLICATION 是否不考虑决策直接切换，可能导致无地址调用失败问题）&lt;/li>
-&lt;li>interfaces: 接口粒度配置&lt;/li>
-&lt;/ul>
-&lt;p>参考配置示例如下：&lt;/p></description></item><item><title>应用级服务发现迁移示例</title><link>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%BF%81%E7%A7%BB%E7%A4%BA%E4%BE%8B/</link><pubDate>Mon, 13 May 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%BF%81%E7%A7%BB%E7%A4%BA%E4%BE%8B/</guid><description>&lt;p>应用级服务发现为应用间服务发现的协议，因此使用应用级服务发现需要消费端和服务端均升级到 Dubbo 3.0 版本并开启新特性（默认开启）才能在链路中使用应用级服务发现，真正发挥应用级服务发现的优点。&lt;/p>
-&lt;h2 id="开启方式">开启方式&lt;/h2>
-&lt;h3 id="服务端">服务端&lt;/h3>
-&lt;p>应用升级到 Dubbo 3.0 后，服务端自动开启接口级 + 应用级双注册功能，默认无需开发者修改任何配置&lt;/p>
-&lt;h3 id="消费端">消费端&lt;/h3>
-&lt;p>应用升级到 Dubbo 3.0 后，消费端自动始接口级 + 应用级双订阅功能，默认无需开发者修改任何配置。建议在服务端都升级到 Dubbo 3.0 并开启应用级注册以后通过规则配置消费端关闭接口级订阅，释放对应的内存空间。&lt;/p>
-&lt;h2 id="详细说明">详细说明&lt;/h2>
-&lt;h3 id="服务端配置">服务端配置&lt;/h3>
-&lt;ol>
-&lt;li>全局开关&lt;/li>
-&lt;/ol>
-&lt;p>应用配置（可以通过配置文件或者 -D 指定）&lt;code>dubbo.application.register-mode&lt;/code> 为 instance（只注册应用级）、all（接口级+应用级均注册）开启全局的注册开关，配置此开关后，默认会向所有的注册中心中注册应用级的地址，供消费端服务发现使用。&lt;/p>
-&lt;blockquote>
-&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider1/src/main/resources/application.yml">参考示例&lt;/a>&lt;/p>
-&lt;/blockquote>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># 双注册
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> register-mode: all
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span># 仅应用级注册
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>dubbo:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registry:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> register-mode: instance
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>注册中心地址参数配置&lt;/li>
-&lt;/ol>
-&lt;p>注册中心的地址上可以配置 &lt;code>registry-type=service&lt;/code> 来显示指定该注册中心为应用级服务发现的注册中心，带上此配置的注册中心将只进行应用级服务发现。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;nacos://${nacos.address:127.0.0.1}:8848?registry-type=service&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="消费端订阅模式">消费端订阅模式&lt;/h3>
-&lt;p>FORCE_INTERFACE：仅接口级订阅，行为和 Dubbo 2.7 及以前版本一致。
+FORCE_APPLICATION：只启用新模式下应用级服务发现的注册中心逻辑，调用流量 100% 走应用级订阅的地址&lt;/p&gt;
+&lt;h2 id="规则体说明"&gt;规则体说明&lt;/h2&gt;
+&lt;p&gt;规则采用 yaml 格式配置，具体配置下参考如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;key&lt;/span&gt;: 消费者应用名（必填）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;step&lt;/span&gt;: 状态名（必填）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;threshold&lt;/span&gt;: 决策阈值（默认1.0）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;proportion&lt;/span&gt;: 灰度比例（默认100）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;delay&lt;/span&gt;: 延迟决策时间（默认0）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;force&lt;/span&gt;: 强制切换（默认 false）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;interfaces&lt;/span&gt;: 接口粒度配置（可选）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;serviceKey: 接口名（接口 + &lt;/span&gt;: + 版本号）（必填）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;threshold&lt;/span&gt;: 决策阈值
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;proportion&lt;/span&gt;: 灰度比例
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;delay&lt;/span&gt;: 延迟决策时间
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;force&lt;/span&gt;: 强制切换
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;step&lt;/span&gt;: 状态名（必填）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;serviceKey: 接口名（接口 + &lt;/span&gt;: + 版本号）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;step&lt;/span&gt;: 状态名
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;applications&lt;/span&gt;: 应用粒度配置（可选）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;serviceKey&lt;/span&gt;: 应用名（消费的上游应用名）（必填）
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;threshold&lt;/span&gt;: 决策阈值
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;proportion&lt;/span&gt;: 灰度比例
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;delay&lt;/span&gt;: 延迟决策时间
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;force&lt;/span&gt;: 强制切换
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;step&lt;/span&gt;: 状态名（必填）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;key: 消费者应用名&lt;/li&gt;
+&lt;li&gt;step: 状态名（FORCE_INTERFACE、APPLICATION_FIRST、FORCE_APPLICATION）&lt;/li&gt;
+&lt;li&gt;threshold: 决策阈值（浮点数，具体含义参考后文）&lt;/li&gt;
+&lt;li&gt;proportion: 灰度比例（0～100，决定调用次数比例）&lt;/li&gt;
+&lt;li&gt;delay: 延迟决策时间（延迟决策的时间，实际等待时间为 1～2 倍 delay 时间，取决于注册中心第一次通知的时间，对于目前 Dubbo 的注册中心实现次配置项保留 0 即可）&lt;/li&gt;
+&lt;li&gt;force: 强制切换（对于 FORCE_INTERFACE、FORCE_APPLICATION 是否不考虑决策直接切换，可能导致无地址调用失败问题）&lt;/li&gt;
+&lt;li&gt;interfaces: 接口粒度配置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;参考配置示例如下：&lt;/p&gt;</description></item><item><title>应用级服务发现迁移示例</title><link>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%BF%81%E7%A7%BB%E7%A4%BA%E4%BE%8B/</link><pubDate>Mon, 13 May 2024 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2024/05/13/%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%BF%81%E7%A7%BB%E7%A4%BA%E4%BE%8B/</guid><description>&lt;p&gt;应用级服务发现为应用间服务发现的协议，因此使用应用级服务发现需要消费端和服务端均升级到 Dubbo 3.0 版本并开启新特性（默认开启）才能在链路中使用应用级服务发现，真正发挥应用级服务发现的优点。&lt;/p&gt;
+&lt;h2 id="开启方式"&gt;开启方式&lt;/h2&gt;
+&lt;h3 id="服务端"&gt;服务端&lt;/h3&gt;
+&lt;p&gt;应用升级到 Dubbo 3.0 后，服务端自动开启接口级 + 应用级双注册功能，默认无需开发者修改任何配置&lt;/p&gt;
+&lt;h3 id="消费端"&gt;消费端&lt;/h3&gt;
+&lt;p&gt;应用升级到 Dubbo 3.0 后，消费端自动始接口级 + 应用级双订阅功能，默认无需开发者修改任何配置。建议在服务端都升级到 Dubbo 3.0 并开启应用级注册以后通过规则配置消费端关闭接口级订阅，释放对应的内存空间。&lt;/p&gt;
+&lt;h2 id="详细说明"&gt;详细说明&lt;/h2&gt;
+&lt;h3 id="服务端配置"&gt;服务端配置&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;全局开关&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;应用配置（可以通过配置文件或者 -D 指定）&lt;code&gt;dubbo.application.register-mode&lt;/code&gt; 为 instance（只注册应用级）、all（接口级+应用级均注册）开启全局的注册开关，配置此开关后，默认会向所有的注册中心中注册应用级的地址，供消费端服务发现使用。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href="https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-servicediscovery-migration/dubbo-servicediscovery-migration-provider1/src/main/resources/application.yml"&gt;参考示例&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;# 双注册
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; registry:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; register-mode: all
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;# 仅应用级注册
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; registry:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; register-mode: instance
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;注册中心地址参数配置&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;注册中心的地址上可以配置 &lt;code&gt;registry-type=service&lt;/code&gt; 来显示指定该注册中心为应用级服务发现的注册中心，带上此配置的注册中心将只进行应用级服务发现。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;nacos://${nacos.address:127.0.0.1}:8848?registry-type=service&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="消费端订阅模式"&gt;消费端订阅模式&lt;/h3&gt;
+&lt;p&gt;FORCE_INTERFACE：仅接口级订阅，行为和 Dubbo 2.7 及以前版本一致。
 APPLICATION_FIRST：接口级 + 应用级多订阅，如果应用级能订阅到地址就使用应用级的订阅，如果订阅不到地址则使用接口级的订阅，以此保证迁移过程中最大的兼容性。（注：由于存在同时进行订阅的行为，此模式下内存占用会有一定的增长，因此在所有服务端都升级到 Dubbo 3.0 以后建议迁移到 FORCE_APPLICATION 模式降低内存占用）
-FORCE_APPLICATION：仅应用级订阅，将只采用全新的服务发现模型。&lt;/p>
-&lt;h3 id="消费端配置">消费端配置&lt;/h3>
-&lt;ol>
-&lt;li>默认配置（不需要配置）&lt;/li>
-&lt;/ol>
-&lt;p>升级到 Dubbo 3.0 后默认行为为接口级+应用级多订阅，如果应用级能订阅到地址就使用应用级的订阅，如果订阅不到地址则使用接口级的订阅，以此保证最大的兼容性。&lt;/p></description></item></channel></rss>
+FORCE_APPLICATION：仅应用级订阅，将只采用全新的服务发现模型。&lt;/p&gt;
+&lt;h3 id="消费端配置"&gt;消费端配置&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;默认配置（不需要配置）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;升级到 Dubbo 3.0 后默认行为为接口级+应用级多订阅，如果应用级能订阅到地址就使用应用级的订阅，如果订阅不到地址则使用接口级的订阅，以此保证最大的兼容性。&lt;/p&gt;</description></item></channel></rss>

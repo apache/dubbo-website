@@ -1,92 +1,92 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>用户文档 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/</link><description>Recent content in 用户文档 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/quickstart/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/quickstart/</guid><description>&lt;p>让我们从将 HTTP 请求转换为 Dubbo2 请求的案例来快速展示 Pixiu 的能力。&lt;/p>
-&lt;h2 id="用例">用例&lt;/h2>
-&lt;p>Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后的 Dubbo Server，然后将 Dubbo Server 的响应转换为 HTTP
-响应，最后返回给 Client。&lt;/p>
-&lt;h3 id="架构图">架构图&lt;/h3>
-&lt;p>&lt;img alt="Architecture" src="https://dubbo.apache.org/imgs/pixiu/user/quick_start_architecture.png">&lt;/p>
-&lt;h3 id="案例">案例&lt;/h3>
-&lt;p>案例路径请查看 &lt;code>/samples/dubbogo/simple/resolve&lt;/code>&lt;/p>
-&lt;h4 id="dubbo-server-实现和启动">Dubbo Server 实现和启动&lt;/h4>
-&lt;p>Dubbo Server 提供用户增删改查的相关接口，其具体的代码实现见案例路径下的 &lt;code>server&lt;/code>&lt;/p>
-&lt;p>Dubbo Server 的配置如下所示，注册了 Dubbo2 协议的 interface &lt;code>com.dubbogo.pixiu.UserService&lt;/code>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registries&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">zk&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocol&lt;/span>: zookeeper
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">timeout&lt;/span>: 3s
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">address&lt;/span>: &lt;span style="color:#2aa198">127.0.0.1&lt;/span>:&lt;span style="color:#2aa198">2181&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">protocols&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">dubbo&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">name&lt;/span>: dubbo
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">port&lt;/span>: &lt;span style="color:#2aa198">20000&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">provider&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">registry-ids&lt;/span>: zk
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">services&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">UserProvider&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">group&lt;/span>: test
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">version&lt;/span>: &lt;span style="color:#2aa198">1.0.0&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">cluster&lt;/span>: test_dubbo
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">serialization&lt;/span>: hessian2
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">interface&lt;/span>: com.dubbogo.pixiu.UserService
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="pixiu-配置和启动">Pixiu 配置和启动&lt;/h4>
-&lt;p>为了用例的场景，Pixiu 需要启动对应的 HTTP Listener 进行 HTTP 请求的监听，所以就会使用到 &lt;code>httpconnectionmanager&lt;/code>。
-然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 &lt;code>dgp.filter.http.dubboproxy&lt;/code>，这里我们将其&lt;code>auto_resolve&lt;/code> 设置为true，表示开启
-HTTP to Dubbo 默认转换协议(具体定义请看&lt;a href="../appendix/http-to-dubbo-default-stragety">附录&lt;/a>)。&lt;/p></description></item><item><title>启动和配置</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/configurations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/configurations/</guid><description>&lt;h3 id="pixiu-启动命令">Pixiu 启动命令&lt;/h3>
-&lt;p>Pixiu 分为两个形态 Gateway 和 Sidecar，目前 Pixiu 可执行程序的命令如下所示，其中 pixiu 是可执行文件名称。注意，-c 后是本地配置文件的绝对路径。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>pixiu gateway start -c /config/conf.yaml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="配置详解">配置详解&lt;/h3>
-&lt;p>Pixiu 接受 yaml 格式的文件作为其主配置文件，其中对 Pixiu 的各类组件进行配置。我们以快速开始中的配置文件为例，详细讲解其中的组成部分，并且列出可能的扩展。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>static_resources:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> listeners:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: &amp;#34;net/http&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol_type: &amp;#34;HTTP&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> socket_address:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: &amp;#34;0.0.0.0&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: 8883
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filter_chains:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> filters:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: dgp.filter.httpconnectionmanager
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> route_config:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> routes:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - match:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> prefix: &amp;#34;*&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> http_filters:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - name: dgp.filter.http.dubboproxy
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> config:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dubboProxyConfig:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> auto_resolve: true
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> registries:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &amp;#34;zookeeper&amp;#34;:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol: &amp;#34;zookeeper&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timeout: &amp;#34;3s&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> address: &amp;#34;127.0.0.1:2181&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> username: &amp;#34;&amp;#34;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> password: &amp;#34;&amp;#34;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>首先，类似 &lt;code>envoy&lt;/code>的配置，&lt;code>static_resources&lt;/code> 表示如下都是静态配置。在静态配置中包括 Listener，NetworkFilter，Route，HttpFilter等组件，它们之间并不是完全独立的。&lt;/p></description></item><item><title>部署操作</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/deployment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/deployment/</guid><description>&lt;h2 id="一docker镜像部署">一、Docker镜像部署&lt;/h2>
-&lt;p>注：首先确认本机已经安装好docker并且启动&lt;/p>
-&lt;h3 id="1从docker-hub-拉取-pixiu-镜像">1、从docker hub 拉取 pixiu 镜像&lt;/h3>
-&lt;p>&lt;code>docker pull phial3/dubbo-go-pixiu:latest&lt;/code>&lt;/p>
-&lt;h3 id="2按照需求准备pixiu配置">2、按照需求准备pixiu配置&lt;/h3>
-&lt;h4 id="pixiu配置参数详解configurations">&lt;a href="../configurations/">pixiu配置参数详解&lt;/a>&lt;/h4>
-&lt;p>准备 &lt;code>log.yml&lt;/code> 和 &lt;code>conf.yaml&lt;/code> 配置文件，将这两个配置文件在pixiu启动的时候挂在到本地&lt;/p>
-&lt;h3 id="3启动-pixiu">3、启动 pixiu&lt;/h3>
-&lt;p>&lt;strong>前台启动&lt;/strong>：，可方便查看服务信息运行是否正常&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>docker run --name dubbo-go-pixiu -p 8883:8883 &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -v /yourpath/log.yml:/etc/pixiu/log.yml &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> apache/dubbo-go-pixiu:latest
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>后台启动&lt;/strong>：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>docker run -itd --name dubbo-go-pixiu -p 8883:8883 &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> -v /yourpath/log.yml:/etc/pixiu/log.yml &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> apache/dubbo-go-pixiu:latest
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>注：&lt;/p>
-&lt;p>(1) &lt;code>--name&lt;/code>命令后面的dubbo-go-pixiu为你的pixiu实例的名称，可自行修改&lt;/p>
-&lt;p>(2)命令中的&lt;code>/yourpath/**&lt;/code>路径为你本地存放pixiu配置文件的绝对路径&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="4查看-pixiu-实例">4、查看 pixiu 实例&lt;/h3>
-&lt;p>&lt;code>docker ps | grep dubbo-go-pixiu&lt;/code> 正在运行的pixiu实例&lt;/p>
-&lt;p>&lt;code>docker exec -it dubbo-go-pixiu /bin/bash&lt;/code> 进入pixiu&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>用户文档 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/</link><description>Recent content in 用户文档 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/quickstart/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/quickstart/</guid><description>&lt;p&gt;让我们从将 HTTP 请求转换为 Dubbo2 请求的案例来快速展示 Pixiu 的能力。&lt;/p&gt;
+&lt;h2 id="用例"&gt;用例&lt;/h2&gt;
+&lt;p&gt;Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后的 Dubbo Server，然后将 Dubbo Server 的响应转换为 HTTP
+响应，最后返回给 Client。&lt;/p&gt;
+&lt;h3 id="架构图"&gt;架构图&lt;/h3&gt;
+&lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/pixiu/user/quick_start_architecture.png" alt="Architecture"&gt;&lt;/p&gt;
+&lt;h3 id="案例"&gt;案例&lt;/h3&gt;
+&lt;p&gt;案例路径请查看 &lt;code&gt;/samples/dubbogo/simple/resolve&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id="dubbo-server-实现和启动"&gt;Dubbo Server 实现和启动&lt;/h4&gt;
+&lt;p&gt;Dubbo Server 提供用户增删改查的相关接口，其具体的代码实现见案例路径下的 &lt;code&gt;server&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Dubbo Server 的配置如下所示，注册了 Dubbo2 协议的 interface &lt;code&gt;com.dubbogo.pixiu.UserService&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;registries&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;zk&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: zookeeper
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;timeout&lt;/span&gt;: 3s
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;127.0.0.1&lt;/span&gt;:&lt;span style="color:#2aa198"&gt;2181&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocols&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;provider&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;registry-ids&lt;/span&gt;: zk
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;services&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;UserProvider&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;group&lt;/span&gt;: test
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;version&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1.0.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;cluster&lt;/span&gt;: test_dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;serialization&lt;/span&gt;: hessian2
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt;: com.dubbogo.pixiu.UserService
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="pixiu-配置和启动"&gt;Pixiu 配置和启动&lt;/h4&gt;
+&lt;p&gt;为了用例的场景，Pixiu 需要启动对应的 HTTP Listener 进行 HTTP 请求的监听，所以就会使用到 &lt;code&gt;httpconnectionmanager&lt;/code&gt;。
+然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 &lt;code&gt;dgp.filter.http.dubboproxy&lt;/code&gt;，这里我们将其&lt;code&gt;auto_resolve&lt;/code&gt; 设置为true，表示开启
+HTTP to Dubbo 默认转换协议(具体定义请看&lt;a href="../appendix/http-to-dubbo-default-stragety"&gt;附录&lt;/a&gt;)。&lt;/p&gt;</description></item><item><title>启动和配置</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/configurations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/configurations/</guid><description>&lt;h3 id="pixiu-启动命令"&gt;Pixiu 启动命令&lt;/h3&gt;
+&lt;p&gt;Pixiu 分为两个形态 Gateway 和 Sidecar，目前 Pixiu 可执行程序的命令如下所示，其中 pixiu 是可执行文件名称。注意，-c 后是本地配置文件的绝对路径。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;pixiu gateway start -c /config/conf.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="配置详解"&gt;配置详解&lt;/h3&gt;
+&lt;p&gt;Pixiu 接受 yaml 格式的文件作为其主配置文件，其中对 Pixiu 的各类组件进行配置。我们以快速开始中的配置文件为例，详细讲解其中的组成部分，并且列出可能的扩展。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;static_resources:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; listeners:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: &amp;#34;net/http&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol_type: &amp;#34;HTTP&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; socket_address:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address: &amp;#34;0.0.0.0&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; port: 8883
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filter_chains:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filters:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: dgp.filter.httpconnectionmanager
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; route_config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; routes:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - match:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; prefix: &amp;#34;*&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; http_filters:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: dgp.filter.http.dubboproxy
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; dubboProxyConfig:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; auto_resolve: true
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; registries:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &amp;#34;zookeeper&amp;#34;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol: &amp;#34;zookeeper&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; timeout: &amp;#34;3s&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address: &amp;#34;127.0.0.1:2181&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; username: &amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; password: &amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;首先，类似 &lt;code&gt;envoy&lt;/code&gt;的配置，&lt;code&gt;static_resources&lt;/code&gt; 表示如下都是静态配置。在静态配置中包括 Listener，NetworkFilter，Route，HttpFilter等组件，它们之间并不是完全独立的。&lt;/p&gt;</description></item><item><title>部署操作</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/deployment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/user/deployment/</guid><description>&lt;h2 id="一docker镜像部署"&gt;一、Docker镜像部署&lt;/h2&gt;
+&lt;p&gt;注：首先确认本机已经安装好docker并且启动&lt;/p&gt;
+&lt;h3 id="1从docker-hub-拉取-pixiu-镜像"&gt;1、从docker hub 拉取 pixiu 镜像&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;docker pull phial3/dubbo-go-pixiu:latest&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="2按照需求准备pixiu配置"&gt;2、按照需求准备pixiu配置&lt;/h3&gt;
+&lt;h4 id="pixiu配置参数详解"&gt;&lt;a href="../configurations/"&gt;pixiu配置参数详解&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;准备 &lt;code&gt;log.yml&lt;/code&gt; 和 &lt;code&gt;conf.yaml&lt;/code&gt; 配置文件，将这两个配置文件在pixiu启动的时候挂在到本地&lt;/p&gt;
+&lt;h3 id="3启动-pixiu"&gt;3、启动 pixiu&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;前台启动&lt;/strong&gt;：，可方便查看服务信息运行是否正常&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker run --name dubbo-go-pixiu -p 8883:8883 &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/log.yml:/etc/pixiu/log.yml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; apache/dubbo-go-pixiu:latest
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;后台启动&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker run -itd --name dubbo-go-pixiu -p 8883:8883 &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/log.yml:/etc/pixiu/log.yml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; apache/dubbo-go-pixiu:latest
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;注：&lt;/p&gt;
+&lt;p&gt;(1) &lt;code&gt;--name&lt;/code&gt;命令后面的dubbo-go-pixiu为你的pixiu实例的名称，可自行修改&lt;/p&gt;
+&lt;p&gt;(2)命令中的&lt;code&gt;/yourpath/**&lt;/code&gt;路径为你本地存放pixiu配置文件的绝对路径&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="4查看-pixiu-实例"&gt;4、查看 pixiu 实例&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;docker ps | grep dubbo-go-pixiu&lt;/code&gt; 正在运行的pixiu实例&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker exec -it dubbo-go-pixiu /bin/bash&lt;/code&gt; 进入pixiu&lt;/p&gt;</description></item></channel></rss>

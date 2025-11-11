@@ -1,26 +1,26 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Node.js SDK 手册 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/</link><description>Recent content in Node.js SDK 手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/quick-start/</guid><description>&lt;p>基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Node.js SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p>
-&lt;p>本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。&lt;/p>
-&lt;h2 id="span-idprecondition前置条件span">&lt;span id="precondition">前置条件&lt;/span>&lt;/h2>
-&lt;p>因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 &lt;code>@bufbuild/protoc-gen-es&lt;/code>、&lt;code>@bufbuild/protobuf&lt;/code>、&lt;code>@apachedubbo/protoc-gen-apache-dubbo-es&lt;/code>、&lt;code>@apachedubbo/dubbo&lt;/code>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-Shell" data-lang="Shell">&lt;span style="display:flex;">&lt;span>npm install @bufbuild/protoc-gen-es @bufbuild/protobuf @apachedubbo/protoc-gen-apache-dubbo-es @apachedubbo/dubbo
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="span-iddefineservice定义服务span">&lt;span id="defineService">定义服务&lt;/span>&lt;/h2>
-&lt;p>现在，使用 Protocol Buffer (IDL) 来定义一个 Dubbo 服务。&lt;/p>
-&lt;p>创建目录，并生成文件&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-Shell" data-lang="Shell">&lt;span style="display:flex;">&lt;span>mkdir -p proto &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> touch proto/example.proto
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>写入内容&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-Protobuf" data-lang="Protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> apache&lt;span style="color:#719e07">.&lt;/span>dubbo.demo.example.v1;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayRequest&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">SayResponse&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> sentence &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> ExampleService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Say(SayRequest) &lt;span style="color:#719e07">returns&lt;/span> (SayResponse) {}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个文件声明了一个叫做 &lt;code>ExampleService&lt;/code> 的服务，为这个服务定义了 &lt;code>Say&lt;/code> 方法以及它的请求参数 &lt;code>SayRequest&lt;/code> 和返回值 &lt;code>SayResponse&lt;/code>。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Node.js SDK 手册 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/</link><description>Recent content in Node.js SDK 手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/quick-start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/nodejs-sdk/quick-start/</guid><description>&lt;p&gt;基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Node.js SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p&gt;
+&lt;p&gt;本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。&lt;/p&gt;
+&lt;h2 id="前置条件"&gt;&lt;span id="precondition"&gt;前置条件&lt;/span&gt;&lt;/h2&gt;
+&lt;p&gt;因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 &lt;code&gt;@bufbuild/protoc-gen-es&lt;/code&gt;、&lt;code&gt;@bufbuild/protobuf&lt;/code&gt;、&lt;code&gt;@apachedubbo/protoc-gen-apache-dubbo-es&lt;/code&gt;、&lt;code&gt;@apachedubbo/dubbo&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-Shell" data-lang="Shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;npm install @bufbuild/protoc-gen-es @bufbuild/protobuf @apachedubbo/protoc-gen-apache-dubbo-es @apachedubbo/dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="定义服务"&gt;&lt;span id="defineService"&gt;定义服务&lt;/span&gt;&lt;/h2&gt;
+&lt;p&gt;现在，使用 Protocol Buffer (IDL) 来定义一个 Dubbo 服务。&lt;/p&gt;
+&lt;p&gt;创建目录，并生成文件&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-Shell" data-lang="Shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;mkdir -p proto &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; touch proto/example.proto
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;写入内容&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-Protobuf" data-lang="Protobuf"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;syntax &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;proto3&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; apache&lt;span style="color:#719e07"&gt;.&lt;/span&gt;dubbo.demo.example.v1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;SayRequest&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; sentence &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;SayResponse&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; sentence &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;service&lt;/span&gt; ExampleService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; Say(SayRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (SayResponse) {}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个文件声明了一个叫做 &lt;code&gt;ExampleService&lt;/code&gt; 的服务，为这个服务定义了 &lt;code&gt;Say&lt;/code&gt; 方法以及它的请求参数 &lt;code&gt;SayRequest&lt;/code&gt; 和返回值 &lt;code&gt;SayResponse&lt;/code&gt;。&lt;/p&gt;</description></item></channel></rss>

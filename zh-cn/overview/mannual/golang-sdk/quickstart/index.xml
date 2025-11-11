@@ -1,45 +1,45 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>快速开始 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/</link><description>Recent content in 快速开始 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/index.xml" rel="self" type="application/rss+xml"/><item><title>开发 RPC Server &amp; RPC Client</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/</guid><description>&lt;p>基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Go SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p>
-&lt;p>本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。&lt;/p>
-&lt;h2 id="前置条件">前置条件&lt;/h2>
-&lt;p>因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 &lt;code>protoc&lt;/code>、&lt;code>protoc-gen-go&lt;/code>、&lt;code>protoc-gen-go-triple&lt;/code>。&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>安装 &lt;code>protoc&lt;/code>&lt;/p>
-&lt;p>查看 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/protoc-installation/" target="_blank">Protocol Buffer Compiler 安装指南&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>安装 &lt;code>protoc&lt;/code> 插件&lt;/p>
-&lt;p>接下来，我们安装插件 &lt;code>protoc-gen-go&lt;/code>、&lt;code>protoc-gen-go-triple&lt;/code>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go install github.com/dubbogo/protoc-gen-go-triple/v3@v3.0.3
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>确保 &lt;code>protoc-gen-go&lt;/code>、&lt;code>protoc-gen-go-triple&lt;/code> 在你的 &lt;code>PATH&lt;/code> 中。这可以通过 &lt;code>which protoc-gen-go&lt;/code> 验证，如果该命令不能正常工作的话，请执行以下命令：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span> -n &lt;span style="color:#2aa198">&amp;#34;&lt;/span>&lt;span style="color:#719e07">$(&lt;/span>go env GOBIN&lt;span style="color:#719e07">)&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&lt;/span> &lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&lt;/span>&lt;span style="color:#719e07">$(&lt;/span>go env GOBIN&lt;span style="color:#719e07">)&lt;/span>&lt;span style="color:#2aa198">:&lt;/span>&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span> -n &lt;span style="color:#2aa198">&amp;#34;&lt;/span>&lt;span style="color:#719e07">$(&lt;/span>go env GOPATH&lt;span style="color:#719e07">)&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&lt;/span> &lt;span style="color:#719e07">]&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#b58900">export&lt;/span> &lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&lt;/span>&lt;span style="color:#719e07">$(&lt;/span>go env GOPATH&lt;span style="color:#719e07">)&lt;/span>&lt;span style="color:#2aa198">/bin:&lt;/span>&lt;span style="color:#2aa198">${&lt;/span>&lt;span style="color:#268bd2">PATH&lt;/span>&lt;span style="color:#2aa198">}&lt;/span>&lt;span style="color:#2aa198">&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;/ol>
-&lt;h2 id="快速运行示例">快速运行示例&lt;/h2>
-&lt;h3 id="下载示例源码">下载示例源码&lt;/h3>
-&lt;p>我们在 &lt;a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples&lt;/a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。&lt;/p></description></item><item><title>开发微服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/microservices/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/microservices/</guid><description>&lt;p>本示例演示了使用 dubbo-go 开发微服务应用，为应用增加包括服务发现、负载均衡、流量管控等微服务核心能力。&lt;/p>
-&lt;h2 id="前置条件">前置条件&lt;/h2>
-&lt;p>本示例我们继续使用 Protobuf 开发微服务应用，请参考 &lt;a href="../rpc">开发 rpc server 和 rpc client&lt;/a> 了解如何安装 protoc、protoc-gen-go-triple 等必须插件。&lt;/p>
-&lt;h2 id="快速运行示例">快速运行示例&lt;/h2>
-&lt;h3 id="下载示例源码">下载示例源码&lt;/h3>
-&lt;p>我们在 &lt;a href="https://github.com/apache/dubbo-go-samples/">apache/dubbo-go-samples&lt;/a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ git clone --depth &lt;span style="color:#2aa198">1&lt;/span> https://github.com/apache/dubbo-go-samples
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>切换到快速开始示例目录：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ &lt;span style="color:#b58900">cd&lt;/span> dubbo-go-samples/registry/nacos
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动-nacos">启动 Nacos&lt;/h3>
-&lt;p>由于示例应用中启用了服务发现能力且使用 Nacos 作为注册中心，在运行示例之前需要先启动注册中心。请参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/integrations/nacos/">Nacos 本地安装&lt;/a> 了解如何快速安装和启动 Nacos。&lt;/p>
-&lt;h3 id="运行-server">运行 server&lt;/h3>
-&lt;p>在 &lt;code>go-server/cmd&lt;/code> 示例目录：&lt;/p>
-&lt;p>运行以下命令，启动 server：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ go run server.go
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>使用 &lt;code>cURL&lt;/code> 验证 server 正常启动：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ curl &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --header &lt;span style="color:#2aa198">&amp;#34;Content-Type: application/json&amp;#34;&lt;/span> &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> --data &lt;span style="color:#2aa198">&amp;#39;{&amp;#34;name&amp;#34;: &amp;#34;Dubbo&amp;#34;}&amp;#39;&lt;/span> &lt;span style="color:#cb4b16">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#cb4b16">&lt;/span> http://localhost:50051/greet.v1.GreetService/Greet
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Greeting: Hello world
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="运行-client">运行 client&lt;/h3>
-&lt;p>打开一个新的 terminal，运行以下命令，启动 client&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>快速开始 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/</link><description>Recent content in 快速开始 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/index.xml" rel="self" type="application/rss+xml"/><item><title>开发 RPC Server &amp; RPC Client</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/rpc/</guid><description>&lt;p&gt;基于 Dubbo 定义的 Triple 协议，你可以轻松编写浏览器、gRPC 兼容的 RPC 服务，并让这些服务同时运行在 HTTP/1 和 HTTP/2 上。Dubbo Go SDK 支持使用 IDL 或编程语言特有的方式定义服务，并提供一套轻量的 API 来发布或调用这些服务。&lt;/p&gt;
+&lt;p&gt;本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。&lt;/p&gt;
+&lt;h2 id="前置条件"&gt;前置条件&lt;/h2&gt;
+&lt;p&gt;因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 &lt;code&gt;protoc&lt;/code&gt;、&lt;code&gt;protoc-gen-go&lt;/code&gt;、&lt;code&gt;protoc-gen-go-triple&lt;/code&gt;。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;安装 &lt;code&gt;protoc&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;查看 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/protoc-installation/" target="_blank"&gt;Protocol Buffer Compiler 安装指南&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;安装 &lt;code&gt;protoc&lt;/code&gt; 插件&lt;/p&gt;
+&lt;p&gt;接下来，我们安装插件 &lt;code&gt;protoc-gen-go&lt;/code&gt;、&lt;code&gt;protoc-gen-go-triple&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;go install github.com/dubbogo/protoc-gen-go-triple/v3@v3.0.3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;确保 &lt;code&gt;protoc-gen-go&lt;/code&gt;、&lt;code&gt;protoc-gen-go-triple&lt;/code&gt; 在你的 &lt;code&gt;PATH&lt;/code&gt; 中。这可以通过 &lt;code&gt;which protoc-gen-go&lt;/code&gt; 验证，如果该命令不能正常工作的话，请执行以下命令：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;[&lt;/span&gt; -n &lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#719e07"&gt;$(&lt;/span&gt;go env GOBIN&lt;span style="color:#719e07"&gt;)&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;]&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style="color:#b58900"&gt;export&lt;/span&gt; &lt;span style="color:#268bd2"&gt;PATH&lt;/span&gt;&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#719e07"&gt;$(&lt;/span&gt;go env GOBIN&lt;span style="color:#719e07"&gt;)&lt;/span&gt;&lt;span style="color:#2aa198"&gt;:&lt;/span&gt;&lt;span style="color:#2aa198"&gt;${&lt;/span&gt;&lt;span style="color:#268bd2"&gt;PATH&lt;/span&gt;&lt;span style="color:#2aa198"&gt;}&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;[&lt;/span&gt; -n &lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#719e07"&gt;$(&lt;/span&gt;go env GOPATH&lt;span style="color:#719e07"&gt;)&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;]&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style="color:#b58900"&gt;export&lt;/span&gt; &lt;span style="color:#268bd2"&gt;PATH&lt;/span&gt;&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#719e07"&gt;$(&lt;/span&gt;go env GOPATH&lt;span style="color:#719e07"&gt;)&lt;/span&gt;&lt;span style="color:#2aa198"&gt;/bin:&lt;/span&gt;&lt;span style="color:#2aa198"&gt;${&lt;/span&gt;&lt;span style="color:#268bd2"&gt;PATH&lt;/span&gt;&lt;span style="color:#2aa198"&gt;}&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="快速运行示例"&gt;快速运行示例&lt;/h2&gt;
+&lt;h3 id="下载示例源码"&gt;下载示例源码&lt;/h3&gt;
+&lt;p&gt;我们在 &lt;a href="https://github.com/apache/dubbo-go-samples/" target="_blank"&gt;apache/dubbo-go-samples&lt;/a&gt; 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。&lt;/p&gt;</description></item><item><title>开发微服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/microservices/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/quickstart/microservices/</guid><description>&lt;p&gt;本示例演示了使用 dubbo-go 开发微服务应用，为应用增加包括服务发现、负载均衡、流量管控等微服务核心能力。&lt;/p&gt;
+&lt;h2 id="前置条件"&gt;前置条件&lt;/h2&gt;
+&lt;p&gt;本示例我们继续使用 Protobuf 开发微服务应用，请参考 &lt;a href="../rpc"&gt;开发 rpc server 和 rpc client&lt;/a&gt; 了解如何安装 protoc、protoc-gen-go-triple 等必须插件。&lt;/p&gt;
+&lt;h2 id="快速运行示例"&gt;快速运行示例&lt;/h2&gt;
+&lt;h3 id="下载示例源码"&gt;下载示例源码&lt;/h3&gt;
+&lt;p&gt;我们在 &lt;a href="https://github.com/apache/dubbo-go-samples/"&gt;apache/dubbo-go-samples&lt;/a&gt; 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ git clone --depth &lt;span style="color:#2aa198"&gt;1&lt;/span&gt; https://github.com/apache/dubbo-go-samples
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;切换到快速开始示例目录：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ &lt;span style="color:#b58900"&gt;cd&lt;/span&gt; dubbo-go-samples/registry/nacos
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="启动-nacos"&gt;启动 Nacos&lt;/h3&gt;
+&lt;p&gt;由于示例应用中启用了服务发现能力且使用 Nacos 作为注册中心，在运行示例之前需要先启动注册中心。请参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/reference/integrations/nacos/"&gt;Nacos 本地安装&lt;/a&gt; 了解如何快速安装和启动 Nacos。&lt;/p&gt;
+&lt;h3 id="运行-server"&gt;运行 server&lt;/h3&gt;
+&lt;p&gt;在 &lt;code&gt;go-server/cmd&lt;/code&gt; 示例目录：&lt;/p&gt;
+&lt;p&gt;运行以下命令，启动 server：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ go run server.go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;使用 &lt;code&gt;cURL&lt;/code&gt; 验证 server 正常启动：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ curl &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; --header &lt;span style="color:#2aa198"&gt;&amp;#34;Content-Type: application/json&amp;#34;&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; --data &lt;span style="color:#2aa198"&gt;&amp;#39;{&amp;#34;name&amp;#34;: &amp;#34;Dubbo&amp;#34;}&amp;#39;&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; http://localhost:50051/greet.v1.GreetService/Greet
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Greeting: Hello world
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="运行-client"&gt;运行 client&lt;/h3&gt;
+&lt;p&gt;打开一个新的 terminal，运行以下命令，启动 client&lt;/p&gt;</description></item></channel></rss>
