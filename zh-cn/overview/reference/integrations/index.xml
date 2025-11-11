@@ -1,126 +1,126 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>集成适配 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/</link><description>Recent content in 集成适配 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/index.xml" rel="self" type="application/rss+xml"/><item><title>Prometheus</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/prometheus/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/prometheus/</guid><description>&lt;h2 id="安装">安装&lt;/h2>
-&lt;p>你可以使用 Dubbo 社区提供的示例配置快速安装 Prometheus。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/prometheus.yaml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>本安装仅适用于测试或体验使用，生产级别的安装请参考 Prometheus 官方安装文档。&lt;/p>
-&lt;/blockquote>
-&lt;p>执行端口映射 &lt;code>kubectl -n dubbo-system port-forward svc/prometheus-server 9090:9090&lt;/code>，访问页面 &lt;code>http://localhost:9090&lt;/code>，切换到 graph 视图。&lt;/p>
-&lt;p>&lt;img alt="Prometheus" src="https://cn.dubbo.apache.org/imgs/v3/reference/integrations/prometheus.jpg">&lt;/p>
-&lt;h2 id="scrape-配置">Scrape 配置&lt;/h2>
-&lt;p>Dubbo 的每个实例都会暴露一个 http 端口用于 Metrics 采集，Prometheus 通过 scraping 每个实例的 http 接口来采集统计数据。具体的 scraping 路径可以通过 Prometheus 配置文件进行调整，该文件控制 scraping 实例的端口、路径、TLS 设置等。&lt;/p>
-&lt;h3 id="kubernetes-注解约定">Kubernetes 注解约定&lt;/h3>
-&lt;p>在 Kubernetes 部署模式下，使用官方社区维护的 &lt;a href="https://github.com/prometheus-community/helm-charts">Helm Charts 安装 Prometheus&lt;/a>，Prometheus 服务可以自动识别包含 &lt;code>prometheus.io&lt;/code> 注解的 Dubbo Pod 实例，并将它们列入 Scraping 实例列表。&lt;/p>
-&lt;p>Dubbo 官网给出的示例即是基于 &lt;code>prometheus.io&lt;/code> 注解实现了 scraping target 地址的自动发现，具体注解配置可参见示例中的 &lt;a href="https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml">Deployment 资源定义&lt;/a>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">annotations&lt;/span>:
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus.io/scrape&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus.io/path&lt;/span>: /management/prometheus
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">prometheus.io/port&lt;/span>: &lt;span style="color:#2aa198">&amp;#34;22222&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在此模式下，Dubbo 实例默认提供的 Prometheus Metrics 采集路径是：&lt;code>/management/prometheus&lt;/code>。&lt;/p></description></item><item><title>Grafana</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</guid><description>&lt;p>Grafana 是一种开源的监控解决方案，可用于为 Dubbo 配置可视化仪表板，您可以使用 Grafana 来监控 Dubbo 集群的运行状况。&lt;/p>
-&lt;h2 id="配置可视化控制面板">配置可视化控制面板&lt;/h2>
-&lt;p>以下是 Dubbo 社区提供的默认指标面板，您配置好数据源并直接导入使用即可。如果默认面板不能满足要求，您还可以自定义 Grafana 面板。&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://grafana.com/grafana/dashboards/18469">&lt;strong>Apache Dubbo Observability Dashboard：&lt;/strong>&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://grafana.com/grafana/dashboards/4701">&lt;strong>JVM (Micrometer) Dashboard：&lt;/strong>&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>您可以通过以下几种方式快速的导入 Grafana 监控面板。&lt;/p>
-&lt;h3 id="方式一kubernetes-安装">方式一：Kubernetes 安装&lt;/h3>
-&lt;p>你可以使用 Dubbo 社区提供的示例配置快速安装 Grafana，安装后的 Grafana 提供了社区默认指标面板视图。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/grafana.yaml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>你可能需要端口映射获得访问地址 &lt;code>$ kubectl port-forward service/grafana 3000:3000&lt;/code>，打开浏览器访问页面 &lt;code>http://localhost:3000&lt;/code>。&lt;/p>
-&lt;blockquote>
-&lt;p>获取登录信息&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl get secrets grafana -o &lt;span style="color:#268bd2">jsonpath&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;{.data.admin-user}&amp;#34;&lt;/span> | base64 --decode ; &lt;span style="color:#b58900">echo&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> kubectl get secrets grafana -o &lt;span style="color:#268bd2">jsonpath&lt;/span>&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;{.data.admin-password}&amp;#34;&lt;/span> | base64 --decode ; &lt;span style="color:#b58900">echo&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/blockquote>
-&lt;h3 id="方式二向已经安装好的集群导入-dashboard">方式二：向已经安装好的集群导入 dashboard&lt;/h3>
-&lt;p>如果你已经有安装好的 Grafana 服务了，则还可以通过 &lt;a href="https://grafana.com/docs/grafana/v8.4/dashboards/export-import/#importing-a-dashboard">Grafana 控制台的导入菜单&lt;/a> 导入 dashboard。根据 Grafana 的要求，导入 dashboard 的过程中需要同时指定 Prometheus 数据源地址。&lt;/p></description></item><item><title>Skywalking</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/skywalking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/skywalking/</guid><description>&lt;h2 id="安装">安装&lt;/h2>
-&lt;p>你可以使用 Dubbo 社区提供的示例配置快速安装 Skywalking。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/skywalking.yaml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>本安装仅适用于测试或体验使用，生产级别的安装请参考 Skywalking 官方安装文档。&lt;/p>
-&lt;/blockquote></description></item><item><title>Zipkin</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zipkin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zipkin/</guid><description>&lt;h2 id="安装">安装&lt;/h2>
-&lt;p>你可以使用 Dubbo 社区提供的示例配置快速安装 Zipkin。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/zipkin.yaml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>本安装仅适用于测试或体验使用，生产级别的安装请参考 Zipkin 官方安装文档。&lt;/p>
-&lt;/blockquote></description></item><item><title>Nacos</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/nacos/</guid><description>&lt;p>本文档讲解如何安装与配置 Nacos，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Nacos 官方文档。&lt;/p>
-&lt;h2 id="本地下载">本地下载&lt;/h2>
-&lt;p>Nacos 依赖 &lt;a href="https://sdkman.io/" target="_blank">Java 环境&lt;/a> 来运行，目前支持 Linux、MacOS、Windows 等环境。&lt;/p>
-&lt;p>您可以 &lt;a href="https://nacos.io/download/nacos-server/" target="_blank">下载最新稳定版本 Nacos&lt;/a>，解压缩二进制包：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>unzip nacos-server-&lt;span style="color:#268bd2">$version&lt;/span>.zip
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> nacos/bin
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">#tar -xvf nacos-server-$version.tar.gz&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动命令">启动命令&lt;/h4>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Linux/Unix/Mac&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sh startup.sh -m standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Ubuntu&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>bash startup.sh -m standalone
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"># Windows&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>startup.cmd -m standalone
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="验证-nacos-正常启动">验证 nacos 正常启动&lt;/h4>
-&lt;p>通过浏览器访问以下链接打开控制台：http://127.0.0.1:8080/index.html&lt;/p>
-&lt;h2 id="docker">docker&lt;/h2>
-&lt;p>下载 nacos-docker 项目。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone https://github.com/nacos-group/nacos-docker.git
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> nacos-docker
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>执行 docker-compose 命令启动Nacos。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>docker-compose -f example/standalone-derby.yaml up
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="kubernetes">kubernetes&lt;/h2>
-&lt;p>下载 nacos-k8s 项目&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>git clone https://github.com/nacos-group/nacos-k8s.git
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> nacos-k8s
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>快速启动（注意：使用此方式快速启动,请注意这是没有使用持久化卷的,可能存在数据丢失风险）&lt;/p></description></item><item><title>Higress</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/higress/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/higress/</guid><description>&lt;p>本文档讲解如何安装与配置 Higress，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Higress 官方文档。&lt;/p>
-&lt;h2 id="docker">docker&lt;/h2>
-&lt;p>使用 docker 启动 Higress，请首先确保您已经在本地机器正确 &lt;a href="https://docs.docker.com/engine/install/" target="_blank">下载页面&lt;/a> 安装 docker&lt;/a>。&lt;/p>
-&lt;p>使用以下命令安装 Higress：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s -- -a -c nacos://192.168.0.1:8848 --nacos-username&lt;span style="color:#719e07">=&lt;/span>nacos --nacos-password&lt;span style="color:#719e07">=&lt;/span>nacos
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>请将 &lt;code>192.168.0.1&lt;/code> 替换为 Nacos 服务器的 IP（如果 Nacos 部署在本机，请不要使用如 &lt;code>localhost&lt;/code> 或 &lt;code>127.0.0.1&lt;/code> 的 Loopback 地址）。按需调整 &amp;ndash;nacos-username 和 &amp;ndash;nacos-password 的取值，如果 Nacos 服务未开启认证功能，则可以移除这两个参数。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>集成适配 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/</link><description>Recent content in 集成适配 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/index.xml" rel="self" type="application/rss+xml"/><item><title>Prometheus</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/prometheus/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/prometheus/</guid><description>&lt;h2 id="安装"&gt;安装&lt;/h2&gt;
+&lt;p&gt;你可以使用 Dubbo 社区提供的示例配置快速安装 Prometheus。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/prometheus.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;本安装仅适用于测试或体验使用，生产级别的安装请参考 Prometheus 官方安装文档。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;执行端口映射 &lt;code&gt;kubectl -n dubbo-system port-forward svc/prometheus-server 9090:9090&lt;/code&gt;，访问页面 &lt;code&gt;http://localhost:9090&lt;/code&gt;，切换到 graph 视图。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/v3/reference/integrations/prometheus.jpg" alt="Prometheus"&gt;&lt;/p&gt;
+&lt;h2 id="scrape-配置"&gt;Scrape 配置&lt;/h2&gt;
+&lt;p&gt;Dubbo 的每个实例都会暴露一个 http 端口用于 Metrics 采集，Prometheus 通过 scraping 每个实例的 http 接口来采集统计数据。具体的 scraping 路径可以通过 Prometheus 配置文件进行调整，该文件控制 scraping 实例的端口、路径、TLS 设置等。&lt;/p&gt;
+&lt;h3 id="kubernetes-注解约定"&gt;Kubernetes 注解约定&lt;/h3&gt;
+&lt;p&gt;在 Kubernetes 部署模式下，使用官方社区维护的 &lt;a href="https://github.com/prometheus-community/helm-charts"&gt;Helm Charts 安装 Prometheus&lt;/a&gt;，Prometheus 服务可以自动识别包含 &lt;code&gt;prometheus.io&lt;/code&gt; 注解的 Dubbo Pod 实例，并将它们列入 Scraping 实例列表。&lt;/p&gt;
+&lt;p&gt;Dubbo 官网给出的示例即是基于 &lt;code&gt;prometheus.io&lt;/code&gt; 注解实现了 scraping target 地址的自动发现，具体注解配置可参见示例中的 &lt;a href="https://github.com/apache/dubbo-samples/blob/master/4-governance/dubbo-samples-metrics-spring-boot/Deployment.yml"&gt;Deployment 资源定义&lt;/a&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;annotations&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;prometheus.io/scrape&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;true&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;prometheus.io/path&lt;/span&gt;: /management/prometheus
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;prometheus.io/port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;22222&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在此模式下，Dubbo 实例默认提供的 Prometheus Metrics 采集路径是：&lt;code&gt;/management/prometheus&lt;/code&gt;。&lt;/p&gt;</description></item><item><title>Grafana</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/grafana/</guid><description>&lt;p&gt;Grafana 是一种开源的监控解决方案，可用于为 Dubbo 配置可视化仪表板，您可以使用 Grafana 来监控 Dubbo 集群的运行状况。&lt;/p&gt;
+&lt;h2 id="配置可视化控制面板"&gt;配置可视化控制面板&lt;/h2&gt;
+&lt;p&gt;以下是 Dubbo 社区提供的默认指标面板，您配置好数据源并直接导入使用即可。如果默认面板不能满足要求，您还可以自定义 Grafana 面板。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://grafana.com/grafana/dashboards/18469"&gt;&lt;strong&gt;Apache Dubbo Observability Dashboard：&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://grafana.com/grafana/dashboards/4701"&gt;&lt;strong&gt;JVM (Micrometer) Dashboard：&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;您可以通过以下几种方式快速的导入 Grafana 监控面板。&lt;/p&gt;
+&lt;h3 id="方式一kubernetes-安装"&gt;方式一：Kubernetes 安装&lt;/h3&gt;
+&lt;p&gt;你可以使用 Dubbo 社区提供的示例配置快速安装 Grafana，安装后的 Grafana 提供了社区默认指标面板视图。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/grafana.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;你可能需要端口映射获得访问地址 &lt;code&gt;$ kubectl port-forward service/grafana 3000:3000&lt;/code&gt;，打开浏览器访问页面 &lt;code&gt;http://localhost:3000&lt;/code&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;获取登录信息&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;kubectl get secrets grafana -o &lt;span style="color:#268bd2"&gt;jsonpath&lt;/span&gt;&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;{.data.admin-user}&amp;#34;&lt;/span&gt; | base64 --decode ; &lt;span style="color:#b58900"&gt;echo&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; kubectl get secrets grafana -o &lt;span style="color:#268bd2"&gt;jsonpath&lt;/span&gt;&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;{.data.admin-password}&amp;#34;&lt;/span&gt; | base64 --decode ; &lt;span style="color:#b58900"&gt;echo&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/blockquote&gt;
+&lt;h3 id="方式二向已经安装好的集群导入-dashboard"&gt;方式二：向已经安装好的集群导入 dashboard&lt;/h3&gt;
+&lt;p&gt;如果你已经有安装好的 Grafana 服务了，则还可以通过 &lt;a href="https://grafana.com/docs/grafana/v8.4/dashboards/export-import/#importing-a-dashboard"&gt;Grafana 控制台的导入菜单&lt;/a&gt; 导入 dashboard。根据 Grafana 的要求，导入 dashboard 的过程中需要同时指定 Prometheus 数据源地址。&lt;/p&gt;</description></item><item><title>Skywalking</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/skywalking/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/skywalking/</guid><description>&lt;h2 id="安装"&gt;安装&lt;/h2&gt;
+&lt;p&gt;你可以使用 Dubbo 社区提供的示例配置快速安装 Skywalking。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/skywalking.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;本安装仅适用于测试或体验使用，生产级别的安装请参考 Skywalking 官方安装文档。&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>Zipkin</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zipkin/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zipkin/</guid><description>&lt;h2 id="安装"&gt;安装&lt;/h2&gt;
+&lt;p&gt;你可以使用 Dubbo 社区提供的示例配置快速安装 Zipkin。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;kubectl create -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/deploy/kubernetes/zipkin.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;本安装仅适用于测试或体验使用，生产级别的安装请参考 Zipkin 官方安装文档。&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>Nacos</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/nacos/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/nacos/</guid><description>&lt;p&gt;本文档讲解如何安装与配置 Nacos，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Nacos 官方文档。&lt;/p&gt;
+&lt;h2 id="本地下载"&gt;本地下载&lt;/h2&gt;
+&lt;p&gt;Nacos 依赖 &lt;a href="https://sdkman.io/" target="_blank"&gt;Java 环境&lt;/a&gt; 来运行，目前支持 Linux、MacOS、Windows 等环境。&lt;/p&gt;
+&lt;p&gt;您可以 &lt;a href="https://nacos.io/download/nacos-server/" target="_blank"&gt;下载最新稳定版本 Nacos&lt;/a&gt;，解压缩二进制包：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;unzip nacos-server-&lt;span style="color:#268bd2"&gt;$version&lt;/span&gt;.zip
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; nacos/bin
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;#tar -xvf nacos-server-$version.tar.gz&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="启动命令"&gt;启动命令&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# Linux/Unix/Mac&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;sh startup.sh -m standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# Ubuntu&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;bash startup.sh -m standalone
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# Windows&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;startup.cmd -m standalone
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="验证-nacos-正常启动"&gt;验证 nacos 正常启动&lt;/h4&gt;
+&lt;p&gt;通过浏览器访问以下链接打开控制台：http://127.0.0.1:8080/index.html&lt;/p&gt;
+&lt;h2 id="docker"&gt;docker&lt;/h2&gt;
+&lt;p&gt;下载 nacos-docker 项目。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;git clone https://github.com/nacos-group/nacos-docker.git
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; nacos-docker
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;执行 docker-compose 命令启动Nacos。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker-compose -f example/standalone-derby.yaml up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="kubernetes"&gt;kubernetes&lt;/h2&gt;
+&lt;p&gt;下载 nacos-k8s 项目&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;git clone https://github.com/nacos-group/nacos-k8s.git
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; nacos-k8s
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;快速启动（注意：使用此方式快速启动,请注意这是没有使用持久化卷的,可能存在数据丢失风险）&lt;/p&gt;</description></item><item><title>Higress</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/higress/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/higress/</guid><description>&lt;p&gt;本文档讲解如何安装与配置 Higress，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Higress 官方文档。&lt;/p&gt;
+&lt;h2 id="docker"&gt;docker&lt;/h2&gt;
+&lt;p&gt;使用 docker 启动 Higress，请首先确保您已经在本地机器正确 &lt;a href="https://docs.docker.com/engine/install/" target="_blank"&gt;下载页面&lt;/a&gt; 安装 docker&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;使用以下命令安装 Higress：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s -- -a -c nacos://192.168.0.1:8848 --nacos-username&lt;span style="color:#719e07"&gt;=&lt;/span&gt;nacos --nacos-password&lt;span style="color:#719e07"&gt;=&lt;/span&gt;nacos
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;请将 &lt;code&gt;192.168.0.1&lt;/code&gt; 替换为 Nacos 服务器的 IP（如果 Nacos 部署在本机，请不要使用如 &lt;code&gt;localhost&lt;/code&gt; 或 &lt;code&gt;127.0.0.1&lt;/code&gt; 的 Loopback 地址）。按需调整 &amp;ndash;nacos-username 和 &amp;ndash;nacos-password 的取值，如果 Nacos 服务未开启认证功能，则可以移除这两个参数。&lt;/p&gt;
 
 
-&lt;div class="alert alert-info" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;div class="alert alert-info" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- &lt;ul>
-&lt;li>如果您还没有安装 nacos，请 &lt;a href="../nacos/">参考文档完成安装&lt;/a>。&lt;/li>
-&lt;li>如果您使用 Zookeeper 做服务发现，请修改对应的集群地址为 zookeeper 集群地址。&lt;/li>
-&lt;/ul>
+ &lt;ul&gt;
+&lt;li&gt;如果您还没有安装 nacos，请 &lt;a href="../nacos/"&gt;参考文档完成安装&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;如果您使用 Zookeeper 做服务发现，请修改对应的集群地址为 zookeeper 集群地址。&lt;/li&gt;
+&lt;/ul&gt;
 
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;p>在浏览器中输入 &lt;code>http://127.0.0.1:8080&lt;/code> 进入 Higress 控制台。&lt;/p>
-&lt;h2 id="kubernetes">kubernetes&lt;/h2>
-&lt;p>通过以下命令安装 Higress：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>helm repo add higress.io https://higress.io/helm-charts
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>helm install higress -n higress-system higress.io/higress --create-namespace --render-subchart-notes --set global.local&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">true&lt;/span> --set higress-console.o11y.enabled&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#b58900">false&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过以下端口映射命令，对本机访问开放端口：&lt;/p></description></item><item><title>Zookeeper</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</guid><description>&lt;p>这篇文章讲解如何安装与配置 Zookeeper，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Zookeeper 官方文档。&lt;/p>
-&lt;h2 id="本地下载">本地下载&lt;/h2>
-&lt;h4 id="下载zookeeper">下载Zookeeper&lt;/h4>
-&lt;p>请到 Apache Zookeeper &lt;a href="https://zookeeper.apache.org/releases.html" target="_blank">下载页面&lt;/a> 下载最新版本的 zookeeper 发行包。&lt;/p>
-&lt;p>解压下载的 zookeeper 包：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>tar -zxvf apache-zookeeper-3.8.3.tar.gz
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> apache-zookeeper-3.8.3
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="启动-zookeeper">启动 Zookeeper&lt;/h4>
-&lt;p>在启动 zookeeper 之前，首先需要在根目录以下位置创建文件 &lt;code>conf/zoo.cfg&lt;/code>：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>tickTime=2000
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>clientPort=2181
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>admin.enableServer=false
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以下是一些参数的详细解释：&lt;/p>
-&lt;ul>
-&lt;li>tickTime : Zookeeper 用到的基本时间设置，tickTime 为心跳检测间隔， 2*tickTime 是最大 session 超时时间等（单位是毫秒 ms）。&lt;/li>
-&lt;li>clientPort : 监听端口，客户端可通过这个端口方案 zookeeper server&lt;/li>
-&lt;li>admin.enableServer：运维端口，默认为 8080，建议关闭防止和 Spring Web 应用程序冲突&lt;/li>
-&lt;/ul>
-&lt;p>接下来，可以以 standalone 模式启动 Zookeeper 了：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>bin/zkServer.sh start
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="测试连接到-zookeeper">测试连接到 ZooKeeper&lt;/h4>
-&lt;p>运行以下命令，连接到刚刚启动的 zookeeper server：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>$ bin/zkCli.sh -server 127.0.0.1:2181
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>连接成功后，可看到以下输出：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>Connecting to localhost:2181
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Welcome to ZooKeeper!
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>JLine support is enabled
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">[&lt;/span>zkshell: 0&lt;span style="color:#719e07">]&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>执行以下命令查看根节点内容：&lt;/p></description></item></channel></rss>
+&lt;p&gt;在浏览器中输入 &lt;code&gt;http://127.0.0.1:8080&lt;/code&gt; 进入 Higress 控制台。&lt;/p&gt;
+&lt;h2 id="kubernetes"&gt;kubernetes&lt;/h2&gt;
+&lt;p&gt;通过以下命令安装 Higress：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;helm repo add higress.io https://higress.io/helm-charts
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;helm install higress -n higress-system higress.io/higress --create-namespace --render-subchart-notes --set global.local&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#b58900"&gt;true&lt;/span&gt; --set higress-console.o11y.enabled&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#b58900"&gt;false&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过以下端口映射命令，对本机访问开放端口：&lt;/p&gt;</description></item><item><title>Zookeeper</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/integrations/zookeeper/</guid><description>&lt;p&gt;这篇文章讲解如何安装与配置 Zookeeper，涵盖本地、docker、kubernetes 等环境。以下仅为快速示例安装指南，如想搭建生产可用集群请参考 Zookeeper 官方文档。&lt;/p&gt;
+&lt;h2 id="本地下载"&gt;本地下载&lt;/h2&gt;
+&lt;h4 id="下载zookeeper"&gt;下载Zookeeper&lt;/h4&gt;
+&lt;p&gt;请到 Apache Zookeeper &lt;a href="https://zookeeper.apache.org/releases.html" target="_blank"&gt;下载页面&lt;/a&gt; 下载最新版本的 zookeeper 发行包。&lt;/p&gt;
+&lt;p&gt;解压下载的 zookeeper 包：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;tar -zxvf apache-zookeeper-3.8.3.tar.gz
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; apache-zookeeper-3.8.3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="启动-zookeeper"&gt;启动 Zookeeper&lt;/h4&gt;
+&lt;p&gt;在启动 zookeeper 之前，首先需要在根目录以下位置创建文件 &lt;code&gt;conf/zoo.cfg&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;tickTime=2000
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;clientPort=2181
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;admin.enableServer=false
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;以下是一些参数的详细解释：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;tickTime : Zookeeper 用到的基本时间设置，tickTime 为心跳检测间隔， 2*tickTime 是最大 session 超时时间等（单位是毫秒 ms）。&lt;/li&gt;
+&lt;li&gt;clientPort : 监听端口，客户端可通过这个端口方案 zookeeper server&lt;/li&gt;
+&lt;li&gt;admin.enableServer：运维端口，默认为 8080，建议关闭防止和 Spring Web 应用程序冲突&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来，可以以 standalone 模式启动 Zookeeper 了：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;bin/zkServer.sh start
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="测试连接到-zookeeper"&gt;测试连接到 ZooKeeper&lt;/h4&gt;
+&lt;p&gt;运行以下命令，连接到刚刚启动的 zookeeper server：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ bin/zkCli.sh -server 127.0.0.1:2181
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;连接成功后，可看到以下输出：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Connecting to localhost:2181
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Welcome to ZooKeeper!
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;JLine support is enabled
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;[&lt;/span&gt;zkshell: 0&lt;span style="color:#719e07"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;执行以下命令查看根节点内容：&lt;/p&gt;</description></item></channel></rss>

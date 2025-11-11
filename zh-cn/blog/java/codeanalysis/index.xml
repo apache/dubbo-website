@@ -1,209 +1,209 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>源码分析 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/</link><description>Recent content in 源码分析 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo 3 中的三层配置隔离</title><link>https://cn.dubbo.apache.org/zh-cn/blog/1/01/01/dubbo-3-%E4%B8%AD%E7%9A%84%E4%B8%89%E5%B1%82%E9%85%8D%E7%BD%AE%E9%9A%94%E7%A6%BB/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/1/01/01/dubbo-3-%E4%B8%AD%E7%9A%84%E4%B8%89%E5%B1%82%E9%85%8D%E7%BD%AE%E9%9A%94%E7%A6%BB/</guid><description>&lt;h2 id="models提供的隔离">Models提供的隔离&lt;/h2>
-&lt;p>Dubbo目前提供了三个级别上的隔离：JVM级别、应用级别、服务(模块)级别，从而实现各个级别上的生命周期及配置信息的单独管理。这三个层次上的隔离由 FrameworkModel、ApplicationModel 和 ModuleModel 及它们对应的 Config 来完成。&lt;/p>
-&lt;p>&lt;img alt="image" src="https://cn.dubbo.apache.org/imgs/blog/models.png">&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>FrameworkModel ：Dubbo 框架的顶级模型，表示 Dubbo 框架的全局运行环境，适配多应用混合部署的场景，降低资源成本。&lt;/p>
-&lt;p>如：假设我们有一个在线教育平台，平台下有多个租户，而我们希望使这些租户的服务部署在同一个 JVM 上以节省资源，但它们之间可能使用不同的注册中心、监控设施、协议等，因此我们可以为每个租户分配一个 FrameWorkModel 实例来实现这种隔离。&lt;/p>
-&lt;p>FrameworkModel负责管理整个Dubbo框架的各种全局配置、元数据以及默认配置。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>ApplicationModel ：应用程序级别模型，表示一个 Dubbo 应用（通常为一个 SpringApplication）。适配单JVM多应用场景，通常结合热发布使用，降低热发布对整个应用的影响范围。&lt;/p>
-&lt;p>如，以上的在线教育平台有多个子系统，如课程管理、学生管理，而每个子系统都是独立的 Spring 应用，在同个 JVM 中运行，共享一个 FrameworkModel，也会共享 Framework 级别的默认配置和资源：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//课程管理应用&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">ClassApplication&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> ApplicationModel classAppModel;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> classAppModel
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .getApplicationConfigManager()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .addRegistry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(REGISTRY_URL_CLASS));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...其它设置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpringApplication.run(ClassApplication.class, args);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setApplicationModel&lt;/span>(ApplicationModel classAppModel){
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.classAppModel &lt;span style="color:#719e07">=&lt;/span> classAppModel;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//学生管理应用&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SpringBootApplication&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">StudentApplication&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> ApplicationModel studentAppModel;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> studentAppModel
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .getApplicationConfigManager()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .addRegistry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(REGISTRY_URL_STUDENT));
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//...其它设置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> SpringApplication.run(StudentApplication.class, args);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setApplicationModel&lt;/span>(ApplicationModel studentAppModel){
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.studentAppModel &lt;span style="color:#719e07">=&lt;/span> studentAppModel;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//单机发布多应用&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MultiContextLauncher&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> FrameworkModel frameworkModel &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> FrameworkModel();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//使用同一个FrameworkModel&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ClassApplication.setApplicationModel(frameworkModel.newApplication());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StudenAppication.setApplicationModel(frameworkModel.newApplication());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SpringApplicationBuilder(ClassApplication.class)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .run(args);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">new&lt;/span> SpringApplicationBuilder(StudentApplication.class.class)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .run(args);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由此，我们可以重新部署单个应用与其对应的ApplicationModel，实现热发布，而不会影响到另一个应用。&lt;/p></description></item><item><title>Dubbo 3 之 Triple 流控反压原理解析</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/28/dubbo-3-%E4%B9%8B-triple-%E6%B5%81%E6%8E%A7%E5%8F%8D%E5%8E%8B%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</link><pubDate>Wed, 28 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/28/dubbo-3-%E4%B9%8B-triple-%E6%B5%81%E6%8E%A7%E5%8F%8D%E5%8E%8B%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</guid><description>&lt;p>Triple 是 Dubbo 3 提出的基于 HTTP2 的开放协议，
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>源码分析 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/</link><description>Recent content in 源码分析 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo 3 中的三层配置隔离</title><link>https://cn.dubbo.apache.org/zh-cn/blog/1/01/01/dubbo-3-%E4%B8%AD%E7%9A%84%E4%B8%89%E5%B1%82%E9%85%8D%E7%BD%AE%E9%9A%94%E7%A6%BB/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/1/01/01/dubbo-3-%E4%B8%AD%E7%9A%84%E4%B8%89%E5%B1%82%E9%85%8D%E7%BD%AE%E9%9A%94%E7%A6%BB/</guid><description>&lt;h2 id="models提供的隔离"&gt;Models提供的隔离&lt;/h2&gt;
+&lt;p&gt;Dubbo目前提供了三个级别上的隔离：JVM级别、应用级别、服务(模块)级别，从而实现各个级别上的生命周期及配置信息的单独管理。这三个层次上的隔离由 FrameworkModel、ApplicationModel 和 ModuleModel 及它们对应的 Config 来完成。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/models.png" alt="image"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;FrameworkModel ：Dubbo 框架的顶级模型，表示 Dubbo 框架的全局运行环境，适配多应用混合部署的场景，降低资源成本。&lt;/p&gt;
+&lt;p&gt;如：假设我们有一个在线教育平台，平台下有多个租户，而我们希望使这些租户的服务部署在同一个 JVM 上以节省资源，但它们之间可能使用不同的注册中心、监控设施、协议等，因此我们可以为每个租户分配一个 FrameWorkModel 实例来实现这种隔离。&lt;/p&gt;
+&lt;p&gt;FrameworkModel负责管理整个Dubbo框架的各种全局配置、元数据以及默认配置。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ApplicationModel ：应用程序级别模型，表示一个 Dubbo 应用（通常为一个 SpringApplication）。适配单JVM多应用场景，通常结合热发布使用，降低热发布对整个应用的影响范围。&lt;/p&gt;
+&lt;p&gt;如，以上的在线教育平台有多个子系统，如课程管理、学生管理，而每个子系统都是独立的 Spring 应用，在同个 JVM 中运行，共享一个 FrameworkModel，也会共享 Framework 级别的默认配置和资源：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//课程管理应用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@SpringBootApplication&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;ClassApplication&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; ApplicationModel classAppModel;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;(String&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; args) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; classAppModel
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .getApplicationConfigManager()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .addRegistry(&lt;span style="color:#719e07"&gt;new&lt;/span&gt; RegistryConfig(REGISTRY_URL_CLASS));
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//...其它设置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; SpringApplication.run(ClassApplication.class, args);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;setApplicationModel&lt;/span&gt;(ApplicationModel classAppModel){
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.classAppModel &lt;span style="color:#719e07"&gt;=&lt;/span&gt; classAppModel;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//学生管理应用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@SpringBootApplication&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;StudentApplication&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; ApplicationModel studentAppModel;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;(String&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; args) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; studentAppModel
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .getApplicationConfigManager()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .addRegistry(&lt;span style="color:#719e07"&gt;new&lt;/span&gt; RegistryConfig(REGISTRY_URL_STUDENT));
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//...其它设置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; SpringApplication.run(StudentApplication.class, args);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;setApplicationModel&lt;/span&gt;(ApplicationModel studentAppModel){
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.studentAppModel &lt;span style="color:#719e07"&gt;=&lt;/span&gt; studentAppModel;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//单机发布多应用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;MultiContextLauncher&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; FrameworkModel frameworkModel &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; FrameworkModel();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;(String&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; args) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//使用同一个FrameworkModel&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ClassApplication.setApplicationModel(frameworkModel.newApplication());
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; StudenAppication.setApplicationModel(frameworkModel.newApplication());
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; SpringApplicationBuilder(ClassApplication.class)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .run(args);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; SpringApplicationBuilder(StudentApplication.class.class)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .run(args);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;由此，我们可以重新部署单个应用与其对应的ApplicationModel，实现热发布，而不会影响到另一个应用。&lt;/p&gt;</description></item><item><title>Dubbo 3 之 Triple 流控反压原理解析</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/28/dubbo-3-%E4%B9%8B-triple-%E6%B5%81%E6%8E%A7%E5%8F%8D%E5%8E%8B%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</link><pubDate>Wed, 28 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/28/dubbo-3-%E4%B9%8B-triple-%E6%B5%81%E6%8E%A7%E5%8F%8D%E5%8E%8B%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/</guid><description>&lt;p&gt;Triple 是 Dubbo 3 提出的基于 HTTP2 的开放协议，
 旨在解决 Dubbo 2 私有协议带来的互通性问题。
 Triple 基于 HTTP/2 定制自己的流控，支持通过特定的异常通知客户端业务层服务端负载高情况，
-保护了服务端被大流量击垮，提高系统高可用能力。&lt;/p>
-&lt;h2 id="一流控反压现状">一、流控反压现状&lt;/h2>
-&lt;p>客户端和服务器端在接收数据的时候有一个缓冲区来临时存储数据，
+保护了服务端被大流量击垮，提高系统高可用能力。&lt;/p&gt;
+&lt;h2 id="一流控反压现状"&gt;一、流控反压现状&lt;/h2&gt;
+&lt;p&gt;客户端和服务器端在接收数据的时候有一个缓冲区来临时存储数据，
 但是缓冲区的大小是有限制的，所以有可能会出现缓冲区溢出的情况，
-HTTP 通过流控保护数据溢出丢失风险。&lt;/p>
-&lt;h3 id="1http1-流控">1、HTTP/1 流控&lt;/h3>
-&lt;p>在 HTTP/1.1 中，流量的控制依赖的是底层TCP协议，在客户端和服务器端建立连接的时候，
+HTTP 通过流控保护数据溢出丢失风险。&lt;/p&gt;
+&lt;h3 id="1http1-流控"&gt;1、HTTP/1 流控&lt;/h3&gt;
+&lt;p&gt;在 HTTP/1.1 中，流量的控制依赖的是底层TCP协议，在客户端和服务器端建立连接的时候，
 会使用系统默认的设置来建立缓冲区。在数据进行通信的时候，会告诉对方它的接收窗口的大小，
 这个接收窗口就是缓冲区中剩余的可用空间。如果接收窗口大小为零，则说明接收方缓冲区已满，
-则发送方将不再发送数据，直到客户端清除其内部缓冲区，然后请求恢复数据传输。&lt;/p>
-&lt;h3 id="2http2-流控">2、HTTP/2 流控&lt;/h3>
-&lt;p>HTTP/2 使用了多路复用机制，一个TCP连接可以有多个 HTTP/2 连接，
+则发送方将不再发送数据，直到客户端清除其内部缓冲区，然后请求恢复数据传输。&lt;/p&gt;
+&lt;h3 id="2http2-流控"&gt;2、HTTP/2 流控&lt;/h3&gt;
+&lt;p&gt;HTTP/2 使用了多路复用机制，一个TCP连接可以有多个 HTTP/2 连接，
 故在 HTTP/2 中，有更加精细的流控制机制，允许服务端实现自己数据流和连接级的流控制。
-服务端与客户端第一次连接时，会通过发送 &lt;code>HTTP/2 SettingsFrame&lt;/code>设置初始化的流控窗口大小，
-用于 &lt;code>Stream&lt;/code> 级别流控，默认为 65,535 字节。
+服务端与客户端第一次连接时，会通过发送 &lt;code&gt;HTTP/2 SettingsFrame&lt;/code&gt;设置初始化的流控窗口大小，
+用于 &lt;code&gt;Stream&lt;/code&gt; 级别流控，默认为 65,535 字节。
 定好流控窗口后，每次客户端发送数据就会减少流控窗口的大小，
-服务端收到数据后会发送窗口更新包（&lt;code>WINDOW_UPDATE frame&lt;/code>）通知客户端更新窗口。
-客户端收到窗口更新包后就会增加对应值的流控窗口，从而达到动态控制的目的。&lt;/p>
-&lt;p>&lt;img alt="1.png" src="https://cn.dubbo.apache.org/imgs/blog/2022/12/28/triple/1.png">&lt;/p>
-&lt;h2 id="二triple流控反压">二、Triple流控反压&lt;/h2>
-&lt;p>Netty 基于 HTTP/2 实现了基础的流控，当服务端负载过高，客户端发送窗口为 0 时，
+服务端收到数据后会发送窗口更新包（&lt;code&gt;WINDOW_UPDATE frame&lt;/code&gt;）通知客户端更新窗口。
+客户端收到窗口更新包后就会增加对应值的流控窗口，从而达到动态控制的目的。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/2022/12/28/triple/1.png" alt="1.png"&gt;&lt;/p&gt;
+&lt;h2 id="二triple流控反压"&gt;二、Triple流控反压&lt;/h2&gt;
+&lt;p&gt;Netty 基于 HTTP/2 实现了基础的流控，当服务端负载过高，客户端发送窗口为 0 时，
 新增请求就无法被发送出去，会在缓存到客户端待发送请求队列中，缓存数据过大，
-就会造成客户端内存溢出，影响业务程序。&lt;/p>
-&lt;p>Triple 基于 Netty 实现了 HTTP/2 协议，通过 &lt;code>HTTP/2 FlowController&lt;/code>接口统一封装，
+就会造成客户端内存溢出，影响业务程序。&lt;/p&gt;
+&lt;p&gt;Triple 基于 Netty 实现了 HTTP/2 协议，通过 &lt;code&gt;HTTP/2 FlowController&lt;/code&gt;接口统一封装，
 在实现分为进站（inbound）和出站（outbound）两个维度的实现。
 Triple 在 inbound 流量上使用了 Netty 的默认流控实现，
 在 outbound 上实现了自己流控，基于服务端负载，
 将服务端流量压力透传到客户端业务层，实现客户端的业务反压，暂停业务继续发送请求，
-保护服务端不被大流量击垮。&lt;/p></description></item><item><title>Triple 协议支持 Java 异常回传的设计与实现</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</link><pubDate>Mon, 19 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</guid><description>&lt;h2 id="背景">背景&lt;/h2>
-&lt;p>在一些业务场景, 往往需要自定义异常来满足特定的业务, 主流用法是在catch里抛出异常, 例如：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">deal&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span>{
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//doSomething &lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span>(IGreeterException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> e;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或者通过ExceptionBuilder，把相关的异常对象返回给consumer：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>provider.send(&lt;span style="color:#719e07">new&lt;/span> ExceptionBuilders.IGreeterExceptionBuilder()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .setDescription(&amp;#39;异常描述信息&amp;#39;); 
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在抛出异常后, 通过捕获和instanceof来判断特定的异常, 然后做相应的业务处理，例如：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> greeterProxy.echo(REQUEST_MSG);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>} &lt;span style="color:#719e07">catch&lt;/span> (IGreeterException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//做相应的处理&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在 Dubbo 2.x 版本，可以通过上述方法来捕获 Provider 端的异常。
-而随着云原生时代的到来， Dubbo 也开启了 3.0 的里程碑。&lt;/p>
-&lt;p>Dubbo 3.0 的一个很重要的目标就是全面拥抱云原生，
-在 3.0 的许多特性中，很重要的一个改动就是支持&lt;strong>新的一代Rpc协议Triple&lt;/strong>。&lt;/p>
-&lt;p>Triple 协议基于 HTTP 2.0 进行构建，对网关的穿透性强，&lt;strong>兼容 gRPC&lt;/strong>，
+保护服务端不被大流量击垮。&lt;/p&gt;</description></item><item><title>Triple 协议支持 Java 异常回传的设计与实现</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</link><pubDate>Mon, 19 Dec 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2022/12/19/triple-%E5%8D%8F%E8%AE%AE%E6%94%AF%E6%8C%81-java-%E5%BC%82%E5%B8%B8%E5%9B%9E%E4%BC%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</guid><description>&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
+&lt;p&gt;在一些业务场景, 往往需要自定义异常来满足特定的业务, 主流用法是在catch里抛出异常, 例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;deal&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;try&lt;/span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//doSomething &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } &lt;span style="color:#719e07"&gt;catch&lt;/span&gt;(IGreeterException e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; e;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或者通过ExceptionBuilder，把相关的异常对象返回给consumer：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;provider.send(&lt;span style="color:#719e07"&gt;new&lt;/span&gt; ExceptionBuilders.IGreeterExceptionBuilder()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .setDescription(&amp;#39;异常描述信息&amp;#39;); 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在抛出异常后, 通过捕获和instanceof来判断特定的异常, 然后做相应的业务处理，例如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;try&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; greeterProxy.echo(REQUEST_MSG);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;} &lt;span style="color:#719e07"&gt;catch&lt;/span&gt; (IGreeterException e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//做相应的处理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在 Dubbo 2.x 版本，可以通过上述方法来捕获 Provider 端的异常。
+而随着云原生时代的到来， Dubbo 也开启了 3.0 的里程碑。&lt;/p&gt;
+&lt;p&gt;Dubbo 3.0 的一个很重要的目标就是全面拥抱云原生，
+在 3.0 的许多特性中，很重要的一个改动就是支持&lt;strong&gt;新的一代Rpc协议Triple&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;Triple 协议基于 HTTP 2.0 进行构建，对网关的穿透性强，&lt;strong&gt;兼容 gRPC&lt;/strong&gt;，
 提供 Request Response、Request Streaming、Response Streaming、
 Bi-directional Streaming 等通信模型；
-从 Triple 协议开始，Dubbo 还支持基于 IDL 的服务定义。&lt;/p></description></item><item><title>浅析 Dubbo 3.0 中接口级地址推送性能的优化</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</link><pubDate>Thu, 23 Jun 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</guid><description>&lt;h2 id="url-简介">URL 简介&lt;/h2>
-&lt;p>在阐述地址推送性能的具体优化之前，我们有必要先了解一下与之息息相关的内容 &amp;mdash; URL。&lt;/p>
-&lt;h3 id="定义">定义&lt;/h3>
-&lt;p>在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 (&lt;a href="https://www.ietf.org/rfc/rfc1738.txt">RFC1738&lt;/a>――Uniform Resource Locators (URL))应该是最广为人知的一个 RFC 规范，它的定义也非常简单。&lt;/p>
-&lt;blockquote>
-&lt;p>因特网上的可用资源可以用简单字符串来表示，该文档就是描述了这种字符串的语法和语 义。而这些字符串则被称为：“统一资源定位器”（URL）&lt;/p>
-&lt;/blockquote>
-&lt;p>&lt;strong>一个标准的 URL 格式&lt;/strong>至多可以包含如下的几个部分&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>protocol://username:password@host:port/path?key=value&amp;amp;key=value
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>一些典型 URL&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://www.facebook.com/friends?param1=value1&amp;amp;amp;param2=value2
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://username:password@10.20.130.230:8080/list?version=1.0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ftp://username:password@192.168.1.7:21/1/read.txt
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，也有一些&lt;strong>不太符合常规的 URL&lt;/strong>，也被归类到了 URL 之中&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>192.168.1.3:20880
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = 192.168.1.3, port = 20880, url path = null
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///home/user1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = home/user1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file://home/user1/router.js?type=script&amp;lt;br&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = home, url path = user1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///D:/1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = D:/1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:/D:/1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>同上 file:///D:/1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/home/user1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = null, url path = home/user1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>home/user1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = home, url path = user1/router.js
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-中的-url">Dubbo 中的 URL&lt;/h3>
-&lt;p>在 dubbo 中，也使用了类似的 URL，主要用于在各个扩展点之间传递数据，组成此 URL 对象的具体参数如下:&lt;/p></description></item><item><title>Dubbo3 应用级服务发现</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2021/06/02/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</link><pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2021/06/02/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</guid><description>&lt;h2 id="1-服务发现service-discovery-概述">1 服务发现（Service Discovery） 概述&lt;/h2>
-&lt;p>从 Internet 刚开始兴起，如何动态感知后端服务的地址变化就是一个必须要面对的问题，为此人们定义了 DNS 协议，基于此协议，调用方只需要记住由固定字符串组成的域名，就能轻松完成对后端服务的访问，而不用担心流量最终会访问到哪些机器 IP，因为有代理组件会基于 DNS 地址解析后的地址列表，将流量透明的、均匀的分发到不同的后端机器上。&lt;/p>
-&lt;p>在使用微服务构建复杂的分布式系统时，如何感知 backend 服务实例的动态上下线，也是微服务框架最需要关心并解决的问题之一。业界将这个问题称之为 - 微服务的地址发现（Service Discovery），业界比较有代表性的微服务框架如 SpringCloud、Dubbo 等都抽象了强大的动态地址发现能力，并且为了满足微服务业务场景的需求，绝大多数框架的地址发现都是基于自己设计的一套机制来实现，因此在能力、灵活性上都要比传统 DNS 丰富得多。如 SpringCloud 中常用的 Eureka， Dubbo 中常用的 Zookeeper、Nacos 等，这些注册中心实现不止能够传递地址（IP + Port），还包括一些微服务的 Metadata 信息，如实例序列化类型、实例方法列表、各个方法级的定制化配置等。&lt;/p>
-&lt;p>下图是微服务中 Service Discovery 的基本工作原理图，微服务体系中的实例大概可分为三种角色：服务提供者（Provider）、服务消费者（Consumer）和注册中心（Registry）。而不同框架实现间最主要的区别就体现在注册中心数据的组织：地址如何组织、以什么粒度组织、除地址外还同步哪些数据？&lt;/p>
-&lt;p>&lt;img alt="img1" src="https://cn.dubbo.apache.org/imgs/blog/service-discovery-1.png">&lt;/p>
-&lt;p>我们今天这篇文章就是围绕这三个角色展开，重点看下 Dubbo 中对于服务发现方案的设计，包括之前老的服务发现方案的优势和缺点，以及 Dubbo 3.0 中正在设计、开发中的全新的&lt;strong>面向应用粒度的地址发现方案&lt;/strong>，我们期待这个新的方案能做到：&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>支持几十万/上百万级集群实例的地址发现&lt;/strong>&lt;/li>
-&lt;li>&lt;strong>与不同的微服务体系（如 Spring Cloud）实现在地址发现层面的互通&lt;/strong>&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-dubbo-地址发现机制解析">2 Dubbo 地址发现机制解析&lt;/h2>
-&lt;p>我们先以一个 DEMO 应用为例，来快速的看一下 Dubbo “接口粒度”服务发现与“应用粒度”服务发现体现出来的区别。这里我们重点关注 Provider 实例是如何向注册中心注册的，并且，为了体现注册中心数据量变化，我们观察的是两个 Provider 实例的场景。&lt;/p>
-&lt;p>&lt;strong>应用 DEMO 提供的服务列表如下：&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.basic.api.DemoService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;demoService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.basic.api.GreetingService&amp;#34;&lt;/span> ref=&lt;span style="color:#2aa198">&amp;#34;greetingService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们示例注册中心实现采用的是 Zookeeper ，启动 192.168.0.103 和 192.168.0.104 两个实例后，以下是两种模式下注册中心的实际数据&lt;/p></description></item><item><title>Dubbo 中的 URL 统一模型</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</link><pubDate>Thu, 17 Oct 2019 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</guid><description>&lt;h3 id="定义">定义&lt;/h3>
-&lt;p>在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 (&lt;a href="https://www.ietf.org/rfc/rfc1738.txt">RFC1738&lt;/a>――Uniform Resource Locators (URL)）应该是最广为人知的一个 RFC 规范，它的定义也非常简单&lt;/p>
-&lt;blockquote>
-&lt;p>因特网上的可用资源可以用简单字符串来表示，该文档就是描述了这种字符串的语法和语
-义。而这些字符串则被称为：“统一资源定位器”（URL）&lt;/p>
-&lt;/blockquote>
-&lt;p>&lt;strong>一个标准的 URL 格式&lt;/strong>至多可以包含如下的几个部分&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>protocol://username:password@host:port/path?key=value&amp;amp;key=value
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>一些典型 URL&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>http://www.facebook.com/friends?param1=value1&amp;amp;amp;param2=value2
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>https://username:password@10.20.130.230:8080/list?version=1.0.0
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ftp://username:password@192.168.1.7:21/1/read.txt
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当然，也有一些&lt;strong>不太符合常规的 URL&lt;/strong>，也被归类到了 URL 之中&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-fallback" data-lang="fallback">&lt;span style="display:flex;">&lt;span>192.168.1.3:20880
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = 192.168.1.3, port = 20880, url path = null
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///home/user1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = home/user1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file://home/user1/router.js?type=script&amp;lt;br&amp;gt;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = home, url path = user1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:///D:/1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = file, url host = null, url path = D:/1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>file:/D:/1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>同上 file:///D:/1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>/home/user1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = null, url path = home/user1/router.js
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>home/user1/router.js?type=script
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>url protocol = null, url host = home, url path = user1/router.js
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="dubbo-中的-url">Dubbo 中的 URL&lt;/h3>
-&lt;p>在 dubbo 中，也使用了类似的 URL，主要用于在各个扩展点之间传递数据，组成此 URL 对象的具体参数如下:&lt;/p></description></item></channel></rss>
+从 Triple 协议开始，Dubbo 还支持基于 IDL 的服务定义。&lt;/p&gt;</description></item><item><title>浅析 Dubbo 3.0 中接口级地址推送性能的优化</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</link><pubDate>Thu, 23 Jun 2022 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2022/06/23/%E6%B5%85%E6%9E%90-dubbo-3.0-%E4%B8%AD%E6%8E%A5%E5%8F%A3%E7%BA%A7%E5%9C%B0%E5%9D%80%E6%8E%A8%E9%80%81%E6%80%A7%E8%83%BD%E7%9A%84%E4%BC%98%E5%8C%96/</guid><description>&lt;h2 id="url-简介"&gt;URL 简介&lt;/h2&gt;
+&lt;p&gt;在阐述地址推送性能的具体优化之前，我们有必要先了解一下与之息息相关的内容 &amp;mdash; URL。&lt;/p&gt;
+&lt;h3 id="定义"&gt;定义&lt;/h3&gt;
+&lt;p&gt;在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 (&lt;a href="https://www.ietf.org/rfc/rfc1738.txt"&gt;RFC1738&lt;/a&gt;――Uniform Resource Locators (URL))应该是最广为人知的一个 RFC 规范，它的定义也非常简单。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;因特网上的可用资源可以用简单字符串来表示，该文档就是描述了这种字符串的语法和语 义。而这些字符串则被称为：“统一资源定位器”（URL）&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一个标准的 URL 格式&lt;/strong&gt;至多可以包含如下的几个部分&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;protocol://username:password@host:port/path?key=value&amp;amp;key=value
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;一些典型 URL&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;http://www.facebook.com/friends?param1=value1&amp;amp;amp;param2=value2
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;https://username:password@10.20.130.230:8080/list?version=1.0.0
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ftp://username:password@192.168.1.7:21/1/read.txt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;当然，也有一些&lt;strong&gt;不太符合常规的 URL&lt;/strong&gt;，也被归类到了 URL 之中&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;192.168.1.3:20880
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = null, url host = 192.168.1.3, port = 20880, url path = null
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file:///home/user1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = file, url host = null, url path = home/user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file://home/user1/router.js?type=script&amp;lt;br&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = file, url host = home, url path = user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file:///D:/1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = file, url host = null, url path = D:/1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file:/D:/1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;同上 file:///D:/1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;/home/user1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = null, url host = null, url path = home/user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;home/user1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = null, url host = home, url path = user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="dubbo-中的-url"&gt;Dubbo 中的 URL&lt;/h3&gt;
+&lt;p&gt;在 dubbo 中，也使用了类似的 URL，主要用于在各个扩展点之间传递数据，组成此 URL 对象的具体参数如下:&lt;/p&gt;</description></item><item><title>Dubbo3 应用级服务发现</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2021/06/02/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</link><pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2021/06/02/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/</guid><description>&lt;h2 id="1-服务发现service-discovery-概述"&gt;1 服务发现（Service Discovery） 概述&lt;/h2&gt;
+&lt;p&gt;从 Internet 刚开始兴起，如何动态感知后端服务的地址变化就是一个必须要面对的问题，为此人们定义了 DNS 协议，基于此协议，调用方只需要记住由固定字符串组成的域名，就能轻松完成对后端服务的访问，而不用担心流量最终会访问到哪些机器 IP，因为有代理组件会基于 DNS 地址解析后的地址列表，将流量透明的、均匀的分发到不同的后端机器上。&lt;/p&gt;
+&lt;p&gt;在使用微服务构建复杂的分布式系统时，如何感知 backend 服务实例的动态上下线，也是微服务框架最需要关心并解决的问题之一。业界将这个问题称之为 - 微服务的地址发现（Service Discovery），业界比较有代表性的微服务框架如 SpringCloud、Dubbo 等都抽象了强大的动态地址发现能力，并且为了满足微服务业务场景的需求，绝大多数框架的地址发现都是基于自己设计的一套机制来实现，因此在能力、灵活性上都要比传统 DNS 丰富得多。如 SpringCloud 中常用的 Eureka， Dubbo 中常用的 Zookeeper、Nacos 等，这些注册中心实现不止能够传递地址（IP + Port），还包括一些微服务的 Metadata 信息，如实例序列化类型、实例方法列表、各个方法级的定制化配置等。&lt;/p&gt;
+&lt;p&gt;下图是微服务中 Service Discovery 的基本工作原理图，微服务体系中的实例大概可分为三种角色：服务提供者（Provider）、服务消费者（Consumer）和注册中心（Registry）。而不同框架实现间最主要的区别就体现在注册中心数据的组织：地址如何组织、以什么粒度组织、除地址外还同步哪些数据？&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/service-discovery-1.png" alt="img1"&gt;&lt;/p&gt;
+&lt;p&gt;我们今天这篇文章就是围绕这三个角色展开，重点看下 Dubbo 中对于服务发现方案的设计，包括之前老的服务发现方案的优势和缺点，以及 Dubbo 3.0 中正在设计、开发中的全新的&lt;strong&gt;面向应用粒度的地址发现方案&lt;/strong&gt;，我们期待这个新的方案能做到：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;支持几十万/上百万级集群实例的地址发现&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;与不同的微服务体系（如 Spring Cloud）实现在地址发现层面的互通&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-dubbo-地址发现机制解析"&gt;2 Dubbo 地址发现机制解析&lt;/h2&gt;
+&lt;p&gt;我们先以一个 DEMO 应用为例，来快速的看一下 Dubbo “接口粒度”服务发现与“应用粒度”服务发现体现出来的区别。这里我们重点关注 Provider 实例是如何向注册中心注册的，并且，为了体现注册中心数据量变化，我们观察的是两个 Provider 实例的场景。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;应用 DEMO 提供的服务列表如下：&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.samples.basic.api.DemoService&amp;#34;&lt;/span&gt; ref=&lt;span style="color:#2aa198"&gt;&amp;#34;demoService&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.samples.basic.api.GreetingService&amp;#34;&lt;/span&gt; ref=&lt;span style="color:#2aa198"&gt;&amp;#34;greetingService&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;我们示例注册中心实现采用的是 Zookeeper ，启动 192.168.0.103 和 192.168.0.104 两个实例后，以下是两种模式下注册中心的实际数据&lt;/p&gt;</description></item><item><title>Dubbo 中的 URL 统一模型</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</link><pubDate>Thu, 17 Oct 2019 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2019/10/17/dubbo-%E4%B8%AD%E7%9A%84-url-%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B/</guid><description>&lt;h3 id="定义"&gt;定义&lt;/h3&gt;
+&lt;p&gt;在不谈及 dubbo 时，我们大多数人对 URL 这个概念并不会感到陌生。统一资源定位器 (&lt;a href="https://www.ietf.org/rfc/rfc1738.txt"&gt;RFC1738&lt;/a&gt;――Uniform Resource Locators (URL)）应该是最广为人知的一个 RFC 规范，它的定义也非常简单&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;因特网上的可用资源可以用简单字符串来表示，该文档就是描述了这种字符串的语法和语
+义。而这些字符串则被称为：“统一资源定位器”（URL）&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一个标准的 URL 格式&lt;/strong&gt;至多可以包含如下的几个部分&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;protocol://username:password@host:port/path?key=value&amp;amp;key=value
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;一些典型 URL&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;http://www.facebook.com/friends?param1=value1&amp;amp;amp;param2=value2
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;https://username:password@10.20.130.230:8080/list?version=1.0.0
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ftp://username:password@192.168.1.7:21/1/read.txt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;当然，也有一些&lt;strong&gt;不太符合常规的 URL&lt;/strong&gt;，也被归类到了 URL 之中&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;192.168.1.3:20880
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = null, url host = 192.168.1.3, port = 20880, url path = null
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file:///home/user1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = file, url host = null, url path = home/user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file://home/user1/router.js?type=script&amp;lt;br&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = file, url host = home, url path = user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file:///D:/1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = file, url host = null, url path = D:/1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;file:/D:/1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;同上 file:///D:/1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;/home/user1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = null, url host = null, url path = home/user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;home/user1/router.js?type=script
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;url protocol = null, url host = home, url path = user1/router.js
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="dubbo-中的-url"&gt;Dubbo 中的 URL&lt;/h3&gt;
+&lt;p&gt;在 dubbo 中，也使用了类似的 URL，主要用于在各个扩展点之间传递数据，组成此 URL 对象的具体参数如下:&lt;/p&gt;</description></item></channel></rss>

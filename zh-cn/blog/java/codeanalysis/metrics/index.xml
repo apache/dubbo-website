@@ -1,180 +1,180 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>dubbo-metrics 指标模块源码浅析 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/</link><description>Recent content in dubbo-metrics 指标模块源码浅析 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/index.xml" rel="self" type="application/rss+xml"/><item><title>引言</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</guid><description>&lt;h2 id="引言">引言&lt;/h2>
-&lt;p>服务指标统计体系是 Dubbo 可观测能力的重要组成部分。
-dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综合到一个单独的模块中，提供一套更加完善、全面、可拓展、解耦合的指标采样-统计-导出解决方案。&lt;/p>
-&lt;p>dubbo-metrics 模块包括：&lt;/p>
-&lt;ul>
-&lt;li>dubbo-metrics-api 公用接口包&lt;/li>
-&lt;li>dubbo-metrics-prometheus 普罗米修斯适配包&lt;/li>
-&lt;li>dubbo-metrics-metadata 元数据中心指标监控包&lt;/li>
-&lt;li>dubbo-metrics-registry 注册中心指标监控包&lt;/li>
-&lt;li>dubbo-metrics-config-center 配置中心指标监控包&lt;/li>
-&lt;li>dubbo-metrics-default 接口默认实现包，提供dubbo内部核心指标的监控功能&lt;/li>
-&lt;/ul>
-&lt;p>在设计上，dubbo-metrics 深入应用事件驱动编程思想，总体体现出下图的事件处理链路：&lt;/p>
-&lt;p>&lt;img alt="metrics-event-struct" src="https://cn.dubbo.apache.org/imgs/blog/metrics-source-blog/metrics-event-struct.png">&lt;/p>
-&lt;p>在拓展上，dubbo-metrics 抽象了一套指标导出接口与抽象实现，可实现兼容多种指标统计监控中心，默认提供了普罗米修斯实现。&lt;/p></description></item><item><title>1-指标样本的收集与存储</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/1-%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/1-%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</guid><description>&lt;h2 id="一指标样本的收集与存储">一、指标样本的收集与存储&lt;/h2>
-&lt;h3 id="指标样本收集">指标样本收集&lt;/h3>
-&lt;p>&lt;strong>指标收集器（Collector）是指标对外导出的入口&lt;/strong>。最终导出到指标统计中心的指标采样实际均直接来源于各个指标采样器。因此，我们将从各个收集器实现开始，分析 dubbo-metrics 模块是如何工作的。&lt;/p>
-&lt;p>指标收集操作定义在 MetricsCollector （指标采集器，SPI）接口中，可以通过它的实现收集某一类的指标样本（MetricSample）。它主要有以下实现，对应着不同类型的指标：&lt;/p>
-&lt;ul>
-&lt;li>ConfigCenterMetricsCollector &lt;strong>配置中心操作相关指标收集器&lt;/strong> ，收集配置信息的变化次数&lt;/li>
-&lt;li>MetadataMetricsCollector &lt;strong>元数据中心操作相关指标收集器&lt;/strong>，收集提供者、消费者对元数据中心操作（推送数据、拉取数据）情况的计数、耗时统计。&lt;/li>
-&lt;li>RegistryMetricsCollector &lt;strong>注册中心相关操作指标收集器&lt;/strong>，收集应用级、接口级服务注册成功、失败、耗时的相关计数。&lt;/li>
-&lt;li>DefaultMetricsCollector &lt;strong>默认指标收集器&lt;/strong>，内置多种采样器来完成不同类型的内部指标采样。&lt;/li>
-&lt;li>HistogramMetricsCollector &lt;strong>直方图指标收集器&lt;/strong>，利用 micrometer API 处理直方图类型的指标，它的实现较为特殊。&lt;/li>
-&lt;/ul>
-&lt;p>配置中心 、元数据、服务注册及默认指标收集器均实现自混合指标收集器（CombMetricsCollector）。混合指标收集器实现了 ApplicationMetricsCollector 、ServiceMetricsCollector 、MethodMetricsCollector 三个接口（定义按应用名收集、按应用名-服务名收集和按应用-方法名收集指标的操作），因此它们可以进行应用、服务和方法三个层面的指标收集工作。&lt;/p>
-&lt;p>默认指标收集器的特点是通过内部的指标采样器（MetricsSampler）完成指标事件的处理操作，而不是其它收集器的指标监听器（MetricsListener）&lt;/p>
-&lt;p>直方图指标收集器则负责收集直方图类型的指标。它利用直方图度量寄存器（HistogramMetricRegister）借助 micrometer API 完成直方图样本的采集。直方图类型包括百分位数、服务水平目标、最小预期值、最大预期值、统计数据分布有效期等。&lt;/p>
-&lt;p>&lt;strong>Collector的继承关系：&lt;/strong>&lt;/p>
-&lt;p>&lt;img alt="collectors" src="https://cn.dubbo.apache.org/imgs/blog/metrics-source-blog/collectors.png">&lt;/p>
-&lt;p>可以看出，每个指标收集器都具有来自 MetricsListener 的监听指标事件的能力。为什么指标收集器本身需要监听指标事件？ 在后文中，我们将讨论指标收集器是如何利用内置的子转发器（SubDispatcher）转发指标事件，并完成计数处理的。&lt;/p>
-&lt;h3 id="指标样本存储">指标样本存储&lt;/h3>
-&lt;p>前文中，我们了解了指标收集的入口是指标收集器（Collector）。那么各个收集器从哪里收集指标样本？&lt;/p>
-&lt;p>&lt;strong>对于配置中心、元数据中心、 注册中心的指标收集器：&lt;/strong>&lt;/p>
-&lt;p>它们分别负责采集三大中心模块的指标，均继承于&lt;strong>混合数据收集器（CombMetricsCollector）&lt;/strong>，而混合数据收集器中实现了 export 方法 。&lt;/p>
-&lt;p>混合数据收集器内部有一个&lt;strong>基本数据聚合器（BaseStatComposite）&lt;/strong>，它实现了 MetricsExport 接口，该接口定义了指标导出操作，混合数据收集器则利用它的 export 方法导出指标。&lt;/p>
-&lt;p>基本数据聚合器是一个抽象类，内有三个属性：ApplicationStatComposite 、ServiceStatComposite 和 RtStatComposite 。它们的作用：&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>ApplicationStatComposite 应用数据聚合器&lt;/strong>，应用程序级别相关事件的计数 ，根据指标Key（ MetricsKey ）和应用名统计指标，提供计数递增操作&lt;/li>
-&lt;li>&lt;strong>ServiceStatComposite 服务数据聚合器&lt;/strong>，服务级别相关事件的计数，根据指标Key、应用名和服务名统计指标，提供计数递增操作&lt;/li>
-&lt;li>&lt;strong>MethodStatComposite 方法数据聚合器&lt;/strong>，方法级别相关事件的计数，存储各方法RPC调用相关计数。&lt;/li>
-&lt;li>&lt;strong>RtStatComposite，Rt（Response Time，响应时间）数据聚合器&lt;/strong>，包括应用级别和服务级别。根据应用名、服务名、注册的指标名及相应相应时间统计指标，提供添加操作。&lt;/li>
-&lt;/ul>
-&lt;p>对于以上四个聚合器，他们的职责就是存储某一类型的采样样本。&lt;/p>
-&lt;p>&lt;strong>基本数据聚合器 （BaseStatComposite）&lt;/strong> 对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong>而混合指标收集器（CombMetricsCollector）&lt;/strong> 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code>increment&lt;/code>、&lt;code>setNum&lt;/code>、&lt;code>addRt &lt;/code>三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p></description></item><item><title>2-指标收集器的指标采集流程</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/2-%E6%8C%87%E6%A0%87%E6%94%B6%E9%9B%86%E5%99%A8%E7%9A%84%E6%8C%87%E6%A0%87%E9%87%87%E9%9B%86%E6%B5%81%E7%A8%8B/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/2-%E6%8C%87%E6%A0%87%E6%94%B6%E9%9B%86%E5%99%A8%E7%9A%84%E6%8C%87%E6%A0%87%E9%87%87%E9%9B%86%E6%B5%81%E7%A8%8B/</guid><description>&lt;h2 id="二指标收集器的指标采集流程">二、指标收集器的指标采集流程&lt;/h2>
-&lt;p>在前文中，我们了解了指标收集器（Collector）最终收集的数据只有三个来源：&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>实现自混合指标收集器（CombMetricsCollector） 的元数据指标收集器（MetadataMetricsCollector）和注册中心指标收集器（RegistryMetricsCollector），它们的样本均存储在内置的基本数据聚合器中。具体来说，是基本数据聚合器下的四个子数据聚合器中：&lt;/p>
-&lt;p>&lt;img alt="composite-struct" src="https://cn.dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png">&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>DefaultMetricsCollector 默认指标收集器&lt;/strong>，它的样本不仅来自于指标事件，还来自其下&lt;strong>采样器（Sampler）&lt;/strong> 中，用于Dubbo核心模块的采样。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>HistogramMetricsCollector 直方图指标收集器&lt;/strong>，由于采样数据的特殊性，它的样本直接以 Map 存储在内部。&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;p>接下来，我们需要明确它们存储的指标是如何添加进去的。&lt;/p>
-&lt;h3 id="1服务治理模块的指标采集流程">1，服务治理模块的指标采集流程&lt;/h3>
-&lt;p>通过之前的分析，我们知道服务治理模块的指标采集器均实现自混合指标收集器（CombMetricsCollector）。它对基本数据聚合器（BaseStatComposite） 的大部分方法做了封装。基本数据聚合器又封装了四个负责存储不同类型指标采样的子聚合器。&lt;/p>
-&lt;p>这四个子聚合器包括：&lt;/p>
-&lt;ul>
-&lt;li>ApplicationStatComposite&lt;/li>
-&lt;li>ServiceStatComposite&lt;/li>
-&lt;li>MethodStatComposite&lt;/li>
-&lt;li>RtStatComposite&lt;/li>
-&lt;/ul>
-&lt;p>实际上，&lt;strong>元数据、注册中心指标收集器&lt;/strong>更新、添加指标的操作都是通过混合指标收集器暴露的方法进行。而具体的，是通过 &lt;code>setNum&lt;/code>、&lt;code>increment&lt;/code>、&lt;code>addRt&lt;/code> 这三个方法（及它们的重载）进行操作。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//CombMetricsCollector&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#268bd2">final&lt;/span> BaseStatComposite stats;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">setNum&lt;/span>(MetricsKey metricsKey, String applicationName, String serviceKey, &lt;span style="color:#dc322f">int&lt;/span> num) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.stats.setServiceKey(metricsKey, applicationName, serviceKey, num);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">increment&lt;/span>(String applicationName, MetricsKey metricsKey) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.stats.incrementApp(metricsKey, applicationName, SELF_INCREMENT_SIZE);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">increment&lt;/span>(String applicationName, String serviceKey, MetricsKey metricsKey, &lt;span style="color:#dc322f">int&lt;/span> size) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.stats.incrementServiceKey(metricsKey, applicationName, serviceKey, size);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">addRt&lt;/span>(String applicationName, String registryOpType, Long responseTime) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> stats.calcApplicationRt(applicationName, registryOpType, responseTime);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">addRt&lt;/span>(String applicationName, String serviceKey, String registryOpType, Long responseTime) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> stats.calcServiceKeyRt(applicationName, serviceKey, registryOpType, responseTime);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>...
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>由于几个方法实际上的调用链路类似，我们选择从其中的 setNum 方法开始分析。&lt;/p></description></item><item><title>3-指标监听注册梳理</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</guid><description>&lt;h2 id="三指标监听注册梳理">三、指标监听注册梳理&lt;/h2>
-&lt;p>在前一章中，我们了解了不同收集器中的指标样本是如何被监听器添加进去的。接下来，我们将归纳指标监听器 的创建位置，及它们对应统计的指标。&lt;/p>
-&lt;p>通过之前的分析，我们已经知道指标 注册事件多播器（RegistryMetricsEventMulticaster）中定义了并绑定了服务注册相关的指标。这种绑定操作同样存在于其它几个简单指标事件多播器（SimpleMetricsEventMulticaster）的几个实现中。&lt;/p>
-&lt;h3 id="转发器注册">转发器注册&lt;/h3>
-&lt;p>&lt;strong>RegistrySubDispatcher （服务注册指标转发器）注册了服务注册相关指标：&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>应用级实例注册成功/失败/总数计数 （APPLICATION_REGISTER_&amp;hellip;)&lt;/li>
-&lt;li>应用级服务接口订阅成功/失败/总数计数 （APPLICATION_SUBSCRIBE_&amp;hellip;)&lt;/li>
-&lt;li>服务级注册成功/失败/总数计数 （SERVICE_REGISTER_&amp;hellip;）&lt;/li>
-&lt;li>特殊的 APPLICATION_NOTIFY_FINISH 和 APPLICATION_DIRECTORY_POST （应用服务目录变化次数）&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>MetadataSubDispatcher（元数据指标转发器）注册应用元数据相关指标&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>应用推送元数据相关计数 （APPLICATION_PUSH_&amp;hellip;)&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>应用订阅元数据相关计数 （APPLICAITON_SUBSCRIBE_&amp;hellip;）&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>服务订阅元数据相关计数 （SERVICE_SUBSCRIBE_&amp;hellip;）&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>ConfigCenterSubDispatcher (配置中心指标转发器) 注册配置中心配置更新次数指标&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>配置中心推送新配置次数 （CONFIGCENTER_METRIC_TOTAL）&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>DefaultSubDispatcher (默认转发器) 注册核心RPC调用次数指标&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>请求次数 （METRIC_REQUESTS）&lt;/li>
-&lt;li>请求成功次数（METRIC_REQUESTS_SUCCEED）&lt;/li>
-&lt;li>请求失败次数（METRIC_REQUEST_BUSINESS_FAILED）&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>MetricsDispatcher&lt;/strong>&lt;/p>
-&lt;p>MetricsDispatcher 较为特殊，它负责 ApplicationModel 下所有 MetricsCollector（前文中提到的指标收集器） 的初始化注册工作，并将它们添加到自己的监听器列表中。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">MetricsDispatcher&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> SimpleMetricsEventMulticaster {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@SuppressWarnings&lt;/span>({&lt;span style="color:#2aa198">&amp;#34;rawtypes&amp;#34;&lt;/span>})
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">MetricsDispatcher&lt;/span>(ApplicationModel applicationModel) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ScopeBeanFactory beanFactory &lt;span style="color:#719e07">=&lt;/span> applicationModel.getBeanFactory();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExtensionLoader&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCollector&lt;span style="color:#719e07">&amp;gt;&lt;/span> extensionLoader &lt;span style="color:#719e07">=&lt;/span> applicationModel.getExtensionLoader(MetricsCollector.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (extensionLoader &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricsCollector&lt;span style="color:#719e07">&amp;gt;&lt;/span> customizeCollectors &lt;span style="color:#719e07">=&lt;/span> extensionLoader
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .getActivateExtensions();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (MetricsCollector customizeCollector : customizeCollectors) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> beanFactory.registerBean(customizeCollector);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> customizeCollectors.forEach(&lt;span style="color:#719e07">this&lt;/span>::addListener);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>需要注意，以上几个实现均继承自 SimpleMetricsEventMulticaster，因此它们都具有注册监听、转发事件的能力。它们将自己注册到对应领域的指标 Collector 中，并在收到指标事件时转发到自己注册的监听器中。&lt;/p></description></item><item><title>4-指标转换与导出</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</guid><description>&lt;h2 id="四指标转换与导出">四、指标转换与导出&lt;/h2>
-&lt;p>本章主要梳理指标收集完成后，向外部收集器导出的流程。&lt;/p>
-&lt;p>通过之前的分析，我们知道不同类型指标的收集分别由各个 Collector 实现进行。它们底层的 MetricsCollector 接口定义了指标导出的操作。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@SPI&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsCollector&lt;/span>&lt;span style="color:#719e07">&amp;lt;&lt;/span>E &lt;span style="color:#268bd2">extends&lt;/span> TimeCounterEvent&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">extends&lt;/span> MetricsLifeListener&lt;span style="color:#719e07">&amp;lt;&lt;/span>E&lt;span style="color:#719e07">&amp;gt;&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">isCollectEnabled&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">false&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Collect metrics as {@link MetricSample}
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * @return List of MetricSample
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>MetricSample&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">collect&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>而指标报告器 (MetricsReporter) 的实现会定时调用Collector 的 &lt;code>collect&lt;/code> 方法，更新并导出指标数据。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">MetricsReporter&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//初始化&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">init&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//刷新统计数据，定时调用collect()&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">refreshData&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取指标数据&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">getResponse&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">//获取带指标名的指标样本（单个指标）&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">default&lt;/span> String &lt;span style="color:#268bd2">getResponseWithName&lt;/span>(String metricsName) { &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>; }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>指标报告器有两个实现：DefaultMetricsReporter 和 PrometheusMetricsReporter，它们都实现自 AbstractMetricsRepoter，并使用它的指标刷新逻辑 (&lt;code>refreshData&lt;/code>方法)。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>dubbo-metrics 指标模块源码浅析 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/</link><description>Recent content in dubbo-metrics 指标模块源码浅析 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/blog/java/codeanalysis/metrics/index.xml" rel="self" type="application/rss+xml"/><item><title>引言</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/%E5%BC%95%E8%A8%80/</guid><description>&lt;h2 id="引言"&gt;引言&lt;/h2&gt;
+&lt;p&gt;服务指标统计体系是 Dubbo 可观测能力的重要组成部分。
+dubbo-metrics 指标模块旨在将 dubbo 内部零散的 Metrics 相关类综合到一个单独的模块中，提供一套更加完善、全面、可拓展、解耦合的指标采样-统计-导出解决方案。&lt;/p&gt;
+&lt;p&gt;dubbo-metrics 模块包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;dubbo-metrics-api 公用接口包&lt;/li&gt;
+&lt;li&gt;dubbo-metrics-prometheus 普罗米修斯适配包&lt;/li&gt;
+&lt;li&gt;dubbo-metrics-metadata 元数据中心指标监控包&lt;/li&gt;
+&lt;li&gt;dubbo-metrics-registry 注册中心指标监控包&lt;/li&gt;
+&lt;li&gt;dubbo-metrics-config-center 配置中心指标监控包&lt;/li&gt;
+&lt;li&gt;dubbo-metrics-default 接口默认实现包，提供dubbo内部核心指标的监控功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在设计上，dubbo-metrics 深入应用事件驱动编程思想，总体体现出下图的事件处理链路：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/metrics-source-blog/metrics-event-struct.png" alt="metrics-event-struct"&gt;&lt;/p&gt;
+&lt;p&gt;在拓展上，dubbo-metrics 抽象了一套指标导出接口与抽象实现，可实现兼容多种指标统计监控中心，默认提供了普罗米修斯实现。&lt;/p&gt;</description></item><item><title>1-指标样本的收集与存储</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/1-%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/1-%E6%8C%87%E6%A0%87%E6%A0%B7%E6%9C%AC%E7%9A%84%E6%94%B6%E9%9B%86%E4%B8%8E%E5%AD%98%E5%82%A8/</guid><description>&lt;h2 id="一指标样本的收集与存储"&gt;一、指标样本的收集与存储&lt;/h2&gt;
+&lt;h3 id="指标样本收集"&gt;指标样本收集&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;指标收集器（Collector）是指标对外导出的入口&lt;/strong&gt;。最终导出到指标统计中心的指标采样实际均直接来源于各个指标采样器。因此，我们将从各个收集器实现开始，分析 dubbo-metrics 模块是如何工作的。&lt;/p&gt;
+&lt;p&gt;指标收集操作定义在 MetricsCollector （指标采集器，SPI）接口中，可以通过它的实现收集某一类的指标样本（MetricSample）。它主要有以下实现，对应着不同类型的指标：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ConfigCenterMetricsCollector &lt;strong&gt;配置中心操作相关指标收集器&lt;/strong&gt; ，收集配置信息的变化次数&lt;/li&gt;
+&lt;li&gt;MetadataMetricsCollector &lt;strong&gt;元数据中心操作相关指标收集器&lt;/strong&gt;，收集提供者、消费者对元数据中心操作（推送数据、拉取数据）情况的计数、耗时统计。&lt;/li&gt;
+&lt;li&gt;RegistryMetricsCollector &lt;strong&gt;注册中心相关操作指标收集器&lt;/strong&gt;，收集应用级、接口级服务注册成功、失败、耗时的相关计数。&lt;/li&gt;
+&lt;li&gt;DefaultMetricsCollector &lt;strong&gt;默认指标收集器&lt;/strong&gt;，内置多种采样器来完成不同类型的内部指标采样。&lt;/li&gt;
+&lt;li&gt;HistogramMetricsCollector &lt;strong&gt;直方图指标收集器&lt;/strong&gt;，利用 micrometer API 处理直方图类型的指标，它的实现较为特殊。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;配置中心 、元数据、服务注册及默认指标收集器均实现自混合指标收集器（CombMetricsCollector）。混合指标收集器实现了 ApplicationMetricsCollector 、ServiceMetricsCollector 、MethodMetricsCollector 三个接口（定义按应用名收集、按应用名-服务名收集和按应用-方法名收集指标的操作），因此它们可以进行应用、服务和方法三个层面的指标收集工作。&lt;/p&gt;
+&lt;p&gt;默认指标收集器的特点是通过内部的指标采样器（MetricsSampler）完成指标事件的处理操作，而不是其它收集器的指标监听器（MetricsListener）&lt;/p&gt;
+&lt;p&gt;直方图指标收集器则负责收集直方图类型的指标。它利用直方图度量寄存器（HistogramMetricRegister）借助 micrometer API 完成直方图样本的采集。直方图类型包括百分位数、服务水平目标、最小预期值、最大预期值、统计数据分布有效期等。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Collector的继承关系：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/metrics-source-blog/collectors.png" alt="collectors"&gt;&lt;/p&gt;
+&lt;p&gt;可以看出，每个指标收集器都具有来自 MetricsListener 的监听指标事件的能力。为什么指标收集器本身需要监听指标事件？ 在后文中，我们将讨论指标收集器是如何利用内置的子转发器（SubDispatcher）转发指标事件，并完成计数处理的。&lt;/p&gt;
+&lt;h3 id="指标样本存储"&gt;指标样本存储&lt;/h3&gt;
+&lt;p&gt;前文中，我们了解了指标收集的入口是指标收集器（Collector）。那么各个收集器从哪里收集指标样本？&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;对于配置中心、元数据中心、 注册中心的指标收集器：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;它们分别负责采集三大中心模块的指标，均继承于&lt;strong&gt;混合数据收集器（CombMetricsCollector）&lt;/strong&gt;，而混合数据收集器中实现了 export 方法 。&lt;/p&gt;
+&lt;p&gt;混合数据收集器内部有一个&lt;strong&gt;基本数据聚合器（BaseStatComposite）&lt;/strong&gt;，它实现了 MetricsExport 接口，该接口定义了指标导出操作，混合数据收集器则利用它的 export 方法导出指标。&lt;/p&gt;
+&lt;p&gt;基本数据聚合器是一个抽象类，内有三个属性：ApplicationStatComposite 、ServiceStatComposite 和 RtStatComposite 。它们的作用：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;ApplicationStatComposite 应用数据聚合器&lt;/strong&gt;，应用程序级别相关事件的计数 ，根据指标Key（ MetricsKey ）和应用名统计指标，提供计数递增操作&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ServiceStatComposite 服务数据聚合器&lt;/strong&gt;，服务级别相关事件的计数，根据指标Key、应用名和服务名统计指标，提供计数递增操作&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MethodStatComposite 方法数据聚合器&lt;/strong&gt;，方法级别相关事件的计数，存储各方法RPC调用相关计数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RtStatComposite，Rt（Response Time，响应时间）数据聚合器&lt;/strong&gt;，包括应用级别和服务级别。根据应用名、服务名、注册的指标名及相应相应时间统计指标，提供添加操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;对于以上四个聚合器，他们的职责就是存储某一类型的采样样本。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;基本数据聚合器 （BaseStatComposite）&lt;/strong&gt; 对这三个子聚合器的操作进行了简单整合，统一提供给外界。&lt;strong&gt;而混合指标收集器（CombMetricsCollector）&lt;/strong&gt; 也基本保留了内部基本数据聚合器的所有操作，将其封装为 &lt;code&gt;increment&lt;/code&gt;、&lt;code&gt;setNum&lt;/code&gt;、&lt;code&gt;addRt &lt;/code&gt;三个方法（及它们的重载，分别收集应用级数据和服务级数据）向上提供。外部组件可以直接调用这些收集器完成指标更新操作。&lt;/p&gt;</description></item><item><title>2-指标收集器的指标采集流程</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/2-%E6%8C%87%E6%A0%87%E6%94%B6%E9%9B%86%E5%99%A8%E7%9A%84%E6%8C%87%E6%A0%87%E9%87%87%E9%9B%86%E6%B5%81%E7%A8%8B/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/2-%E6%8C%87%E6%A0%87%E6%94%B6%E9%9B%86%E5%99%A8%E7%9A%84%E6%8C%87%E6%A0%87%E9%87%87%E9%9B%86%E6%B5%81%E7%A8%8B/</guid><description>&lt;h2 id="二指标收集器的指标采集流程"&gt;二、指标收集器的指标采集流程&lt;/h2&gt;
+&lt;p&gt;在前文中，我们了解了指标收集器（Collector）最终收集的数据只有三个来源：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;实现自混合指标收集器（CombMetricsCollector） 的元数据指标收集器（MetadataMetricsCollector）和注册中心指标收集器（RegistryMetricsCollector），它们的样本均存储在内置的基本数据聚合器中。具体来说，是基本数据聚合器下的四个子数据聚合器中：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/metrics-source-blog/composite-struct.png" alt="composite-struct"&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;DefaultMetricsCollector 默认指标收集器&lt;/strong&gt;，它的样本不仅来自于指标事件，还来自其下&lt;strong&gt;采样器（Sampler）&lt;/strong&gt; 中，用于Dubbo核心模块的采样。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;HistogramMetricsCollector 直方图指标收集器&lt;/strong&gt;，由于采样数据的特殊性，它的样本直接以 Map 存储在内部。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接下来，我们需要明确它们存储的指标是如何添加进去的。&lt;/p&gt;
+&lt;h3 id="1服务治理模块的指标采集流程"&gt;1，服务治理模块的指标采集流程&lt;/h3&gt;
+&lt;p&gt;通过之前的分析，我们知道服务治理模块的指标采集器均实现自混合指标收集器（CombMetricsCollector）。它对基本数据聚合器（BaseStatComposite） 的大部分方法做了封装。基本数据聚合器又封装了四个负责存储不同类型指标采样的子聚合器。&lt;/p&gt;
+&lt;p&gt;这四个子聚合器包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ApplicationStatComposite&lt;/li&gt;
+&lt;li&gt;ServiceStatComposite&lt;/li&gt;
+&lt;li&gt;MethodStatComposite&lt;/li&gt;
+&lt;li&gt;RtStatComposite&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;实际上，&lt;strong&gt;元数据、注册中心指标收集器&lt;/strong&gt;更新、添加指标的操作都是通过混合指标收集器暴露的方法进行。而具体的，是通过 &lt;code&gt;setNum&lt;/code&gt;、&lt;code&gt;increment&lt;/code&gt;、&lt;code&gt;addRt&lt;/code&gt; 这三个方法（及它们的重载）进行操作。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//CombMetricsCollector&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#268bd2"&gt;final&lt;/span&gt; BaseStatComposite stats;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;setNum&lt;/span&gt;(MetricsKey metricsKey, String applicationName, String serviceKey, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; num) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.stats.setServiceKey(metricsKey, applicationName, serviceKey, num);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;increment&lt;/span&gt;(String applicationName, MetricsKey metricsKey) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.stats.incrementApp(metricsKey, applicationName, SELF_INCREMENT_SIZE);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;increment&lt;/span&gt;(String applicationName, String serviceKey, MetricsKey metricsKey, &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; size) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.stats.incrementServiceKey(metricsKey, applicationName, serviceKey, size);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;addRt&lt;/span&gt;(String applicationName, String registryOpType, Long responseTime) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; stats.calcApplicationRt(applicationName, registryOpType, responseTime);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;addRt&lt;/span&gt;(String applicationName, String serviceKey, String registryOpType, Long responseTime) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; stats.calcServiceKeyRt(applicationName, serviceKey, registryOpType, responseTime);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;由于几个方法实际上的调用链路类似，我们选择从其中的 setNum 方法开始分析。&lt;/p&gt;</description></item><item><title>3-指标监听注册梳理</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/3-%E6%8C%87%E6%A0%87%E7%9B%91%E5%90%AC%E6%B3%A8%E5%86%8C%E6%A2%B3%E7%90%86/</guid><description>&lt;h2 id="三指标监听注册梳理"&gt;三、指标监听注册梳理&lt;/h2&gt;
+&lt;p&gt;在前一章中，我们了解了不同收集器中的指标样本是如何被监听器添加进去的。接下来，我们将归纳指标监听器 的创建位置，及它们对应统计的指标。&lt;/p&gt;
+&lt;p&gt;通过之前的分析，我们已经知道指标 注册事件多播器（RegistryMetricsEventMulticaster）中定义了并绑定了服务注册相关的指标。这种绑定操作同样存在于其它几个简单指标事件多播器（SimpleMetricsEventMulticaster）的几个实现中。&lt;/p&gt;
+&lt;h3 id="转发器注册"&gt;转发器注册&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;RegistrySubDispatcher （服务注册指标转发器）注册了服务注册相关指标：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;应用级实例注册成功/失败/总数计数 （APPLICATION_REGISTER_&amp;hellip;)&lt;/li&gt;
+&lt;li&gt;应用级服务接口订阅成功/失败/总数计数 （APPLICATION_SUBSCRIBE_&amp;hellip;)&lt;/li&gt;
+&lt;li&gt;服务级注册成功/失败/总数计数 （SERVICE_REGISTER_&amp;hellip;）&lt;/li&gt;
+&lt;li&gt;特殊的 APPLICATION_NOTIFY_FINISH 和 APPLICATION_DIRECTORY_POST （应用服务目录变化次数）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;MetadataSubDispatcher（元数据指标转发器）注册应用元数据相关指标&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;应用推送元数据相关计数 （APPLICATION_PUSH_&amp;hellip;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;应用订阅元数据相关计数 （APPLICAITON_SUBSCRIBE_&amp;hellip;）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;服务订阅元数据相关计数 （SERVICE_SUBSCRIBE_&amp;hellip;）&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;ConfigCenterSubDispatcher (配置中心指标转发器) 注册配置中心配置更新次数指标&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;配置中心推送新配置次数 （CONFIGCENTER_METRIC_TOTAL）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;DefaultSubDispatcher (默认转发器) 注册核心RPC调用次数指标&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;请求次数 （METRIC_REQUESTS）&lt;/li&gt;
+&lt;li&gt;请求成功次数（METRIC_REQUESTS_SUCCEED）&lt;/li&gt;
+&lt;li&gt;请求失败次数（METRIC_REQUEST_BUSINESS_FAILED）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;MetricsDispatcher&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;MetricsDispatcher 较为特殊，它负责 ApplicationModel 下所有 MetricsCollector（前文中提到的指标收集器） 的初始化注册工作，并将它们添加到自己的监听器列表中。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;MetricsDispatcher&lt;/span&gt; &lt;span style="color:#268bd2"&gt;extends&lt;/span&gt; SimpleMetricsEventMulticaster {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@SuppressWarnings&lt;/span&gt;({&lt;span style="color:#2aa198"&gt;&amp;#34;rawtypes&amp;#34;&lt;/span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;MetricsDispatcher&lt;/span&gt;(ApplicationModel applicationModel) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ScopeBeanFactory beanFactory &lt;span style="color:#719e07"&gt;=&lt;/span&gt; applicationModel.getBeanFactory();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ExtensionLoader&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCollector&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; extensionLoader &lt;span style="color:#719e07"&gt;=&lt;/span&gt; applicationModel.getExtensionLoader(MetricsCollector.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (extensionLoader &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricsCollector&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; customizeCollectors &lt;span style="color:#719e07"&gt;=&lt;/span&gt; extensionLoader
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .getActivateExtensions();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;for&lt;/span&gt; (MetricsCollector customizeCollector : customizeCollectors) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; beanFactory.registerBean(customizeCollector);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; customizeCollectors.forEach(&lt;span style="color:#719e07"&gt;this&lt;/span&gt;::addListener);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;需要注意，以上几个实现均继承自 SimpleMetricsEventMulticaster，因此它们都具有注册监听、转发事件的能力。它们将自己注册到对应领域的指标 Collector 中，并在收到指标事件时转发到自己注册的监听器中。&lt;/p&gt;</description></item><item><title>4-指标转换与导出</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</link><pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/04/28/4-%E6%8C%87%E6%A0%87%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%AF%BC%E5%87%BA/</guid><description>&lt;h2 id="四指标转换与导出"&gt;四、指标转换与导出&lt;/h2&gt;
+&lt;p&gt;本章主要梳理指标收集完成后，向外部收集器导出的流程。&lt;/p&gt;
+&lt;p&gt;通过之前的分析，我们知道不同类型指标的收集分别由各个 Collector 实现进行。它们底层的 MetricsCollector 接口定义了指标导出的操作。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@SPI&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;MetricsCollector&lt;/span&gt;&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;E &lt;span style="color:#268bd2"&gt;extends&lt;/span&gt; TimeCounterEvent&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;extends&lt;/span&gt; MetricsLifeListener&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;E&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;default&lt;/span&gt; &lt;span style="color:#dc322f"&gt;boolean&lt;/span&gt; &lt;span style="color:#268bd2"&gt;isCollectEnabled&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;false&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Collect metrics as {@link MetricSample}
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * @return List of MetricSample
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;MetricSample&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;collect&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;而指标报告器 (MetricsReporter) 的实现会定时调用Collector 的 &lt;code&gt;collect&lt;/code&gt; 方法，更新并导出指标数据。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;MetricsReporter&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//初始化&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;init&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//刷新统计数据，定时调用collect()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;refreshData&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//获取指标数据&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String &lt;span style="color:#268bd2"&gt;getResponse&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;//获取带指标名的指标样本（单个指标）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;default&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;getResponseWithName&lt;/span&gt;(String metricsName) { &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;指标报告器有两个实现：DefaultMetricsReporter 和 PrometheusMetricsReporter，它们都实现自 AbstractMetricsRepoter，并使用它的指标刷新逻辑 (&lt;code&gt;refreshData&lt;/code&gt;方法)。&lt;/p&gt;</description></item></channel></rss>

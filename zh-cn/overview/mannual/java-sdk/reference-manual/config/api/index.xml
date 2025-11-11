@@ -1,97 +1,97 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>配置手册 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/</link><description>Recent content in 配置手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/index.xml" rel="self" type="application/rss+xml"/><item><title>API 配置</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/api/</guid><description>&lt;p>作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 Dubbo 应用，关于如何使用原生API开发轻量RPC、微服务应用等的具体示例可查看 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/develop/api/">使用教程 - API开发模式&lt;/a> 中的示例。它的适用场景包括以下两类：&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>轻量 RPC Server &amp;amp; Client&lt;/strong>，通常用于一些应用内、基础组件、中间件等内的简单远程调用场景&lt;/li>
-&lt;li>&lt;strong>微服务应用&lt;/strong>，不依赖 Spring、Spring Boot 的情况下，直接用 API 开发微服务；同时，直接使用 API 对于一些网关或测试平台集成场景也可能比较有用。&lt;/li>
-&lt;/ul>
-&lt;p>目前的入口 API 主要有 &lt;code>Bootstrap&lt;/code>、&lt;code>ServiceConfig&lt;/code>、&lt;code>ReferenceConfig&lt;/code> 等，分别用于不同场景下的 Dubbo 应用开发。&lt;/p>
-&lt;h2 id="bootstrap-api">Bootstrap API&lt;/h2>
-&lt;p>DubboBootstrap 实例代表一个 Dubbo 应用，是整个 Dubbo 应用的启动入口。在 DubboBootstrap 基础上，我们可以设置 protocol、service、registry、metrics 等来注册服务、连接注册中心等，这和我们在 Spring Boot 中调整 application.yml 或者 application.properties 文件是对等的作用。&lt;/p>
-&lt;p>官方推荐使用 DubboBootstrap.start() 作为应用的集中启动入口，但为了方便在进程启动后，在运行态单独发布一些服务，Dubbo 也允许直接调用 ServiceConfig.export() 或 ReferenceConfig.refer() 方法发布服务，这时 Service/Reference 会注册到默认的 DubboBootstrap 实例中，效果同调用 DubboBootstrap.service(&amp;hellip;).start() 类似。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.bootstrap.DubboBootstrap;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.ApplicationConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.RegistryConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.ProviderConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.ServiceConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.xxx.DemoService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.xxx.DemoServiceImpl;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoProvider&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ConfigCenterConfig configCenter &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ConfigCenterConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> configCenter.setAddress(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 服务提供者协议配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ProtocolConfig protocol &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ProtocolConfig();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.setName(&lt;span style="color:#2aa198">&amp;#34;dubbo&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.setPort(12345);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.setThreads(200);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 注意：ServiceConfig为重对象，内部封装了与注册中心的连接，以及开启服务端口&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 服务提供者暴露服务配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span> demoServiceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demoServiceConfig.setInterface(DemoService.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demoServiceConfig.setRef(&lt;span style="color:#719e07">new&lt;/span> DemoServiceImpl());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demoServiceConfig.setVersion(&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 第二个服务配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>FooService&lt;span style="color:#719e07">&amp;gt;&lt;/span> fooServiceConfig &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ServiceConfig&lt;span style="color:#719e07">&amp;lt;&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fooServiceConfig.setInterface(FooService.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fooServiceConfig.setRef(&lt;span style="color:#719e07">new&lt;/span> FooServiceImpl());
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fooServiceConfig.setVersion(&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 通过DubboBootstrap简化配置组装，控制启动过程&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DubboBootstrap.getInstance()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .application(&lt;span style="color:#2aa198">&amp;#34;demo-provider&amp;#34;&lt;/span>) &lt;span style="color:#586e75">// 应用配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .registry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>)) &lt;span style="color:#586e75">// 注册中心配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .protocol(protocol) &lt;span style="color:#586e75">// 全局默认协议配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .service(demoServiceConfig) &lt;span style="color:#586e75">// 添加ServiceConfig&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .service(fooServiceConfig)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .start() &lt;span style="color:#586e75">// 启动Dubbo&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .await(); &lt;span style="color:#586e75">// 挂起等待(防止进程退出）&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.bootstrap.DubboBootstrap;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.ApplicationConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.RegistryConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.ProviderConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> org.apache.dubbo.config.ServiceConfig;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.xxx.DemoService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> com.xxx.DemoServiceImpl;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">DemoConsumer&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>(String&lt;span style="color:#719e07">[]&lt;/span> args) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 引用远程服务&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span> demoServiceReference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>DemoService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demoServiceReference.setInterface(DemoService.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demoServiceReference.setVersion(&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>FooService&lt;span style="color:#719e07">&amp;gt;&lt;/span> fooServiceReference &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> ReferenceConfig&lt;span style="color:#719e07">&amp;lt;&lt;/span>FooService&lt;span style="color:#719e07">&amp;gt;&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fooServiceReference.setInterface(FooService.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fooServiceReference.setVersion(&lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 通过DubboBootstrap简化配置组装，控制启动过程&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DubboBootstrap bootstrap &lt;span style="color:#719e07">=&lt;/span> DubboBootstrap.getInstance();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> bootstrap.application(&lt;span style="color:#2aa198">&amp;#34;demo-consumer&amp;#34;&lt;/span>) &lt;span style="color:#586e75">// 应用配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .registry(&lt;span style="color:#719e07">new&lt;/span> RegistryConfig(&lt;span style="color:#2aa198">&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span>)) &lt;span style="color:#586e75">// 注册中心配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .reference(demoServiceReference) &lt;span style="color:#586e75">// 添加ReferenceConfig&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .reference(fooServiceReference)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .start(); &lt;span style="color:#586e75">// 启动Dubbo&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ...
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 和本地bean一样使用demoService&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 通过Interface获取远程服务接口代理，不需要依赖ReferenceConfig对象&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DemoService demoService &lt;span style="color:#719e07">=&lt;/span> DubboBootstrap.getInstance().getCache().get(DemoService.class);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> demoService.sayHello(&lt;span style="color:#2aa198">&amp;#34;Dubbo&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> FooService fooService &lt;span style="color:#719e07">=&lt;/span> fooServiceReference.get();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fooService.greeting(&lt;span style="color:#2aa198">&amp;#34;Dubbo&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="基本配置">基本配置&lt;/h3>
-&lt;p>可以在 DubboBootstrap 中设置全局基本配置，包括应用配置、协议配置、注册中心、配置中心、元数据中心、模块、监控、SSL、provider 配置、consumer 配置等。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>配置手册 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/</link><description>Recent content in 配置手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/index.xml" rel="self" type="application/rss+xml"/><item><title>API 配置</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/config/api/api/</guid><description>&lt;p&gt;作为一款 RPC 框架，Dubbo 定义了一套完善的 API 接口，我们可以基于原生 API 开发 Dubbo 应用，关于如何使用原生API开发轻量RPC、微服务应用等的具体示例可查看 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/develop/api/"&gt;使用教程 - API开发模式&lt;/a&gt; 中的示例。它的适用场景包括以下两类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;轻量 RPC Server &amp;amp; Client&lt;/strong&gt;，通常用于一些应用内、基础组件、中间件等内的简单远程调用场景&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;微服务应用&lt;/strong&gt;，不依赖 Spring、Spring Boot 的情况下，直接用 API 开发微服务；同时，直接使用 API 对于一些网关或测试平台集成场景也可能比较有用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;目前的入口 API 主要有 &lt;code&gt;Bootstrap&lt;/code&gt;、&lt;code&gt;ServiceConfig&lt;/code&gt;、&lt;code&gt;ReferenceConfig&lt;/code&gt; 等，分别用于不同场景下的 Dubbo 应用开发。&lt;/p&gt;
+&lt;h2 id="bootstrap-api"&gt;Bootstrap API&lt;/h2&gt;
+&lt;p&gt;DubboBootstrap 实例代表一个 Dubbo 应用，是整个 Dubbo 应用的启动入口。在 DubboBootstrap 基础上，我们可以设置 protocol、service、registry、metrics 等来注册服务、连接注册中心等，这和我们在 Spring Boot 中调整 application.yml 或者 application.properties 文件是对等的作用。&lt;/p&gt;
+&lt;p&gt;官方推荐使用 DubboBootstrap.start() 作为应用的集中启动入口，但为了方便在进程启动后，在运行态单独发布一些服务，Dubbo 也允许直接调用 ServiceConfig.export() 或 ReferenceConfig.refer() 方法发布服务，这时 Service/Reference 会注册到默认的 DubboBootstrap 实例中，效果同调用 DubboBootstrap.service(&amp;hellip;).start() 类似。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.bootstrap.DubboBootstrap;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.ApplicationConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.RegistryConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.ProviderConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.ServiceConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; com.xxx.DemoService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; com.xxx.DemoServiceImpl;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoProvider&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;(String&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; args) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ConfigCenterConfig configCenter &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; ConfigCenterConfig();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; configCenter.setAddress(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 服务提供者协议配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ProtocolConfig protocol &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; ProtocolConfig();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol.setName(&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol.setPort(12345);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol.setThreads(200);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 注意：ServiceConfig为重对象，内部封装了与注册中心的连接，以及开启服务端口&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 服务提供者暴露服务配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ServiceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;DemoService&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; demoServiceConfig &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; ServiceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&amp;gt;&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; demoServiceConfig.setInterface(DemoService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; demoServiceConfig.setRef(&lt;span style="color:#719e07"&gt;new&lt;/span&gt; DemoServiceImpl());
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; demoServiceConfig.setVersion(&lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 第二个服务配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ServiceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;FooService&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; fooServiceConfig &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; ServiceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&amp;gt;&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; fooServiceConfig.setInterface(FooService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; fooServiceConfig.setRef(&lt;span style="color:#719e07"&gt;new&lt;/span&gt; FooServiceImpl());
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; fooServiceConfig.setVersion(&lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 通过DubboBootstrap简化配置组装，控制启动过程&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; DubboBootstrap.getInstance()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .application(&lt;span style="color:#2aa198"&gt;&amp;#34;demo-provider&amp;#34;&lt;/span&gt;) &lt;span style="color:#586e75"&gt;// 应用配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .registry(&lt;span style="color:#719e07"&gt;new&lt;/span&gt; RegistryConfig(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span&gt;)) &lt;span style="color:#586e75"&gt;// 注册中心配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .protocol(protocol) &lt;span style="color:#586e75"&gt;// 全局默认协议配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .service(demoServiceConfig) &lt;span style="color:#586e75"&gt;// 添加ServiceConfig&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .service(fooServiceConfig)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .start() &lt;span style="color:#586e75"&gt;// 启动Dubbo&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .await(); &lt;span style="color:#586e75"&gt;// 挂起等待(防止进程退出）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.bootstrap.DubboBootstrap;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.ApplicationConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.RegistryConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.ProviderConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; org.apache.dubbo.config.ServiceConfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; com.xxx.DemoService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; com.xxx.DemoServiceImpl;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;DemoConsumer&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;(String&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; args) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 引用远程服务&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ReferenceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;DemoService&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; demoServiceReference &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; ReferenceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;DemoService&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; demoServiceReference.setInterface(DemoService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; demoServiceReference.setVersion(&lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ReferenceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;FooService&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; fooServiceReference &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; ReferenceConfig&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;FooService&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; fooServiceReference.setInterface(FooService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; fooServiceReference.setVersion(&lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 通过DubboBootstrap简化配置组装，控制启动过程&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; DubboBootstrap bootstrap &lt;span style="color:#719e07"&gt;=&lt;/span&gt; DubboBootstrap.getInstance();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; bootstrap.application(&lt;span style="color:#2aa198"&gt;&amp;#34;demo-consumer&amp;#34;&lt;/span&gt;) &lt;span style="color:#586e75"&gt;// 应用配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .registry(&lt;span style="color:#719e07"&gt;new&lt;/span&gt; RegistryConfig(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper://127.0.0.1:2181&amp;#34;&lt;/span&gt;)) &lt;span style="color:#586e75"&gt;// 注册中心配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .reference(demoServiceReference) &lt;span style="color:#586e75"&gt;// 添加ReferenceConfig&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .reference(fooServiceReference)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .start(); &lt;span style="color:#586e75"&gt;// 启动Dubbo&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 和本地bean一样使用demoService&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 通过Interface获取远程服务接口代理，不需要依赖ReferenceConfig对象&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; DemoService demoService &lt;span style="color:#719e07"&gt;=&lt;/span&gt; DubboBootstrap.getInstance().getCache().get(DemoService.class);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; demoService.sayHello(&lt;span style="color:#2aa198"&gt;&amp;#34;Dubbo&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; FooService fooService &lt;span style="color:#719e07"&gt;=&lt;/span&gt; fooServiceReference.get();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; fooService.greeting(&lt;span style="color:#2aa198"&gt;&amp;#34;Dubbo&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="基本配置"&gt;基本配置&lt;/h3&gt;
+&lt;p&gt;可以在 DubboBootstrap 中设置全局基本配置，包括应用配置、协议配置、注册中心、配置中心、元数据中心、模块、监控、SSL、provider 配置、consumer 配置等。&lt;/p&gt;</description></item></channel></rss>

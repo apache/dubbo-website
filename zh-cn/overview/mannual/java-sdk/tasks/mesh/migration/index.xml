@@ -1,90 +1,90 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>传统 Dubbo 微服务集群如何平滑迁移到 Istio 服务网格体系 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/</link><description>Recent content in 传统 Dubbo 微服务集群如何平滑迁移到 Istio 服务网格体系 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/index.xml" rel="self" type="application/rss+xml"/><item><title>地址同步</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/dubbo-mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/dubbo-mesh/</guid><description>&lt;p>遵循以下步骤，可以轻松掌握如何开发符合 Service Mesh 架构的 Dubbo 服务，并将其部署到 Kubernetes 并接入 Istio 的流量治理体系。在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s">完整示例源码&lt;/a>&lt;/p>
-&lt;h2 id="1-总体目标">1 总体目标&lt;/h2>
-&lt;ul>
-&lt;li>部署 Dubbo 应用到 Kubernetes&lt;/li>
-&lt;li>Istio 自动注入 Envoy 并实现流量拦截&lt;/li>
-&lt;li>基于 Istio 规则进行流量治理&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-基本流程与工作原理">2 基本流程与工作原理&lt;/h2>
-&lt;p>这个示例演示了如何将 Dubbo 开发的应用部署在 Istio 体系下，以实现 Envoy 对 Dubbo 服务的自动代理，示例总体架构如下图所示。&lt;/p>
-&lt;p>&lt;img alt="thinsdk" src="https://cn.dubbo.apache.org/imgs/v3/mesh/thinsdk-envoy.png">&lt;/p>
-&lt;p>完成示例将需要的步骤如下：&lt;/p>
-&lt;ol>
-&lt;li>创建一个 Dubbo 应用( &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s">dubbo-samples-mesh-k8s&lt;/a> )&lt;/li>
-&lt;li>构建容器镜像并推送到镜像仓库（ &lt;a href="https://hub.docker.com/r/apache/dubbo-demo">本示例官方镜像&lt;/a> ）&lt;/li>
-&lt;li>分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes 并验证 Envoy 代理注入成功&lt;/li>
-&lt;li>验证 Envoy 发现服务地址、正常拦截 RPC 流量并实现负载均衡&lt;/li>
-&lt;li>基于 Istio VirtualService 实现按比例流量转发&lt;/li>
-&lt;/ol>
-&lt;h2 id="3-详细步骤">3 详细步骤&lt;/h2>
-&lt;h3 id="31-环境要求">3.1 环境要求&lt;/h3>
-&lt;p>请确保本地安装如下环境，以提供容器运行时、Kubernetes集群及访问工具&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://www.docker.com/get-started/">Docker&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://minikube.sigs.k8s.io/docs/start/">Minikube&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubectl&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://istio.io/latest/docs/setup/getting-started/">Istio&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/ahmetb/kubectx">Kubens(optional)&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>通过以下命令启动本地 Kubernetes 集群&lt;/p></description></item><item><title>协议识别</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/deploy-on-k8s/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/deploy-on-k8s/</guid><description>&lt;p>可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes">完整代码示例地址&lt;/a>&lt;/p>
-&lt;h2 id="1-总体目标">1 总体目标&lt;/h2>
-&lt;ul>
-&lt;li>部署 Dubbo 应用到 Kubernetes&lt;/li>
-&lt;li>基于 Kubernetes 内置 Service 实现服务发现&lt;/li>
-&lt;li>将 Dubbo 应用对接到 Kubernetes 生命周期&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-基本流程">2 基本流程&lt;/h2>
-&lt;ol>
-&lt;li>创建一个 Dubbo
-应用( &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes">dubbo-samples-kubernetes&lt;/a> )&lt;/li>
-&lt;li>构建容器镜像并推送到镜像仓库（ &lt;a href="https://hub.docker.com/r/apache/dubbo-demo">dubbo-demo 示例例镜像&lt;/a> ）&lt;/li>
-&lt;li>分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes&lt;/li>
-&lt;li>验证服务发现与调用正常&lt;/li>
-&lt;/ol>
-&lt;h2 id="3-详细步骤">3 详细步骤&lt;/h2>
-&lt;h3 id="31-环境要求">3.1 环境要求&lt;/h3>
-&lt;p>请确保本地安装如下环境，以提供容器运行时、Kubernetes集群及访问工具&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://www.docker.com/get-started/">Docker&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://minikube.sigs.k8s.io/docs/start/">Minikube&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://kubernetes.io/docs/tasks/tools/">Kubectl&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/ahmetb/kubectx">Kubens(optional)&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>通过以下命令启动本地 Kubernetes 集群&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>minikube start
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 kubectl 检查集群正常运行，且 kubectl 绑定到默认本地集群&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>kubectl cluster-info
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="32-前置条件">3.2 前置条件&lt;/h3>
-&lt;p>由于示例 Dubbo 项目均部署在 Pod 中且与 API-SERVER 有交互，因此有相应的权限要求，我们这里创建独立 ServiceAccount 并绑定必须的 Roles，后面所有的 Dubbo Kubernetes
-资源都将使用这里新建的 ServiceAccount。&lt;/p></description></item><item><title>其他问题？</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/proxyless/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/proxyless/</guid><description>&lt;p>Proxyless 模式是指 Dubbo 直接与 Istiod 通信，通过 xDS 协议实现服务发现和服务治理等能力。
-本示例中将通过一个简单的示例来演示如何使用 Proxyless 模式。&lt;/p>
-&lt;p>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds">示例地址&lt;/a>&lt;/p>
-&lt;h2 id="代码架构">代码架构&lt;/h2>
-&lt;p>本小节中主要介绍本文所使用的示例的代码架构，通过模仿本示例中的相关配置改造已有的项目代码可以使已有的项目快速跑在 Proxyless Mesh 模式下。&lt;/p>
-&lt;h3 id="1-接口定义">1. 接口定义&lt;/h3>
-&lt;p>为了示例足够简单，这里使用了一个简单的接口定义，仅对参数做拼接进行返回。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">GreetingService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-接口实现">2. 接口实现&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AnnotatedGreetingService&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> GreetingService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;greeting service received: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#2aa198">&amp;#34;hello, &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34;! from host: &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> NetUtils.getLocalHost();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="3-客户端订阅方式">3. 客户端订阅方式&lt;/h3>
-&lt;p>&lt;strong>由于原生 xDS 协议无法支持获取从接口到应用名的映射，因此需要配置 &lt;code>providedBy&lt;/code> 参数来标记此服务来自哪个应用。&lt;/strong>&lt;/p>
-&lt;p>未来我们将基于 Dubbo Mesh 的控制面实现自动的&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/">服务映射&lt;/a>关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Component&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;annotatedConsumer&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">GreetingServiceConsumer&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@DubboReference&lt;/span>(version &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;1.0.0&amp;#34;&lt;/span>, providedBy &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;dubbo-samples-xds-provider&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> GreetingService greetingService;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">doSayHello&lt;/span>(String name) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> greetingService.sayHello(name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4-服务端配置">4. 服务端配置&lt;/h3>
-&lt;p>服务端配置注册中心为 istio 的地址，协议为 xds。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>传统 Dubbo 微服务集群如何平滑迁移到 Istio 服务网格体系 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/</link><description>Recent content in 传统 Dubbo 微服务集群如何平滑迁移到 Istio 服务网格体系 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/index.xml" rel="self" type="application/rss+xml"/><item><title>地址同步</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/dubbo-mesh/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/dubbo-mesh/</guid><description>&lt;p&gt;遵循以下步骤，可以轻松掌握如何开发符合 Service Mesh 架构的 Dubbo 服务，并将其部署到 Kubernetes 并接入 Istio 的流量治理体系。在此查看 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s"&gt;完整示例源码&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="1-总体目标"&gt;1 总体目标&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;部署 Dubbo 应用到 Kubernetes&lt;/li&gt;
+&lt;li&gt;Istio 自动注入 Envoy 并实现流量拦截&lt;/li&gt;
+&lt;li&gt;基于 Istio 规则进行流量治理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-基本流程与工作原理"&gt;2 基本流程与工作原理&lt;/h2&gt;
+&lt;p&gt;这个示例演示了如何将 Dubbo 开发的应用部署在 Istio 体系下，以实现 Envoy 对 Dubbo 服务的自动代理，示例总体架构如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/v3/mesh/thinsdk-envoy.png" alt="thinsdk"&gt;&lt;/p&gt;
+&lt;p&gt;完成示例将需要的步骤如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;创建一个 Dubbo 应用( &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-mesh-k8s"&gt;dubbo-samples-mesh-k8s&lt;/a&gt; )&lt;/li&gt;
+&lt;li&gt;构建容器镜像并推送到镜像仓库（ &lt;a href="https://hub.docker.com/r/apache/dubbo-demo"&gt;本示例官方镜像&lt;/a&gt; ）&lt;/li&gt;
+&lt;li&gt;分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes 并验证 Envoy 代理注入成功&lt;/li&gt;
+&lt;li&gt;验证 Envoy 发现服务地址、正常拦截 RPC 流量并实现负载均衡&lt;/li&gt;
+&lt;li&gt;基于 Istio VirtualService 实现按比例流量转发&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="3-详细步骤"&gt;3 详细步骤&lt;/h2&gt;
+&lt;h3 id="31-环境要求"&gt;3.1 环境要求&lt;/h3&gt;
+&lt;p&gt;请确保本地安装如下环境，以提供容器运行时、Kubernetes集群及访问工具&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.docker.com/get-started/"&gt;Docker&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://minikube.sigs.k8s.io/docs/start/"&gt;Minikube&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://kubernetes.io/docs/tasks/tools/"&gt;Kubectl&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://istio.io/latest/docs/setup/getting-started/"&gt;Istio&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/ahmetb/kubectx"&gt;Kubens(optional)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;通过以下命令启动本地 Kubernetes 集群&lt;/p&gt;</description></item><item><title>协议识别</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/deploy-on-k8s/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/deploy-on-k8s/</guid><description>&lt;p&gt;可以按照下文步骤，将 Dubbo 服务轻松部署到 Kubernetes 集群，此查看文章用到的 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes"&gt;完整代码示例地址&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="1-总体目标"&gt;1 总体目标&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;部署 Dubbo 应用到 Kubernetes&lt;/li&gt;
+&lt;li&gt;基于 Kubernetes 内置 Service 实现服务发现&lt;/li&gt;
+&lt;li&gt;将 Dubbo 应用对接到 Kubernetes 生命周期&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-基本流程"&gt;2 基本流程&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;创建一个 Dubbo
+应用( &lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-kubernetes"&gt;dubbo-samples-kubernetes&lt;/a&gt; )&lt;/li&gt;
+&lt;li&gt;构建容器镜像并推送到镜像仓库（ &lt;a href="https://hub.docker.com/r/apache/dubbo-demo"&gt;dubbo-demo 示例例镜像&lt;/a&gt; ）&lt;/li&gt;
+&lt;li&gt;分别部署 Dubbo Provider 与 Dubbo Consumer 到 Kubernetes&lt;/li&gt;
+&lt;li&gt;验证服务发现与调用正常&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="3-详细步骤"&gt;3 详细步骤&lt;/h2&gt;
+&lt;h3 id="31-环境要求"&gt;3.1 环境要求&lt;/h3&gt;
+&lt;p&gt;请确保本地安装如下环境，以提供容器运行时、Kubernetes集群及访问工具&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.docker.com/get-started/"&gt;Docker&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://minikube.sigs.k8s.io/docs/start/"&gt;Minikube&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://kubernetes.io/docs/tasks/tools/"&gt;Kubectl&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/ahmetb/kubectx"&gt;Kubens(optional)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;通过以下命令启动本地 Kubernetes 集群&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;minikube start
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过 kubectl 检查集群正常运行，且 kubectl 绑定到默认本地集群&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;kubectl cluster-info
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="32-前置条件"&gt;3.2 前置条件&lt;/h3&gt;
+&lt;p&gt;由于示例 Dubbo 项目均部署在 Pod 中且与 API-SERVER 有交互，因此有相应的权限要求，我们这里创建独立 ServiceAccount 并绑定必须的 Roles，后面所有的 Dubbo Kubernetes
+资源都将使用这里新建的 ServiceAccount。&lt;/p&gt;</description></item><item><title>其他问题？</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/proxyless/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/mesh/migration/proxyless/</guid><description>&lt;p&gt;Proxyless 模式是指 Dubbo 直接与 Istiod 通信，通过 xDS 协议实现服务发现和服务治理等能力。
+本示例中将通过一个简单的示例来演示如何使用 Proxyless 模式。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/3-extensions/registry/dubbo-samples-xds"&gt;示例地址&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="代码架构"&gt;代码架构&lt;/h2&gt;
+&lt;p&gt;本小节中主要介绍本文所使用的示例的代码架构，通过模仿本示例中的相关配置改造已有的项目代码可以使已有的项目快速跑在 Proxyless Mesh 模式下。&lt;/p&gt;
+&lt;h3 id="1-接口定义"&gt;1. 接口定义&lt;/h3&gt;
+&lt;p&gt;为了示例足够简单，这里使用了一个简单的接口定义，仅对参数做拼接进行返回。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;GreetingService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="2-接口实现"&gt;2. 接口实现&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;(version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;AnnotatedGreetingService&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; GreetingService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; System.out.println(&lt;span style="color:#2aa198"&gt;&amp;#34;greeting service received: &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;hello, &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; name &lt;span style="color:#719e07"&gt;+&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;! from host: &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; NetUtils.getLocalHost();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="3-客户端订阅方式"&gt;3. 客户端订阅方式&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;由于原生 xDS 协议无法支持获取从接口到应用名的映射，因此需要配置 &lt;code&gt;providedBy&lt;/code&gt; 参数来标记此服务来自哪个应用。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;未来我们将基于 Dubbo Mesh 的控制面实现自动的&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/concepts-and-architecture/service-discovery/"&gt;服务映射&lt;/a&gt;关系获取，届时将不需要独立配置参数即可将 Dubbo 运行在 Mesh 体系下，敬请期待。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@Component&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;annotatedConsumer&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;GreetingServiceConsumer&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@DubboReference&lt;/span&gt;(version &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;, providedBy &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo-samples-xds-provider&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; GreetingService greetingService;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;doSayHello&lt;/span&gt;(String name) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; greetingService.sayHello(name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="4-服务端配置"&gt;4. 服务端配置&lt;/h3&gt;
+&lt;p&gt;服务端配置注册中心为 istio 的地址，协议为 xds。&lt;/p&gt;</description></item></channel></rss>

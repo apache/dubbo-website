@@ -1,339 +1,339 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>源码解读 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/</link><description>Recent content in 源码解读 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/index.xml" rel="self" type="application/rss+xml"/><item><title>网络协议</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/protocol/</guid><description>&lt;p>对于 Dubbogo 微服务框架，网络协议为远程过程调用中负责网络通信的模块，负责应用层到网络层的数据序列化、打包、请求发起、网络端口监听等功能。Dubbogo 为协议抽象了一套接口如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Protocol &lt;span style="color:#268bd2">interface&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Export service for remote invocation
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Export&lt;/span>(invoker Invoker) Exporter
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Refer a remote service
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Refer&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) Invoker
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Destroy will destroy all invoker and exporter, so it only is called once.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Destroy&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该接口包含三个方法。其中 Export 方法负责服务的暴露过程。入参 invoker 为dubbo 的概念，其封装了一个可以被调用的实例。在具体网络协议（例如Triple）实现的 Export 方法中，会针对特定的协议，将封装有一定逻辑的可调用实例 Invoker 以网络端口监听的形式暴露给外部服务，来自外部针对该网络端口的请求将会被 Export 方法开启的监听协程获取，进而根据网络协议进行拆解包和反序列化，得到解析后的请求数据。&lt;/p>
-&lt;p>Refer 方法负责服务的引用过程，其入参 url 为 dubbo 框架通用的结构，可以描述一个希望引用的服务，url 参数中包含了多个希望引用服务的参数，例如对应服务的接口名(interface)，版本号(version)，使用协议(protocol) 等等。在具体网络协议（例如Triple）实现的 Refer 方法中，会将特定的网络协议封装到 Invoker 可调用实例的方法中，用户层发起的 RPC 调用即可直接通过返回的 Invoker 对象，发起特定协议的网络请求。&lt;/p>
-&lt;p>Destroy 方法作用为销毁当前暴露的服务，用于服务下线场景。Dubbogo 框架有优雅下线机制，可以在服务进程终止前以监听信号的形式，下线所有已启动的服务。&lt;/p></description></item><item><title>注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/registry/</guid><description>&lt;p>Dubbogo 为注册中心抽象了一套接口如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Registry Extension - Registry
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Registry &lt;span style="color:#268bd2">interface&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	common.Node
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Register is used for service provider calling, register services
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// to registry. And it is also used for service consumer calling, register
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// services cared about, for dubbo&amp;#39;s admin monitoring.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Register&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// UnRegister is required to support the contract:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 1. If it is the persistent stored data of dynamic=false, the
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// registration data can not be found, then the IllegalStateException
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// is thrown, otherwise it is ignored.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 2. Unregister according to the full url match.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// url Registration information, is not allowed to be empty, e.g:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// dubbo://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">UnRegister&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// Subscribe is required to support the contract:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// When creating new registry extension, pls select one of the
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// following modes.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// Will remove in dubbogo version v1.1.0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// mode1: return Listener with Next function which can return
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// subscribe service event from registry
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// Deprecated!
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// subscribe(event.URL) (Listener, error)
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// Will replace mode1 in dubbogo version v1.1.0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// mode2: callback mode, subscribe with notify(notify listener).
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">Subscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#586e75">// UnSubscribe is required to support the contract:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 1. If don&amp;#39;t subscribe, ignore it directly.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// 2. Unsubscribe by full URL match.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// url Subscription condition, not allowed to be empty, e.g.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// consumer://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#586e75">// listener A listener of the change event, not allowed to be empty
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>	&lt;span style="color:#268bd2">UnSubscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该接口主要包含四个方法，分别是注册、反注册、订阅、取消订阅。顾名思义，概括了客户端和服务端与注册中心交互的动作。针对普通接口级服务注册发现场景，在Provider 服务启动时，会将自身服务接口信息抽象为一个 url，该 url 包含了客户端发起调用所需的所有信息（ip、端口、协议等），服务端的注册中心组件会将该 url 写入注册中心（例如zk）。客户端启动后，在服务引用 Refer 步骤会通过注册中心组件订阅（Subscribe）需要的服务信息，获取到的服务信息以异步事件更新的形式写入客户端缓存，从而在服务发现成功后，可以根据拿到的服务 url 参数，向对应服务提供者发起调用。&lt;/p></description></item><item><title>新特性</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/3.0_feature/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/3.0_feature/</guid><description>&lt;p>&lt;img alt="star" src="https://shields.io/github/stars/apache/dubbo-go?style=dark">&lt;/p>
-&lt;h2 id="1-triple-协议">1. Triple 协议&lt;/h2>
-&lt;h3 id="11-概述">1.1 概述&lt;/h3>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/tri.png">&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>通信层面&lt;/p>
-&lt;p>Triple 协议，也称为Dubbo3协议，是基于HTTP2 + gRPC协议，增加特定字段和逻辑的扩展协议，保证了和&lt;strong>原生gRPC协议互通&lt;/strong>。在此基础之上，Triple 新协议将更原生地支持 &lt;strong>Dubbo 服务治理能力&lt;/strong>。并支持&lt;strong>流式RPC调用&lt;/strong>。&lt;/p>
-&lt;p>简单来说，可以理解为 Triple = gRPC + Dubbo&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>序列化&lt;/p>
-&lt;p>Triple 协议使用高效的&lt;strong>PB序列化方式&lt;/strong>，并在此基础之上增加序列化协议的&lt;strong>可扩展支持&lt;/strong>。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>用户开发习惯：&lt;/p>
-&lt;p>Triple 服务在开发前需要&lt;strong>预定义.proto文件&lt;/strong>，对于习惯在编码前先定义IDL的Go语言开发者带来便捷。不同于符合java编程习惯的，定义JavaClassName用于描述接口的 Dubbo-go 1.x版本。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>跨语言互通性：&lt;/p>
-&lt;p>可与 Dubbo-Java 实现&lt;strong>跨语言互通&lt;/strong>。&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-应用级服务发现">2. 应用级服务发现&lt;/h2>
-&lt;h3 id="21-简介">2.1 简介&lt;/h3>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/disc.png">&lt;/p>
-&lt;p>在服务注册阶段，服务端实例将应用级别的注册信息，主要包含从应用名到实例IP的映射注册到注册中心。在服务发现阶段，客户端实例，通过注册中心获取到需要请求的服务实例IP。进入服务自省阶段，服务自省过程为通过应用信息获取接口信息的过程。如上图，包含两种模式：&lt;/p>
-&lt;ol>
-&lt;li>remote模式：通过元数据中心（例如 zk ）获取应用到接口元数据的映射&lt;/li>
-&lt;li>local模式：直接通过服务端获取应用到接口元数据的映射（通过 Dubbo 协议针对 Metadata Service 发起 RPC 调用）&lt;/li>
-&lt;/ol>
-&lt;p>经过服务自省后，客户端正式向对应实例发起调用。这样做最明显的好处是减少了注册中心的数据量，即注册中心只保存了应用级别的数据。&lt;/p>
-&lt;p>用户在使用 Dubbo-go 3.0的应用级服务发现能力时，可以仿照示例，直接在配置文件中配置服务自省模式和元数据中心信息，引入依赖，开启应用级别服务发现。&lt;/p>
-&lt;h3 id="22-应用级服务发现介绍文章">2.2 应用级服务发现介绍文章&lt;/h3>
-&lt;p>&lt;a href="https://baijiahao.baidu.com/s?id=1669266413887039723&amp;wfr=spider&amp;for=pc">应用级服务发现解析&lt;/a>&lt;/p>
-&lt;h2 id="3-mesh-路由规则">3. Mesh 路由规则&lt;/h2>
-&lt;p>用户可定义路由文件：&lt;/p>
-&lt;p>virtual_service.yaml&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/virtual_service.png">&lt;/p>
-&lt;p>以及 dist_rule.yml&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/dest_rule.png">&lt;/p>
-&lt;p>框架可根据路由文件针对特定的请求进行流量转发。&lt;/p>
-&lt;h2 id="4-相关文章">4. 相关文章&lt;/h2>
-&lt;p>阿里云官方介绍文章：&lt;a href="https://developer.aliyun.com/article/770964?utm_content=g_1000175535">《Dubbo 3.0 - 开启下一代云原生微服务》&lt;/a>&lt;/p></description></item><item><title>泛化调用</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic/</guid><description>&lt;h2 id="1-dubbo-go-泛化调用-java-server">1. Dubbo-go 泛化调用 Java Server&lt;/h2>
-&lt;p>使用 Triple 协议 + hessian2 序列化方案&lt;/p>
-&lt;h3 id="11-java-server启动">1.1 Java-Server启动&lt;/h3>
-&lt;ol>
-&lt;li>传输结构定义&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.io.Serializable;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Date;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">private&lt;/span> String id;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> age;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Date time &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Date();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>接口定义&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.ArrayList;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Map;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserProvider&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	User &lt;span style="color:#268bd2">GetUser1&lt;/span>(String userId);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-go-client-泛化调用">1.2 Go-Client 泛化调用&lt;/h3>
-&lt;p>此处展示以 API 的形式构造泛化接口引用&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 初始化 Reference 配置
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">NewReferenceConfigBuilder&lt;/span>().
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetInterface&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.UserProvider&amp;#34;&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetRegistryIDs&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetProtocol&lt;/span>(tripleConst.TRIPLE).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetGeneric&lt;/span>(&lt;span style="color:#cb4b16">true&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetSerialization&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">Build&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 构造 Root 配置，引入注册中心模块
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>rootConfig &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">NewRootConfigBuilder&lt;/span>().
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">AddRegistry&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>, config.&lt;span style="color:#268bd2">NewRegistryConfigWithProtocolDefaultPort&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>)).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">Build&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Reference 配置初始化，因为需要使用注册中心进行服务发现，需要传入经过配置的 rootConfig
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">Init&lt;/span>(rootConfig); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 泛化调用加载、服务发现
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf.&lt;span style="color:#268bd2">GenericLoad&lt;/span>(appName)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Second)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 发起泛化调用
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>resp, err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">GetRPCService&lt;/span>().(&lt;span style="color:#719e07">*&lt;/span>generic.GenericService).&lt;span style="color:#268bd2">Invoke&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.&lt;span style="color:#268bd2">TODO&lt;/span>(),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;getUser1&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []hessian.Object{&lt;span style="color:#2aa198">&amp;#34;A003&amp;#34;&lt;/span>},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GetUser1(userId string) res: %+v&amp;#34;&lt;/span>, resp)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>GenericService 的 Invoke 方法包括三个参数：context.Context, []string, []hessian.Object,&lt;/p></description></item><item><title>泛化调用</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic-2/</guid><description>&lt;h2 id="1-dubbogo-泛化调用-java-server">1. Dubbogo 泛化调用 Java Server&lt;/h2>
-&lt;p>使用 Triple 协议 + hessian2 序列化方案&lt;/p>
-&lt;p>可参考Dubbogo 3.0 &lt;a href="https://www.yuque.com/docs/share/f4e72670-74ab-45b9-bc0c-4b42249ed953?">泛化调用文档&lt;/a>&lt;/p>
-&lt;h3 id="11-java-server启动">1.1 Java-Server启动&lt;/h3>
-&lt;ol>
-&lt;li>传输结构定义&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.io.Serializable;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Date;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">User&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Serializable {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">private&lt;/span> String id;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> String name;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">int&lt;/span> age;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> Date time &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Date();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>接口定义&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.ArrayList;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.List;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> java.util.Map;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">UserProvider&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	User &lt;span style="color:#268bd2">GetUser1&lt;/span>(String userId);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="12-go-client-泛化调用">1.2 Go-Client 泛化调用&lt;/h3>
-&lt;p>此处展示以 API 的形式构造泛化接口引用&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 初始化 Reference 配置
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">NewReferenceConfigBuilder&lt;/span>().
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetInterface&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.UserProvider&amp;#34;&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetRegistryIDs&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetProtocol&lt;/span>(tripleConst.TRIPLE).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetGeneric&lt;/span>(&lt;span style="color:#cb4b16">true&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">SetSerialization&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;hessian2&amp;#34;&lt;/span>).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">Build&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 构造 Root 配置，引入注册中心模块
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>rootConfig &lt;span style="color:#719e07">:=&lt;/span> config.&lt;span style="color:#268bd2">NewRootConfigBuilder&lt;/span>().
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">AddRegistry&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zk&amp;#34;&lt;/span>, config.&lt;span style="color:#268bd2">NewRegistryConfigWithProtocolDefaultPort&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;zookeeper&amp;#34;&lt;/span>)).
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">Build&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Reference 配置初始化，因为需要使用注册中心进行服务发现，需要传入经过配置的 rootConfig
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">Init&lt;/span>(rootConfig); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span>{
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 泛化调用加载、服务发现
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>refConf.&lt;span style="color:#268bd2">GenericLoad&lt;/span>(appName)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>time.&lt;span style="color:#268bd2">Sleep&lt;/span>(time.Second)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 发起泛化调用
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>resp, err &lt;span style="color:#719e07">:=&lt;/span> refConf.&lt;span style="color:#268bd2">GetRPCService&lt;/span>().(&lt;span style="color:#719e07">*&lt;/span>generic.GenericService).&lt;span style="color:#268bd2">Invoke&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> context.&lt;span style="color:#268bd2">TODO&lt;/span>(),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#2aa198">&amp;#34;getUser1&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []&lt;span style="color:#dc322f">string&lt;/span>{&lt;span style="color:#2aa198">&amp;#34;java.lang.String&amp;#34;&lt;/span>},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> []hessian.Object{&lt;span style="color:#2aa198">&amp;#34;A003&amp;#34;&lt;/span>},
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#b58900">panic&lt;/span>(err)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>logger.&lt;span style="color:#268bd2">Infof&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;GetUser1(userId string) res: %+v&amp;#34;&lt;/span>, resp)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>GenericService 的 Invoke 方法包括三个参数：context.Context, []string, []hessian.Object,&lt;/p></description></item><item><title>AOP 与可扩展机制</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/</guid><description>&lt;h2 id="1-extension-模块与-init-方法">1. extension 模块与 init 方法&lt;/h2>
-&lt;h3 id="11-接口与实现">1.1 接口与实现&lt;/h3>
-&lt;p>golang 中的一个接口往往伴随多个实现类，dubbo-go 提供了针对接口实现类的可插拔可扩展机制。降低模块之间的耦合性，方便开发者引入、自定义组件。&lt;/p>
-&lt;h3 id="12-golang-中的-init-方法">1.2 golang 中的 init 方法&lt;/h3>
-&lt;p>init 方法作为 golang 中特殊的方法，用户引入一组模块后，会在程序启动时率先执行这些模块内的init 方法，进行加载逻辑，该方法是dubbogo注册扩展组件的重要方式。&lt;/p>
-&lt;h3 id="13-extension-模块">1.3 extension 模块&lt;/h3>
-&lt;p>在框架源码中，有一个特殊的模块: common/extension ，这一模块负责缓存所有可扩展组件的实现。&lt;/p>
-&lt;p>以负载均衡模块为例：common/extension/loadbalance.go&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> extension
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">import&lt;/span> (
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#2aa198">&amp;#34;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> loadbalances = &lt;span style="color:#b58900">make&lt;/span>(&lt;span style="color:#268bd2">map&lt;/span>[&lt;span style="color:#dc322f">string&lt;/span>]&lt;span style="color:#268bd2">func&lt;/span>() loadbalance.LoadBalance)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// SetLoadbalance sets the loadbalance extension with @name
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// For example: random/round_robin/consistent_hash/least_active/...
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">SetLoadbalance&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>, fcn &lt;span style="color:#268bd2">func&lt;/span>() loadbalance.LoadBalance) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	loadbalances[name] = fcn
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// GetLoadbalance finds the loadbalance extension with @name
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">GetLoadbalance&lt;/span>(name &lt;span style="color:#dc322f">string&lt;/span>) loadbalance.LoadBalance {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">if&lt;/span> loadbalances[name] &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#b58900">panic&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;loadbalance for &amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> name &lt;span style="color:#719e07">+&lt;/span> &lt;span style="color:#2aa198">&amp;#34; is not existing, make sure you have import the package.&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">return&lt;/span> loadbalances[name]()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该模块包含Get 方法和Set方法。Get 返回实例化的 LoadBalance 接口，Set 方法用于注册工厂函数，map 用于缓存工厂函数。&lt;/p></description></item><item><title>Dubbo的应用和接口</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/</guid><description>&lt;h2 id="dubbogo-服务层级">Dubbogo 服务层级&lt;/h2>
-&lt;p>Dubbogo 服务层级为两个级别：分别是应用级别(App Level)和接口级别(Interface Level)，该服务分层与&lt;strong>框架配置&lt;/strong>结构息息相关。&lt;/p>
-&lt;p>如下图所示，可以看到，应用级别的组件以浅红色标注，接口级别的组件以浅蓝色标注：&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png">&lt;/p>
-&lt;h2 id="1-应用级别组件">1. 应用级别组件&lt;/h2>
-&lt;p>应用级别组件的特点：被当前应用的所有接口级别组件共用。&lt;/p>
-&lt;p>应用级别的主要组件如下：&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>应用信息模块&lt;/p>
-&lt;p>包含应用维度相关信息，包括应用名、版本号、数据上报方式等&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Consumer 模块&lt;/p>
-&lt;p>Consumer 模块负责客户端相关信息，包括一个或多个引用（Reference）结构，以及超时、客户端过滤器（consumer filter）等相关信息。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Provider 模块&lt;/p>
-&lt;p>Provider 模块负责服务端相关信息，包括一个或多个服务（Service）结构、服务端过滤器（provider filter）等相关信息。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>注册中心（Registry）模块&lt;/p>
-&lt;p>注册中心模块负责定义好所要使用的一系列注册中心，例如框架支持的ZK、Nacos、ETCD等中间件。应用级别的注册模块只负责声明，由接口级别的组件进行引用，引用时以用户自定义的注册中心ID（registryID) 作为索引。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>协议（Protocol）模块&lt;/p>
-&lt;p>协议模块只存在于服务端。&lt;/p>
-&lt;p>协议模块关心服务的暴露信息，例如协议名、服务监听IP、端口号等信息。协议模块属于应用级别，只负责声明，由接口级别的组件进行引用，引用时以用户自定义的协议ID（protocolID) 作为索引。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>元数据中心模块&lt;/p>
-&lt;p>元数据中心类似于注册中心模块，负责声明框架需要使用的元数据中心，从而将元数据成功上报。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>配置中心模块&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>路由模块&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>日志模块&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>监控模块&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="2-接口级别组件">2. 接口级别组件&lt;/h2>
-&lt;ul>
-&lt;li>
-&lt;p>服务（Service）模块&lt;/p>
-&lt;p>服务模块被使用于任何暴露的服务，声明接口暴露所需的信息，包括例如接口名、协议、序列化方式等，负责单个服务接口的暴露。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>引用（Reference）模块&lt;/p>
-&lt;p>引用模块被使用于需要调用的远程服务的客户端，其声明了需要请求接口所需的信息，包括例如接口名、协议、序列化方式等、负责特定协议的抽象，参与客户端的生成。&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="3-说明">3. 说明&lt;/h2>
-&lt;p>暴露的服务是接口级别的，一个用户定义的 Provider Struct/一个用户定义的Consumer Struct，对应一个Service/Reference 模块，一个应用可以同时存在Consumer 模块和 Provider 模块，因此可以同时存在多个Service/Reference 模块。&lt;/p></description></item><item><title>架构</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/architecture/</guid><description>&lt;h3 id="架构说明">架构说明&lt;/h3>
-&lt;p>&lt;img alt="architecture" src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/architecture/architecture.png">&lt;/p>
-&lt;h3 id="节点说明">节点说明&lt;/h3>
-&lt;ul>
-&lt;li>&lt;code>Registry&lt;/code> : dubbo-go中负责服务注册与发现的注册中心&lt;/li>
-&lt;li>&lt;code>Consumer&lt;/code> : 调用远程服务的服务消费方&lt;/li>
-&lt;li>&lt;code>Provider&lt;/code> : 暴露服务的服务提供方&lt;/li>
-&lt;/ul>
-&lt;h3 id="过程说明">过程说明&lt;/h3>
-&lt;ul>
-&lt;li>&lt;code>0. register&lt;/code> : 当服务提供方在启动的时候，会自动将自己的服务注册到注册中心&lt;/li>
-&lt;li>&lt;code>1. subscribe&lt;/code> : 服务消费方会在启动的时候，向注册中心订阅自己所需要的服务&lt;/li>
-&lt;li>&lt;code>2. notify&lt;/code> : 注册中心返回服务注册的信息给到服务消费方，当订阅的服务发生变更，会推送变更的数据给到消费方&lt;/li>
-&lt;li>&lt;code>3. invoke&lt;/code> : 服务消费者根据从注册中心获得的服务地址，经过负载均衡算法选出一个合适的服务地址发起请求&lt;/li>
-&lt;/ul></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>源码解读 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/</link><description>Recent content in 源码解读 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/index.xml" rel="self" type="application/rss+xml"/><item><title>网络协议</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/protocol/</guid><description>&lt;p&gt;对于 Dubbogo 微服务框架，网络协议为远程过程调用中负责网络通信的模块，负责应用层到网络层的数据序列化、打包、请求发起、网络端口监听等功能。Dubbogo 为协议抽象了一套接口如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; Protocol &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Export service for remote invocation&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Export&lt;/span&gt;(invoker Invoker) Exporter
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Refer a remote service&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Refer&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) Invoker
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Destroy will destroy all invoker and exporter, so it only is called once.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Destroy&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;该接口包含三个方法。其中 Export 方法负责服务的暴露过程。入参 invoker 为dubbo 的概念，其封装了一个可以被调用的实例。在具体网络协议（例如Triple）实现的 Export 方法中，会针对特定的协议，将封装有一定逻辑的可调用实例 Invoker 以网络端口监听的形式暴露给外部服务，来自外部针对该网络端口的请求将会被 Export 方法开启的监听协程获取，进而根据网络协议进行拆解包和反序列化，得到解析后的请求数据。&lt;/p&gt;
+&lt;p&gt;Refer 方法负责服务的引用过程，其入参 url 为 dubbo 框架通用的结构，可以描述一个希望引用的服务，url 参数中包含了多个希望引用服务的参数，例如对应服务的接口名(interface)，版本号(version)，使用协议(protocol) 等等。在具体网络协议（例如Triple）实现的 Refer 方法中，会将特定的网络协议封装到 Invoker 可调用实例的方法中，用户层发起的 RPC 调用即可直接通过返回的 Invoker 对象，发起特定协议的网络请求。&lt;/p&gt;
+&lt;p&gt;Destroy 方法作用为销毁当前暴露的服务，用于服务下线场景。Dubbogo 框架有优雅下线机制，可以在服务进程终止前以监听信号的形式，下线所有已启动的服务。&lt;/p&gt;</description></item><item><title>注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/registry/</guid><description>&lt;p&gt;Dubbogo 为注册中心抽象了一套接口如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// Registry Extension - Registry&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; Registry &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	common.Node
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Register is used for service provider calling, register services&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// to registry. And it is also used for service consumer calling, register&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// services cared about, for dubbo&amp;#39;s admin monitoring.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Register&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// UnRegister is required to support the contract:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// 1. If it is the persistent stored data of dynamic=false, the&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// registration data can not be found, then the IllegalStateException&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// is thrown, otherwise it is ignored.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// 2. Unregister according to the full url match.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// url Registration information, is not allowed to be empty, e.g:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// dubbo://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;UnRegister&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Subscribe is required to support the contract:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// When creating new registry extension, pls select one of the&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// following modes.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Will remove in dubbogo version v1.1.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// mode1: return Listener with Next function which can return&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// subscribe service event from registry&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Deprecated!&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// subscribe(event.URL) (Listener, error)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// Will replace mode1 in dubbogo version v1.1.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// mode2: callback mode, subscribe with notify(notify listener).&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Subscribe&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// UnSubscribe is required to support the contract:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// 1. If don&amp;#39;t subscribe, ignore it directly.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// 2. Unsubscribe by full URL match.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// url Subscription condition, not allowed to be empty, e.g.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// consumer://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// listener A listener of the change event, not allowed to be empty&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;UnSubscribe&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;该接口主要包含四个方法，分别是注册、反注册、订阅、取消订阅。顾名思义，概括了客户端和服务端与注册中心交互的动作。针对普通接口级服务注册发现场景，在Provider 服务启动时，会将自身服务接口信息抽象为一个 url，该 url 包含了客户端发起调用所需的所有信息（ip、端口、协议等），服务端的注册中心组件会将该 url 写入注册中心（例如zk）。客户端启动后，在服务引用 Refer 步骤会通过注册中心组件订阅（Subscribe）需要的服务信息，获取到的服务信息以异步事件更新的形式写入客户端缓存，从而在服务发现成功后，可以根据拿到的服务 url 参数，向对应服务提供者发起调用。&lt;/p&gt;</description></item><item><title>新特性</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/3.0_feature/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/3.0_feature/</guid><description>&lt;p&gt;&lt;img src="https://shields.io/github/stars/apache/dubbo-go?style=dark" alt="star"&gt;&lt;/p&gt;
+&lt;h2 id="1-triple-协议"&gt;1. Triple 协议&lt;/h2&gt;
+&lt;h3 id="11-概述"&gt;1.1 概述&lt;/h3&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/tri.png" alt="img"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;通信层面&lt;/p&gt;
+&lt;p&gt;Triple 协议，也称为Dubbo3协议，是基于HTTP2 + gRPC协议，增加特定字段和逻辑的扩展协议，保证了和&lt;strong&gt;原生gRPC协议互通&lt;/strong&gt;。在此基础之上，Triple 新协议将更原生地支持 &lt;strong&gt;Dubbo 服务治理能力&lt;/strong&gt;。并支持&lt;strong&gt;流式RPC调用&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;简单来说，可以理解为 Triple = gRPC + Dubbo&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;序列化&lt;/p&gt;
+&lt;p&gt;Triple 协议使用高效的&lt;strong&gt;PB序列化方式&lt;/strong&gt;，并在此基础之上增加序列化协议的&lt;strong&gt;可扩展支持&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;用户开发习惯：&lt;/p&gt;
+&lt;p&gt;Triple 服务在开发前需要&lt;strong&gt;预定义.proto文件&lt;/strong&gt;，对于习惯在编码前先定义IDL的Go语言开发者带来便捷。不同于符合java编程习惯的，定义JavaClassName用于描述接口的 Dubbo-go 1.x版本。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;跨语言互通性：&lt;/p&gt;
+&lt;p&gt;可与 Dubbo-Java 实现&lt;strong&gt;跨语言互通&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-应用级服务发现"&gt;2. 应用级服务发现&lt;/h2&gt;
+&lt;h3 id="21-简介"&gt;2.1 简介&lt;/h3&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/disc.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;在服务注册阶段，服务端实例将应用级别的注册信息，主要包含从应用名到实例IP的映射注册到注册中心。在服务发现阶段，客户端实例，通过注册中心获取到需要请求的服务实例IP。进入服务自省阶段，服务自省过程为通过应用信息获取接口信息的过程。如上图，包含两种模式：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;remote模式：通过元数据中心（例如 zk ）获取应用到接口元数据的映射&lt;/li&gt;
+&lt;li&gt;local模式：直接通过服务端获取应用到接口元数据的映射（通过 Dubbo 协议针对 Metadata Service 发起 RPC 调用）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;经过服务自省后，客户端正式向对应实例发起调用。这样做最明显的好处是减少了注册中心的数据量，即注册中心只保存了应用级别的数据。&lt;/p&gt;
+&lt;p&gt;用户在使用 Dubbo-go 3.0的应用级服务发现能力时，可以仿照示例，直接在配置文件中配置服务自省模式和元数据中心信息，引入依赖，开启应用级别服务发现。&lt;/p&gt;
+&lt;h3 id="22-应用级服务发现介绍文章"&gt;2.2 应用级服务发现介绍文章&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://baijiahao.baidu.com/s?id=1669266413887039723&amp;amp;wfr=spider&amp;amp;for=pc"&gt;应用级服务发现解析&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="3-mesh-路由规则"&gt;3. Mesh 路由规则&lt;/h2&gt;
+&lt;p&gt;用户可定义路由文件：&lt;/p&gt;
+&lt;p&gt;virtual_service.yaml&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/virtual_service.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;以及 dist_rule.yml&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/3.0_feature/dest_rule.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;框架可根据路由文件针对特定的请求进行流量转发。&lt;/p&gt;
+&lt;h2 id="4-相关文章"&gt;4. 相关文章&lt;/h2&gt;
+&lt;p&gt;阿里云官方介绍文章：&lt;a href="https://developer.aliyun.com/article/770964?utm_content=g_1000175535"&gt;《Dubbo 3.0 - 开启下一代云原生微服务》&lt;/a&gt;&lt;/p&gt;</description></item><item><title>泛化调用</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic/</guid><description>&lt;h2 id="1-dubbo-go-泛化调用-java-server"&gt;1. Dubbo-go 泛化调用 Java Server&lt;/h2&gt;
+&lt;p&gt;使用 Triple 协议 + hessian2 序列化方案&lt;/p&gt;
+&lt;h3 id="11-java-server启动"&gt;1.1 Java-Server启动&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;传输结构定义&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.io.Serializable;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.Date;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;User&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; Serializable {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; String id;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; String name;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; age;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; Date time &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; Date();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;接口定义&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.ArrayList;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.List;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.Map;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;UserProvider&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	User &lt;span style="color:#268bd2"&gt;GetUser1&lt;/span&gt;(String userId);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="12-go-client-泛化调用"&gt;1.2 Go-Client 泛化调用&lt;/h3&gt;
+&lt;p&gt;此处展示以 API 的形式构造泛化接口引用&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 初始化 Reference 配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;refConf &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; config.&lt;span style="color:#268bd2"&gt;NewReferenceConfigBuilder&lt;/span&gt;().
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetInterface&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.UserProvider&amp;#34;&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetRegistryIDs&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zk&amp;#34;&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetProtocol&lt;/span&gt;(tripleConst.TRIPLE).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetGeneric&lt;/span&gt;(&lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetSerialization&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;hessian2&amp;#34;&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;Build&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 构造 Root 配置，引入注册中心模块&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;rootConfig &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; config.&lt;span style="color:#268bd2"&gt;NewRootConfigBuilder&lt;/span&gt;().
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;AddRegistry&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zk&amp;#34;&lt;/span&gt;, config.&lt;span style="color:#268bd2"&gt;NewRegistryConfigWithProtocolDefaultPort&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;)).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;Build&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// Reference 配置初始化，因为需要使用注册中心进行服务发现，需要传入经过配置的 rootConfig&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; refConf.&lt;span style="color:#268bd2"&gt;Init&lt;/span&gt;(rootConfig); err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 泛化调用加载、服务发现&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;refConf.&lt;span style="color:#268bd2"&gt;GenericLoad&lt;/span&gt;(appName)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;time.&lt;span style="color:#268bd2"&gt;Sleep&lt;/span&gt;(time.Second)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 发起泛化调用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;resp, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; refConf.&lt;span style="color:#268bd2"&gt;GetRPCService&lt;/span&gt;().(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;generic.GenericService).&lt;span style="color:#268bd2"&gt;Invoke&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; context.&lt;span style="color:#268bd2"&gt;TODO&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;getUser1&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; []&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;{&lt;span style="color:#2aa198"&gt;&amp;#34;java.lang.String&amp;#34;&lt;/span&gt;},
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; []hessian.Object{&lt;span style="color:#2aa198"&gt;&amp;#34;A003&amp;#34;&lt;/span&gt;},
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;logger.&lt;span style="color:#268bd2"&gt;Infof&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;GetUser1(userId string) res: %+v&amp;#34;&lt;/span&gt;, resp)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;GenericService 的 Invoke 方法包括三个参数：context.Context, []string, []hessian.Object,&lt;/p&gt;</description></item><item><title>泛化调用</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic-2/</guid><description>&lt;h2 id="1-dubbogo-泛化调用-java-server"&gt;1. Dubbogo 泛化调用 Java Server&lt;/h2&gt;
+&lt;p&gt;使用 Triple 协议 + hessian2 序列化方案&lt;/p&gt;
+&lt;p&gt;可参考Dubbogo 3.0 &lt;a href="https://www.yuque.com/docs/share/f4e72670-74ab-45b9-bc0c-4b42249ed953?"&gt;泛化调用文档&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="11-java-server启动"&gt;1.1 Java-Server启动&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;传输结构定义&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.io.Serializable;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.Date;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;User&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; Serializable {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; String id;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; String name;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; age;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; Date time &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; Date();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;接口定义&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.ArrayList;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.List;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; java.util.Map;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//import org.apache.dubbo.rpc.filter.GenericFilter;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;UserProvider&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	User &lt;span style="color:#268bd2"&gt;GetUser1&lt;/span&gt;(String userId);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="12-go-client-泛化调用"&gt;1.2 Go-Client 泛化调用&lt;/h3&gt;
+&lt;p&gt;此处展示以 API 的形式构造泛化接口引用&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 初始化 Reference 配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;refConf &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; config.&lt;span style="color:#268bd2"&gt;NewReferenceConfigBuilder&lt;/span&gt;().
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetInterface&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.UserProvider&amp;#34;&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetRegistryIDs&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zk&amp;#34;&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetProtocol&lt;/span&gt;(tripleConst.TRIPLE).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetGeneric&lt;/span&gt;(&lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;SetSerialization&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;hessian2&amp;#34;&lt;/span&gt;).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;Build&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 构造 Root 配置，引入注册中心模块&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;rootConfig &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; config.&lt;span style="color:#268bd2"&gt;NewRootConfigBuilder&lt;/span&gt;().
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;AddRegistry&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zk&amp;#34;&lt;/span&gt;, config.&lt;span style="color:#268bd2"&gt;NewRegistryConfigWithProtocolDefaultPort&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;)).
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;Build&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// Reference 配置初始化，因为需要使用注册中心进行服务发现，需要传入经过配置的 rootConfig&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; refConf.&lt;span style="color:#268bd2"&gt;Init&lt;/span&gt;(rootConfig); err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 泛化调用加载、服务发现&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;refConf.&lt;span style="color:#268bd2"&gt;GenericLoad&lt;/span&gt;(appName)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;time.&lt;span style="color:#268bd2"&gt;Sleep&lt;/span&gt;(time.Second)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 发起泛化调用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;resp, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; refConf.&lt;span style="color:#268bd2"&gt;GetRPCService&lt;/span&gt;().(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;generic.GenericService).&lt;span style="color:#268bd2"&gt;Invoke&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; context.&lt;span style="color:#268bd2"&gt;TODO&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;getUser1&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; []&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;{&lt;span style="color:#2aa198"&gt;&amp;#34;java.lang.String&amp;#34;&lt;/span&gt;},
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; []hessian.Object{&lt;span style="color:#2aa198"&gt;&amp;#34;A003&amp;#34;&lt;/span&gt;},
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;logger.&lt;span style="color:#268bd2"&gt;Infof&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;GetUser1(userId string) res: %+v&amp;#34;&lt;/span&gt;, resp)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;GenericService 的 Invoke 方法包括三个参数：context.Context, []string, []hessian.Object,&lt;/p&gt;</description></item><item><title>AOP 与可扩展机制</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/</guid><description>&lt;h2 id="1-extension-模块与-init-方法"&gt;1. extension 模块与 init 方法&lt;/h2&gt;
+&lt;h3 id="11-接口与实现"&gt;1.1 接口与实现&lt;/h3&gt;
+&lt;p&gt;golang 中的一个接口往往伴随多个实现类，dubbo-go 提供了针对接口实现类的可插拔可扩展机制。降低模块之间的耦合性，方便开发者引入、自定义组件。&lt;/p&gt;
+&lt;h3 id="12-golang-中的-init-方法"&gt;1.2 golang 中的 init 方法&lt;/h3&gt;
+&lt;p&gt;init 方法作为 golang 中特殊的方法，用户引入一组模块后，会在程序启动时率先执行这些模块内的init 方法，进行加载逻辑，该方法是dubbogo注册扩展组件的重要方式。&lt;/p&gt;
+&lt;h3 id="13-extension-模块"&gt;1.3 extension 模块&lt;/h3&gt;
+&lt;p&gt;在框架源码中，有一个特殊的模块: common/extension ，这一模块负责缓存所有可扩展组件的实现。&lt;/p&gt;
+&lt;p&gt;以负载均衡模块为例：common/extension/loadbalance.go&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; extension
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; (
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/cluster/loadbalance&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;var&lt;/span&gt; loadbalances = &lt;span style="color:#b58900"&gt;make&lt;/span&gt;(&lt;span style="color:#268bd2"&gt;map&lt;/span&gt;[&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;]&lt;span style="color:#268bd2"&gt;func&lt;/span&gt;() loadbalance.LoadBalance)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// SetLoadbalance sets the loadbalance extension with @name&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// For example: random/round_robin/consistent_hash/least_active/...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;SetLoadbalance&lt;/span&gt;(name &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;, fcn &lt;span style="color:#268bd2"&gt;func&lt;/span&gt;() loadbalance.LoadBalance) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	loadbalances[name] = fcn
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// GetLoadbalance finds the loadbalance extension with @name&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;GetLoadbalance&lt;/span&gt;(name &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;) loadbalance.LoadBalance {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;if&lt;/span&gt; loadbalances[name] &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;loadbalance for &amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; name &lt;span style="color:#719e07"&gt;+&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34; is not existing, make sure you have import the package.&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; loadbalances[name]()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;该模块包含Get 方法和Set方法。Get 返回实例化的 LoadBalance 接口，Set 方法用于注册工厂函数，map 用于缓存工厂函数。&lt;/p&gt;</description></item><item><title>Dubbo的应用和接口</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/</guid><description>&lt;h2 id="dubbogo-服务层级"&gt;Dubbogo 服务层级&lt;/h2&gt;
+&lt;p&gt;Dubbogo 服务层级为两个级别：分别是应用级别(App Level)和接口级别(Interface Level)，该服务分层与&lt;strong&gt;框架配置&lt;/strong&gt;结构息息相关。&lt;/p&gt;
+&lt;p&gt;如下图所示，可以看到，应用级别的组件以浅红色标注，接口级别的组件以浅蓝色标注：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png" alt="img"&gt;&lt;/p&gt;
+&lt;h2 id="1-应用级别组件"&gt;1. 应用级别组件&lt;/h2&gt;
+&lt;p&gt;应用级别组件的特点：被当前应用的所有接口级别组件共用。&lt;/p&gt;
+&lt;p&gt;应用级别的主要组件如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;应用信息模块&lt;/p&gt;
+&lt;p&gt;包含应用维度相关信息，包括应用名、版本号、数据上报方式等&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Consumer 模块&lt;/p&gt;
+&lt;p&gt;Consumer 模块负责客户端相关信息，包括一个或多个引用（Reference）结构，以及超时、客户端过滤器（consumer filter）等相关信息。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Provider 模块&lt;/p&gt;
+&lt;p&gt;Provider 模块负责服务端相关信息，包括一个或多个服务（Service）结构、服务端过滤器（provider filter）等相关信息。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;注册中心（Registry）模块&lt;/p&gt;
+&lt;p&gt;注册中心模块负责定义好所要使用的一系列注册中心，例如框架支持的ZK、Nacos、ETCD等中间件。应用级别的注册模块只负责声明，由接口级别的组件进行引用，引用时以用户自定义的注册中心ID（registryID) 作为索引。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;协议（Protocol）模块&lt;/p&gt;
+&lt;p&gt;协议模块只存在于服务端。&lt;/p&gt;
+&lt;p&gt;协议模块关心服务的暴露信息，例如协议名、服务监听IP、端口号等信息。协议模块属于应用级别，只负责声明，由接口级别的组件进行引用，引用时以用户自定义的协议ID（protocolID) 作为索引。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;元数据中心模块&lt;/p&gt;
+&lt;p&gt;元数据中心类似于注册中心模块，负责声明框架需要使用的元数据中心，从而将元数据成功上报。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;配置中心模块&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;路由模块&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;日志模块&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;监控模块&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="2-接口级别组件"&gt;2. 接口级别组件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;服务（Service）模块&lt;/p&gt;
+&lt;p&gt;服务模块被使用于任何暴露的服务，声明接口暴露所需的信息，包括例如接口名、协议、序列化方式等，负责单个服务接口的暴露。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;引用（Reference）模块&lt;/p&gt;
+&lt;p&gt;引用模块被使用于需要调用的远程服务的客户端，其声明了需要请求接口所需的信息，包括例如接口名、协议、序列化方式等、负责特定协议的抽象，参与客户端的生成。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="3-说明"&gt;3. 说明&lt;/h2&gt;
+&lt;p&gt;暴露的服务是接口级别的，一个用户定义的 Provider Struct/一个用户定义的Consumer Struct，对应一个Service/Reference 模块，一个应用可以同时存在Consumer 模块和 Provider 模块，因此可以同时存在多个Service/Reference 模块。&lt;/p&gt;</description></item><item><title>架构</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/sourcecode/architecture/</guid><description>&lt;h3 id="架构说明"&gt;架构说明&lt;/h3&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/more/architecture/architecture.png" alt="architecture"&gt;&lt;/p&gt;
+&lt;h3 id="节点说明"&gt;节点说明&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Registry&lt;/code&gt; : dubbo-go中负责服务注册与发现的注册中心&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Consumer&lt;/code&gt; : 调用远程服务的服务消费方&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Provider&lt;/code&gt; : 暴露服务的服务提供方&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="过程说明"&gt;过程说明&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;0. register&lt;/code&gt; : 当服务提供方在启动的时候，会自动将自己的服务注册到注册中心&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;1. subscribe&lt;/code&gt; : 服务消费方会在启动的时候，向注册中心订阅自己所需要的服务&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;2. notify&lt;/code&gt; : 注册中心返回服务注册的信息给到服务消费方，当订阅的服务发生变更，会推送变更的数据给到消费方&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;3. invoke&lt;/code&gt; : 服务消费者根据从注册中心获得的服务地址，经过负载均衡算法选出一个合适的服务地址发起请求&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

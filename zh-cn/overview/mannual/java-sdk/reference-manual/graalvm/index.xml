@@ -1,113 +1,113 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo 集成 Graalvm参考手册 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/</link><description>Recent content in Dubbo 集成 Graalvm参考手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo AOT -- 如何使用 GraalVM Native Image 实现 Dubbo 应用静态化</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/support-graalvm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/support-graalvm/</guid><description>&lt;p>在 Dubbo 3.3.0 版本中，我们正式发布了 Dubbo AOT 静态化解决方案。本文档将介绍将介绍如何借助 Dubbo AOT 技术将应用接入 GraalVM Native Image，将应用编译为 Native 二进制包的流程以及目前支持的组件。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo 集成 Graalvm参考手册 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/</link><description>Recent content in Dubbo 集成 Graalvm参考手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo AOT -- 如何使用 GraalVM Native Image 实现 Dubbo 应用静态化</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/support-graalvm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/graalvm/support-graalvm/</guid><description>&lt;p&gt;在 Dubbo 3.3.0 版本中，我们正式发布了 Dubbo AOT 静态化解决方案。本文档将介绍将介绍如何借助 Dubbo AOT 技术将应用接入 GraalVM Native Image，将应用编译为 Native 二进制包的流程以及目前支持的组件。&lt;/p&gt;
 
 
-&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">Dubbo GraalVM 适配文档可能更新滞后&lt;/h4>
+&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;Dubbo GraalVM 适配文档可能更新滞后&lt;/h4&gt;
 
- &lt;p>由于 Dubbo AOT 技术发展迅速，本文档内容可能无法总是保持及时更新，请结合以下内容了解最新内容与使用方式：&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry" target="_blank">示例项目源码&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://cn.dubbo.apache.org/zh-cn/blog/2023/06/28/走向-native-化springdubbo-aot-技术示例与原理讲解/" target="_blank">博客文章与演讲&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>关于 GraalVm 的更多信息可以阅读 &lt;a href="https://www.graalvm.org/docs/getting-started/container-images/">https://www.graalvm.org/docs/getting-started/container-images/&lt;/a> 此文档。&lt;/p>
+ &lt;p&gt;由于 Dubbo AOT 技术发展迅速，本文档内容可能无法总是保持及时更新，请结合以下内容了解最新内容与使用方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-native-image-registry" target="_blank"&gt;示例项目源码&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/blog/2023/06/28/走向-native-化springdubbo-aot-技术示例与原理讲解/" target="_blank"&gt;博客文章与演讲&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;关于 GraalVm 的更多信息可以阅读 &lt;a href="https://www.graalvm.org/docs/getting-started/container-images/"&gt;https://www.graalvm.org/docs/getting-started/container-images/&lt;/a&gt; 此文档。&lt;/p&gt;
 
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;ul>
-&lt;li>
-&lt;p>本机映像编译：将应用程序预编译为本机映像，缩短启动时间并减少内存使用。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>语言互操作：GraalVM 能够用多种语言编写代码，在同一应用程序中进行互操作。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>优化：GraalVM 为用 Java、JavaScript 和其他语言编写的应用程序提供优化，提高 Dubbo 应用程序的性能。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Polyglot 调试：GraalVM 能够在同一会话中调试用多种语言编写的代码，对复杂 Dubbo 应用程序中的问题进行故障排除时非常有用。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Java 运行时：可以在 GraalVM 上运行，提供更快、更高效的 Java 运行时环境。&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>开发微服务：可以与 GraalVM 结合，创建高性能、低资源利用率的微服务。&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>在编译我们的dubbo项目之前，需要确保我们正基于graalVm的环境。&lt;/p>
-&lt;h3 id="第一步安装graalvm">第一步：安装GraalVM&lt;/h3>
-&lt;ol>
-&lt;li>在Graalvm官网根据自己的系统选取对应Graalvm版本：https://www.graalvm.org/downloads/&lt;/li>
-&lt;li>根据官方文档安装native-image：https://www.graalvm.org/latest/reference-manual/native-image/#install-native-image&lt;/li>
-&lt;/ol>
-&lt;h3 id="第二步配置profiles">第二步：配置profiles&lt;/h3>
-&lt;p>其中包括maven-compiler-plugin、spring-boot-maven-plugin、native-maven-plugin、dubbo-maven-plugin，修改dubbo-maven-plugin中的mainClass为所需的启动类全路径。（其中API使用方式无需添加spring-boot-maven-plugin依赖。）&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;profiles&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;profile&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>native&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;build&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;plugins&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>maven-compiler-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;release&amp;gt;&lt;/span>17&lt;span style="color:#268bd2">&amp;lt;/release&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;fork&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/fork&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;verbose&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/verbose&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.springframework.boot&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>spring-boot-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>process-aot&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>process-aot&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.graalvm.buildtools&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>native-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>0.9.25&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;classesDirectory&amp;gt;&lt;/span>${project.build.outputDirectory}&lt;span style="color:#268bd2">&amp;lt;/classesDirectory&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;metadataRepository&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;enabled&amp;gt;&lt;/span>true&lt;span style="color:#268bd2">&amp;lt;/enabled&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/metadataRepository&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;requiredVersion&amp;gt;&lt;/span>22.3&lt;span style="color:#268bd2">&amp;lt;/requiredVersion&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;id&amp;gt;&lt;/span>add-reachability-metadata&lt;span style="color:#268bd2">&amp;lt;/id&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>add-reachability-metadata&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-maven-plugin&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>${dubbo.version}&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;mainClass&amp;gt;&lt;/span>com.example.nativedemo.NativeDemoApplication&lt;span style="color:#268bd2">&amp;lt;/mainClass&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;phase&amp;gt;&lt;/span>process-sources&lt;span style="color:#268bd2">&amp;lt;/phase&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;goal&amp;gt;&lt;/span>dubbo-process-aot&lt;span style="color:#268bd2">&amp;lt;/goal&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/goals&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/execution&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/executions&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/plugin&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/plugins&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/build&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/profile&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;/profiles&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="第三步在pom依赖中添加native相关的依赖">第三步：在Pom依赖中添加native相关的依赖：&lt;/h3>
-&lt;p>&lt;strong>其中API使用方式无需添加dubbo-config-spring6依赖&lt;/strong>。&lt;/p></description></item></channel></rss>
+&lt;h2 id="使用场景"&gt;使用场景&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;本机映像编译：将应用程序预编译为本机映像，缩短启动时间并减少内存使用。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;语言互操作：GraalVM 能够用多种语言编写代码，在同一应用程序中进行互操作。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;优化：GraalVM 为用 Java、JavaScript 和其他语言编写的应用程序提供优化，提高 Dubbo 应用程序的性能。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Polyglot 调试：GraalVM 能够在同一会话中调试用多种语言编写的代码，对复杂 Dubbo 应用程序中的问题进行故障排除时非常有用。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Java 运行时：可以在 GraalVM 上运行，提供更快、更高效的 Java 运行时环境。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;开发微服务：可以与 GraalVM 结合，创建高性能、低资源利用率的微服务。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
+&lt;p&gt;在编译我们的dubbo项目之前，需要确保我们正基于graalVm的环境。&lt;/p&gt;
+&lt;h3 id="第一步安装graalvm"&gt;第一步：安装GraalVM&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;在Graalvm官网根据自己的系统选取对应Graalvm版本：https://www.graalvm.org/downloads/&lt;/li&gt;
+&lt;li&gt;根据官方文档安装native-image：https://www.graalvm.org/latest/reference-manual/native-image/#install-native-image&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="第二步配置profiles"&gt;第二步：配置profiles&lt;/h3&gt;
+&lt;p&gt;其中包括maven-compiler-plugin、spring-boot-maven-plugin、native-maven-plugin、dubbo-maven-plugin，修改dubbo-maven-plugin中的mainClass为所需的启动类全路径。（其中API使用方式无需添加spring-boot-maven-plugin依赖。）&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;profiles&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;profile&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;id&amp;gt;&lt;/span&gt;native&lt;span style="color:#268bd2"&gt;&amp;lt;/id&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;build&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;plugins&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;maven-compiler-plugin&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;release&amp;gt;&lt;/span&gt;17&lt;span style="color:#268bd2"&gt;&amp;lt;/release&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;fork&amp;gt;&lt;/span&gt;true&lt;span style="color:#268bd2"&gt;&amp;lt;/fork&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;verbose&amp;gt;&lt;/span&gt;true&lt;span style="color:#268bd2"&gt;&amp;lt;/verbose&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.springframework.boot&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;spring-boot-maven-plugin&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;id&amp;gt;&lt;/span&gt;process-aot&lt;span style="color:#268bd2"&gt;&amp;lt;/id&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goal&amp;gt;&lt;/span&gt;process-aot&lt;span style="color:#268bd2"&gt;&amp;lt;/goal&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.graalvm.buildtools&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;native-maven-plugin&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.9.25&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;classesDirectory&amp;gt;&lt;/span&gt;${project.build.outputDirectory}&lt;span style="color:#268bd2"&gt;&amp;lt;/classesDirectory&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;metadataRepository&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;enabled&amp;gt;&lt;/span&gt;true&lt;span style="color:#268bd2"&gt;&amp;lt;/enabled&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/metadataRepository&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;requiredVersion&amp;gt;&lt;/span&gt;22.3&lt;span style="color:#268bd2"&gt;&amp;lt;/requiredVersion&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;id&amp;gt;&lt;/span&gt;add-reachability-metadata&lt;span style="color:#268bd2"&gt;&amp;lt;/id&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goal&amp;gt;&lt;/span&gt;add-reachability-metadata&lt;span style="color:#268bd2"&gt;&amp;lt;/goal&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.dubbo&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo-maven-plugin&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;${dubbo.version}&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;mainClass&amp;gt;&lt;/span&gt;com.example.nativedemo.NativeDemoApplication&lt;span style="color:#268bd2"&gt;&amp;lt;/mainClass&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;phase&amp;gt;&lt;/span&gt;process-sources&lt;span style="color:#268bd2"&gt;&amp;lt;/phase&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;goal&amp;gt;&lt;/span&gt;dubbo-process-aot&lt;span style="color:#268bd2"&gt;&amp;lt;/goal&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/goals&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/execution&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/executions&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/plugin&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/plugins&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/build&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/profile&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;/profiles&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="第三步在pom依赖中添加native相关的依赖"&gt;第三步：在Pom依赖中添加native相关的依赖：&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;其中API使用方式无需添加dubbo-config-spring6依赖&lt;/strong&gt;。&lt;/p&gt;</description></item></channel></rss>

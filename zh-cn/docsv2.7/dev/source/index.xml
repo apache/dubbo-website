@@ -1,263 +1,263 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo 源代码分析 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/</link><description>Recent content in Dubbo 源代码分析 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo SPI</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</guid><description>&lt;h2 id="1简介">1.简介&lt;/h2>
-&lt;p>SPI 全称为 Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件，加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过 SPI 机制为我们的程序提供拓展功能。SPI 机制在第三方框架中也有所应用，比如 Dubbo 就是通过 SPI 机制加载所有的组件。不过，Dubbo 并未使用 Java 原生的 SPI 机制，而是对其进行了增强，使其能够更好的满足需求。在 Dubbo 中，SPI 是一个非常重要的模块。基于 SPI，我们可以很容易的对 Dubbo 进行拓展。如果大家想要学习 Dubbo 的源码，SPI 机制务必弄懂。接下来，我们先来了解一下 Java SPI 与 Dubbo SPI 的用法，然后再来分析 Dubbo SPI 的源码。&lt;/p>
-&lt;p>需要特别说明的是，本篇文章以及本系列其他文章所分析的源码版本均为 &lt;strong>dubbo-2.6.4&lt;/strong>。因此大家在阅读文章的过程中，需注意将代码版本切换到 dubbo-2.6.4 tag 上。&lt;/p>
-&lt;h2 id="2spi-示例">2.SPI 示例&lt;/h2>
-&lt;h3 id="21--java-spi-示例">2.1 Java SPI 示例&lt;/h3>
-&lt;p>前面简单介绍了 SPI 机制的原理，本节通过一个示例演示 Java SPI 的使用方法。首先，我们定义一个接口，名称为 Robot。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">Robot&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHello&lt;/span>();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来定义两个实现类，分别为 OptimusPrime 和 Bumblebee。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">OptimusPrime&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Robot {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHello&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello, I am Optimus Prime.&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">Bumblebee&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> Robot {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">sayHello&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.out.println(&lt;span style="color:#2aa198">&amp;#34;Hello, I am Bumblebee.&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来 META-INF/services 文件夹下创建一个文件，名称为 Robot 的全限定名 org.apache.spi.Robot。文件内容为实现类的全限定的类名，如下：&lt;/p></description></item><item><title>服务路由</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/router/</guid><description>&lt;h2 id="1-简介">1. 简介&lt;/h2>
-&lt;p>上一篇文章分析了集群容错的第一部分 — 服务目录 Directory。服务目录在刷新 Invoker 列表的过程中，会通过 Router 进行服务路由，筛选出符合路由规则的服务提供者。在详细分析服务路由的源码之前，先来介绍一下服务路由是什么。服务路由包含一条路由规则，路由规则决定了服务消费者的调用目标，即规定了服务消费者可调用哪些服务提供者。Dubbo 目前提供了三种服务路由实现，分别为条件路由 ConditionRouter、脚本路由 ScriptRouter 和标签路由 TagRouter。其中条件路由是我们最常使用的，标签路由是一个新的实现，暂时还未发布，该实现预计会在 2.7.x 版本中发布。本篇文章将分析条件路由相关源码，脚本路由和标签路由这里就不分析了。&lt;/p>
-&lt;h2 id="2-源码分析">2. 源码分析&lt;/h2>
-&lt;p>条件路由规则由两个条件组成，分别用于对服务消费者和提供者进行匹配。比如有这样一条规则：&lt;/p>
-&lt;p>&lt;code>host = 10.20.153.10 =&amp;gt; host = 10.20.153.11&lt;/code>&lt;/p>
-&lt;p>该条规则表示 IP 为 10.20.153.10 的服务消费者&lt;strong>只可&lt;/strong>调用 IP 为 10.20.153.11 机器上的服务，不可调用其他机器上的服务。条件路由规则的格式如下：&lt;/p>
-&lt;p>&lt;code>[服务消费者匹配条件] =&amp;gt; [服务提供者匹配条件]&lt;/code>&lt;/p>
-&lt;p>如果服务消费者匹配条件为空，表示不对服务消费者进行限制。如果服务提供者匹配条件为空，表示对某些服务消费者禁用服务。官方文档中对条件路由进行了比较详细的介绍，大家可以参考下，这里就不过多说明了。&lt;/p>
-&lt;p>条件路由实现类 ConditionRouter 在进行工作前，需要先对用户配置的路由规则进行解析，得到一系列的条件。然后再根据这些条件对服务进行路由。本章将分两节进行说明，2.1节介绍表达式解析过程。2.2 节介绍服务路由的过程。下面，我们先从表达式解析过程看起。&lt;/p>
-&lt;h3 id="21-表达式解析">2.1 表达式解析&lt;/h3>
-&lt;p>条件路由规则是一条字符串，对于 Dubbo 来说，它并不能直接理解字符串的意思，需要将其解析成内部格式才行。条件表达式的解析过程始于 ConditionRouter 的构造方法，下面一起看一下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">ConditionRouter&lt;/span>(URL url) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.url &lt;span style="color:#719e07">=&lt;/span> url;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 获取 priority 和 force 配置&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.priority &lt;span style="color:#719e07">=&lt;/span> url.getParameter(Constants.PRIORITY_KEY, 0);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.force &lt;span style="color:#719e07">=&lt;/span> url.getParameter(Constants.FORCE_KEY, &lt;span style="color:#cb4b16">false&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 获取路由规则&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String rule &lt;span style="color:#719e07">=&lt;/span> url.getParameterAndDecoded(Constants.RULE_KEY);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (rule &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">||&lt;/span> rule.trim().length() &lt;span style="color:#719e07">==&lt;/span> 0) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException(&lt;span style="color:#2aa198">&amp;#34;Illegal route rule!&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> rule &lt;span style="color:#719e07">=&lt;/span> rule.replace(&lt;span style="color:#2aa198">&amp;#34;consumer.&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>).replace(&lt;span style="color:#2aa198">&amp;#34;provider.&amp;#34;&lt;/span>, &lt;span style="color:#2aa198">&amp;#34;&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 定位 =&amp;gt; 分隔符&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">int&lt;/span> i &lt;span style="color:#719e07">=&lt;/span> rule.indexOf(&lt;span style="color:#2aa198">&amp;#34;=&amp;gt;&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 分别获取服务消费者和提供者匹配规则&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String whenRule &lt;span style="color:#719e07">=&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> 0 &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> : rule.substring(0, i).trim();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String thenRule &lt;span style="color:#719e07">=&lt;/span> i &lt;span style="color:#719e07">&amp;lt;&lt;/span> 0 &lt;span style="color:#719e07">?&lt;/span> rule.trim() : rule.substring(i &lt;span style="color:#719e07">+&lt;/span> 2).trim();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 解析服务消费者匹配规则&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, MatchPair&lt;span style="color:#719e07">&amp;gt;&lt;/span> when &lt;span style="color:#719e07">=&lt;/span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringUtils.isBlank(whenRule) &lt;span style="color:#719e07">||&lt;/span> &lt;span style="color:#2aa198">&amp;#34;true&amp;#34;&lt;/span>.equals(whenRule) 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#719e07">new&lt;/span> HashMap&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, MatchPair&lt;span style="color:#719e07">&amp;gt;&lt;/span>() : parseRule(whenRule);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 解析服务提供者匹配规则&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Map&lt;span style="color:#719e07">&amp;lt;&lt;/span>String, MatchPair&lt;span style="color:#719e07">&amp;gt;&lt;/span> then &lt;span style="color:#719e07">=&lt;/span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> StringUtils.isBlank(thenRule) &lt;span style="color:#719e07">||&lt;/span> &lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span>.equals(thenRule) 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">?&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> : parseRule(thenRule);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 将解析出的匹配规则分别赋值给 whenCondition 和 thenCondition 成员变量&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.whenCondition &lt;span style="color:#719e07">=&lt;/span> when;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.thenCondition &lt;span style="color:#719e07">=&lt;/span> then;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (ParseException e) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException(e.getMessage(), e);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上，ConditionRouter 构造方法先是对路由规则做预处理，然后调用 parseRule 方法分别对服务提供者和消费者规则进行解析，最后将解析结果赋值给 whenCondition 和 thenCondition 成员变量。ConditionRouter 构造方法不是很复杂，这里就不多说了。下面我们把重点放在 parseRule 方法上，在详细介绍这个方法之前，我们先来看一个内部类。&lt;/p></description></item><item><title>SPI 自适应拓展</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/adaptive-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/adaptive-extension/</guid><description>&lt;h2 id="1原理">1.原理&lt;/h2>
-&lt;p>在 Dubbo 中，很多拓展都是通过 SPI 机制进行加载的，比如 Protocol、Cluster、LoadBalance 等。有时，有些拓展并不想在框架启动阶段被加载，而是希望在拓展方法被调用时，根据运行时参数进行加载。这听起来有些矛盾。拓展未被加载，那么拓展方法就无法被调用（静态方法除外）。拓展方法未被调用，拓展就无法被加载。对于这个矛盾的问题，Dubbo 通过自适应拓展机制很好的解决了。自适应拓展机制的实现逻辑比较复杂，首先 Dubbo 会为拓展接口生成具有代理功能的代码。然后通过 javassist 或 jdk 编译这段代码，得到 Class 类。最后再通过反射创建代理类，整个过程比较复杂。为了让大家对自适应拓展有一个感性的认识，下面我们通过一个示例进行演示。这是一个与汽车相关的例子，我们有一个车轮制造厂接口 WheelMaker：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">WheelMaker&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Wheel &lt;span style="color:#268bd2">makeWheel&lt;/span>(URL url);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>WheelMaker 接口的自适应实现类如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">AdaptiveWheelMaker&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> WheelMaker {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Wheel &lt;span style="color:#268bd2">makeWheel&lt;/span>(URL url) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (url &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException(&lt;span style="color:#2aa198">&amp;#34;url == null&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 	&lt;span style="color:#586e75">// 1.从 URL 中获取 WheelMaker 名称&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String wheelMakerName &lt;span style="color:#719e07">=&lt;/span> url.getParameter(&lt;span style="color:#2aa198">&amp;#34;Wheel.maker&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (wheelMakerName &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalArgumentException(&lt;span style="color:#2aa198">&amp;#34;wheelMakerName == null&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 2.通过 SPI 加载具体的 WheelMaker&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> WheelMaker wheelMaker &lt;span style="color:#719e07">=&lt;/span> ExtensionLoader
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .getExtensionLoader(WheelMaker.class).getExtension(wheelMakerName);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 3.调用目标方法&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> wheelMaker.makeWheel(url);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>AdaptiveWheelMaker 是一个代理类，与传统的代理逻辑不同，AdaptiveWheelMaker 所代理的对象是在 makeWheel 方法中通过 SPI 加载得到的。makeWheel 方法主要做了三件事情：&lt;/p></description></item><item><title>服务导出</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/export-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/export-service/</guid><description>&lt;h2 id="1简介">1.简介&lt;/h2>
-&lt;p>本篇文章，我们来研究一下 Dubbo 导出服务的过程。Dubbo 服务导出过程始于 Spring 容器发布刷新事件，Dubbo 在接收到事件后，会立即执行服务导出逻辑。整个逻辑大致可分为三个部分，第一部分是前置工作，主要用于检查参数，组装 URL。第二部分是导出服务，包含导出服务到本地 (JVM)，和导出服务到远程两个过程。第三部分是向注册中心注册服务，用于服务发现。本篇文章将会对这三个部分代码进行详细的分析。&lt;/p>
-&lt;h2 id="2源码分析">2.源码分析&lt;/h2>
-&lt;p>服务导出的入口方法是 ServiceBean 的 onApplicationEvent。onApplicationEvent 是一个事件响应方法，该方法会在收到 Spring 上下文刷新事件后执行服务导出操作。方法代码如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#dc322f">void&lt;/span> &lt;span style="color:#268bd2">onApplicationEvent&lt;/span>(ContextRefreshedEvent event) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 是否有延迟导出 &amp;amp;&amp;amp; 是否已导出 &amp;amp;&amp;amp; 是不是已被取消导出&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (isDelay() &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>isExported() &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>isUnexported()) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 导出服务&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> export();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个方法首先会根据条件决定是否导出服务，比如有些服务设置了延时导出，那么此时就不应该在此处导出。还有一些服务已经被导出了，或者当前服务被取消导出了，此时也不能再次导出相关服务。注意这里的 isDelay 方法，这个方法字面意思是“是否延迟导出服务”，返回 true 表示延迟导出，false 表示不延迟导出。但是该方法真实意思却并非如此，当方法返回 true 时，表示无需延迟导出。返回 false 时，表示需要延迟导出。与字面意思恰恰相反，这个需要大家注意一下。下面我们来看一下这个方法的逻辑。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// -☆- ServiceBean&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> &lt;span style="color:#dc322f">boolean&lt;/span> &lt;span style="color:#268bd2">isDelay&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 获取 delay&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Integer delay &lt;span style="color:#719e07">=&lt;/span> getDelay();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ProviderConfig provider &lt;span style="color:#719e07">=&lt;/span> getProvider();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (delay &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> provider &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 如果前面获取的 delay 为空，这里继续获取&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> delay &lt;span style="color:#719e07">=&lt;/span> provider.getDelay();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 判断 delay 是否为空，或者等于 -1&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> supportedApplicationListener &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> (delay &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">||&lt;/span> delay &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#719e07">-&lt;/span>1);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>暂时忽略 supportedApplicationListener 这个条件，当 delay 为空，或者等于-1时，该方法返回 true，而不是 false。这个方法的返回值让人有点困惑。该方法目前已被重构，详细请参考 &lt;a href="https://github.com/apache/dubbo/pull/2686">dubbo #2686&lt;/a>。&lt;/p></description></item><item><title>服务引用</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/refer-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/refer-service/</guid><description>&lt;h2 id="1-简介">1. 简介&lt;/h2>
-&lt;p>上一篇文章详细分析了服务导出的过程，本篇文章我们趁热打铁，继续分析服务引用过程。在 Dubbo 中，我们可以通过两种方式引用远程服务。第一种是使用服务直连的方式引用服务，第二种方式是基于注册中心进行引用。服务直连的方式仅适合在调试或测试服务的场景下使用，不适合在线上环境使用。因此，本文我将重点分析通过注册中心引用服务的过程。从注册中心中获取服务配置只是服务引用过程中的一环，除此之外，服务消费者还需要经历 Invoker 创建、代理类创建等步骤。这些步骤，将在后续章节中一一进行分析。&lt;/p>
-&lt;h2 id="2服务引用原理">2.服务引用原理&lt;/h2>
-&lt;p>Dubbo 服务引用的时机有两个，第一个是在 Spring 容器调用 ReferenceBean 的 afterPropertiesSet 方法时引用服务，第二个是在 ReferenceBean 对应的服务被注入到其他类中时引用。这两个引用服务的时机区别在于，第一个是饿汉式的，第二个是懒汉式的。默认情况下，Dubbo 使用懒汉式引用服务。如果需要使用饿汉式，可通过配置 &amp;lt;dubbo:reference&amp;gt; 的 init 属性开启。下面我们按照 Dubbo 默认配置进行分析，整个分析过程从 ReferenceBean 的 getObject 方法开始。当我们的服务被注入到其他类中时，Spring 会第一时间调用 getObject 方法，并由该方法执行服务引用逻辑。按照惯例，在进行具体工作之前，需先进行配置检查与收集工作。接着根据收集到的信息决定服务用的方式，有三种，第一种是引用本地 (JVM) 服务，第二是通过直连方式引用远程服务，第三是通过注册中心引用远程服务。不管是哪种引用方式，最后都会得到一个 Invoker 实例。如果有多个注册中心，多个服务提供者，这个时候会得到一组 Invoker 实例，此时需要通过集群管理类 Cluster 将多个 Invoker 合并成一个实例。合并后的 Invoker 实例已经具备调用本地或远程服务的能力了，但并不能将此实例暴露给用户使用，这会对用户业务代码造成侵入。此时框架还需要通过代理工厂类 (ProxyFactory) 为服务接口生成代理类，并让代理类去调用 Invoker 逻辑。避免了 Dubbo 框架代码对业务代码的侵入，同时也让框架更容易使用。&lt;/p>
-&lt;p>以上就是服务引用的大致原理，下面我们深入到代码中，详细分析服务引用细节。&lt;/p>
-&lt;h2 id="3源码分析">3.源码分析&lt;/h2>
-&lt;p>服务引用的入口方法为 ReferenceBean 的 getObject 方法，该方法定义在 Spring 的 FactoryBean 接口中，ReferenceBean 实现了这个方法。实现代码如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">getObject&lt;/span>() &lt;span style="color:#268bd2">throws&lt;/span> Exception {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> get();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">synchronized&lt;/span> T &lt;span style="color:#268bd2">get&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (destroyed) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> IllegalStateException(&lt;span style="color:#2aa198">&amp;#34;Already destroyed!&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 检测 ref 是否为空，为空则通过 init 方法创建&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (ref &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// init 方法主要用于处理配置，以及调用 createProxy 生成代理类&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> init();
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> ref;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>以上两个方法的代码比较简短，并不难理解。这里需要特别说明一下，如果你对 2.6.4 及以下版本的 getObject 方法进行调试时，会碰到比较奇怪的的问题。这里假设你使用 IDEA，且保持了 IDEA 的默认配置。当你面调试到 get 方法的&lt;code>if (ref == null)&lt;/code>时，你会发现 ref 不为空，导致你无法进入到 init 方法中继续调试。导致这个现象的原因是 Dubbo 框架本身有一些小问题。该问题已经在 pull request &lt;a href="https://github.com/apache/dubbo/pull/2754">#2754&lt;/a> 修复了此问题，并跟随 2.6.5 版本发布了。如果你正在学习 2.6.4 及以下版本，可通过修改 IDEA 配置规避这个问题。首先 IDEA 配置弹窗中搜索 toString，然后取消&lt;code>Enable 'toString' object view&lt;/code>勾选。具体如下：&lt;/p></description></item><item><title>服务调用过程</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/service-invoking-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/service-invoking-process/</guid><description>&lt;h2 id="1-简介">1. 简介&lt;/h2>
-&lt;p>在前面的文章中，我们分析了 Dubbo SPI、服务导出与引入、以及集群容错方面的代码。经过前文的铺垫，本篇文章我们终于可以分析服务调用过程了。Dubbo 服务调用过程比较复杂，包含众多步骤，比如发送请求、编解码、服务降级、过滤器链处理、序列化、线程派发以及响应请求等步骤。限于篇幅原因，本篇文章无法对所有的步骤一一进行分析。本篇文章将会重点分析请求的发送与接收、编解码、线程派发以及响应的发送与接收等过程，至于服务降级、过滤器链和序列化大家自行进行分析，也可以将其当成一个黑盒，暂时忽略也没关系。介绍完本篇文章要分析的内容，接下来我们进入正题吧。&lt;/p>
-&lt;h2 id="2-源码分析">2. 源码分析&lt;/h2>
-&lt;p>在进行源码分析之前，我们先来通过一张图了解 Dubbo 服务调用过程。&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/dev/send-request-process.jpg">&lt;/p>
-&lt;p>首先服务消费者通过代理对象 Proxy 发起远程调用，接着通过网络客户端 Client 将编码后的请求发送给服务提供方的网络层上，也就是 Server。Server 在收到请求后，首先要做的事情是对数据包进行解码。然后将解码后的请求发送至分发器 Dispatcher，再由分发器将请求派发到指定的线程池上，最后由线程池调用具体的服务。这就是一个远程调用请求的发送与接收过程。至于响应的发送与接收过程，这张图中没有表现出来。对于这两个过程，我们也会进行详细分析。&lt;/p>
-&lt;h3 id="21-服务调用方式">2.1 服务调用方式&lt;/h3>
-&lt;p>Dubbo 支持同步和异步两种调用方式，其中异步调用还可细分为“有返回值”的异步调用和“无返回值”的异步调用。所谓“无返回值”异步调用是指服务消费方只管调用，但不关心调用结果，此时 Dubbo 会直接返回一个空的 RpcResult。若要使用异步特性，需要服务消费方手动进行配置。默认情况下，Dubbo 使用同步调用方式。&lt;/p>
-&lt;p>本节以及其他章节将会使用 Dubbo 官方提供的 Demo 分析整个调用过程，下面我们从 DemoService 接口的代理类开始进行分析。Dubbo 默认使用 Javassist 框架为服务接口生成动态代理类，因此我们需要先将代理类进行反编译才能看到源码。这里使用阿里开源 Java 应用诊断工具 &lt;a href="https://github.com/alibaba/arthas">Arthas&lt;/a> 反编译代理类，结果如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">/**
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Arthas 反编译步骤：
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 1. 启动 Arthas
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * java -jar arthas-boot.jar
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 2. 输入编号选择进程
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * Arthas 启动后，会打印 Java 应用进程列表，如下：
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * [1]: 11232 org.jetbrains.jps.cmdline.Launcher
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * [2]: 22370 org.jetbrains.jps.cmdline.Launcher
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * [3]: 22371 com.alibaba.dubbo.demo.consumer.Consumer
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * [4]: 22362 com.alibaba.dubbo.demo.provider.Provider
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * [5]: 2074 org.apache.zookeeper.server.quorum.QuorumPeerMain
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 这里输入编号 3，让 Arthas 关联到启动类为 com.....Consumer 的 Java 进程上
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 3. 由于 Demo 项目中只有一个服务接口，因此此接口的代理类类名为 proxy0，此时使用 sc 命令搜索这个类名。
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * $ sc *.proxy0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * com.alibaba.dubbo.common.bytecode.proxy0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 4. 使用 jad 命令反编译 com.alibaba.dubbo.common.bytecode.proxy0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * $ jad com.alibaba.dubbo.common.bytecode.proxy0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> *
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * 更多使用方法请参考 Arthas 官方文档：
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> * https://arthas.aliyun.com/doc/quick-start.html
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75"> */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">class&lt;/span> &lt;span style="color:#268bd2">proxy0&lt;/span> &lt;span style="color:#268bd2">implements&lt;/span> ClassGenerator.DC, EchoService, DemoService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 方法数组&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">static&lt;/span> Method&lt;span style="color:#719e07">[]&lt;/span> methods;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">private&lt;/span> InvocationHandler handler;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">proxy0&lt;/span>(InvocationHandler invocationHandler) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">this&lt;/span>.handler &lt;span style="color:#719e07">=&lt;/span> invocationHandler;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">proxy0&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> String &lt;span style="color:#268bd2">sayHello&lt;/span>(String string) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 将参数存储到 Object 数组中&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object&lt;span style="color:#719e07">[]&lt;/span> arrobject &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{string};
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 调用 InvocationHandler 实现类的 invoke 方法得到调用结果&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object object &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.handler.invoke(&lt;span style="color:#719e07">this&lt;/span>, methods&lt;span style="color:#719e07">[&lt;/span>0&lt;span style="color:#719e07">]&lt;/span>, arrobject);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 返回调用结果&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> (String)object;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">/** 回声测试方法 */&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">public&lt;/span> Object &lt;span style="color:#268bd2">$echo&lt;/span>(Object object) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object&lt;span style="color:#719e07">[]&lt;/span> arrobject &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">new&lt;/span> Object&lt;span style="color:#719e07">[]&lt;/span>{object};
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Object object2 &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.handler.invoke(&lt;span style="color:#719e07">this&lt;/span>, methods&lt;span style="color:#719e07">[&lt;/span>1&lt;span style="color:#719e07">]&lt;/span>, arrobject);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> object2;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如上，代理类的逻辑比较简单。首先将运行时参数存储到数组中，然后调用 InvocationHandler 接口实现类的 invoke 方法，得到调用结果，最后将结果转型并返回给调用方。关于代理类的逻辑就说这么多，继续向下分析。&lt;/p></description></item><item><title>服务目录</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/directory/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/directory/</guid><description>&lt;h2 id="1-简介">1. 简介&lt;/h2>
-&lt;p>本篇文章，将开始分析 Dubbo 集群容错方面的源码。集群容错源码包含四个部分，分别是服务目录 Directory、服务路由 Router、集群 Cluster 和负载均衡 LoadBalance。这几个部分的源码逻辑相对比较独立，我们将会分四篇文章进行分析。本篇文章作为集群容错的开篇文章，将和大家一起分析服务目录相关的源码。在进行深入分析之前，我们先来了解一下服务目录是什么。服务目录中存储了一些和服务提供者有关的信息，通过服务目录，服务消费者可获取到服务提供者的信息，比如 ip、端口、服务协议等。通过这些信息，服务消费者就可通过 Netty 等客户端进行远程调用。在一个服务集群中，服务提供者数量并不是一成不变的，如果集群中新增了一台机器，相应地在服务目录中就要新增一条服务提供者记录。或者，如果服务提供者的配置修改了，服务目录中的记录也要做相应的更新。如果这样说，服务目录和注册中心的功能不就雷同了吗？确实如此，这里这么说是为了方便大家理解。实际上服务目录在获取注册中心的服务配置信息后，会为每条配置信息生成一个 Invoker 对象，并把这个 Invoker 对象存储起来，这个 Invoker 才是服务目录最终持有的对象。Invoker 有什么用呢？看名字就知道了，这是一个具有远程调用功能的对象。讲到这大家应该知道了什么是服务目录了，它可以看做是 Invoker 集合，且这个集合中的元素会随注册中心的变化而进行动态调整。&lt;/p>
-&lt;p>关于服务目录这里就先介绍这些，大家先有个大致印象。接下来我们通过继承体系图来了解一下服务目录的家族成员都有哪些。&lt;/p>
-&lt;h2 id="2-继承体系">2. 继承体系&lt;/h2>
-&lt;p>服务目录目前内置的实现有两个，分别为 StaticDirectory 和 RegistryDirectory，它们均是 AbstractDirectory 的子类。AbstractDirectory 实现了 Directory 接口，这个接口包含了一个重要的方法定义，即 list(Invocation)，用于列举 Invoker。下面我们来看一下他们的继承体系图。&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/dev/directory-inherit-hierarchy.png">&lt;/p>
-&lt;p>如上，Directory 继承自 Node 接口，Node 这个接口继承者比较多，像 Registry、Monitor、Invoker 等均继承了这个接口。这个接口包含了一个获取配置信息的方法 getUrl，实现该接口的类可以向外提供配置信息。另外，大家注意看 RegistryDirectory 实现了 NotifyListener 接口，当注册中心节点信息发生变化后，RegistryDirectory 可以通过此接口方法得到变更信息，并根据变更信息动态调整内部 Invoker 列表。&lt;/p>
-&lt;h2 id="3-源码分析">3. 源码分析&lt;/h2>
-&lt;p>本章将分析 AbstractDirectory 和它两个子类的源码。AbstractDirectory 封装了 Invoker 列举流程，具体的列举逻辑则由子类实现，这是典型的模板模式。所以，接下来我们先来看一下 AbstractDirectory 的源码。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">list&lt;/span>(Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (destroyed) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">throw&lt;/span> &lt;span style="color:#719e07">new&lt;/span> RpcException(&lt;span style="color:#2aa198">&amp;#34;Directory already destroyed...&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 调用 doList 方法列举 Invoker，doList 是模板方法，由子类实现&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers &lt;span style="color:#719e07">=&lt;/span> doList(invocation);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 获取路由 Router 列表&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Router&lt;span style="color:#719e07">&amp;gt;&lt;/span> localRouters &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#719e07">this&lt;/span>.routers;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (localRouters &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#719e07">!&lt;/span>localRouters.isEmpty()) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">for&lt;/span> (Router router : localRouters) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">try&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 获取 runtime 参数，并根据参数决定是否进行路由&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (router.getUrl() &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">||&lt;/span> router.getUrl().getParameter(Constants.RUNTIME_KEY, &lt;span style="color:#cb4b16">false&lt;/span>)) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 进行服务路由&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> invokers &lt;span style="color:#719e07">=&lt;/span> router.route(invokers, getConsumerUrl(), invocation);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#719e07">catch&lt;/span> (Throwable t) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> logger.error(&lt;span style="color:#2aa198">&amp;#34;Failed to execute router: ...&amp;#34;&lt;/span>);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invokers;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 模板方法，由子类实现&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#268bd2">abstract&lt;/span> List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#268bd2">doList&lt;/span>(Invocation invocation) &lt;span style="color:#268bd2">throws&lt;/span> RpcException;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面就是 AbstractDirectory 的 list 方法源码，这个方法封装了 Invoker 的列举过程。如下：&lt;/p></description></item><item><title>集群</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/cluster/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/cluster/</guid><description>&lt;h2 id="1简介">1.简介&lt;/h2>
-&lt;p>为了避免单点故障，现在的应用通常至少会部署在两台服务器上。对于一些负载比较高的服务，会部署更多的服务器。这样，在同一环境下的服务提供者数量会大于1。对于服务消费者来说，同一环境下出现了多个服务提供者。这时会出现一个问题，服务消费者需要决定选择哪个服务提供者进行调用。另外服务调用失败时的处理措施也是需要考虑的，是重试呢，还是抛出异常，亦或是只打印异常等。为了处理这些问题，Dubbo 定义了集群接口 Cluster 以及 Cluster Invoker。集群 Cluster 用途是将多个服务提供者合并为一个 Cluster Invoker，并将这个 Invoker 暴露给服务消费者。这样一来，服务消费者只需通过这个 Invoker 进行远程调用即可，至于具体调用哪个服务提供者，以及调用失败后如何处理等问题，现在都交给集群模块去处理。集群模块是服务提供者和服务消费者的中间层，为服务消费者屏蔽了服务提供者的情况，这样服务消费者就可以专心处理远程调用相关事宜。比如发请求，接受服务提供者返回的数据等。这就是集群的作用。&lt;/p>
-&lt;p>Dubbo 提供了多种集群实现，包含但不限于 Failover Cluster、Failfast Cluster 和 Failsafe Cluster 等。每种集群实现类的用途不同，接下来会一一进行分析。&lt;/p>
-&lt;h2 id="2-集群容错">2. 集群容错&lt;/h2>
-&lt;p>在对集群相关代码进行分析之前，这里有必要先来介绍一下集群容错的所有组件。包含 Cluster、Cluster Invoker、Directory、Router 和 LoadBalance 等。&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/dev/cluster.jpg">&lt;/p>
-&lt;p>集群工作过程可分为两个阶段，第一个阶段是在服务消费者初始化期间，集群 Cluster 实现类为服务消费者创建 Cluster Invoker 实例，即上图中的 merge 操作。第二个阶段是在服务消费者进行远程调用时。以 FailoverClusterInvoker 为例，该类型 Cluster Invoker 首先会调用 Directory 的 list 方法列举 Invoker 列表（可将 Invoker 简单理解为服务提供者）。Directory 的用途是保存 Invoker，可简单类比为 List&amp;lt;Invoker&amp;gt;。其实现类 RegistryDirectory 是一个动态服务目录，可感知注册中心配置的变化，它所持有的 Invoker 列表会随着注册中心内容的变化而变化。每次变化后，RegistryDirectory 会动态增删 Invoker，并调用 Router 的 route 方法进行路由，过滤掉不符合路由规则的 Invoker。当 FailoverClusterInvoker 拿到 Directory 返回的 Invoker 列表后，它会通过 LoadBalance 从 Invoker 列表中选择一个 Invoker。最后 FailoverClusterInvoker 会将参数传给 LoadBalance 选择出的 Invoker 实例的 invoke 方法，进行真正的远程调用。&lt;/p></description></item><item><title>负载均衡</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/loadbalance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/loadbalance/</guid><description>&lt;h2 id="1简介">1.简介&lt;/h2>
-&lt;p>LoadBalance 中文意思为负载均衡，它的职责是将网络请求，或者其他形式的负载“均摊”到不同的机器上。避免集群中部分服务器压力过大，而另一些服务器比较空闲的情况。通过负载均衡，可以让每台服务器获取到适合自己处理能力的负载。在为高负载服务器分流的同时，还可以避免资源浪费，一举两得。负载均衡可分为软件负载均衡和硬件负载均衡。在我们日常开发中，一般很难接触到硬件负载均衡。但软件负载均衡还是可以接触到的，比如 Nginx。在 Dubbo 中，也有负载均衡的概念和相应的实现。Dubbo 需要对服务消费者的调用请求进行分配，避免少数服务提供者负载过大。服务提供者负载过大，会导致部分请求超时。因此将负载均衡到每个服务提供者上，是非常必要的。Dubbo 提供了4种负载均衡实现，分别是基于权重随机算法的 RandomLoadBalance、基于最少活跃调用数算法的 LeastActiveLoadBalance、基于 hash 一致性的 ConsistentHashLoadBalance，以及基于加权轮询算法的 RoundRobinLoadBalance。这几个负载均衡算法代码不是很长，但是想看懂也不是很容易，需要大家对这几个算法的原理有一定了解才行。如果不是很了解，也没不用太担心。我们会在分析每个算法的源码之前，对算法原理进行简单的讲解，帮助大家建立初步的印象。&lt;/p>
-&lt;p>本系列文章在编写之初是基于 Dubbo 2.6.4 的，近期，Dubbo 2.6.5 发布了，其中就有针对对负载均衡部分的优化。因此我们在分析完 2.6.4 版本后的源码后，会另外分析 2.6.5 更新的部分。其他的就不多说了，进入正题吧。&lt;/p>
-&lt;h2 id="2源码分析">2.源码分析&lt;/h2>
-&lt;p>在 Dubbo 中，所有负载均衡实现类均继承自 AbstractLoadBalance，该类实现了 LoadBalance 接口，并封装了一些公共的逻辑。所以在分析负载均衡实现之前，先来看一下 AbstractLoadBalance 的逻辑。首先来看一下负载均衡的入口方法 select，如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@Override&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">select&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (invokers &lt;span style="color:#719e07">==&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span> &lt;span style="color:#719e07">||&lt;/span> invokers.isEmpty())
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> &lt;span style="color:#cb4b16">null&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 如果 invokers 列表中仅有一个 Invoker，直接返回即可，无需进行负载均衡&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">if&lt;/span> (invokers.size() &lt;span style="color:#719e07">==&lt;/span> 1)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> invokers.get(0);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// 调用 doSelect 方法进行负载均衡，该方法为抽象方法，由子类实现&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">return&lt;/span> doSelect(invokers, url, invocation);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">protected&lt;/span> &lt;span style="color:#268bd2">abstract&lt;/span> &lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&lt;/span> &lt;span style="color:#268bd2">doSelect&lt;/span>(List&lt;span style="color:#719e07">&amp;lt;&lt;/span>Invoker&lt;span style="color:#719e07">&amp;lt;&lt;/span>T&lt;span style="color:#719e07">&amp;gt;&amp;gt;&lt;/span> invokers, URL url, Invocation invocation);
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>select 方法的逻辑比较简单，首先会检测 invokers 集合的合法性，然后再检测 invokers 集合元素数量。如果只包含一个 Invoker，直接返回该 Inovker 即可。如果包含多个 Invoker，此时需要通过负载均衡算法选择一个 Invoker。具体的负载均衡算法由子类实现，接下来章节会对这些子类一一进行详细分析。&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dubbo 源代码分析 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/</link><description>Recent content in Dubbo 源代码分析 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo SPI</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/dubbo-spi/</guid><description>&lt;h2 id="1简介"&gt;1.简介&lt;/h2&gt;
+&lt;p&gt;SPI 全称为 Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件，加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过 SPI 机制为我们的程序提供拓展功能。SPI 机制在第三方框架中也有所应用，比如 Dubbo 就是通过 SPI 机制加载所有的组件。不过，Dubbo 并未使用 Java 原生的 SPI 机制，而是对其进行了增强，使其能够更好的满足需求。在 Dubbo 中，SPI 是一个非常重要的模块。基于 SPI，我们可以很容易的对 Dubbo 进行拓展。如果大家想要学习 Dubbo 的源码，SPI 机制务必弄懂。接下来，我们先来了解一下 Java SPI 与 Dubbo SPI 的用法，然后再来分析 Dubbo SPI 的源码。&lt;/p&gt;
+&lt;p&gt;需要特别说明的是，本篇文章以及本系列其他文章所分析的源码版本均为 &lt;strong&gt;dubbo-2.6.4&lt;/strong&gt;。因此大家在阅读文章的过程中，需注意将代码版本切换到 dubbo-2.6.4 tag 上。&lt;/p&gt;
+&lt;h2 id="2spi-示例"&gt;2.SPI 示例&lt;/h2&gt;
+&lt;h3 id="21--java-spi-示例"&gt;2.1 Java SPI 示例&lt;/h3&gt;
+&lt;p&gt;前面简单介绍了 SPI 机制的原理，本节通过一个示例演示 Java SPI 的使用方法。首先，我们定义一个接口，名称为 Robot。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;Robot&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;接下来定义两个实现类，分别为 OptimusPrime 和 Bumblebee。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;OptimusPrime&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; Robot {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; System.out.println(&lt;span style="color:#2aa198"&gt;&amp;#34;Hello, I am Optimus Prime.&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;Bumblebee&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; Robot {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; System.out.println(&lt;span style="color:#2aa198"&gt;&amp;#34;Hello, I am Bumblebee.&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;接下来 META-INF/services 文件夹下创建一个文件，名称为 Robot 的全限定名 org.apache.spi.Robot。文件内容为实现类的全限定的类名，如下：&lt;/p&gt;</description></item><item><title>服务路由</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/router/</guid><description>&lt;h2 id="1-简介"&gt;1. 简介&lt;/h2&gt;
+&lt;p&gt;上一篇文章分析了集群容错的第一部分 — 服务目录 Directory。服务目录在刷新 Invoker 列表的过程中，会通过 Router 进行服务路由，筛选出符合路由规则的服务提供者。在详细分析服务路由的源码之前，先来介绍一下服务路由是什么。服务路由包含一条路由规则，路由规则决定了服务消费者的调用目标，即规定了服务消费者可调用哪些服务提供者。Dubbo 目前提供了三种服务路由实现，分别为条件路由 ConditionRouter、脚本路由 ScriptRouter 和标签路由 TagRouter。其中条件路由是我们最常使用的，标签路由是一个新的实现，暂时还未发布，该实现预计会在 2.7.x 版本中发布。本篇文章将分析条件路由相关源码，脚本路由和标签路由这里就不分析了。&lt;/p&gt;
+&lt;h2 id="2-源码分析"&gt;2. 源码分析&lt;/h2&gt;
+&lt;p&gt;条件路由规则由两个条件组成，分别用于对服务消费者和提供者进行匹配。比如有这样一条规则：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;host = 10.20.153.10 =&amp;gt; host = 10.20.153.11&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;该条规则表示 IP 为 10.20.153.10 的服务消费者&lt;strong&gt;只可&lt;/strong&gt;调用 IP 为 10.20.153.11 机器上的服务，不可调用其他机器上的服务。条件路由规则的格式如下：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;[服务消费者匹配条件] =&amp;gt; [服务提供者匹配条件]&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;如果服务消费者匹配条件为空，表示不对服务消费者进行限制。如果服务提供者匹配条件为空，表示对某些服务消费者禁用服务。官方文档中对条件路由进行了比较详细的介绍，大家可以参考下，这里就不过多说明了。&lt;/p&gt;
+&lt;p&gt;条件路由实现类 ConditionRouter 在进行工作前，需要先对用户配置的路由规则进行解析，得到一系列的条件。然后再根据这些条件对服务进行路由。本章将分两节进行说明，2.1节介绍表达式解析过程。2.2 节介绍服务路由的过程。下面，我们先从表达式解析过程看起。&lt;/p&gt;
+&lt;h3 id="21-表达式解析"&gt;2.1 表达式解析&lt;/h3&gt;
+&lt;p&gt;条件路由规则是一条字符串，对于 Dubbo 来说，它并不能直接理解字符串的意思，需要将其解析成内部格式才行。条件表达式的解析过程始于 ConditionRouter 的构造方法，下面一起看一下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;ConditionRouter&lt;/span&gt;(URL url) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.url &lt;span style="color:#719e07"&gt;=&lt;/span&gt; url;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 获取 priority 和 force 配置&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.priority &lt;span style="color:#719e07"&gt;=&lt;/span&gt; url.getParameter(Constants.PRIORITY_KEY, 0);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.force &lt;span style="color:#719e07"&gt;=&lt;/span&gt; url.getParameter(Constants.FORCE_KEY, &lt;span style="color:#cb4b16"&gt;false&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;try&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 获取路由规则&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String rule &lt;span style="color:#719e07"&gt;=&lt;/span&gt; url.getParameterAndDecoded(Constants.RULE_KEY);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (rule &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; &lt;span style="color:#719e07"&gt;||&lt;/span&gt; rule.trim().length() &lt;span style="color:#719e07"&gt;==&lt;/span&gt; 0) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; IllegalArgumentException(&lt;span style="color:#2aa198"&gt;&amp;#34;Illegal route rule!&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; rule &lt;span style="color:#719e07"&gt;=&lt;/span&gt; rule.replace(&lt;span style="color:#2aa198"&gt;&amp;#34;consumer.&amp;#34;&lt;/span&gt;, &lt;span style="color:#2aa198"&gt;&amp;#34;&amp;#34;&lt;/span&gt;).replace(&lt;span style="color:#2aa198"&gt;&amp;#34;provider.&amp;#34;&lt;/span&gt;, &lt;span style="color:#2aa198"&gt;&amp;#34;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 定位 =&amp;gt; 分隔符&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;int&lt;/span&gt; i &lt;span style="color:#719e07"&gt;=&lt;/span&gt; rule.indexOf(&lt;span style="color:#2aa198"&gt;&amp;#34;=&amp;gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 分别获取服务消费者和提供者匹配规则&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String whenRule &lt;span style="color:#719e07"&gt;=&lt;/span&gt; i &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt; 0 &lt;span style="color:#719e07"&gt;?&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; : rule.substring(0, i).trim();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String thenRule &lt;span style="color:#719e07"&gt;=&lt;/span&gt; i &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt; 0 &lt;span style="color:#719e07"&gt;?&lt;/span&gt; rule.trim() : rule.substring(i &lt;span style="color:#719e07"&gt;+&lt;/span&gt; 2).trim();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 解析服务消费者匹配规则&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Map&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;String, MatchPair&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; when &lt;span style="color:#719e07"&gt;=&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; StringUtils.isBlank(whenRule) &lt;span style="color:#719e07"&gt;||&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;true&amp;#34;&lt;/span&gt;.equals(whenRule) 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;?&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; HashMap&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;String, MatchPair&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt;() : parseRule(whenRule);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 解析服务提供者匹配规则&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Map&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;String, MatchPair&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; then &lt;span style="color:#719e07"&gt;=&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; StringUtils.isBlank(thenRule) &lt;span style="color:#719e07"&gt;||&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;false&amp;#34;&lt;/span&gt;.equals(thenRule) 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;?&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; : parseRule(thenRule);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 将解析出的匹配规则分别赋值给 whenCondition 和 thenCondition 成员变量&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.whenCondition &lt;span style="color:#719e07"&gt;=&lt;/span&gt; when;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.thenCondition &lt;span style="color:#719e07"&gt;=&lt;/span&gt; then;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } &lt;span style="color:#719e07"&gt;catch&lt;/span&gt; (ParseException e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; IllegalStateException(e.getMessage(), e);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如上，ConditionRouter 构造方法先是对路由规则做预处理，然后调用 parseRule 方法分别对服务提供者和消费者规则进行解析，最后将解析结果赋值给 whenCondition 和 thenCondition 成员变量。ConditionRouter 构造方法不是很复杂，这里就不多说了。下面我们把重点放在 parseRule 方法上，在详细介绍这个方法之前，我们先来看一个内部类。&lt;/p&gt;</description></item><item><title>SPI 自适应拓展</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/adaptive-extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/adaptive-extension/</guid><description>&lt;h2 id="1原理"&gt;1.原理&lt;/h2&gt;
+&lt;p&gt;在 Dubbo 中，很多拓展都是通过 SPI 机制进行加载的，比如 Protocol、Cluster、LoadBalance 等。有时，有些拓展并不想在框架启动阶段被加载，而是希望在拓展方法被调用时，根据运行时参数进行加载。这听起来有些矛盾。拓展未被加载，那么拓展方法就无法被调用（静态方法除外）。拓展方法未被调用，拓展就无法被加载。对于这个矛盾的问题，Dubbo 通过自适应拓展机制很好的解决了。自适应拓展机制的实现逻辑比较复杂，首先 Dubbo 会为拓展接口生成具有代理功能的代码。然后通过 javassist 或 jdk 编译这段代码，得到 Class 类。最后再通过反射创建代理类，整个过程比较复杂。为了让大家对自适应拓展有一个感性的认识，下面我们通过一个示例进行演示。这是一个与汽车相关的例子，我们有一个车轮制造厂接口 WheelMaker：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;WheelMaker&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Wheel &lt;span style="color:#268bd2"&gt;makeWheel&lt;/span&gt;(URL url);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;WheelMaker 接口的自适应实现类如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;AdaptiveWheelMaker&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; WheelMaker {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; Wheel &lt;span style="color:#268bd2"&gt;makeWheel&lt;/span&gt;(URL url) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (url &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; IllegalArgumentException(&lt;span style="color:#2aa198"&gt;&amp;#34;url == null&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 	&lt;span style="color:#586e75"&gt;// 1.从 URL 中获取 WheelMaker 名称&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String wheelMakerName &lt;span style="color:#719e07"&gt;=&lt;/span&gt; url.getParameter(&lt;span style="color:#2aa198"&gt;&amp;#34;Wheel.maker&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (wheelMakerName &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; IllegalArgumentException(&lt;span style="color:#2aa198"&gt;&amp;#34;wheelMakerName == null&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 2.通过 SPI 加载具体的 WheelMaker&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; WheelMaker wheelMaker &lt;span style="color:#719e07"&gt;=&lt;/span&gt; ExtensionLoader
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .getExtensionLoader(WheelMaker.class).getExtension(wheelMakerName);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 3.调用目标方法&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; wheelMaker.makeWheel(url);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;AdaptiveWheelMaker 是一个代理类，与传统的代理逻辑不同，AdaptiveWheelMaker 所代理的对象是在 makeWheel 方法中通过 SPI 加载得到的。makeWheel 方法主要做了三件事情：&lt;/p&gt;</description></item><item><title>服务导出</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/export-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/export-service/</guid><description>&lt;h2 id="1简介"&gt;1.简介&lt;/h2&gt;
+&lt;p&gt;本篇文章，我们来研究一下 Dubbo 导出服务的过程。Dubbo 服务导出过程始于 Spring 容器发布刷新事件，Dubbo 在接收到事件后，会立即执行服务导出逻辑。整个逻辑大致可分为三个部分，第一部分是前置工作，主要用于检查参数，组装 URL。第二部分是导出服务，包含导出服务到本地 (JVM)，和导出服务到远程两个过程。第三部分是向注册中心注册服务，用于服务发现。本篇文章将会对这三个部分代码进行详细的分析。&lt;/p&gt;
+&lt;h2 id="2源码分析"&gt;2.源码分析&lt;/h2&gt;
+&lt;p&gt;服务导出的入口方法是 ServiceBean 的 onApplicationEvent。onApplicationEvent 是一个事件响应方法，该方法会在收到 Spring 上下文刷新事件后执行服务导出操作。方法代码如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#dc322f"&gt;void&lt;/span&gt; &lt;span style="color:#268bd2"&gt;onApplicationEvent&lt;/span&gt;(ContextRefreshedEvent event) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 是否有延迟导出 &amp;amp;&amp;amp; 是否已导出 &amp;amp;&amp;amp; 是不是已被取消导出&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (isDelay() &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style="color:#719e07"&gt;!&lt;/span&gt;isExported() &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style="color:#719e07"&gt;!&lt;/span&gt;isUnexported()) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 导出服务&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; export();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个方法首先会根据条件决定是否导出服务，比如有些服务设置了延时导出，那么此时就不应该在此处导出。还有一些服务已经被导出了，或者当前服务被取消导出了，此时也不能再次导出相关服务。注意这里的 isDelay 方法，这个方法字面意思是“是否延迟导出服务”，返回 true 表示延迟导出，false 表示不延迟导出。但是该方法真实意思却并非如此，当方法返回 true 时，表示无需延迟导出。返回 false 时，表示需要延迟导出。与字面意思恰恰相反，这个需要大家注意一下。下面我们来看一下这个方法的逻辑。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// -☆- ServiceBean&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; &lt;span style="color:#dc322f"&gt;boolean&lt;/span&gt; &lt;span style="color:#268bd2"&gt;isDelay&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 获取 delay&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Integer delay &lt;span style="color:#719e07"&gt;=&lt;/span&gt; getDelay();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ProviderConfig provider &lt;span style="color:#719e07"&gt;=&lt;/span&gt; getProvider();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (delay &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; provider &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 如果前面获取的 delay 为空，这里继续获取&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; delay &lt;span style="color:#719e07"&gt;=&lt;/span&gt; provider.getDelay();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 判断 delay 是否为空，或者等于 -1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; supportedApplicationListener &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; (delay &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; &lt;span style="color:#719e07"&gt;||&lt;/span&gt; delay &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#719e07"&gt;-&lt;/span&gt;1);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;暂时忽略 supportedApplicationListener 这个条件，当 delay 为空，或者等于-1时，该方法返回 true，而不是 false。这个方法的返回值让人有点困惑。该方法目前已被重构，详细请参考 &lt;a href="https://github.com/apache/dubbo/pull/2686"&gt;dubbo #2686&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>服务引用</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/refer-service/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/refer-service/</guid><description>&lt;h2 id="1-简介"&gt;1. 简介&lt;/h2&gt;
+&lt;p&gt;上一篇文章详细分析了服务导出的过程，本篇文章我们趁热打铁，继续分析服务引用过程。在 Dubbo 中，我们可以通过两种方式引用远程服务。第一种是使用服务直连的方式引用服务，第二种方式是基于注册中心进行引用。服务直连的方式仅适合在调试或测试服务的场景下使用，不适合在线上环境使用。因此，本文我将重点分析通过注册中心引用服务的过程。从注册中心中获取服务配置只是服务引用过程中的一环，除此之外，服务消费者还需要经历 Invoker 创建、代理类创建等步骤。这些步骤，将在后续章节中一一进行分析。&lt;/p&gt;
+&lt;h2 id="2服务引用原理"&gt;2.服务引用原理&lt;/h2&gt;
+&lt;p&gt;Dubbo 服务引用的时机有两个，第一个是在 Spring 容器调用 ReferenceBean 的 afterPropertiesSet 方法时引用服务，第二个是在 ReferenceBean 对应的服务被注入到其他类中时引用。这两个引用服务的时机区别在于，第一个是饿汉式的，第二个是懒汉式的。默认情况下，Dubbo 使用懒汉式引用服务。如果需要使用饿汉式，可通过配置 &amp;lt;dubbo:reference&amp;gt; 的 init 属性开启。下面我们按照 Dubbo 默认配置进行分析，整个分析过程从 ReferenceBean 的 getObject 方法开始。当我们的服务被注入到其他类中时，Spring 会第一时间调用 getObject 方法，并由该方法执行服务引用逻辑。按照惯例，在进行具体工作之前，需先进行配置检查与收集工作。接着根据收集到的信息决定服务用的方式，有三种，第一种是引用本地 (JVM) 服务，第二是通过直连方式引用远程服务，第三是通过注册中心引用远程服务。不管是哪种引用方式，最后都会得到一个 Invoker 实例。如果有多个注册中心，多个服务提供者，这个时候会得到一组 Invoker 实例，此时需要通过集群管理类 Cluster 将多个 Invoker 合并成一个实例。合并后的 Invoker 实例已经具备调用本地或远程服务的能力了，但并不能将此实例暴露给用户使用，这会对用户业务代码造成侵入。此时框架还需要通过代理工厂类 (ProxyFactory) 为服务接口生成代理类，并让代理类去调用 Invoker 逻辑。避免了 Dubbo 框架代码对业务代码的侵入，同时也让框架更容易使用。&lt;/p&gt;
+&lt;p&gt;以上就是服务引用的大致原理，下面我们深入到代码中，详细分析服务引用细节。&lt;/p&gt;
+&lt;h2 id="3源码分析"&gt;3.源码分析&lt;/h2&gt;
+&lt;p&gt;服务引用的入口方法为 ReferenceBean 的 getObject 方法，该方法定义在 Spring 的 FactoryBean 接口中，ReferenceBean 实现了这个方法。实现代码如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; Object &lt;span style="color:#268bd2"&gt;getObject&lt;/span&gt;() &lt;span style="color:#268bd2"&gt;throws&lt;/span&gt; Exception {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; get();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;synchronized&lt;/span&gt; T &lt;span style="color:#268bd2"&gt;get&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (destroyed) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; IllegalStateException(&lt;span style="color:#2aa198"&gt;&amp;#34;Already destroyed!&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 检测 ref 是否为空，为空则通过 init 方法创建&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (ref &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// init 方法主要用于处理配置，以及调用 createProxy 生成代理类&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; init();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; ref;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;以上两个方法的代码比较简短，并不难理解。这里需要特别说明一下，如果你对 2.6.4 及以下版本的 getObject 方法进行调试时，会碰到比较奇怪的的问题。这里假设你使用 IDEA，且保持了 IDEA 的默认配置。当你面调试到 get 方法的&lt;code&gt;if (ref == null)&lt;/code&gt;时，你会发现 ref 不为空，导致你无法进入到 init 方法中继续调试。导致这个现象的原因是 Dubbo 框架本身有一些小问题。该问题已经在 pull request &lt;a href="https://github.com/apache/dubbo/pull/2754"&gt;#2754&lt;/a&gt; 修复了此问题，并跟随 2.6.5 版本发布了。如果你正在学习 2.6.4 及以下版本，可通过修改 IDEA 配置规避这个问题。首先 IDEA 配置弹窗中搜索 toString，然后取消&lt;code&gt;Enable 'toString' object view&lt;/code&gt;勾选。具体如下：&lt;/p&gt;</description></item><item><title>服务调用过程</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/service-invoking-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/service-invoking-process/</guid><description>&lt;h2 id="1-简介"&gt;1. 简介&lt;/h2&gt;
+&lt;p&gt;在前面的文章中，我们分析了 Dubbo SPI、服务导出与引入、以及集群容错方面的代码。经过前文的铺垫，本篇文章我们终于可以分析服务调用过程了。Dubbo 服务调用过程比较复杂，包含众多步骤，比如发送请求、编解码、服务降级、过滤器链处理、序列化、线程派发以及响应请求等步骤。限于篇幅原因，本篇文章无法对所有的步骤一一进行分析。本篇文章将会重点分析请求的发送与接收、编解码、线程派发以及响应的发送与接收等过程，至于服务降级、过滤器链和序列化大家自行进行分析，也可以将其当成一个黑盒，暂时忽略也没关系。介绍完本篇文章要分析的内容，接下来我们进入正题吧。&lt;/p&gt;
+&lt;h2 id="2-源码分析"&gt;2. 源码分析&lt;/h2&gt;
+&lt;p&gt;在进行源码分析之前，我们先来通过一张图了解 Dubbo 服务调用过程。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/dev/send-request-process.jpg" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;首先服务消费者通过代理对象 Proxy 发起远程调用，接着通过网络客户端 Client 将编码后的请求发送给服务提供方的网络层上，也就是 Server。Server 在收到请求后，首先要做的事情是对数据包进行解码。然后将解码后的请求发送至分发器 Dispatcher，再由分发器将请求派发到指定的线程池上，最后由线程池调用具体的服务。这就是一个远程调用请求的发送与接收过程。至于响应的发送与接收过程，这张图中没有表现出来。对于这两个过程，我们也会进行详细分析。&lt;/p&gt;
+&lt;h3 id="21-服务调用方式"&gt;2.1 服务调用方式&lt;/h3&gt;
+&lt;p&gt;Dubbo 支持同步和异步两种调用方式，其中异步调用还可细分为“有返回值”的异步调用和“无返回值”的异步调用。所谓“无返回值”异步调用是指服务消费方只管调用，但不关心调用结果，此时 Dubbo 会直接返回一个空的 RpcResult。若要使用异步特性，需要服务消费方手动进行配置。默认情况下，Dubbo 使用同步调用方式。&lt;/p&gt;
+&lt;p&gt;本节以及其他章节将会使用 Dubbo 官方提供的 Demo 分析整个调用过程，下面我们从 DemoService 接口的代理类开始进行分析。Dubbo 默认使用 Javassist 框架为服务接口生成动态代理类，因此我们需要先将代理类进行反编译才能看到源码。这里使用阿里开源 Java 应用诊断工具 &lt;a href="https://github.com/alibaba/arthas"&gt;Arthas&lt;/a&gt; 反编译代理类，结果如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Arthas 反编译步骤：
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 1. 启动 Arthas
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * java -jar arthas-boot.jar
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 2. 输入编号选择进程
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * Arthas 启动后，会打印 Java 应用进程列表，如下：
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * [1]: 11232 org.jetbrains.jps.cmdline.Launcher
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * [2]: 22370 org.jetbrains.jps.cmdline.Launcher
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * [3]: 22371 com.alibaba.dubbo.demo.consumer.Consumer
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * [4]: 22362 com.alibaba.dubbo.demo.provider.Provider
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * [5]: 2074 org.apache.zookeeper.server.quorum.QuorumPeerMain
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 这里输入编号 3，让 Arthas 关联到启动类为 com.....Consumer 的 Java 进程上
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 3. 由于 Demo 项目中只有一个服务接口，因此此接口的代理类类名为 proxy0，此时使用 sc 命令搜索这个类名。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * $ sc *.proxy0
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * com.alibaba.dubbo.common.bytecode.proxy0
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 4. 使用 jad 命令反编译 com.alibaba.dubbo.common.bytecode.proxy0
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * $ jad com.alibaba.dubbo.common.bytecode.proxy0
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * 更多使用方法请参考 Arthas 官方文档：
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; * https://arthas.aliyun.com/doc/quick-start.html
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;class&lt;/span&gt; &lt;span style="color:#268bd2"&gt;proxy0&lt;/span&gt; &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; ClassGenerator.DC, EchoService, DemoService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 方法数组&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;static&lt;/span&gt; Method&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; methods;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;private&lt;/span&gt; InvocationHandler handler;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;proxy0&lt;/span&gt;(InvocationHandler invocationHandler) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.handler &lt;span style="color:#719e07"&gt;=&lt;/span&gt; invocationHandler;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;proxy0&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; String &lt;span style="color:#268bd2"&gt;sayHello&lt;/span&gt;(String string) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 将参数存储到 Object 数组中&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Object&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; arrobject &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; Object&lt;span style="color:#719e07"&gt;[]&lt;/span&gt;{string};
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 调用 InvocationHandler 实现类的 invoke 方法得到调用结果&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Object object &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.handler.invoke(&lt;span style="color:#719e07"&gt;this&lt;/span&gt;, methods&lt;span style="color:#719e07"&gt;[&lt;/span&gt;0&lt;span style="color:#719e07"&gt;]&lt;/span&gt;, arrobject);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 返回调用结果&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; (String)object;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;/** 回声测试方法 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;public&lt;/span&gt; Object &lt;span style="color:#268bd2"&gt;$echo&lt;/span&gt;(Object object) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Object&lt;span style="color:#719e07"&gt;[]&lt;/span&gt; arrobject &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; Object&lt;span style="color:#719e07"&gt;[]&lt;/span&gt;{object};
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Object object2 &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.handler.invoke(&lt;span style="color:#719e07"&gt;this&lt;/span&gt;, methods&lt;span style="color:#719e07"&gt;[&lt;/span&gt;1&lt;span style="color:#719e07"&gt;]&lt;/span&gt;, arrobject);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; object2;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如上，代理类的逻辑比较简单。首先将运行时参数存储到数组中，然后调用 InvocationHandler 接口实现类的 invoke 方法，得到调用结果，最后将结果转型并返回给调用方。关于代理类的逻辑就说这么多，继续向下分析。&lt;/p&gt;</description></item><item><title>服务目录</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/directory/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/directory/</guid><description>&lt;h2 id="1-简介"&gt;1. 简介&lt;/h2&gt;
+&lt;p&gt;本篇文章，将开始分析 Dubbo 集群容错方面的源码。集群容错源码包含四个部分，分别是服务目录 Directory、服务路由 Router、集群 Cluster 和负载均衡 LoadBalance。这几个部分的源码逻辑相对比较独立，我们将会分四篇文章进行分析。本篇文章作为集群容错的开篇文章，将和大家一起分析服务目录相关的源码。在进行深入分析之前，我们先来了解一下服务目录是什么。服务目录中存储了一些和服务提供者有关的信息，通过服务目录，服务消费者可获取到服务提供者的信息，比如 ip、端口、服务协议等。通过这些信息，服务消费者就可通过 Netty 等客户端进行远程调用。在一个服务集群中，服务提供者数量并不是一成不变的，如果集群中新增了一台机器，相应地在服务目录中就要新增一条服务提供者记录。或者，如果服务提供者的配置修改了，服务目录中的记录也要做相应的更新。如果这样说，服务目录和注册中心的功能不就雷同了吗？确实如此，这里这么说是为了方便大家理解。实际上服务目录在获取注册中心的服务配置信息后，会为每条配置信息生成一个 Invoker 对象，并把这个 Invoker 对象存储起来，这个 Invoker 才是服务目录最终持有的对象。Invoker 有什么用呢？看名字就知道了，这是一个具有远程调用功能的对象。讲到这大家应该知道了什么是服务目录了，它可以看做是 Invoker 集合，且这个集合中的元素会随注册中心的变化而进行动态调整。&lt;/p&gt;
+&lt;p&gt;关于服务目录这里就先介绍这些，大家先有个大致印象。接下来我们通过继承体系图来了解一下服务目录的家族成员都有哪些。&lt;/p&gt;
+&lt;h2 id="2-继承体系"&gt;2. 继承体系&lt;/h2&gt;
+&lt;p&gt;服务目录目前内置的实现有两个，分别为 StaticDirectory 和 RegistryDirectory，它们均是 AbstractDirectory 的子类。AbstractDirectory 实现了 Directory 接口，这个接口包含了一个重要的方法定义，即 list(Invocation)，用于列举 Invoker。下面我们来看一下他们的继承体系图。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/dev/directory-inherit-hierarchy.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;如上，Directory 继承自 Node 接口，Node 这个接口继承者比较多，像 Registry、Monitor、Invoker 等均继承了这个接口。这个接口包含了一个获取配置信息的方法 getUrl，实现该接口的类可以向外提供配置信息。另外，大家注意看 RegistryDirectory 实现了 NotifyListener 接口，当注册中心节点信息发生变化后，RegistryDirectory 可以通过此接口方法得到变更信息，并根据变更信息动态调整内部 Invoker 列表。&lt;/p&gt;
+&lt;h2 id="3-源码分析"&gt;3. 源码分析&lt;/h2&gt;
+&lt;p&gt;本章将分析 AbstractDirectory 和它两个子类的源码。AbstractDirectory 封装了 Invoker 列举流程，具体的列举逻辑则由子类实现，这是典型的模板模式。所以，接下来我们先来看一下 AbstractDirectory 的源码。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Invoker&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;list&lt;/span&gt;(Invocation invocation) &lt;span style="color:#268bd2"&gt;throws&lt;/span&gt; RpcException {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (destroyed) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;throw&lt;/span&gt; &lt;span style="color:#719e07"&gt;new&lt;/span&gt; RpcException(&lt;span style="color:#2aa198"&gt;&amp;#34;Directory already destroyed...&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 调用 doList 方法列举 Invoker，doList 是模板方法，由子类实现&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Invoker&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; invokers &lt;span style="color:#719e07"&gt;=&lt;/span&gt; doList(invocation);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 获取路由 Router 列表&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Router&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; localRouters &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#719e07"&gt;this&lt;/span&gt;.routers;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (localRouters &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style="color:#719e07"&gt;!&lt;/span&gt;localRouters.isEmpty()) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;for&lt;/span&gt; (Router router : localRouters) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;try&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 获取 runtime 参数，并根据参数决定是否进行路由&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (router.getUrl() &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; &lt;span style="color:#719e07"&gt;||&lt;/span&gt; router.getUrl().getParameter(Constants.RUNTIME_KEY, &lt;span style="color:#cb4b16"&gt;false&lt;/span&gt;)) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 进行服务路由&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; invokers &lt;span style="color:#719e07"&gt;=&lt;/span&gt; router.route(invokers, getConsumerUrl(), invocation);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } &lt;span style="color:#719e07"&gt;catch&lt;/span&gt; (Throwable t) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; logger.error(&lt;span style="color:#2aa198"&gt;&amp;#34;Failed to execute router: ...&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; invokers;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 模板方法，由子类实现&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;protected&lt;/span&gt; &lt;span style="color:#268bd2"&gt;abstract&lt;/span&gt; List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Invoker&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;doList&lt;/span&gt;(Invocation invocation) &lt;span style="color:#268bd2"&gt;throws&lt;/span&gt; RpcException;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;上面就是 AbstractDirectory 的 list 方法源码，这个方法封装了 Invoker 的列举过程。如下：&lt;/p&gt;</description></item><item><title>集群</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/cluster/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/cluster/</guid><description>&lt;h2 id="1简介"&gt;1.简介&lt;/h2&gt;
+&lt;p&gt;为了避免单点故障，现在的应用通常至少会部署在两台服务器上。对于一些负载比较高的服务，会部署更多的服务器。这样，在同一环境下的服务提供者数量会大于1。对于服务消费者来说，同一环境下出现了多个服务提供者。这时会出现一个问题，服务消费者需要决定选择哪个服务提供者进行调用。另外服务调用失败时的处理措施也是需要考虑的，是重试呢，还是抛出异常，亦或是只打印异常等。为了处理这些问题，Dubbo 定义了集群接口 Cluster 以及 Cluster Invoker。集群 Cluster 用途是将多个服务提供者合并为一个 Cluster Invoker，并将这个 Invoker 暴露给服务消费者。这样一来，服务消费者只需通过这个 Invoker 进行远程调用即可，至于具体调用哪个服务提供者，以及调用失败后如何处理等问题，现在都交给集群模块去处理。集群模块是服务提供者和服务消费者的中间层，为服务消费者屏蔽了服务提供者的情况，这样服务消费者就可以专心处理远程调用相关事宜。比如发请求，接受服务提供者返回的数据等。这就是集群的作用。&lt;/p&gt;
+&lt;p&gt;Dubbo 提供了多种集群实现，包含但不限于 Failover Cluster、Failfast Cluster 和 Failsafe Cluster 等。每种集群实现类的用途不同，接下来会一一进行分析。&lt;/p&gt;
+&lt;h2 id="2-集群容错"&gt;2. 集群容错&lt;/h2&gt;
+&lt;p&gt;在对集群相关代码进行分析之前，这里有必要先来介绍一下集群容错的所有组件。包含 Cluster、Cluster Invoker、Directory、Router 和 LoadBalance 等。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/dev/cluster.jpg" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;集群工作过程可分为两个阶段，第一个阶段是在服务消费者初始化期间，集群 Cluster 实现类为服务消费者创建 Cluster Invoker 实例，即上图中的 merge 操作。第二个阶段是在服务消费者进行远程调用时。以 FailoverClusterInvoker 为例，该类型 Cluster Invoker 首先会调用 Directory 的 list 方法列举 Invoker 列表（可将 Invoker 简单理解为服务提供者）。Directory 的用途是保存 Invoker，可简单类比为 List&amp;lt;Invoker&amp;gt;。其实现类 RegistryDirectory 是一个动态服务目录，可感知注册中心配置的变化，它所持有的 Invoker 列表会随着注册中心内容的变化而变化。每次变化后，RegistryDirectory 会动态增删 Invoker，并调用 Router 的 route 方法进行路由，过滤掉不符合路由规则的 Invoker。当 FailoverClusterInvoker 拿到 Directory 返回的 Invoker 列表后，它会通过 LoadBalance 从 Invoker 列表中选择一个 Invoker。最后 FailoverClusterInvoker 会将参数传给 LoadBalance 选择出的 Invoker 实例的 invoke 方法，进行真正的远程调用。&lt;/p&gt;</description></item><item><title>负载均衡</title><link>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/loadbalance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/loadbalance/</guid><description>&lt;h2 id="1简介"&gt;1.简介&lt;/h2&gt;
+&lt;p&gt;LoadBalance 中文意思为负载均衡，它的职责是将网络请求，或者其他形式的负载“均摊”到不同的机器上。避免集群中部分服务器压力过大，而另一些服务器比较空闲的情况。通过负载均衡，可以让每台服务器获取到适合自己处理能力的负载。在为高负载服务器分流的同时，还可以避免资源浪费，一举两得。负载均衡可分为软件负载均衡和硬件负载均衡。在我们日常开发中，一般很难接触到硬件负载均衡。但软件负载均衡还是可以接触到的，比如 Nginx。在 Dubbo 中，也有负载均衡的概念和相应的实现。Dubbo 需要对服务消费者的调用请求进行分配，避免少数服务提供者负载过大。服务提供者负载过大，会导致部分请求超时。因此将负载均衡到每个服务提供者上，是非常必要的。Dubbo 提供了4种负载均衡实现，分别是基于权重随机算法的 RandomLoadBalance、基于最少活跃调用数算法的 LeastActiveLoadBalance、基于 hash 一致性的 ConsistentHashLoadBalance，以及基于加权轮询算法的 RoundRobinLoadBalance。这几个负载均衡算法代码不是很长，但是想看懂也不是很容易，需要大家对这几个算法的原理有一定了解才行。如果不是很了解，也没不用太担心。我们会在分析每个算法的源码之前，对算法原理进行简单的讲解，帮助大家建立初步的印象。&lt;/p&gt;
+&lt;p&gt;本系列文章在编写之初是基于 Dubbo 2.6.4 的，近期，Dubbo 2.6.5 发布了，其中就有针对对负载均衡部分的优化。因此我们在分析完 2.6.4 版本后的源码后，会另外分析 2.6.5 更新的部分。其他的就不多说了，进入正题吧。&lt;/p&gt;
+&lt;h2 id="2源码分析"&gt;2.源码分析&lt;/h2&gt;
+&lt;p&gt;在 Dubbo 中，所有负载均衡实现类均继承自 AbstractLoadBalance，该类实现了 LoadBalance 接口，并封装了一些公共的逻辑。所以在分析负载均衡实现之前，先来看一下 AbstractLoadBalance 的逻辑。首先来看一下负载均衡的入口方法 select，如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@Override&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; Invoker&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;select&lt;/span&gt;(List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Invoker&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; invokers, URL url, Invocation invocation) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (invokers &lt;span style="color:#719e07"&gt;==&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt; &lt;span style="color:#719e07"&gt;||&lt;/span&gt; invokers.isEmpty())
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;null&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 如果 invokers 列表中仅有一个 Invoker，直接返回即可，无需进行负载均衡&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; (invokers.size() &lt;span style="color:#719e07"&gt;==&lt;/span&gt; 1)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; invokers.get(0);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 调用 doSelect 方法进行负载均衡，该方法为抽象方法，由子类实现&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;return&lt;/span&gt; doSelect(invokers, url, invocation);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;protected&lt;/span&gt; &lt;span style="color:#268bd2"&gt;abstract&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; Invoker&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;doSelect&lt;/span&gt;(List&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;Invoker&lt;span style="color:#719e07"&gt;&amp;lt;&lt;/span&gt;T&lt;span style="color:#719e07"&gt;&amp;gt;&amp;gt;&lt;/span&gt; invokers, URL url, Invocation invocation);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;select 方法的逻辑比较简单，首先会检测 invokers 集合的合法性，然后再检测 invokers 集合元素数量。如果只包含一个 Invoker，直接返回该 Inovker 即可。如果包含多个 Invoker，此时需要通过负载均衡算法选择一个 Invoker。具体的负载均衡算法由子类实现，接下来章节会对这些子类一一进行详细分析。&lt;/p&gt;</description></item></channel></rss>

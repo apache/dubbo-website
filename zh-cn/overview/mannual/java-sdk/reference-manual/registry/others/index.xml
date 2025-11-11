@@ -1,110 +1,110 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>注册中心、服务发现与负载均衡 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/</link><description>Recent content in 注册中心、服务发现与负载均衡 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/index.xml" rel="self" type="application/rss+xml"/><item><title>Multicast</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/multicast/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/multicast/</guid><description>&lt;p>Multicast 注册中心不需要启动任何中心节点，只要广播地址一样，就可以互相发现。&lt;/p>
-&lt;p>&lt;img alt="/user-guide/images/multicast.jpg" src="https://cn.dubbo.apache.org/imgs/user/multicast.jpg">&lt;/p>
-&lt;h2 id="1-使用说明">1 使用说明&lt;/h2>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;multicast://224.5.6.7:1234&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;multicast&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;224.5.6.7:1234&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="注意">注意:&lt;/h4>
-&lt;p>为了减少广播量，Dubbo 缺省使用单播发送提供者地址信息给消费者。
-如果一个机器上同时启了多个消费者进程，消费者需声明 &lt;code>unicast=false&lt;/code>，否则只会有一个消费者能收到消息; 当服务者和消费者运行在同一台机器上，消费者同样需要声明&lt;code>unicast=false&lt;/code>，否则消费者无法收到消息，导致No provider available for the service异常：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:application&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;demo-consumer&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;unicast&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:application&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:consumer&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:parameter&lt;/span> key=&lt;span style="color:#2aa198">&amp;#34;unicast&amp;#34;&lt;/span> value=&lt;span style="color:#2aa198">&amp;#34;false&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:consumer&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-工作原理">2 工作原理&lt;/h2>
-&lt;h3 id="21-基本流程">2.1 基本流程&lt;/h3>
-&lt;ol start="0">
-&lt;li>提供方启动时广播自己的地址&lt;/li>
-&lt;li>消费方启动时广播订阅请求&lt;/li>
-&lt;li>提供方收到订阅请求时，单播自己的地址给订阅者，如果设置了 &lt;code>unicast=false&lt;/code>，则广播给订阅者&lt;/li>
-&lt;li>消费方收到提供方地址时，连接该地址进行 RPC 调用。&lt;/li>
-&lt;/ol>
-&lt;h3 id="22-使用限制">2.2 使用限制&lt;/h3>
-&lt;p>组播受网络结构限制，只适合小规模应用或开发阶段使用。组播地址段: 224.0.0.0 - 239.255.255.255&lt;/p></description></item><item><title>Consul</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/consul/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/consul/</guid><description>&lt;h2 id="前置条件">前置条件&lt;/h2>
-&lt;ul>
-&lt;li>了解 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/starter/">Dubbo 基本开发步骤&lt;/a>&lt;/li>
-&lt;li>安装并启动 &lt;a href="http://consul.io">Consul&lt;/a> 服务&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用说明">使用说明&lt;/h2>
-&lt;h3 id="添加依赖">添加依赖&lt;/h3>
-&lt;p>从 Dubbo3 开始，consul 注册中国适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的&lt;a href="https://cn.dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-registry">模块&lt;/a>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-registry-consul&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="基本配置">基本配置&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;redis&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;redis&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;p>使用 Consul 作为共享注册中心实现，可用于 &lt;a href="https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E9%9B%B6%E6%94%B9%E9%80%A0%E5%AE%9E%E7%8E%B0-spring-cloud-apache-dubbo-%E4%BA%92%E9%80%9A/">Dubbo 与 Spring Cloud 体系的互通或迁移&lt;/a>&lt;/p></description></item><item><title>Etcd</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/etcd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/etcd/</guid><description>&lt;h2 id="前置条件">前置条件&lt;/h2>
-&lt;ul>
-&lt;li>了解 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/starter/">Dubbo 基本开发步骤&lt;/a>&lt;/li>
-&lt;li>安装并启动 Etcd 服务&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用说明">使用说明&lt;/h2>
-&lt;h3 id="添加依赖">添加依赖&lt;/h3>
-&lt;p>从 Dubbo3 开始，etcd 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的&lt;a href="https://cn.dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-registry">模块&lt;/a>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-registry-etcd&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="基本配置">基本配置&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;etcd://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;etcd://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;etcd&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;etcd&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Redis</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/redis/</guid><description>&lt;h2 id="前置条件">前置条件&lt;/h2>
-&lt;ul>
-&lt;li>了解 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/starter/">Dubbo 基本开发步骤&lt;/a>&lt;/li>
-&lt;li>安装并启动 &lt;a href="http://redis.io">Redis&lt;/a> 服务&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用说明">使用说明&lt;/h2>
-&lt;h3 id="添加依赖">添加依赖&lt;/h3>
-&lt;p>从 Dubbo3 开始，redis 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的&lt;a href="https://cn.dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-registry">模块&lt;/a>。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>org.apache.dubbo.extensions&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>dubbo-registry-redis&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>3.3.0&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="基本配置">基本配置&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;redis://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;redis&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>或&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:registry&lt;/span> protocol=&lt;span style="color:#2aa198">&amp;#34;redis&amp;#34;&lt;/span> address=&lt;span style="color:#2aa198">&amp;#34;10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="其他配置项">其他配置项&lt;/h3>
-&lt;ul>
-&lt;li>可通过 &lt;code>&amp;lt;dubbo:registry group=&amp;quot;dubbo&amp;quot; /&amp;gt;&lt;/code> 设置 redis 中 key 的前缀，缺省为 &lt;code>dubbo&lt;/code>。&lt;/li>
-&lt;li>可通过 &lt;code>&amp;lt;dubbo:registry cluster=&amp;quot;replicate&amp;quot; /&amp;gt;&lt;/code> 设置 redis 集群策略，缺省为 &lt;code>failover&lt;/code>：
-&lt;ul>
-&lt;li>&lt;code>failover&lt;/code>: 只写入和读取任意一台，失败时重试另一台，需要服务器端自行配置数据同步&lt;/li>
-&lt;li>&lt;code>replicate&lt;/code>: 在客户端同时写入所有服务器，只读取单台，服务器端不需要同步，注册中心集群增大，性能压力也会更大&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;h2 id="工作原理">工作原理&lt;/h2>
-&lt;p>基于 Redis [^1] 实现的注册中心。&lt;/p>
-&lt;p>Redis 过期数据通过心跳的方式检测脏数据，服务器时间必须同步，并且对服务器有一定压力，否则过期检测会不准确&lt;/p>
-&lt;p>&lt;img alt="/user-guide/images/dubbo-redis-registry.jpg" src="https://cn.dubbo.apache.org/imgs/user/dubbo-redis-registry.jpg">&lt;/p>
-&lt;p>使用 Redis 的 Key/Map 结构存储数据结构：&lt;/p>
-&lt;ul>
-&lt;li>主 Key 为服务名和类型&lt;/li>
-&lt;li>Map 中的 Key 为 URL 地址&lt;/li>
-&lt;li>Map 中的 Value 为过期时间，用于判断脏数据，脏数据由监控中心删除 [^3]&lt;/li>
-&lt;/ul>
-&lt;p>使用 Redis 的 Publish/Subscribe 事件通知数据变更：&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>注册中心、服务发现与负载均衡 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/</link><description>Recent content in 注册中心、服务发现与负载均衡 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/index.xml" rel="self" type="application/rss+xml"/><item><title>Multicast</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/multicast/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/multicast/</guid><description>&lt;p&gt;Multicast 注册中心不需要启动任何中心节点，只要广播地址一样，就可以互相发现。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/user/multicast.jpg" alt="/user-guide/images/multicast.jpg"&gt;&lt;/p&gt;
+&lt;h2 id="1-使用说明"&gt;1 使用说明&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;multicast://224.5.6.7:1234&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;multicast&amp;#34;&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;224.5.6.7:1234&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="注意"&gt;注意:&lt;/h4&gt;
+&lt;p&gt;为了减少广播量，Dubbo 缺省使用单播发送提供者地址信息给消费者。
+如果一个机器上同时启了多个消费者进程，消费者需声明 &lt;code&gt;unicast=false&lt;/code&gt;，否则只会有一个消费者能收到消息; 当服务者和消费者运行在同一台机器上，消费者同样需要声明&lt;code&gt;unicast=false&lt;/code&gt;，否则消费者无法收到消息，导致No provider available for the service异常：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:application&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;demo-consumer&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:parameter&lt;/span&gt; key=&lt;span style="color:#2aa198"&gt;&amp;#34;unicast&amp;#34;&lt;/span&gt; value=&lt;span style="color:#2aa198"&gt;&amp;#34;false&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dubbo:application&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:consumer&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:parameter&lt;/span&gt; key=&lt;span style="color:#2aa198"&gt;&amp;#34;unicast&amp;#34;&lt;/span&gt; value=&lt;span style="color:#2aa198"&gt;&amp;#34;false&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dubbo:consumer&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="2-工作原理"&gt;2 工作原理&lt;/h2&gt;
+&lt;h3 id="21-基本流程"&gt;2.1 基本流程&lt;/h3&gt;
+&lt;ol start="0"&gt;
+&lt;li&gt;提供方启动时广播自己的地址&lt;/li&gt;
+&lt;li&gt;消费方启动时广播订阅请求&lt;/li&gt;
+&lt;li&gt;提供方收到订阅请求时，单播自己的地址给订阅者，如果设置了 &lt;code&gt;unicast=false&lt;/code&gt;，则广播给订阅者&lt;/li&gt;
+&lt;li&gt;消费方收到提供方地址时，连接该地址进行 RPC 调用。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="22-使用限制"&gt;2.2 使用限制&lt;/h3&gt;
+&lt;p&gt;组播受网络结构限制，只适合小规模应用或开发阶段使用。组播地址段: 224.0.0.0 - 239.255.255.255&lt;/p&gt;</description></item><item><title>Consul</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/consul/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/consul/</guid><description>&lt;h2 id="前置条件"&gt;前置条件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;了解 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/starter/"&gt;Dubbo 基本开发步骤&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;安装并启动 &lt;a href="http://consul.io"&gt;Consul&lt;/a&gt; 服务&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用说明"&gt;使用说明&lt;/h2&gt;
+&lt;h3 id="添加依赖"&gt;添加依赖&lt;/h3&gt;
+&lt;p&gt;从 Dubbo3 开始，consul 注册中国适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的&lt;a href="https://cn.dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-registry"&gt;模块&lt;/a&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.dubbo.extensions&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo-registry-consul&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.3.0&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="基本配置"&gt;基本配置&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;redis://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;redis&amp;#34;&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;10.20.153.10:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;redis&amp;#34;&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="使用场景"&gt;使用场景&lt;/h2&gt;
+&lt;p&gt;使用 Consul 作为共享注册中心实现，可用于 &lt;a href="https://cn.dubbo.apache.org/zh-cn/blog/2023/10/07/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E9%9B%B6%E6%94%B9%E9%80%A0%E5%AE%9E%E7%8E%B0-spring-cloud-apache-dubbo-%E4%BA%92%E9%80%9A/"&gt;Dubbo 与 Spring Cloud 体系的互通或迁移&lt;/a&gt;&lt;/p&gt;</description></item><item><title>Etcd</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/etcd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/etcd/</guid><description>&lt;h2 id="前置条件"&gt;前置条件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;了解 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/starter/"&gt;Dubbo 基本开发步骤&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;安装并启动 Etcd 服务&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用说明"&gt;使用说明&lt;/h2&gt;
+&lt;h3 id="添加依赖"&gt;添加依赖&lt;/h3&gt;
+&lt;p&gt;从 Dubbo3 开始，etcd 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的&lt;a href="https://cn.dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-registry"&gt;模块&lt;/a&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.dubbo.extensions&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo-registry-etcd&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.3.0&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="基本配置"&gt;基本配置&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;etcd://10.20.153.10:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;etcd://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;etcd&amp;#34;&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;10.20.153.10:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;etcd&amp;#34;&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>Redis</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/redis/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/others/redis/</guid><description>&lt;h2 id="前置条件"&gt;前置条件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;了解 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/quick-start/starter/"&gt;Dubbo 基本开发步骤&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;安装并启动 &lt;a href="http://redis.io"&gt;Redis&lt;/a&gt; 服务&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用说明"&gt;使用说明&lt;/h2&gt;
+&lt;h3 id="添加依赖"&gt;添加依赖&lt;/h3&gt;
+&lt;p&gt;从 Dubbo3 开始，redis 注册中心适配已经不再内嵌在 Dubbo 中，使用前需要单独引入独立的&lt;a href="https://cn.dubbo.apache.org/zh-cn/download/spi-extensions/#dubbo-registry"&gt;模块&lt;/a&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.dubbo.extensions&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;dubbo-registry-redis&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.3.0&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="基本配置"&gt;基本配置&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;redis://10.20.153.10:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;redis://10.20.153.10:6379?backup=10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;redis&amp;#34;&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;10.20.153.10:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:registry&lt;/span&gt; protocol=&lt;span style="color:#2aa198"&gt;&amp;#34;redis&amp;#34;&lt;/span&gt; address=&lt;span style="color:#2aa198"&gt;&amp;#34;10.20.153.10:6379,10.20.153.11:6379,10.20.153.12:6379&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="其他配置项"&gt;其他配置项&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;可通过 &lt;code&gt;&amp;lt;dubbo:registry group=&amp;quot;dubbo&amp;quot; /&amp;gt;&lt;/code&gt; 设置 redis 中 key 的前缀，缺省为 &lt;code&gt;dubbo&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;可通过 &lt;code&gt;&amp;lt;dubbo:registry cluster=&amp;quot;replicate&amp;quot; /&amp;gt;&lt;/code&gt; 设置 redis 集群策略，缺省为 &lt;code&gt;failover&lt;/code&gt;：
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;failover&lt;/code&gt;: 只写入和读取任意一台，失败时重试另一台，需要服务器端自行配置数据同步&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicate&lt;/code&gt;: 在客户端同时写入所有服务器，只读取单台，服务器端不需要同步，注册中心集群增大，性能压力也会更大&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="工作原理"&gt;工作原理&lt;/h2&gt;
+&lt;p&gt;基于 Redis [^1] 实现的注册中心。&lt;/p&gt;
+&lt;p&gt;Redis 过期数据通过心跳的方式检测脏数据，服务器时间必须同步，并且对服务器有一定压力，否则过期检测会不准确&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/user/dubbo-redis-registry.jpg" alt="/user-guide/images/dubbo-redis-registry.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;使用 Redis 的 Key/Map 结构存储数据结构：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主 Key 为服务名和类型&lt;/li&gt;
+&lt;li&gt;Map 中的 Key 为 URL 地址&lt;/li&gt;
+&lt;li&gt;Map 中的 Value 为过期时间，用于判断脏数据，脏数据由监控中心删除 [^3]&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;使用 Redis 的 Publish/Subscribe 事件通知数据变更：&lt;/p&gt;</description></item></channel></rss>

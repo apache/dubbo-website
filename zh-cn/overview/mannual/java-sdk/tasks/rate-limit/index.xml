@@ -1,92 +1,92 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>限流降级 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/</link><description>Recent content in 限流降级 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Sentinel 应对突发流量，保护您的应用</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/sentinel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/sentinel/</guid><description>&lt;p>在复杂的生产环境下可能部署着成千上万的 Dubbo 服务实例，流量持续不断地进入，服务之间进行相互调用。但是分布式系统中可能会因流量激增、系统负载过高、网络延迟等一系列问题，导致某些服务不可用，如果不进行相应的控制可能导致级联故障，影响服务的可用性，因此如何对流量进行合理的控制，成为保障服务稳定性的关键。&lt;/p>
-&lt;p>&lt;a href="https://github.com/alibaba/Sentinel">Sentinel&lt;/a> 是阿里中间件团队开源的，面向分布式服务架构的轻量级流量控制产品，主要以流量为切入点，从&lt;strong>流量控制&lt;/strong>、&lt;strong>熔断降级&lt;/strong>、&lt;strong>系统负载保护&lt;/strong>等多个维度来帮助用户保护服务的稳定性。&lt;/p>
-&lt;p>本文提供 Dubbo 整合 Sentinel 限流降级的最佳实践。&lt;/p>
-&lt;h2 id="快速接入-sentinel">快速接入 Sentinel&lt;/h2>
-&lt;p>Sentinel 通过对服务提供方和服务消费方的限流提升服务在极端场景下的可用性，接下来我们看看 Sentinel 对服务提供方和服务消费方限流的技术实现方式。&lt;/p>
-&lt;p>使用时我们只需引入以下模块（以 Maven 为例）：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.csp&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>sentinel-apache-dubbo3-adapter&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.8.6&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&amp;lt;!-- optional --&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">&amp;lt;groupId&amp;gt;&lt;/span>com.alibaba.csp&lt;span style="color:#268bd2">&amp;lt;/groupId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">&amp;lt;artifactId&amp;gt;&lt;/span>sentinel-transport-simple-http&lt;span style="color:#268bd2">&amp;lt;/artifactId&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#268bd2">&amp;lt;version&amp;gt;&lt;/span>1.8.6&lt;span style="color:#268bd2">&amp;lt;/version&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dependency&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>引入此依赖后，Dubbo 的服务接口和方法（包括调用端和服务端）就会成为 Sentinel 中的资源，在配置了规则后就可以自动享受到 Sentinel 的防护能力。&lt;/p>
-&lt;blockquote>
-&lt;p>&lt;code>sentinel-apache-dubbo3-adapter&lt;/code> 中包含 Sentinel Filter 实现，加入依赖之后会自动开启。如若不希望开启 Sentinel Dubbo Adapter 中的某个 Filter，可通过配置关闭，如 &lt;code>dubbo.provider.filter=&amp;quot;-sentinel.dubbo.consumer.filter&amp;quot;&lt;/code>。&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="示例详解">示例详解&lt;/h2>
-&lt;p>可在此查看以下 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-sentinel">示例的完整源码&lt;/a>。&lt;/p>
-&lt;h3 id="provider-端限流">Provider 端限流&lt;/h3>
-&lt;p>对服务提供方的流量控制可分为 &lt;strong>服务提供方的自我保护能力&lt;/strong> 和 &lt;strong>服务提供方对服务消费方的请求分配能力&lt;/strong> 两个维度。&lt;/p>
-&lt;h4 id="基于-qps-设定限流">基于 QPS 设定限流&lt;/h4>
-&lt;p>为了保护 Provider 不被激增的流量拖垮影响稳定性，可以给 Provider 配置 &lt;strong>QPS 模式&lt;/strong> 的限流，这样当每秒的请求量超过设定的阈值时会自动拒绝多出来的请求。&lt;/p>
-&lt;p>以下是示例中配置的 &lt;strong>服务级别&lt;/strong> 的 QPS 限流配置，最大 QPS 设定为 10：&lt;/p></description></item><item><title>Dubbo 框架内置的并发控制策略</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/concurrency-control/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/concurrency-control/</guid><description>&lt;p>Dubbo 通过 Filter 拦截器机制，内置了并发控制策略实现。限制从同一客户端到同一服务的并发请求数，防止恶意请求使服务器过载，确保服务的稳定性，并防止使用过多资源。&lt;/p>
-&lt;ul>
-&lt;li>控制某些服务的最大并发请求数，确保其他服务的资源可用性。系统过载和确保系统稳定性。&lt;/li>
-&lt;li>允许在需求增加时更平滑地扩展服务。&lt;/li>
-&lt;li>确保服务在高峰使用时间保持可靠和稳定。&lt;/li>
-&lt;/ul>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>限流降级 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/</link><description>Recent content in 限流降级 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Sentinel 应对突发流量，保护您的应用</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/sentinel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/sentinel/</guid><description>&lt;p&gt;在复杂的生产环境下可能部署着成千上万的 Dubbo 服务实例，流量持续不断地进入，服务之间进行相互调用。但是分布式系统中可能会因流量激增、系统负载过高、网络延迟等一系列问题，导致某些服务不可用，如果不进行相应的控制可能导致级联故障，影响服务的可用性，因此如何对流量进行合理的控制，成为保障服务稳定性的关键。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/alibaba/Sentinel"&gt;Sentinel&lt;/a&gt; 是阿里中间件团队开源的，面向分布式服务架构的轻量级流量控制产品，主要以流量为切入点，从&lt;strong&gt;流量控制&lt;/strong&gt;、&lt;strong&gt;熔断降级&lt;/strong&gt;、&lt;strong&gt;系统负载保护&lt;/strong&gt;等多个维度来帮助用户保护服务的稳定性。&lt;/p&gt;
+&lt;p&gt;本文提供 Dubbo 整合 Sentinel 限流降级的最佳实践。&lt;/p&gt;
+&lt;h2 id="快速接入-sentinel"&gt;快速接入 Sentinel&lt;/h2&gt;
+&lt;p&gt;Sentinel 通过对服务提供方和服务消费方的限流提升服务在极端场景下的可用性，接下来我们看看 Sentinel 对服务提供方和服务消费方限流的技术实现方式。&lt;/p&gt;
+&lt;p&gt;使用时我们只需引入以下模块（以 Maven 为例）：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.alibaba.csp&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;sentinel-apache-dubbo3-adapter&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.8.6&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&amp;lt;!-- optional --&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.alibaba.csp&lt;span style="color:#268bd2"&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;sentinel-transport-simple-http&lt;span style="color:#268bd2"&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.8.6&lt;span style="color:#268bd2"&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;引入此依赖后，Dubbo 的服务接口和方法（包括调用端和服务端）就会成为 Sentinel 中的资源，在配置了规则后就可以自动享受到 Sentinel 的防护能力。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;sentinel-apache-dubbo3-adapter&lt;/code&gt; 中包含 Sentinel Filter 实现，加入依赖之后会自动开启。如若不希望开启 Sentinel Dubbo Adapter 中的某个 Filter，可通过配置关闭，如 &lt;code&gt;dubbo.provider.filter=&amp;quot;-sentinel.dubbo.consumer.filter&amp;quot;&lt;/code&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="示例详解"&gt;示例详解&lt;/h2&gt;
+&lt;p&gt;可在此查看以下 &lt;a href="https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-sentinel"&gt;示例的完整源码&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id="provider-端限流"&gt;Provider 端限流&lt;/h3&gt;
+&lt;p&gt;对服务提供方的流量控制可分为 &lt;strong&gt;服务提供方的自我保护能力&lt;/strong&gt; 和 &lt;strong&gt;服务提供方对服务消费方的请求分配能力&lt;/strong&gt; 两个维度。&lt;/p&gt;
+&lt;h4 id="基于-qps-设定限流"&gt;基于 QPS 设定限流&lt;/h4&gt;
+&lt;p&gt;为了保护 Provider 不被激增的流量拖垮影响稳定性，可以给 Provider 配置 &lt;strong&gt;QPS 模式&lt;/strong&gt; 的限流，这样当每秒的请求量超过设定的阈值时会自动拒绝多出来的请求。&lt;/p&gt;
+&lt;p&gt;以下是示例中配置的 &lt;strong&gt;服务级别&lt;/strong&gt; 的 QPS 限流配置，最大 QPS 设定为 10：&lt;/p&gt;</description></item><item><title>Dubbo 框架内置的并发控制策略</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/concurrency-control/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/concurrency-control/</guid><description>&lt;p&gt;Dubbo 通过 Filter 拦截器机制，内置了并发控制策略实现。限制从同一客户端到同一服务的并发请求数，防止恶意请求使服务器过载，确保服务的稳定性，并防止使用过多资源。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;控制某些服务的最大并发请求数，确保其他服务的资源可用性。系统过载和确保系统稳定性。&lt;/li&gt;
+&lt;li&gt;允许在需求增加时更平滑地扩展服务。&lt;/li&gt;
+&lt;li&gt;确保服务在高峰使用时间保持可靠和稳定。&lt;/li&gt;
+&lt;/ul&gt;
 
 
-&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
- 这种方式要求用户准确的预先评估系统能处理的并发数，而准确的评估系统处理能力并不是一件容易的事情，因此 Dubbo 还提供了自适应限流模式，根据系统负载自动识别系统健康程度并进行限流保护，可以在此查看 &lt;a href="../adaptive-concurrency-control">自适应限流模式使用文档&lt;/a>。
+ 这种方式要求用户准确的预先评估系统能处理的并发数，而准确的评估系统处理能力并不是一件容易的事情，因此 Dubbo 还提供了自适应限流模式，根据系统负载自动识别系统健康程度并进行限流保护，可以在此查看 &lt;a href="../adaptive-concurrency-control"&gt;自适应限流模式使用文档&lt;/a&gt;。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;h2 id="限流策略配置">限流策略配置&lt;/h2>
-&lt;h3 id="限制服务器端并发执行数服务粒度">限制服务器端并发执行数(服务粒度)&lt;/h3>
-&lt;p>限制 &lt;code>com.foo.BarService&lt;/code> 的每个方法，服务器端并发执行（或占用线程池线程数）不能超过 10 个&lt;/p>
-&lt;p>XML 方式：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> executes=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注解方式：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(executes&lt;span style="color:#719e07">=&lt;/span>10)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> DemoServiceImpl &lt;span style="color:#268bd2">implements&lt;/span> DemoService{}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="限制服务器端并发执行数方法粒度">限制服务器端并发执行数(方法粒度)&lt;/h3>
-&lt;p>限制 &lt;code>com.foo.BarService&lt;/code> 的 &lt;code>sayHello&lt;/code> 方法，服务器端并发执行（或占用线程池线程数）不能超过 10 个&lt;/p>
-&lt;p>XML 方式：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span>&lt;span style="color:#268bd2">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#268bd2">&amp;lt;dubbo:method&lt;/span> name=&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span> executes=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;/dubbo:service&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注解方式：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboService&lt;/span>(executes&lt;span style="color:#719e07">=&lt;/span>10, methods &lt;span style="color:#719e07">=&lt;/span> {&lt;span style="color:#268bd2">@Method&lt;/span>(name&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">&amp;#34;sayHello&amp;#34;&lt;/span>,executes&lt;span style="color:#719e07">=&lt;/span>10)})
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> DemoServiceImpl &lt;span style="color:#268bd2">implements&lt;/span> DemoService{}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="限制消费端并发调用数服务粒度">限制消费端并发调用数(服务粒度)&lt;/h3>
-&lt;p>限制 &lt;code>com.foo.BarService&lt;/code> 的每个方法，每客户端并发执行（或占用连接的请求数）不能超过 10 个&lt;/p>
-&lt;p>XML 方式：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> actives=&lt;span style="color:#2aa198">&amp;#34;10&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>注解方式：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">@DubboReference&lt;/span>(actives&lt;span style="color:#719e07">=&lt;/span>10)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">private&lt;/span> DemoService demoService;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="限制消费端并发调用数方法粒度">限制消费端并发调用数(方法粒度)&lt;/h3>
-&lt;p>限制 &lt;code>com.foo.BarService&lt;/code> 的 &lt;code>sayHello&lt;/code> 方法，每客户端并发执行（或占用连接的请求数）不能超过 10 个&lt;/p></description></item><item><title>自适应限流</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/adaptive-concurrency-control/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/adaptive-concurrency-control/</guid><description>&lt;p>自适应限流的设计与实现思路请参考 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/reference/proposals/heuristic-flow-control/#%E8%87%AA%E9%80%82%E5%BA%94%E9%99%90%E6%B5%81">Dubbo 自适应限流功能&lt;/a>。自适应限流能够确保分布式系统稳定性和可靠性，例如在服务提供商资源有限且多变的场景下。&lt;/p>
-&lt;h2 id="使用场景">使用场景&lt;/h2>
-&lt;ul>
-&lt;li>服务降级预防：当服务提供者因资源耗尽而性能下降时，使用自适应限流暂时减少其接受的请求数直至恢复正常。&lt;/li>
-&lt;li>峰值流量处理：当服务流量突然激增时，自适应流量限制可以通过动态减少接受的请求数量来帮助防止服务过载。&lt;/li>
-&lt;li>不可预测流量处理：服务提供商可能会遇到不可预测的流量，第三方应用程序使用服务时可能会偶尔产生流量，自适应流量限制可以根据当前系统负载调整允许的最大并发请求数并防止过载。&lt;/li>
-&lt;/ul>
-&lt;h2 id="使用方式">使用方式&lt;/h2>
-&lt;p>设置方法与静态的最大并发值设置类似，只需在服务端设置 flowcontrol 参数即可，可选值有以下两种：&lt;/p>
-&lt;ul>
-&lt;li>heuristicSmoothingFlowControl。当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从 HeuristicSmoothingFlowControl 算法中获得当前的 maxConcurrency 值。如果当前正在处理的请求数量超过了 maxConcurrency，则拒绝该请求。&lt;/li>
-&lt;li>autoConcurrencyLimiter。与 HeuristicSmoothingFlowControl 的最大区别是，AutoConcurrencyLimiter 是基于窗口的，每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到 maxConcurrency，其次，利用exploreRatio来对剩余的容量进行探索。&lt;/li>
-&lt;/ul>
-&lt;blockquote>
-&lt;p>在确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。&lt;/p>
-&lt;/blockquote>
-&lt;h3 id="示例一使用-heuristicsmoothingflowcontrol-自适应限流算法">示例一：使用 heuristicSmoothingFlowControl 自适应限流算法&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.provider.flowcontrol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">heuristicSmoothingFlowControl&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> flowcontrol=&lt;span style="color:#2aa198">&amp;#34;heuristicSmoothingFlowControl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="示例二使用-autoconcurrencylimiter-自适应限流算法">示例二：使用 autoConcurrencyLimiter 自适应限流算法&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-properties" data-lang="properties">&lt;span style="display:flex;">&lt;span>dubbo.provider.flowcontrol&lt;span style="color:#719e07">=&lt;/span>&lt;span style="color:#2aa198">autoConcurrencyLimiter&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:provider&lt;/span> flowcontrol=&lt;span style="color:#2aa198">&amp;#34;autoConcurrencyLimiter&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="示例三设置服务粒度的-heuristicsmoothingflowcontrol-自适应限流">示例三：设置服务粒度的 heuristicSmoothingFlowControl 自适应限流&lt;/h3>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-xml" data-lang="xml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">&amp;lt;dubbo:service&lt;/span> interface=&lt;span style="color:#2aa198">&amp;#34;com.foo.BarService&amp;#34;&lt;/span> flowcontrol=&lt;span style="color:#2aa198">&amp;#34;heuristicSmoothingFlowControl&amp;#34;&lt;/span> &lt;span style="color:#268bd2">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>
+&lt;h2 id="限流策略配置"&gt;限流策略配置&lt;/h2&gt;
+&lt;h3 id="限制服务器端并发执行数服务粒度"&gt;限制服务器端并发执行数(服务粒度)&lt;/h3&gt;
+&lt;p&gt;限制 &lt;code&gt;com.foo.BarService&lt;/code&gt; 的每个方法，服务器端并发执行（或占用线程池线程数）不能超过 10 个&lt;/p&gt;
+&lt;p&gt;XML 方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;com.foo.BarService&amp;#34;&lt;/span&gt; executes=&lt;span style="color:#2aa198"&gt;&amp;#34;10&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;注解方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;(executes&lt;span style="color:#719e07"&gt;=&lt;/span&gt;10)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; DemoServiceImpl &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; DemoService{}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="限制服务器端并发执行数方法粒度"&gt;限制服务器端并发执行数(方法粒度)&lt;/h3&gt;
+&lt;p&gt;限制 &lt;code&gt;com.foo.BarService&lt;/code&gt; 的 &lt;code&gt;sayHello&lt;/code&gt; 方法，服务器端并发执行（或占用线程池线程数）不能超过 10 个&lt;/p&gt;
+&lt;p&gt;XML 方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;com.foo.BarService&amp;#34;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:method&lt;/span&gt; name=&lt;span style="color:#2aa198"&gt;&amp;#34;sayHello&amp;#34;&lt;/span&gt; executes=&lt;span style="color:#2aa198"&gt;&amp;#34;10&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;/dubbo:service&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;注解方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboService&lt;/span&gt;(executes&lt;span style="color:#719e07"&gt;=&lt;/span&gt;10, methods &lt;span style="color:#719e07"&gt;=&lt;/span&gt; {&lt;span style="color:#268bd2"&gt;@Method&lt;/span&gt;(name&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;&amp;#34;sayHello&amp;#34;&lt;/span&gt;,executes&lt;span style="color:#719e07"&gt;=&lt;/span&gt;10)})
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; DemoServiceImpl &lt;span style="color:#268bd2"&gt;implements&lt;/span&gt; DemoService{}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="限制消费端并发调用数服务粒度"&gt;限制消费端并发调用数(服务粒度)&lt;/h3&gt;
+&lt;p&gt;限制 &lt;code&gt;com.foo.BarService&lt;/code&gt; 的每个方法，每客户端并发执行（或占用连接的请求数）不能超过 10 个&lt;/p&gt;
+&lt;p&gt;XML 方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;com.foo.BarService&amp;#34;&lt;/span&gt; actives=&lt;span style="color:#2aa198"&gt;&amp;#34;10&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;注解方式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;@DubboReference&lt;/span&gt;(actives&lt;span style="color:#719e07"&gt;=&lt;/span&gt;10)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;private&lt;/span&gt; DemoService demoService;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="限制消费端并发调用数方法粒度"&gt;限制消费端并发调用数(方法粒度)&lt;/h3&gt;
+&lt;p&gt;限制 &lt;code&gt;com.foo.BarService&lt;/code&gt; 的 &lt;code&gt;sayHello&lt;/code&gt; 方法，每客户端并发执行（或占用连接的请求数）不能超过 10 个&lt;/p&gt;</description></item><item><title>自适应限流</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/adaptive-concurrency-control/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/adaptive-concurrency-control/</guid><description>&lt;p&gt;自适应限流的设计与实现思路请参考 &lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/reference/proposals/heuristic-flow-control/#%E8%87%AA%E9%80%82%E5%BA%94%E9%99%90%E6%B5%81"&gt;Dubbo 自适应限流功能&lt;/a&gt;。自适应限流能够确保分布式系统稳定性和可靠性，例如在服务提供商资源有限且多变的场景下。&lt;/p&gt;
+&lt;h2 id="使用场景"&gt;使用场景&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;服务降级预防：当服务提供者因资源耗尽而性能下降时，使用自适应限流暂时减少其接受的请求数直至恢复正常。&lt;/li&gt;
+&lt;li&gt;峰值流量处理：当服务流量突然激增时，自适应流量限制可以通过动态减少接受的请求数量来帮助防止服务过载。&lt;/li&gt;
+&lt;li&gt;不可预测流量处理：服务提供商可能会遇到不可预测的流量，第三方应用程序使用服务时可能会偶尔产生流量，自适应流量限制可以根据当前系统负载调整允许的最大并发请求数并防止过载。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
+&lt;p&gt;设置方法与静态的最大并发值设置类似，只需在服务端设置 flowcontrol 参数即可，可选值有以下两种：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;heuristicSmoothingFlowControl。当服务端收到一个请求时，首先判断CPU的使用率是否超过50%。如果没有超过50%，则接受这个请求进行处理。如果超过50%，说明当前的负载较高，便从 HeuristicSmoothingFlowControl 算法中获得当前的 maxConcurrency 值。如果当前正在处理的请求数量超过了 maxConcurrency，则拒绝该请求。&lt;/li&gt;
+&lt;li&gt;autoConcurrencyLimiter。与 HeuristicSmoothingFlowControl 的最大区别是，AutoConcurrencyLimiter 是基于窗口的，每当窗口内积累了一定量的采样数据时，才利用窗口内的数据来更新得到 maxConcurrency，其次，利用exploreRatio来对剩余的容量进行探索。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在确保服务端存在多个节点，并且消费端开启重试策略的前提下，限流功能才能更好的发挥作用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="示例一使用-heuristicsmoothingflowcontrol-自适应限流算法"&gt;示例一：使用 heuristicSmoothingFlowControl 自适应限流算法&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-properties" data-lang="properties"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo.provider.flowcontrol&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;heuristicSmoothingFlowControl&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:provider&lt;/span&gt; flowcontrol=&lt;span style="color:#2aa198"&gt;&amp;#34;heuristicSmoothingFlowControl&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="示例二使用-autoconcurrencylimiter-自适应限流算法"&gt;示例二：使用 autoConcurrencyLimiter 自适应限流算法&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-properties" data-lang="properties"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dubbo.provider.flowcontrol&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;autoConcurrencyLimiter&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:provider&lt;/span&gt; flowcontrol=&lt;span style="color:#2aa198"&gt;&amp;#34;autoConcurrencyLimiter&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="示例三设置服务粒度的-heuristicsmoothingflowcontrol-自适应限流"&gt;示例三：设置服务粒度的 heuristicSmoothingFlowControl 自适应限流&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-xml" data-lang="xml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;&amp;lt;dubbo:service&lt;/span&gt; interface=&lt;span style="color:#2aa198"&gt;&amp;#34;com.foo.BarService&amp;#34;&lt;/span&gt; flowcontrol=&lt;span style="color:#2aa198"&gt;&amp;#34;heuristicSmoothingFlowControl&amp;#34;&lt;/span&gt; &lt;span style="color:#268bd2"&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item></channel></rss>

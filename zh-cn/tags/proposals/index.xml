@@ -1,49 +1,49 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Proposals on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/tags/proposals/</link><description>Recent content in Proposals on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 23 Feb 2023 11:00:42 +0800</lastBuildDate><atom:link href="https://cn.dubbo.apache.org/zh-cn/tags/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo3 应用级服务发现设计</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</guid><description>&lt;h2 id="objective">Objective&lt;/h2>
-&lt;ul>
-&lt;li>显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。&lt;/li>
-&lt;li>适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。&lt;/li>
-&lt;/ul>
-&lt;h2 id="background">Background&lt;/h2>
-&lt;p>&lt;img alt="interface-arc" src="https://cn.dubbo.apache.org/imgs/blog/proposals/discovery/arc.png">&lt;/p>
-&lt;p>我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。&lt;/p>
-&lt;p>在这个过程中：&lt;/p>
-&lt;ul>
-&lt;li>每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；&lt;/li>
-&lt;li>注册中心通过这个 key 对 provider 实例地址进行聚合；&lt;/li>
-&lt;li>Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="interface-data1" src="https://cn.dubbo.apache.org/imgs/blog/proposals/discovery/interface-data1.png">&lt;/p>
-&lt;p>这里，我们对接口级地址发现的内部数据结构进行详细分析。&lt;/p>
-&lt;p>首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。&lt;/p>
-&lt;p>然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。&lt;/p>
-&lt;p>&lt;img alt="interface-data2" src="https://cn.dubbo.apache.org/imgs/blog/proposals/discovery/interface-data2.png">&lt;/p>
-&lt;p>这里把 URL 地址数据划分成了几份：&lt;/p>
-&lt;ul>
-&lt;li>首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体&lt;/li>
-&lt;li>其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明&lt;/li>
-&lt;li>下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。&lt;/li>
-&lt;li>最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。&lt;/li>
-&lt;/ul>
-&lt;p>结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：&lt;/p></description></item><item><title>Dubbo Go 中 metrics 的设计</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</guid><description>&lt;p>最近因为要在 Apache/dubbo-go（以下简称 dubbo-go ）里面实现类似的这个 metrics 功能，于是花了很多时间去了解现在 Dubbo 里面的 metrics 是怎么实现的。该部分，实际上是被放在一个独立的项目里面，即
-metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter">https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter&lt;/a> 下 metrics 子目录。&lt;/p>
-&lt;p>总体上来说，Dubbo 的 metrics 是一个从设计到实现都非常优秀的模块，理论上来说，大部分的 Java 项目是可以直接使用 metrics 的。但也因为兼顾性能、扩展性等各种非功能特性，所以初看代码会有种无从下手的感觉。&lt;/p>
-&lt;p>今天这篇文章将会从比较大的概念和抽象上讨论一下 dubbo-go 中的 metrics 模块的设计——实际上也就是 Dubbo 中的 metrics 的设计。因为我仅仅是将 Dubbo 里面的相关内容在 dubbo-go 中复制一份。&lt;/p>
-&lt;p>目前 dubbo-go 的 metrics 刚刚开始起步，第一个 PR 是： &lt;a href="https://github.com/apache/dubbo-go/pull/278">https://github.com/apache/dubbo-go/pull/278&lt;/a>&lt;/p>
-&lt;h2 id="总体设计">总体设计&lt;/h2>
-&lt;h3 id="metrics">Metrics&lt;/h3>
-&lt;p>要想理解 metrics 的设计，首先要理解，我们需要收集一些什么数据。我们可以轻易列举出来在 RPC 领域里面我们所关心的各种指标，诸如每个服务的调用次数，响应时间；如果更加细致一点，还有各种响应时间的分布，平均响应时间，999线……&lt;/p>
-&lt;p>但是上面列举的是从数据的内容上划分的。 metrics 在抽象上，则是摒弃了这种划分方式，而是结合了数据的特性和表现形式综合划分的。&lt;/p>
-&lt;p>从源码里面很容易找到这种划分的抽象。&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/metrics/p1.png">&lt;/p>
-&lt;p>metrics 设计了 Metric 接口作为所有数据的顶级抽象：&lt;/p>
-&lt;p>在 Dubbo 里面，其比较关键的子接口是：&lt;/p>
-&lt;p>&lt;img alt="img" src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/metrics/p2.webp">&lt;/p>
-&lt;p>为了大家理解，这里我抄一下这些接口的用途：&lt;/p>
-&lt;ul>
-&lt;li>Gauge: 一种实时数据的度量，反映的是瞬态的数据，不具有累加性，例如当前 JVM 的线程数；&lt;/li>
-&lt;li>Counter: 计数器型指标，适用于记录调用总量等类型的数据；&lt;/li>
-&lt;li>Histogram : 直方分布指标，例如，可以用于统计某个接口的响应时间，可以展示 50%, 70%, 90% 的请求响应时间落在哪个区间内；&lt;/li>
-&lt;li>Meter: 一种用于度量一段时间内吞吐率的计量器。例如，一分钟内，五分钟内，十五分钟内的qps指标；&lt;/li>
-&lt;li>Timer: Timer相当于Meter+Histogram的组合，同时统计一段代码，一个方法的qps，以及执行时间的分布情况；&lt;/li>
-&lt;/ul>
-&lt;p>目前 dubbo-go 只实现了 FastCompass ，它也是 Metric 的子类：&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Proposals on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/tags/proposals/</link><description>Recent content in Proposals on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 23 Feb 2023 11:00:42 +0800</lastBuildDate><atom:link href="https://cn.dubbo.apache.org/zh-cn/tags/proposals/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo3 应用级服务发现设计</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 30 Jan 2023 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2023/01/30/dubbo3-%E5%BA%94%E7%94%A8%E7%BA%A7%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E8%AE%BE%E8%AE%A1/</guid><description>&lt;h2 id="objective"&gt;Objective&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;显著降低服务发现过程的资源消耗，包括提升注册中心容量上限、降低消费端地址解析资源占用等，使得 Dubbo3 框架能够支持更大规模集群的服务治理，实现无限水平扩容。&lt;/li&gt;
+&lt;li&gt;适配底层基础设施服务发现模型，如 Kubernetes、Service Mesh 等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/proposals/discovery/arc.png" alt="interface-arc"&gt;&lt;/p&gt;
+&lt;p&gt;我们从 Dubbo 最经典的工作原理图说起，Dubbo 从设计之初就内置了服务地址发现的能力，Provider 注册地址到注册中心，Consumer 通过订阅实时获取注册中心的地址更新，在收到地址列表后，consumer 基于特定的负载均衡策略发起对 provider 的 RPC 调用。&lt;/p&gt;
+&lt;p&gt;在这个过程中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每个 Provider 通过特定的 key 向注册中心注册本机可访问地址；&lt;/li&gt;
+&lt;li&gt;注册中心通过这个 key 对 provider 实例地址进行聚合；&lt;/li&gt;
+&lt;li&gt;Consumer 通过同样的 key 从注册中心订阅，以便及时收到聚合后的地址列表；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/proposals/discovery/interface-data1.png" alt="interface-data1"&gt;&lt;/p&gt;
+&lt;p&gt;这里，我们对接口级地址发现的内部数据结构进行详细分析。&lt;/p&gt;
+&lt;p&gt;首先，看右下角 provider 实例内部的数据与行为。Provider 部署的应用中通常会有多个 Service，也就是 Dubbo2 中的服务，每个 service 都可能会有其独有的配置，我们所讲的 service 服务发布的过程，其实就是基于这个服务配置生成地址 URL 的过程，生成的地址数据如图所示；同样的，其他服务也都会生成地址。&lt;/p&gt;
+&lt;p&gt;然后，看一下注册中心的地址数据存储结构，注册中心以 service 服务名为数据划分依据，将一个服务下的所有地址数据都作为子节点进行聚合，子节点的内容就是实际可访问的ip地址，也就是我们 Dubbo 中 URL，格式就是刚才 provider 实例生成的。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/proposals/discovery/interface-data2.png" alt="interface-data2"&gt;&lt;/p&gt;
+&lt;p&gt;这里把 URL 地址数据划分成了几份：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;首先是实例可访问地址，主要信息包含 ip port，是消费端将基于这条数据生成 tcp 网络链接，作为后续 RPC 数据的传输载体&lt;/li&gt;
+&lt;li&gt;其次是 RPC 元数据，元数据用于定义和描述一次 RPC 请求，一方面表明这条地址数据是与某条具体的 RPC 服务有关的，它的版本号、分组以及方法相关信息，另一方面表明&lt;/li&gt;
+&lt;li&gt;下一部分是 RPC 配置数据，部分配置用于控制 RPC 调用的行为，还有一部分配置用于同步 Provider 进程实例的状态，典型的如超时时间、数据编码的序列化方式等。&lt;/li&gt;
+&lt;li&gt;最后一部分是自定义的元数据，这部分内容区别于以上框架预定义的各项配置，给了用户更大的灵活性，用户可任意扩展并添加自定义元数据，以进一步丰富实例状态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;结合以上两页对于 Dubbo2 接口级地址模型的分析，以及最开始的 Dubbo 基本原理图，我们可以得出这么几条结论：&lt;/p&gt;</description></item><item><title>Dubbo Go 中 metrics 的设计</title><link>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</link><pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/blog/2021/01/11/dubbo-go-%E4%B8%AD-metrics-%E7%9A%84%E8%AE%BE%E8%AE%A1/</guid><description>&lt;p&gt;最近因为要在 Apache/dubbo-go（以下简称 dubbo-go ）里面实现类似的这个 metrics 功能，于是花了很多时间去了解现在 Dubbo 里面的 metrics 是怎么实现的。该部分，实际上是被放在一个独立的项目里面，即
+metrics ，见 &lt;a href="https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter"&gt;https://github.com/flycash/dubbo-go/tree/feature/MetricsFilter&lt;/a&gt; 下 metrics 子目录。&lt;/p&gt;
+&lt;p&gt;总体上来说，Dubbo 的 metrics 是一个从设计到实现都非常优秀的模块，理论上来说，大部分的 Java 项目是可以直接使用 metrics 的。但也因为兼顾性能、扩展性等各种非功能特性，所以初看代码会有种无从下手的感觉。&lt;/p&gt;
+&lt;p&gt;今天这篇文章将会从比较大的概念和抽象上讨论一下 dubbo-go 中的 metrics 模块的设计——实际上也就是 Dubbo 中的 metrics 的设计。因为我仅仅是将 Dubbo 里面的相关内容在 dubbo-go 中复制一份。&lt;/p&gt;
+&lt;p&gt;目前 dubbo-go 的 metrics 刚刚开始起步，第一个 PR 是： &lt;a href="https://github.com/apache/dubbo-go/pull/278"&gt;https://github.com/apache/dubbo-go/pull/278&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="总体设计"&gt;总体设计&lt;/h2&gt;
+&lt;h3 id="metrics"&gt;Metrics&lt;/h3&gt;
+&lt;p&gt;要想理解 metrics 的设计，首先要理解，我们需要收集一些什么数据。我们可以轻易列举出来在 RPC 领域里面我们所关心的各种指标，诸如每个服务的调用次数，响应时间；如果更加细致一点，还有各种响应时间的分布，平均响应时间，999线……&lt;/p&gt;
+&lt;p&gt;但是上面列举的是从数据的内容上划分的。 metrics 在抽象上，则是摒弃了这种划分方式，而是结合了数据的特性和表现形式综合划分的。&lt;/p&gt;
+&lt;p&gt;从源码里面很容易找到这种划分的抽象。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/metrics/p1.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;metrics 设计了 Metric 接口作为所有数据的顶级抽象：&lt;/p&gt;
+&lt;p&gt;在 Dubbo 里面，其比较关键的子接口是：&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/blog/dubbo-go/metrics/p2.webp" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;为了大家理解，这里我抄一下这些接口的用途：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Gauge: 一种实时数据的度量，反映的是瞬态的数据，不具有累加性，例如当前 JVM 的线程数；&lt;/li&gt;
+&lt;li&gt;Counter: 计数器型指标，适用于记录调用总量等类型的数据；&lt;/li&gt;
+&lt;li&gt;Histogram : 直方分布指标，例如，可以用于统计某个接口的响应时间，可以展示 50%, 70%, 90% 的请求响应时间落在哪个区间内；&lt;/li&gt;
+&lt;li&gt;Meter: 一种用于度量一段时间内吞吐率的计量器。例如，一分钟内，五分钟内，十五分钟内的qps指标；&lt;/li&gt;
+&lt;li&gt;Timer: Timer相当于Meter+Histogram的组合，同时统计一段代码，一个方法的qps，以及执行时间的分布情况；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;目前 dubbo-go 只实现了 FastCompass ，它也是 Metric 的子类：&lt;/p&gt;</description></item></channel></rss>

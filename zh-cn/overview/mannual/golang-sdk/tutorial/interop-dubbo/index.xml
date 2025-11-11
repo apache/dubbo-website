@@ -1,93 +1,93 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>与dubbo-java互通 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/</link><description>Recent content in 与dubbo-java互通 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/index.xml" rel="self" type="application/rss+xml"/><item><title>基于 protobuf 实现 triple 协议互通（适用于两边都用 protobuf 开发的场景）</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_triple_protobuf/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_triple_protobuf/</guid><description>&lt;p>我们这里提供一个示例，演示如何使用 triple 协议实现 dubbo-java 和 dubbo-go 互通，可在此查看 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/java_interop/protobuf-triple">示例完整源码&lt;/a>。&lt;/p>
-&lt;p>示例主要内容如下：&lt;/p>
-&lt;ul>
-&lt;li>go，go 语言实现的 rpc server 与 client&lt;/li>
-&lt;li>java，java 语言实现的 rpc server 与 client&lt;/li>
-&lt;/ul>
-&lt;h2 id="共享-protobuf-服务定义">共享 protobuf 服务定义&lt;/h2>
-&lt;p>共享服务定义如下，请注意以下 &lt;code>package&lt;/code>、&lt;code>go_package &lt;/code>、&lt;code>java_package&lt;/code> 的具体定义：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//protoc --go_out=. --go_opt=paths=source_relative --go-triple_out=. greet.proto
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org&lt;span style="color:#719e07">.&lt;/span>apache.dubbo.sample;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> go_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-samples/java_interop/protobuf-triple/go/proto;proto&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">//package of go
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#719e07">option&lt;/span> java_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#39;org.apache.dubbo.sample&amp;#39;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_multiple_files &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#cb4b16">true&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> java_outer_classname &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;HelloWorldProto&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> objc_class_prefix &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;WH&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The greeting service definition.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">service&lt;/span> Greeter {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Sends a greeting
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#719e07">rpc&lt;/span> SayHello(HelloRequest) &lt;span style="color:#719e07">returns&lt;/span> (HelloReply);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Sends a greeting via stream
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// rpc SayHelloStream (stream HelloRequest) returns (stream HelloReply) {}
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The request message containing the user&amp;#39;s name.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloRequest&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// The response message containing the greetings
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">HelloReply&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> &lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="java-client调用go-server">java-client调用go-server&lt;/h2>
-&lt;ol>
-&lt;li>首先启动 go server：&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>go run go/go-server/cmd/server.go
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行以上命令后，go server 运行在 50052 端口，可通过以下命令测试服务运行正常：&lt;/p></description></item><item><title>非protoubf模式协议互通（适用于老版本 dubbo java 应用）</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_dubbo_non_protobuf/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_dubbo_non_protobuf/</guid><description>&lt;div class="alert alert-warning" role="alert">
-&lt;h4 class="alert-heading">注意&lt;/h4>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>与dubbo-java互通 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/</link><description>Recent content in 与dubbo-java互通 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/index.xml" rel="self" type="application/rss+xml"/><item><title>基于 protobuf 实现 triple 协议互通（适用于两边都用 protobuf 开发的场景）</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_triple_protobuf/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_triple_protobuf/</guid><description>&lt;p&gt;我们这里提供一个示例，演示如何使用 triple 协议实现 dubbo-java 和 dubbo-go 互通，可在此查看 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/java_interop/protobuf-triple"&gt;示例完整源码&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;示例主要内容如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;go，go 语言实现的 rpc server 与 client&lt;/li&gt;
+&lt;li&gt;java，java 语言实现的 rpc server 与 client&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="共享-protobuf-服务定义"&gt;共享 protobuf 服务定义&lt;/h2&gt;
+&lt;p&gt;共享服务定义如下，请注意以下 &lt;code&gt;package&lt;/code&gt;、&lt;code&gt;go_package &lt;/code&gt;、&lt;code&gt;java_package&lt;/code&gt; 的具体定义：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-protobuf" data-lang="protobuf"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//protoc --go_out=. --go_opt=paths=source_relative --go-triple_out=. greet.proto
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;syntax &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;proto3&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org&lt;span style="color:#719e07"&gt;.&lt;/span&gt;apache.dubbo.sample;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; go_package &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;github.com/apache/dubbo-go-samples/java_interop/protobuf-triple/go/proto;proto&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;//package of go
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; java_package &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#39;org.apache.dubbo.sample&amp;#39;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; java_multiple_files &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; java_outer_classname &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;HelloWorldProto&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; objc_class_prefix &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;WH&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// The greeting service definition.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;service&lt;/span&gt; Greeter {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// Sends a greeting
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; SayHello(HelloRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (HelloReply);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// Sends a greeting via stream
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt; &lt;span style="color:#586e75"&gt;// rpc SayHelloStream (stream HelloRequest) returns (stream HelloReply) {}
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// The request message containing the user&amp;#39;s name.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloRequest&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// The response message containing the greetings
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;&lt;/span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;HelloReply&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; &lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="java-client调用go-server"&gt;java-client调用go-server&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;首先启动 go server：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;go run go/go-server/cmd/server.go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;运行以上命令后，go server 运行在 50052 端口，可通过以下命令测试服务运行正常：&lt;/p&gt;</description></item><item><title>非protoubf模式协议互通（适用于老版本 dubbo java 应用）</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_dubbo_non_protobuf/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/call_java_protocol_dubbo_non_protobuf/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;注意&lt;/h4&gt;
 
  在阅读本文档之前，请记住我们推荐使用 protobuf+triple 的模式编写 java 和 go 语言互通的服务。本文仅当您已经有老版本 dubbo java 应用的情况下适用，否则的话请参考上一篇文档，使用 protobuf+triple 开发服务。
 
-&lt;/div>
+&lt;/div&gt;
 
-&lt;p>可在此查看本文档 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/java_interop/non-protobuf-dubbo">完整示例源码&lt;/a>。&lt;/p>
-&lt;h2 id="go-client-调用-java-server">go-client 调用 java-server&lt;/h2>
-&lt;p>但如果您是 dubbo java 的老用户，可能您的 dubbo java 应用并没有使用 protobuf（直接使用 java interface 定义服务），这个时候您需要使用以下方式开发 dubbo go-client，来调用老版本的 dubbo 服务。&lt;/p>
-&lt;blockquote>
-&lt;p>以下方案同时支持 triple(non-protobuf) 和 dubbo 协议，你只需要调整协议配置 &lt;code>client.WithClientProtocolTriple()&lt;/code> 即可。&lt;/p>
-&lt;/blockquote>
-&lt;p>假设我们当前的 java 服务定义如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> org.apache.dubbo.samples.api;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">public&lt;/span> &lt;span style="color:#268bd2">interface&lt;/span> &lt;span style="color:#268bd2">GreetingsService&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> String &lt;span style="color:#268bd2">sayHi&lt;/span>(String name);
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们需要这么编写 go-client，以实现服务调用：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 生成共享 client，指定
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>cliDubbo, _ &lt;span style="color:#719e07">:=&lt;/span> client.&lt;span style="color:#268bd2">NewClient&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	client.&lt;span style="color:#268bd2">WithClientProtocolDubbo&lt;/span>(),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	client.&lt;span style="color:#268bd2">WithClientSerialization&lt;/span>(constant.Hessian2Serialization),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 生成服务代理，这里指定 java 服务全路径名
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>connDubbo, _ &lt;span style="color:#719e07">:=&lt;/span> cliDubbo.&lt;span style="color:#268bd2">Dial&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;org.apache.dubbo.samples.api.GreetingsService&amp;#34;&lt;/span>, client.&lt;span style="color:#268bd2">WithURL&lt;/span>(&lt;span style="color:#2aa198">&amp;#34;tri://localhost:50052&amp;#34;&lt;/span>))
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">var&lt;/span> respDubbo &lt;span style="color:#dc322f">string&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// 发起调用，参数以数组形式指定（标准 json 格式，可参考 java 泛化调用）
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>connDubbo.&lt;span style="color:#268bd2">CallUnary&lt;/span>(context.&lt;span style="color:#268bd2">Background&lt;/span>(), []&lt;span style="color:#268bd2">interface&lt;/span>{}{&lt;span style="color:#2aa198">&amp;#34;hello&amp;#34;&lt;/span>}, &lt;span style="color:#719e07">&amp;amp;&lt;/span>respDubbo, &lt;span style="color:#2aa198">&amp;#34;SayHello&amp;#34;&lt;/span>)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>接下来我们尝试运行示例：&lt;/p></description></item><item><title>基于应用级服务发现实现地址互通</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/service-discovery/</guid><description>&lt;p>前面两篇示例我们演示了 dubbo java 和 dubbo go 在协议层面的互通能力，涵盖 triple 和 dubbo 两种协议，&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="../call_java_protocol_dubbo_non_protobuf">非 protoubf 模式协议互通（triple 和 dubbo 协议）&lt;/a>&lt;/li>
-&lt;li>&lt;a href="../call_java_protocol_triple_protobuf">protobuf+triple 协议互通（triple 协议）&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>在本篇文档中，我们将演示 dubbo java 和 dubbo go 的服务发现互通能力，这样结合协议兼容性，我们就能实现完整的打通 dubbo java 和 dubbo go 微服务体系。&lt;/p>
-&lt;p>本文档使用 Nacos 注册中心作为演示，可在此查看本文档 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/java_interop/service_discovery">示例完整源码&lt;/a>。&lt;/p>
-&lt;blockquote>
-&lt;p>before run the code , you should Follow this instruction to install and start Nacos server.&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="应用级别服务发现">应用级别服务发现&lt;/h2>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> service
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>start java server&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> java-server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sh run.sh
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>start go client&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#b58900">cd&lt;/span> go-client
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go run client.go
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="go-server---java-client">go server &amp;lt;-&amp;gt; java client&lt;/h4>
-&lt;p>&lt;strong>start go server&lt;/strong>&lt;/p></description></item></channel></rss>
+&lt;p&gt;可在此查看本文档 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/java_interop/non-protobuf-dubbo"&gt;完整示例源码&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="go-client-调用-java-server"&gt;go-client 调用 java-server&lt;/h2&gt;
+&lt;p&gt;但如果您是 dubbo java 的老用户，可能您的 dubbo java 应用并没有使用 protobuf（直接使用 java interface 定义服务），这个时候您需要使用以下方式开发 dubbo go-client，来调用老版本的 dubbo 服务。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;以下方案同时支持 triple(non-protobuf) 和 dubbo 协议，你只需要调整协议配置 &lt;code&gt;client.WithClientProtocolTriple()&lt;/code&gt; 即可。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;假设我们当前的 java 服务定义如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; org.apache.dubbo.samples.api;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;public&lt;/span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; &lt;span style="color:#268bd2"&gt;GreetingsService&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; String &lt;span style="color:#268bd2"&gt;sayHi&lt;/span&gt;(String name);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;我们需要这么编写 go-client，以实现服务调用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 生成共享 client，指定&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cliDubbo, _ &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; client.&lt;span style="color:#268bd2"&gt;NewClient&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithClientProtocolDubbo&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithClientSerialization&lt;/span&gt;(constant.Hessian2Serialization),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 生成服务代理，这里指定 java 服务全路径名&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;connDubbo, _ &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; cliDubbo.&lt;span style="color:#268bd2"&gt;Dial&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.samples.api.GreetingsService&amp;#34;&lt;/span&gt;, client.&lt;span style="color:#268bd2"&gt;WithURL&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;tri://localhost:50052&amp;#34;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;var&lt;/span&gt; respDubbo &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// 发起调用，参数以数组形式指定（标准 json 格式，可参考 java 泛化调用）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;connDubbo.&lt;span style="color:#268bd2"&gt;CallUnary&lt;/span&gt;(context.&lt;span style="color:#268bd2"&gt;Background&lt;/span&gt;(), []&lt;span style="color:#268bd2"&gt;interface&lt;/span&gt;{}{&lt;span style="color:#2aa198"&gt;&amp;#34;hello&amp;#34;&lt;/span&gt;}, &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;respDubbo, &lt;span style="color:#2aa198"&gt;&amp;#34;SayHello&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;接下来我们尝试运行示例：&lt;/p&gt;</description></item><item><title>基于应用级服务发现实现地址互通</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-dubbo/service-discovery/</guid><description>&lt;p&gt;前面两篇示例我们演示了 dubbo java 和 dubbo go 在协议层面的互通能力，涵盖 triple 和 dubbo 两种协议，&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="../call_java_protocol_dubbo_non_protobuf"&gt;非 protoubf 模式协议互通（triple 和 dubbo 协议）&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="../call_java_protocol_triple_protobuf"&gt;protobuf+triple 协议互通（triple 协议）&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在本篇文档中，我们将演示 dubbo java 和 dubbo go 的服务发现互通能力，这样结合协议兼容性，我们就能实现完整的打通 dubbo java 和 dubbo go 微服务体系。&lt;/p&gt;
+&lt;p&gt;本文档使用 Nacos 注册中心作为演示，可在此查看本文档 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/java_interop/service_discovery"&gt;示例完整源码&lt;/a&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;before run the code , you should Follow this instruction to install and start Nacos server.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="应用级别服务发现"&gt;应用级别服务发现&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;start java server&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; java-server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;sh run.sh
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;start go client&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; go-client
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;go run client.go
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="go-server---java-client"&gt;go server &amp;lt;-&amp;gt; java client&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;start go server&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>

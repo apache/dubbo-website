@@ -1,63 +1,63 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>与grpc互通 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/</link><description>Recent content in 与grpc互通 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/index.xml" rel="self" type="application/rss+xml"/><item><title>与 gRPC 应用互通</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/call_grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/call_grpc/</guid><description>&lt;h2 id="1介绍">1.介绍&lt;/h2>
-&lt;p>triple 协议 100% 兼容 gRPC，本示例演示使用 dubbo-go 开发与 grpc 互调的应用，可在此查看 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/grpc" target="_blank">完整示例源码地址&lt;/a>&lt;/p>
-&lt;h2 id="2如何互通">2.如何互通&lt;/h2>
-&lt;p>Dubbo-go的Triple协议能够兼容grpc协议
-在创建服务端时，可以设置&lt;code>protocol.WithTriple()&lt;/code>使用Triple协议&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>	srv, err &lt;span style="color:#719e07">:=&lt;/span> server.&lt;span style="color:#268bd2">NewServer&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> server.&lt;span style="color:#268bd2">WithServerProtocol&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithPort&lt;/span>(&lt;span style="color:#2aa198">20000&lt;/span>),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> protocol.&lt;span style="color:#268bd2">WithTriple&lt;/span>(),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3案例">3.案例&lt;/h2>
-&lt;h3 id="31服务端介绍">3.1服务端介绍&lt;/h3>
-&lt;h4 id="服务端proto文件">服务端proto文件&lt;/h4>
-&lt;p>源文件路径：dubbo-go-sample/rpc/grpc/proto/greet.proto&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-protobuf" data-lang="protobuf">&lt;span style="display:flex;">&lt;span>syntax &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;proto3&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">package&lt;/span> greet;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#719e07">option&lt;/span> go_package &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">&amp;#34;github.com/apache/dubbo-go-samples/rpc/grpc/proto;greet&amp;#34;&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreetRequest&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> name &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">message&lt;/span> &lt;span style="color:#268bd2">GreetResponse&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#dc322f">string&lt;/span> greeting &lt;span style="color:#719e07">=&lt;/span> &lt;span style="color:#2aa198">1&lt;/span>;
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">service&lt;/span> GreetService {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#719e07">rpc&lt;/span> Greet(GreetRequest) &lt;span style="color:#719e07">returns&lt;/span> (GreetResponse) {}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="dubbo-go服务端">dubbo-go服务端&lt;/h4>
-&lt;p>源文件路径：dubbo-go-sample/rpc/grpc/go-server/cmd/main.go&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> GreetTripleServer &lt;span style="color:#268bd2">struct&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> (srv &lt;span style="color:#719e07">*&lt;/span>GreetTripleServer) &lt;span style="color:#268bd2">Greet&lt;/span>(ctx context.Context, req &lt;span style="color:#719e07">*&lt;/span>greet.GreetRequest) (&lt;span style="color:#719e07">*&lt;/span>greet.GreetResponse, &lt;span style="color:#dc322f">error&lt;/span>) {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	resp &lt;span style="color:#719e07">:=&lt;/span> &lt;span style="color:#719e07">&amp;amp;&lt;/span>greet.GreetResponse{Greeting: &lt;span style="color:#2aa198">&amp;#34;dubbo:&amp;#34;&lt;/span> &lt;span style="color:#719e07">+&lt;/span> req.Name}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">return&lt;/span> resp, &lt;span style="color:#cb4b16">nil&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">func&lt;/span> &lt;span style="color:#268bd2">main&lt;/span>() {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	srv, err &lt;span style="color:#719e07">:=&lt;/span> server.&lt;span style="color:#268bd2">NewServer&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		server.&lt;span style="color:#268bd2">WithServerProtocol&lt;/span>(
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>			protocol.&lt;span style="color:#268bd2">WithPort&lt;/span>(&lt;span style="color:#2aa198">20000&lt;/span>),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>			protocol.&lt;span style="color:#268bd2">WithTriple&lt;/span>(),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		),
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#b58900">panic&lt;/span>(err)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> greet.&lt;span style="color:#268bd2">RegisterGreetServiceHandler&lt;/span>(srv, &lt;span style="color:#719e07">&amp;amp;&lt;/span>GreetTripleServer{}); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#b58900">panic&lt;/span>(err)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#719e07">if&lt;/span> err &lt;span style="color:#719e07">:=&lt;/span> srv.&lt;span style="color:#268bd2">Serve&lt;/span>(); err &lt;span style="color:#719e07">!=&lt;/span> &lt;span style="color:#cb4b16">nil&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		logger.&lt;span style="color:#268bd2">Error&lt;/span>(err)
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="grpc服务端">grpc服务端&lt;/h4>
-&lt;p>源文件路径: dubbo-go-sample/rpc/grpc/grpc-server/cmd/main.go&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>与grpc互通 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/</link><description>Recent content in 与grpc互通 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/index.xml" rel="self" type="application/rss+xml"/><item><title>与 gRPC 应用互通</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/call_grpc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/interop-grpc/call_grpc/</guid><description>&lt;h2 id="1介绍"&gt;1.介绍&lt;/h2&gt;
+&lt;p&gt;triple 协议 100% 兼容 gRPC，本示例演示使用 dubbo-go 开发与 grpc 互调的应用，可在此查看 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/grpc" target="_blank"&gt;完整示例源码地址&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="2如何互通"&gt;2.如何互通&lt;/h2&gt;
+&lt;p&gt;Dubbo-go的Triple协议能够兼容grpc协议
+在创建服务端时，可以设置&lt;code&gt;protocol.WithTriple()&lt;/code&gt;使用Triple协议&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	srv, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; server.&lt;span style="color:#268bd2"&gt;NewServer&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; server.&lt;span style="color:#268bd2"&gt;WithServerProtocol&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol.&lt;span style="color:#268bd2"&gt;WithPort&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol.&lt;span style="color:#268bd2"&gt;WithTriple&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; )
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="3案例"&gt;3.案例&lt;/h2&gt;
+&lt;h3 id="31服务端介绍"&gt;3.1服务端介绍&lt;/h3&gt;
+&lt;h4 id="服务端proto文件"&gt;服务端proto文件&lt;/h4&gt;
+&lt;p&gt;源文件路径：dubbo-go-sample/rpc/grpc/proto/greet.proto&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-protobuf" data-lang="protobuf"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;syntax &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;proto3&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; greet;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; go_package &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;github.com/apache/dubbo-go-samples/rpc/grpc/proto;greet&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;GreetRequest&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; name &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;message&lt;/span&gt; &lt;span style="color:#268bd2"&gt;GreetResponse&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#dc322f"&gt;string&lt;/span&gt; greeting &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;service&lt;/span&gt; GreetService {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; Greet(GreetRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (GreetResponse) {}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="dubbo-go服务端"&gt;dubbo-go服务端&lt;/h4&gt;
+&lt;p&gt;源文件路径：dubbo-go-sample/rpc/grpc/go-server/cmd/main.go&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; GreetTripleServer &lt;span style="color:#268bd2"&gt;struct&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (srv &lt;span style="color:#719e07"&gt;*&lt;/span&gt;GreetTripleServer) &lt;span style="color:#268bd2"&gt;Greet&lt;/span&gt;(ctx context.Context, req &lt;span style="color:#719e07"&gt;*&lt;/span&gt;greet.GreetRequest) (&lt;span style="color:#719e07"&gt;*&lt;/span&gt;greet.GreetResponse, &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	resp &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;greet.GreetResponse{Greeting: &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo:&amp;#34;&lt;/span&gt; &lt;span style="color:#719e07"&gt;+&lt;/span&gt; req.Name}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; resp, &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	srv, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; server.&lt;span style="color:#268bd2"&gt;NewServer&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		server.&lt;span style="color:#268bd2"&gt;WithServerProtocol&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			protocol.&lt;span style="color:#268bd2"&gt;WithPort&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			protocol.&lt;span style="color:#268bd2"&gt;WithTriple&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; greet.&lt;span style="color:#268bd2"&gt;RegisterGreetServiceHandler&lt;/span&gt;(srv, &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;GreetTripleServer{}); err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; srv.&lt;span style="color:#268bd2"&gt;Serve&lt;/span&gt;(); err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		logger.&lt;span style="color:#268bd2"&gt;Error&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="grpc服务端"&gt;grpc服务端&lt;/h4&gt;
+&lt;p&gt;源文件路径: dubbo-go-sample/rpc/grpc/grpc-server/cmd/main.go&lt;/p&gt;</description></item></channel></rss>

@@ -1,925 +1,925 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>SPI 插件扩展点使用手册 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/</link><description>Recent content in SPI 插件扩展点使用手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo SPI 概述</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/overview/</guid><description>&lt;p>使用 IoC 容器帮助管理组件的生命周期、依赖关系注入等是很多开发框架的常用设计，Dubbo 中内置了一个轻量版本的 IoC 容器，用来管理框架内部的插件，实现包括插件实例化、生命周期、依赖关系自动注入等能力。&lt;/p>
-&lt;p>感兴趣的读者可以了解：&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/">Dubbo SPI 扩展体系的工作原理&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/extensibility/spi/">Dubbo SPI 扩展使用示例&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>Dubbo 插件体系与 IoC 容器具有以下特点：&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>&lt;a href="../spi-list/">核心组件均被定义为插件&lt;/a>，用户或二次开发者扩展非常简单。&lt;/strong> 在无需改造框架内核的情况下，用户可以基于自身需求扩展如负载均衡、注册中心、通信协议、路由等策略。&lt;/li>
-&lt;li>&lt;strong>平等对待第三方扩展实现。&lt;/strong> Dubbo 中所有内部实现和第三方实现都是平等的，用户可以基于自身业务需求替换 Dubbo 提供的原生实现。&lt;/li>
-&lt;li>&lt;strong>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#23-ioc-%E6%9C%BA%E5%88%B6">插件依赖支持自动注入（IoC）&lt;/a>。&lt;/strong> 如果插件实现依赖其他插件属性，则 Dubbo 框架会完成该依赖对象的自动注入，支持属性、构造函数等方式。&lt;/li>
-&lt;li>&lt;strong>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#24-aop-%E6%9C%BA%E5%88%B6">插件扩展实现支持 AOP 能力&lt;/a>。&lt;/strong> 框架可以自动发现扩展类的包装类，通过包装器模式对插件进行 AOP 增强。&lt;/li>
-&lt;li>&lt;strong>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#25-activate%E6%BF%80%E6%B4%BB%E6%9D%A1%E4%BB%B6">支持插件自动激活&lt;/a>。&lt;/strong> 通过为插件实现指定激活条件（通过注解参数等），框架可在运行时自动根据当前上下文决策是否激活该插件实现。&lt;/li>
-&lt;li>&lt;strong>&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#26-%E6%89%A9%E5%B1%95%E7%82%B9%E6%8E%92%E5%BA%8F">支持插件扩展排序&lt;/a>。&lt;/strong>&lt;/li>
-&lt;/ul></description></item><item><title>Dubbo SPI 插件及详情</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/spi-list/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/spi-list/</guid><description>&lt;p>Dubbo 在框架中定义了非常多的扩展点，因此，&lt;strong>当你发现官方库没法满足业务需求，想为 Dubbo 框架提供定制能力时，请优先查阅以下扩展点定义，看是否能通过提供扩展实现的方式无侵入的定制 Dubbo 框架&lt;/strong>。&lt;/p>
-&lt;p>具体可参见本文下方的 &lt;a href="https://cn.dubbo.apache.org/zh-cn/#扩展点汇总">Dubbo SPI 扩展定义汇总&lt;/a>。&lt;/p>
-&lt;img src="https://cn.dubbo.apache.org/imgs/v3/concepts/extension-use.png" style="max-width:600px;height:auto;">
-&lt;h2 id="扩展点汇总">扩展点汇总&lt;/h2>
-&lt;h3 id="生命周期与事件回调">生命周期与事件回调&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;strong>SPI 扩展定义&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>功能说明&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>示例实现&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>激活条件&lt;/strong>&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.lang.ShutdownHookCallback&lt;/td>
- &lt;td style="text-align: left">优雅下线回调逻辑扩展点，Dubbo 进程销毁前会调用所有 ShutdownHookCallback 实现&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.event.ThreadPoolExhaustedListener&lt;/td>
- &lt;td style="text-align: left">当 dubbo 业务线程池满时，会调用这个扩展点发出事件通知&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.collector.sample.MetricThreadPoolExhaustedListener&lt;/td>
- &lt;td style="text-align: left">通过 dubbo.protocol.thread-pool-exhausted-listeners=spi-name1,spi-name2 设置激活哪些实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.ExporterListener&lt;/td>
- &lt;td style="text-align: left">每个 Exporter 成功 export/unexport 发布后，都会回调这个扩展点&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.listener.InjvmExporterListener&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 exporter.listener=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.InvokerListener&lt;/td>
- &lt;td style="text-align: left">每个服务 Invoker 成功 refer/destroy 发布后，都会回调这个扩展点&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.CountInvokerListener&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 invoker.listener=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.status.StatusChecker&lt;/td>
- &lt;td style="text-align: left">对外透出内部组件状态的扩展点，每个需要透出状态的组件均可实现此扩展点。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.dubbo.status.ThreadPoolStatusChecker&lt;/td>
- &lt;td style="text-align: left">通过设置 dubbo.protocol.status=spi-name1,spi-name2 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.config.ServiceListener&lt;/td>
- &lt;td style="text-align: left">ServciceConfig 回调扩展点，每个 ServiceConfig 成功 export/unexport 后都会被回调。拦截点与 ExporterListener 略有不同&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.RegistryServiceListener&lt;/td>
- &lt;td style="text-align: left">服务 URL 向注册中心 register/unregister 之后的回调扩展点，所有扩展实现会被依次通知&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 Registry URL 中配置 registry.listeners 控制具体激活哪个实现，如dubbo.registry.parameters.registry.listeners=spi-name1,spi-name2&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.integration.RegistryProtocolListener&lt;/td>
- &lt;td style="text-align: left">用于接口级服务发现。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.migration.MigrationRuleListener&lt;/td>
- &lt;td style="text-align: left">RegistryProtocol listener is introduced to provide a chance to user to customize or change export and refer behavior of RegistryProtocol. For example: re-export or re-refer on the fly when certain condition meets.&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.qos.probe.LivenessProbe&lt;/td>
- &lt;td style="text-align: left">生命周期检测扩展点。可通过 qos live http 接口配置为 k8s liveness 检测，qos live 会检查所有 LivenessProbe 扩展点实现&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 URL 中配置 dubbo.application.liveness-probe=spi-name1,spi-name2 控制具体激活哪些实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.qos.probe.ReadinessProbe&lt;/td>
- &lt;td style="text-align: left">生命周期检测扩展点。可通过 qos ready http 接口配置为 k8s readiness 检测，qos ready 会检查所有 ReadinessProbe 扩展点实现&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 URL 中配置 dubbo.application.readiness-probe=spi-name1,spi-name2 控制具体激活哪些实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.qos.probe.StartupProbe&lt;/td>
- &lt;td style="text-align: left">生命周期检测扩展点。可通过 qos startup http 接口配置为 k8s startup 检测，qos startup 会检查所有 StartupProbe 扩展点实现&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 URL 中配置 dubbo.application.startup-probe=spi-name1,spi-name2 控制具体激活哪些实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.deploy.ApplicationDeployListener&lt;/td>
- &lt;td style="text-align: left">Dubbo 进程启动生命周期中的回调扩展，支持包括初始化、启动成功、停止等多个回调点。如果是多应用部署的场景，则是单应用粒度的生命周期回调。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.security.cert.CertDeployerListener&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.deploy.ModuleDeployListener&lt;/td>
- &lt;td style="text-align: left">Dubbo 进程启动生命周期中的回调扩展，支持包括初始化、启动成功、停止等多个回调点。如果是多模块部署的场景，则是单模块粒度的生命周期回调。&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.qos.api.BaseCommand&lt;/td>
- &lt;td style="text-align: left">QoS 命令扩展点，实现该扩展点增加新 QoS 命令。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.qos.command.impl.Ls&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">&lt;del>org.apache.dubbo.remoting.telnet.TelnetHandler&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">&lt;del>org.apache.dubbo.config.bootstrap.DubboBootstrapStartStopListener&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="配置相关">配置相关&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;strong>SPI 扩展定义&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>功能说明&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>示例实现&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>激活条件&lt;/strong>&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.extension.ExtensionInjector&lt;/td>
- &lt;td style="text-align: left">IoC 注入器扩展点，通过扩展可以实现多种类型的示例自动注入，用于 Dubbo 框架 SPI 实例与不同 IOC 容器之间的结合，如支持 Spring Bean 注入 SPI 实例。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.config.spring.extension.SpringExtensionInjector&lt;/td>
- &lt;td style="text-align: left">无需额外配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.infra.InfraAdapter&lt;/td>
- &lt;td style="text-align: left">用于自定义加载环境变量的扩展实现，可以批量的通过编码的方式获取你要读取的环境变量，框架会自动将这些值附加到每个服务的 URL 参数中。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.infra.support.EnvironmentAdapter&lt;/td>
- &lt;td style="text-align: left">无需额外配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.logger.LoggerAdapter&lt;/td>
- &lt;td style="text-align: left">日志框架适配，如果要额外提供 Dubbo 不支持的日志框架适配，可以使用此扩展点。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.logger.slf4j.Slf4jLoggerAdapter&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.application.logger=spi-name 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.config.ConfigInitializer&lt;/td>
- &lt;td style="text-align: left">在配置初始化之前，服务初始化之前定制 ServciceConfig、ReferenceConfig 参数&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需增加激活条件&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.config.CommonConfigPostProcessor&lt;/td>
- &lt;td style="text-align: left">在配置初始化之后，服务初始化之前定制 ServciceConfig、ReferenceConfig 参数。在 ConfigInitializer 之后执行。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.config.FeignClientAnnotationConfigPostProcessor&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需增加激活条件&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.config.spring.context.DubboSpringInitCustomizer&lt;/td>
- &lt;td style="text-align: left">Custom dubbo spring initialization. Customize dubbo spring initialization on bean registry processing phase.�&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需额外配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="服务发现">服务发现&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;strong>SPI 扩展定义&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>功能说明&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>示例实现&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>激活条件&lt;/strong>&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.AddressListener&lt;/td>
- &lt;td style="text-align: left">用于服务发现。URL 地址通知发生时会调用此扩展点实现，可做一些地址预处理操作&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.ProviderFirstParams&lt;/td>
- &lt;td style="text-align: left">用于服务发现。用于指定 URL 参数优先级，改扩展点实现返回的参数列表（provider优先级高于consumer），多个扩展实现的参数列表会合并&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.support.DefaultProviderFirstParams&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.RegistryFactory&lt;/td>
- &lt;td style="text-align: left">用于接口级服务发现。通过扩展此可SPI实现不同的注册中心适配&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.nacos.NacosRegistryFactory&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.registry.address=spi-name://ip:port 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.RegistryClusterIdentifier&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现。Dubbo 框架支持为注册中心集群指定标识，通过此标识 key 可以对地址 URL 进行分类（来自哪个集群），从而根据不同集群做一些事情。此扩展点给用户机会指定依据哪个 key 来作为注册中心集群分类。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.DefaultRegistryClusterIdentifier&lt;/td>
- &lt;td style="text-align: left">通过 dubbo.provider.parameters.registry-cluster-type=spi-name 激活指定扩展实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.ServiceDiscoveryFactory&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现。通过扩展此可SPI实现不同的注册中心适配&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.nacos.NacosServiceDiscoveryFactory&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.registry.address=spi-name://ip:port 激活，同时指定 dubbo.registry.register-mode=instance 激活应用级服务发现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.ServiceInstanceCustomizer&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现。在应用级地址实例 URL 注册到注册中心之前，通过此扩展点实现进行定制&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataCustomizer&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.migration.MigrationAddressComparator&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现。作为接口级地址向应用级别地址迁移机制的一部分，在框架决策是否迁移之前，用于对两边的地址做比较，可自行定制决策逻辑。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.migration.DefaultMigrationAddressComparator&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">&lt;del>org.apache.dubbo.registry.client.migration.PreMigratingConditionChecker&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;del>用于应用级服务发现。作为接口级地址向应用级别地址迁移机制的一部分，在框架决策是否迁移之前，可自行定制检查逻辑。&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;del>无&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;del>无需配置，自动激活&lt;/del>&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.MetadataParamsFilter&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现。通过该扩展点可以控制哪些参数注册到注册中心，哪些参数注册到服务元数据。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.DefaultMetadataParamsFilter&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活。支持通过在 URL 中配置 params-filter 控制具体激活哪个实现，如 dubbo.provider.parameters.params-filter=-default,spi-name1 表示关闭所有扩展实现仅启用 spi-name1 实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.ServiceInstanceNotificationCustomizer&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现。识别特殊类型的地址 URL，示例扩展实现用于识别 Spring Cloud Alibaba Dubbo 类型地址&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.SpringCloudServiceInstanceNotificationCustomizer&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.integration.ServiceURLCustomizer&lt;/td>
- &lt;td style="text-align: left">用于接口级服务发现。在优化接口级地址列表并做 URL 精简时，可以通过该扩展点指定哪些 URL 注册到注册中心、哪些 URL 不注册。当有多个扩展实现时，效果叠加。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.integration.DefaultServiceURLCustomizer&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.ProviderURLMergeProcessor&lt;/td>
- &lt;td style="text-align: left">用于接口级服务发现。该扩展点用于完成 consumer url 和 provider url 合并，可以使用不同的实现控制合并策略，以确定保留不同的 key，使用不同的覆盖关系（仅对接口级服务发现有效）&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.support.merger.DefaultProviderURLMergeProcessor&lt;/td>
- &lt;td style="text-align: left">可通过配置 dubbo.consumer.url-merge-processor=spi-name 启用指定扩展实现&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="rpc与流量管控">RPC与流量管控&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;strong>SPI 扩展定义&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>功能说明&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>示例实现&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>激活条件&lt;/strong>&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.Protocol&lt;/td>
- &lt;td style="text-align: left">RPC 协议实现扩展点。通过扩展该扩展点增加更多的协议实现&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.prorocol.name=spi-nam,e 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.ProxyFactory&lt;/td>
- &lt;td style="text-align: left">RPC 代理实现扩展点。可以提供多种不同的代理实现，如字节码增强、JDK 等&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.proxy.javassist.JavassistProxyFactory&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.application.compiler=spi-name 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.ZoneDetector&lt;/td>
- &lt;td style="text-align: left">在多注册中心场景下，Dubbo 提供了自动同区域优先的匹配策略。此扩展点可以让用户更方便的扩展 zone 读取策略，以更灵活的决策当前请求属于哪个 zone。默认情况下框架会从 RpcContext 特定的 key 读取&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">只会有一个 ZoneDetector 实现会被激活。key 为 &lt;code>default&lt;/code>的扩展实现将优先被激活。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.Cluster&lt;/td>
- &lt;td style="text-align: left">RPC 请求容灾策略扩展点，比如通过 Cluster 可以设置在请求失败时动作，如 FailoverCluster、FailfastCluster 等。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.support.FailoverCluster&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.consumer.cluster=spi-name 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.LoadBalance&lt;/td>
- &lt;td style="text-align: left">负载均衡策略扩展点，通过扩展可以实现不同的负载均衡策略。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.consumer.loadbalance=spi-name 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.HeaderFilter&lt;/td>
- &lt;td style="text-align: left">在 RPC 请求前，通过不同的扩展实现各种 attachment/header 校验策略&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.filter.TokenHeaderFilter&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活。支持通过在 URL 中配置 header.filter=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.Filter&lt;/td>
- &lt;td style="text-align: left">RPC 请求过滤器，用于在请求发起前、响应结果返回后，对 RPC 调用进行过滤&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.filter.GenericFilter&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件如@Activate(group=&amp;ldquo;consumer&amp;rdquo;)。支持通过在 URL 中配置 service.filter=spi-name1,spi-name2 控制具体在provider侧激活哪些实现；支持通过在 URL 中配置 reference.filter=spi-name1,spi-name2 控制具体在consumer侧激活哪些实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.ClusterFilter&lt;/td>
- &lt;td style="text-align: left">RPC 请求过滤器，与 Filter 作用相同，但 ClusterFilter 发生在选址之前。对于大部分用户可以直接使用：org.apache.dubbo.rpc.Filter&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.support.ConsumerContextFilter&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 filter=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.RouterFactory&lt;/td>
- &lt;td style="text-align: left">路由器扩展点，可以通过扩展增加不同的路由规则策略。&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 router=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory&lt;/td>
- &lt;td style="text-align: left">路由器扩展点，可以通过扩展增加不同的路由规则策略。与 RouterFactory 作用一致，但具备更高性能。对大部分用户，为简单起见可直接使用 RouterFactory&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.ConditionStateRouterFactory&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 router=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.ConfiguratorFactory&lt;/td>
- &lt;td style="text-align: left">动态配置规则扩展点，通过增加扩展可以增加不同的动态配置规则策略&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.configurator.override.OverrideConfiguratorFactory&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 router=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.pattern.ValuePattern&lt;/td>
- &lt;td style="text-align: left">路由规则处理扩展点。条件路由规则内部的规则处理器，通过扩展可支持更丰富的规则和匹配条件&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.pattern.range.RangeValuePattern&lt;/td>
- &lt;td style="text-align: left">自动激活，通过规则控制激活哪个具体实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcherFactory&lt;/td>
- &lt;td style="text-align: left">路由规则处理扩展点。条件路由规则内部的规则处理器，通过扩展可支持更丰富的规则和匹配条件&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.condition.matcher.argument.ArgumentConditionMatcherFactory&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.mesh.util.TracingContextProvider&lt;/td>
- &lt;td style="text-align: left">MeshRule 路由规则处理扩展点，可用于从不同的第三方 Tracing 系统读取上下文&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.router.mesh.route.MeshEnvListenerFactory&lt;/td>
- &lt;td style="text-align: left">MeshRule 路由规则处理扩展点&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.cache.CacheFactory&lt;/td>
- &lt;td style="text-align: left">缓存实现扩展点，用于缓存 RPC 调用结果&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.cache.support.expiring.ExpiringCacheFactory&lt;/td>
- &lt;td style="text-align: left">通过在 URL 中配置 cache=spi-name 控制具体激活哪个实现&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.serialize.Serialization&lt;/td>
- &lt;td style="text-align: left">序列化协议扩展点，如果要扩展新的序列化协议，可以使用此扩展点。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.serialize.hessian2.Hessian2Serialization&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.provider.serialization=spi-name 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.ThreadPool&lt;/td>
- &lt;td style="text-align: left">线程池策略扩展点。目前仅适用于 dubbo 协议实现，不适用于 triple 协议。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.support.fixed.FixedThreadPool&lt;/td>
- &lt;td style="text-align: left">通过配置 dubbo.provider.threadpool=spi-name 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.executor.IsolationExecutorSupportFactory&lt;/td>
- &lt;td style="text-align: left">线程池隔离策略扩展点。如 dubbo 协议、triple 协议都可以定义不同的隔离策略，每个协议可设置一个线程池隔离策略。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.transport.TripleIsolationExecutorSupportFactory&lt;/td>
- &lt;td style="text-align: left">跟随用户配置的 dubbo.protocol.name，因此必须确保配置的 key 值与 rpc 协议名相同&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.PenetrateAttachmentSelector&lt;/td>
- &lt;td style="text-align: left">通过此扩展点可以自定义参数全链路传递（dubbo链路），Dubbo 默认只会在 A-&amp;gt;B 链路传递参数，通过此扩展点可以控制参数在 A-&amp;gt;B-&amp;gt;C一直传递下去。&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">&lt;del>org.apache.dubbo.rpc.cluster.interceptor.ClusterInterceptor&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;del>与 ~~~~org.apache.dubbo.rpc.cluster.filter.ClusterFilter 相同，废弃&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;del>废弃&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="服务治理">服务治理&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;strong>SPI 扩展定义&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>功能说明&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>示例实现&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>激活条件&lt;/strong>&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.config.configcenter.DynamicConfigurationFactory&lt;/td>
- &lt;td style="text-align: left">配置中心核心扩展点。用于提供不同配置中心适配实现。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.configcenter.support.nacos.NacosDynamicConfigurationFactory&lt;/td>
- &lt;td style="text-align: left">通过指定 dubbo.config-center.address=spi-name:// 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.report.MetadataReportFactory&lt;/td>
- &lt;td style="text-align: left">元数据中心扩展点，用于提供新的元数据中心存储实现&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.store.nacos.NacosMetadataReportFactory&lt;/td>
- &lt;td style="text-align: left">通过指定 dubbo.metadata-report.address=spi-name:// 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.report.MetricsReporterFactory&lt;/td>
- &lt;td style="text-align: left">Metrics 指标上报扩展点，可以通过扩展实现适配到不同的 Metrics 后端服务&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.prometheus.PrometheusMetricsReporterFactory&lt;/td>
- &lt;td style="text-align: left">通过指定 dubbo.metrics.protocol=spi-name 激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.collector.MetricsCollector&lt;/td>
- &lt;td style="text-align: left">框架内部 Metrics 采集扩展点，可以通过扩展支持 RPC、注册中心等不同组件的 metrics 埋点数据采集&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.registry.collector.RegistryMetricsCollector&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活，可按需增加激活条件&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.auth.spi.AccessKeyStorage&lt;/td>
- &lt;td style="text-align: left">用于 dubbo-auth 模块，该扩展点可不同的扩展 AK 来源读取方式&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.auth.DefaultAccessKeyStorage&lt;/td>
- &lt;td style="text-align: left">通过指定 accessKey.storage URL 参数激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.auth.spi.Authenticator&lt;/td>
- &lt;td style="text-align: left">用于 dubbo-auth 模块，该扩展点用于实现具体的认证逻辑&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.auth.AccessKeyAuthenticator&lt;/td>
- &lt;td style="text-align: left">通过指定 authenticator URL 参数激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.ssl.CertProvider&lt;/td>
- &lt;td style="text-align: left">TLS 证书来源扩展，用于适配不同的证书来源实现&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.ssl.impl.SSLConfigCertProvider&lt;/td>
- &lt;td style="text-align: left">扩展实现必须增加 @Activate 注解激活&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="协议与传输层实现">协议与传输层实现&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;strong>SPI 扩展定义&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>功能说明&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>示例实现&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>激活条件&lt;/strong>&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.ChannelHandler&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.Codec&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.Codec2&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.Dispatcher&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.Transporter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.dubbo.ByteAccessor&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.api.pu.PortUnificationTransporter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.api.WireProtocol&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.api.connection.ConnectionManager&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.exchange.Exchanger&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.http.HttpBinder&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.message.HttpMessageEncoderFactory&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.message.HttpMessageDecoderFactory&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.h2.Http2ServerTransportListenerFactory&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.h1.Http1ServerTransportListenerFactory&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.http12.message.HttpMessageAdapterFactory&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.annotation.processing.builder.TypeBuilder&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.annotation.processing.rest.AnnotatedMethodParameterProcessor&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.annotation.processing.rest.ServiceRestMetadataResolver&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.definition.builder.TypeBuilder&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.AnnotatedMethodParameterProcessor&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.ServiceRestMetadataReader&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.compressor.Compressor&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.compressor.DeCompressor&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.argument.ArgumentConverter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.argument.ArgumentResolver&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.filter.RestExtension&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.filter.RestExtensionAdapter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.rest.mapping.RequestMappingResolver&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.tri.route.RequestHandlerMapping&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.annotation.param.parse.provider.BaseProviderParamParser&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.ServiceRestMetadataResolver&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.filter.RestRequestFilter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.filter.RestResponseFilter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.rest.NoAnnotatedParameterRequestTagProcessor&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.message.HttpMessageCodec&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.annotation.consumer.HttpConnectionPreBuildIntercept&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.annotation.param.parse.consumer.BaseConsumerParamParser&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.http.factory.RestClientFactory&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.rest.filter.RestResponseInterceptor&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table>
-&lt;h3 id="框架内部实现">框架内部实现&lt;/h3>
-&lt;table>
- &lt;thead>
- &lt;tr>
- &lt;th style="text-align: left">&lt;strong>SPI 扩展定义&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>功能说明&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>示例实现&lt;/strong>&lt;/th>
- &lt;th style="text-align: left">&lt;strong>激活条件&lt;/strong>&lt;/th>
- &lt;/tr>
- &lt;/thead>
- &lt;tbody>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.url.component.param.DynamicParamSource&lt;/td>
- &lt;td style="text-align: left">可通过扩展自定义动态参数列表，与 Dubbo3 中关于 URL 存储的优化相关。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.url.component.param.DefaultDynamicParamSource&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.compiler.Compiler&lt;/td>
- &lt;td style="text-align: left">用于设置 Dubbo IoC 容器的自适应扩展实现依赖的字节码工具。默认使用 javassist，可设置使用 jdk 或 bytebuddy 等实现。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.compiler.support.JavassistCompiler&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.serialize.MultipleSerialization&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.convert.Converter&lt;/td>
- &lt;td style="text-align: left">实现原类型到目标类型的转换，多限于框架内部集成使用&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.convert.StringToFloatConverter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.config.OrderedPropertiesProvider&lt;/td>
- &lt;td style="text-align: left">通过扩展可以为框架提供更多的 properties 来源，多限于框架内部集成使用&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.convert.multiple.MultiValueConverter&lt;/td>
- &lt;td style="text-align: left">实现原类型到目标类型的转换，多限于框架内部集成使用&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.common.convert.multiple.StringToArrayConverter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.store.DataStore&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.threadpool.manager.ExecutorRepository&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.spring.security.jackson.ObjectMapperCodecCustomer&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.validation.Validation&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.PathResolver&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.model.PackableMethodFactory&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.model.ApplicationInitListener&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.model.BuiltinServiceDetector&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.model.ScopeModelInitializer&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.aot.api.ReflectionTypeDescriberRegistrar&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.aot.api.ProxyDescriberRegistrar&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.json.JsonUtil&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.protocol.injvm.ParamDeepCopyUtil&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.aot.api.ResourceDescriberRegistrar&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.context.ApplicationExt&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.context.ModuleExt&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.service.MetricsService&lt;/td>
- &lt;td style="text-align: left">用于对外发布/透出 Metrics 指标的内部服务定义，以标准 Dubbo 服务形式发布。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.service.DefaultMetricsService&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metrics.service.MetricsServiceExporter&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.FilterChainBuilder&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.filter.InvocationInterceptorBuilder&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.Merger&lt;/td>
- &lt;td style="text-align: left">目前用于多 group 调用场景，对请求结果进行合并&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.rpc.cluster.governance.GovernanceRuleRepository&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.qos.permission.PermissionChecker&lt;/td>
- &lt;td style="text-align: left">用于检查扩展QoS执行权限检查逻辑，配合每个 QoS 命令配置的 @CMD 权限注解，结合上下文进行检查。&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.qos.permission.DefaultAnonymousAccessPermissionChecker&lt;/td>
- &lt;td style="text-align: left">默认只支持 qosPermissionChecker&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.common.status.reporter.FrameworkStatusReporter&lt;/td>
- &lt;td style="text-align: left">用于上报 Dubbo 框架内部运行状态的扩展点，目前框架在服务发现模型自动迁移等位置做了统计埋点，所有迁移动作都会通过此扩展实现上报出去。未来可考虑用 metrics 标准埋点取代。&lt;/td>
- &lt;td style="text-align: left">无&lt;/td>
- &lt;td style="text-align: left">无需配置，自动激活&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.MetadataServiceURLBuilder&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现。在收到应用级地址 URL 推送后，生成 MetadataService URL 时的定制逻辑（仅对点对点应用级地址发现有效）&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.StandardMetadataServiceURLBuilder&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">org.apache.dubbo.metadata.ServiceNameMapping&lt;/td>
- &lt;td style="text-align: left">用于应用级服务发现&lt;/td>
- &lt;td style="text-align: left">org.apache.dubbo.registry.client.metadata.MetadataServiceNameMapping&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;tr>
- &lt;td style="text-align: left">&lt;del>org.apache.dubbo.common.extension.ExtensionFactory&lt;/del>&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;td style="text-align: left">&lt;/td>
- &lt;/tr>
- &lt;/tbody>
-&lt;/table></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>SPI 插件扩展点使用手册 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/</link><description>Recent content in SPI 插件扩展点使用手册 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/index.xml" rel="self" type="application/rss+xml"/><item><title>Dubbo SPI 概述</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/overview/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/overview/</guid><description>&lt;p&gt;使用 IoC 容器帮助管理组件的生命周期、依赖关系注入等是很多开发框架的常用设计，Dubbo 中内置了一个轻量版本的 IoC 容器，用来管理框架内部的插件，实现包括插件实例化、生命周期、依赖关系自动注入等能力。&lt;/p&gt;
+&lt;p&gt;感兴趣的读者可以了解：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/"&gt;Dubbo SPI 扩展体系的工作原理&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/tasks/extensibility/spi/"&gt;Dubbo SPI 扩展使用示例&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo 插件体系与 IoC 容器具有以下特点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="../spi-list/"&gt;核心组件均被定义为插件&lt;/a&gt;，用户或二次开发者扩展非常简单。&lt;/strong&gt; 在无需改造框架内核的情况下，用户可以基于自身需求扩展如负载均衡、注册中心、通信协议、路由等策略。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;平等对待第三方扩展实现。&lt;/strong&gt; Dubbo 中所有内部实现和第三方实现都是平等的，用户可以基于自身业务需求替换 Dubbo 提供的原生实现。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#23-ioc-%E6%9C%BA%E5%88%B6"&gt;插件依赖支持自动注入（IoC）&lt;/a&gt;。&lt;/strong&gt; 如果插件实现依赖其他插件属性，则 Dubbo 框架会完成该依赖对象的自动注入，支持属性、构造函数等方式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#24-aop-%E6%9C%BA%E5%88%B6"&gt;插件扩展实现支持 AOP 能力&lt;/a&gt;。&lt;/strong&gt; 框架可以自动发现扩展类的包装类，通过包装器模式对插件进行 AOP 增强。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#25-activate%E6%BF%80%E6%B4%BB%E6%9D%A1%E4%BB%B6"&gt;支持插件自动激活&lt;/a&gt;。&lt;/strong&gt; 通过为插件实现指定激活条件（通过注解参数等），框架可在运行时自动根据当前上下文决策是否激活该插件实现。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/dubbo-spi/#26-%E6%89%A9%E5%B1%95%E7%82%B9%E6%8E%92%E5%BA%8F"&gt;支持插件扩展排序&lt;/a&gt;。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Dubbo SPI 插件及详情</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/spi-list/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/spi/spi-list/</guid><description>&lt;p&gt;Dubbo 在框架中定义了非常多的扩展点，因此，&lt;strong&gt;当你发现官方库没法满足业务需求，想为 Dubbo 框架提供定制能力时，请优先查阅以下扩展点定义，看是否能通过提供扩展实现的方式无侵入的定制 Dubbo 框架&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;具体可参见本文下方的 &lt;a href="https://cn.dubbo.apache.org/zh-cn/#%e6%89%a9%e5%b1%95%e7%82%b9%e6%b1%87%e6%80%bb"&gt;Dubbo SPI 扩展定义汇总&lt;/a&gt;。&lt;/p&gt;
+&lt;img src="https://cn.dubbo.apache.org/imgs/v3/concepts/extension-use.png" style="max-width:600px;height:auto;"&gt;
+&lt;h2 id="扩展点汇总"&gt;扩展点汇总&lt;/h2&gt;
+&lt;h3 id="生命周期与事件回调"&gt;生命周期与事件回调&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;SPI 扩展定义&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;功能说明&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;示例实现&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;激活条件&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.lang.ShutdownHookCallback&lt;/td&gt;
+ &lt;td&gt;优雅下线回调逻辑扩展点，Dubbo 进程销毁前会调用所有 ShutdownHookCallback 实现&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.threadpool.event.ThreadPoolExhaustedListener&lt;/td&gt;
+ &lt;td&gt;当 dubbo 业务线程池满时，会调用这个扩展点发出事件通知&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.collector.sample.MetricThreadPoolExhaustedListener&lt;/td&gt;
+ &lt;td&gt;通过 dubbo.protocol.thread-pool-exhausted-listeners=spi-name1,spi-name2 设置激活哪些实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.ExporterListener&lt;/td&gt;
+ &lt;td&gt;每个 Exporter 成功 export/unexport 发布后，都会回调这个扩展点&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.listener.InjvmExporterListener&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 exporter.listener=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.InvokerListener&lt;/td&gt;
+ &lt;td&gt;每个服务 Invoker 成功 refer/destroy 发布后，都会回调这个扩展点&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.CountInvokerListener&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 invoker.listener=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.status.StatusChecker&lt;/td&gt;
+ &lt;td&gt;对外透出内部组件状态的扩展点，每个需要透出状态的组件均可实现此扩展点。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.dubbo.status.ThreadPoolStatusChecker&lt;/td&gt;
+ &lt;td&gt;通过设置 dubbo.protocol.status=spi-name1,spi-name2 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.config.ServiceListener&lt;/td&gt;
+ &lt;td&gt;ServciceConfig 回调扩展点，每个 ServiceConfig 成功 export/unexport 后都会被回调。拦截点与 ExporterListener 略有不同&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.RegistryServiceListener&lt;/td&gt;
+ &lt;td&gt;服务 URL 向注册中心 register/unregister 之后的回调扩展点，所有扩展实现会被依次通知&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 Registry URL 中配置 registry.listeners 控制具体激活哪个实现，如dubbo.registry.parameters.registry.listeners=spi-name1,spi-name2&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.integration.RegistryProtocolListener&lt;/td&gt;
+ &lt;td&gt;用于接口级服务发现。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.migration.MigrationRuleListener&lt;/td&gt;
+ &lt;td&gt;RegistryProtocol listener is introduced to provide a chance to user to customize or change export and refer behavior of RegistryProtocol. For example: re-export or re-refer on the fly when certain condition meets.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.qos.probe.LivenessProbe&lt;/td&gt;
+ &lt;td&gt;生命周期检测扩展点。可通过 qos live http 接口配置为 k8s liveness 检测，qos live 会检查所有 LivenessProbe 扩展点实现&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 URL 中配置 dubbo.application.liveness-probe=spi-name1,spi-name2 控制具体激活哪些实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.qos.probe.ReadinessProbe&lt;/td&gt;
+ &lt;td&gt;生命周期检测扩展点。可通过 qos ready http 接口配置为 k8s readiness 检测，qos ready 会检查所有 ReadinessProbe 扩展点实现&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 URL 中配置 dubbo.application.readiness-probe=spi-name1,spi-name2 控制具体激活哪些实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.qos.probe.StartupProbe&lt;/td&gt;
+ &lt;td&gt;生命周期检测扩展点。可通过 qos startup http 接口配置为 k8s startup 检测，qos startup 会检查所有 StartupProbe 扩展点实现&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，默认激活。支持通过在 URL 中配置 dubbo.application.startup-probe=spi-name1,spi-name2 控制具体激活哪些实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.deploy.ApplicationDeployListener&lt;/td&gt;
+ &lt;td&gt;Dubbo 进程启动生命周期中的回调扩展，支持包括初始化、启动成功、停止等多个回调点。如果是多应用部署的场景，则是单应用粒度的生命周期回调。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.security.cert.CertDeployerListener&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.deploy.ModuleDeployListener&lt;/td&gt;
+ &lt;td&gt;Dubbo 进程启动生命周期中的回调扩展，支持包括初始化、启动成功、停止等多个回调点。如果是多模块部署的场景，则是单模块粒度的生命周期回调。&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.qos.api.BaseCommand&lt;/td&gt;
+ &lt;td&gt;QoS 命令扩展点，实现该扩展点增加新 QoS 命令。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.qos.command.impl.Ls&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;del&gt;org.apache.dubbo.remoting.telnet.TelnetHandler&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;del&gt;org.apache.dubbo.config.bootstrap.DubboBootstrapStartStopListener&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="配置相关"&gt;配置相关&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;SPI 扩展定义&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;功能说明&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;示例实现&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;激活条件&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.extension.ExtensionInjector&lt;/td&gt;
+ &lt;td&gt;IoC 注入器扩展点，通过扩展可以实现多种类型的示例自动注入，用于 Dubbo 框架 SPI 实例与不同 IOC 容器之间的结合，如支持 Spring Bean 注入 SPI 实例。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.config.spring.extension.SpringExtensionInjector&lt;/td&gt;
+ &lt;td&gt;无需额外配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.infra.InfraAdapter&lt;/td&gt;
+ &lt;td&gt;用于自定义加载环境变量的扩展实现，可以批量的通过编码的方式获取你要读取的环境变量，框架会自动将这些值附加到每个服务的 URL 参数中。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.infra.support.EnvironmentAdapter&lt;/td&gt;
+ &lt;td&gt;无需额外配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.logger.LoggerAdapter&lt;/td&gt;
+ &lt;td&gt;日志框架适配，如果要额外提供 Dubbo 不支持的日志框架适配，可以使用此扩展点。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.logger.slf4j.Slf4jLoggerAdapter&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.application.logger=spi-name 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.config.ConfigInitializer&lt;/td&gt;
+ &lt;td&gt;在配置初始化之前，服务初始化之前定制 ServciceConfig、ReferenceConfig 参数&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需增加激活条件&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.config.CommonConfigPostProcessor&lt;/td&gt;
+ &lt;td&gt;在配置初始化之后，服务初始化之前定制 ServciceConfig、ReferenceConfig 参数。在 ConfigInitializer 之后执行。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.config.FeignClientAnnotationConfigPostProcessor&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需增加激活条件&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.config.spring.context.DubboSpringInitCustomizer&lt;/td&gt;
+ &lt;td&gt;Custom dubbo spring initialization. Customize dubbo spring initialization on bean registry processing phase.�&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需额外配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="服务发现"&gt;服务发现&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;SPI 扩展定义&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;功能说明&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;示例实现&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;激活条件&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.AddressListener&lt;/td&gt;
+ &lt;td&gt;用于服务发现。URL 地址通知发生时会调用此扩展点实现，可做一些地址预处理操作&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.ProviderFirstParams&lt;/td&gt;
+ &lt;td&gt;用于服务发现。用于指定 URL 参数优先级，改扩展点实现返回的参数列表（provider优先级高于consumer），多个扩展实现的参数列表会合并&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.support.DefaultProviderFirstParams&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.RegistryFactory&lt;/td&gt;
+ &lt;td&gt;用于接口级服务发现。通过扩展此可SPI实现不同的注册中心适配&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.nacos.NacosRegistryFactory&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.registry.address=spi-name://ip:port 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.RegistryClusterIdentifier&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现。Dubbo 框架支持为注册中心集群指定标识，通过此标识 key 可以对地址 URL 进行分类（来自哪个集群），从而根据不同集群做一些事情。此扩展点给用户机会指定依据哪个 key 来作为注册中心集群分类。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.DefaultRegistryClusterIdentifier&lt;/td&gt;
+ &lt;td&gt;通过 dubbo.provider.parameters.registry-cluster-type=spi-name 激活指定扩展实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.ServiceDiscoveryFactory&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现。通过扩展此可SPI实现不同的注册中心适配&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.nacos.NacosServiceDiscoveryFactory&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.registry.address=spi-name://ip:port 激活，同时指定 dubbo.registry.register-mode=instance 激活应用级服务发现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.ServiceInstanceCustomizer&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现。在应用级地址实例 URL 注册到注册中心之前，通过此扩展点实现进行定制&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataCustomizer&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.migration.MigrationAddressComparator&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现。作为接口级地址向应用级别地址迁移机制的一部分，在框架决策是否迁移之前，用于对两边的地址做比较，可自行定制决策逻辑。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.migration.DefaultMigrationAddressComparator&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;del&gt;org.apache.dubbo.registry.client.migration.PreMigratingConditionChecker&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;del&gt;用于应用级服务发现。作为接口级地址向应用级别地址迁移机制的一部分，在框架决策是否迁移之前，可自行定制检查逻辑。&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;del&gt;无&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;del&gt;无需配置，自动激活&lt;/del&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.MetadataParamsFilter&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现。通过该扩展点可以控制哪些参数注册到注册中心，哪些参数注册到服务元数据。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.DefaultMetadataParamsFilter&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活。支持通过在 URL 中配置 params-filter 控制具体激活哪个实现，如 dubbo.provider.parameters.params-filter=-default,spi-name1 表示关闭所有扩展实现仅启用 spi-name1 实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.metadata.ServiceInstanceNotificationCustomizer&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现。识别特殊类型的地址 URL，示例扩展实现用于识别 Spring Cloud Alibaba Dubbo 类型地址&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.metadata.SpringCloudServiceInstanceNotificationCustomizer&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.integration.ServiceURLCustomizer&lt;/td&gt;
+ &lt;td&gt;用于接口级服务发现。在优化接口级地址列表并做 URL 精简时，可以通过该扩展点指定哪些 URL 注册到注册中心、哪些 URL 不注册。当有多个扩展实现时，效果叠加。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.integration.DefaultServiceURLCustomizer&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.ProviderURLMergeProcessor&lt;/td&gt;
+ &lt;td&gt;用于接口级服务发现。该扩展点用于完成 consumer url 和 provider url 合并，可以使用不同的实现控制合并策略，以确定保留不同的 key，使用不同的覆盖关系（仅对接口级服务发现有效）&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.support.merger.DefaultProviderURLMergeProcessor&lt;/td&gt;
+ &lt;td&gt;可通过配置 dubbo.consumer.url-merge-processor=spi-name 启用指定扩展实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="rpc与流量管控"&gt;RPC与流量管控&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;SPI 扩展定义&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;功能说明&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;示例实现&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;激活条件&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.Protocol&lt;/td&gt;
+ &lt;td&gt;RPC 协议实现扩展点。通过扩展该扩展点增加更多的协议实现&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.prorocol.name=spi-nam,e 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.ProxyFactory&lt;/td&gt;
+ &lt;td&gt;RPC 代理实现扩展点。可以提供多种不同的代理实现，如字节码增强、JDK 等&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.proxy.javassist.JavassistProxyFactory&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.application.compiler=spi-name 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.ZoneDetector&lt;/td&gt;
+ &lt;td&gt;在多注册中心场景下，Dubbo 提供了自动同区域优先的匹配策略。此扩展点可以让用户更方便的扩展 zone 读取策略，以更灵活的决策当前请求属于哪个 zone。默认情况下框架会从 RpcContext 特定的 key 读取&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;只会有一个 ZoneDetector 实现会被激活。key 为 &lt;code&gt;default&lt;/code&gt;的扩展实现将优先被激活。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.Cluster&lt;/td&gt;
+ &lt;td&gt;RPC 请求容灾策略扩展点，比如通过 Cluster 可以设置在请求失败时动作，如 FailoverCluster、FailfastCluster 等。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.support.FailoverCluster&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.consumer.cluster=spi-name 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.LoadBalance&lt;/td&gt;
+ &lt;td&gt;负载均衡策略扩展点，通过扩展可以实现不同的负载均衡策略。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.consumer.loadbalance=spi-name 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.HeaderFilter&lt;/td&gt;
+ &lt;td&gt;在 RPC 请求前，通过不同的扩展实现各种 attachment/header 校验策略&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.filter.TokenHeaderFilter&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活。支持通过在 URL 中配置 header.filter=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.Filter&lt;/td&gt;
+ &lt;td&gt;RPC 请求过滤器，用于在请求发起前、响应结果返回后，对 RPC 调用进行过滤&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.filter.GenericFilter&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件如@Activate(group=&amp;ldquo;consumer&amp;rdquo;)。支持通过在 URL 中配置 service.filter=spi-name1,spi-name2 控制具体在provider侧激活哪些实现；支持通过在 URL 中配置 reference.filter=spi-name1,spi-name2 控制具体在consumer侧激活哪些实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.filter.ClusterFilter&lt;/td&gt;
+ &lt;td&gt;RPC 请求过滤器，与 Filter 作用相同，但 ClusterFilter 发生在选址之前。对于大部分用户可以直接使用：org.apache.dubbo.rpc.Filter&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.filter.support.ConsumerContextFilter&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 filter=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.RouterFactory&lt;/td&gt;
+ &lt;td&gt;路由器扩展点，可以通过扩展增加不同的路由规则策略。&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 router=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory&lt;/td&gt;
+ &lt;td&gt;路由器扩展点，可以通过扩展增加不同的路由规则策略。与 RouterFactory 作用一致，但具备更高性能。对大部分用户，为简单起见可直接使用 RouterFactory&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.condition.ConditionStateRouterFactory&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 router=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.ConfiguratorFactory&lt;/td&gt;
+ &lt;td&gt;动态配置规则扩展点，通过增加扩展可以增加不同的动态配置规则策略&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.configurator.override.OverrideConfiguratorFactory&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。支持通过在 URL 中配置 router=spi-name1,spi-name2 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.condition.matcher.pattern.ValuePattern&lt;/td&gt;
+ &lt;td&gt;路由规则处理扩展点。条件路由规则内部的规则处理器，通过扩展可支持更丰富的规则和匹配条件&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.condition.matcher.pattern.range.RangeValuePattern&lt;/td&gt;
+ &lt;td&gt;自动激活，通过规则控制激活哪个具体实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcherFactory&lt;/td&gt;
+ &lt;td&gt;路由规则处理扩展点。条件路由规则内部的规则处理器，通过扩展可支持更丰富的规则和匹配条件&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.condition.matcher.argument.ArgumentConditionMatcherFactory&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需配置激活条件。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.mesh.util.TracingContextProvider&lt;/td&gt;
+ &lt;td&gt;MeshRule 路由规则处理扩展点，可用于从不同的第三方 Tracing 系统读取上下文&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.router.mesh.route.MeshEnvListenerFactory&lt;/td&gt;
+ &lt;td&gt;MeshRule 路由规则处理扩展点&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.cache.CacheFactory&lt;/td&gt;
+ &lt;td&gt;缓存实现扩展点，用于缓存 RPC 调用结果&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.cache.support.expiring.ExpiringCacheFactory&lt;/td&gt;
+ &lt;td&gt;通过在 URL 中配置 cache=spi-name 控制具体激活哪个实现&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.serialize.Serialization&lt;/td&gt;
+ &lt;td&gt;序列化协议扩展点，如果要扩展新的序列化协议，可以使用此扩展点。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.serialize.hessian2.Hessian2Serialization&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.provider.serialization=spi-name 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.threadpool.ThreadPool&lt;/td&gt;
+ &lt;td&gt;线程池策略扩展点。目前仅适用于 dubbo 协议实现，不适用于 triple 协议。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.threadpool.support.fixed.FixedThreadPool&lt;/td&gt;
+ &lt;td&gt;通过配置 dubbo.provider.threadpool=spi-name 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.executor.IsolationExecutorSupportFactory&lt;/td&gt;
+ &lt;td&gt;线程池隔离策略扩展点。如 dubbo 协议、triple 协议都可以定义不同的隔离策略，每个协议可设置一个线程池隔离策略。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.transport.TripleIsolationExecutorSupportFactory&lt;/td&gt;
+ &lt;td&gt;跟随用户配置的 dubbo.protocol.name，因此必须确保配置的 key 值与 rpc 协议名相同&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.PenetrateAttachmentSelector&lt;/td&gt;
+ &lt;td&gt;通过此扩展点可以自定义参数全链路传递（dubbo链路），Dubbo 默认只会在 A-&amp;gt;B 链路传递参数，通过此扩展点可以控制参数在 A-&amp;gt;B-&amp;gt;C一直传递下去。&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;del&gt;org.apache.dubbo.rpc.cluster.interceptor.ClusterInterceptor&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;del&gt;与 ~~~~org.apache.dubbo.rpc.cluster.filter.ClusterFilter 相同，废弃&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;del&gt;废弃&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="服务治理"&gt;服务治理&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;SPI 扩展定义&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;功能说明&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;示例实现&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;激活条件&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.config.configcenter.DynamicConfigurationFactory&lt;/td&gt;
+ &lt;td&gt;配置中心核心扩展点。用于提供不同配置中心适配实现。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.configcenter.support.nacos.NacosDynamicConfigurationFactory&lt;/td&gt;
+ &lt;td&gt;通过指定 dubbo.config-center.address=spi-name:// 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.report.MetadataReportFactory&lt;/td&gt;
+ &lt;td&gt;元数据中心扩展点，用于提供新的元数据中心存储实现&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.store.nacos.NacosMetadataReportFactory&lt;/td&gt;
+ &lt;td&gt;通过指定 dubbo.metadata-report.address=spi-name:// 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.report.MetricsReporterFactory&lt;/td&gt;
+ &lt;td&gt;Metrics 指标上报扩展点，可以通过扩展实现适配到不同的 Metrics 后端服务&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.prometheus.PrometheusMetricsReporterFactory&lt;/td&gt;
+ &lt;td&gt;通过指定 dubbo.metrics.protocol=spi-name 激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.collector.MetricsCollector&lt;/td&gt;
+ &lt;td&gt;框架内部 Metrics 采集扩展点，可以通过扩展支持 RPC、注册中心等不同组件的 metrics 埋点数据采集&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.registry.collector.RegistryMetricsCollector&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活，可按需增加激活条件&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.auth.spi.AccessKeyStorage&lt;/td&gt;
+ &lt;td&gt;用于 dubbo-auth 模块，该扩展点可不同的扩展 AK 来源读取方式&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.auth.DefaultAccessKeyStorage&lt;/td&gt;
+ &lt;td&gt;通过指定 accessKey.storage URL 参数激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.auth.spi.Authenticator&lt;/td&gt;
+ &lt;td&gt;用于 dubbo-auth 模块，该扩展点用于实现具体的认证逻辑&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.auth.AccessKeyAuthenticator&lt;/td&gt;
+ &lt;td&gt;通过指定 authenticator URL 参数激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.ssl.CertProvider&lt;/td&gt;
+ &lt;td&gt;TLS 证书来源扩展，用于适配不同的证书来源实现&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.ssl.impl.SSLConfigCertProvider&lt;/td&gt;
+ &lt;td&gt;扩展实现必须增加 @Activate 注解激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="协议与传输层实现"&gt;协议与传输层实现&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;SPI 扩展定义&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;功能说明&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;示例实现&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;激活条件&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.ChannelHandler&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.Codec&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.Codec2&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.Dispatcher&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.Transporter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.dubbo.ByteAccessor&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.api.pu.PortUnificationTransporter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.api.WireProtocol&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.api.connection.ConnectionManager&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.exchange.Exchanger&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.http.HttpBinder&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.http12.message.HttpMessageEncoderFactory&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.http12.message.HttpMessageDecoderFactory&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.http12.h2.Http2ServerTransportListenerFactory&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.http12.h1.Http1ServerTransportListenerFactory&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.http12.message.HttpMessageAdapterFactory&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.annotation.processing.builder.TypeBuilder&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.annotation.processing.rest.AnnotatedMethodParameterProcessor&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.annotation.processing.rest.ServiceRestMetadataResolver&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.definition.builder.TypeBuilder&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.rest.AnnotatedMethodParameterProcessor&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.rest.ServiceRestMetadataReader&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.compressor.Compressor&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.compressor.DeCompressor&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.rest.argument.ArgumentConverter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.rest.argument.ArgumentResolver&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.rest.filter.RestExtension&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.rest.filter.RestExtensionAdapter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.rest.mapping.RequestMappingResolver&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.tri.route.RequestHandlerMapping&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.annotation.param.parse.provider.BaseProviderParamParser&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.rest.ServiceRestMetadataResolver&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.filter.RestRequestFilter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.filter.RestResponseFilter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.rest.NoAnnotatedParameterRequestTagProcessor&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.message.HttpMessageCodec&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.annotation.consumer.HttpConnectionPreBuildIntercept&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.annotation.param.parse.consumer.BaseConsumerParamParser&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.http.factory.RestClientFactory&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.rest.filter.RestResponseInterceptor&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="框架内部实现"&gt;框架内部实现&lt;/h3&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;&lt;strong&gt;SPI 扩展定义&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;功能说明&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;示例实现&lt;/strong&gt;&lt;/th&gt;
+ &lt;th&gt;&lt;strong&gt;激活条件&lt;/strong&gt;&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.url.component.param.DynamicParamSource&lt;/td&gt;
+ &lt;td&gt;可通过扩展自定义动态参数列表，与 Dubbo3 中关于 URL 存储的优化相关。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.url.component.param.DefaultDynamicParamSource&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.compiler.Compiler&lt;/td&gt;
+ &lt;td&gt;用于设置 Dubbo IoC 容器的自适应扩展实现依赖的字节码工具。默认使用 javassist，可设置使用 jdk 或 bytebuddy 等实现。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.compiler.support.JavassistCompiler&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.serialize.MultipleSerialization&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.convert.Converter&lt;/td&gt;
+ &lt;td&gt;实现原类型到目标类型的转换，多限于框架内部集成使用&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.convert.StringToFloatConverter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.config.OrderedPropertiesProvider&lt;/td&gt;
+ &lt;td&gt;通过扩展可以为框架提供更多的 properties 来源，多限于框架内部集成使用&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.convert.multiple.MultiValueConverter&lt;/td&gt;
+ &lt;td&gt;实现原类型到目标类型的转换，多限于框架内部集成使用&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.common.convert.multiple.StringToArrayConverter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.store.DataStore&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.threadpool.manager.ExecutorRepository&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.spring.security.jackson.ObjectMapperCodecCustomer&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.validation.Validation&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.PathResolver&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.model.PackableMethodFactory&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.model.ApplicationInitListener&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.model.BuiltinServiceDetector&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.model.ScopeModelInitializer&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.aot.api.ReflectionTypeDescriberRegistrar&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.aot.api.ProxyDescriberRegistrar&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.json.JsonUtil&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.protocol.injvm.ParamDeepCopyUtil&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.aot.api.ResourceDescriberRegistrar&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.context.ApplicationExt&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.context.ModuleExt&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.service.MetricsService&lt;/td&gt;
+ &lt;td&gt;用于对外发布/透出 Metrics 指标的内部服务定义，以标准 Dubbo 服务形式发布。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.service.DefaultMetricsService&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metrics.service.MetricsServiceExporter&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.filter.FilterChainBuilder&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.filter.InvocationInterceptorBuilder&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.Merger&lt;/td&gt;
+ &lt;td&gt;目前用于多 group 调用场景，对请求结果进行合并&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.rpc.cluster.governance.GovernanceRuleRepository&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.qos.permission.PermissionChecker&lt;/td&gt;
+ &lt;td&gt;用于检查扩展QoS执行权限检查逻辑，配合每个 QoS 命令配置的 @CMD 权限注解，结合上下文进行检查。&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.qos.permission.DefaultAnonymousAccessPermissionChecker&lt;/td&gt;
+ &lt;td&gt;默认只支持 qosPermissionChecker&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.common.status.reporter.FrameworkStatusReporter&lt;/td&gt;
+ &lt;td&gt;用于上报 Dubbo 框架内部运行状态的扩展点，目前框架在服务发现模型自动迁移等位置做了统计埋点，所有迁移动作都会通过此扩展实现上报出去。未来可考虑用 metrics 标准埋点取代。&lt;/td&gt;
+ &lt;td&gt;无&lt;/td&gt;
+ &lt;td&gt;无需配置，自动激活&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.metadata.MetadataServiceURLBuilder&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现。在收到应用级地址 URL 推送后，生成 MetadataService URL 时的定制逻辑（仅对点对点应用级地址发现有效）&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.metadata.StandardMetadataServiceURLBuilder&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;org.apache.dubbo.metadata.ServiceNameMapping&lt;/td&gt;
+ &lt;td&gt;用于应用级服务发现&lt;/td&gt;
+ &lt;td&gt;org.apache.dubbo.registry.client.metadata.MetadataServiceNameMapping&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;del&gt;org.apache.dubbo.common.extension.ExtensionFactory&lt;/del&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;</description></item></channel></rss>
