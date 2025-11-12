@@ -1,3 +1,16 @@
+---
+aliases:
+    - /en/docs3-v2/dubbo-go-pixiu/user/start/
+    - /en/docs3-v2/dubbo-go-pixiu/user/start/
+    - /en/overview/reference/pixiu/user/start/
+    - /en/overview/mannual/dubbo-go-pixiu/user/start/
+description: Start the dubbo-go-pixiu
+linkTitle: Start the dubbo-go-pixiu
+title: Start the dubbo-go-pixiu
+type: docs
+weight: 10
+---
+
 # Start
 
 How to start the dubbo-go-pixiu

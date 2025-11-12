@@ -2,8 +2,8 @@
 
 Base on sample/http.
 
-* [http-http](http-http.md)
-* [http-gprc](http-grpc.md)
+* [http-http](./simple/http-http.md)
+* [http-gprc](./grpc/http-grpc.md)
 
 
-[Previous](../README.md)
+[Previous](../_index.md)

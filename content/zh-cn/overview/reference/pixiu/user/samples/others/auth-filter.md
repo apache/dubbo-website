@@ -1,3 +1,15 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/auth_filter/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/auth_filter/
+    - /zh-cn/overview/reference/pixiu/user/samples/auth_filter/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/auth_filter/
+description: Auth Filter 快速入门
+linkTitle: Auth Filter 快速入门
+title: Auth Filter 快速入门
+type: docs
+weight: 20
+---
 # Auth Filter 快速入门
 
 ## Http

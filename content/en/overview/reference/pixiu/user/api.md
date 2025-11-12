@@ -1,3 +1,16 @@
+---
+aliases:
+    - /en/docs3-v2/dubbo-go-pixiu/user/api/
+    - /en/docs3-v2/dubbo-go-pixiu/user/api/
+    - /en/overview/reference/pixiu/user/api/
+    - /en/overview/mannual/dubbo-go-pixiu/user/api/
+description: API Model Introduction
+linkTitle: API Model Introduction
+title: API Model Introduction
+type: docs
+weight: 20
+---
+
 # Api
 
 Introduction to API model, recommended reading before customizing API for api_config.yaml.

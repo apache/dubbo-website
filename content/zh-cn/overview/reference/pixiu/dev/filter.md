@@ -1,3 +1,17 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/dev/filter/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/filter/
+    - /zh-cn/overview/reference/pixiu/dev/filter/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/dev/filter/
+description: filter概述
+linkTitle: filter概述
+title: filter概述
+type: docs
+weight: 1
+---
+
+
 # Filter
 
 

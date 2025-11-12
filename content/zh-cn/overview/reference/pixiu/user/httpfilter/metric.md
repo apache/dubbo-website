@@ -1,6 +1,21 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/httpfilter/metric/
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/httpfilter/metric/
+  - /zh-cn/overview/reference/pixiu/user/httpfilter/metric/
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/metric/
+description: Metric 介绍
+linkTitle: Metric 介绍
+title: Metric 介绍
+type: docs
+weight: 20
+---
+
+
+
 # 指标上报过滤器 (dgp.filter.http.metric)
 
-[English](metric.md) | 中文
+
 
 ---
 

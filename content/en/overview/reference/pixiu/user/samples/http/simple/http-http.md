@@ -1,3 +1,16 @@
+---
+aliases:
+    - /en/docs3-v2/dubbo-go-pixiu/user/samples/http/simple/http-http
+    - /en/docs3-v2/dubbo-go-pixiu/user/samples/http/simple/http-http
+    - /en/overview/reference/pixiu/user/samples/http/simple/http-http
+    - /en/overview/mannual/dubbo-go-pixiu/user/samples/http/simple/http-http
+description: HTTP Usage
+linkTitle: HTTP Usage
+title: HTTP Usage
+type: docs
+weight: 20
+---
+
 # Http to Http Proxy
 
 > Doc metions below fit the code in the `samples/http/simple`

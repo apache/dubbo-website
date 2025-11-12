@@ -1,10 +1,22 @@
+---
+aliases:
+- /zh/docs3-v2/dubbo-go-pixiu/user/samples/mock/
+- /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/mock/
+- /zh-cn/overview/reference/pixiu/user/samples/mock/
+- /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/mock/
+description: mock 案例介绍
+linkTitle: mock 案例介绍
+title: mock 案例介绍
+type: docs
+weight: 20
+---
+
 # Mock request
 
 ## Simple Demo
 
 ### Api Config
-
-```yaml
+[https.md](https.md)yaml
 name: pixiu
 description: pixiu sample
 resources:
@@ -36,6 +48,6 @@ curl localhost:8888/api/v1/test-dubbo/mock -X GET
 
 ## TODO
 
-We plan use can config custom result in the future. Not only api config way, but also create a match rule.
+我们计划在未来能够配置自定义结果。不仅通过API配置的方式，还会创建匹配规则。
 
-[Previous](README.md)  
+[Previous](_index.md)  

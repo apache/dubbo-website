@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/others/fail-inject
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/others/fail-inject
+- /en/overview/reference/pixiu/user/samples/others/fail-inject
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/others/fail-inject
+description: Fail Inject
+linkTitle: Fail Inject
+title: Fail Inject
+type: docs
+weight: 20
+---
+
 # Fail Inject Filter Quick Start
 
 ## Start Pixiu:

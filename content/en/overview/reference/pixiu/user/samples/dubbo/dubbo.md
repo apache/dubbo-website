@@ -1,3 +1,16 @@
+---
+aliases:
+  - /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo
+  - /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo
+  - /en/overview/reference/pixiu/user/samples/dubbo/dubbo
+  - /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo
+description: Dubbo Related
+linkTitle: Dubbo Related
+title: Dubbo Related
+type: docs
+weight: 10
+---
+
 # Dubbo Catalog
 
 ### http to dubbo-protocol-base dubbo request

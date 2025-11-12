@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-mix
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-mix
+  - /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo-mix
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-mix
+description: Dubbo 混合多个部分获取参数
+linkTitle: Dubbo 混合多个部分获取参数
+title: Dubbo 混合多个部分获取参数
+type: docs
+weight: 10
+---
+
 # 从 URI，Query，Body 各个部分获取参数
 
 > GET 请求 [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/mix)

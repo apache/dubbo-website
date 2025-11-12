@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-query
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-query
+  - /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo-query
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-query
+description: Dubbo 查询
+linkTitle: Dubbo 查询
+title: Dubbo 查询
+type: docs
+weight: 10
+---
+
 # 从表单请求里面获取参数
 
 > GET 请求 [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/query)

@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-universality
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-universality
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-universality
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-universality
+description: Dubbo Universality
+linkTitle: Dubbo Universality
+title: Dubbo Universality
+type: docs
+weight: 10
+---
+
 # Use dubbo request universality
 
 > POST request [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/proxy)

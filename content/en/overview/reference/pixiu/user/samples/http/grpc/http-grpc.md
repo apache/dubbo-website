@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/http/grpc/http-grpc
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/http/grpc/http-grpc
+- /en/overview/reference/pixiu/user/samples/http/grpc/http-grpc
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/http/grpc/http-grpc
+description: GRPC Usage
+linkTitle: GRPC Usage
+title: GRPC Usage
+type: docs
+weight: 20
+---
+
 # Invoke service provider using grpc
 
 > Doc metions below fit the code in the `samples/http/grpc`

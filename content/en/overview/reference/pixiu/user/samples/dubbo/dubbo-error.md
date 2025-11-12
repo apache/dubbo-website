@@ -1,3 +1,16 @@
+---
+aliases:
+  - /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-error
+  - /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-error
+  - /en/overview/reference/pixiu/user/samples/dubbo/dubbo-error
+  - /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-error
+description: Dubbo Error
+linkTitle: Dubbo Error
+title: Dubbo Error
+type: docs
+weight: 10
+---
+
 # How to check dubbo error
 
 ## Pixiu bug condition

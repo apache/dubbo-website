@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/others/prometheus
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/others/prometheus
+- /en/overview/reference/pixiu/user/samples/others/prometheus
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/others/prometheus
+description: Prometheus
+linkTitle: Prometheus
+title: Prometheus
+type: docs
+weight: 20
+---
+
 # Metric Filter Quick Start
 
 ## Start PrometheusPushGateway [Docker environment]:

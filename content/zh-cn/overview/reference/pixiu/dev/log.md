@@ -1,6 +1,20 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/dev/log/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/log/
+    - /zh-cn/overview/reference/pixiu/dev/log/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/dev/log/
+description: 日志阅读介绍
+linkTitle: 日志阅读介绍
+title: 日志阅读介绍
+type: docs
+weight: 2
+---
+
+
 # Log
 
-How to view logs in dubbo-go-pixiu.
+如何在Dubbogo-pixiu中阅读日志
 
 ## DEBUG log
 

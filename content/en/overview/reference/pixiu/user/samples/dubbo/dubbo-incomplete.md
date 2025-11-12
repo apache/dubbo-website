@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-incomplete
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-incomplete
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-incomplete
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-incomplete
+description: Dubbo Incomplete
+linkTitle: Dubbo Incomplete
+title: Dubbo Incomplete
+type: docs
+weight: 10
+---
+
 # Dubbo incomplete
 
 ## Args will nil

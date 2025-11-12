@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-universality
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-universality
+  - /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo-universality
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-universality
+description: Dubbo 通用请求
+linkTitle: Dubbo 通用请求
+title: Dubbo 通用请求
+type: docs
+weight: 10
+---
+
 # 使用 dubbo 通用性请求
 
 > POST 请求 [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/proxy)

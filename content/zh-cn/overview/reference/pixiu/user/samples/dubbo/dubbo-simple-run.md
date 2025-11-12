@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-simple-run
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-simple-run
+  - /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo-simple-run
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-simple-run
+description: Dubbo 运行简单例子
+linkTitle: Dubbo 运行简单例子
+title: Dubbo 运行简单例子
+type: docs
+weight: 10
+---
+
 # 如何运行 dubbo 简单的测试例子
 
 ## 启动 Pixiu

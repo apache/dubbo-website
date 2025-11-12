@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-body
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-body
+  - /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo-body
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-body
+description: Dubbo 请求体
+linkTitle: Dubbo 请求体
+title: Dubbo 请求体
+type: docs
+weight: 10
+---
+
 # 从请求体里面获取参数
 
 > POST 请求 [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/body)

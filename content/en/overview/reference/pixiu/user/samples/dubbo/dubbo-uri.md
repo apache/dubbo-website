@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-uri
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-uri
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-uri
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-uri
+description: Dubbo Uri
+linkTitle: Dubbo Uri
+title: Dubbo Uri
+type: docs
+weight: 10
+---
+
 # Get the parameter from the uri
 
 > GET request [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/uri)

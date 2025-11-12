@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/http-body
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/http-body
+- /en/overview/reference/pixiu/user/samples/dubbo/http-body
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/http-body
+description: HTTP Body
+linkTitle: HTTP Body
+title: HTTP Body
+type: docs
+weight: 10
+---
+
 # Get the parameter from the body
 
 > POST request

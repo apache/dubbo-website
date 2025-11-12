@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-multi
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-multi
+  - /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo-multi
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-multi
+description: Dubbo 结合
+linkTitle: Dubbo 结合
+title: Dubbo 结合
+type: docs
+weight: 10
+---
+
 # 从 URI获取参数
 
 > GET 请求 [sample](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/multi)

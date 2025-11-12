@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/fail_inject/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/fail_inject/
+    - /zh-cn/overview/reference/pixiu/user/samples/fail_inject/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/fail_inject/
+description: Fail Inject Filter 快速入门
+linkTitle: Fail Inject Filter 快速入门
+title: Fail Inject Filter 快速入门
+type: docs
+weight: 20
+---
+
 # Fail Inject Filter 快速入门
 
 ## 启动 Pixiu：

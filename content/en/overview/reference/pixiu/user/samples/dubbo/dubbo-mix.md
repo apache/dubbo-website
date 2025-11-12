@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-mix
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-mix
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-mix
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-mix
+description: Dubbo Mix
+linkTitle: Dubbo Mix
+title: Dubbo Mix
+type: docs
+weight: 10
+---
+
 # Get the parameter from the part of uri,query,body
 
 > GET request [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/mix)

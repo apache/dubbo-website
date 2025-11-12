@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/springcloud/springcloud-springcloud
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/springcloud/springcloud-springcloud
+- /en/overview/reference/pixiu/user/samples/springcloud/springcloud-springcloud
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/springcloud/springcloud-springcloud
+description: SpringCloud
+linkTitle: SpringCloud
+title: SpringCloud 
+type: docs
+weight: 20
+---
+
 # Quick Start
 
 Start Nacos [Docker environment]:

@@ -1,3 +1,16 @@
+---
+aliases:
+- /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-uri
+- /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-uri
+- /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo-uri
+- /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-uri
+description: Dubbo URI
+linkTitle: Dubbo URI
+title: Dubbo URI
+type: docs
+weight: 10
+---
+
 # 从请求的URI部分获取参数
 
 > GET 请求 [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/uri)

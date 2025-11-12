@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-multi
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-multi
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-multi
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-multi
+description: Dubbo Multi
+linkTitle: Dubbo Multi
+title: Dubbo Multi
+type: docs
+weight: 10
+---
+
 # Get the parameter from the part of uri
 
 > GET request [sample](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/multi)

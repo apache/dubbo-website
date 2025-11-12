@@ -1,3 +1,16 @@
+---
+aliases:
+    - /en/docs3-v2/dubbo-go-pixiu/dev/log/
+    - /en/docs3-v2/dubbo-go-pixiu/dev/log/
+    - /en/overview/reference/pixiu/dev/log/
+    - /en/overview/mannual/dubbo-go-pixiu/dev/log/
+description: Log Overview
+linkTitle: Log Overview
+title: Log Overview
+type: docs
+weight: 2
+---
+
 # Log
 
 How to view logs in dubbo-go-pixiu.

@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo
+  - /zh-cn/overview/reference/pixiu/user/samples/dubbo/dubbo
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo
+description: Dubbo 案例
+linkTitle: Dubbo 案例
+title: Dubbo 案例
+type: docs
+weight: 20
+---
+
 # Dubbo
 
 * [dubbo-query](dubbo-query.md)

@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-registry
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-registry
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-registry
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-registry
+description: Dubbo Registry
+linkTitle: Dubbo Registry
+title: Dubbo Registry
+type: docs
+weight: 10
+---
+
 # Generate API config automatically from dubbogo registry
 
 > Doc metions below fit the code in the `samples/dubbogo/simple/registry`

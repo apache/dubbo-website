@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/start/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/start/
+    - /zh-cn/overview/reference/pixiu/user/start/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/start/
+description: 启动 dubbo-go-pixiu
+linkTitle: 启动 dubbo-go-pixiu
+title: 启动 dubbo-go-pixiu
+type: docs
+weight: 10
+---
+
 # Start
 
 如何启动 dubbo-go-pixiu

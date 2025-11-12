@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-query(http)
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-query(http)
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-query(http)
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-query(http)
+description: Dubbo Query(Http)
+linkTitle: Dubbo Query(Http)
+title: Dubbo Query(Http)
+type: docs
+weight: 10
+---
+
 # Get the parameter from the query
 
 > GET request

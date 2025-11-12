@@ -1,6 +1,19 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/config/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/config/
+    - /zh-cn/overview/reference/pixiu/user/config/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/config/
+description: 配置文件
+linkTitle: 配置文件
+title: 配置文件
+type: docs
+weight: 20
+---
+
 ### Config
 
-Pixiu 支持使用参数 -c 指定本地配置文件，您可以在那些样本的 pixiu 目录中找到它。
+Pixiu 支持使config用参数 -c 指定本地配置文件，您可以在那些样本的 pixiu 目录中找到它。
 Pixiu 使用类似于 envoy 的配置抽象，如 listener、filter、route 和 cluster。
 此外，pixiu 提供了另一个特定于 dubbo 的配置名为 api_config，通过它 dubbo-filter 可以将 http 请求转换为 dubbo 泛化调用。您也可以在那些样本的 pixiu 目录中找到它。
 文档 Api 模型 提供了关于 pixiu 配置抽象的 api_config 规范。

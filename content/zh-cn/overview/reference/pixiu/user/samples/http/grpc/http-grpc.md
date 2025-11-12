@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/http/grpc/http-grpc
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/http/grpc/http-grpc
+    - /zh-cn/overview/reference/pixiu/user/samples/http/grpc/http-grpc
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/http/grpc/http-grpc
+description: GRPC 调用
+linkTitle: GRPC 调用
+title: GRPC 调用
+type: docs
+weight: 20
+---
+
 # 使用 grpc 调用服务提供程序
 
 > 以下文档提到的内容适用于 `samples/http/grpc` 中的代码

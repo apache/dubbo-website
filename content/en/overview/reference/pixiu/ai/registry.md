@@ -1,6 +1,17 @@
-## LLM Service Discovery and Registration
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/ai/registry/
+- /en/docs3-v2/dubbo-go-pixiu/ai/registry/
+- /en/overview/reference/pixiu/ai/registry/
+- /en/overview/mannual/dubbo-go-pixiu/ai/registry/
+description: register service
+linkTitle: register service
+title: register service
+type: docs
+weight: 2
+---
 
-English | [中文](registry_CN.md)
+## LLM Service Discovery and Registration
 
 This document aims to guide LLM service providers on how to dynamically register their service instances with the LLM Gateway via a Nacos registry. By following these guidelines, the gateway will be able to automatically discover your service and apply appropriate routing, retry, and fallback strategies based on the metadata you provide.
 

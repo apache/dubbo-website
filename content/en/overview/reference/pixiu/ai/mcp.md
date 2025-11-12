@@ -1,6 +1,17 @@
-## MCP (Model Context Protocol) Gateway Configuration
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/ai/mcp/
+- /en/docs3-v2/dubbo-go-pixiu/ai/mcp/
+- /en/overview/reference/pixiu/ai/mcp/
+- /en/overview/mannual/dubbo-go-pixiu/ai/mcp/
+description: configure the MCP
+linkTitle: configure the MCP
+title: configure the MCP
+type: docs
+weight: 2
+---
 
-English | [中文](./mcp_CN.md)
+## MCP (Model Context Protocol) Gateway Configuration
 
 This document explains how to configure the MCP (Model Context Protocol) filters within your gateway, enabling you to securely expose backend HTTP APIs as callable "tools" for AI Agents.
 

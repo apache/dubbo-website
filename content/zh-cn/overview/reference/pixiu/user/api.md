@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/api/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/api/
+    - /zh-cn/overview/reference/pixiu/user/api/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/api/
+description: API 模型介绍
+linkTitle: API 模型介绍
+title: API 模型介绍
+type: docs
+weight: 20
+---
+
 # Api
 
 API 模型介绍，建议在为 api_config.yaml 自定义 API 之前阅读。

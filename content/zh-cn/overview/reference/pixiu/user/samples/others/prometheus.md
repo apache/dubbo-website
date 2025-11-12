@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/prometheus/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/prometheus/
+    - /zh-cn/overview/reference/pixiu/user/samples/prometheus/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/prometheus/
+description: 启动 PrometheusPushGateway
+linkTitle: 启动 PrometheusPushGateway
+title: 启动 PrometheusPushGateway
+type: docs
+weight: 20
+---
+
 # Metric Filter Quick Start
 
 ## 启动 PrometheusPushGateway [Docker 环境]：

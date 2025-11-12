@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/http/simple/http-http
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/http/simple/http-http
+    - /zh-cn/overview/reference/pixiu/user/samples/http/simple/http-http
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/http/simple/http-http
+description: HTTP 调用
+linkTitle: HTTP 调用
+title: HTTP 调用
+type: docs
+weight: 20
+---
+
 # Http 到 Http 代理
 
 > 以下文档提到的内容适用于 `samples/http/simple` 中的代码

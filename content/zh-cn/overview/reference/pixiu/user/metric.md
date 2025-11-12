@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/metric/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/metric/
+    - /zh-cn/overview/reference/pixiu/user/metric/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/metric/
+description: Metric 介绍
+linkTitle: Metric 介绍
+title: Metric 介绍
+type: docs
+weight: 10
+---
+
 # Metric
 
 ## Enable

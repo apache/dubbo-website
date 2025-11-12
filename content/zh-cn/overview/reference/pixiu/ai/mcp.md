@@ -1,6 +1,19 @@
-## MCP (Model Context Protocol) 网关配置
+---
+aliases:
+   - /zh/docs3-v2/dubbo-go-pixiu/ai/mcp/
+   - /zh-cn/docs3-v2/dubbo-go-pixiu/ai/mcp/
+   - /zh-cn/overview/reference/pixiu/ai/mcp/
+   - /zh-cn/overview/mannual/dubbo-go-pixiu/ai/mcp/
+description: 配置 MCP
+linkTitle: 配置 MCP
+title: 配置 MCP
+type: docs
+weight: 2
+---
 
-[English](./mcp.md) | 中文
+
+
+## MCP (Model Context Protocol) 网关配置
 
 本文档解释了如何在您的网关中配置 MCP (Model Context Protocol) 过滤器，使您能够安全地将后端 HTTP API 暴露为可供 AI Agent 调用的"工具"。
 

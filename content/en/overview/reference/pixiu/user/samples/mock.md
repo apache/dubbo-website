@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/mock/
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/mock/
+- /en/overview/reference/pixiu/user/samples/mock/
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/mock/
+description: Mock Sample Introduction
+linkTitle: Mock Sample Introduction
+title: Mock Sample Introduction
+type: docs
+weight: 20
+---
+
 # Mock request
 
 ## Simple Demo
@@ -39,4 +52,4 @@ curl localhost:8888/api/v1/test-dubbo/mock -X GET
 
 We plan use can config custom result in the future. Not only api config way, but also create a match rule.
 
-[Previous](README.md)  
+[Previous](_index.md)  

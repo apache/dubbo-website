@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-query
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-query
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-query
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-query
+description: Dubbo Query
+linkTitle: Dubbo Query
+title: Dubbo Query
+type: docs
+weight: 10
+---
+
 # Get the parameter from the query
 
 > GET request [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/query)

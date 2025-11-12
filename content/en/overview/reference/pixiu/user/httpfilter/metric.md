@@ -1,6 +1,18 @@
+---
+aliases:
+  - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/metric/
+  - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/metric/
+  - /en/overview/reference/pixiu/user/httpfilter/metric/
+  - /en/overview/mannual/dubbo-go-pixiu/user/httpfilter/metric/
+description: Metric Introduction
+linkTitle: Metric Introduction
+title: Metric Introduction
+type: docs
+weight: 20
+---
+
 # Metric Reporter Filter (dgp.filter.http.metric)
 
-English | [中文](metric_CN.md)
 
 ---
 

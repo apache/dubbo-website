@@ -1,7 +1,17 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/ai/endpoint/
+- en/docs3-v2/dubbo-go-pixiu/ai/endpoint/
+- /en/overview/reference/pixiu/ai/endpoint/
+- /en/overview/mannual/dubbo-go-pixiu/ai/endpoint/
+description: configure upstream endpoints
+linkTitle: configure upstream endpoints
+title: configure upstream endpoints
+type: docs
+weight: 2
+---
 
 ## LLM Gateway Endpoint Configuration
-
-English | [中文](./endpoint_CN.md)
 
 This document explains how to configure upstream endpoints for Large Language Models (LLMs) within your gateway's routing configuration.
 

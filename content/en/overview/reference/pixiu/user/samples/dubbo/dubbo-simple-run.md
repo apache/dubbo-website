@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-simple-run
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/dubbo-simple-run
+- /en/overview/reference/pixiu/user/samples/dubbo/dubbo-simple-run
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/dubbo-simple-run
+description: Dubbo Simple Run
+linkTitle: Dubbo Simple Run
+title: Dubbo Simple Run
+type: docs
+weight: 10
+---
+
 # How run dubbo simple test samples
 
 ## Start Pixiu

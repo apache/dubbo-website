@@ -1,3 +1,16 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/user/samples/jaeger/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/user/samples/jaeger/
+    - /zh-cn/overview/reference/pixiu/user/samples/jaeger/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/user/samples/jaeger/
+description: 使用 Jaeger 进行追踪
+linkTitle: 使用 Jaeger 进行追踪
+title: 使用 Jaeger 进行追踪
+type: docs
+weight: 20
+---
+
 
 
 #### 使用 Jaeger 进行追踪

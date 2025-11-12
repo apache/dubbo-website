@@ -1,6 +1,19 @@
+---
+aliases:
+- /zh/docs3-v2/dubbo-go-pixiu/ai/endpoint/
+- /zh-cn/docs3-v2/dubbo-go-pixiu/ai/endpoint/
+- /zh-cn/overview/reference/pixiu/ai/endpoint/
+- /zh-cn/overview/mannual/dubbo-go-pixiu/ai/endpoint/
+description: 配置上游 endpoint
+linkTitle: 配置上游 endpoint
+title: 配置上游 endpoint
+type: docs
+weight: 2
+---
+
 ## LLM 网关 endpoint 配置
 
-[English](./endpoint.md) | 中文
+
 
 本文档解释了如何在您的网关路由配置中为大语言模型 (LLM) 配置上游 endpoint。
 

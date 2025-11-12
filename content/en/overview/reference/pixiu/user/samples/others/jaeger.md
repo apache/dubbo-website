@@ -1,4 +1,15 @@
-
+---
+aliases:
+    - /en/docs3-v2/dubbo-go-pixiu/user/samples/others/jaeger
+    - /en/docs3-v2/dubbo-go-pixiu/user/samples/others/jaeger
+    - /en/overview/reference/pixiu/user/samples/others/jaeger
+    - /en/overview/mannual/dubbo-go-pixiu/user/samples/others/jaeger
+description: Jaeger
+linkTitle: Jaeger
+title: Jaeger
+type: docs
+weight: 20
+---
 
 #### Tracing with Jaeger
 

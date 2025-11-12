@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/http-uri
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/dubbo/http-uri
+- /en/overview/reference/pixiu/user/samples/dubbo/http-uri
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/dubbo/http-uri
+description: Http Uri
+linkTitle: Http Uri
+title: Http Uri
+type: docs
+weight: 10
+---
+
 # Get the parameter from the URI
 
 > GET request \

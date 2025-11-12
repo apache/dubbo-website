@@ -1,3 +1,17 @@
+---
+aliases:
+    - /zh/docs3-v2/dubbo-go-pixiu/dev/auto-registy/
+    - /zh-cn/docs3-v2/dubbo-go-pixiu/dev/auto-registy/
+    - /zh-cn/overview/reference/pixiu/dev/auto-registy/
+    - /zh-cn/overview/mannual/dubbo-go-pixiu/dev/auto-registy/
+description: 自动注册
+linkTitle: 自动注册
+title: 自动注册
+type: docs
+weight: 2
+---
+
+
 # 自动注册
 
 一个便于用户使用dubbo-go-pixiu的功能。

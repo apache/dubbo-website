@@ -1,3 +1,16 @@
+---
+aliases:
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/others/auth-filter
+- /en/docs3-v2/dubbo-go-pixiu/user/samples/others/auth-filter
+- /en/overview/reference/pixiu/user/samples/others/auth-filter
+- /en/overview/mannual/dubbo-go-pixiu/user/samples/others/auth-filter
+description: Auth Filter
+linkTitle: Auth Filter
+title: Auth Filter
+type: docs
+weight: 20
+---
+
 # Auth Filter Quick Start
 
 ## Http

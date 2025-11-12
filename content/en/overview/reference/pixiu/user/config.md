@@ -1,3 +1,16 @@
+---
+aliases:
+    - /en/docs3-v2/dubbo-go-pixiu/user/config/
+    - /en/docs3-v2/dubbo-go-pixiu/user/config/
+    - /en/overview/reference/pixiu/user/config/
+    - /en/overview/mannual/dubbo-go-pixiu/user/config/
+description: Config File
+linkTitle: Config File
+title: Config File
+type: docs
+weight: 20
+---
+
 ### Config
  
 Pixiu supports specifying local config file with argument `-c` which you can find in those samples pixiu dir. 

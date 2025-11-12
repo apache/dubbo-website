@@ -1,6 +1,17 @@
-## LLM 服务发现与注册
+---
+aliases:
+- /zh/docs3-v2/dubbo-go-pixiu/ai/registry/
+- /zh-cn/docs3-v2/dubbo-go-pixiu/ai/registry/
+- /zh-cn/overview/reference/pixiu/ai/registry/
+- /zh-cn/overview/mannual/dubbo-go-pixiu/ai/registry/
+description: 注册服务到网关
+linkTitle: 注册服务到网关
+title: 注册服务到网关
+type: docs
+weight: 2
+---
 
-[English](registry.md) | 中文
+## LLM 服务发现与注册
 
 本文档旨在指导 LLM 服务提供商如何通过 Nacos 注册中心，将其服务实例动态地注册到 LLM 网关。通过遵循这些准则，网关将能够自动发现您的服务，并根据您提供的元数据（metadata）应用相应的路由、重试和 fallback 策略。
 

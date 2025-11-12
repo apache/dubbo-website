@@ -1,3 +1,16 @@
+---
+aliases:
+  - /zh/docs3-v2/dubbo-go-pixiu/user/httpfilter/opa/
+  - /zh-cn/docs3-v2/dubbo-go-pixiu/user/httpfilter/opa/
+  - /zh-cn/overview/reference/pixiu/user/httpfilter/opa/
+  - /zh-cn/overview/mannual/dubbo-go-pixiu/user/httpfilter/opa/
+description: Opa 介绍
+linkTitle: Opa 介绍
+title: Opa 介绍
+type: docs
+weight: 20
+---
+
 # OPA 过滤器 (dgp.filter.http.opa)
 
 [English](opa.md) | 中文

@@ -1,3 +1,16 @@
+---
+aliases:
+    - /en/docs3-v2/dubbo-go-pixiu/user/metric/
+    - /en/docs3-v2/dubbo-go-pixiu/user/metric/
+    - /en/overview/reference/pixiu/user/metric/
+    - /en/overview/mannual/dubbo-go-pixiu/user/metric/
+description: Metric Introduction
+linkTitle: Metric Introduction
+title: Metric Introduction
+type: docs
+weight: 10
+---
+
 # Metric
 
 ## Enable

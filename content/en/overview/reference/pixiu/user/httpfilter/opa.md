@@ -1,6 +1,18 @@
+---
+aliases:
+  - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/opa/
+  - /en/docs3-v2/dubbo-go-pixiu/user/httpfilter/opa/
+  - /en/overview/reference/pixiu/user/httpfilter/opa/
+  - /en/overview/mannual/dubbo-go-pixiu/user/httpfilter/opa/
+description: Opa Introduction
+linkTitle: Opa Introduction
+title: Opa Introduction
+type: docs
+weight: 20
+---
+
 # OPA Filter (dgp.filter.http.opa)
 
-English | [中文](opa_CN.md)
 
 ---
 
