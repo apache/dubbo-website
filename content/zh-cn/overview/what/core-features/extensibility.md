@@ -36,7 +36,7 @@ Dubbo 扩展能力使得 Dubbo 项目很方便的切分成一个一个的子模�
 众多的扩展点与抽象，是 Dubbo 与众多微服务生态组件对接、实现微服务治理能力的基础。
 
 * [全链路追踪](../../mannual/java-sdk/tasks/observability/tracing/)
-* [数据一致性](../../mannual/java-sdk/tasks/ecosystem/transaction/)
+* `数据一致性`
 * [限流降级](../../core-features/traffic/circuit-breaking/)
 
 Dubbo 的各语言 sdk 实现都是采用的 "微内核+插件" 的设计模式，几乎所有流程中的核心节点都被定义为扩展点，官方发布的组件也是以扩展点的实现形式发布，因此 Dubbo 可以平等的对待所有官方与第三方组件扩展。

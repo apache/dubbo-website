@@ -65,7 +65,7 @@ Greeting: Hello world
 以上就是一个完整的 dubbo-go 微服务应用工作流程。
 
 ## 源码讲解
-关于 `dubbo-go-samples/registry/nacos` 示例源码，包括服务定义、代码生成、server/client 启动等均与上一篇 [rpc server & rpc client]() 类似，请点击以上链接查看具体解读。
+关于 `dubbo-go-samples/registry/nacos` 示例源码，包括服务定义、代码生成、server/client 启动等均与上一篇 `rpc server & rpc client` 类似，请点击以上链接查看具体解读。
 
 **开发微服务最大的不同点在于：应用中增加了关于注册中心的配置，如下所示（以 server.go 为例）：**
 
@@ -113,7 +113,7 @@ ins, err := dubbo.NewInstance(
 
 {{% alert title="关于 dubbo.Insance 说明" color="info" %}}
 * 在开发 dubbo 微服务应用时，我们推荐使用 `dubbo.Instance` 来设置一些全局性的服务治理能力，如注册中心、协议、应用名、tracing、配置中心等。
-* `ins.NewServer()` 可以创建多个，通常当你需要在多个端口 [发布多个协议]() 时才需要这么做。
+* `ins.NewServer()` 可以创建多个，通常当你需要在多个端口 `发布多个协议` 时才需要这么做。
 {{% /alert %}}
 
 如果你要为应用添加更多服务治理能力，请参考以下内容：
