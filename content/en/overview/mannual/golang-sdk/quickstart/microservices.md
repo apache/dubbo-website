@@ -16,9 +16,7 @@ In this example, we will continue to use Protobuf to develop the microservice ap
 
 ## Quick Run Example
 ### Download Example Source Code
-We maintain a series of dubbo-go usage examples in the <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> repository to help users quickly learn how to use dubbo-go.
-
-You can <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">download the example zip package and extract it</a>, or clone the repository:
+We maintain a series of dubbo-go usage examples in the [apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples/) repository to help users quickly learn how to use dubbo-go.
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples
@@ -67,7 +65,7 @@ Greeting: Hello world
 This is a complete flow of a dubbo-go microservice application.
 
 ## Source Code Explanation
-Regarding the source code of the `dubbo-go-samples/registry/nacos` example, including service definitions, code generation, and server/client startup, it is similar to the previous [rpc server & rpc client]() discussion. Please click the link above for specific interpretations.
+Regarding the source code of the `dubbo-go-samples/registry/nacos` example, including service definitions, code generation, and server/client startup, it is similar to the previous [rpc server & rpc client](./rpc.md) discussion. Please click the link above for specific interpretations.
 
 **The biggest difference in developing microservices is that the application includes configuration for the registry, as shown below (taking server.go as an example):**
 
@@ -115,7 +113,7 @@ Then, we create `ins.NewServer()` and register services for the server instance 
 
 {{% alert title="About dubbo.Instance" color="info" %}}
 * When developing dubbo microservice applications, we recommend using `dubbo.Instance` to set up some global service governance capabilities, such as registry, protocol, application name, tracing, configuration center, etc.
-* `ins.NewServer()` can create multiple instances, typically needed when you want to [publish multiple protocols]() on different ports.
+* `ins.NewServer()` can create multiple instances, typically needed when you want to publish multiple protocols on different ports.
 {{% /alert %}}
 
 If you want to add more service governance capabilities to the application, please refer to the following content:
