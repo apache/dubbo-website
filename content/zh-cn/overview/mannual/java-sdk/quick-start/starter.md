@@ -38,7 +38,7 @@ chmod a+x ./mvnw
 * 由于配置文件中启用了注册中心，您需要首先在本地启动 <a href="/zh-cn/overview/reference/integrations/nacos/" target="_blank_">Nacos</a> 注册中心 server。或者参考下一篇 Kubernetes 部署方式。
 {{% /alert %}}
 
-在应用启动成功后，本地进程使用 <a href="overview/mannual/java-sdk/tasks/protocols/triple" target="_blank_">Triple </a>协议在指定端口发布了服务。同时可以看到消费端持续对提供端发起调用：
+在应用启动成功后，本地进程使用 Triple 协议在指定端口发布了服务。同时可以看到消费端持续对提供端发起调用：
 
 ```text
 Started QuickStartApplication in 4.38 seconds (process running for 4.629)

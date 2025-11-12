@@ -124,7 +124,7 @@ Stream 分为以下三种。
 关于 Streaming 的具体使用示例，请参见 [Streaming 流式通信](../protocol/triple)。
 
 ## REST 支持
-通过为 Java 接口增加注解，可以发布 rest 风格的 triple 服务，可在这里查看 <a href="" target="_blank">具体代码示例</a>
+通过为 Java 接口增加注解，可以发布 rest 风格的 triple 服务，可在这里查看 `具体代码示例`
 
 {{% alert title="流的语义保证" color="info" %}}
 目前 rest 协议仅支持 `Java 接口` 服务定义模式，相比于 dubbo 和 triple 协议，rest 场景下我们需要为 Interface 增加注解，支持 Spring MVC、JAX_RS 两种注解。

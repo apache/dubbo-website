@@ -274,7 +274,7 @@ DestinationRule C
 
 ### 示例：按比例流量路由规则
 
-> 注意，虽然接下来的规则和 Istio 的 VirtualService、DestinationRule 很像，但工作过程和具体规则和 Istio 还是有一些差异，Dubbo 只是参考了 Istio 的设计。如果您想接入原生的 Istio 服务网格治理体系，请参考下文 [接入服务网格流量治理](#接入服务网格流量治理)。
+> 注意，虽然接下来的规则和 Istio 的 VirtualService、DestinationRule 很像，但工作过程和具体规则和 Istio 还是有一些差异，Dubbo 只是参考了 Istio 的设计。如果您想接入原生的 Istio 服务网格治理体系，请参考下文 `接入服务网格流量治理`。
 
 在一些场景下，我们需要将相同属性的流量按比例的分发到不同的实例分组。一个典型的示例场景是 A/B 测试，比如我们需要将 20% 流量转发到服务新版本 v2 的实例，以验证新版本的稳定性，或者是将公司内部的一部分用户导流到新版本 v2 的实例进行测试验证。另一个应用场景是实现服务的金丝雀发布，通过逐步调整流量分配比例值，使得新版本的流量逐步提升并最终将全部流量完全迁移到新版本之上。
 
@@ -366,8 +366,8 @@ subsets:
      detail_version: v2 # 'version' is a reserved key in Dubbo, so must not be used.
 ```
 
-> 和标签路由类似，这里牵涉到如何给您的实例打标（这里是 `detail_version`）的问题，请参考下文的 [如何给实例打标](#如何给实例打标) 一节。
+> 和标签路由类似，这里牵涉到如何给您的实例打标（这里是 `detail_version`）的问题，请参考下文的 `如何给实例打标` 一节。
 
-除了以上介绍的与 Istio 流量规则很相似的功能之外，Dubbo 的 VirtualService、DestinationRule 还可以实现方法参数路由等 Istio 规则不能做到的事情，具体查看 [参考手册]()。
+除了以上介绍的与 Istio 流量规则很相似的功能之外，Dubbo 的 VirtualService、DestinationRule 还可以实现方法参数路由等 Istio 规则不能做到的事情，具体查看 `参考手册`。
 
 
