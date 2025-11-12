@@ -24,7 +24,7 @@ weight: 6
 
 | JVM 参数 | 示例值 | 说明 |
 | --- | --- | --- |
-| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo支持 [所有的配置项](aaa) 以JVM参数格式指定。其中`config` 是指如 application、registry、protocol 等配置项，而`property`则是指每个配置项中的具体属性。 |
+| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo支持 `所有的配置项` 以JVM参数格式指定。其中`config` 是指如 application、registry、protocol 等配置项，而`property`则是指每个配置项中的具体属性。 |
 | dubbo.resolve.file | -Ddubbo.resolve.file=/home/ken/.../dubbo-resolve.properties | 在文件中指定每个接口的直连地址url，如：org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx |
 | org.graalvm.nativeimage.imagecode || [https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java](https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java) |
 | dubbo.properties.file | -Ddubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
@@ -64,7 +64,7 @@ weight: 6
 
 | 环境变量 | 示例值 | 说明 |
 | --- | --- | --- |
-| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo支持[所有的配置项](aaa)以环境变量格式指定。其中`CONFIG-NAME` 是指如 application、registry、protocol 等配置项，而 `PROPERTY`则是指每个配置项中的具体属性。 |
+| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo支持`所有的配置项`以环境变量格式指定。其中`CONFIG-NAME` 是指如 application、registry、protocol 等配置项，而 `PROPERTY`则是指每个配置项中的具体属性。 |
 | DUBBO_DEFAULT_SERIALIZATION | DUBBO_DEFAULT_SERIALIZATION="hessan2" | 设置框架的默认序列化方式，如hessian2、fastjson2、msgpack等 |
 | DUBBO2_COMPACT_ENABLE | DUBBO2_COMPAT_ENABLE="true" |  |
 | DUBBO_ENV_KEYS| DUBBO_LABELS="tag1=value1; tag2=value2" | `tag1=value1`会作为附加参数上报到地址 URL，作为系统环境变量可用于为实例打标等。 |
@@ -353,7 +353,7 @@ weight: 6
 | url-merge-processor| java.lang.String| Url Merge Processor Used to customize the URL merge of consumer and provider| | |
 | validation| java.lang.String| Enable JSR303 standard annotation validation for method parameters.| | |
 | version| java.lang.String| Version of the remote service referenced by the consumer/provider.| | |
-### dubbo.metadata-report
+### dubbo.metadata-report {#dubbo.metadata-report}
 **Class:** `org.apache.dubbo.config.MetadataReportConfig`
 
 |Key|Type|Description|Default value|Deprecation|

@@ -10,7 +10,7 @@ weight: 1
 
 ## 1 介绍
 
-<a href="" target="_blank">Protobuf（Protocol Buffers）</a> 是由 Google 开发的一种轻量级、高效的数据交换格式，它被用于结构化数据的序列化、反序列化和传输。 相比于XML 和JSON 等文本格式，Protobuf 具有更小的数据体积、更快的解析速度和更强的可扩展性。
+Protobuf（Protocol Buffers） 是由 Google 开发的一种轻量级、高效的数据交换格式，它被用于结构化数据的序列化、反序列化和传输。 相比于XML 和JSON 等文本格式，Protobuf 具有更小的数据体积、更快的解析速度和更强的可扩展性。
 
 ## 2 使用方式
 **在使用 [Protobuf(IDL) 开发 triple 通信服务](/zh-cn/overview/mannual/java-sdk/tasks/protocols/triple/idl/) 的时候，dubbo server 将自动启用 protobuf、protobuf-json 序列化模式支持。**

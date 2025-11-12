@@ -104,6 +104,6 @@ public class Application {
 
 ## 更多内容
 
-- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/zh-cn/overview/mannual/java-sdk/quick-start/)，或者 [使用其他通信协议]()
-- 作为 RPC 框架，Dubbo 支持异步调用、连接管理、context上下文等，请参考 [RPC 框架核心功能]()
-- 您可以继续 [使用 API 为应用添加更多微服务治理能力]()，但我们更推进您使用 [Dubbo Spring Boot 开发微服务应用](../../microservice/develop/)
+- Triple 协议完全兼容 gRPC，您可以参考这里了解如何  [使用 IDL 编写 gRPC 兼容的服务](/zh-cn/overview/mannual/java-sdk/quick-start/)，或者 `使用其他通信协议`
+- 作为 RPC 框架，Dubbo 支持异步调用、连接管理、context上下文等，请参考 `RPC 框架核心功能`
+- 您可以继续 `使用 API 为应用添加更多微服务治理能力`，但我们更推进您使用 [Dubbo Spring Boot 开发微服务应用](/zh-cn/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop)

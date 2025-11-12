@@ -34,7 +34,7 @@ Filter 工作原理如下图所示：
 public interface Filter extends BaseFilter {}
 ```
 
-Filter 的默认激活状态可在定义中通过 `@Activate` 注解设置，如以下定义表示该 Filter 在提供者端执行 RPC 请求时自动开启（在消费端不开启）。`@Activate` 支持多种条件控制，包括 classpath 下有某个类的定义时开启，URL 中有哪个参数值时开启等，具体可参见 [SPI 扩展 Activate 介绍]()。
+Filter 的默认激活状态可在定义中通过 `@Activate` 注解设置，如以下定义表示该 Filter 在提供者端执行 RPC 请求时自动开启（在消费端不开启）。`@Activate` 支持多种条件控制，包括 classpath 下有某个类的定义时开启，URL 中有哪个参数值时开启等，具体可参见 `SPI 扩展 Activate 介绍`。
 
 ```java
 @Activate(group = PROVIDER)
@@ -130,7 +130,7 @@ public interface ClusterFilter extends BaseFilter {}
 
 ### 扩展Filter
 
-可参考 [使用教程 - 自定义扩展]() 学习具体示例。
+可参考 `使用教程 - 自定义扩展` 学习具体示例。
 
 
 

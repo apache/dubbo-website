@@ -9,7 +9,7 @@ type: docs
 weight: 3
 working_in_progress: true
 ---
-这种模式将 Dubbo Service 与 <a target="_blank" href="">Kubernetes Service</a> 概念映射起来，不再需要 Nacos 等传统注册中心，而是由 Kubernetes APISERVER 承担注册中心指责。
+这种模式将 Dubbo Service 与 `Kubernetes Service` 概念映射起来，不再需要 Nacos 等传统注册中心，而是由 Kubernetes APISERVER 承担注册中心指责。
 
 <img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes-service.png" style="max-width:650px;height:auto;" />
 

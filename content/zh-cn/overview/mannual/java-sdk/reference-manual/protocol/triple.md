@@ -21,7 +21,7 @@ weight: 2
 使用 triple 协议时，开发者可以使用 `Java Interface`、`Protobuf(IDL)` 两种方式定义 RPC 服务，两种服务定义方式的协议能力是对等的，仅影响开发者的编程体验、序列化方式，具体选用那种开发模式，取决于使用者的业务背景。
 
 ### Java接口
-**适合于 Dubbo 老用户、没有跨语言诉求的开发团队，具备学习成本低的优势，[Dubbo2 老用户可以零成本切换到该协议]()**。
+适合于 Dubbo 老用户、没有跨语言诉求的开发团队，具备学习成本低的优势，`Dubbo2 老用户可以零成本切换到该协议`。
 
 服务定义范例：
 ```java
@@ -32,7 +32,7 @@ public interface DemoService {
 
 这种模式下，序列化方式可以选用 Hessian、JSON、Kryo、JDK、自定义扩展等任意编码协议。在使用体验上，可以说与老版本 dubbo 协议没有任何区别，只需要改一个 protocol 配置项即可，因此对于 dubbo 协议迁移到 triple 也会更平滑。
 
-请通过【进阶学习 - 通信协议】查看 [java Interface + Triple 协议的具体使用示例]()。
+请通过【进阶学习 - 通信协议】查看 `java Interface + Triple 协议的具体使用示例`。
 
 ### Protobuf
 
@@ -68,7 +68,7 @@ public interface Greeter extends org.apache.dubbo.rpc.model.DubboStub {
 }
 ```
 
-Protobuf 模式支持序列化方式有 Protobuf Binary、Protobuf JSON 两种模式。最后，请通过【进阶学习 - 通信协议】查看 [Protobuf (IDL) + Triple 协议的具体使用示例]()。
+Protobuf 模式支持序列化方式有 Protobuf Binary、Protobuf JSON 两种模式。最后，请通过【进阶学习 - 通信协议】查看 `Protobuf (IDL) + Triple 协议的具体使用示例`。
 
 #### 3. 我该使用哪种编程模式，如何选择？
 
@@ -121,7 +121,7 @@ Stream 分为以下三种。
 - 支持取消和超时
 {{% /alert %}}
 
-关于 Streaming 的具体使用示例，请参见 [Streaming 流式通信](../triple/streaming/)。
+关于 Streaming 的具体使用示例，请参见 [Streaming 流式通信](../protocol/triple)。
 
 ## REST 支持
 通过为 Java 接口增加注解，可以发布 rest 风格的 triple 服务，可在这里查看 <a href="" target="_blank">具体代码示例</a>

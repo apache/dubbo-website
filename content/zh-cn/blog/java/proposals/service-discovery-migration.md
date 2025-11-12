@@ -11,7 +11,7 @@ description: >
 
 总体上来说，在地址注册与发现环节，`3.x` 是完全兼容 `2.x` 版本的，这意味着，用户可以选择将集群内任意数量的应用或机器升级到 `3.x`，同时在这个过程中保持与 `2.x` 版本的互操作性。
 
-> 如关心迁移背后工作原理，请参考 [迁移规则详情与工作原理](/zh-cn/blog/java/proposals/service-discovery-rule)
+> 如关心迁移背后工作原理，请参考 [迁移规则详情与工作原理](/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule)
 
 ## 1 快速升级步骤
 
@@ -186,7 +186,7 @@ services:
 ```
 
 使用这种方式能做到比较精细迁移控制，但是当下及后续的改造成本会比较高，除了一些特别场景，我们不太推荐启用这种配置方式。
-[迁移指南](/zh-cn/blog/java/proposals/service-discovery-rule)官方推荐使用的全局的开关式的迁移策略，让消费端实例在启动阶段自行决策使用哪份可用的地址列表。
+[迁移指南](/zh-cn/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule)官方推荐使用的全局的开关式的迁移策略，让消费端实例在启动阶段自行决策使用哪份可用的地址列表。
 
 
 

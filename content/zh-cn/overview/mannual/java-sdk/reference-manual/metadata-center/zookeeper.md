@@ -48,7 +48,7 @@ MetadataReportConfig metadataConfig = new MetadataReportConfig();
 metadataConfig.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-`address` 格式请参考 [zookeeper 注册中心 - 启用配置](../../registry/zookeeper/#22-配置并启用-zookeeper)
+`address` 格式请参考 [zookeeper 注册中心 - 启用配置](../../../java-sdk/reference-manual/registry/zookeeper)
 
 ## 3 高级配置
 

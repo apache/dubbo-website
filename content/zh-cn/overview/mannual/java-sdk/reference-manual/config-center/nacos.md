@@ -49,10 +49,10 @@ ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("nacos://127.0.0.1:8848");
 ```
 
-`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#22-配置并启用-nacos)
+`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../reference-manual/registry/nacos)
 
 ## 3 高级配置
-如要开启认证鉴权，请参考 [Nacos 注册中心 - 启用认证鉴权](../../registry/nacos/#31-认证)
+如要开启认证鉴权，请参考 [Nacos 注册中心 - 启用认证鉴权](../../reference-manual/registry/nacos)
 
 ### 3.1 外部化配置
 #### 3.1.1 全局外部化配置
@@ -101,7 +101,7 @@ dubbo
 对配置中心而言，`group` 与 `namespace` 应该是全公司（集群）统一的，应该避免不同应用使用不同的值。
 
 ### 3.3 Nacos 扩展配置
-更多 Nacos sdk/server 支持的参数配置请参见 [Nacos 注册中心 - 更多配置](../../registry/nacos/#35-更多配置)
+更多 Nacos sdk/server 支持的参数配置请参见 [Nacos 注册中心 - 更多配置](../../reference-manual/registry/nacos)
 
 ## 4 流量治理规则
 对 Nacos 而言，所有流量治理规则和外部化配置都应该是全局可见的，因此相同逻辑集群内的应用都必须使用相同的 namespace 与 group。其中，namespace 的默认值是 `public`，group 默认值是 `dubbo`，应用不得擅自修改 namespace 与 group，除非能保持全局一致。
