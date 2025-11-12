@@ -192,7 +192,7 @@ weight: 6
 | providers| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ProviderConfig&gt;| Multiple configurations for Provider.| | |
 | registries| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.RegistryConfig&gt;| Multiple configurations for Registry.| | |
 | tracings| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.TracingConfig&gt;| Multiple configurations for TracingConfig.| | |
-### dubbo.application
+### dubbo.application {#dubbo.application}
 **Class:** `org.apache.dubbo.config.ApplicationConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -251,7 +251,7 @@ weight: 6
 | startup-probe| java.lang.String| The probe for checking the startup of the application.| | |
 | trust-serialize-class-level| java.lang.Integer| The trust level for serialized classes.| | |
 | version| java.lang.String| The application version.| | |
-### dubbo.config-center
+### dubbo.config-center {#dubbo.config-center}
 **Class:** `org.apache.dubbo.config.ConfigCenterConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -278,7 +278,7 @@ weight: 6
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | timeout| java.lang.Long| The timeout for accessing the config center. Default value is 30000L.| | |
 | username| java.lang.String| Username for authentication with the config center.| | |
-### dubbo.consumer
+### dubbo.consumer {#dubbo.consumer}
 **Class:** `org.apache.dubbo.config.ConsumerConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -409,7 +409,7 @@ weight: 6
 | rpc-level| java.lang.String| The level of metrics collection, which can be &quot;SERVICE&quot; or &quot;METHOD&quot;. The default is &quot;METHOD&quot;.| | |
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | use-global-registry| java.lang.Boolean| Decide whether to use the global registry of Micrometer.| | |
-### dubbo.module
+### dubbo.module {#dubbo.module}
 **Class:** `org.apache.dubbo.config.ModuleConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -433,7 +433,7 @@ weight: 6
 | registry| org.apache.dubbo.config.RegistryConfig| | | |
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | version| java.lang.String| The module version| | |
-### dubbo.monitor
+### dubbo.monitor {#dubbo.monitor}
 **Class:** `org.apache.dubbo.config.MonitorConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -452,7 +452,7 @@ weight: 6
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | username| java.lang.String| The monitor username| | |
 | version| java.lang.String| The monitor version| | |
-### dubbo.protocol
+### dubbo.protocol {#dubbo.protocol}
 **Class:** `org.apache.dubbo.config.ProtocolConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -502,7 +502,7 @@ weight: 6
 | threadpool| java.lang.String| The name of the thread pool.| | |
 | threads| java.lang.Integer| The fixed size of the thread pool.| | |
 | transporter| java.lang.String| The transporter used for communication.| | |
-### dubbo.provider
+### dubbo.provider {#dubbo.provider}
 **Class:** `org.apache.dubbo.config.ProviderConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -601,7 +601,7 @@ weight: 6
 | wait| java.lang.Integer| The wait time when stopping the service.| | |
 | warmup| java.lang.Integer| Warm-up period for the service.| | |
 | weight| java.lang.Integer| The service weight.| | |
-### dubbo.registry
+### dubbo.registry {#dubbo.registry}
 **Class:** `org.apache.dubbo.config.RegistryConfig`
 
 |Key|Type|Description|Default value|Deprecation|

@@ -11,7 +11,7 @@ weight: 3
 ---
 
 {{% alert title="请注意" color="warning" %}}
-* 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并使用 [框架的服务发现默认行为](/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/#启用应用级服务发现)。
+* 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并使用 [框架的服务发现默认行为](/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery#启用应用级服务发现)。
 * 本文档更适用于 Dubbo2 老用户，用于了解在升级到 Dubbo3 版本后，框架中的服务发现模型切换过程与工作原理。新用户请直接 [配置启用应用级服务发现](/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/nacos/#13-配置并启用-nacos)。
 {{% /alert %}}
 
