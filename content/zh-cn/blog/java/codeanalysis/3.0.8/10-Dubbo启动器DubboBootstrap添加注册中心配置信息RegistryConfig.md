@@ -36,7 +36,7 @@ registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
 | 属性       | 对应URL参数          | 类型    | 是否必填 | 缺省值 | 作用     | 描述                                                         | 兼容性         |
 | ---------- | -------------------- | ------- | -------- | ------ | -------- | ------------------------------------------------------------ | -------------- |
 | id         |                      | string  | 可选     |        | 配置关联 | 注册中心引用BeanId，可以在<dubbo:service registry="">或<dubbo:reference registry="">中引用此ID | 1.0.16以上版本 |
-| address    | <host:port>          | string  | **必填** |        | 服务发现 | 注册中心服务器地址，如果地址没有端口缺省为9090，同一集群内的多个地址用逗号分隔，如：ip:port,ip:port，不同集群的注册中心，请配置多个<dubbo:registry>标签 | 1.0.16以上版本 |
+| address    | `<host:port> `         | string  | **必填** |        | 服务发现 | 注册中心服务器地址，如果地址没有端口缺省为9090，同一集群内的多个地址用逗号分隔，如：ip:port,ip:port，不同集群的注册中心，请配置多个`<dubbo:registry>`标签 | 1.0.16以上版本 |
 | protocol   | <protocol>           | string  | 可选     | dubbo  | 服务发现 | 注册中心地址协议，支持`dubbo`, `multicast`, `zookeeper`, `redis`, `consul(2.7.1)`, `sofa(2.7.2)`, `etcd(2.7.2)`, `nacos(2.7.2)`等协议 | 2.0.0以上版本  |
 | port       | <port>               | int     | 可选     | 9090   | 服务发现 | 注册中心缺省端口，当address没有带端口时使用此端口做为缺省值  | 2.0.0以上版本  |
 | username   | <username>           | string  | 可选     |        | 服务治理 | 登录注册中心用户名，如果注册中心不需要验证可不填             | 2.0.0以上版本  |
@@ -227,4 +227,4 @@ private <C extends AbstractConfig> C addIfAbsent(C config, Map<String, C> config
 ```
 
 
-  原文： [<<Dubbo启动器DubboBootstrap添加注册中心配置信息RegistryConfig>>](https://blog.elastic.link/2022/07/10/dubbo/10-dubbo-qi-dong-qi-dubbobootstrap-tian-jia-zhu-ce-zhong-xin-pei-zhi-xin-xi-registryconfig//)
+  原文： [`<<Dubbo启动器DubboBootstrap添加注册中心配置信息RegistryConfig>>`](https://blog.elastic.link/2022/07/10/dubbo/10-dubbo-qi-dong-qi-dubbobootstrap-tian-jia-zhu-ce-zhong-xin-pei-zhi-xin-xi-registryconfig//)

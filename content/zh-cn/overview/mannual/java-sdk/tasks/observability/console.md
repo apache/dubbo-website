@@ -9,7 +9,7 @@ type: docs
 weight: 1
 ---
 
-管理 Dubbo 最直接的方式就是通过 Dubbo 控制面（即 dubbo-control-plane）提供的可视化界面，之前我们在[【快速开始 - 部署 Dubbo 应用】]()一文的最后，也有用到它查看服务启动后的状态。
+管理 Dubbo 最直接的方式就是通过 Dubbo 控制面（即 dubbo-control-plane）提供的可视化界面，之前我们在`【快速开始 - 部署 Dubbo 应用】`一文的最后，也有用到它查看服务启动后的状态。
 
 **`dubbo-control-plane` 支持可视化的展示、监控集群状态，还支持实时下发流量管控规则。**
 
@@ -28,7 +28,7 @@ weight: 1
     ```
     注意，`conf/dubbo.yml` 配置需要按需调整，指向你要连接的注册中心等后台服务，具体请查看 dubbo-control-plane 架构中依赖的后台服务。
 3. 访问 `http://xxx` 即可打开控制台页面。
-    ![页面截图]()
+    `页面截图`
 
 {{% alert title="注意" color="info" %}}
 * 请查看文档了解 dubbo-control-plane 详细安装步骤，包括多个平台的安装方法与配置指导。

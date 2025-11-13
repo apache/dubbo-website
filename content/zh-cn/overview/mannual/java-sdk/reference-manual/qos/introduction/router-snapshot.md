@@ -17,7 +17,7 @@ weight: 8
 
 Dubbo 的很多流量治理能力是基于 Router 进行实现的，在生产环境中，如果出现流量结果不符合预期的情况，可以通过路由状态命令来查看路由的状态，以此来定位可能存在的问题。
 
-> [路由状态采集](../../../advanced-features-and-usage/performance/router-snapshot/)
+> [路由状态采集](/zh-cn/overview/mannual/java-sdk/tasks/framework/more/router-snapshot)
 
 ### getRouterSnapshot 命令
 

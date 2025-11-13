@@ -21,9 +21,9 @@ weight: 5
 
 流量控制解决的问题和工作方式比较容易理解，而其使用的难点就是如何确定服务所能处理的流量最大值？
 * 一种模式是由用户预先设定一个固定的限流值，如 Dubbo 通过集成 Sentinel 等产品实现的限流能力即是这种模式
-    * [Dubbo Sentinel 流量控制](../../../tasks/rate-limit/sentinel/)
+    * [Dubbo Sentinel 流量控制](../../../mannual/java-sdk/tasks/rate-limit/sentinel)
 * 另一种方式是 Dubbo 框架自动根据系统或集群负载情况执行限流，相比用户预先设置限流值更加灵活方便，Dubbo 目前内置了自适应限流模式，具体可参见：
-    * [Java 自适应限流使用方式](../../../mannual/java-sdk/advanced-features-and-usage/performance/adaptive-concurrency-control/)
+    * [Java 自适应限流使用方式](/zh-cn/overview/mannual/java-sdk/tasks/rate-limit/adaptive-concurrency-control)
     * [Go 自适应限流使用方式](../../../reference/proposals/heuristic-flow-control/)
     * [自适应限流设计原理](../../../reference/proposals/heuristic-flow-control/)
 
@@ -38,6 +38,6 @@ weight: 5
 
 Dubbo 通过集成业界主流的框架实现了服务熔断降级能力
 
-* [Sentinel](../../../tasks/rate-limit/sentinel/)
-* [Hystrix](../../../tasks/rate-limit/hystrix/)
-* [Resilience4J](../../../tasks/rate-limit/resilience4j/)
+* [Sentinel](../../../mannual/java-sdk/tasks/rate-limit/sentinel)
+* [Hystrix](../../../mannual/java-sdk/tasks/rate-limit/)
+* [Resilience4J](../../../mannual/java-sdk/tasks/rate-limit)

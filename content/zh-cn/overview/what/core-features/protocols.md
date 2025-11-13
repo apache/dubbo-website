@@ -43,16 +43,16 @@ Triple 协议的核心特性如下：
 * 双向流式通信（Bidirectional Streaming）
 
 开发实践
-* Triple 协议使用请参见 [Triple 协议开发任务](../../tasks/protocols/triple/) 或 [java sdk 示例文档](../../mannual/java-sdk/reference-manual/protocol/triple/)
-* [Triple 设计思路与协议规范](../../reference/protocols/triple/)
+* Triple 协议使用请参见 [Triple 协议开发任务](../../mannual/java-sdk/tasks/protocols/triple/) 或 [java sdk 示例文档](../../mannual/java-sdk/reference-manual/protocol/triple/)
+* [Triple 设计思路与协议规范](../../reference/protocols/triple)
 
 ## Dubbo2
 Dubbo2 协议是基于 TCP 传输层协议之上构建的一套 RPC 通信协议，由于其紧凑、灵活、高性能的特点，在 Dubbo2 时代取得了非常广泛的应用，是企业构建高性能、大规模微服务集群的关键通信方案。在云原生时代，我们更推荐使用通用性、穿透性更好的 Triple 协议。
 
 Dubbo2 协议也内置 HTTP 支持，因此你可以使用 curl 在开发阶段快速验证或调试服务。
 
-* [Dubbo2 协议开发任务](../../tasks/protocols/dubbo/)
-* [Dubbo2 设计思路与协议规范](../../reference/protocols/tcp/)
+* [Dubbo2 协议开发任务](../../mannual/java-sdk/tasks/protocols/dubbo)
+* [Dubbo2 设计思路与协议规范](../../reference/protocols/tcp)
 
 ## gRPC
 你可以用 Dubbo 开发和治理微服务，然后设置使用 gRPC 协议进行底层通信。但为什么要这么做呢，与直接使用 gRPC 框架对比有什么优势？简单的答案是，这是使用 gRPC 进行微服务开发的常用模式，具体请往下看。
@@ -61,13 +61,13 @@ gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 [产品�
 
 在 Dubbo 体系下使用 gRPC 协议 (gRPC over Dubbo Framework) 是一个非常高效和轻量的选择，它让你既能使用原生的 gRPC 协议通信，又避免了基于 gRPC 进行二次定制与开发的复杂度 (二次开发与定制 gRPC，是很多企业规模化实践后证实不可避免的环节，Dubbo 框架替开发者完成了这一步，让开发者可以直接以最简单的方式使用 gRPC)。
 
-[gRPC over Dubbo 示例](../../tasks/protocols/grpc/)
+[gRPC over Dubbo 示例](../../mannual/java-sdk/tasks/protocols/triple/grpc)
 
 ## REST
 微服务领域常用的一种通信模式是 HTTP + JSON，包括 Spring Cloud、Microprofile 等一些主流的微服务框架都默认使用的这种通信模式，Dubbo 同样提供了对基于 HTTP 的编程、通信模式的支持。
 
-* [HTTP over Dubbo 示例](../../tasks/protocols/web/)
-* [Dubbo 与 Spring Cloud 体系互通](../../tasks/protocols/springcloud/)
+* `HTTP over Dubbo 示例`
+* [Dubbo 与 Spring Cloud 体系互通](../../mannual/java-sdk/tasks/protocols)
 
 ## 其他通信协议
 除了以上介绍的几种协议之外，你还可以将以下协议运行在 Dubbo 之上。对 Dubbo 而言，只需要修改一行简单的配置，就可以切换底层服务的通信协议，其他外围 API 和治理能力不受影响。
@@ -86,4 +86,4 @@ gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 [产品�
 * [Rust](../../mannual/rust-sdk/)
 
 ## 自定义扩展
-除了以上官方版本支持的通信协议，Dubbo 支持扩展新协议支持，具体请参见 [【任务】-【可扩展性】-【protocol】](../../tasks/extensibility/protocol/)
+除了以上官方版本支持的通信协议，Dubbo 支持扩展新协议支持，具体请参见 [【任务】-【可扩展性】-【protocol】](../../mannual/java-sdk/tasks/extensibility/protocol)

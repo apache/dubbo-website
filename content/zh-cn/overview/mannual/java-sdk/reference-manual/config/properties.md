@@ -24,7 +24,7 @@ weight: 6
 
 | JVM 参数 | 示例值 | 说明 |
 | --- | --- | --- |
-| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo支持 [所有的配置项](aaa) 以JVM参数格式指定。其中`config` 是指如 application、registry、protocol 等配置项，而`property`则是指每个配置项中的具体属性。 |
+| dubbo.{config-name}.{property} | -Ddubbo.application.name="dubbo-demo"<br/><br/>-Ddubbo.registry.address="nacos://host:port"<br/><br/>-Ddubbo.protocol.port="20880"<br/><br/>...... | Dubbo支持 `所有的配置项` 以JVM参数格式指定。其中`config` 是指如 application、registry、protocol 等配置项，而`property`则是指每个配置项中的具体属性。 |
 | dubbo.resolve.file | -Ddubbo.resolve.file=/home/ken/.../dubbo-resolve.properties | 在文件中指定每个接口的直连地址url，如：org.apache.dubbo.demo.DemoService=tri://127.0.0.1:50051/org.apache.dubbo.demo.DemoService?xxx=xxx |
 | org.graalvm.nativeimage.imagecode || [https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java](https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java) |
 | dubbo.properties.file | -Ddubbo.properties.file=foo.properties | 指定 properties 配置文件地址，可以是绝对路径或者classpath相对路径。默认值为 dubbo.properties |
@@ -64,7 +64,7 @@ weight: 6
 
 | 环境变量 | 示例值 | 说明 |
 | --- | --- | --- |
-| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo支持[所有的配置项](aaa)以环境变量格式指定。其中`CONFIG-NAME` 是指如 application、registry、protocol 等配置项，而 `PROPERTY`则是指每个配置项中的具体属性。 |
+| DUBBO_{CONFIG-NAME}.{PROPERTY} | DUBBO_APPLICATION_NAME="dubbo-demo"<br/><br/>DUBBO_REGISTRY_ADDRESS="nacos://host:port"<br/><br/>DUBBO_PROTOCOL_PORT="20880"<br/><br/>...... | Dubbo支持`所有的配置项`以环境变量格式指定。其中`CONFIG-NAME` 是指如 application、registry、protocol 等配置项，而 `PROPERTY`则是指每个配置项中的具体属性。 |
 | DUBBO_DEFAULT_SERIALIZATION | DUBBO_DEFAULT_SERIALIZATION="hessan2" | 设置框架的默认序列化方式，如hessian2、fastjson2、msgpack等 |
 | DUBBO2_COMPACT_ENABLE | DUBBO2_COMPAT_ENABLE="true" |  |
 | DUBBO_ENV_KEYS| DUBBO_LABELS="tag1=value1; tag2=value2" | `tag1=value1`会作为附加参数上报到地址 URL，作为系统环境变量可用于为实例打标等。 |
@@ -192,7 +192,7 @@ weight: 6
 | providers| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.ProviderConfig&gt;| Multiple configurations for Provider.| | |
 | registries| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.RegistryConfig&gt;| Multiple configurations for Registry.| | |
 | tracings| java.util.Map&lt;java.lang.String,org.apache.dubbo.config.TracingConfig&gt;| Multiple configurations for TracingConfig.| | |
-### dubbo.application
+### dubbo.application {#dubbo.application}
 **Class:** `org.apache.dubbo.config.ApplicationConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -251,7 +251,7 @@ weight: 6
 | startup-probe| java.lang.String| The probe for checking the startup of the application.| | |
 | trust-serialize-class-level| java.lang.Integer| The trust level for serialized classes.| | |
 | version| java.lang.String| The application version.| | |
-### dubbo.config-center
+### dubbo.config-center {#dubbo.config-center}
 **Class:** `org.apache.dubbo.config.ConfigCenterConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -278,7 +278,7 @@ weight: 6
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | timeout| java.lang.Long| The timeout for accessing the config center. Default value is 30000L.| | |
 | username| java.lang.String| Username for authentication with the config center.| | |
-### dubbo.consumer
+### dubbo.consumer {#dubbo.consumer}
 **Class:** `org.apache.dubbo.config.ConsumerConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -353,7 +353,7 @@ weight: 6
 | url-merge-processor| java.lang.String| Url Merge Processor Used to customize the URL merge of consumer and provider| | |
 | validation| java.lang.String| Enable JSR303 standard annotation validation for method parameters.| | |
 | version| java.lang.String| Version of the remote service referenced by the consumer/provider.| | |
-### dubbo.metadata-report
+### dubbo.metadata-report {#dubbo.metadata-report}
 **Class:** `org.apache.dubbo.config.MetadataReportConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -409,7 +409,7 @@ weight: 6
 | rpc-level| java.lang.String| The level of metrics collection, which can be &quot;SERVICE&quot; or &quot;METHOD&quot;. The default is &quot;METHOD&quot;.| | |
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | use-global-registry| java.lang.Boolean| Decide whether to use the global registry of Micrometer.| | |
-### dubbo.module
+### dubbo.module {#dubbo.module}
 **Class:** `org.apache.dubbo.config.ModuleConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -433,7 +433,7 @@ weight: 6
 | registry| org.apache.dubbo.config.RegistryConfig| | | |
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | version| java.lang.String| The module version| | |
-### dubbo.monitor
+### dubbo.monitor {#dubbo.monitor}
 **Class:** `org.apache.dubbo.config.MonitorConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -452,7 +452,7 @@ weight: 6
 | scope-model| org.apache.dubbo.rpc.model.ScopeModel| The scope model of this config instance. &lt;p&gt; &lt;b&gt;NOTE:&lt;/b&gt; the model maybe changed during config processing, the extension spi instance needs to be reinitialized after changing the model!| | |
 | username| java.lang.String| The monitor username| | |
 | version| java.lang.String| The monitor version| | |
-### dubbo.protocol
+### dubbo.protocol {#dubbo.protocol}
 **Class:** `org.apache.dubbo.config.ProtocolConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -502,7 +502,7 @@ weight: 6
 | threadpool| java.lang.String| The name of the thread pool.| | |
 | threads| java.lang.Integer| The fixed size of the thread pool.| | |
 | transporter| java.lang.String| The transporter used for communication.| | |
-### dubbo.provider
+### dubbo.provider {#dubbo.provider}
 **Class:** `org.apache.dubbo.config.ProviderConfig`
 
 |Key|Type|Description|Default value|Deprecation|
@@ -601,7 +601,7 @@ weight: 6
 | wait| java.lang.Integer| The wait time when stopping the service.| | |
 | warmup| java.lang.Integer| Warm-up period for the service.| | |
 | weight| java.lang.Integer| The service weight.| | |
-### dubbo.registry
+### dubbo.registry {#dubbo.registry}
 **Class:** `org.apache.dubbo.config.RegistryConfig`
 
 |Key|Type|Description|Default value|Deprecation|

@@ -161,7 +161,7 @@ dubbo
    session: 60 * 1000* # 会话超时时间，默认 60s
 ```
 
-Zookeeper 注册中心还支持其他一些控制参数，具体可参见[Registry 配置项手册](../../config/properties#registry)
+Zookeeper 注册中心还支持其他一些控制参数，具体可参见[Registry 配置项手册](../../reference-manual/config/properties#dubbo.registry)
 
 ## 3 工作原理
 在前面的一节中，我们讲解了应用级服务发现与接口级服务发现的区别，在 Zookeeper 实现中，它们的存储结构也存在较大差异。总体来说，Zookeeper 注册中心实现支持以下高可用能力：

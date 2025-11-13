@@ -189,7 +189,7 @@ public class ProviderConfiguration {
 
 
 #### 通过 dubbo.properties 补充配置
-对于使用 `DubboService` 或 `DubboReference` 的场景，可以通过在项目 resources 目录下增加 dubbo.properties 文件作为配置补充，[具体格式](../principle/#1-配置格式)这里有更详细解释。
+对于使用 `DubboService` 或 `DubboReference` 的场景，可以通过在项目 resources 目录下增加 dubbo.properties 文件作为配置补充，[具体格式](/zh-cn/overview/mannual/java-sdk/reference-manual/config/principle)这里有更详细解释。
 
 ```properties
 dubbo.service.org.apache.dubbo.springboot.demo.DemoService.timeout=5000

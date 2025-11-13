@@ -13,13 +13,11 @@ weight: 1
 
 Dubbo-js 已于 9 月份发布支持 Dubbo3 协议的首个 alpha 版本，它的发布将有机会彻底改变微服务前后端的架构与通信模式，让你能直接在浏览器页面或web服务器中访问后端 Dubbo RPC 服务。
 
-![dubbo-web.png](/imgs/v3/web/web-1.png)
 
 # 浏览器 Web 应用示例
 
 本示例演示了如何使用 dubbo-js 开发运行在浏览器上的 web 应用程序，web 页面将调用 dubbo node.js 开发的后端服务并生成页面内容。本示例演示基于 IDL 和非 IDL 两种编码模式。
 
-![dubbo-web.png](/imgs/v3/web/web-2.png)
 
 ## IDL 模式
 

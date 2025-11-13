@@ -17,7 +17,7 @@ weight: 5
 
 在这种模式下，服务发现与用户的部署运维操作形成统一，用户定义标准的 Kubernetes Service、Deployment，并将其部署到 Kubernetes，之后 Control Plane 通过监控 APISERVER 资源并与 SDK 进程联动，形成一整套的服务发现体系。
 
-关于使用 Kubernetes 作为注册中心的具体实践案例，请参考 [Kubernetes Service 部署]() 一节了解更多细节。
+关于使用 Kubernetes 作为注册中心的具体实践案例，请参考 `Kubernetes Service 部署` 一节了解更多细节。
 
 
 

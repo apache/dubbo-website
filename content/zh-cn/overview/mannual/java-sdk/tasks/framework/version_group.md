@@ -127,7 +127,7 @@ private DemoService demoService2;
 
 #### 服务消费端( xml 配置)
 
-使用 <dubbo:reference/> 注解，添加 group 参数
+使用 `<dubbo:reference/>` 注解，添加 group 参数
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

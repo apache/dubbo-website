@@ -86,4 +86,4 @@ dubbo>
 ```
 
 #### 注意：
-由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](../../others/logger-management/)动态修改日志输出框架。
+由于日志框架不匹配导致的日志为空可以参考[日志框架适配及运行时管理](/zh-cn/overview/mannual/java-sdk/reference-manual/qos/introduction/logger-management)动态修改日志输出框架。
