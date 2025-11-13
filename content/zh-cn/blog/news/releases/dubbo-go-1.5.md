@@ -94,6 +94,6 @@ Dubbo-go 处于一个比较稳定成熟的状态。目前新版本正处于往�
 
 目前下一个版本正在紧锣密鼓的开发中，具体规划及任务清单[^1] ，都已经在 Github 上体现。
 
-[^1]: https://github.com/apache/dubbo-go/projects/8
+[^1]: https://github.com/apache/dubbo-go
 [^2]: https://github.com/seata-golang/seata-golang
 [^3]: https://github.com/AlexStocks/getty/tree/feature/rpc

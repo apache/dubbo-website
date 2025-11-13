@@ -46,5 +46,5 @@ Additionally, building on DockerHub requires queuing, and sometimes you may enco
 
 [^apache-repo]: https://hub.docker.com/r/apache
 [^request-ticket]: https://issues.apache.org/jira/browse/INFRA-18167
-[^docker-file]: https://github.com/apache/dubbo-admin/blob/develop/docker/0.1.0/Dockerfile
+[^docker-file]: https://github.com/apache/dubbo-admin/blob/develop
 

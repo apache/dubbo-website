@@ -151,7 +151,7 @@ triple 协议相关实现源码：
 #### 4.2 赛题说明
 本赛题官方已经提供了后端适配层的参考实现，同时给出了部分前端交互设计初稿。选手完全可以此为基础进行开发设计，具体评分标准参见官方报名渠道说明。
 
-1. 后端： [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
+1. 后端： [https://github.com/apache/dubbo-kubernetes/tree/master](https://github.com/apache/dubbo-kubernetes/tree/master)
 
 2. 前端代码框架：https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
 

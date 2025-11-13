@@ -147,8 +147,8 @@ You can follow these [procedures](https://www.apache.org/info/verification) and 
 ### 2.6.12 (2021-12-29)
 
 * [source](https://www.apache.org/dyn/closer.lua/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip) |
-  [asc](https://downloads.apache.org/dubbo/2.6.12/apache-dubbo-v-src.zip.asc) |
-  [sha512](https://downloads.apache.org/dubbo/2.6.12/apache-dubbo-2.6.12-src.zip.sha512)
+  [asc](https://downloads.apache.org/dubbo/2.6.12) |
+  [sha512](https://downloads.apache.org/dubbo/2.6.12)
 
 ### 3.0.4 (2021-10-24)
 

@@ -93,7 +93,7 @@ Previously, the dubbo-go RPC layer reused the RPC layer of the getty framework[[
 
 Currently, the next version is under intense development, and the specific plans and task lists[^1] are already reflected on GitHub.
 
-[^1]: https://github.com/apache/dubbo-go/projects/8
+[^1]: https://github.com/apache/dubbo-go
 [^2]: https://github.com/seata-golang/seata-golang
 [^3]: https://github.com/AlexStocks/getty/tree/feature/rpc
 

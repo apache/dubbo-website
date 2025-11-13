@@ -149,7 +149,7 @@ From a user GUI perspective, the menu design can be as follows:
 #### 4.2 Topic Explanation
 The official has provided reference implementations for the back-end adaptation layer and part of the front-end interaction design drafts. Participants can base their development design on these. Specific scoring standards can be referred to in the official registration channel.
 
-1. Back-end: [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
+1. Back-end: [https://github.com/apache/dubbo-kubernetes/tree/master](https://github.com/apache/dubbo-kubernetes/tree/master)
 
 2. Front-end code framework: https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
 

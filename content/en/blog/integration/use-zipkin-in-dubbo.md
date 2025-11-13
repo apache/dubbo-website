@@ -9,11 +9,11 @@ description: >
 
 As business grows, the scale of applications continues to expand, and traditional application architectures cannot meet demands. The transformation to a service-oriented architecture is imperative, with distributed service frameworks like Dubbo becoming essential. As the microservices concept becomes widely accepted, applications are further segmented into finer granularity, and different applications are independently managed by various development teams, resulting in a very complex distributed system. No one can clearly and timely know the overall dependency relationships within the system. When problems occur, it's also not possible to quickly identify which link in the chain fails.
 
-Against this backdrop, Google published the paper on [Dapper](https://ai.google/research/pubs/pub36356), detailing how a distributed tracing system can address the above issues. Based on this paper, major internet companies have implemented and deployed their distributed tracing systems, notable among them being Alibaba's EagleEye. The Zipkin mentioned in this article is an open-source distributed tracing system by Twitter. The following sections will explain how to use Zipkin in Dubbo for distributed tracing.
+Against this backdrop, Google published the paper on [Dapper](https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/), detailing how a distributed tracing system can address the above issues. Based on this paper, major internet companies have implemented and deployed their distributed tracing systems, notable among them being Alibaba's EagleEye. The Zipkin mentioned in this article is an open-source distributed tracing system by Twitter. The following sections will explain how to use Zipkin in Dubbo for distributed tracing.
 
 ## Introduction to Zipkin
 
-Zipkin is based on the implementation described in the [Dapper](https://ai.google/research/pubs/pub36356) paper and is an open-source distributed tracing system developed by Twitter. It achieves tracing of service call chains and analysis of service execution delays by collecting information about the execution times of distributed services.
+Zipkin is based on the implementation described in the [Dapper](https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/) paper and is an open-source distributed tracing system developed by Twitter. It achieves tracing of service call chains and analysis of service execution delays by collecting information about the execution times of distributed services.
 
 ### Zipkin Architecture
 
