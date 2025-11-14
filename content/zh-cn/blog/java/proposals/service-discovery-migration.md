@@ -57,7 +57,7 @@ dubbo.application.register-mode=instance
 2. 注册中心地址参数配置
 
 注册中心的地址上可以配置 `registry-type=service` 来显示指定该注册中心为应用级服务发现的注册中心，带上此配置的注册中心将只进行应用级服务发现。
-> [参考示例](https://github.com/apache/dubbo-samples/blob/master/2-advanced/dubbo-samples-service-discovery/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources/spring/dubbo-provider.xml)
+> [参考示例](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-service-discovery/dubbo-demo-servicediscovery-xml/servicediscovery-provider/src/main/resources)
 
 ```xml
 <dubbo:registry address="nacos://${nacos.address:127.0.0.1}:8848?registry-type=service"/>

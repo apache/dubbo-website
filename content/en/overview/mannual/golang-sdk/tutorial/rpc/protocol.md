@@ -137,5 +137,5 @@ The Dubbo framework supports protocol extensions. Currently, the officially supp
 * dubbo
 * jsonrpc
 
-In some scenarios, you can publish services of multiple protocols simultaneously within one application or call services with different protocols simultaneously. Here is a [usage example for multi-protocol publishing](https://github.com/apache/dubbo-go-samples/tree/main/multirpc) for reference.
+In some scenarios, you can publish services of multiple protocols simultaneously within one application or call services with different protocols simultaneously. Here is a [usage example for multi-protocol publishing](https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols) for reference.
 

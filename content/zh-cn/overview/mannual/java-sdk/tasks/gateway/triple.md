@@ -55,7 +55,7 @@ public interface DemoService {
 
 以下示例部署在 Kubernetes 环境，因此请确保您已经连接到一个可用 Kubernetes 集群。
 
-1. 安装 Higress，参考 [Higress安装部署文档](https://higress.io/zh-cn/docs/ops/deploy-by-helm)
+1. 安装 Higress，参考 [Higress安装部署文档](https://higress.cn/docs/latest/ops/deploy-by-helm/)
 
 2. 安装 Nacos，运行
 
@@ -130,7 +130,7 @@ spec:
     type: nacos2
 ```
 
-> 更多详细配置参考[McpBridge配置说明](https://higress.io/zh-cn/docs/user/mcp-bridge)
+> 更多详细配置参考[McpBridge配置说明](https://higress.cn/docs/latest/user/mcp-bridge/)
 
 
 接下来我们创建如下 Ingress，从而创建一条指向 Dubbo 服务的 HTTP 路由：
