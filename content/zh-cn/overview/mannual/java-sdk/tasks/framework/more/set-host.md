@@ -60,9 +60,9 @@ weight: 37
 以上四个配置项均为可选项，如不配置 dubbo 会自动获取 ip 与端口，请根据具体的部署场景灵活选择配置。
 dubbo 支持多协议，如果一个应用同时暴露多个不同协议服务，且需要为每个服务单独指定 ip 或 port，请分别在以上属性前加协议前缀。 如：
 
-* **HESSIAN_DUBBO_PORT_TO_BIND**：hessian 协议绑定的 port
+* **DUBBO_HESSIAN_PORT_TO_BIND**：hessian 协议绑定的 port
 * **DUBBO_DUBBO_PORT_TO_BIND**：dubbo 协议绑定的 port
-* **HESSIAN_DUBBO_IP_TO_REGISTRY**：hessian 协议注册的 ip
+* **DUBBO_HESSIAN_IP_TO_REGISTRY**：hessian 协议注册的 ip
 * **DUBBO_DUBBO_IP_TO_REGISTRY**：dubbo 协议注册的 ip
 
 PORT_TO_REGISTRY 或 IP_TO_REGISTRY 不会用作默认 PORT_TO_BIND 或 IP_TO_BIND，但是反过来是成立的。如：
