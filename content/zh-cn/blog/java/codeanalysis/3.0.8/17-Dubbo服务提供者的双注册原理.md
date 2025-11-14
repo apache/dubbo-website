@@ -984,4 +984,4 @@ ZookeeperMetadataReport的storeMetadata
 
 ```
 
-原文地址：[17-Dubbo服务提供者的双注册原理](https://blog.elastic.link/2022/07/10/dubbo/17-dubbo3-ying-yong-ji-zhu-ce-zhi-fu-wu-ti-gong-zhe-de-shuang-zhu-ce-yuan-li/)
+原文地址：[17-Dubbo服务提供者的双注册原理](https://developer.aliyun.com/article/1180705)
