@@ -169,7 +169,7 @@ spec:
 
 对于 Nacos 来源的服务，这里的目标服务格式为：“服务名称.服务分组.命名空间ID.nacos”，注意这里需要遵循 DNS 域名格式，因此服务分组中的下划线'_'被转换成了横杠'-'。命名空间未指定时，这里默认值为"public"。
 
-> 更多流量治理相关配置参考[Ingress Annotation 配置说明](https://higress.io/zh-cn/docs/user/annotation)和[通过Ingress Annotation实现高阶流量治理](https://higress.io/zh-cn/docs/user/annotation-use-case)
+> 更多流量治理相关配置参考[Ingress Annotation 配置说明](https://higress.io/zh-cn/docs/user/annotation)和[通过Ingress Annotation实现高阶流量治理](https://higress.cn/docs/latest/user/annotation-use-case)
 
 ### 请求验证
 
