@@ -72,7 +72,7 @@
 &lt;p&gt;以下是一个使用 &lt;code&gt;Higress + dubbo协议 + Nacos注册中心&lt;/code&gt; 的完整示例：&lt;a href="https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo"&gt;dubbo-samples-gateway-higress-dubbo&lt;/a&gt;。&lt;/p&gt;
 &lt;h2 id="前提条件"&gt;前提条件&lt;/h2&gt;
 &lt;ol&gt;
-&lt;li&gt;已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.io/zh-cn/docs/ops/deploy-by-helm"&gt;Higress安装部署文档&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;已安装Higress，并开启了对Istio CRD的支持，参考&lt;a href="https://higress.cn/docs/latest/ops/deploy-by-helm/"&gt;Higress安装部署文档&lt;/a&gt;。&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h2 id="部署nacos和dubbo服务"&gt;部署Nacos和Dubbo服务&lt;/h2&gt;
 &lt;p&gt;首先在K8s集群中apply以下资源，以部署一个Nacos注册中心，同时通过K8s service将这个Nacos server暴露出来。&lt;/p&gt;
@@ -653,9 +653,9 @@
 &lt;h2 id="pinpoint与dubbo的结合"&gt;Pinpoint与Dubbo的结合&lt;/h2&gt;
 &lt;h3 id="启动pinpoint"&gt;启动Pinpoint&lt;/h3&gt;
 &lt;p&gt;参考Pinpoint的&lt;a href="https://pinpoint-apm.github.io/pinpoint/quickstart.html"&gt;Quick start&lt;/a&gt;搭建环境（不需要启动TestApp）&lt;/p&gt;</description></item><item><title>在 Dubbo 中使用 Zipkin</title><link>https://dubbo.apache.org/zh-cn/blog/2018/06/17/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-zipkin/</link><pubDate>Sun, 17 Jun 2018 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/blog/2018/06/17/%E5%9C%A8-dubbo-%E4%B8%AD%E4%BD%BF%E7%94%A8-zipkin/</guid><description>&lt;p&gt;随着业务的发展，应用的规模不断的扩大，传统的应用架构无法满足诉求，服务化架构改造势在必行，以 Dubbo 为代表的分布式服务框架成为了服务化改造架构中的基石。随着微服务理念逐渐被大众接受，应用进一步向更细粒度拆分，并且，不同的应用由不同的开发团队独立负责，整个分布式系统变得十分复杂。没有人能够清晰及时的知道当前系统整体的依赖关系。当出现问题时，也无法及时知道具体是链路上的哪个环节出了问题。&lt;/p&gt;
-&lt;p&gt;在这个背景下，Google 发表了 &lt;a href="https://ai.google/research/pubs/pub36356"&gt;Dapper&lt;/a&gt; 的论文，描述了如何通过一个分布式追踪系统解决上述问题。基于该论文，各大互联网公司实现并部署了自己的分布式追踪系统，其中比较出名的有阿里巴巴的 EagleEye。本文中提到的 Zipkin 是 Twitter 公司开源的分布式追踪系统。下面会详细介绍如何在 Dubbo 中使用 Zipkin 来实现分布式追踪。&lt;/p&gt;
+&lt;p&gt;在这个背景下，Google 发表了 &lt;a href="https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/"&gt;Dapper&lt;/a&gt; 的论文，描述了如何通过一个分布式追踪系统解决上述问题。基于该论文，各大互联网公司实现并部署了自己的分布式追踪系统，其中比较出名的有阿里巴巴的 EagleEye。本文中提到的 Zipkin 是 Twitter 公司开源的分布式追踪系统。下面会详细介绍如何在 Dubbo 中使用 Zipkin 来实现分布式追踪。&lt;/p&gt;
 &lt;h2 id="zipkin-简介"&gt;Zipkin 简介&lt;/h2&gt;
-&lt;p&gt;Zipkin 是基于 &lt;a href="https://ai.google/research/pubs/pub36356"&gt;Dapper&lt;/a&gt; 论文实现，由 Twitter 开源的分布式追踪系统，通过收集分布式服务执行时间的信息来达到追踪服务调用链路、以及分析服务执行延迟等目的。&lt;/p&gt;
+&lt;p&gt;Zipkin 是基于 &lt;a href="https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/"&gt;Dapper&lt;/a&gt; 论文实现，由 Twitter 开源的分布式追踪系统，通过收集分布式服务执行时间的信息来达到追踪服务调用链路、以及分析服务执行延迟等目的。&lt;/p&gt;
 &lt;h3 id="zipkin-架构"&gt;Zipkin 架构&lt;/h3&gt;
 &lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/blog/zipkin-architecture.png" alt="Zipkin architecture"&gt;&lt;/p&gt;
 &lt;p&gt;Collector 收集器、Storage 存储、API、UI 用户界面等几部分构成了 Zipkin Server 部分，对应于 GitHub 上 &lt;a href="https://github.com/openzipkin/zipkin"&gt;openzipkin/zipkin&lt;/a&gt; 这个项目。而收集应用中调用的耗时信息并将其上报的组件与应用共生，并拥有各个语言的实现版本，其中 Java 的实现是 GitHub 上 &lt;a href="https://github.com/openzipkin/brave"&gt;openzipkin/brave&lt;/a&gt;。除了 Java 客户端实现之外，openzipkin 还提供了许多其他语言的实现，其中包括了 go、php、JavaScript、.net、ruby 等，具体列表可以参阅 Zipkin 的 &lt;a href="https://zipkin.io/pages/tracers_instrumentation.html"&gt;Exiting instrumentations&lt;/a&gt;。&lt;/p&gt;
