@@ -24,7 +24,7 @@ weight: 8
 
 ## 集群容错模式
 
-可以自行扩展集群容错策略，参见：[集群扩展](../../../dev/impls/cluster)
+可以自行扩展集群容错策略，参见：[集群扩展](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/description/cluster)
 
 ### Failover Cluster
 

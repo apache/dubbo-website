@@ -10,7 +10,7 @@ weight: 1
 
 ## 1 Introduction
 
-<a href="" target="_blank">Protobuf (Protocol Buffers)</a> is a lightweight and efficient data interchange format developed by Google, used for the serialization, deserialization, and transmission of structured data. Compared to text formats like XML and JSON, Protobuf has smaller data sizes, faster parsing speeds, and better scalability.
+[Protobuf (Protocol Buffers)](https://developers.google.com/protocol-buffers) is a lightweight and efficient data interchange format developed by Google, used for the serialization, deserialization, and transmission of structured data. Compared to text formats like XML and JSON, Protobuf has smaller data sizes, faster parsing speeds, and better scalability.
 
 ## 2 Usage
 **When using [Protobuf (IDL) to develop triple communication services](/en/overview/mannual/java-sdk/tasks/protocols/triple/idl/), the Dubbo server will automatically enable support for protobuf and protobuf-json serialization modes.**
@@ -83,4 +83,3 @@ or
 ```xml
 <dubbo:protocol name="tri" />
 ```
-

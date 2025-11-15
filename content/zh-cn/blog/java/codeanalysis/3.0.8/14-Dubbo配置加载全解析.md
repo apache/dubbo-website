@@ -519,4 +519,4 @@ private void loadApplicationConfigs() {
  
 
 
-原文地址：[Dubbo配置加载全解析](https://blog.elastic.link/2022/07/10/dubbo/14-dubbo-pei-zhi-jia-zai-quan-jie-xi/)
+原文地址：[Dubbo配置加载全解析](https://developer.aliyun.com/article/1180713)

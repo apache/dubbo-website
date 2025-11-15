@@ -82,7 +82,7 @@ Taking the registry center as an example, below is a schematic diagram of a mult
 
 ## Physical Deployment Architecture of the Three Centers
 
-![Same cluster, undertaking the responsibilities of the three centers](#)
+[//]: # (![Same cluster, undertaking the responsibilities of the three centers]&#40;#&#41;)
 
 ## Recommended Usage in Different Scenarios
 * Configure only the registry, defaulting to serve as the metadata and config-center.

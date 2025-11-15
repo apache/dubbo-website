@@ -810,4 +810,4 @@ private <T> T getOptionalBean(ListableBeanFactory beanFactory, String name, Clas
 ```
  
 
-原文：  [《自适应扩展对象的创建getAdaptiveExtension方法》](https://blog.elastic.link/2022/07/10/dubbo/5-dubbo-de-spi-kuo-zhan-ji-zhi-yu-zi-gua-ying-kuo-zhan-dui-xiang-de-chuang-jian-yu-kuo-zhan-wen-jian-de-sao-miao-yuan-ma-jie-xi/)
+原文：  [《自适应扩展对象的创建getAdaptiveExtension方法》](https://developer.aliyun.com/article/1180712)

@@ -504,7 +504,7 @@ The search is conducted from high to low priority; if a preceding prefix propert
 
 ![Property Override Process](/imgs/v3/config/properties-override.svg)
 
-### 3.3 Externalized Configuration
+### 3.3 Externalized Configuration {#33-external-configuration}
 
 One of the aims of externalized configuration is to achieve centralized management of configurations. There are many mature professional configuration systems in the industry, such as Apollo and Nacos. What Dubbo does primarily is ensure proper functionality with these systems.
 

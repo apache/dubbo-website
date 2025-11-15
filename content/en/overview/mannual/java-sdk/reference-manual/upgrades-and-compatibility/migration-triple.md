@@ -12,7 +12,7 @@ weight: 2
 
 {{% alert title="Note" color="warning" %}}
 * The content of this document is not mandatory for upgrading Dubbo3. You can simply upgrade the framework and continue using the Dubbo communication protocol.
-* If you are a new Dubbo user, it is highly recommended to directly [use the Triple protocol](/en/overview/mannual/java-sdk/tasks/protocol/).
+* If you are a new Dubbo user, it is highly recommended to directly [use the Triple protocol](/en/overview/mannual/java-sdk/tasks/protocols/).
 {{% /alert %}}
 
 This document is suitable for users whose services are already running on the Dubbo protocol. Please first refer to the previous document [How to Upgrade from Dubbo2 to Dubbo3](../migration/) to complete the framework version upgrade, and then follow these steps for a smooth migration to the Triple protocol with minimal changes.

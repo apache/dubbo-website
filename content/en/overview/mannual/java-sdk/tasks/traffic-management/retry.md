@@ -14,8 +14,8 @@ weight: 2
 Retrying after an initial service call failure can effectively increase the overall call success rate. However, it is important to note that retries may lead to increased response times and higher system load. Additionally, retries are generally suitable for read-only services or write services that guarantee idempotency.
 
 ## Before You Begin
-* [Deploy the Shop Mall Project](../#deploy-the-mall-system)
-* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
+* `Deploy the Shop Mall Project`
+* Deploy and open [Dubbo Admin](/en/overview/mannual/control-plane/architecture)
 
 ## Task Details
 

@@ -231,7 +231,7 @@ API 的实现者是运行时，它负责所有控制平面操作。运行时决�
 
 [23]  Json. [https://www.json.org/json-en.html.](https://www.json.org/json-en.html)
 
-[24]  Kalix. [https://www.kalix.io/.](https://www.kalix.io/)
+[24]  Kalix. [https://www.kalix.io/.](https://platformengineering.org/tools/kalix)
 
 [25]  Kubernetes. [https://kubernetes.io/.](https://kubernetes.io/)
 

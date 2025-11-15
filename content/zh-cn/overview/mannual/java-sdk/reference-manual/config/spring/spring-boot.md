@@ -31,18 +31,18 @@ dubbo:
 ```
 
 ### dubbo
-* [**dubbo.application** - `org.apache.dubbo.config.ApplicationConfig`](../../properties#dubboapplication)
-* [**dubbo.config-center** - `org.apache.dubbo.config.ConfigCenterConfig`](../../properties#dubboconfig-center)
-* [**dubbo.consumer** - `org.apache.dubbo.config.ConsumerConfig`](../../properties#dubboconsumer)
-* [**dubbo.metadata-report** - `org.apache.dubbo.config.MetadataReportConfig`](../../properties#dubbometadata-report)
-* [**dubbo.protocol** - `org.apache.dubbo.config.ProtocolConfig`](../../properties#dubboprotocol)
-* [**dubbo.provider** - `org.apache.dubbo.config.ProviderConfig`](../../properties#dubboprovider)
-* [**dubbo.registry** - `org.apache.dubbo.config.RegistryConfig`](../../properties#dubboregistry)
+* [**dubbo.application** - `org.apache.dubbo.config.ApplicationConfig`](../../config/properties#dubbo.application)
+* [**dubbo.config-center** - `org.apache.dubbo.config.ConfigCenterConfig`](../../config/properties#dubbo.config-center)
+* [**dubbo.consumer** - `org.apache.dubbo.config.ConsumerConfig`](../../config/properties#dubbo.consumer)
+* [**dubbo.metadata-report** - `org.apache.dubbo.config.MetadataReportConfig`](../../config/properties#dubbo.metadata-report)
+* [**dubbo.protocol** - `org.apache.dubbo.config.ProtocolConfig`](../../config/properties#dubbo.protocol)
+* [**dubbo.provider** - `org.apache.dubbo.config.ProviderConfig`](../../config/properties#dubbo.provider)
+* [**dubbo.registry** - `org.apache.dubbo.config.RegistryConfig`](../../config/properties#dubbo.registry)
 * [**dubbo.metrics** - `org.apache.dubbo.config.MetricsConfig`](../../properties#dubbometrics)
 * [**dubbo.tracing** - `org.apache.dubbo.config.TracingConfig`](../../properties#dubbotracing)
 * [**dubbo.ssl** - `org.apache.dubbo.config.SslConfig`](../../properties#dubbossl)
-* ~~[**dubbo.monitor** - `org.apache.dubbo.config.MonitorConfig`](../../properties#dubbomonitor)~~
-* ~~[**dubbo.module** - `org.apache.dubbo.config.ModuleConfig`](../../properties#dubbomodule)~~
+* ~~[**dubbo.monitor** - `org.apache.dubbo.config.MonitorConfig`](../../config/properties#dubbo.monitor)~~
+* ~~[**dubbo.module** - `org.apache.dubbo.config.ModuleConfig`](../../config/properties#dubbo.module)~~
 
 ### dubbo.metrics
 * [**dubbo.metrics.aggregation** - `org.apache.dubbo.config.nested.AggregationConfig`](../../properties#dubbometricsaggregation)
@@ -52,7 +52,7 @@ dubbo:
 * [**dubbo.metrics.prometheus.pushgateway** - `org.apache.dubbo.config.nested.PrometheusConfig$Pushgateway`](../../properties#dubbometricsprometheuspushgateway)
 
 ### dubbo.tracing
-* [**dubbo.tracing.baggage.correlation** - `org.apache.dubbo.config.nested.BaggageConfig$Correlation`](../../properties#dubbotracingbaggage.correlation)
+* [**dubbo.tracing.baggage.correlation** - `org.apache.dubbo.config.nested.BaggageConfig$Correlation`](../../config/properties)
 * [**dubbo.tracing.tracing-exporter.otlp-config** - `org.apache.dubbo.config.nested.ExporterConfig$OtlpConfig`](../../properties#dubbotracingtracing-exporterotlp-config)
 * [**dubbo.tracing.tracing-exporter.zipkin-config** - `org.apache.dubbo.config.nested.ExporterConfig$ZipkinConfig`](../../properties#dubbotracingtracing-exporterzipkin-config)
 * [**dubbo.tracing.baggage** - `org.apache.dubbo.config.nested.BaggageConfig`](../../properties#dubbotracingbaggage)
@@ -89,5 +89,5 @@ dubbo:
 
 {{% alert title="注意" color="info" %}}
 * 关于每个 starter 适配的第三方组件版本，请查看 [组件版本映射表](/zh-cn/overview/mannual/java-sdk/versions/#版本说明)。
-* 每个 starter 都有对应的 application.yml 配置项，请跟随上文 [配置项列表](./#配置示例) 了解使用细节。
+* 每个 starter 都有对应的 application.yml 配置项，请跟随上文 `配置项列表` 了解使用细节。
 {{% /alert %}}

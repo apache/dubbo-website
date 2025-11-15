@@ -26,7 +26,7 @@ TLS 的配置都有统一的入口。
 对全链路有加密需求的用户可以使用 TLS。
 
 > 参考用例
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
+[dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
 
 ## 使用方式
 

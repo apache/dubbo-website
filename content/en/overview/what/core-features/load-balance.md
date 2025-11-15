@@ -96,7 +96,7 @@ Within the same application, different services can be configured to use differe
 
 For specific configuration methods, refer to the following multi-language implementations:
 
-* [Java](../../mannual/java-sdk/advanced-features-and-usage/performance/loadbalance/)
+* [Java](../../mannual/java-sdk/tasks/service-discovery/loadbalance)
 * [Golang](../../mannual/golang-sdk/)
 
 ## Custom Extension

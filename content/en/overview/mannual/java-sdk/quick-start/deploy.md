@@ -11,10 +11,10 @@ weight: 3
 In the previous article, we created a Dubbo application from scratch and detailed its code structure. Next, we will learn how to deploy this Dubbo application.
 
 This article will explain the deployment of Dubbo applications based on a Kubernetes cluster, and the deployment architecture is shown in the diagram below.
-![Dubbo+Kubernetes+Nacos Deployment Architecture]()
+!`Dubbo+Kubernetes+Nacos Deployment Architecture`
 
 {{% alert title="Note" color="info" %}}
-In real-world usage, the deployment environment may vary widely, including Kubernetes Services, Service Mesh, virtual machines, and more. Please refer to [Deployment Documentation]() for more detailed content.
+In real-world usage, the deployment environment may vary widely, including Kubernetes Services, Service Mesh, virtual machines, and more. Please refer to `Deployment Documentation` for more detailed content.
 {{% /alert %}}
 
 ## Prerequisites

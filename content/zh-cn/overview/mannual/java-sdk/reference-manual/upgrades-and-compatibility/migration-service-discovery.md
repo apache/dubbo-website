@@ -11,7 +11,7 @@ weight: 3
 ---
 
 {{% alert title="请注意" color="warning" %}}
-* 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并使用 [框架的服务发现默认行为](/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery/#启用应用级服务发现)。
+* 本文档内容并不是升级 Dubbo3 必须的，您完全可以只升级框架并使用 [框架的服务发现默认行为](/zh-cn/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery#enable-application-level-service-discovery)。
 * 本文档更适用于 Dubbo2 老用户，用于了解在升级到 Dubbo3 版本后，框架中的服务发现模型切换过程与工作原理。新用户请直接 [配置启用应用级服务发现](/zh-cn/overview/mannual/java-sdk/tasks/service-discovery/nacos/#13-配置并启用-nacos)。
 {{% /alert %}}
 
@@ -53,7 +53,7 @@ dubbo:
    register-mode: interface #表示继续使用老版本服务发现模型，可选值 interface、instance、all
 ```
 
-## 启用应用级服务发现(默认)
+## 启用应用级服务发现(默认) {#enable-application-level-service-discovery}
 对于老用户而言，如果要启用应用级服务发现，就需要一个平滑迁移的过程。这时需要让新升级的 Dubbo3 应用进行双注册双订阅（当前框架默认行为，因此用户无需修改任何配置，以下内容均会自行发生，注意：未来版本可能切换为应用级单注册单订阅），以确保新老服务发现模型都能兼顾。
 
 {{% alert title="请注意" color="warning" %}}

@@ -354,7 +354,7 @@ If you found your published service, but the number of addresses is `0`, please 
 
 If found with an incorrect service discovery model, check:
 
-1. The configured subscription migration rules in files like `dubbo-migration.yaml` or dynamic configurations. Refer to [Application-level Service Discovery Address Migration Rules](/en/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/).
+1. The configured subscription migration rules in files like `dubbo-migration.yaml` or dynamic configurations. Refer to `Application-level Service Discovery Address Migration Rules`.
 
 If you located your published service and the corresponding service discovery model shows more than `0` addresses, proceed to Step 7 for further troubleshooting.
 
@@ -497,7 +497,7 @@ All blacklisted addresses (typically taken offline voluntarily)
 
 Check whether the corresponding migration model meets your expectations, with the default being `APPLICATION_FIRST`. If the corresponding service discovery model is incorrect, please check the following checklist:
 
-1. The configured subscription migration rule, in files like `dubbo-migration.yaml` or dynamic settings. Refer to [Application-level Service Discovery Address Migration Rules](/en/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/service-discovery-rule/)
+1. The configured subscription migration rule, in files like `dubbo-migration.yaml` or dynamic settings. Refer to `Application-level Service Discovery Address Migration Rules`
 
 If the migration model is correct, confirm that **all** addresses in the corresponding model match expectations. If not, check the following checklist:
 

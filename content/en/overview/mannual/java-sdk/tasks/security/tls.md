@@ -26,7 +26,7 @@ TLS configuration has a unified entry point.
 Users with encryption requirements for end-to-end links can use TLS.
 
 > Reference Use Case
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
+[dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
 
 ## Usage
 
@@ -57,7 +57,7 @@ if (!mutualTls) {}
 }
 ```
 
-To ensure flexibility in application startup, the TLS Cert specification can also be dynamically set during startup based on the deployment environment using -D parameters or environment variables. Refer to Dubbo's [configuration reading rules](/en/docs/advanced/config-rule).
+To ensure flexibility in application startup, the TLS Cert specification can also be dynamically set during startup based on the deployment environment using -D parameters or environment variables. Refer to Dubbo's `configuration reading rules`.
 
 > Regarding the security of service calls, Dubbo will continue to invest in this area in future versions, with authentication mechanisms for service discovery/calls expected to be available in upcoming releases.
 

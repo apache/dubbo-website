@@ -49,7 +49,7 @@ Typically, in Dubbo, multiple routers form a routing chain that works together. 
 
 Tag routing divides instances of a service into different groups, constraining traffic with specific tags to flow only within designated groups. Different groups serve different traffic scenarios, achieving traffic isolation. Tag routing can serve as the foundation for scenarios like blue-green deployment and grayscale release.
 
-Tag routing rules are an either-or traffic isolation solution, meaning requests that match the `tag` will be 100% forwarded to instances with the same `tag`, and requests that do not match the `tag` will be 100% forwarded to the remaining unmatched instances. If you need a proportional traffic scheduling solution, please refer to the example [Proportional Traffic Routing Based on Weight](../../tasks/traffic-management/weight/).
+Tag routing rules are an either-or traffic isolation solution, meaning requests that match the `tag` will be 100% forwarded to instances with the same `tag`, and requests that do not match the `tag` will be 100% forwarded to the remaining unmatched instances. If you need a proportional traffic scheduling solution, please refer to the example [Proportional Traffic Routing Based on Weight](/en/overview/mannual/java-sdk/tasks/traffic-management/weight/).
 
 `Tags` mainly refer to the grouping of provider application instances. Currently, there are two ways to complete instance grouping: `dynamic rule tagging` and `static rule tagging`. `Dynamic rule tagging` can dynamically enclose a group of machine instances at runtime, while `static rule tagging` requires instance restart to take effect. Among them, dynamic rules have higher priority than static rules, and when both rules exist and conflict, dynamic rules will prevail.
 
@@ -118,7 +118,7 @@ RpcContext.getContext().setAttachment(Constants.TAG_KEY, "Hangzhou");
 
 Traffic with the above tag will be routed to instances divided into the `hangzhou-region`.
 
-> The scope of the request tag is limited to a single point-to-point RPC request. For example, in an A -> B -> C call chain, if the A -> B call sets the `tag` parameter via `setAttachment`, this parameter will not be effective in the B -> C call. Similarly, after completing the entire A -> B -> C call and A receives the result, if you want the same `tag` parameter, you still need to set `setAttachment` separately before initiating another call. You can refer to [Example Task - Environment Isolation](../../tasks/traffic-management/isolation/) for more information on the full-link transmission solution of `tag`.
+> The scope of the request tag is limited to a single point-to-point RPC request. For example, in an A -> B -> C call chain, if the A -> B call sets the `tag` parameter via `setAttachment`, this parameter will not be effective in the B -> C call. Similarly, after completing the entire A -> B -> C call and A receives the result, if you want the same `tag` parameter, you still need to set `setAttachment` separately before initiating another call. You can refer to [Example Task - Environment Isolation](/en/overview/mannual/java-sdk/tasks/traffic-management/isolation/) for more information on the full-link transmission solution of `tag`.
 
 ### Conditional Routing Rules
 
@@ -194,7 +194,7 @@ scope: service
 key: org.apache.dubbo.samples.UserService
 ```
 
-> For more information on `scope` and `service`, `application` in Dubbo rules, please refer to the [Dynamic Configuration Reference Manual](./configuration-rule/) or [Dynamic Configuration Example](../../tasks/traffic-management/timeout/).
+> For more information on `scope` and `service`, `application` in Dubbo rules, please refer to the [Dynamic Configuration Reference Manual](./configuration-rule/) or [Dynamic Configuration Example](/en/overview/mannual/java-sdk/tasks/traffic-management/timeout/).
 
 The `parameters` parameter specifies the new modification value, here setting the timeout to 2000ms through `timeout: 2000`.
 
@@ -253,7 +253,7 @@ spec:
       value: "gray"
 ```
 
-If you have a different instance environment storage mechanism, you can customize your own tag loading method by extending the `InfraAdapter extension point`. If your application is deployed in a Kubernetes environment and has integrated with the service mesh system, you can also use the standard deployment tag method for tagging. For details, please follow the [Service Mesh Task Example](../../tasks/mesh/).
+If you have a different instance environment storage mechanism, you can customize your own tag loading method by extending the `InfraAdapter extension point`. If your application is deployed in a Kubernetes environment and has integrated with the service mesh system, you can also use the standard deployment tag method for tagging. For details, please follow the [Service Mesh Task Example](/en/overview/tasks/mesh/).
 
 ## How to Configure Traffic Rules
 Dubbo provides a console called Dubbo Admin to help you visualize and issue traffic control rules, and monitor the effectiveness of the rules in real-time.
@@ -271,4 +271,4 @@ The above introduces traffic governance rules within the Dubbo system. If you ar
 For details, please refer to [Service Mesh Architecture in Dubbo](../service-mesh).
 
 ## Learn by Example
-We have set up an [online shopping system](../../tasks/traffic-management/) for you to learn the specific usage of traffic rules.
+We have set up an [online shopping system](/en/overview/mannual/java-sdk/tasks/traffic-management/) for you to learn the specific usage of traffic rules.

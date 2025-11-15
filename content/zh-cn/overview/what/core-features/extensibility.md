@@ -35,8 +35,8 @@ Dubbo 扩展能力使得 Dubbo 项目很方便的切分成一个一个的子模�
 ## 基于扩展点的微服务生态
 众多的扩展点与抽象，是 Dubbo 与众多微服务生态组件对接、实现微服务治理能力的基础。
 
-* [全链路追踪](../../tasks/observability/tracing/)
-* [数据一致性](../../tasks/ecosystem/transaction/)
+* [全链路追踪](../../mannual/java-sdk/tasks/observability/tracing/)
+* `数据一致性`
 * [限流降级](../../core-features/traffic/circuit-breaking/)
 
 Dubbo 的各语言 sdk 实现都是采用的 "微内核+插件" 的设计模式，几乎所有流程中的核心节点都被定义为扩展点，官方发布的组件也是以扩展点的实现形式发布，因此 Dubbo 可以平等的对待所有官方与第三方组件扩展。
@@ -98,7 +98,7 @@ Dubbo 官方提供了加权随机、加权轮询、一致性哈希、最小活�
 通过对 Consul、Eureka 的支持，Dubbo 也实现了与 Spring Cloud 体系在地址和通信层面的互通，让用户同时部署 Dubbo 与 Spring Cloud，或者从 Spring Cloud 迁移到 Dubbo 变得更容易。
 
 ### Config Center
-配置中心是用户实现动态控制 Dubbo 行为的关键组件，我们在 [流量管控](../../tasks/traffic-management) 任务中下发的所有规则，都是先下发到配置中心保存起来，进而 Dubbo 实例通过监听配置中心的变化，收到路由规则并达到控制流量的行为。
+配置中心是用户实现动态控制 Dubbo 行为的关键组件，我们在 [流量管控](../../mannual/java-sdk/tasks/traffic-management) 任务中下发的所有规则，都是先下发到配置中心保存起来，进而 Dubbo 实例通过监听配置中心的变化，收到路由规则并达到控制流量的行为。
 
 Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis、Apollo 等配置中心实现。
 
@@ -111,10 +111,10 @@ Dubbo 官方支持 Zookeeper、Nacos、Etcd、Redis 等元数据中心实现。
 
 以下示例演示了如何扩展 Dubbo 来解决实际问题，可以跟随示例学习。
 
-* [自定义 RPC 协议](../../tasks/extensibility/protocol/)
-* [自定义流量路由规则](../../tasks/extensibility/router/)
-* [自定义注册中心](../../tasks/extensibility/registry/)
-* [自定义拦截器](../../tasks/extensibility/filter/)
+* [自定义 RPC 协议](../../mannual/java-sdk/tasks/extensibility/protocol/)
+* [自定义流量路由规则](../../mannual/java-sdk/tasks/extensibility/router/)
+* [自定义注册中心](../../mannual/java-sdk/tasks/extensibility/registry/)
+* [自定义拦截器](../../mannual/java-sdk/tasks/extensibility/filter/)
 
 ## 更多扩展点
 本文列出了 Dubbo 常用的一些扩展点，但还有大量的扩展点可供灵活定制，并且不同语言 sdk 的扩展定义和配置方式上也存在差异，以下是 Dubbo SDK 的扩展点手册。

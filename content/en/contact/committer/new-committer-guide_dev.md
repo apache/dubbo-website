@@ -15,7 +15,7 @@ weight: 1
 
 ### Initial Committers during Project Incubation
 
-During the project incubation phase, there will be an option for the initial committers list in the incubation project proposal. Confirm that you are one of the initial committers. Once the project is voted through by the Apache Incubator community, committers can begin preparing to register their accounts. Refer to the [incubator wiki](https://wiki.apache.org/incubator/).
+During the project incubation phase, there will be an option for the initial committers list in the incubation project proposal. Confirm that you are one of the initial committers. Once the project is voted through by the Apache Incubator community, committers can begin preparing to register their accounts. Refer to the [incubator wiki](https://cwiki.apache.org/confluence/display/incubator).
 
 ### Active Contributors Elected as Committers
 

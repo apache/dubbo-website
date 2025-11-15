@@ -211,7 +211,7 @@ demo=com.dubbo.spi.demo.consumer.DemoLoadBalance
 ```xml
 <dubbo:reference id="helloService" interface="com.dubbo.spi.demo.api.IHelloService" loadbalance="demo" />
 ```
-在consumer端的[dubbo:reference](dubbo:reference)中配置<loadbalance="demo">
+在consumer端的`<dubbo:reference>`中配置<loadbalance="demo">
 
 ### 7.4 启动Dubbo
 启动Dubbo，调用一次IHelloService，可以看到控制台会输出一条`DemoLoadBalance: Select the first invoker...`日志。说明Dubbo的确是使用了我们自定义的LoadBalance。

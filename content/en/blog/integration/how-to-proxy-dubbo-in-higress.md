@@ -18,7 +18,7 @@ Higress provides the capability to convert from HTTP protocol to Dubbo protocol.
 Here is a complete example using `Higress + Dubbo protocol + Nacos registry`: [dubbo-samples-gateway-higress-dubbo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo).
 
 ## Prerequisites
-1. Higress has been installed with support for Istio CRDs enabled. Refer to [Higress installation and deployment documentation](https://higress.io/zh-cn/docs/ops/deploy-by-helm).
+1. Higress has been installed with support for Istio CRDs enabled. Refer to [Higress installation and deployment documentation](https://higress.cn/docs/latest/ops/deploy-by-helm/).
 
 ## Deploy Nacos and Dubbo Services
 

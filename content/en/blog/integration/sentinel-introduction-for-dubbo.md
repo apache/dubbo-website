@@ -121,7 +121,7 @@ When a service depends on multiple downstream services, a sluggish downstream ca
 
 ### Fallback
 
-Starting from version 0.1.1, the Sentinel Dubbo Adapter also supports configuring a global fallback function to handle fallback operations when Dubbo services are rate limited/degraded/load protected. Users simply need to implement a custom [`DubboFallback`](https://github.com/alibaba/Sentinel/blob/master/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/fallback/DubboFallback.java) interface and register it through `DubboFallbackRegistry`. By default, the `BlockException` will be wrapped and thrown. At the same time, this can be combined with [Dubbo's fallback mechanism](/en/docsv2.7/user/examples/local-mock/) to provide alternative implementations for downgraded services.
+Starting from version 0.1.1, the Sentinel Dubbo Adapter also supports configuring a global fallback function to handle fallback operations when Dubbo services are rate limited/degraded/load protected. Users simply need to implement a custom [`DubboFallback`](https://github.com/alibaba/Sentinel/blob/master/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/fallback/DubboFallback.java) interface and register it through `DubboFallbackRegistry`. By default, the `BlockException` will be wrapped and thrown. At the same time, this can be combined with [Dubbo's fallback mechanism](/zh-cn/docsv2.7/user/examples/local-mock/) to provide alternative implementations for downgraded services.
 
 ## Comparison Between Sentinel and Hystrix
 

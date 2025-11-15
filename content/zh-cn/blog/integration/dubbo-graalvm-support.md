@@ -112,7 +112,7 @@ AOT 编译机制是对所有 Java 应用通用的，但相比于 AOT 编译，AO
 - Dubbo - Dubbo AOT processing
 - Third-party libraries - Reachability Metadata
 
-对于 Spring 来说，Spring6 中发布了 Spring AOT 机制，用来支持 Spring 应用的静态化预处理；Dubbo 最近也在 3.2 版本中发布了 Dubbo AOT 机制，让 Dubbo 相关组件可以自动化实现 Native 预处理；除了这两个与业务开发密切相关的框架，一个应用中往往还有大量的第三方依赖，这些依赖的 Metadata 也是影响静态化的关键，如果它们中有反射、类加载等行为，那么需要为它们提供 Metadata 配置，对于这些第三方应用目前有两个渠道，一个是 GraalVM 官方提供的共享空间，这里有相当一部分依赖的 Metadata 配置可供使用（https://github.com/oracle/graalvm-reachability-metadata），另一种方式则是要求组件官方发布的发布中包含 Metadata 配置，对于这两种情况 GraalVM 都可以做到对于 Metadata 的自动读取。
+对于 Spring 来说，Spring6 中发布了 Spring AOT 机制，用来支持 Spring 应用的静态化预处理；Dubbo 最近也在 3.2 版本中发布了 Dubbo AOT 机制，让 Dubbo 相关组件可以自动化实现 Native 预处理；除了这两个与业务开发密切相关的框架，一个应用中往往还有大量的第三方依赖，这些依赖的 Metadata 也是影响静态化的关键，如果它们中有反射、类加载等行为，那么需要为它们提供 Metadata 配置，对于这些第三方应用目前有两个渠道，一个是 GraalVM 官方提供的共享空间，这里有相当一部分依赖的 Metadata 配置可供使用（https://github.com/oracle/graalvm-reachability-metadata)，另一种方式则是要求组件官方发布的发布中包含 Metadata 配置，对于这两种情况 GraalVM 都可以做到对于 Metadata 的自动读取。
 
 ### Spring AOT
 

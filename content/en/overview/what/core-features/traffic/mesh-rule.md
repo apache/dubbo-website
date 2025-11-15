@@ -363,4 +363,4 @@ subsets:
 
 > Similar to label routing, this involves how to label your instances (here it is `detail_version`). Please refer to the section How to Label Instances below.
 
-In addition to the functions introduced above that are very similar to Istio's traffic rules, Dubbo's VirtualService and DestinationRule can also achieve things that Istio rules cannot, such as method parameter routing. For details, see the [Reference Manual]().
+In addition to the functions introduced above that are very similar to Istio's traffic rules, Dubbo's VirtualService and DestinationRule can also achieve things that Istio rules cannot, such as method parameter routing. For details, see the `Reference Manual`.

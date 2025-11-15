@@ -65,10 +65,10 @@ In Proxyless mode, Dubbo processes continue to maintain direct communication:
 * Suitable for almost all deployment environments.
 
 ## Example Tasks
-Having understood enough theoretical knowledge, we recommend you visit the following [examples](../../tasks/mesh) for hands-on practice.
+Having understood enough theoretical knowledge, we recommend you visit the following [examples](/en/overview/mannual/java-sdk/reference-manual/mesh/mesh) for hands-on practice.
 
 ## Visualization
-We recommend using [Dubbo Admin](../../tasks/deploy) as the visual control console for your Dubbo cluster. It is compatible with all Kubernetes, Mesh, and non-Mesh architecture deployments.
+We recommend using [Dubbo Admin](/en/overview/mannual/java-sdk/quick-start/deploy) as the visual control console for your Dubbo cluster. It is compatible with all Kubernetes, Mesh, and non-Mesh architecture deployments.
 
 
 In addition, you can use the [officially recommended visualization tool by Istio](https://istio.io/latest/docs/tasks/observability/kiali/) to manage your Dubbo Mesh cluster.

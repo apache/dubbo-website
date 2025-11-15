@@ -19,7 +19,7 @@ Higress提供了从HTTP协议到Dubbo协议进行转换的功能，用户通过�
 以下是一个使用 `Higress + dubbo协议 + Nacos注册中心` 的完整示例：[dubbo-samples-gateway-higress-dubbo](https://github.com/apache/dubbo-samples/tree/master/2-advanced/dubbo-samples-gateway/dubbo-samples-gateway-higress/dubbo-samples-gateway-higress-dubbo)。
 
 ## 前提条件
-1. 已安装Higress，并开启了对Istio CRD的支持，参考[Higress安装部署文档](https://higress.io/zh-cn/docs/ops/deploy-by-helm)。
+1. 已安装Higress，并开启了对Istio CRD的支持，参考[Higress安装部署文档](https://higress.cn/docs/latest/ops/deploy-by-helm/)。
 
 ## 部署Nacos和Dubbo服务
 

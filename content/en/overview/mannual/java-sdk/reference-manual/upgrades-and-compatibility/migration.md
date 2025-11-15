@@ -53,7 +53,7 @@ If the previous application was Spring Boot, it is recommended to use the follow
 {{% alert title="Upgrade Notes for Spring and Spring Boot related to Dubbo3" color="warning" %}}
 Dubbo3 supports a wide range of compatible Spring and Spring Boot versions:
 * It supports both Spring 3.x ~ Spring 5.x versions as well as Spring Boot 1.x ~ Spring Boot 2.x. If you encounter issues upgrading to higher versions of Spring or Spring Boot, you can remove the high-version Spring dependencies propagated by `dubbo-spring-boot-starter` or `dubbo`, and specify the acceptable Spring version dependencies for the project.
-* Spring Boot 3.x and Spring 6 versions require JDK 17 or higher; please refer to the [Dubbo Spring Boot Manual]() for more details.
+* Spring Boot 3.x and Spring 6 versions require JDK 17 or higher; please refer to the `Dubbo Spring Boot Manual` for more details.
 {{% /alert %}}
 
 ### Step 2: Upgrade Other Component Dependencies
@@ -127,7 +127,7 @@ Dubbo3 supports a wide range of compatible Spring and Spring Boot versions:
     In addition to the registry, if you are using other features of Dubbo and depend on third-party components to support these features, you need to upgrade the corresponding component versions based on specific circumstances to ensure that the components work with Dubbo3.
 
 {{% alert title="Check Third-Party Component Versions" color="info" %}}
-The goal is to confirm that the third-party dependencies in the project can work normally with Dubbo3 (maintain API compatibility). Typically, there aren't too many third-party component dependencies in Dubbo applications, so just confirm as needed. Additionally, you can refer to [Dubbo3 Version Dependencies]() to confirm suitable component versions.
+The goal is to confirm that the third-party dependencies in the project can work normally with Dubbo3 (maintain API compatibility). Typically, there aren't too many third-party component dependencies in Dubbo applications, so just confirm as needed. Additionally, you can refer to `Dubbo3 Version Dependencies` to confirm suitable component versions.
 {{% /alert %}}
 
 ### Step 3: Compatibility Checks

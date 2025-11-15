@@ -66,7 +66,7 @@ public class GreetingServiceConsumer {
 
 我们建议将 `protocol` 配置为 tri 协议（全面兼容 grpc 协议），以获得在 istio 体系下更好的体验。
 
-为了使 Kubernetes 感知到应用的状态，需要配置 `qosAcceptForeignIp` 参数，以便 Kubernetes 可以获得正确的应用状态，[对齐生命周期](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/others/dubbo-kubernetes-probe/)。
+为了使 Kubernetes 感知到应用的状态，需要配置 `qosAcceptForeignIp` 参数，以便 Kubernetes 可以获得正确的应用状态，`对齐生命周期`.
 
 ```properties
 dubbo.application.name=dubbo-samples-xds-provider

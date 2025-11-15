@@ -13,7 +13,7 @@ Dubbo provides the ability to dynamically adjust service timeout, allowing adjus
 
 ## Before You Start
 * Deploy the Shop mall project
-* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
+* Deploy and open [Dubbo Admin](/en/overview/mannual/control-plane/architecture)
 
 ## Task Details
 

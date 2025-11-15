@@ -36,7 +36,7 @@ dubbo
 3.3.0 及之后的版本可不配置注册中心。而在 3.3.0 版本之前的 Dubbo 应用必须指定注册中心配置，即使不启用注册中心也要配置（可通过设置地址为空 address='N/A' ）。
 {{% /alert %}}
 
-每个注册中心组件有自己特有的配置，可以用来控制命名空间、分组、鉴权等，具体可以参考 [registry 配置参考手册](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#registry)或通过 parameters 参数进行扩展。
+每个注册中心组件有自己特有的配置，可以用来控制命名空间、分组、鉴权等，具体可以参考 [registry 配置参考手册](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties#dubbo.registry)或通过 parameters 参数进行扩展。
 
 ## 配置中心与元数据中心
 配置中心、元数据中心是实现 Dubbo 高阶服务治理能力会依赖的组件，如流量管控规则等，相比于注册中心通常这两个组件的配置是可选的。

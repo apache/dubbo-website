@@ -15,7 +15,7 @@ weight: 8
 
 Many traffic governance capabilities in Dubbo are implemented based on the Router. In production environments, if traffic results do not meet expectations, you can use the router status command to check the router's status to locate potential issues.
 
-> [Router Status Collection](../../../advanced-features-and-usage/performance/router-snapshot/)
+> [Router Status Collection](/en/docs3-v2/java-sdk/advanced-features-and-usage/performance/router-snapshot/)
 
 ### getRouterSnapshot Command
 

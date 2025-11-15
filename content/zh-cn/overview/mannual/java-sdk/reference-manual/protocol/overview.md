@@ -37,12 +37,12 @@ Dubbo 作为一款 RPC 框架内置了高效的 RPC 通信协议，帮助解决�
 ## 多协议扩展
 以下是当前 Dubbo 官方生态库提供的拓展协议实现。如果要扩展更多自定义协议，请参考 [SPI 扩展手册](/zh-cn/overview/mannual/java-sdk/reference-manual/spi/) 或 [使用教程 - 协议扩展](/zh-cn/overview/mannual/java-sdk/tasks/extensibility/protocol/)。
 
-| 协议 | 配置值 | 说明 |
-| --- | --- | --- |
-| Hessian | hessian | Hessian 定义的 RPC 通信协议，具体查看 [hessian协议](../others/hessian/) |
-| Spring HTTP | http | Spring 定义的基于 HTTP 的私有协议，具体查看 [hessian协议](../others/hessian/)  |
-| Apache Thrift | thrift | Thrift 协议，具备高性能、支持多语言的特点，具体查看 [Thrift协议](../others/thrift/)  |
-| JsonRPC | jsonrpc | 具体查看 [JsonRPC](../others/jsonrpc/)  |
-| RMI | rmi | 具体查看 [RMI协议](../others/rmi/)  |
-| WebService | webservice | 具体查看 [WebService协议](../others/webservice/)  |
+| 协议 | 配置值 | 说明                                                          |
+| --- | --- |-------------------------------------------------------------|
+| Hessian | hessian | Hessian 定义的 RPC 通信协议，具体查看 [hessian协议](../others/hessian/)   |
+| Spring HTTP | http | Spring 定义的基于 HTTP 的私有协议，具体查看 [hessian协议](../others/hessian/) |
+| Apache Thrift | thrift | Thrift 协议，具备高性能、支持多语言的特点，具体查看 [Thrift协议](../others/thrift/) |
+| JsonRPC | jsonrpc | 具体查看 `JsonRPC`                  |
+| RMI | rmi | 具体查看 [RMI协议](../others/rmi/)                                |
+| WebService | webservice | 具体查看 [WebService协议](../others/webservice/)                  |
 

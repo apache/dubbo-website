@@ -49,7 +49,7 @@ Dubbo 的流量管控规则可以基于应用、服务、方法、参数等粒�
 
 标签路由通过将某一个服务的实例划分到不同的分组，约束具有特定标签的流量只能在指定分组中流转，不同分组为不同的流量场景服务，从而实现流量隔离的目的。标签路由可以作为蓝绿发布、灰度发布等场景能力的基础。
 
-标签路由规则是一个非此即彼的流量隔离方案，也就是匹配`标签`的请求会 100% 转发到有相同`标签`的实例，没有匹配`标签`的请求会 100% 转发到其余未匹配的实例。如果您需要按比例的流量调度方案，请参考示例 [基于权重的按比例流量路由](../../tasks/traffic-management/weight/)。
+标签路由规则是一个非此即彼的流量隔离方案，也就是匹配`标签`的请求会 100% 转发到有相同`标签`的实例，没有匹配`标签`的请求会 100% 转发到其余未匹配的实例。如果您需要按比例的流量调度方案，请参考示例 [基于权重的按比例流量路由](/zh-cn/overview/mannual/java-sdk/tasks/traffic-management/weight)。
 
 `标签`主要是指对 Provider 端应用实例的分组，目前有两种方式可以完成实例分组，分别是`动态规则打标`和`静态规则打标`。`动态规则打标` 可以在运行时动态的圈住一组机器实例，而 `静态规则打标` 则需要实例重启后才能生效，其中，动态规则相较于静态规则优先级更高，而当两种规则同时存在且出现冲突时，将以动态规则为准。
 
@@ -118,7 +118,7 @@ RpcContext.getContext().setAttachment(Constants.TAG_KEY, "Hangzhou");
 
 设置了以上标签的流量，将全部导流到 `hangzhou-region` 划分的实例上。
 
-> 请求标签的作用域仅为一次点对点的 RPC 请求。比如，在一个 A -> B -> C 调用链路上，如果 A -> B 调用通过 `setAttachment` 设置了 `tag` 参数，则该参数不会在 B -> C 的调用中生效，同样的，在完成了 A -> B -> C 的整个调用同时 A 收到调用结果后，如果想要相同的 `tag` 参数，则在发起其他调用前仍需要单独设置 `setAttachment`。可以参考 [示例任务 - 环境隔离](../../tasks/traffic-management/isolation/) 了解更多 `tag` 全链路传递解决方案。
+> 请求标签的作用域仅为一次点对点的 RPC 请求。比如，在一个 A -> B -> C 调用链路上，如果 A -> B 调用通过 `setAttachment` 设置了 `tag` 参数，则该参数不会在 B -> C 的调用中生效，同样的，在完成了 A -> B -> C 的整个调用同时 A 收到调用结果后，如果想要相同的 `tag` 参数，则在发起其他调用前仍需要单独设置 `setAttachment`。可以参考 [示例任务 - 环境隔离](/zh-cn/overview/mannual/java-sdk/tasks/traffic-management/isolation) 了解更多 `tag` 全链路传递解决方案。
 
 ### 条件路由规则
 
@@ -195,7 +195,7 @@ scope: service
 key: org.apache.dubbo.samples.UserService
 ```
 
-> 关于 Dubbo 规则中的 `scope` 以及 `service`、`application` 的说明请参考 [动态配置参考手册](./configuration-rule/) 或 [动态配置示例](../../tasks/traffic-management/timeout/)。
+> 关于 Dubbo 规则中的 `scope` 以及 `service`、`application` 的说明请参考 [动态配置参考手册](./configuration-rule/) 或 [动态配置示例](/zh-cn/overview/mannual/java-sdk/tasks/traffic-management/timeout)。
 
 `parameters` 参数指定了新的修改值，这里将通过 `timeout: 2000` 将超时时间设置为 2000ms。
 
@@ -254,7 +254,7 @@ spec:
       value: "gray"
 ```
 
-如果您有不同的实例环境保存机制，可以通过扩展 `InfraAdapter 扩展点` 来自定义自己的标签加载方式。如果您的应用是部署在 Kubernetes 环境下，并且已经接入了服务网格体系，则也可以使用标准 deployment 标签的方式打标，具体请跟随 [服务网格任务示例](../../tasks/mesh/) 学习。
+如果您有不同的实例环境保存机制，可以通过扩展 `InfraAdapter 扩展点` 来自定义自己的标签加载方式。如果您的应用是部署在 Kubernetes 环境下，并且已经接入了服务网格体系，则也可以使用标准 deployment 标签的方式打标，具体请跟随 [服务网格任务示例](/zh-cn/overview/mannual/java-sdk/tasks/mesh/) 学习。
 
 ## 如何配置流量规则
 Dubbo 提供了控制台 Dubbo Admin，帮助您可视化的下发流量管控规则，并实时监控规则生效情况。
@@ -272,4 +272,4 @@ Dubbo 还提供了 `dubboctl` 命令行工具，需要有 Dubbo Admin 提前部�
 具体请参见 [Dubbo 中的服务网格架构](../service-mesh)。
 
 ## 跟随示例学习
-我们搭建了一个 [线上商城系统](../../tasks/traffic-management/) 供您学习流量规则的具体使用。
+我们搭建了一个 [线上商城系统](/zh-cn/overview/mannual/java-sdk/tasks/traffic-management/) 供您学习流量规则的具体使用。

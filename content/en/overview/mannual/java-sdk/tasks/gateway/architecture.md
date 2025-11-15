@@ -22,7 +22,7 @@ BFF applications can typically be developed using common frameworks such as Spri
 
 {{% alert title="Note" color="info" %}}
 Both `dubbo` and `triple` protocols support this access architecture. Additionally, when configuring BFF applications to call Dubbo services, you can use the regular Dubbo configuration method or use generalized calls:
-* The advantage of using [generalized calls]() for accessing Dubbo protocol is that it avoids dependency on the service binary package and achieves dynamic configuration effects.
+* The advantage of using `generalized calls` for accessing Dubbo protocol is that it avoids dependency on the service binary package and achieves dynamic configuration effects.
 * When configuring access to the triple protocol, you can use HTTP calling methods to similarly avoid dependency on the service binary package for dynamic configuration effects.
 {{% /alert %}}
 

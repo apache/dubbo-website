@@ -14,7 +14,7 @@ weight: 2
 
 自定义一套私有协议有两种方式，第一种是对原有的协议进行包装，添加一些特定的业务逻辑。另外一种是完全自定义一套协议。前者实现简单，在`dubbo`中也是有广泛的使用，比如：`ProtocolFilterWrapper`, `QosProtocolWrapper`, `ProtocolListenerWrapper`等。后者实现相对复杂，但却具有最大的灵活性，比如 Dubbo 框架内置的协议 `dubbo`、`triple` 协议都可以算作这种实现方式。
 
-本示例的完整源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/)。除了本示例之外，Dubbo 核心仓库 apache/dubbo 以及扩展库 [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-protocol-extensions/) 中的众多 Protocol 实现，都可以作为扩展参考实现：
+本示例的完整源码请参见 [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/tree/master/10-task/dubbo-samples-extensibility)。除了本示例之外，Dubbo 核心仓库 apache/dubbo 以及扩展库 [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-samples/tree/master/10-task/dubbo-samples-extensibility) 中的众多 Protocol 实现，都可以作为扩展参考实现：
 
 ```properties
 # Dubbo对外支持的常用协议

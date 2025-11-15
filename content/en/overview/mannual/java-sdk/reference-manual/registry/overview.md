@@ -36,7 +36,7 @@ For cluster format addresses, you can use the backup parameter:
 In versions 3.3.0 and later, the registry is optional. However, in versions prior to 3.3.0, Dubbo applications must specify registry configuration, even if the registry is not enabled (it can be set to an empty address: address='N/A').
 {{% /alert %}}
 
-Each registry component has its unique configurations to control namespaces, groups, authentication, etc. For more details, refer to the [Registry Configuration Reference Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties/#registry) or extend through parameters.
+Each registry component has its unique configurations to control namespaces, groups, authentication, etc. For more details, refer to the [Registry Configuration Reference Manual](/en/overview/mannual/java-sdk/reference-manual/config/properties#dubbo.registry) or extend through parameters.
 
 ## Configuration Center and Metadata Center
 The configuration center and metadata center are components that Dubbo relies on to implement advanced service governance capabilities, such as traffic control rules. Compared to the registry, the configurations for these two components are typically optional.
@@ -82,7 +82,7 @@ The mainstream registry implementations currently supported by Dubbo include:
 * Etcd
 * More implementations
 
-It also supports service discovery in Kubernetes and Mesh architectures. For more details, refer to [Tutorial - Kubernetes Deployment](http://localhost:1313/zh-cn/overview/mannual/java-sdk/tasks/deploy/).
+It also supports service discovery in Kubernetes and Mesh architectures. For more details, refer to [Tutorial - Kubernetes Deployment](../../../java-sdk/tasks/deploy/_index.md).
 
 Additionally, the [Dubbo Extension Ecosystem](https://github.com/apache/dubbo-spi-extensions) provides extension implementations for registries like Consul, Eureka, Etcd, etc. Contributions of more registry implementations to the Dubbo ecosystem are welcome through the [Registry SPI Extension](../../spi/).
 

@@ -131,7 +131,7 @@ Additionally, to support direct access to `application/json` format requests, th
 </dependency>
 ```
 
-### Generated Code Cannot Compile
+### Generated Code Cannot Compile {#generated-code-cannot-be-compiled}
 When using Protobuf, ensure that the core Dubbo library version matches the protoc plugin version and run `mvn clean compile` to regenerate the code.
 
 **Before version 3.3.0**

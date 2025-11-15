@@ -104,8 +104,8 @@ Participants can contribute in two sections:
 
 Relevant source code repositories:
 
-- Dubbo Java source code: [https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds)
-- Dubbo Go source code: [https://github.com/apache/dubbo-go/tree/main/xds](https://github.com/apache/dubbo-go/tree/main/xds)
+- Dubbo Java source code: [dubbo-xds](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds)
+- Dubbo Go source code: [xds](https://github.com/apache/dubbo-go/tree/release-3.0/xds)
 
 ##### 3.2.2 Control Plane Development Guide:
 The xDS Server of the control plane will be implemented by the official community, and participants should focus on the design and implementation of security-related components.
@@ -149,9 +149,9 @@ From a user GUI perspective, the menu design can be as follows:
 #### 4.2 Topic Explanation
 The official has provided reference implementations for the back-end adaptation layer and part of the front-end interaction design drafts. Participants can base their development design on these. Specific scoring standards can be referred to in the official registration channel.
 
-1. Back-end: [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
+1. Back-end: [admin](https://github.com/apache/dubbo-kubernetes/tree/ospp-2024/pkg/admin)
 
-2. Front-end code framework: https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
+2. Front-end code framework: [ui-vue3](https://github.com/apache/dubbo-kubernetes/tree/ospp-2024/ui-vue3)
 
 #### 4.3 Reference Materials
 
