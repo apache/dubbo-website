@@ -148,11 +148,11 @@ When a NetworkFilter receives a request from a Listener, it needs to perform a s
 
 As shown in the configuration above, the `httpconnectionmanager` NetworkFilter has an HttpFilter chain, which includes the `dgp.filter.http.dubboproxy` HttpFilter. It is responsible for converting HTTP requests into Dubbo requests and forwarding them. It requires configuration of the address of a Dubbo cluster registration center, specified as middleware in Zookeeper. The `auto_resolve` specifies using the default HTTP to Dubbo conversion protocol for related data conversions, which can be referenced in [Default Conversion Protocol](../appendix/http-to-dubbo-default-stragety/).
 
-More HttpFilters can be found in the [HttpFilter documentation](../httpfilter/dubbo/).
+More HttpFilters can be found in the [HttpFilter documentation](./httpfilter).
 
 #### Adapter
 
 Adapter represents the capability of Pixiu to interact with external metadata centers. Currently, there are two: `dgp.adapter.dubboregistrycenter` and `dgp.adapter.springcloud`, representing retrieval of service instance information from Dubbo cluster registration centers and Spring Cloud cluster registration centers respectively to build Pixiu forwarding HTTP request routing rules.
 
-More Adapters can be found in the [Adapter documentation](../adapter/dubbo/)。
+More Adapters can be found in the [Adapter documentation](./adapter)。
 

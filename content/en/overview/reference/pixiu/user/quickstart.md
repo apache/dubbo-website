@@ -24,7 +24,7 @@ Pixiu converts the Client's HTTP request into a Dubbo2 request, which is then fo
 
 ### Example
 
-The example path can be found at `/samples/dubbogo/simple/resolve`.
+The example path can be found at `/samples/http/simple/http-http`.
 
 #### Dubbo Server Implementation and Startup
 

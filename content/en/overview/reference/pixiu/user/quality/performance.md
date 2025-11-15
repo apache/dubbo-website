@@ -1,9 +1,9 @@
 ---
 aliases:
-    - /docs3-v2/dubbo-go-pixiu/user/quality/performance/
-    - /docs3-v2/dubbo-go-pixiu/user/quality/performance/
-    - /overview/reference/pixiu/user/quality/stability/
-    - /overview/mannual/dubbo-go-pixiu/user/quality/stability/
+    - /en/docs3-v2/dubbo-go-pixiu/user/quality/performance/
+    - /en/docs3-v2/dubbo-go-pixiu/user/quality/performance/
+    - /en/overview/reference/pixiu/user/quality/stability/
+    - /en/overview/mannual/dubbo-go-pixiu/user/quality/stability/
 description: Performance
 linkTitle: Performance
 title: Performance
