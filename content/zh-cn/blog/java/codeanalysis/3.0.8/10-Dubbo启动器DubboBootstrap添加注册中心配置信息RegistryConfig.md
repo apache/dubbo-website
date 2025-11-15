@@ -227,4 +227,4 @@ private <C extends AbstractConfig> C addIfAbsent(C config, Map<String, C> config
 ```
 
 
-  原文： [`<<Dubbo启动器DubboBootstrap添加注册中心配置信息RegistryConfig>>`](https://blog.elastic.link/2022/07/10/dubbo/10-dubbo-qi-dong-qi-dubbobootstrap-tian-jia-zhu-ce-zhong-xin-pei-zhi-xin-xi-registryconfig//)
+  原文： [`<<Dubbo启动器DubboBootstrap添加注册中心配置信息RegistryConfig>>`](https://developer.aliyun.com/article/1147112)

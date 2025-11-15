@@ -55,7 +55,7 @@ Next, we will specifically demonstrate the steps for accessing the Higress gatew
 
 The following example is deployed in a Kubernetes environment, so ensure you are connected to a usable Kubernetes cluster.
 
-1. Install Higress, refer to the [Higress Deployment Documentation](https://higress.io/en/docs/ops/deploy-by-helm).
+1. Install Higress, refer to the [Higress Deployment Documentation](https://higress.cn/en/docs/latest/ops/deploy-by-helm).
 
 2. Install Nacos by running
 
@@ -128,7 +128,7 @@ spec:
     type: nacos2
 ```
 
-> For more detailed configuration, refer to [McpBridge Configuration Documentation](https://higress.io/en/docs/user/mcp-bridge).
+> For more detailed configuration, refer to [McpBridge Configuration Documentation](https://higress.cn/docs/latest/user/mcp-bridge).
 
 Next, we create the following Ingress to create an HTTP route pointing to the Dubbo service:
 
@@ -166,7 +166,7 @@ Note here that the annotation higress.io/destination specifies the target servic
 
 For services sourced from Nacos, the format here is: “ServiceName.ServiceGroup.NamespaceID.nacos”. Note that the underscore '_' in the service group is converted to a dash '-'. When the namespace is not specified, the default value here is "public".
 
-> For more traffic governance-related configurations, refer to [Ingress Annotation Configuration Documentation](https://higress.io/en/docs/user/annotation) and [Advanced Traffic Governance through Ingress Annotation](https://higress.io/en/docs/user/annotation-use-case).
+> For more traffic governance-related configurations, refer to [Ingress Annotation Configuration Documentation](https://higress.cn/en/docs/latest/user/annotation) and [Advanced Traffic Governance through Ingress Annotation](https://higress.cn/en/docs/latest/user/annotation-use-case).
 
 ### Request Validation
 
@@ -250,6 +250,6 @@ The content described in this article applies only to the versions of the triple
 {{% /alert %}}
 
 ## Reference Links
-* `Use Apache APISIX to Proxy Triple Protocol Traffic`
-* [Higress Achieves Microservice Discovery and Routing Configuration Based on HTTP Protocol](https://higress.io/en/docs/user/spring-cloud)
+* [Use Apache APISIX to Proxy Triple Protocol Traffic](/en/blog/2024/04/22/use-apache-apisix-to-proxy-dubbo-services-triple-protocol/)
+* [Higress Achieves Microservice Discovery and Routing Configuration Based on HTTP Protocol](https://higress.cn/en/docs/latest/user/spring-cloud)
 

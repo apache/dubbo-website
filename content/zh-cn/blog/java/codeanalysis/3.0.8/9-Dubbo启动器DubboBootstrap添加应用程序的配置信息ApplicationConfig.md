@@ -192,4 +192,4 @@ private <C extends AbstractConfig> C addIfAbsent(C config, Map<String, C> config
     }
 ```
 
- 原文： [<<Dubbo启动器DubboBootstrap添加应用程序的配置信息ApplicationConfig>>](https://blog.elastic.link/2022/07/10/dubbo/9-dubbo-qi-dong-qi-dubbobootstrap-tian-jia-ying-yong-cheng-xu-de-pei-zhi-xin-xi-applicationconfig/)
+ 原文： [<<Dubbo启动器DubboBootstrap添加应用程序的配置信息ApplicationConfig>>](https://developer.aliyun.com/article/1147113)

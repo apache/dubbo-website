@@ -82,7 +82,7 @@ The mainstream registry implementations currently supported by Dubbo include:
 * Etcd
 * More implementations
 
-It also supports service discovery in Kubernetes and Mesh architectures. For more details, refer to [Tutorial - Kubernetes Deployment](http://localhost:1313/zh-cn/overview/mannual/java-sdk/tasks/deploy/).
+It also supports service discovery in Kubernetes and Mesh architectures. For more details, refer to [Tutorial - Kubernetes Deployment](../../../java-sdk/tasks/deploy/_index.md).
 
 Additionally, the [Dubbo Extension Ecosystem](https://github.com/apache/dubbo-spi-extensions) provides extension implementations for registries like Consul, Eureka, Etcd, etc. Contributions of more registry implementations to the Dubbo ecosystem are welcome through the [Registry SPI Extension](../../spi/).
 

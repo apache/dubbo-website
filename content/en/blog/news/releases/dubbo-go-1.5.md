@@ -91,9 +91,8 @@ On the **registry model**, it supports load balancing across multiple registry c
 
 Previously, the dubbo-go RPC layer reused the RPC layer of the getty framework[[^3](https://github.com/AlexStocks/getty/tree/feature/rpc)], failing to achieve isolation between protocols and application communication addresses. The Alibaba Middleware Exhibition team restructured the dubbo-go RPC layer to achieve connection reuse: enabling multi-protocol communication over the same TCP connection for both consumer and provider ends. The related PR has been merged and will be released in dubbo-go v1.5.1.
 
-Currently, the next version is under intense development, and the specific plans and task lists[^1] are already reflected on GitHub.
+Currently, the next version is under intense development, and the specific plans and task lists are already reflected on GitHub.
 
-[^1]: https://github.com/apache/dubbo-go/projects/8
 [^2]: https://github.com/seata-golang/seata-golang
 [^3]: https://github.com/AlexStocks/getty/tree/feature/rpc
 

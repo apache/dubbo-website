@@ -93,7 +93,7 @@ public DubboBootstrap protocol(ProtocolConfig protocolConfig) {
 ```
 
 继续看protocols方法 ,这个代码与前面两个博客中看到的向配置管理器添加配置对象的逻辑是一样的
-这里就不说了可以看前面的博客[《9-Dubbo启动器DubboBootstrap添加应用程序的配置信息ApplicationConfig》](https://blog.elastic.link/2022/07/10/dubbo/9-dubbo-qi-dong-qi-dubbobootstrap-tian-jia-ying-yong-cheng-xu-de-pei-zhi-xin-xi-applicationconfig/)
+这里就不说了可以看前面的博客[《9-Dubbo启动器DubboBootstrap添加应用程序的配置信息ApplicationConfig》](https://developer.aliyun.com/article/1147113)
 ```java
    public DubboBootstrap protocols(List<ProtocolConfig> protocolConfigs) {
         if (CollectionUtils.isEmpty(protocolConfigs)) {
@@ -107,4 +107,4 @@ public DubboBootstrap protocol(ProtocolConfig protocolConfig) {
     }
 ```
 
-原文：[Dubbo启动器DubboBootstrap添加协议配置信息ProtocolConfig](https://blog.elastic.link/2022/07/10/dubbo/11-dubbo-qi-dong-qi-dubbobootstrap-tian-jia-xie-yi-pei-zhi-xin-xi-protocolconfig/)
+原文：[Dubbo启动器DubboBootstrap添加协议配置信息ProtocolConfig](https://developer.aliyun.com/article/1150915)

@@ -312,5 +312,5 @@ message AnchorInfo {
 #### 5. Community Resources
 * Community homepage: https://developers.google.cn/protocol-buffers/
 * Community open source address: https://github.com/google/protobuf
-* Relevant JARs in Maven: https://search.maven.org/search?q=com.google.protobuf
+* Relevant JARs in Maven: https://central.sonatype.com/search?q=com.google.protobuf
 

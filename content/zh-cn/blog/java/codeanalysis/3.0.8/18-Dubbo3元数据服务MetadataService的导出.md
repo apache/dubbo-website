@@ -249,7 +249,7 @@ ExporterDeployListener类型的onModuleStarted方法如下：
     }
 ```
 
-在前面的博客[<<Dubbo启动器DubboBootstrap添加应用程序的配置信息ApplicationConfig>>](https://blog.elastic.link/2022/07/10/dubbo/9-dubbo-qi-dong-qi-dubbobootstrap-tian-jia-ying-yong-cheng-xu-de-pei-zhi-xin-xi-applicationconfig/) 中有提到这个配置下面我再说下
+在前面的博客[<<Dubbo启动器DubboBootstrap添加应用程序的配置信息ApplicationConfig>>](https://developer.aliyun.com/article/1147113) 中有提到这个配置下面我再说下
 
 metadata-type
 
@@ -634,4 +634,4 @@ public static org.apache.curator.x.discovery.ServiceInstance<ZookeeperInstance> 
 
 
 
-原文地址：[18-Dubbo3元数据服务MetadataService的导出](https://blog.elastic.link/2022/07/10/dubbo/18-dubbo3-yuan-shu-ju-fu-wu-metadataservice-de-dao-chu/)
+原文地址：[18-Dubbo3元数据服务MetadataService的导出](https://developer.aliyun.com/article/11807035)

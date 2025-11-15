@@ -135,7 +135,7 @@ dubbo-go v1.0.0 版本，主要由我和同在携程的同事[方银城](https:/
 
 dubbo-go 现在已经开始被一些企业尝试应用于 Go 语言应用融入企业已有 Java & Dubbo 技术栈，以及搭建全新 Go 语言分布式应用等场景。比如中通快递内部 Go 调用 Java Dubbo 服务；作为携程 Go 语言应用的服务框架以及 Go、Java 应用互通。
 
-具体的应用情况可以查看： https://github.com/dubbo/go-for-apache-dubbo/issues/2
+具体的应用情况可以查看： https://github.com/apache/dubbo-go/issues/2
 
 *OSCHINA*：接下来的演进方向是怎么样的？
 

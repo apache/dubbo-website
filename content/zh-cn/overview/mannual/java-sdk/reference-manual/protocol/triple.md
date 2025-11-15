@@ -312,7 +312,7 @@ message AnchorInfo {
 #### 5. 社区资料
 * 社区主页地址：https://developers.google.cn/protocol-buffers/
 * 社区开源地址：https://github.com/google/protobuf
-* 相关jar的maven：https://search.maven.org/search?q=com.google.protobuf
+* 相关jar的maven：https://central.sonatype.com/search?q=com.google.protobuf
 
 
 

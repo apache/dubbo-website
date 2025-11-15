@@ -14,7 +14,7 @@ In the [Communication Protocol](/en/overview/mannual/java-sdk/tasks/protocols/) 
 
 There are two ways to create a private protocol: the first is to wrap the existing protocol and add specific business logic. The second is to completely customize a protocol. The former is simpler to implement and is widely used in `dubbo`, such as `ProtocolFilterWrapper`, `QosProtocolWrapper`, and `ProtocolListenerWrapper`. The latter is relatively complex but offers maximum flexibility; for instance, the built-in protocols `dubbo` and `triple` in the Dubbo framework fall under this implementation style.
 
-For the complete source code of this example, refer to [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/). In addition to this example, many Protocol implementations in the core Dubbo repository apache/dubbo and the extension library [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-protocol-extensions/) can also serve as extension references: 
+For the complete source code of this example, refer to [dubbo-samples-extensibility](https://github.com/apache/dubbo-samples/blob/master/10-task/dubbo-samples-extensibility/). In addition to this example, many Protocol implementations in the core Dubbo repository apache/dubbo and the extension library [apache/dubbo-spi-extensions](https://github.com/apache/dubbo-samples/tree/master/10-task/dubbo-samples-extensibility) can also serve as extension references: 
 
 ```properties
 # Common protocols supported by Dubbo

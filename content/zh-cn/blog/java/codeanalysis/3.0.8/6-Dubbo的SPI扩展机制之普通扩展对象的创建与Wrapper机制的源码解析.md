@@ -352,4 +352,4 @@ isWrapperClass方法通过判断构造器类型是否为当前类型来判断是
 如果匹配到了当前扩展对象是需要进行wrapp的就为当前扩展创建当前wrapper扩展对象进行包装
 
 
- 原文： [《Dubbo的SPI扩展机制之普通扩展对象的创建与Wrapper机制的源码解析》](https://blog.elastic.link/2022/07/10/dubbo/6-dubbo-de-spi-kuo-zhan-ji-zhi-zhi-pu-tong-kuo-zhan-dui-xiang-de-chuang-jian-yu-wrapper-ji-zhi-de-yuan-ma-jie-xi/)
+ 原文： [《Dubbo的SPI扩展机制之普通扩展对象的创建与Wrapper机制的源码解析》](https://developer.aliyun.com/article/1141064)

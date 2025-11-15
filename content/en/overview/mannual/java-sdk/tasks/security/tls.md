@@ -26,7 +26,7 @@ TLS configuration has a unified entry point.
 Users with encryption requirements for end-to-end links can use TLS.
 
 > Reference Use Case
-[https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
+[dubbo-samples-ssl](https://github.com/apache/dubbo-samples/tree/master/4-governance/dubbo-samples-ssl)
 
 ## Usage
 
