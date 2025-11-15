@@ -73,4 +73,4 @@ static_resources:
     reject_policy: "immediacy"
 ```
 
-对于自定义配置 ,您可以参考用户指南中的[config](../../user/config.md) 
+对于自定义配置 ,您可以参考用户指南中的[配置文件](../../../../user/config.md) 

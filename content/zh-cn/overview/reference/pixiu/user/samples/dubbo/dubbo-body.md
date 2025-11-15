@@ -139,4 +139,3 @@ curl host:port/api/v1/test-dubbo/user2 -X PUT -d '{"name":"tc","user":{"id":"000
 true
 ```
 
-[上一页](dubbo.md)

@@ -20,7 +20,7 @@ weight: 10
 
 The HTTP Proxy case demonstrates Pixiu's ability to receive external HTTP requests and forward them to the underlying HTTP Server.
 
-![img](/imgs/pixiu/user/samples/http_proxy.png)
+![img](../../../../../../../static/imgs/pixiu/user/samples/http_proxy.png)
 
 For the case code, please refer to `/samples/http/simple`. The directory structure and purpose in the case are as follows:
 

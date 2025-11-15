@@ -13,7 +13,6 @@ weight: 20
 
 # OPA 过滤器 (dgp.filter.http.opa)
 
-[English](opa.md) | 中文
 
 ---
 

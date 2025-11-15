@@ -100,4 +100,3 @@ Run command curl using:
 curl http://localhost:8881/BDTService/com.dubbogo.pixiu.UserService/1.0.0/GetUserByCode -X POST -d '{"types":"int", "values":1}'
 ```
 
-[Previous](dubbo.md)

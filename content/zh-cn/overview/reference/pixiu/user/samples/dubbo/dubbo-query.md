@@ -15,7 +15,7 @@ weight: 10
 
 > GET 请求 [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/query)
 
-## 简单示例
+## 简单示例{simple}
 
 ### 接口配置
 
@@ -131,4 +131,4 @@ curl localhost:port/api/v1/test-dubbo/userByNameAndAge?name=tc&age=99 -X GET
 }
 ```
 
-[上一页](dubbo.md)
+

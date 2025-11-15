@@ -73,4 +73,4 @@ static_resources:
     reject_policy: "immediacy"
 ```
 
-for custom config , you can refer to [config](../../user/config.md) in user-guide
+for custom config , you can refer to [config](../../../../user/config.md) in user-guide

@@ -15,7 +15,7 @@ weight: 10
 
 > GET request [samples](https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbogo/simple/query)
 
-## Simple Demo
+## Simple Demo{simple}
 
 ### Api Config
 
@@ -131,4 +131,3 @@ result
 }
 ```
 
-[Previous](dubbo.md)
