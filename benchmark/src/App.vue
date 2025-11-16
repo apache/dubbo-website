@@ -21,7 +21,7 @@
 
 <script>
 import TriggerTraceDetail from "@/components/TriggerTraceDetail.vue";
-  //ljq
+  
 
 export default {
   name: 'App',
