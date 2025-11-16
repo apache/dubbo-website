@@ -21,7 +21,6 @@
 
 <script>
 import TriggerTraceDetail from "@/components/TriggerTraceDetail.vue";
-  
 
 export default {
   name: 'App',
