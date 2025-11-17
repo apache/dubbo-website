@@ -30,7 +30,7 @@ Dubbo is released under the permissive Apache 2.0 license, follows the standard 
   {{< card header="DingTalk Group" >}}
 <div id="slack" class="community-resource">
     <a href="/">
-        <img src="/imgs/contacts/dingtalk.png" alt="Dingtalk">
+        <img src="/imgs/contacts/dingtalk.jpg" alt="Dingtalk">
     </a>
     <p>Regular online community meetings or developer bi-weekly meetings</p>
 </div>
