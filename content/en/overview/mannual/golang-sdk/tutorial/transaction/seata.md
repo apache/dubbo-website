@@ -15,4 +15,4 @@ weight: 1
 2. Then, execute the main() method in the triple/client/cmd and triple/server/cmd directories.
 
 
-<a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">Complete example source code address</a>
+Complete example source code [address](https://github.com/apache/dubbo-go-samples/tree/main/transcation/)

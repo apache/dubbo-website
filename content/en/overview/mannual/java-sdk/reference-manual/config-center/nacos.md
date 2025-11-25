@@ -14,14 +14,14 @@ weight: 3
 * Understand [Basic Development Steps of Dubbo](/en/overview/mannual/java-sdk/quick-start/starter/)
 * Install and start [Nacos](/en/overview/reference/integrations/nacos/)
 
-> When Dubbo uses version `3.0.0` or above, Nacos version `2.0.0` or above is required. Please refer to [nacos registry]( /en/overview/mannual/java-sdk/reference-manual/registry/nacos/#12-nacos-version) for Nacos version compatibility.
+> When Dubbo uses version `3.0.0` or above, Nacos version `2.0.0` or above is required. Please refer to [nacos registry]( /en/overview/mannual/java-sdk/reference-manual/registry/nacos#Nacos-Version) for Nacos version compatibility.
 
 ## 2 Instructions
 
 ### 2.1 Add Maven Dependency
 If the project has already enabled Nacos as a registry, no additional configuration is required.
 
-If Nacos registry is not enabled, please refer to [Add Nacos dependency for registry](/en/overview/mannual/java-sdk/reference-manual/registry/nacos/#11-add-dependency).
+If Nacos registry is not enabled, please refer to [Add Nacos dependency for registry](/en/overview/mannual/java-sdk/reference-manual/registry/nacos#11-Add-Dependency).
 
 ### 2.2 Enable Nacos Configuration Center
 ```xml
@@ -49,10 +49,10 @@ ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("nacos://127.0.0.1:8848");
 ```
 
-For `address` format, please refer to [Nacos Registry - Enable Configuration](../../registry/nacos/#22-configure-and-enable-nacos)
+For `address` format, please refer to [Nacos Registry - Enable Configuration](../../registry/nacos#22-configure-and-enable-nacos)
 
 ## 3 Advanced Configuration
-To enable authentication, please refer to [Nacos Registry - Enable Authentication](../../registry/nacos/#31-authentication)
+To enable authentication, please refer to [Nacos Registry - Enable Authentication](../../registry/nacos#22-configure-and-enable-nacos)
 
 ### 3.1 Externalized Configuration
 #### 3.1.1 Global Externalized Configuration
@@ -101,7 +101,7 @@ dubbo
 For the configuration center, `group` and `namespace` should be consistent across the company (cluster) and avoid different values for different applications.
 
 ### 3.3 Nacos Extended Configuration
-For more Nacos sdk/server supported parameter configurations, refer to [Nacos Registry - More Configurations](../../registry/nacos/#35-more-configurations)
+For more Nacos sdk/server supported parameter configurations, refer to [Nacos Registry - More Configurations](../../registry/nacos)
 
 ## 4 Traffic Governance Rules
 For Nacos, all traffic governance rules and externalized configurations should be globally visible, thus applications in the same logical cluster must use the same namespace and group. The default value for namespace is `public` and the default value for group is `dubbo`. Applications must not modify the namespace and group without maintaining global consistency.

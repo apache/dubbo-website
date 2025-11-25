@@ -17,7 +17,7 @@ weight: 6
 
 The configuration center (config-center) in Dubbo can undertake two types of responsibilities:
 
-1. [External configuration](../config/principle/#33-external-configuration): centralized storage of startup configurations (simply understood as external storage of dubbo.properties).
+1. [External configuration](../config/principle#33-external-configuration): centralized storage of startup configurations (simply understood as external storage of dubbo.properties).
 2. Storage of traffic governance rules.
 
 Please refer to the specific extension implementations to understand how to enable the configuration center.

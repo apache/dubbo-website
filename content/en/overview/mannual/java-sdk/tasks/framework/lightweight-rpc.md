@@ -104,7 +104,7 @@ Congratulations! You have now learned the basic usage of Dubbo Java RPC communic
 
 ## More Content
 
-- The Triple protocol is fully compatible with gRPC; you can refer here to learn how to [write gRPC-compatible services using IDL](/en/overview/mannual/java-sdk/quick-start/), or [use other communication protocols]()
-- As an RPC framework, Dubbo supports asynchronous calls, connection management, context, etc. Please refer to [RPC framework core features]()
-- You can continue to [add more microservice governance capabilities to your application using API]() but we encourage you to use [Dubbo Spring Boot to develop microservice applications](../../microservice/develop/)
+- The Triple protocol is fully compatible with gRPC; you can refer here to learn how to [write gRPC-compatible services using IDL](/en/overview/mannual/java-sdk/quick-start/), or `use other communication protocols`
+- As an RPC framework, Dubbo supports asynchronous calls, connection management, context, etc. Please refer to `RPC framework core features`
+- You can continue to `add more microservice governance capabilities to your application using API` but we encourage you to use [Dubbo Spring Boot to develop microservice applications](/en/overview/mannual/java-sdk/reference-manual/architecture/multi-instance/develop)
 

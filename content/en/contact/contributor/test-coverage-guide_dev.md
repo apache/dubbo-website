@@ -19,7 +19,7 @@ weight: 7
 * Pay attention to boundary conditions.
 * Unit tests should also be well-designed; do not write useless code.
 * When you find a `method` difficult to unit test, if it can be confirmed that this `method` is `smelly code`, then refactor it together with the developer.
-* The mock framework used in Dubbo is: [mockito](http://site.mockito.org/). Below are some developer guides: [mockito tutorial](https://www.baeldung.com/bdd-mockito), [mockito refcard](https://dzone.com/refcardz/mockito)
+* The mock framework used in Dubbo is: [mockito](http://site.mockito.org/). Below are some developer guides: [mockito tutorial](https://www.baeldung.com/bdd-mockito), [mockito refcard](https://site.mockito.org/)
 * TDD (optional): When you start writing a new feature, you can try to write the test cases first. 
 ### Test Coverage Threshold
 * At this stage, the test coverage threshold for Delta changes is: >=60%, the higher the better.

@@ -596,7 +596,7 @@ Configuration:
 
 ### 6. Protocol Migration
 
-![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/LvBPlNAjAmw3OdG8/img/36d30183-8d5-494c-8ebb-b57403c88661.png)
+TODO:there needs a image.
 
 Rest encoding style
 

@@ -138,6 +138,6 @@ Dubbo 框架支持协议扩展，目前官方生态支持的协议包括：
 * jsonrpc
 
 
-在一些场景下，你可以在一个应用内同时发布多个协议的服务，或者同时以不同的协议调用服务，这里有一个 [多协议发布的使用示例](https://github.com/apache/dubbo-go-samples/tree/main/multirpc) 供参考。
+在一些场景下，你可以在一个应用内同时发布多个协议的服务，或者同时以不同的协议调用服务，这里有一个 [多协议发布的使用示例](https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols) 供参考。
 
 

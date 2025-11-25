@@ -15,4 +15,4 @@ weight: 1
 2. 再执行 triple/client/cmd 和 triple/server/cmd 目录下的 main()方法。
 
 
-<a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">完整示例源码地址</a>
+完整示例源码[地址](https://github.com/apache/dubbo-go-samples/tree/main/transcation/)

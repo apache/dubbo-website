@@ -17,8 +17,8 @@ The core objective of service downgrading is to address these weak dependencies.
 
 ## Before You Start
 
-* [Deploy Shop Mall Project](../#deploy-the-mall-system)
-* Deploy and open [Dubbo Admin](../.././../reference/admin/architecture/)
+* `Deploy Shop Mall Project`
+* Deploy and open [Dubbo Admin](/en/overview/mannual/control-plane/architecture)
 
 ## Task Details
 
@@ -67,7 +67,7 @@ To avoid affecting other tasks, delete or disable the downgrade rules just confi
 
 ## Other Matters
 
-The service downgrading feature can also be utilized in development and testing environments. Due to the distributed characteristics of microservices, there are interdependencies among different services or applications. Thus, it is challenging for a service or application to be deployed independently without relying on other services. However, not all services in the testing environment are always ready, presenting a significant obstacle to the independent evolution of services emphasized in microservices. By using the service downgrading feature, we can simulate or short-circuit an application’s dependency on other services, allowing the application to mock the return results of external service calls as expected. For details, refer to the usage of [Dubbo Admin Service Mock](../.././../reference/admin/mock/).
+The service downgrading feature can also be utilized in development and testing environments. Due to the distributed characteristics of microservices, there are interdependencies among different services or applications. Thus, it is challenging for a service or application to be deployed independently without relying on other services. However, not all services in the testing environment are always ready, presenting a significant obstacle to the independent evolution of services emphasized in microservices. By using the service downgrading feature, we can simulate or short-circuit an application’s dependency on other services, allowing the application to mock the return results of external service calls as expected. For details, refer to the usage of [Dubbo Admin Service Mock](/en/overview/mannual/control-plane/mock).
 
 Dubbo's downgrade rules are used to set behaviors and return values upon downgrading. However, the judgment of when to execute flow limiting downgrade actions has not been extensively covered. Dubbo has completed this by integrating more specialized flow limiting downgrade products such as Sentinel, which can be used in conjunction with Dubbo downgrade rules, as detailed in the [flow limiting downgrade](/en/overview/core-features/traffic/circuit-breaking/) documentation.
 

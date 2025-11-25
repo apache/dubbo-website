@@ -37,7 +37,7 @@ Unlike many other microservice frameworks, **Dubbo3's service discovery mechanis
 From the registry center's perspective, it aggregates instance addresses for the entire cluster by application name (dubbo.application.name). Each service-providing instance registers its application name, instance ip:port address information (usually with a small amount of instance metadata, such as the machine's region, environment, etc.) to the registry center.
 
 > In Dubbo2, the registry center aggregates instance addresses at the service granularity, which is finer than the application granularity, meaning more data is transmitted. Therefore, some performance issues were encountered in large-scale clusters.
-> To address the inconsistency between Dubbo2 and Dubbo3 cross-version data models, Dubbo3 provides a [smooth migration solution](/en/overview/mannual/java-sdk/upgrades-and-compatibility/service-discovery/migration-service-discovery/), ensuring that model changes are transparent to users.
+> To address the inconsistency between Dubbo2 and Dubbo3 cross-version data models, Dubbo3 provides a [smooth migration solution](/en/overview/mannual/java-sdk/reference-manual/upgrades-and-compatibility/migration-service-discovery), ensuring that model changes are transparent to users.
 
 ![service-discovery](/imgs/v3/feature/service-discovery/registry-data.png)
 
@@ -64,7 +64,7 @@ The complete workflow is shown in the figure above. First, the consumer receives
 Dubbo service discovery extends support for multiple registry components such as Nacos, Zookeeper, Consul, Redis, Kubernetes, etc. You can switch between different implementations through configuration, and it also supports configurations like authentication and namespace isolation. For specific configuration methods, please refer to the SDK documentation:
 
 * [Java](../../mannual/java-sdk/reference-manual/registry)
-* [Golang](../../mannual/golang-sdk/tutorial/develop/registry)
+* [Golang](../../mannual/golang-sdk/refer/sourcecode/registry.md)
 * [Rust](../../mannual/rust-sdk/)
 
 Dubbo also supports scenarios where multiple registries are configured within an application, such as dual registration and dual subscription. This is very useful for scenarios like intercommunication of different cluster addresses and cluster migration. We will add examples of `Best Practices` for this part in future documentation.

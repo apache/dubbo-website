@@ -21,7 +21,7 @@ View the [complete sample code](https://github.com/apache/dubbo-samples/tree/mas
 ### 2.1 Add Maven Dependencies
 If the project has already enabled Zookeeper as the registry, no additional configurations are necessary.
 
-If Zookeeper is not used as the registry, refer to [Add Zookeeper related dependencies for the registry](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper/#11-Add-Maven-dependencies).
+If Zookeeper is not used as the registry, refer to [Add Zookeeper related dependencies for the registry](/en/overview/mannual/java-sdk/reference-manual/registry/zookeeper#11-Add-Maven-dependencies).
 
 ### 2.2 Enable Zookeeper Configuration Center
 ```xml
@@ -49,10 +49,10 @@ ConfigCenterConfig configCenter = new ConfigCenterConfig();
 configCenter.setAddress("zookeeper://127.0.0.1:2181");
 ```
 
-For the format of `address`, refer to [zookeeper registry - enable configuration](../../registry/zookeeper/#13-Configure-and-enable-Zookeeper)
+For the format of `address`, refer to [zookeeper registry - enable configuration](../../registry/zookeeper#13-Configure-and-enable-Zookeeper)
 
 ## 3 Advanced Configuration
-To enable authentication and authorization, refer to [zookeeper registry - enable authentication and authorization](../../registry/zookeeper/#21-Authentication-and-authorization)
+To enable authentication and authorization, refer to [zookeeper registry - enable authentication and authorization](../../registry/zookeeper#21-Authentication-and-authorization)
 
 ### 3.1 Customize Externalized Configuration Key
 **1. Enable externalized configuration and specify key**

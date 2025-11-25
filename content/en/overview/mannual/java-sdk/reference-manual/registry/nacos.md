@@ -15,7 +15,7 @@ This example demonstrates automatic service discovery using Nacos as a registry 
 
 ## 1 Basic Configuration
 
-### 1.1 Add Dependencies
+### 1.1 Add Dependencies {#11-Add-Dependency}
 
 For Spring Boot applications, use the following spring-boot-starter:
 ```xml
@@ -47,7 +47,7 @@ Non-Spring Boot users can add dubbo and nacos-client dependencies:
 </dependencies>
 ```
 
-### 1.2 Nacos Version Mapping
+### 1.2 Nacos Version Mapping {#Nacos-Version}
 | Dubbo | Recommended Nacos Version | Nacos Compatibility Range |
 | --- | --- | --- |
 | 3.3.0 | 2.3.0 | 2.x |
@@ -75,7 +75,7 @@ or
 <dubbo:registry address="nacos://localhost:8848" />
 ```
 
-## 2 Advanced Configuration
+## 2 Advanced Configuration {#22-configure-and-enable-nacos}
 
 ### 2.1 Authentication
 
@@ -141,7 +141,7 @@ dubbo:
     parameters.register-consumer-url: true
 ```
 
-### 2.5 More Configurations
+### 2.5 More Configurations {#35-more-configurations]
 
 Parameter Name | Description | Default Value
 ---|---|---
@@ -204,5 +204,4 @@ The application-level service discovery "service name" is the application name.
 
 ### 3.4 Heartbeat Detection
 
-### 3.5
 

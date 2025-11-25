@@ -53,7 +53,7 @@ weight: 1
 {{% alert title="Dubbo3 相关的 Spring、Spring Boot 版本升级说明" color="warning" %}}
 Dubbo3 支持的 Spring、Spring Boot 版本兼容范围非常广：
 * 既支持 Spring 3.x ~ Spring 5.x 相关版本，同时也支持 Spring Boot 1.x ~ Spring Boot 2.x 版本。如果遇到应用无法升级高版本 Spring、Spring Boot 的情况下，可排掉 `dubbo-spring-boot-starter` 或 `dubbo` 中传递的高版本 Spring 依赖，指定项目可接受的 Spring 版本依赖即可。
-* Spring Boot 3.x 和 Spring 6 版本由于需要 JDK 17 及以上版本，请参考 [Dubbo Spring Boot 手册]() 了解详情。
+* Spring Boot 3.x 和 Spring 6 版本由于需要 JDK 17 及以上版本，请参考 `Dubbo Spring Boot 手册` 了解详情。
 {{% /alert %}}
 
 ### 步骤二：升级其它组件依赖
@@ -126,7 +126,7 @@ Dubbo3 支持的 Spring、Spring Boot 版本兼容范围非常广：
 	除了注册中心之外，如果您有用到 Dubbo 的其它特性并且依赖第三方组件支持此特性，则您需要根据具体情况升级相应的组件版本，以确保组件能配合 Dubbo3 工作。
 
 {{% alert title="查看依赖的三方组件版本" color="info" %}}
-目的是确认项目中的三方依赖可以与 Dubbo3 正常工作（保持API兼容性）。正常来说，Dubbo 应用中并不会有非常多的第三方组件依赖，所以只要按需确认即可，另外，您可以参考 [Dubbo3 版本依赖的组件版本]() 确认合适的组件版本。
+目的是确认项目中的三方依赖可以与 Dubbo3 正常工作（保持API兼容性）。正常来说，Dubbo 应用中并不会有非常多的第三方组件依赖，所以只要按需确认即可，另外，您可以参考 `Dubbo3 版本依赖的组件版本` 确认合适的组件版本。
 {{% /alert %}}
 
 ### 步骤三：兼容性检查
@@ -227,11 +227,11 @@ Dubbo 3 升级对于发布流程没有做特殊限制，按照正常业务发布
 
 ### 步骤二：升级其它组件依赖
 
-您需要升级注册中心（Nacos、Zookeeper或其它）等第三方组件，具体升级方法和目标版本请参考本文前面一节的 [2.7.x 版本升级到 Dubbo3](./#步骤二升级其它组件依赖) 中的详细说明，两者操作方法完全一样。
+您需要升级注册中心（Nacos、Zookeeper或其它）等第三方组件，具体升级方法和目标版本请参考本文前面一节的 `2.7.x 版本升级到 Dubbo3` 中的详细说明，两者操作方法完全一样。
 
 {{% alert title="请务必注意第三方组件的版本" color="info" %}}
 * 对于很多 Dubbo 2.6.x 及以下的老用户来说，可能用到的组件（如注册中心）都是比较老的版本，这时升级到 Dubbo3 之前请仔细分析一下都有哪些功能和核心依赖组件，以评估组件升级到的目标版本。
-* 对于部分 Zookeeper 用户而言，如果 Zookeeper 版本较老，建议先升级 Zookeeper Server 到 3.8.x 及以上版本，再使用 Dubbo3 的 `dubbo-zookeeper-curator5-spring-boot-starter` 管理依赖，如上文 [2.7.x 升级](./#步骤二升级其它组件依赖) 一节中所述。
+* 对于部分 Zookeeper 用户而言，如果 Zookeeper 版本较老，建议先升级 Zookeeper Server 到 3.8.x 及以上版本，再使用 Dubbo3 的 `dubbo-zookeeper-curator5-spring-boot-starter` 管理依赖，如上文 `2.7.x 升级` 一节中所述。
 {{% /alert %}}
 
 ### 步骤三：兼容性检查
@@ -302,4 +302,4 @@ Maven坐标升级比较直观，只需要修改相应的pom文件就可以了；
 
 ### 步骤四：上线验证
 
-参考本文前面一节的 [2.7.x 版本升级到 Dubbo3](./#步骤四上线验证) 中讲到的验证方法。
+参考本文前面一节的 `2.7.x 版本升级到 Dubbo3` 中讲到的验证方法。

@@ -19,7 +19,7 @@ content:
           name: '[Version Migration Guide](reference-manual/upgrades-and-compatibility/)'
     - Historical Version Documentation:
             - description: Historical Version Documentation
-              name: '[2.x and Earlier Version Documentation](/en/docsv2.7/)'
+              name: '[2.x and Earlier Version Documentation](/zh-cn/docsv2.7/)'
 description: Java SDK Manual
 hide_feedback: true
 hide_summary: true

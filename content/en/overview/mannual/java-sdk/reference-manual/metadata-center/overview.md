@@ -17,7 +17,7 @@ The Metadata Center provides access to two types of metadata in Dubbo:
 ## 1 Address Discovery Metadata
 Dubbo3 introduces the [application-level service discovery mechanism](/en/overview/core-features/service-discovery/) to address performance issues in heterogeneous microservice systems and large-scale cluster practices. Application-level service discovery will fully replace the interface-level service discovery of version 2.x. To maintain Dubbo's usability oriented towards services/interfaces and flexibility in service governance, Dubbo has built a metadata mechanism around application-level service discovery, specifically `interface-application mapping relations` and `interface configuration metadata`.
 
-### 1.1 Interface-Application Mapping Relation
+### 1.1 Interface-Application Mapping Relation {#11-interface---application-mapping-relationship}
 Dubbo has always been capable of precise address discovery, subscribing only to the list of services and addresses declared by the Consumer. Achieving precise address subscription in the application-level service discovery model is not easy, as the Dubbo Consumer only declares the list of interfaces to consume. Therefore, the Consumer needs to convert the interface into the Provider's application name for accurate service subscription.
 
 For this, Dubbo must maintain this mapping of `interface name -> application name` in the metadata center, reported actively by the provider during startup in Dubbo3.
@@ -110,7 +110,7 @@ Using Zookeeper as an example, the interface configuration metadata is stored in
 }
 ```
 
-## 2 Service Operation and Maintenance Metadata
+## 2 Service Operation and Maintenance Metadata {#2-service-operation-metadata}
 
 The service operation and maintenance metadata reported by Dubbo is typically used by various operation and maintenance systems, such as service testing, gateway data mapping, and service static dependency analysis.
 
@@ -213,4 +213,3 @@ dubbo.metadata-report.sync.report=false    ## optional, default is false
 > If the metadata address (dubbo.metadata-report.address) is not configured, it will judge whether the protocol of the registry center supports the metadata center. If supported, it will use the registry center's address as the metadata center.
 
 Please refer to [metadata-report](../../spi/description/metadata-report/) for details on how to extend custom third-party implementations.
-

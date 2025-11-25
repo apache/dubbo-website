@@ -16,9 +16,7 @@ weight: 2
 
 ## 快速运行示例
 ### 下载示例源码
-我们在 <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
-
-你可以 <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">下载示例zip包并解压</a>，或者克隆仓库：
+我们在 [apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples/) 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples
@@ -67,7 +65,7 @@ Greeting: Hello world
 以上就是一个完整的 dubbo-go 微服务应用工作流程。
 
 ## 源码讲解
-关于 `dubbo-go-samples/registry/nacos` 示例源码，包括服务定义、代码生成、server/client 启动等均与上一篇 [rpc server & rpc client]() 类似，请点击以上链接查看具体解读。
+关于 `dubbo-go-samples/registry/nacos` 示例源码，包括服务定义、代码生成、server/client 启动等均与上一篇 `rpc server & rpc client` 类似，请点击以上链接查看具体解读。
 
 **开发微服务最大的不同点在于：应用中增加了关于注册中心的配置，如下所示（以 server.go 为例）：**
 
@@ -115,7 +113,7 @@ ins, err := dubbo.NewInstance(
 
 {{% alert title="关于 dubbo.Insance 说明" color="info" %}}
 * 在开发 dubbo 微服务应用时，我们推荐使用 `dubbo.Instance` 来设置一些全局性的服务治理能力，如注册中心、协议、应用名、tracing、配置中心等。
-* `ins.NewServer()` 可以创建多个，通常当你需要在多个端口 [发布多个协议]() 时才需要这么做。
+* `ins.NewServer()` 可以创建多个，通常当你需要在多个端口 `发布多个协议` 时才需要这么做。
 {{% /alert %}}
 
 如果你要为应用添加更多服务治理能力，请参考以下内容：
@@ -129,7 +127,7 @@ ins, err := dubbo.NewInstance(
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/rpc/streaming" >}}'>服务发现与负载均衡</a>
+                     <a href='{{< relref "../tutorial/service-discovery" >}}'>服务发现与负载均衡</a>
                 </h4>
                 <p>更多关于 Nacos、Zookeeper 等服务发现的使用方式，负载均衡策略配置等。</p>
             </div>
@@ -139,7 +137,7 @@ ins, err := dubbo.NewInstance(
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                     <a href='{{< relref "../tutorial/service-discovery" >}}'>流量管控</a>
+                     <a href='{{< relref "../tutorial/traffic" >}}'>流量管控</a>
                 </h4>
                 <p>学习如何实现按比例流量分配、金丝雀发布、调整超时时间、流量灰度、服务降级等流量管控。</p>
             </div>
@@ -149,7 +147,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>监控服务状态</a>
+					 <a href='{{< relref "../tutorial/observability" >}}'>监控服务状态</a>
 				</h4>
 				<p>开启 Metrics 采集，通过 Prometheus、Grafana 可视化查看应用、服务、示例状态。</p>
 			</div>
@@ -159,7 +157,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>全链路追踪</a>
+					 <a href='{{< relref "../tutorial/observability" >}}'>全链路追踪</a>
 				</h4>
 				<p>开启 OpenTelemetry 全链路追踪。</p>
 			</div>
@@ -169,7 +167,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>网关 HTTP 接入</a>
+					 <a href='{{< relref "../tutorial/gateway" >}}'>网关 HTTP 接入</a>
 				</h4>
 				<p>如何使用 Higress、Nginx 等网关产品，将前端 http 流量（北向流量）接入后端 dubbo-go 微服务集群。</p>
 			</div>
@@ -179,7 +177,7 @@ ins, err := dubbo.NewInstance(
 		<div class="h-100 card shadow" href="#">
 			<div class="card-body">
 				<h4 class="card-title">
-					 <a href='{{< relref "../tutorial/service-discovery" >}}'>分布式事务</a>
+					 <a href='{{< relref "../tutorial/transaction" >}}'>分布式事务</a>
 				</h4>
 				<p>使用 Apache Seata 作为分布式事务解决方案，解决分布式数据一致性问题。</p>
 			</div>

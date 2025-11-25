@@ -105,8 +105,8 @@ triple 协议相关实现源码：
 
 相关源码仓库：
 
-- Dubbo Java 源码：[https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds)
-- Dubbo Go 源码：[https://github.com/apache/dubbo-go/tree/main/xds](https://github.com/apache/dubbo-go/tree/main/xds)
+- Dubbo Java 源码：[dubbo-xds](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-xds)
+- Dubbo Go 源码：[xds](https://github.com/apache/dubbo-go/tree/release-3.0/xds)
 
 ##### 3.2.2 控制面开发指南：
 控制面的 xDS Server 将由官方社区提供基础实现，选手们可关注安全相关部分的设计与实现。
@@ -151,9 +151,9 @@ triple 协议相关实现源码：
 #### 4.2 赛题说明
 本赛题官方已经提供了后端适配层的参考实现，同时给出了部分前端交互设计初稿。选手完全可以此为基础进行开发设计，具体评分标准参见官方报名渠道说明。
 
-1. 后端： [https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin](https://github.com/apache/dubbo-kubernetes/tree/master/pkg/admin)
+1. 后端： [admin](https://github.com/apache/dubbo-kubernetes/tree/ospp-2024/pkg/admin)
 
-2. 前端代码框架：https://github.com/apache/dubbo-kubernetes/tree/master/ui-vue3
+2. 前端代码框架：[ui-vue3](https://github.com/apache/dubbo-kubernetes/tree/ospp-2024/ui-vue3)
 
 #### 4.3 参考资料
 

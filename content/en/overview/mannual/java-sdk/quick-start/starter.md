@@ -81,7 +81,7 @@ Open pom.xml, and you can see the core dependencies related to Dubbo in the samp
     </dependencies>
 ```
 
-Among them, `dubbo-spring-boot-starter` and `dubbo-zookeeper-spring-boot-starter` introduce the dependencies related to the Dubbo kernel framework and Zookeeper client respectively. More content can be viewed in the [list of Spring Boot Starters supported by Dubbo]().
+Among them, `dubbo-spring-boot-starter` and `dubbo-zookeeper-spring-boot-starter` introduce the dependencies related to the Dubbo kernel framework and Zookeeper client respectively. More content can be viewed in the `list of Spring Boot Starters supported by Dubbo`.
 
 ### Service Definition
 
@@ -173,6 +173,6 @@ mvn clean deploy
 ```
 
 ## More Content
-- Next, you can [quickly deploy Dubbo applications to microservice clusters]()
-- Dubbo has built-in capabilities such as service discovery, load balancing, and traffic control rules. Learn [how to configure more service governance capabilities]()
+- Next, you can `quickly deploy Dubbo applications to microservice clusters`
+- Dubbo has built-in capabilities such as service discovery, load balancing, and traffic control rules. Learn `how to configure more service governance capabilities`
 

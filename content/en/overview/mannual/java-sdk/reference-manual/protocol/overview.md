@@ -37,12 +37,12 @@ Here is the specific development, configuration, and runtime information for the
 ## Multi-Protocol Extensions
 Below are the extension protocol implementations currently provided by the Dubbo official ecosystem. For information on extending more custom protocols, please refer to [SPI extension manual](/en/overview/mannual/java-sdk/reference-manual/spi/) or [usage tutorial - protocol extension](/en/overview/mannual/java-sdk/tasks/extensibility/protocol/) .
 
-| Protocol | Configuration Value | Description |
-| --- | --- | --- |
-| Hessian | hessian | RPC communication protocol defined by Hessian, see [Hessian Protocol](../others/hessian/) for details |
-| Spring HTTP | http | Private protocol based on HTTP defined by Spring, see [Hessian Protocol](../others/hessian/) for details |
+| Protocol | Configuration Value | Description                                                                                                                   |
+| --- | --- |-------------------------------------------------------------------------------------------------------------------------------|
+| Hessian | hessian | RPC communication protocol defined by Hessian, see [Hessian Protocol](../others/hessian/) for details                         |
+| Spring HTTP | http | Private protocol based on HTTP defined by Spring, see [Hessian Protocol](../others/hessian/) for details                      |
 | Apache Thrift | thrift | Thrift protocol known for its high performance and multilingual support, see [Thrift Protocol](../others/thrift/) for details |
-| JsonRPC | jsonrpc | See [JsonRPC](../others/jsonrpc/) for details |
-| RMI | rmi | See [RMI Protocol](../others/rmi/) for details |
-| WebService | webservice | See [WebService Protocol](../others/webservice/) for details |
+| JsonRPC | jsonrpc | See `WIP JsonRPC` for details                                                                                                 |
+| RMI | rmi | See [RMI Protocol](../others/rmi/) for details                                                                                |
+| WebService | webservice | See [WebService Protocol](../others/webservice/) for details                                                                  |
 

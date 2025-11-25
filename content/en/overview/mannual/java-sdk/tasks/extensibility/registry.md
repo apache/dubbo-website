@@ -12,7 +12,7 @@ weight: 3
 
 In the [Service Discovery](/en/overview/mannual/java-sdk/tasks/protocols/) chapter, we learned about the usage and working principles of several core built-in registry implementations in Dubbo, such as `Nacos` and `Zookeeper`. This article explains how to provide a custom registry implementation by extending the `org.apache.dubbo.registry.client.ServiceDiscovery` and `org.apache.dubbo.registry.nacos.NacosServiceDiscoveryFactory` SPI.
 
-For the complete source code of this example, please refer to [dubbo-registry-etcd](https://github.com/apache/dubbo-spi-extensions/tree/3.2.0/dubbo-registry-extensions/dubbo-registry-etcd3). In addition to this example, many registry extension implementations in the core repository apache/dubbo and the extension library apache/dubbo-spi-extensions can serve as references for extensions:
+For the complete source code of this example, please refer to [dubbo-registry-etcd](https://github.com/apache/dubbo-spi-extensions/tree/master/dubbo-configcenter-extensions/dubbo-configcenter-etcd). In addition to this example, many registry extension implementations in the core repository apache/dubbo and the extension library apache/dubbo-spi-extensions can serve as references for extensions:
 
 ```properties
 # Common registry implementations supported by Dubbo

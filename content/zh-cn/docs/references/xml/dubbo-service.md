@@ -10,7 +10,7 @@ weight: 1
 
 
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties/#service)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/reference-manual/config/properties)。
 {{% /pageinfo %}}
 
 服务提供者暴露服务配置。对应的配置类：`org.apache.dubbo.config.ServiceConfig`

@@ -65,10 +65,10 @@ Proxy 模式很好的实现了治理能力与有很多优势，如平滑升级�
 * 适用于几乎所有的部署环境
 
 ## 示例任务
-了解了足够多的原理知识，我们推荐你访问如下 [示例](../../tasks/mesh) 进行动手实践。
+了解了足够多的原理知识，我们推荐你访问如下 [示例](../../mannual/java-sdk/tasks/mesh) 进行动手实践。
 
 ## 可视化
-推荐使用 [Dubbo Admin](../../tasks/deploy) 作为您 Dubbo 集群的可视化控制台，它兼容所有 Kubernetes、Mesh 和非 Mesh 架构的部署。
+推荐使用 [Dubbo Admin](../../mannual/java-sdk/tasks/deploy) 作为您 Dubbo 集群的可视化控制台，它兼容所有 Kubernetes、Mesh 和非 Mesh 架构的部署。
 
 除此之外，你也可以使用 [Istio 官方推荐的可视化工具](https://istio.io/latest/docs/tasks/observability/kiali/) 来管理您的 Dubbo Mesh 集群。
 

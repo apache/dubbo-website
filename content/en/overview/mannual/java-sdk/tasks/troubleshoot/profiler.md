@@ -184,6 +184,6 @@ Start time: 285965612316294
                                 +-[ Offset: 1.558545ms; Usage: 804.276436ms, 99% ] Receive request. Server biz impl invoke begin., dubbo version: 3.0.10-SNAPSHOT, current host: xx.xx.xx.xx
 ```
 {{% alert title="Note" color="warning" %}}
-For empty logs caused by log framework mismatches, refer to [Log Framework Adaptation and Runtime Management](../../others/logger-management/) for dynamically modifying the log output framework.
+For empty logs caused by log framework mismatches, refer to [Log Framework Adaptation and Runtime Management](/en/overview/mannual/java-sdk/reference-manual/qos/introduction/logger-management) for dynamically modifying the log output framework.
 {{% /alert %}}
 

@@ -14,10 +14,10 @@ The following diagram illustrates a typical Dubbo microservice deployment archit
 <img src="/imgs/v3/manual/java/tutorial/kubernetes/kubernetes.png" style="max-width:650px;height:auto;" />
 
 ## Install Nacos
-Please refer to the following documentation for how to [install Nacos]() locally.
+Please refer to the following documentation for how to `install Nacos` locally.
 
 ## Deploy Application
-We will continue to use the project in [Quick Start]() as an example to demonstrate the detailed steps for application packaging and deployment.
+We will continue to use the project in `Quick Start` as an example to demonstrate the detailed steps for application packaging and deployment.
 
 Clone the sample project locally:
 ```shell
@@ -107,7 +107,7 @@ Visit `http://xxx` to view service deployment details.
 
 ### Graceful Online and Offline
 In the case of using a traditional registration center, we need to control the timing of when instances are published to the registration center and when instances are removed from the registration center to achieve a graceful online and offline:
-1. In the online phase, control the timing of instance registration to the registration center through the [delayed release]() mechanism and ensure that traffic is gradually forwarded to the new nodes through enabling [consumer preheating]().
+1. In the online phase, control the timing of instance registration to the registration center through the `delayed release` mechanism and ensure that traffic is gradually forwarded to the new nodes through enabling `consumer preheating`.
 2. In the offline phase, configure `prestop` to ensure that instance registration information is first removed from the registration center, and then enter the process of destruction.
 
 Before going offline, it is recommended to call the following http port to remove the instance from the registration center first, then attempt to stop the process.

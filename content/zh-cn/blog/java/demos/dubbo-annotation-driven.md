@@ -39,7 +39,7 @@ description: >
 
 ##### 2.  `@Service` Bean 不支持 Spring AOP
 
-同时，使用 `<dubbo:annotation> ` 方式扫描后的Dubbo `@Service` ，在 Spring 代理方面存在问题，如 GitHub 上的 issue https://github.com/alibaba/dubbo/issues/794：
+同时，使用 `<dubbo:annotation> ` 方式扫描后的Dubbo `@Service` ，在 Spring 代理方面存在问题，如 GitHub 上的 [issue](https://github.com/apache/dubbo/issues/794)：
 
 > 关于dubbo @Service注解生成ServiceBean时, interface获取成spring 的代理对象的bug
 >

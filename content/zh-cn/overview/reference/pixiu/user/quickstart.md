@@ -25,7 +25,7 @@ Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后�
 
 ### 案例
 
-案例路径请查看 `/samples/dubbogo/simple/resolve`
+案例路径请查看 `/samples/http/simple/http-http`
 
 #### Dubbo Server 实现和启动
 

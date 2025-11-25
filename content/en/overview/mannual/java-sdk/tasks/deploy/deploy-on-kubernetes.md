@@ -26,7 +26,7 @@ $ dubboctl install --profile=demo
 {{% /alert %}}
 
 ## Deploy Application
-We still take the project in [Quick Start]() as an example to demonstrate the specific steps for packaging and deploying the application.
+We still take the project in `Quick Start` as an example to demonstrate the specific steps for packaging and deploying the application.
 
 First, clone the sample project locally:
 ```shell
@@ -72,7 +72,7 @@ Access `http://xxx` to view the service deployment details.
 
 ### Graceful Online/Offline
 As shown in the architecture diagram above, we still use Nacos as the registry. Therefore, similar to traditional Linux deployment models, the timing of publishing instances to the registry and removing instances from the registry is key to achieving graceful online/offline:
-1. Online phase, control when instances register to the registry using the [delayed publishing]() mechanism, and ensure traffic is gradually directed to new nodes by enabling [consumer-side warming]().
+1. Online phase, control when instances register to the registry using the `delayed publishing` mechanism, and ensure traffic is gradually directed to new nodes by enabling `consumer-side warming`.
 2. Offline phase, configure `prestop` to ensure instance registration information is removed from the registry first, before proceeding to the process destruction phase.
 
 Example configuration for gracefully offline removing instances:

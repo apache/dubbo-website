@@ -87,6 +87,10 @@ sub   rsa4096/D3D6984B 2018-04-26
 $ gpg --keyserver pgpkeys.mit.edu --send-key 28681CB1
 # 其中，pgpkeys.mit.edu为随意挑选的keyserver，keyserver列表为：https://sks-keyservers.net/status/，为相互之间是自动同步的，选任意一个都可以。
 ```
+
+PS: 上文bash中两个server地址均无法打开，可以使用直接使用网页上传:
+`https://keyserver.ubuntu.com/`
+
 如果有多个 public key，设置默认 key。修改`~/.gnupg/gpg.conf`
 
 ```sh
@@ -189,8 +193,7 @@ $ mvn deploy -Prelease -DskipTests
 所有被deploy到远程[maven仓库](http://repository.apache.org)的Artifacts都会处于staging状态
 
 #### 注意点
-
-- 在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，可以重新开始执行。
+- 在deploy执行过程中，有可能因为网络等原因被中断，如果是这样，会有文件分散在各个包中，需要删除nexus上的包重新开始执行。
 - deploy执行到maven仓库的时候，请确认下包的总量是否正确。多次出现了包丢失的情况，特别是dubbo-parent包。
 
 
@@ -405,6 +408,8 @@ The Apache Dubbo Team
 ```
 
 ## 正式发布
+
+NOTICE:正式发布中的1，2，3步必须PMC才能执行，这是Apache的要求，因为PMC才有项目(Release)的管理权
 
 1. 将[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包添加到[release](https://dist.apache.org/repos/dist/release/dubbo)目录下，KEYS有更新的，也需要同步更新。
 2. 删除[dev](https://dist.apache.org/repos/dist/dev/dubbo)目录下的发布包

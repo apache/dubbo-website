@@ -30,7 +30,7 @@ Admin 控制台可视化展示了集群中的应用、服务、实例及依赖�
 
 ![Admin 效果图](/imgs/v3/feature/observability/admin.jpg)
 
-* [Admin 部署与效果演示](../../tasks/observability/admin/)
+* [Admin 部署与效果演示](../../mannual/java-sdk/tasks/observability)
 
 ## Metrics
 Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数，失败原因统计等在内的核心服务指标，同时，为了更好的监测服务运行状态，Dubbo 还提供了对核心组件状态的监控，如线程池数量、服务健康状态等。
@@ -39,8 +39,8 @@ Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数�
 
 ![Grafana 效果图](/imgs/v3/feature/observability/provider-stat.png)
 
-* [使用 Grafana 可视化展示 Metrics 指标](../../tasks/observability/grafana/)
-* [如何从 Prometheus 查询特定 Metrics 指标](../../tasks/observability/prometheus/)
+* [使用 Grafana 可视化展示 Metrics 指标](../../mannual/java-sdk/tasks/observability/grafana)
+* [如何从 Prometheus 查询特定 Metrics 指标](../../mannual/java-sdk/tasks/observability/prometheus)
 
 ## Tracing
 全链路追踪对于监测分布式系统运行状态具有非常重要的价值，Dubbo 通过 Filter 拦截器实现了请求运行时的埋点跟踪，通过将跟踪数据导出到一些主流实现如 Zipkin、Skywalking、Jaeger 等，可以实现全链路跟踪数据的分析与可视化展示。
@@ -49,12 +49,12 @@ Dubbo 运行时统计了包括 qps、rt、调用总数、成功数、失败数�
 
 > 未来我们计划支持通过 Dubbo Admin 等治理平台动态调整 Dubbo 的链路追踪采样率。
 
-* [基于 Skywalking 实现全链路追踪](../../tasks/observability/tracing/skywalking/)
-* [基于 Zipkin 实现全链路追踪](../../tasks/observability/tracing/zipkin/)
-* [通过链路追踪关联日志系统](../../mannual/java-sdk/advanced-features-and-usage/observability/tracing#关联日志)
+* [基于 Skywalking 实现全链路追踪](../../mannual/java-sdk/tasks/observability/tracing/skywalking)
+* [基于 Zipkin 实现全链路追踪](../../mannual/java-sdk/tasks/observability/tracing/zipkin)
+* [通过链路追踪关联日志系统](../../mannual/java-sdk/tasks/observability/tracing)
 
 ## Logging
 访问日志可以帮助分析系统的流量情况，在有些场景下，开启访问日志对于排查问题也非常有帮助。
 
-* [开启 Access Log](../../mannual/java-sdk/advanced-features-and-usage/service/accesslog/)
-* [你还在运行态开启 Access Log](../../tasks/traffic-management/accesslog/)
+* [开启 Access Log](/zh-cn/overview/mannual/java-sdk/tasks/traffic-management/accesslog)
+* [你还在运行态开启 Access Log](/zh-cn/overview/mannual/java-sdk/tasks/traffic-management/accesslog)

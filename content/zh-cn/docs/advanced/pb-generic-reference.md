@@ -10,7 +10,7 @@ weight: 17
 
 
 
-{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅[最新版本](/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/generic-reference/#protobuf-对象泛化调用)。
+{{% pageinfo %}} 此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅`最新版本`。
 {{% /pageinfo %}}
 
 泛化接口调用方式主要用于客户端没有 API 接口及模型类元的情况，参考 [泛化调用](../generic-reference)。

@@ -13,7 +13,7 @@ weight: 11
 作为一款与应用开发紧密相关的微服务框架，同时旨在为微服务集群提供企业级服务治理能力，Dubbo 还提供了很多高级功能，涵盖服务调用行为控制、服务诊断与调优、服务治理等。
 
 多种语言 sdk 在功能实现、配置方式上会略有差异，具体功能列表和使用方式可参考如下文档：
-* [Java](../../mannual/java-sdk/advanced-features-and-usage/)
+* [Java](../../mannual/java-sdk/)
 * [Golang](../../mannual/golang-sdk/tutorial/)
 
 ## 控制服务调用行为

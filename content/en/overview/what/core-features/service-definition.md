@@ -20,7 +20,7 @@ Dubbo addresses a series of challenges from development, deployment to governanc
 Next, we will explain the basic steps of Dubbo application development using a Java-based Spring Boot project as an example. The entire process is very intuitive and simple, and the development process for other languages is similar.
 
 ### Create Project
-<a href="https://start.dubbo.apache.org/bootstrap.html" target="_blank">Dubbo Microservice Project Scaffolding</a> (supports browser pages, command line, and IDE) can be used to quickly create microservice projects. You only need to tell the scaffolding the desired features or components, and the scaffolding can help developers generate microservice projects with the necessary dependencies. For more explanations on how to use the scaffolding, please refer to the task module [Generate Project Scaffolding through Templates](../../tasks/develop/template/)
+<a href="https://start.dubbo.apache.org/bootstrap.html" target="_blank">Dubbo Microservice Project Scaffolding</a> (supports browser pages, command line, and IDE) can be used to quickly create microservice projects. You only need to tell the scaffolding the desired features or components, and the scaffolding can help developers generate microservice projects with the necessary dependencies. For more explanations on how to use the scaffolding, please refer to the task module `Generate Project Scaffolding through Templates`
 
 ![Scaffolding Example](/imgs/v3/advantages/initializer.png)
 
@@ -88,17 +88,17 @@ public class Consumer {
 ```
 
 The above is a procedural explanation of Dubbo microservice development. For detailed guidance steps in actual development, please refer to:
-* [Java Microservice Development Quick Start](../../quickstart/java)
-* [Go Microservice Development Quick Start](../../quickstart/go)
-* [Rust Microservice Development Quick Start](../../quickstart/rust)
+* [Java Microservice Development Quick Start](../../mannual/java-sdk/quick-start)
+* [Go Microservice Development Quick Start](../../mannual/golang-sdk/quickstart)
+* [Rust Microservice Development Quick Start](../../mannual/rust-sdk/quick-start)
 * [Node.js Microservice Development Quick Start](https://github.com/apache/dubbo-js)
 
 ## Deployment
 Dubbo native services can be packaged and deployed to cloud-native infrastructures and microservice architectures such as Docker containers, Kubernetes, and service meshes.
 
 For deployment examples in different environments, refer to:
-* [Deploy Dubbo Services to Docker Containers](../../tasks/deploy/deploy-on-docker)
-* [Deploy Dubbo Services to Kubernetes](../../tasks/deploy/deploy-on-k8s-docker)
+* `Deploy Dubbo Services to Docker Containers`
+* `Deploy Dubbo Services to Kubernetes`
 
 ## Governance
 For service governance, most applications only need to add the following configuration, and Dubbo applications will have address discovery and load balancing capabilities.
@@ -109,7 +109,7 @@ dubbo:
     address: zookeeper://127.0.0.1:2181
 ```
 
-Deploy and open the [Dubbo Admin Console](../../tasks/deploy), where you can see the service deployment and call data of the cluster.
+Deploy and open the `Dubbo Admin Console`, where you can see the service deployment and call data of the cluster.
 
 ![Admin](/imgs/v3/what/admin.png)
 

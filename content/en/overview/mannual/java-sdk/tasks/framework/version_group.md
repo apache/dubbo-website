@@ -128,7 +128,7 @@ After starting the Dubbo service, the same service name with different groups ca
 
 #### Service Consumer Side (XML Configuration)
 
-Using the <dubbo:reference/> annotation, add the group parameter
+Using the `dubbo:reference`annotation, add the group parameter
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

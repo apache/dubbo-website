@@ -51,7 +51,7 @@ kubectl -n dubbo-demo get deployments
 ## 查看 Grafana 可视化面板
 
 示例程序启动后会自动模拟服务调用，只需等待一会能在 Grafana 中可视化的看到 Metrics 指标。
-1. 如果是通过 [Dubbo 控制面](../../../reference/admin/architecture/) 安装的 Grafana，则可以访问 Admin 控制台并在左侧菜单中找到 Grafana 可视化监控入口
+1. 如果是通过 `Dubbo 控制面` 安装的 Grafana，则可以访问 Admin 控制台并在左侧菜单中找到 Grafana 可视化监控入口
 
 2. 如果是独立安装的 Grafana 组件，则可以直接访问 Grafana 可视化控制台地址：
 

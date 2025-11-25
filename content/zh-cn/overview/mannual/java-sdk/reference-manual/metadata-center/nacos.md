@@ -51,11 +51,11 @@ MetadataReportConfig metadataConfig = new MetadataReportConfig();
 metadataConfig.setAddress("nacos://127.0.0.1:8848");
 ```
 
-`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../registry/nacos/#22-配置并启用-nacos)
+`address` 格式请参考 [Nacos 注册中心 - 启用配置](../../reference-manual/registry/nacos)
 
 ## 3 高级配置
 
-完整配置参数请参考 [metadata-report-config](../../config/properties/#metadata-report-config)。
+完整配置参数请参考 [metadata-report-config](../../reference-manual/config/properties#dubbo.metadata-report)。
 
 ## 4 工作原理
 

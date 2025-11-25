@@ -21,9 +21,9 @@ Depending on the specific deployment of the service, the upper limit of traffic 
 
 The problem solved by rate limiting and its working mechanism are relatively easy to understand. The difficulty lies in determining the maximum traffic that the service can handle.
 * One mode is for the user to preset a fixed rate limit value. For example, Dubbo achieves rate limiting capabilities by integrating products like Sentinel.
-    * [Dubbo Sentinel Rate Limiting](../../../tasks/rate-limit/sentinel/)
+    * [Dubbo Sentinel Rate Limiting](/en/overview/mannual/java-sdk/tasks/rate-limit/sentinel/)
 * Another way is for the Dubbo framework to automatically perform rate limiting based on system or cluster load conditions. This is more flexible and convenient compared to the user presetting the rate limit value. Dubbo currently has a built-in adaptive rate limiting mode. For details, see:
-    * [Java Adaptive Rate Limiting Usage](../../../mannual/java-sdk/advanced-features-and-usage/performance/adaptive-concurrency-control/)
+    * [Java Adaptive Rate Limiting Usage](/en/overview/mannual/java-sdk/tasks/rate-limit/adaptive-concurrency-control)
     * [Go Adaptive Rate Limiting Usage](../../../reference/proposals/heuristic-flow-control/)
     * [Adaptive Rate Limiting Design Principles](../../../reference/proposals/heuristic-flow-control/)
 
@@ -38,7 +38,7 @@ As shown in the figure above, Dubbo Consumer relies on three downstream Dubbo se
 
 Dubbo has achieved service circuit breaking and degradation capabilities by integrating mainstream frameworks in the industry.
 
-* [Sentinel](../../../tasks/rate-limit/sentinel/)
-* [Hystrix](../../../tasks/rate-limit/hystrix/)
-* [Resilience4J](../../../tasks/rate-limit/resilience4j/)
+* [Sentinel](/en/overview/mannual/java-sdk/tasks/rate-limit/sentinel/)
+* `Hystrix`
+* `Resilience4J`
 
