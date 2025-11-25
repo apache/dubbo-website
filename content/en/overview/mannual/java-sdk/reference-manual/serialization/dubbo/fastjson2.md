@@ -15,14 +15,14 @@ weight: 3
 
 `FASTJSON v2` is an important upgrade of the `FASTJSON` project, aimed at providing a high-performance `JSON` library for the next decade. With the same `API`,
 
-- Supports both `JSON/JSONB` protocols, with [`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn) as a first-class citizen.
+- Supports both `JSON/JSONB` protocols, with [`JSONPath`](https://alibaba.github.io/fastjson2) as a first-class citizen.
 - Supports full parsing and partial parsing.
 - Supports `Java` server-side, client-side `Android`, and big data scenarios.
-- Supports `Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
-- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+- Supports `Kotlin` [https://alibaba.github.io/fastjson2](https://alibaba.github.io/fastjson2)
+- Supports `JSON Schema` [https://alibaba.github.io/fastjson2](https://alibaba.github.io/fastjson2)
 - Supports `Android 8+`
 - Supports `Graal Native-Image`
-- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+- Supports `JSON Schema` [https://alibaba.github.io/fastjson2](https://alibaba.github.io/fastjson2)
 
 ## 2 Usage
 
