@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>AI相关功能 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/</link><description>Recent content in AI相关功能 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/index.xml" rel="self" type="application/rss+xml"/><item><title>配置 MCP</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/mcp/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/mcp/</guid><description>&lt;h2 id="mcp-model-context-protocol-网关配置"&gt;MCP (Model Context Protocol) 网关配置&lt;/h2&gt;
+&lt;p&gt;本文档解释了如何在您的网关中配置 MCP (Model Context Protocol) 过滤器，使您能够安全地将后端 HTTP API 暴露为可供 AI Agent 调用的&amp;quot;工具&amp;quot;。&lt;/p&gt;
+&lt;h3 id="简介"&gt;简介&lt;/h3&gt;
+&lt;p&gt;MCP (Model Context Protocol) 是一个智能桥梁，连接 AI Agent 与您现有的后端服务。它将一个简单、统一的协议动态转换为标准的 HTTP 请求，允许 Agent 与您的 API 进行交互，就好像它们是本地函数或工具一样。这种方法简化了 Agent 的开发，并为安全性、控制和可观察性提供了一个中心化的管理点。&lt;/p&gt;
+&lt;p&gt;设置 MCP 端点主要涉及两个过滤器：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;dgp.filter.mcp.mcpserver&lt;/code&gt;&lt;/strong&gt;: 核心的 MCP 服务器过滤器，用于定义服务器的身份并将后端 API 暴露为工具。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;dgp.filter.http.auth.mcp&lt;/code&gt;&lt;/strong&gt;: 一个可选但推荐使用的安全过滤器，它使用 OAuth 2.0 和基于 JWT 的授权来保护 MCP 端点。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h3 id="mcp-服务器过滤器-dgpfiltermcpmcpserver-配置"&gt;MCP 服务器过滤器 (&lt;code&gt;dgp.filter.mcp.mcpserver&lt;/code&gt;) 配置&lt;/h3&gt;
+&lt;p&gt;此过滤器是 MCP 网关的核心。它负责定义哪些工具可用，以及它们如何映射到您的后端 HTTP 服务。&lt;/p&gt;
+&lt;h4 id="服务器信息-server_info"&gt;服务器信息 (&lt;code&gt;server_info&lt;/code&gt;)&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;server_info&lt;/code&gt; 块提供了有关您的 MCP 服务器的元数据，这对于服务发现和诊断非常有用。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;server_info&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;MCP OAuth 示例服务器&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;version&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;description&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;一个用于工具演示的受 OAuth 保护的 MCP 服务器&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;instructions&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;使用读/写令牌通过 MCP 与模拟服务器 API 进行交互&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;name&lt;/code&gt; (&lt;code&gt;string&lt;/code&gt;)&lt;/strong&gt;: MCP 服务器的显示名称。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;version&lt;/code&gt; (&lt;code&gt;string&lt;/code&gt;)&lt;/strong&gt;: 服务器的版本。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;description&lt;/code&gt; (&lt;code&gt;string&lt;/code&gt;)&lt;/strong&gt;: 服务器用途的简要描述。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;instructions&lt;/code&gt; (&lt;code&gt;string&lt;/code&gt;)&lt;/strong&gt;: 为客户端或开发者提供的关于如何与暴露的工具进行交互的说明。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="工具配置-tools"&gt;工具配置 (&lt;code&gt;tools&lt;/code&gt;)&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;tools&lt;/code&gt; 部分是一个数组，其中每个项目定义了 MCP 网关暴露的单个工具。每个工具对应一个特定的后端 HTTP API 端点。&lt;/p&gt;</description></item><item><title>配置上游 endpoint</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/endpoint/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/endpoint/</guid><description>&lt;h2 id="llm-网关-endpoint-配置"&gt;LLM 网关 endpoint 配置&lt;/h2&gt;
+&lt;p&gt;本文档解释了如何在您的网关路由配置中为大语言模型 (LLM) 配置上游 endpoint。&lt;/p&gt;
+&lt;h3 id="endpoint-结构"&gt;endpoint 结构&lt;/h3&gt;
+&lt;p&gt;集群中的每个 endpoint 都由一个 &lt;code&gt;id&lt;/code&gt; 定义，并且可以包含一个 &lt;code&gt;llm_meta&lt;/code&gt; 块用于自定义行为。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;clusters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;my_llm_cluster&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;endpoints&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;id&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;provider-1-main&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;socket_address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;domains&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - api.deepseek.com
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;llm_meta&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;# ... 其他特定于 LLM 的配置在此处 ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;id&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;provider-2-fallback&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;socket_address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;domains&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - api.openai.com/v1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;llm_meta&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;# ... 其他特定于 LLM 的配置在此处 ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="llm_meta-配置字段"&gt;&lt;code&gt;llm_meta&lt;/code&gt; 配置字段&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;llm_meta&lt;/code&gt; 块包含所有与网关应如何处理此 LLM endpoint 相关的特定配置。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;fallback&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;类型&lt;/strong&gt;: &lt;code&gt;boolean&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;描述&lt;/strong&gt;: 决定如果在此endpoint上的所有重试尝试都失败后，网关是否应继续处理集群中的下一个 endpoint。
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;true&lt;/code&gt;: 如果此endpoint失败，网关将尝试下一个可用的 endpoint。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;false&lt;/code&gt;: 如果此endpoint失败，则处理停止，并将最后一个错误返回给客户端。对于 fallback 链中的最后一个 endpoint ，此值应设置为 &lt;code&gt;false&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;api_key&lt;/code&gt;&lt;/p&gt;</description></item><item><title>注册服务到网关</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/ai/registry/</guid><description>&lt;h2 id="llm-服务发现与注册"&gt;LLM 服务发现与注册&lt;/h2&gt;
+&lt;p&gt;本文档旨在指导 LLM 服务提供商如何通过 Nacos 注册中心，将其服务实例动态地注册到 LLM 网关。通过遵循这些准则，网关将能够自动发现您的服务，并根据您提供的元数据（metadata）应用相应的路由、重试和 fallback 策略。&lt;/p&gt;
+&lt;h3 id="注册机制概述"&gt;注册机制概述&lt;/h3&gt;
+&lt;p&gt;服务发现的核心机制是：您的 LLM 服务作为一个&lt;strong&gt;Nacos 实例&lt;/strong&gt;进行注册，并在注册时提供一组特定的&lt;strong&gt;元数据&lt;/strong&gt;。LLM 网关会监听 Nacos 中的服务变更，读取这些元数据，并将其动态地转换为一个功能齐全的网关 &lt;code&gt;endpoint&lt;/code&gt; 配置。&lt;/p&gt;
+&lt;p&gt;一个基本的 Nacos 注册请求包含以下关键信息：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;ServiceName&lt;/code&gt;&lt;/strong&gt;: 您的服务集合的名称 (例如, &lt;code&gt;deepseek-service&lt;/code&gt;)。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;Ip&lt;/code&gt; &amp;amp; &lt;code&gt;Port&lt;/code&gt;&lt;/strong&gt;: 您的服务实例监听流量的网络地址。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;Metadata&lt;/code&gt;&lt;/strong&gt;: 一个键值对集合，&lt;strong&gt;这是配置所有网关行为的关键&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="metadata-配置字段"&gt;&lt;code&gt;metadata&lt;/code&gt; 配置字段&lt;/h3&gt;
+&lt;p&gt;所有网关的特定配置都通过 Nacos 实例的 &lt;code&gt;metadata&lt;/code&gt; 字段进行传递。以下是所有支持的 &lt;code&gt;metadata&lt;/code&gt; 键及其说明。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cluster&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;类型&lt;/strong&gt;: &lt;code&gt;string&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;必需&lt;/strong&gt;: 是&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;描述&lt;/strong&gt;: 定义此 endpoint 应归属到网关中的哪个集群 (&lt;code&gt;cluster&lt;/code&gt;)。网关会根据此值将具有相同 &lt;code&gt;cluster&lt;/code&gt; 名称的服务实例聚合在一起。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;示例&lt;/strong&gt;: &lt;code&gt;&amp;quot;deepseek_cluster&amp;quot;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;id&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;类型&lt;/strong&gt;: &lt;code&gt;string&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;必需&lt;/strong&gt;: 是&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;描述&lt;/strong&gt;: endpoint 的唯一标识符。它在所属的 &lt;code&gt;cluster&lt;/code&gt; 内必须是唯一的。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;示例&lt;/strong&gt;: &lt;code&gt;&amp;quot;deepseek-primary-instance-1&amp;quot;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;ip&lt;/code&gt;&lt;/p&gt;</description></item></channel></rss>
