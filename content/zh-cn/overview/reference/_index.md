@@ -6,7 +6,7 @@ linkTitle: 其他
 no_list: true
 title: 其他
 type: docs
-weight: 7
+weight: 4
 ---
 
 {{< blocks/section color="white" height="auto">}}

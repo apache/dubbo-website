@@ -7,7 +7,7 @@ linkTitle: Introduction
 no_list: true
 title: Introduction to Dubbo
 type: docs
-weight: 2
+weight: 1
 ---
 
 
