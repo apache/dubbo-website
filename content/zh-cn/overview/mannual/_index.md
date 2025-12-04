@@ -13,7 +13,7 @@ linkTitle: 用户手册
 no_list: true
 title: Dubbo SDK 用户手册
 type: docs
-weight: 6
+weight: 2
 ---
 
 > 本文档基于 Dubbo3 编写，由于 Dubbo3 完全兼容 2.7 版本用法，因此文档中的通用功能（除 3.x 版本特有功能外）同样适用于 2.7 版本用户。

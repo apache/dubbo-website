@@ -13,7 +13,7 @@ linkTitle: User Manual
 no_list: true
 title: Dubbo SDK User Manual
 type: docs
-weight: 6
+weight: 2
 ---
 
 > This document is based on Dubbo3. Since Dubbo3 is fully compatible with 2.7 version usage, the general features in this document (except those specific to 3.x version) are also applicable to 2.7 version users.
