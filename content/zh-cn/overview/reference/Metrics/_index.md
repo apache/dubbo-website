@@ -1,7 +1,7 @@
 ---
 description: ""
-linkTitle: Metrics
-title: Metrics
+linkTitle: metrics
+title: metrics
 type: docs
 weight: 2
 ---
