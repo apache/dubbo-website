@@ -11,6 +11,6 @@ type: docs
 weight: 60
 ---
 
-Pixiu Gateway 用于管理 Pixiu Proxy，无论它是作为独立应用网关运行，还是集成在 Kubernetes 中作为应用网关使用。通过网关 API 资源，可以部署并维护受该控制器管理的 Pixiu Proxy 实例。
+Pixiu Gateway 用于管理 Pixiu Proxy，无论它是作为独立应用网关运行，还是集成在 Kubernetes 中作为应用网关使用。通过 Gateway API 资源，可以部署并维护受该控制器管理的 Pixiu Proxy 实例。
 
 > 目前 Pixiu Gateway 处于初步实验阶段。后续支持更多的部署方式和标准功能支持。
