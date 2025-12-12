@@ -25,9 +25,9 @@ weight: 70
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./traffic/" >}}'>Traffic Management</a>
+                    <a href='{{< relref "./traffic/" >}}'>流量管理</a>
                 </h4>
-                <p>Tasks that demonstrates how to use Istio's traffic routing features.</p>
+                <p>演示如何使用 Istio 的流量路由功能的任务。</p>
             </div>
         </div>
     </div>
@@ -35,9 +35,9 @@ weight: 70
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./security/" >}}'>Security</a>
+                    <a href='{{< relref "./security/" >}}'>安全</a>
                 </h4>
-                <p>Demonstrates how to secure Dubbo proxyless mesh.</p>
+                <p>演示如何保护 Dubbo proxyless 服务网格。</p>
             </div>
         </div>
     </div>
