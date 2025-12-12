@@ -25,9 +25,9 @@ weight: 10
         <div class="h-100 card shadow" href="#">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./request-routing/" >}}'>Request Routing</a>
+                    <a href='{{< relref "./request-routing/" >}}'>请求路由</a>
                 </h4>
-                <p>This task shows you how to configure dynamic request routing to multiple versions of a microservice.</p>
+                <p>此任务演示如何配置动态请求路由到微服务的多个版本。</p>
             </div>
         </div>
     </div>
@@ -35,9 +35,9 @@ weight: 10
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./request-routing/" >}}'>Traffic Shifting</a>
+                    <a href='{{< relref "./request-routing/" >}}'>流量迁移</a>
                 </h4>
-                <p>Shows you how to migrate traffic from an old to new version of a service.</p>
+                <p>演示如何将流量从服务的旧版本迁移到新版本。</p>
             </div>
         </div>
     </div>
@@ -45,10 +45,9 @@ weight: 10
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./request-routing/" >}}'>TCP Traffic Shifting</a>
-                    <p>Shows you how to migrate TCP traffic from an old to new version of a TCP service.</p>
+                    <a href='{{< relref "./request-routing/" >}}'>TCP 流量迁移</a>
                 </h4>
-                <p></p>
+                <p>演示如何将 TCP 流量从 TCP 服务的旧版本迁移到新版本。</p>
             </div>
         </div>
     </div>
@@ -56,10 +55,9 @@ weight: 10
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./request-routing/" >}}'>Request Timeouts</a>
-                    <p>This task shows you how to set up request timeouts in Envoy using Istio.</p>
+                    <a href='{{< relref "./request-routing/" >}}'>请求超时</a>
                 </h4>
-                <p></p>
+                <p>此任务演示如何使用 Istio 在 Envoy 中设置请求超时。</p>
             </div>
         </div>
     </div>
@@ -67,10 +65,9 @@ weight: 10
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./request-routing/" >}}'>Mirroring</a>
-                    <p>This task demonstrates the traffic mirroring/shadowing capabilities of Istio.</p>
+                    <a href='{{< relref "./request-routing/" >}}'>流量镜像</a>
                 </h4>
-                <p></p>
+                <p>此任务演示 Istio 的流量镜像/影子功能。</p>
             </div>
         </div>
     </div>
@@ -78,10 +75,9 @@ weight: 10
         <div class="h-100 card shadow">
             <div class="card-body">
                 <h4 class="card-title">
-                    <a href='{{< relref "./request-routing/" >}}'>Locality Load Balancing</a>
-                    <p>This series of tasks demonstrate how to configure locality load balancing in Istio.</p>
+                    <a href='{{< relref "./request-routing/" >}}'>本地负载均衡</a>
                 </h4>
-                <p></p>
+                <p>此系列任务演示如何在 Istio 中配置本地负载均衡。</p>
             </div>
         </div>
     </div>

@@ -69,5 +69,5 @@ Follow the content below to quickly understand the features, advantages, and bes
 <br/>
 <br/>
 
-[//]: # ({{% docs/document_box %}})
+{{% docs/document_box %}}
 
