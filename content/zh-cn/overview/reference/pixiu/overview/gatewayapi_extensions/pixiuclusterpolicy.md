@@ -165,6 +165,6 @@ PixiuClusterPolicy 可以应用于服务级别和网关级别的不同层级
 
 ## 相关资源
 
-- [PixiuGatewayPolicy](./pixiu-gateway-policy.md) - 配置网关级别策略
-- [PixiuFilterPolicy](./pixiu-filter-policy.md) - 配置过滤器级别策略
+- [PixiuGatewayPolicy](./pixiugatewaypolicy.md) - 配置网关级别策略
+- [PixiuFilterPolicy](./pixiufilterpolicy.md) - 配置过滤器级别策略
 - [Gateway API 文档](https://gateway-api.sigs.k8s.io/)

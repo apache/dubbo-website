@@ -13,7 +13,7 @@ weight: 1
 本示例演示了如何使用 Pixiu Gateway 作为 HTTP 代理网关，接收外部的 HTTP 请求并转发到后端的 Dubbo-go RPC 服务。示例基于 `dubbo-go-samples/helloworld` 中的 RPC 服务。
 
 ## 先决条件
-- 安装 [Pixiu Gateway](../getting-started.md)
+- 安装 [Pixiu Gateway](../quickstart/getting-started.md)
 
 ## 部署后端 RPC 服务
 

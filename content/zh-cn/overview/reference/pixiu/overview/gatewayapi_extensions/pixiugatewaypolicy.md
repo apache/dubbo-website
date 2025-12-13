@@ -146,6 +146,6 @@ spec:
 
 ## 相关资源
 
-- [PixiuFilterPolicy](./pixiu-filter-policy.md) - 配置过滤器级别策略
-- [PixiuClusterPolicy](./pixiu-cluster-policy.md) - 配置集群级别策略
+- [PixiuFilterPolicy](./pixiufilterpolicy.md) - 配置过滤器级别策略
+- [PixiuClusterPolicy](./pixiuclusterpolicy.md) - 配置集群级别策略
 - [Gateway API 文档](https://gateway-api.sigs.k8s.io/)
