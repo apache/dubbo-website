@@ -11,7 +11,6 @@ title: Dubbo 服务网格
 type: docs
 weight: 3
 ---
-
 > 目前服务网格处于初步实验阶段。后续标准功能将逐步完善和支持。
 
 关于如何在 Proxyless 模式下设置和运行 Dubbod 的说明。

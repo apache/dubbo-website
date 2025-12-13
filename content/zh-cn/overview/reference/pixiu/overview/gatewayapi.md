@@ -1,0 +1,26 @@
+---
+aliases:
+- /zh/docs3-v2/dubbo-go-pixiu/overview/
+- /zh-cn/docs3-v2/dubbo-go-pixiu/overview/
+- /zh-cn/overview/reference/pixiu/overview/
+- /zh-cn/overview/mannual/dubbo-go-pixiu/overview/
+description: 了解使用 Pixiu Gateway 的基本概念。
+title: Gateway API 
+type: docs
+weight: 20
+---
+## 概述
+
+Gateway API 是 Kubernetes 提供的一组标准化 API，用于以一致、可扩展且具表达力的方式管理集群内外的网络流量。该 API 通过定义明确的角色和职责，将流量入口的基础设施能力与具体的路由规则解耦，从而支持更复杂的流量管理场景。
+
+Gateway API 引入了 GatewayClass、Gateway 等核心资源来描述由基础设施提供方实现的流量处理能力，并通过 HTTPRoute、TLSRoute 等路由资源定义应用层的流量转发与安全策略，实现基础设施与路由配置的解耦，支持不同角色协同管理。
+
+作为 Ingress API 的继任者，Gateway API 解决了 Ingress 在高级路由、多协议支持等方面的能力不足，避免了依赖控制器特定注解所带来的实现差异，从而提升了配置的一致性和可移植性。
+
+## Pixiu Gateway 中的 Gateway API
+
+Gateway API 提供了一个标准接口。在此基础上，Pixiu Gateway 在保持 Kubernetes 原生体验的前提下，引入了面向生产环境的增强能力，补充了标准 API 在复杂场景下的功能需求。
+
+Gateway API 的核心优势之一是其良好的可扩展性。它在覆盖通用路由与流量管理能力的同时，允许实现者通过自定义资源扩展 API，以支持特定场景和高级能力。Pixiu Gateway 基于这一扩展模型，以 Kubernetes CRD 的形式提供了 Gateway API 扩展，向用户暴露 Pixiu Proxy 的高级特性。通过扩展，用户可以使用 Kubernetes 原生、声明式的方式配置生产级能力，而无需直接编写底层的 Pixiu 配置。
+
+

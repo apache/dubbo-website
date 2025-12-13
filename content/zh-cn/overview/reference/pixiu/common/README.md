@@ -1,3 +1,0 @@
-# Common
-
-* [FAQ](faq.md)
