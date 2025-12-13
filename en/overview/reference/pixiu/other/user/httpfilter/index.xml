@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Introduction to Http Filter on Apache Dubbo</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/</link><description>Recent content in Introduction to Http Filter on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/index.xml" rel="self" type="application/rss+xml"/><item><title>Introduction to Dubbo HttpFilter</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/dubbo/</guid><description>&lt;h1 id="using-http-to-call-dubbo"&gt;Using HTTP to Call Dubbo&lt;/h1&gt;
+&lt;h2 id="define-pixiu-configuration-file"&gt;Define Pixiu Configuration File&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;static_resources&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;listeners&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;http-listener&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol_type&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;HTTP&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;socket_address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;0.0.0.0&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8888&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;filter_chains&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;filters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dgp.filter.httpconnectionmanager
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;route_config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;routes&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;match&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;prefix&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;*&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;http_filters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dgp.filter.http.dubboproxy
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;dubboProxyConfig&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;auto_resolve&lt;/span&gt;: &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;registries&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;timeout&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;3s&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;username&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;password&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;timeout_config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;connect_timeout&lt;/span&gt;: 5s
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;request_timeout&lt;/span&gt;: 5s
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;clusters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo-server&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;lb_policy&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;lb&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;endpoints&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;id&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;socket_address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;127.0.0.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;shutdown_config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;timeout&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;60s&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;step_timeout&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;10s&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;reject_policy&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;immediacy&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="prepare-dubbo-service"&gt;Prepare Dubbo Service&lt;/h2&gt;
+&lt;h3 id="start-zookeeper-ensure-docker-and-compose-are-prepared-in-advance-if-available-locally-this-can-be-ignored"&gt;Start zookeeper, ensure docker and compose are prepared in advance. If available locally, this can be ignored.&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://github.com/apache/dubbo-go-pixiu-samples/tree/main/dubbohttpproxy/server/dubbo/app"&gt;docker-compose.yml&lt;/a&gt;&lt;/p&gt;</description></item><item><title>Introduction to RateLimiter</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/ratelimit/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/ratelimit/</guid><description>&lt;p&gt;Welcome to contribute to this document.&lt;/p&gt;</description></item><item><title>Metric Introduction</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/metric/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/metric/</guid><description>&lt;h1 id="metric-reporter-filter-dgpfilterhttpmetric"&gt;Metric Reporter Filter (dgp.filter.http.metric)&lt;/h1&gt;
+&lt;hr&gt;
+&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;dgp.filter.http.metric&lt;/code&gt; filter provides unified metric reporting for Pixiu gateway. It consolidates the functionality of two previous filters (&lt;code&gt;dgp.filter.http.metric&lt;/code&gt; and &lt;code&gt;dgp.filter.http.prometheusmetric&lt;/code&gt;) and supports both &lt;strong&gt;Pull&lt;/strong&gt; and &lt;strong&gt;Push&lt;/strong&gt; modes with OpenTelemetry integration.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: This filter defaults to &lt;strong&gt;Push&lt;/strong&gt; mode. To use Pull mode, explicitly specify &lt;code&gt;mode: &amp;quot;pull&amp;quot;&lt;/code&gt; in the configuration.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="key-features"&gt;Key Features&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Unified Entry Point&lt;/strong&gt;: Single filter for both Pull and Push modes&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;OpenTelemetry Integration&lt;/strong&gt;: Pull mode uses OpenTelemetry for metrics (consistent with Pixiu Tracing)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Context-based Extension&lt;/strong&gt;: Other filters can record custom metrics via &lt;code&gt;HttpContext.RecordMetric()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Backward Compatible&lt;/strong&gt;: Reuses logic from original filters&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id="modes"&gt;Modes&lt;/h2&gt;
+&lt;h3 id="pull-mode-recommended"&gt;Pull Mode (Recommended)&lt;/h3&gt;
+&lt;p&gt;Metrics are exposed via HTTP endpoint for Prometheus to scrape.&lt;/p&gt;</description></item><item><title>Opa Introduction</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/opa/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/opa/</guid><description>&lt;h1 id="opa-filter-dgpfilterhttpopa"&gt;OPA Filter (dgp.filter.http.opa)&lt;/h1&gt;
+&lt;hr&gt;
+&lt;h2 id="english"&gt;English&lt;/h2&gt;
+&lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;The &lt;code&gt;dgp.filter.http.opa&lt;/code&gt; filter delegates authorization decisions to Open Policy Agent (OPA) via a Rego policy. This filter evaluates requests and determines whether to allow or deny based on the policy defined in Rego. The policy is provided as an inline Rego module and evaluated using OPA&amp;rsquo;s built-in query engine.&lt;/p&gt;
+&lt;h3 id="what-the-filter-does-current-behavior"&gt;What the filter does (current behavior)&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Loads a Rego &lt;strong&gt;module string&lt;/strong&gt; from &lt;code&gt;config.policy&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Builds a Rego &lt;strong&gt;query&lt;/strong&gt; from &lt;code&gt;config.entrypoint&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;For each incoming request, constructs an &lt;code&gt;input&lt;/code&gt; object and evaluates the query.&lt;/li&gt;
+&lt;li&gt;If the query result is &lt;code&gt;true&lt;/code&gt;, the request is allowed. Otherwise, the request is denied.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There is &lt;strong&gt;no built-in support&lt;/strong&gt; for external policy files or URIs, custom HTTP status codes, or custom error bodies.&lt;/p&gt;</description></item><item><title>Circuit Breaker Introduction</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/hystrix/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/other/user/httpfilter/hystrix/</guid><description>&lt;p&gt;Welcome to contribute to supplement this documentation.&lt;/p&gt;</description></item></channel></rss>

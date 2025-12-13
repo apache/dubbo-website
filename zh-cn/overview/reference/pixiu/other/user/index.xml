@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>用户文档 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/</link><description>Recent content in 用户文档 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/index.xml" rel="self" type="application/rss+xml"/><item><title>快速开始</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/quickstart/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/quickstart/</guid><description>&lt;p&gt;让我们从将 HTTP 请求转换为 Dubbo2 请求的案例来快速展示 Pixiu 的能力。&lt;/p&gt;
+&lt;h2 id="用例"&gt;用例&lt;/h2&gt;
+&lt;p&gt;Pixiu 将 Client 的 HTTP 请求转换为 Dubbo2 请求，然后转发给背后的 Dubbo Server，然后将 Dubbo Server 的响应转换为 HTTP
+响应，最后返回给 Client。&lt;/p&gt;
+&lt;h3 id="架构图"&gt;架构图&lt;/h3&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/pixiu/user/quick_start_architecture.png" alt="Architecture"&gt;&lt;/p&gt;
+&lt;h3 id="案例"&gt;案例&lt;/h3&gt;
+&lt;p&gt;案例路径请查看 &lt;code&gt;/samples/http/simple/http-http&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id="dubbo-server-实现和启动"&gt;Dubbo Server 实现和启动&lt;/h4&gt;
+&lt;p&gt;Dubbo Server 提供用户增删改查的相关接口，其具体的代码实现见案例路径下的 &lt;code&gt;server&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Dubbo Server 的配置如下所示，注册了 Dubbo2 协议的 interface &lt;code&gt;com.dubbogo.pixiu.UserService&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;registries&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;zk&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: zookeeper
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;timeout&lt;/span&gt;: 3s
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;127.0.0.1&lt;/span&gt;:&lt;span style="color:#2aa198"&gt;2181&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocols&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;provider&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;registry-ids&lt;/span&gt;: zk
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;services&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;UserProvider&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;group&lt;/span&gt;: test
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;version&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1.0.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;cluster&lt;/span&gt;: test_dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;serialization&lt;/span&gt;: hessian2
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt;: com.dubbogo.pixiu.UserService
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="pixiu-配置和启动"&gt;Pixiu 配置和启动&lt;/h4&gt;
+&lt;p&gt;为了用例的场景，Pixiu 需要启动对应的 HTTP Listener 进行 HTTP 请求的监听，所以就会使用到 &lt;code&gt;httpconnectionmanager&lt;/code&gt;。
+然后因为要将 HTTP 请求转换为 Dubbo请求，所以需要使用 &lt;code&gt;dgp.filter.http.dubboproxy&lt;/code&gt;，这里我们将其&lt;code&gt;auto_resolve&lt;/code&gt; 设置为true，表示开启
+HTTP to Dubbo 默认转换协议(具体定义请看&lt;a href="../appendix/http-to-dubbo-default-stragety"&gt;附录&lt;/a&gt;)。&lt;/p&gt;</description></item><item><title>启动 dubbo-go-pixiu</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/start/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/start/</guid><description>&lt;h1 id="start"&gt;Start&lt;/h1&gt;
+&lt;p&gt;如何启动 dubbo-go-pixiu&lt;/p&gt;
+&lt;h4 id="1-cd-samples-dir"&gt;1 cd samples dir&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cd samples/dubbo/simple
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;我们可以使用 start.sh 快速运行示例。如需更多信息，请执行以下命令获取帮助&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./start.sh [action] [project]
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./start.sh help
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;下面我们分步运行 body 示例&lt;/p&gt;
+&lt;h4 id="2-准备配置文件和-docker-环境"&gt;2 准备配置文件和 docker 环境&lt;/h4&gt;
+&lt;p&gt;prepare 命令会准备 dubbo-server 和 pixiu 的配置文件，并启动所需的 docker 容器&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./start.sh prepare body
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果手动准备配置文件，请注意：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 conf.yaml 中的 $PROJECT_DIR 修改为你电脑中的绝对路径&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="3-启动-dubbo-或-http-服务器"&gt;3 启动 dubbo 或 http 服务器&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./start.sh startServer body
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="4-启动-pixiu"&gt;4 启动 pixiu&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./start.sh startPixiu body
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果手动运行 pixiu，请使用以下命令&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; go run cmd/pixiu/*.go gateway start -c /[absolute-path]/dubbo-go-pixiu/samples/dubbo/simple/body/pixiu/conf.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="5-尝试发送请求"&gt;5. 尝试发送请求&lt;/h4&gt;
+&lt;p&gt;使用 curl 尝试或运行单元测试&lt;/p&gt;</description></item><item><title>API 模型介绍</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/api/</guid><description>&lt;h1 id="api"&gt;Api&lt;/h1&gt;
+&lt;p&gt;API 模型介绍，建议在为 api_config.yaml 自定义 API 之前阅读。&lt;/p&gt;
+&lt;h2 id="api-gateway"&gt;Api Gateway&lt;/h2&gt;
+&lt;p&gt;API 是 dubbo-go-pixiu 的关键特性。通过此特性，您可以将 dubbo 服务暴露为 HTTP 服务。&lt;/p&gt;
+&lt;h3 id="configuration"&gt;Configuration&lt;/h3&gt;
+&lt;p&gt;Sample:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: api name
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;description&lt;/span&gt;: api description
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;resources&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;path&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;type&lt;/span&gt;: restful
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;description&lt;/span&gt;: resource documentation
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;methods&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;httpVerb&lt;/span&gt;: GET
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;enable&lt;/span&gt;: &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;inboundRequest&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;requestType&lt;/span&gt;: http
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;queryStrings&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: id
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;required&lt;/span&gt;: &lt;span style="color:#cb4b16"&gt;false&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;integrationRequest&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;requestType&lt;/span&gt;: dubbo
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;mappingParams&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: queryStrings.id
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;mapTo&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;applicationName&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;BDTService&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;com.ikurento.user.UserProvider&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;method&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;GetUser&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;clusterName&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;test_dubbo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;definitions&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: modelDefinition
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;schema&lt;/span&gt;: &amp;gt;-&lt;span style="color:#2aa198"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;type&amp;#34; : &amp;#34;object&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;properties&amp;#34; : {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;id&amp;#34; : {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;type&amp;#34; : &amp;#34;integer&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; },
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;type&amp;#34; : {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;type&amp;#34; : &amp;#34;string&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; },
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;price&amp;#34; : {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; &amp;#34;type&amp;#34; : &amp;#34;number&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; }&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;name
+:&lt;/p&gt;</description></item><item><title>配置文件</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/config/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/config/</guid><description>&lt;h3 id="config"&gt;Config&lt;/h3&gt;
+&lt;p&gt;Pixiu 支持使config用参数 -c 指定本地配置文件，您可以在那些样本的 pixiu 目录中找到它。
+Pixiu 使用类似于 envoy 的配置抽象，如 listener、filter、route 和 cluster。
+此外，pixiu 提供了另一个特定于 dubbo 的配置名为 api_config，通过它 dubbo-filter 可以将 http 请求转换为 dubbo 泛化调用。您也可以在那些样本的 pixiu 目录中找到它。
+文档 Api 模型 提供了关于 pixiu 配置抽象的 api_config 规范。
+本文档主要描述 pixiu 配置抽象，以下是一个示例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;static_resources&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;listeners&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;net/http&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol_type&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;HTTP&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;socket_address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;0.0.0.0&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;8888&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;filter_chains&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;filters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dgp.filter.httpconnectionmanager
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;route_config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;routes&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;match&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;prefix&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;/user&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;route&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;cluster&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;user&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;cluster_not_found_response_code&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;505&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;http_filters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dgp.filter.http.httpproxy
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dgp.filter.http.response
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;clusters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;user&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;lb_policy&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;lb&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;endpoints&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;id&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;socket_address&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;127.0.0.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;1314&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;更多细节可以在 &lt;code&gt;pkg/model/bootstrap.go&lt;/code&gt; 中找到&lt;/p&gt;</description></item><item><title>启动和配置</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/configurations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/configurations/</guid><description>&lt;h3 id="pixiu-启动命令"&gt;Pixiu 启动命令&lt;/h3&gt;
+&lt;p&gt;Pixiu 分为两个形态 Gateway 和 Sidecar，目前 Pixiu 可执行程序的命令如下所示，其中 pixiu 是可执行文件名称。注意，-c 后是本地配置文件的绝对路径。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;pixiu gateway start -c /config/conf.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="配置详解"&gt;配置详解&lt;/h3&gt;
+&lt;p&gt;Pixiu 接受 yaml 格式的文件作为其主配置文件，其中对 Pixiu 的各类组件进行配置。我们以快速开始中的配置文件为例，详细讲解其中的组成部分，并且列出可能的扩展。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;static_resources:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; listeners:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: &amp;#34;net/http&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol_type: &amp;#34;HTTP&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; socket_address:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address: &amp;#34;0.0.0.0&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; port: 8883
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filter_chains:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filters:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: dgp.filter.httpconnectionmanager
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; route_config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; routes:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - match:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; prefix: &amp;#34;*&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; http_filters:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: dgp.filter.http.dubboproxy
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; dubboProxyConfig:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; auto_resolve: true
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; registries:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &amp;#34;zookeeper&amp;#34;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol: &amp;#34;zookeeper&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; timeout: &amp;#34;3s&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address: &amp;#34;127.0.0.1:2181&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; username: &amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; password: &amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;首先，类似 &lt;code&gt;envoy&lt;/code&gt;的配置，&lt;code&gt;static_resources&lt;/code&gt; 表示如下都是静态配置。在静态配置中包括 Listener，NetworkFilter，Route，HttpFilter等组件，它们之间并不是完全独立的。&lt;/p&gt;</description></item><item><title>部署操作</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/deployment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/deployment/</guid><description>&lt;h2 id="一docker镜像部署"&gt;一、Docker镜像部署&lt;/h2&gt;
+&lt;p&gt;注：首先确认本机已经安装好docker并且启动&lt;/p&gt;
+&lt;h3 id="1从docker-hub-拉取-pixiu-镜像"&gt;1、从docker hub 拉取 pixiu 镜像&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;docker pull phial3/dubbo-go-pixiu:latest&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="2按照需求准备pixiu配置"&gt;2、按照需求准备pixiu配置&lt;/h3&gt;
+&lt;h4 id="pixiu配置参数详解"&gt;&lt;a href="../configurations/"&gt;pixiu配置参数详解&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;准备 &lt;code&gt;log.yml&lt;/code&gt; 和 &lt;code&gt;conf.yaml&lt;/code&gt; 配置文件，将这两个配置文件在pixiu启动的时候挂在到本地&lt;/p&gt;
+&lt;h3 id="3启动-pixiu"&gt;3、启动 pixiu&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;前台启动&lt;/strong&gt;：，可方便查看服务信息运行是否正常&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker run --name dubbo-go-pixiu -p 8883:8883 &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/log.yml:/etc/pixiu/log.yml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; apache/dubbo-go-pixiu:latest
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;后台启动&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker run -itd --name dubbo-go-pixiu -p 8883:8883 &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/conf.yaml:/etc/pixiu/conf.yaml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; -v /yourpath/log.yml:/etc/pixiu/log.yml &lt;span style="color:#cb4b16"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; apache/dubbo-go-pixiu:latest
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;注：&lt;/p&gt;
+&lt;p&gt;(1) &lt;code&gt;--name&lt;/code&gt;命令后面的dubbo-go-pixiu为你的pixiu实例的名称，可自行修改&lt;/p&gt;
+&lt;p&gt;(2)命令中的&lt;code&gt;/yourpath/**&lt;/code&gt;路径为你本地存放pixiu配置文件的绝对路径&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="4查看-pixiu-实例"&gt;4、查看 pixiu 实例&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;docker ps | grep dubbo-go-pixiu&lt;/code&gt; 正在运行的pixiu实例&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker exec -it dubbo-go-pixiu /bin/bash&lt;/code&gt; 进入pixiu&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>案例介绍 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/</link><description>Recent content in 案例介绍 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/index.xml" rel="self" type="application/rss+xml"/><item><title>Http Proxy 案例介绍</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/http_proxy/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/http_proxy/</guid><description>&lt;h3 id="http-代理"&gt;HTTP 代理&lt;/h3&gt;
+&lt;p&gt;HTTP 代理案例展示了 Pixiu 接收外界 HTTP 请求然后转发给背后的 HTTP Server 的功能。&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://cn.dubbo.apache.org/imgs/pixiu/user/samples/http_proxy.png" alt="img"&gt;&lt;/p&gt;
+&lt;p&gt;案例代码具体查看 &lt;code&gt;/samples/http/simple&lt;/code&gt;。案例中的目录结构和作用如下所示：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;- pixiu # pixiu 配置文件
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;- server # http server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;- test # client or unit test
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;我们来具体看一下有关 pixiu 的具体配置文件。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;static_resources:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; listeners:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: &amp;#34;net/http&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol_type: &amp;#34;HTTP&amp;#34; # 使用 HTTP Listener
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; socket_address:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address: &amp;#34;0.0.0.0&amp;#34; # 监听地址设置为 0.0.0.0
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; port: 8888 # 端口设置为 8888
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filter_chains:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; filters:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: dgp.filter.httpconnectionmanager # NetworkFilter 设置为 httpconnectionmanager
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; route_config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; routes:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - match:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; prefix: &amp;#34;/user&amp;#34; # 设置路由规则，将 /user 前缀的请求转发给名称为 user 的 cluster 集群
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; route:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; cluster: &amp;#34;user&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; cluster_not_found_response_code: 505
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; http_filters:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: dgp.filter.http.httpproxy # 使用 dgp.filter.http.httpproxy 这个 HttpFilter 来进行转发
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; config:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; clusters:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - name: &amp;#34;user&amp;#34; # 配置一个名称为 user 的 集群，其中有一个实例，地址是 127.0.0.1:1314
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; lb_policy: &amp;#34;random&amp;#34; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; endpoints:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - id: 1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; socket_address:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; address: 127.0.0.1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; port: 1314
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;可以先启动 &lt;code&gt;Server&lt;/code&gt; 文件夹下的 Http Server，然后再使用如下命令启动 &lt;code&gt;Pixiu&lt;/code&gt;，最后执行 test 文件夹下的单元测试。注意，-c 后是本地配置文件的绝对路径。&lt;/p&gt;</description></item><item><title>Http to Dubbo 案例介绍</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/http_to_dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/http_to_dubbo/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item><item><title>mock 案例介绍</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/mock/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/mock/</guid><description>&lt;h1 id="mock-request"&gt;Mock request&lt;/h1&gt;
+&lt;h2 id="simple-demo"&gt;Simple Demo&lt;/h2&gt;
+&lt;h3 id="api-config"&gt;Api Config&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/https/"&gt;https.md&lt;/a&gt;yaml
+name: pixiu
+description: pixiu sample
+resources:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;path: &amp;lsquo;/api/v1/test-dubbo/mock&amp;rsquo;
+type: restful
+description: mock
+methods:
+&lt;ul&gt;
+&lt;li&gt;httpVerb: GET
+enable: true
+mock: true
+timeout: 1000ms
+inboundRequest:
+requestType: http&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;### Request
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;```bash
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;curl localhost:8888/api/v1/test-dubbo/mock -X GET 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="response"&gt;Response&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;&amp;#34;message&amp;#34;&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;mock success&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="todo"&gt;TODO&lt;/h2&gt;
+&lt;p&gt;我们计划在未来能够配置自定义结果。不仅通过API配置的方式，还会创建匹配规则。&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/"&gt;Previous&lt;/a&gt;&lt;/p&gt;</description></item><item><title>SpringCloud</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/springcloud/springcloud-springcloud/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/springcloud/springcloud-springcloud/</guid><description>&lt;h1 id="快速开始"&gt;快速开始&lt;/h1&gt;
+&lt;p&gt;启动 Nacos [Docker 环境]：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; samples/springcloud/docker
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;run docker-compose.yml/services
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;启动 SpringCloud [Java 环境]：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; samples/springcloud/server
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# the port is 8074&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;run auth-service
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# the port is 8071&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;run user-service
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;启动 Pixiu:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;go run cmd/pixiu/*.go gateway start -c samples/springcloud/pixiu/conf.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过 Pixiu 调用 SpringCloud 服务：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# the serviceId is `user-provider`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;curl http://localhost:8888/user-service/echo/Pixiu
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;# the serviceId is `auth-provider`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;curl http://localhost:8888/auth-service/echo/Pixiu
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;控制台输出结果：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Hello Nacos Discovery Pixiu
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>Https 案例介绍</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/https/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/samples/https/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item></channel></rss>
