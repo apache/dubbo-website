@@ -14,7 +14,7 @@ The `dubboctl` command exposes the full DubboOperator API via command-line flags
 
 Before you begin, check the following prerequisites:
 
-1. [Download the Dubbod release](../../getting-started.md)
+1. [Download the Dubbo release](../../getting-started.md)
 
 ## Install Dubbo using a profile
 
@@ -43,7 +43,7 @@ dubboctl manifest generate > $HOME/generated-manifest.yaml
 To completely uninstall Dubbo from the cluster, run:
 
 ```bash
-istioctl uninstall --remove -y
+dubboctl uninstall --remove -y
 ```
 
 This removes all Dubbo resources. Future versions will support specifying a manifest file.

@@ -3,7 +3,7 @@ aliases:
     - /zh/overview/mannual/
     - /zh/docs3-v2/
     - /zh-cn/docs3-v2/
-always_unfold: true
+always_unfold: false
 description: 关于如何在 Proxyless 模式下设置和运行 Dubbo 的说明
 linkTitle: 服务网格
 no_list: true
@@ -12,8 +12,6 @@ type: docs
 weight: 3
 ---
 > 目前服务网格处于初步实验阶段。后续标准功能将逐步完善和支持。
-
-关于如何在 Proxyless 模式下设置和运行 Dubbod 的说明。
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">

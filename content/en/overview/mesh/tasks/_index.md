@@ -17,7 +17,7 @@ Learn how to use various Dubbo features through hands-on tasks.
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "../../mannual/java-sdk/tasks/traffic-management" >}}'>Traffic management</a>
+                    <a href='{{< relref "./traffic-management" >}}'>Traffic management</a>
                 </h4>
                 <p>Learn how to configure and use traffic management features.</p>
             </div>
@@ -25,7 +25,7 @@ Learn how to use various Dubbo features through hands-on tasks.
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "../../mannual/java-sdk/tasks/security" >}}'>Security</a>
+                    <a href='{{< relref "./security" >}}'>Security</a>
                 </h4>
                 <p>Learn how to configure and use security features.</p>
             </div>
@@ -33,7 +33,7 @@ Learn how to use various Dubbo features through hands-on tasks.
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "../../mannual/java-sdk/tasks/observability" >}}'>Observability</a>
+                    <a href='{{< relref "./observability" >}}'>Observability</a>
                 </h4>
                 <p>Learn how to configure and use observability features.</p>
             </div>

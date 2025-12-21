@@ -3,7 +3,7 @@ aliases:
     - /en/overview/mannual/
     - /en/docs3-v2/
     - /en/docs3-v2/
-always_unfold: true
+always_unfold: false
 description: Instructions on how to set up and run Dubbo in Proxyless mode
 linkTitle: Service Mesh
 no_list: true
@@ -11,10 +11,7 @@ title: Dubbo Service Mesh
 type: docs
 weight: 3
 ---
-
 > The service mesh is currently in an early experimental stage. Standard features will be gradually completed and supported.
-
-Instructions on how to set up and run Dubbod in Proxyless mode.
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -26,7 +23,7 @@ Instructions on how to set up and run Dubbod in Proxyless mode.
                 <h4 class="card-title">
                     <a href='{{< relref "./getting-started" >}}'>Getting started</a>
                 </h4>
-                <p>Quickly and easily try out Dubbod features.</p>
+                <p>Quickly and easily try out Dubbo features.</p>
             </div>
         </div>
         <div class="col-sm col-md-6 mb-4">
@@ -40,7 +37,7 @@ Instructions on how to set up and run Dubbod in Proxyless mode.
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "./upgrade" >}}'>Upgrade Dubbod</a>
+                    <a href='{{< relref "./upgrade" >}}'>Upgrade Dubbo</a>
                 </h4>
                 <p>Upgrade, downgrade, and manage Dubbo across multiple control planes.</p>
             </div>

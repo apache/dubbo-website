@@ -6,8 +6,7 @@ type: docs
 weight: 3
 no_list: true
 ---
-
-通过实际任务学习如何使用 Dubbo 的各种功能。
+通过实践方式学习如何利用 Dubbo 服务网格实现既定的目标行为。
 
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -17,25 +16,25 @@ no_list: true
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "../../mannual/java-sdk/tasks/traffic-management" >}}'>流量管理</a>
+                    <a href='{{< relref "./traffic-management" >}}'>流量管理</a>
                 </h4>
-                <p>学习如何配置和使用流量管理功能。</p>
+                <p>使用网格的流量路由能力。</p>
             </div>
         </div>
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "../../mannual/java-sdk/tasks/security" >}}'>安全</a>
+                    <a href='{{< relref "./security" >}}'>安全</a>
                 </h4>
-                <p>学习如何配置和使用安全功能。</p>
+                <p>使用网格进行安全防护。</p>
             </div>
         </div>
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "../../mannual/java-sdk/tasks/observability" >}}'>可观测性</a>
+                    <a href='{{< relref "./observability" >}}'>可观测性</a>
                 </h4>
-                <p>学习如何配置和使用可观测性功能。</p>
+                <p>使用网格采集遥测数据。</p>
             </div>
         </div>
     </div>

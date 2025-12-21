@@ -5,16 +5,14 @@ title: Traffic Management
 type: docs
 weight: 1
 ---
+> The service mesh is currently in an early experimental stage. Resource naming may change.
 
-In Dubbo Service Mesh, traffic management is implemented through the collaboration of the Dubbo control plane and the Dubbo Agent. The control plane generates gRPC xDS configuration based on Kubernetes CRDs and pushes it to Dubbo Agent via the xDS protocol, enabling fine-grained control over inter-service traffic.
-
-## Traffic management overview
+## Introduction
 
 The traffic management model of Dubbo Service Mesh is aligned with Istio, but optimized for the Dubbo protocol and sidecarless architecture. The core components are:
 
 - **ServiceRoute**: defines routing rules and controls how requests are routed to service instances.
 - **SubsetRule**: defines service subsets and traffic policies, such as load balancing, connection pools, TLS settings, etc.
-- **MeshConfig**: mesh-wide configuration, including default traffic policies, trust domain, and more.
 
 By configuring these resources, you can achieve traffic routing, load balancing, and resilience without modifying application code.
 
@@ -26,7 +24,7 @@ ServiceRoute enables you to:
 - Route traffic to different versions of a service (for example, v1 and v2).
 - Route based on request attributes such as headers and paths.
 - Configure weighted routing for canary and gradual rollouts.
-- (Planned) Configure timeouts and retries for resilience.
+- Configure timeouts and retries for resilience.
 
 ### ServiceRoute example
 
@@ -117,13 +115,35 @@ spec:
 
 Subsets are selected based on Pod labels. In the example above, Pods with label `version: v1` are placed into subset `v1`, and Pods with `version: v2` into subset `v2`.
 
-## Other notes
+## Gateway
 
-Because Dubbo Service Mesh uses a sidecarless architecture, the traditional Sidecar resource is replaced by the Dubbo Agent. The Dubbo Agent is embedded into the application process and communicates with the control plane via the xDS protocol.
+Gateways provide unified control over ingress and egress traffic in the mesh, allowing you to specify which traffic is allowed to enter or leave the mesh.
+
+Dubbo mesh gateway is implemented based on Kubernetes Gateway API, using Pixiu Gateway as the data plane proxy.
+
+### Gateway example
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+  namespace: dubbo-ingress
+spec:
+  gatewayClassName: dubbo
+  listeners:
+  - name: default
+    hostname: "*.example.com"
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: All
+```
 
 ## Related content
 
-- [Dubbo Service Mesh Quickstart](/en/overview/quickstart/)
+- [Quickstart](/en/overview/mesh/getting-started/)
 - [Security concepts](/en/overview/mesh/concepts/security/)
 - [Observability](/en/overview/mesh/concepts/observability/)
 

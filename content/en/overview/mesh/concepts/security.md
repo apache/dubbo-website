@@ -5,8 +5,7 @@ title: Security
 type: docs
 weight: 2
 ---
-
-Dubbo Service Mesh security provides strong identities, powerful policies, transparent TLS encryption, and authentication tooling to protect your services and data. It follows the same security model as Istio, but is optimized for the Dubbo protocol and sidecarless architecture.
+> The service mesh is currently in an early experimental stage. Standard features will be gradually completed and supported.
 
 ## High-level architecture
 
@@ -130,6 +129,7 @@ After understanding the basic concepts above, you can:
 
 ## Related content
 
+- [Quickstart](/en/overview/mesh/getting-started/)
 - [Traffic management](/en/overview/mesh/concepts/traffic-management/)
 - [Observability](/en/overview/mesh/concepts/observability/)
 
