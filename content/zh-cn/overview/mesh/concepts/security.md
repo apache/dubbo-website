@@ -5,8 +5,7 @@ title: 安全
 type: docs
 weight: 2
 ---
-
-Dubbo 服务网格的安全功能提供了强大的身份、强大的策略、透明的 TLS 加密以及认证工具，以保护您的服务和数据。Dubbo 的安全功能使用与 Istio 相同的安全模型，但针对 Dubbo 协议和无 Sidecar 架构进行了优化。
+> 目前服务网格处于初步实验阶段。后续标准功能将逐步完善和支持。
 
 ## 高层架构
 
@@ -79,8 +78,8 @@ Dubbo 服务网格支持对等认证（Peer Authentication），用于服务到�
 
 Dubbo 服务网格的认证架构包括：
 
-- **控制平面**：`dubbod` 负责管理认证策略和证书
-- **数据平面**：Dubbo Agent 负责执行认证策略和 TLS 握手
+- **控制平面**：负责管理认证策略和证书
+- **数据平面**：负责执行认证策略和 TLS 握手
 - **策略存储**：认证策略存储在 Kubernetes API 服务器中
 
 ### 认证策略
@@ -130,5 +129,6 @@ spec:
 
 ## 相关内容
 
+- [快速入门](/zh-cn/overview/mesh/getting-started/)
 - [流量管理](/zh-cn/overview/mesh/concepts/traffic-management/)
 - [可观测性](/zh-cn/overview/mesh/concepts/observability/)
