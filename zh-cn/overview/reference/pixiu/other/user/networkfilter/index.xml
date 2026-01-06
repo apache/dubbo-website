@@ -53,4 +53,47 @@
 &lt;p&gt;Grpc 服务器在“集群”中定义&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;blockquote&gt;
-&lt;p&gt;目前 http 请求仅支持 json body 解析参数&lt;/p&gt;</description></item><item><title>Dubbo NetWorkFilter 介绍</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/networkfilter/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/networkfilter/dubbo/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;目前 http 请求仅支持 json body 解析参数&lt;/p&gt;</description></item><item><title>gRPC Server Reflection 支持</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/networkfilter/grpc-reflection/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/networkfilter/grpc-reflection/</guid><description>&lt;h1 id="grpc-server-reflection-支持"&gt;gRPC Server Reflection 支持&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href="https://github.com/apache/dubbo-go-pixiu/pull/849"&gt;实现参考&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;gRPC Proxy 过滤器（&lt;code&gt;dgp.filter.grpc.proxy&lt;/code&gt;）现已支持 &lt;strong&gt;gRPC Server Reflection&lt;/strong&gt;，使得网关能够在不需要预编译 proto 文件的情况下动态解析和检查消息内容。&lt;/p&gt;
+&lt;h2 id="概述"&gt;概述&lt;/h2&gt;
+&lt;p&gt;gRPC Server Reflection 是一项允许 Pixiu 网关在运行时动态发现和解码 gRPC 服务定义的功能。这消除了在网关配置中维护 proto 文件的需要。&lt;/p&gt;
+&lt;h3 id="核心特性"&gt;核心特性&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;三种反射模式&lt;/strong&gt;: 透传、反射和混合模式&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;动态消息解码&lt;/strong&gt;: 在运行时解析消息，无需 proto 文件&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;基于 TTL 的缓存&lt;/strong&gt;: 高效的描述符缓存，自动清理过期条目&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;协议检测&lt;/strong&gt;: 同时支持 gRPC 和 Triple 协议&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;优雅降级&lt;/strong&gt;: 混合模式提供自动回退到透传模式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="反射模式"&gt;反射模式&lt;/h2&gt;
+&lt;h3 id="透传模式passthrough默认"&gt;透传模式（Passthrough，默认）&lt;/h3&gt;
+&lt;p&gt;执行透明的二进制代理，不解码消息。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;使用场景:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不需要消息检查的高吞吐场景&lt;/li&gt;
+&lt;li&gt;仅基于服务/方法名称的简单路由&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;配置:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;grpc_filters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dgp.filter.grpc.proxy
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;reflection_mode&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;passthrough&amp;#34;&lt;/span&gt; &lt;span style="color:#586e75"&gt;# 或省略（默认值）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="反射模式reflection"&gt;反射模式（Reflection）&lt;/h3&gt;
+&lt;p&gt;使用 gRPC Server Reflection API 动态解码和检查消息内容。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;使用场景:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;基于内容的路由（根据消息字段路由）&lt;/li&gt;
+&lt;li&gt;字段级别的过滤或转换&lt;/li&gt;
+&lt;li&gt;完整消息检查的日志记录和调试&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;配置:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;grpc_filters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: dgp.filter.grpc.proxy
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;reflection_mode&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;reflection&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;descriptor_cache_ttl&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;300&lt;/span&gt; &lt;span style="color:#586e75"&gt;# 5分钟缓存&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="混合模式hybrid"&gt;混合模式（Hybrid）&lt;/h3&gt;
+&lt;p&gt;先尝试反射，失败时回退到透传模式。&lt;/p&gt;</description></item><item><title>Dubbo NetWorkFilter 介绍</title><link>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/networkfilter/dubbo/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/networkfilter/dubbo/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item></channel></rss>
