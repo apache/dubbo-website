@@ -2,7 +2,7 @@
 aliases:
   - /zh-cn/docs3-v2/java-sdk/reference-manual/protocol/triple/backpressure/
 description: "本文介绍 Triple 协议的背压机制，包括核心概念、技术原理和使用方式"
-linkTitle: triple-backpressure
+linkTitle: Triple 协议背压机制
 title: Triple 协议背压机制
 type: docs
 weight: 6
