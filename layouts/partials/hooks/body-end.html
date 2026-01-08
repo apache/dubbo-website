@@ -27,3 +27,59 @@
     });
 </script>
 {{ end }}
+
+{{/* Mermaid.js support for rendering diagrams */}}
+{{ if .Site.Params.mermaid.enable }}
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    
+    // Initialize mermaid with custom configuration
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis'
+        },
+        sequence: {
+            useMaxWidth: true,
+            diagramMarginX: 50,
+            diagramMarginY: 10,
+            actorMargin: 50,
+            width: 150,
+            height: 65,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35
+        }
+    });
+
+    // Find all mermaid code blocks and render them
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Find code blocks with language-mermaid class (Hugo's default)
+        const codeBlocks = document.querySelectorAll('pre > code.language-mermaid');
+        
+        for (let i = 0; i < codeBlocks.length; i++) {
+            const codeBlock = codeBlocks[i];
+            const pre = codeBlock.parentElement;
+            const mermaidCode = codeBlock.textContent;
+            
+            // Create a new div for mermaid
+            const mermaidDiv = document.createElement('div');
+            mermaidDiv.className = 'mermaid';
+            mermaidDiv.textContent = mermaidCode;
+            
+            // Replace the pre element with mermaid div
+            pre.parentNode.replaceChild(mermaidDiv, pre);
+        }
+        
+        // Run mermaid on all .mermaid elements
+        await mermaid.run({
+            querySelector: '.mermaid'
+        });
+    });
+</script>
+{{ end }}
