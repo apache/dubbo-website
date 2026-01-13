@@ -56,73 +56,17 @@ Dubbo 提供了一套与 gRPC 兼容的背压 API，位于 `org.apache.dubbo.com
 
 Triple 背压机制基于 HTTP/2 的流量控制能力实现，涉及以下几个层次：
 
-```mermaid
-flowchart TB
-    subgraph Application["应用层 (Application)"]
-        API["StreamObserver / CallStreamObserver API<br/>- isReady() / setOnReadyHandler()<br/>- request() / disableAutoFlowControl()"]
-    end
-    
-    subgraph Framework["框架层 (Framework)"]
-        Adapter["ClientCallToObserverAdapter / ServerCallStreamObserver<br/>- 管理 onReadyHandler 回调<br/>- 维护 autoFlowControl 状态"]
-    end
-    
-    subgraph Transport["传输层 (Transport)"]
-        Channel["H2StreamChannel<br/>- isReady(): 检查传输缓冲区状态<br/>- consumeBytes(): 触发 WINDOW_UPDATE"]
-    end
-    
-    subgraph Network["网络层 (Network)"]
-        Controller["TripleHttp2LocalFlowController<br/>- HTTP/2 流量控制窗口管理<br/>- WINDOW_UPDATE 帧发送"]
-    end
-    
-    Application --> Framework
-    Framework --> Transport
-    Transport --> Network
-```
+<img alt="" style="max-width:800px;height:auto;" src="/imgs/v3/tasks/protocol/backpress.png"/>
 
 ### 网络层数据流转
 
 #### 发送端背压流程
 
-```mermaid
-sequenceDiagram
-    participant Sender as 发送方
-    participant Receiver as 接收方
-    
-    Note over Sender: 1. 检查 isReady()
-    alt isReady() == true
-        Note over Sender: 可以发送数据
-    else isReady() == false
-        Note over Sender: 等待 onReadyHandler 回调
-    end
-    
-    Sender->>Receiver: 2. 发送数据 onNext()<br/>HTTP/2 DATA Frame
-    
-    Note over Receiver: 3. 接收方处理数据<br/>消耗接收窗口<br/>(receiveFlowControlledFrame)
-    
-    Note over Receiver: 4. 数据处理完成<br/>调用 consumeBytes() 归还窗口
-    
-    Receiver->>Sender: 5. 窗口达到阈值<br/>HTTP/2 WINDOW_UPDATE Frame
-    
-    Note over Sender: 6. 发送方收到更新<br/>触发 onReadyHandler
-```
+<img alt="" style="max-width:800px;height:auto;" src="/imgs/v3/tasks/protocol/backpress-client.png"/>
 
 #### 接收端背压流程
 
-```mermaid
-sequenceDiagram
-    participant Consumer as 消费方
-    participant Producer as 生产方
-    
-    Note over Consumer: 1. 禁用自动请求<br/>disableAutoRequest() 或<br/>disableAutoRequestWithInitial(n)
-    
-    Consumer->>Producer: 2. 请求初始数据 request(n)<br/>(内部：增大接收窗口)
-    
-    Producer->>Consumer: 3. 生产方发送 n 条数据<br/>HTTP/2 DATA Frames
-    
-    Note over Consumer: 4. 消费方处理数据<br/>onNext() 被调用
-    
-    Consumer->>Producer: 5. 处理完成，请求更多数据<br/>request(1)
-```
+<img alt="" style="max-width:800px;height:auto;" src="/imgs/v3/tasks/protocol/backpress-server.png"/>
 
 ### HTTP/2 流量控制器
 
