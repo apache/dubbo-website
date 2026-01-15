@@ -3,7 +3,7 @@ description: 任务
 linkTitle: 任务
 title: 任务
 type: docs
-weight: 3
+weight: 4
 no_list: true
 ---
 通过实践方式学习如何利用 Dubbo 服务网格实现既定的目标行为。
