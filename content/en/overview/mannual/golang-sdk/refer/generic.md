@@ -159,5 +159,37 @@ The Invoke method of GenericService takes four parameters:
 
 Note: In the current version, parameterless calls may cause crashing issues.
 
+### Automatic Deserialization with InvokeWithType
+
+In the `Invoke` method, the return value `resp` is a `map` type (for `MapGeneralizer`), requiring users to manually perform type conversion. To simplify this process, dubbo-go provides the `InvokeWithType` method, which can automatically deserialize the result into a user-specified struct.
+
+```go
+// Define the result struct
+type User struct {
+    ID   string
+    Name string
+    Age  int32
+}
+
+var user User
+// Deserialize the result directly into the user struct
+err := refConf.
+    GetRPCService().(*generic.GenericService).
+    InvokeWithType(
+        context.TODO(),
+        "GetUser",
+        []string{"java.lang.String"},
+        []hessian.Object{"A003"},
+        &user,
+    )
+
+if err != nil {
+    // Handle error
+}
+fmt.Println(user.Name)
+```
+
+Note: `InvokeWithType` currently only supports the default Map generic invocation.
+
 Related reading: [【Dubbo-go Service Proxy Model】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
 
