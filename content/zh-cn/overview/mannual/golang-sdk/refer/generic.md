@@ -159,4 +159,36 @@ GenericService 的 Invoke 方法接收四个参数，分别是：
 
 注意：在目前版本中，无参调用会出现崩溃问题。
 
+### 泛化调用获取结果自动反序列化
+
+在 `Invoke` 方法中，返回值 `resp` 是一个 `map` 类型（对于 `MapGeneralizer`），用户需要手动进行类型转换。为了简化这一过程，dubbo-go 提供了 `InvokeWithType` 方法，可以将结果自动反序列化为用户指定的结构体。
+
+```go
+// 定义结果结构体
+type User struct {
+    ID   string
+    Name string
+    Age  int32
+}
+
+var user User
+// 直接将结果反序列化到 user 结构体中
+err := refConf.
+    GetRPCService().(*generic.GenericService).
+    InvokeWithType(
+        context.TODO(),
+        "GetUser",
+        []string{"java.lang.String"},
+        []hessian.Object{"A003"},
+        &user,
+    )
+
+if err != nil {
+    // 处理错误
+}
+fmt.Println(user.Name)
+```
+
+注意：`InvokeWithType` 目前仅支持默认的 Map 泛化方式。
+
 相关阅读：[【Dubbo-go 服务代理模型】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
