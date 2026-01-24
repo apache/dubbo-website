@@ -120,7 +120,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuClusterPolicy
 metadata:
   name: gateway-cluster-policy
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io

@@ -143,7 +143,7 @@ spec:
       push_gateway_url: "http://prometheus-pushgateway:9091"
       counter_push: true
       push_interval_threshold: 1
-      push_job_name: "pixiu-gateway"
+      push_job_name: "pixiu-gateway-helm"
 ```
 
 为 Gateway 中的特定监听器配置过滤器
@@ -152,7 +152,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuFilterPolicy
 metadata:
   name: listener-filter-policy
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io

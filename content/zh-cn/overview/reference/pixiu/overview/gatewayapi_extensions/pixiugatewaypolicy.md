@@ -22,7 +22,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuGatewayPolicy
 metadata:
   name: gateway-timeout-policy
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io
@@ -41,7 +41,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuGatewayPolicy
 metadata:
   name: gateway-tracing-policy
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io
@@ -49,7 +49,7 @@ spec:
     name: pixiu-listeners
   tracing:
     name: jaeger
-    serviceName: pixiu-gateway
+    serviceName: pixiu-gateway-helm
     sampler:
       type: probabilistic
       param: "0.1"
@@ -65,7 +65,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuGatewayPolicy
 metadata:
   name: gateway-log-policy
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io
@@ -91,7 +91,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuGatewayPolicy
 metadata:
   name: gateway-shutdown-policy
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io
@@ -109,7 +109,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuGatewayPolicy
 metadata:
   name: gateway-global-timeout-policy
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io

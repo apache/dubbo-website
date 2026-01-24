@@ -1,7 +1,6 @@
 ---
-description: 安全任务
-linkTitle: 安全
-title: 安全
+linkTitle: 安全保护
+title: 安全保护
 type: docs
 weight: 2
 ---

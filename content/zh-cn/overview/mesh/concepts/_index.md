@@ -1,7 +1,6 @@
 ---
-description: 核心功能
-linkTitle: 核心功能
-title: 核心功能
+linkTitle: 概念
+title: 概念
 type: docs
 weight: 2
 no_list: true

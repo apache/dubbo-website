@@ -1,7 +1,7 @@
 ---
-description: 任务
-linkTitle: 任务
-title: 任务
+description: 任务实践
+linkTitle: 任务实践
+title: 任务实践
 type: docs
 weight: 4
 no_list: true
@@ -24,7 +24,7 @@ no_list: true
         <div class="col-sm col-md-6 mb-4">
             <div class="h-100">
                 <h4 class="card-title">
-                    <a href='{{< relref "./security" >}}'>安全</a>
+                    <a href='{{< relref "./security" >}}'>安全保护</a>
                 </h4>
                 <p>使用网格进行安全防护。</p>
             </div>

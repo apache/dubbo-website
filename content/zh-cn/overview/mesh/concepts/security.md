@@ -1,7 +1,6 @@
 ---
-description: 描述 Dubbo 的认证功能。
-linkTitle: 安全
-title: 安全
+linkTitle: 安全保护
+title: 安全保护
 type: docs
 weight: 2
 ---

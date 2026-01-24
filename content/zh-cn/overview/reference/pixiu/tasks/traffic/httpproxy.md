@@ -123,7 +123,7 @@ metadata:
 spec:
   parentRefs:
     - name: pixiu-listeners
-      namespace: pixiu-gateway-system
+      namespace: pixiu-gateway-helm-system
       sectionName: http
   rules:
     - matches:
@@ -145,7 +145,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuClusterPolicy
 metadata:
   name: helloworld-cluster
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io
@@ -168,7 +168,7 @@ apiVersion: pixiu.apache.org/v1alpha1
 kind: PixiuFilterPolicy
 metadata:
   name: helloworld-http-filter
-  namespace: pixiu-gateway-system
+  namespace: pixiu-gateway-helm-system
 spec:
   targetRef:
     group: gateway.networking.k8s.io
@@ -214,11 +214,11 @@ kubectl apply -f helloworld-http.yaml
 ```bash
 kubectl get httproute -n default
 
-kubectl get pixiuclusterpolicy -n pixiu-gateway-system
+kubectl get pixiuclusterpolicy -n pixiu-gateway-helm-system
 
-kubectl get pixiufilterpolicy -n pixiu-gateway-system
+kubectl get pixiufilterpolicy -n pixiu-gateway-helm-system
 
-kubectl get gateway -n pixiu-gateway-system
+kubectl get gateway -n pixiu-gateway-helm-system
 ```
 
 ## 测试
