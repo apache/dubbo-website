@@ -2,106 +2,306 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
     - /zh-cn/docs3-v2/golang-sdk/tutorial/governance/monitor/rpc_metrics/
-description: "采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统"
-title: metrics监控
+description: "Dubbo-Go 指标监控：支持 Prometheus Pull 模式与 Pushgateway Push 模式，并接入 Grafana 可视化"
+title: 指标监控 (Metrics)
 type: docs
 weight: 2
 ---
 
-Dubbo 支持采集运行态 Metrics 指标并接入 Prometheus、Grafana 系统，实现对微服务集群的可视化监控，以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/metrics)。
 
-## Contents
+# Dubbo-Go 指标监控
 
-- server/main.go - is the main definition of the service, handler and rpc server
-- client/main.go - is the rpc client
-- proto - contains the protobuf definition of the API
+Dubbo-Go 支持采集运行态 Metrics 指标，并接入 **Prometheus + Grafana** 实现微服务可观测性。
 
-## How to run
+当前示例支持两种监控模式：
 
-### Run server
-```shell
+* ✅ **Pull 模式（推荐）**
+* ✅ **Push 模式（基于 Prometheus Pushgateway）**
+
+示例源码：
+
+> [https://github.com/apache/dubbo-go-samples/tree/main/metrics](https://github.com/apache/dubbo-go-samples/tree/main/metrics)
+
+---
+
+# 一、监控架构说明
+
+## 1️⃣ Pull 模式（推荐生产模式）
+
+```
+Dubbo-Go 应用  --->  Prometheus  --->  Grafana
+        (暴露 /metrics 或 /prometheus 接口)
+```
+
+Prometheus 主动抓取 Dubbo-Go 应用指标。
+
+---
+
+## 2️⃣ Push 模式（适用于短生命周期任务）
+
+```
+Dubbo-Go 应用  --->  Pushgateway  --->  Prometheus  --->  Grafana
+```
+
+应用主动推送指标到 Pushgateway，Prometheus 再拉取。
+
+⚠️ 注意：
+
+Pushgateway 适用于 **短生命周期任务（如 batch / cron job）**，不推荐用于长期运行的服务。
+
+---
+
+# 二、示例组件说明
+
+| 组件          | 端口   | 说明                   |
+| ----------- | ---- | -------------------- |
+| Grafana     | 3000 | 指标可视化                |
+| Prometheus  | 9090 | 指标存储与查询              |
+| Pushgateway | 9091 | 接收应用推送指标             |
+| go-server   | —    | Dubbo-Go Provider 示例 |
+| go-client   | —    | Dubbo-Go Consumer 示例 |
+
+---
+
+# 三、运行方式
+
+---
+
+# 🚀 四、快速开始（推荐方式）
+
+## 步骤 1：启动监控服务栈
+
+进入目录：
+
+```bash
+cd metrics/prometheus_grafana
+```
+
+启动监控组件：
+
+```bash
+docker-compose up -d
+```
+
+访问地址：
+
+* Grafana: [http://localhost:3000](http://localhost:3000)
+* Prometheus: [http://localhost:9090](http://localhost:9090)
+* Pushgateway: [http://localhost:9091](http://localhost:9091)
+
+---
+
+## 步骤 2：配置环境变量
+
+客户端与服务端使用相同环境变量：
+
+```bash
+export ZK_ADDRESS="127.0.0.1:2181"
+
+# Push 模式必需
+export PUSHGATEWAY_URL="127.0.0.1:9091"
+export JOB_NAME="dubbo-service"
+
+# 可选
+export PUSHGATEWAY_USER="username"
+export PUSHGATEWAY_PASS="1234"
+```
+
+---
+
+## 步骤 3：启动 Dubbo-Go 服务端
+
+```bash
 go run ./go-server/cmd/main.go
 ```
 
-test server work as expected:
-```shell
-curl \
-    --header "Content-Type: application/json" \
-    --data '{"name": "Dubbo"}' \
-    http://localhost:20000/greet.GreetService/Greet
-```
+---
 
-### Run client
-```shell
+## 步骤 4：启动 Dubbo-Go 客户端
+
+### 默认 Push 模式
+
+```bash
 go run ./go-client/cmd/main.go
 ```
 
-## deploy to local
-install prometheus and open prometheus config file `prometheus.yml`, write the config like this
+### 使用 Pull 模式
 
-```yaml
-global:
-  evaluation_interval: 15s
-  scrape_interval: 15s
-scrape_configs:
-- job_name: dubbo-provider
-  scrape_interval: 15s
-  scrape_timeout: 5s
-  metrics_path: /prometheus
-  static_configs:
-    - targets: ['localhost:9099']
-- job_name: dubbo-consumer
-  scrape_interval: 15s
-  scrape_timeout: 5s
-  metrics_path: /prometheus
-  static_configs:
-    - targets: ['localhost:9097']
+```bash
+go run ./go-client/cmd/main.go --push=false
+go run ./go-server/cmd/main.go --push=false
 ```
 
-install grafana and open grafana web page like `localhost:3000`
+---
 
-open: 【Home / Connections / Data sources】
+## 步骤 5：验证指标
 
-click 【Add new data source】
+### Push 模式
 
-select Prometheus
+访问：
 
-enter 【Prometheus server URL】 like `http://localhost:9090` and click 【Save & test】
+```
+http://localhost:9091/metrics
+```
 
-![datasource.png](/imgs/golang/metrics/dashboard.png)
+### Pull 模式
 
-open 【Home / Dashboards 】click 【New】【import】and enter 19294 click Load
+访问：
 
-![import](/imgs/golang/metrics/import.png)
+```
+http://localhost:<应用端口>/prometheus
+```
 
-if your grafana can't access internet you can open `https://grafana.com/grafana/dashboards/19294-dubbo-observability/` and click 【Download JSON】
+---
 
-paste the JSON
+# 五、Grafana 配置
 
-![json.png](/imgs/golang/metrics/import-json.png)
+---
 
-![datasource.png](/imgs/golang/metrics/import-datasource.png)
+## 1️⃣ 添加 Prometheus 数据源
 
-click 【Import】button and you will see the Dubbo Observability dashboard,enjoy it
+1. 打开 [http://localhost:3000](http://localhost:3000)
+2. 默认账号：admin / admin
+3. 进入：
 
-![databoard](/imgs/golang/metrics/dashboard.png)
+```
+Home → Connections → Data sources
+```
 
-## Deploy to Kubernetes
+4. 选择 Prometheus
+5. 填写：
 
-#### kube-prometheus
+```
+http://host.docker.internal:9090
+```
 
-install prometheus in k8s [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus)
+6. 点击 Save & Test
 
-Set `prometheus-service.yaml` type to NodePort
+---
 
-1. add `dubboPodMoitor.yaml` to  `kube-prometheus` `manifests` dir, The content is as follows
- ```yaml
+## 2️⃣ 导入 Dubbo 监控大盘
+
+1. 进入：
+
+```
+Home → Dashboards → New → Import
+```
+
+2. 导入：
+
+* 上传 `grafana.json`
+* 或粘贴 JSON 内容
+
+3. 选择 Prometheus 数据源
+4. 点击 Import
+
+---
+
+## 3️⃣ 查看效果
+
+你将看到：
+
+* QPS
+* 成功率
+* 请求延迟 P99
+* Consumer / Provider 调用统计
+* 错误率
+
+---
+
+# 六、Pushgateway 僵尸指标问题
+
+## 问题说明
+
+Pushgateway 默认：
+
+> 不会自动删除旧指标
+
+任务停止后：
+
+* 指标仍然保留
+* 会导致数据污染
+
+---
+
+## 方案一：应用侧自动清理（已实现）
+
+机制：
+
+* 注册 `job_pushed_at_seconds`
+* 定期更新时间戳
+* 优雅退出时自动 DELETE
+
+---
+
+## 方案二：运维清理器（推荐生产使用）
+
+工具路径：
+
+```
+tools/pgw-cleaner
+```
+
+用于：
+
+* 自动扫描过期指标
+* 定期清理僵尸 job
+
+---
+
+# 七、常见问题
+
+---
+
+## Grafana 显示 No Data
+
+请检查：
+
+* Prometheus 数据源是否测试成功
+* Prometheus → Status → Targets 是否为 UP
+* 查询：
+
+```
+dubbo_consumer_requests_succeed_total
+```
+
+是否有数据
+
+---
+
+## host.docker.internal 无法访问
+
+请改为实际 IP 地址：
+
+* 修改 prometheus_pull.yml
+* 修改 Grafana 数据源 URL
+
+---
+
+# 八、Kubernetes 部署
+
+推荐使用：
+
+> kube-prometheus
+> [https://github.com/prometheus-operator/kube-prometheus](https://github.com/prometheus-operator/kube-prometheus)
+
+---
+
+## 1️⃣ 添加 PodMonitor
+
+创建：
+
+```
+dubboPodMonitor.yaml
+```
+
+内容：
+
+```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
-  name: podmonitor
-  labels:
-    app: podmonitor
+  name: dubbo-pod-monitor
   namespace: monitoring
 spec:
   namespaceSelector:
@@ -111,37 +311,56 @@ spec:
     matchLabels:
       app-type: dubbo
   podMetricsEndpoints:
-    - port: metrics # ref to dubbo-app port name metrics
+    - port: metrics
       path: /prometheus
----
-# rbac
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  namespace: dubbo-system
-  name: pod-reader
-rules:
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["get", "list", "watch"]
-
----
-# rbac
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: pod-reader-binding
-  namespace: dubbo-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: pod-reader
-subjects:
-  - kind: ServiceAccount
-    name: prometheus-k8s
-    namespace: monitoring
 ```
-2. `kubectl apply -f Deployment.yaml`
-3. open prometheus web page such as http://localhost:9090/targets
-   ![podmonitor.png](/imgs/golang/metrics/podmonitor.png)
 
+---
+
+## 2️⃣ 部署应用
+
+```bash
+kubectl apply -f Deployment.yaml
+```
+
+---
+
+## 3️⃣ 验证
+
+访问：
+
+```
+http://<prometheus-nodeport>/targets
+```
+
+确认 Pod 状态为：
+
+```
+UP
+```
+
+---
+
+# 九、生产建议
+
+| 场景      | 推荐模式              |
+| ------- | ----------------- |
+| 长期运行服务  | Pull              |
+| 短生命周期任务 | Push              |
+| K8s 环境  | Pull + PodMonitor |
+| 需要清理能力  | 配合 pgw-cleaner    |
+
+---
+
+# 十、总结
+
+Dubbo-Go 当前支持：
+
+* Pull 模式（标准 Prometheus 模式）
+* Push 模式（Pushgateway）
+* Docker 快速部署
+* Kubernetes PodMonitor
+* Grafana 大盘
+* 僵尸指标自动治理
+
+通过以上配置，可以实现完整的 Dubbo-Go 可观测性体系。
