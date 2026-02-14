@@ -76,3 +76,32 @@ srv, err := server.NewServer(
 
 For `true` and `default`, the access log will be printed using the logger component in Dubbo. If a specific log file path is specified, it will be written directly to that file.
 
+## 4. OpenTelemetry Trace Integration
+
+You can enable trace integration via `log.WithTraceIntegration(true)`:
+
+```go
+ins, err := dubbo.NewInstance(
+	dubbo.WithLogger(
+		log.WithLevel("warn"),
+		log.WithZap(),
+		log.WithTraceIntegration(true),  // enable trace integration
+		log.WithRecordErrorToSpan(true), // record errors to span
+		),
+)
+```
+
+Once OpenTelemetry tracer is enabled, you can log with trace context using `CtxLogger`:
+
+```go
+ctxLog.CtxInfo(ctx, "hello dubbogo this is info log")
+ctxLog.CtxDebug(ctx, "hello dubbogo this is debug log")
+ctxLog.CtxWarn(ctx, "hello dubbogo this is warn log")
+ctxLog.CtxError(ctx, "hello dubbogo this is error log")
+
+ctxLog.CtxInfof(ctx, "user: %s", "alice")
+ctxLog.CtxDebugf(ctx, "value: %d", 42)
+ctxLog.CtxWarnf(ctx, "latency: %dms", 150)
+ctxLog.CtxErrorf(ctx, "failed: %v", err)
+```
+

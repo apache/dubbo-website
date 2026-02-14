@@ -75,3 +75,32 @@ srv, err := server.NewServer(
 ```
 
 对于 `true` 和 `default` 而言，访问日志会使用 Dubbo 中的 logger 组件打印出来。如果指定了具体的日志文件路径，则直接写入到该文件。
+
+## 4. OpenTelementry trace 集成
+
+可以通过 `log.WithTraceIntegration(true)` 启用 trace 集成：
+
+```go
+ins, err := dubbo.NewInstance(
+	dubbo.WithLogger(
+		log.WithLevel("warn"),
+		log.WithZap(),
+		log.WithTraceIntegration(true),  // 启用 trace 集成
+		log.WithRecordErrorToSpan(true), // 错误记录到 span
+	),
+)
+```
+
+OpenTelemetry tracer 启用后，可以通过 `CtxLogger` 记录带有 trace 的日志：
+
+```go
+ctxLog.CtxInfo(ctx, "hello dubbogo this is info log")
+ctxLog.CtxDebug(ctx, "hello dubbogo this is debug log")
+ctxLog.CtxWarn(ctx, "hello dubbogo this is warn log")
+ctxLog.CtxError(ctx, "hello dubbogo this is error log")
+
+ctxLog.CtxInfof(ctx, "user: %s", "alice")
+ctxLog.CtxDebugf(ctx, "value: %d", 42)
+ctxLog.CtxWarnf(ctx, "latency: %dms", 150)
+ctxLog.CtxErrorf(ctx, "failed: %v", err)
+```
