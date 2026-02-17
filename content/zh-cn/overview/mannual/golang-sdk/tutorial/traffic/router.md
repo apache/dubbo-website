@@ -69,8 +69,8 @@ resp, err := svc.Greet(ctx, &greet.GreetRequest{Name: name})
 
 参数:
 
-- constant.TagKey: 设置客户端发送请求时所携带的tag标签。
-- constant.ForceUseTag: 设置是否强制匹配标签。
+- `constant.TagKey`: 设置客户端发送请求时所携带的tag标签。
+- `constant.ForceUseTag`: 设置是否强制匹配标签。
 
 > 未携带标签的流量只能打到未携带标签的服务，携带标签的流量则可以打到携带相应标签的服务以及不具有标签的服务（取决于是否配置force参数）。
 
@@ -138,9 +138,8 @@ rep, err := srv.Greet(context.Background(), &greet.GreetRequest{Name: "hello wor
 
 Nacos配置示例:
 
-配置的`Data ID`名字必须为: `{application_name}.{router_type}`。
-
-例如: `condition-server.condition-router`。
+> 配置的`Data ID`名字必须为: `{application_name}.{router_type}`。
+> 例如: `condition-server.condition-router`。
 
 ```yaml
 configVersion: V3.3.2
@@ -172,7 +171,7 @@ conditions:
 
 ### Script router 介绍
 
-Script router与condition类型，都提供了使用表达式进行流量管控的功能。
+Script router与condition router类似，都提供了使用表达式进行流量管控的功能。
 但是Script router具有更强大的匹配功能，与此同时带来的是匹配消耗的资源更多，因此在生产环境中应当尽量少使用。
 
 Script router的示例代码与Condition router类似，在nacos配置上略有差别，这里仅提供nacos上的简单配置。
@@ -194,18 +193,11 @@ script: |
 
 参数说明:
 
-| 参数     | 说明               |
-|--------|------------------|
-| type   | script的类型，可以使用js |
-| script | script实际内容       |
+| 参数     | 说明                 |
+|--------|--------------------|
+| type   | script的类型，目前仅可使用js |
+| script | script实际内容         |
 
 完整示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/main/router/script)。
 
 ### Affinity router 介绍
-
-
-
-
-
-
-
