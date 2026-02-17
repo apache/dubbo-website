@@ -170,7 +170,7 @@ conditions:
 
 完整示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/main/router/condition)。
 
-### Script router
+### Script router 介绍
 
 Script router与condition类型，都提供了使用表达式进行流量管控的功能。
 但是Script router具有更强大的匹配功能，与此同时带来的是匹配消耗的资源更多，因此在生产环境中应当尽量少使用。
@@ -199,7 +199,7 @@ script: |
 | type   | script的类型，可以使用js |
 | script | script实际内容       |
 
-### Affinity router
+### Affinity router 介绍
 
 
 
