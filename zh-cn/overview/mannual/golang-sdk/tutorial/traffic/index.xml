@@ -1,4 +1,133 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>流量管控 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/</link><description>Recent content in 流量管控 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>路由规则</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/router/</guid><description/></item><item><title>Sentinel限流降级</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/sentinel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/sentinel/</guid><description>&lt;p&gt;Dubbo-go 中提供了内置的限流组件，用户可根据自己的业务场景调整限流值、限流后的行为等，具体可 &lt;a href="https://github.com/apache/dubbo-go/blob/main/filter/tps_limiter.go#L52"&gt;TpsLimiter&lt;/a&gt; 定义与具体实现。用户可通过类似以下方式在服务端设置简单的限流策略：&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>流量管控 on Apache Dubbo</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/</link><description>Recent content in 流量管控 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/index.xml" rel="self" type="application/rss+xml"/><item><title>标签路由</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/tag_router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/tag_router/</guid><description>&lt;h2 id="使用方法"&gt;使用方法&lt;/h2&gt;
+&lt;h3 id="前置准备"&gt;前置准备&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Docker 以及 Docker compose 环境来部署Nacos配置中心。&lt;/li&gt;
+&lt;li&gt;Nacos 2.x+&lt;/li&gt;
+&lt;li&gt;Go 1.23+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="启动nacos配置中心"&gt;启动Nacos配置中心&lt;/h4&gt;
+&lt;p&gt;参考这个教程来&lt;a href="https://dubbo-next.staged.apache.org/zh-cn/overview/reference/integrations/nacos/"&gt;启动Nacos&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id="tag-router-介绍"&gt;Tag router 介绍&lt;/h3&gt;
+&lt;p&gt;Tag router可以通过标签对流量进行管控，以下为示例代码。&lt;/p&gt;
+&lt;p&gt;服务端部分：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ins, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithName&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;tag-server&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithTag&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;test-Tag&amp;#34;&lt;/span&gt;), &lt;span style="color:#586e75"&gt;// set application&amp;#39;s tag&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			registry.&lt;span style="color:#268bd2"&gt;WithNacos&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(RegistryAddress),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithProtocol&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			protocol.&lt;span style="color:#268bd2"&gt;WithTriple&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			protocol.&lt;span style="color:#268bd2"&gt;WithPort&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;参数：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;dubbo.WithTag: 设置该实例携带的tag，用于标记该实例（例如为灰度环境等）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;客户端部分：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;atta &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; &lt;span style="color:#268bd2"&gt;map&lt;/span&gt;[&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;]&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	constant.Tagkey: &lt;span style="color:#2aa198"&gt;&amp;#34;test-tag&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	constant.ForceUseTag: &lt;span style="color:#2aa198"&gt;&amp;#34;true&amp;#34;&lt;/span&gt;, &lt;span style="color:#586e75"&gt;// 使用string类型&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ctx &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; context.&lt;span style="color:#268bd2"&gt;WithValue&lt;/span&gt;(context.&lt;span style="color:#268bd2"&gt;Background&lt;/span&gt;(), constant.AttachmentKey, atta)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;resp, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; svc.&lt;span style="color:#268bd2"&gt;Greet&lt;/span&gt;(ctx, &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;greet.GreetRequest{Name: name})
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;参数:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;constant.TagKey&lt;/code&gt;: 设置客户端发送请求时所携带的tag标签。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;constant.ForceUseTag&lt;/code&gt;: 设置是否强制匹配标签。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;未携带标签的流量只能打到未携带标签的服务，携带标签的流量则可以打到携带相应标签的服务以及不具有标签的服务（取决于是否配置force参数）。&lt;/p&gt;</description></item><item><title>脚本路由</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/script_router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/script_router/</guid><description>&lt;h2 id="使用方法"&gt;使用方法&lt;/h2&gt;
+&lt;h3 id="前置准备"&gt;前置准备&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Docker 以及 Docker compose 环境来部署Nacos配置中心。&lt;/li&gt;
+&lt;li&gt;Nacos 2.x+&lt;/li&gt;
+&lt;li&gt;Go 1.23+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="启动nacos配置中心"&gt;启动Nacos配置中心&lt;/h4&gt;
+&lt;p&gt;参考这个教程来&lt;a href="https://dubbo-next.staged.apache.org/zh-cn/overview/reference/integrations/nacos/"&gt;启动Nacos&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id="script-router-介绍"&gt;Script router 介绍&lt;/h3&gt;
+&lt;p&gt;Script router与condition router类似，都提供了使用表达式进行流量管控的功能。
+但是Script router具有更强大的匹配功能，与此同时带来的是匹配消耗的资源更多，因此在生产环境中应当尽量少使用。&lt;/p&gt;
+&lt;p&gt;Script router的示例代码与Condition router类似，在nacos配置上略有差别，这里仅提供nacos上的简单配置。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;scope&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;application&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;key&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;script-server&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;enabled&lt;/span&gt;: &lt;span style="color:#cb4b16"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;javascript&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;script&lt;/span&gt;: |&lt;span style="color:#2aa198"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; (function(invokers, invocation, context) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; if (!invokers || invokers.length === 0) return [];
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; return invokers.filter(function(invoker) {
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; var url = invoker.GetURL();
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; return url &amp;amp;&amp;amp; url.Port === &amp;#34;20000&amp;#34;;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; });
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#2aa198"&gt; })(invokers, invocation, context);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;参数说明:&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;参数&lt;/th&gt;
+ &lt;th&gt;说明&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;type&lt;/td&gt;
+ &lt;td&gt;script的类型，目前仅可使用js&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;script&lt;/td&gt;
+ &lt;td&gt;script实际内容&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;完整示例请见: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/router/script"&gt;本示例完整代码&lt;/a&gt;。&lt;/p&gt;</description></item><item><title>条件路由</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/condition_router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/condition_router/</guid><description>&lt;h2 id="使用方法"&gt;使用方法&lt;/h2&gt;
+&lt;h3 id="前置准备"&gt;前置准备&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Docker 以及 Docker compose 环境来部署Nacos配置中心。&lt;/li&gt;
+&lt;li&gt;Nacos 2.x+&lt;/li&gt;
+&lt;li&gt;Go 1.23+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="启动nacos配置中心"&gt;启动Nacos配置中心&lt;/h4&gt;
+&lt;p&gt;参考这个教程来&lt;a href="https://dubbo-next.staged.apache.org/zh-cn/overview/reference/integrations/nacos/"&gt;启动Nacos&lt;/a&gt;。&lt;/p&gt;
+&lt;h3 id="condition-router-介绍"&gt;Condition router 介绍&lt;/h3&gt;
+&lt;p&gt;Condition router 与 Tag router 类似，但是提供了更强大的流量管控功能，可以通过表达式&lt;code&gt;consumer =&amp;gt; provider&lt;/code&gt;，
+对服务端以及客户端进行流量管控。&lt;/p&gt;
+&lt;p&gt;匹配表达式示例:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;host = 127.0.0.1 =&amp;gt; host = 127.0.0.1, 192.168.1.1&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;可以使用 = 以及 != 等符号进行匹配，使用逗号进行多选择匹配。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;示例代码:&lt;/p&gt;
+&lt;p&gt;服务端部分:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ins, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithName&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;condition-server&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			registry.&lt;span style="color:#268bd2"&gt;WithNacos&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(RegistryAddress),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithProtocol&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			protocol.&lt;span style="color:#268bd2"&gt;WithTriple&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			protocol.&lt;span style="color:#268bd2"&gt;WithPort&lt;/span&gt;(TriPort),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;客户端部分:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ins, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithName&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;condition-client&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			registry.&lt;span style="color:#268bd2"&gt;WithNacos&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(RegistryAddress),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithConfigCenter&lt;/span&gt;( &lt;span style="color:#586e75"&gt;// configure config center to enable condition router&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			config_center.&lt;span style="color:#268bd2"&gt;WithNacos&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			config_center.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(RegistryAddress),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;rep, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; srv.&lt;span style="color:#268bd2"&gt;Greet&lt;/span&gt;(context.&lt;span style="color:#268bd2"&gt;Background&lt;/span&gt;(), &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;greet.GreetRequest{Name: &lt;span style="color:#2aa198"&gt;&amp;#34;hello world&amp;#34;&lt;/span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;使用condition router必须在nacos等配置中心动态设置匹配规则。&lt;/p&gt;</description></item><item><title>Sentinel限流降级</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/sentinel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/sentinel/</guid><description>&lt;p&gt;Dubbo-go 中提供了内置的限流组件，用户可根据自己的业务场景调整限流值、限流后的行为等，具体可 &lt;a href="https://github.com/apache/dubbo-go/blob/main/filter/tps_limiter.go#L52"&gt;TpsLimiter&lt;/a&gt; 定义与具体实现。用户可通过类似以下方式在服务端设置简单的限流策略：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;server.&lt;span style="color:#268bd2"&gt;WithTpsLimiter&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;method-service&amp;#34;&lt;/span&gt;) &lt;span style="color:#586e75"&gt;// 目前支持 method-service、polaris 等几个实现&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;server.&lt;span style="color:#268bd2"&gt;WithTpsLimiterXxx&lt;/span&gt;() &lt;span style="color:#586e75"&gt;// 设置限流相关阈值，请根据具体方法填写&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;//tps.limit.strategy: &amp;#34;slidingWindow&amp;#34;&lt;/span&gt;
@@ -12,4 +141,4 @@
 &lt;h3 id="基于并发任务数限流当前在运行任务数"&gt;基于并发任务数限流(当前在运行任务数)&lt;/h3&gt;
 &lt;h2 id="consumer-限流"&gt;Consumer 限流&lt;/h2&gt;
 &lt;h3 id="熔断策略"&gt;熔断策略&lt;/h3&gt;
-&lt;h3 id="基于并发请求数限流未收到响应的请求数"&gt;基于并发请求数限流(未收到响应的请求数)&lt;/h3&gt;</description></item></channel></rss>
+&lt;h3 id="基于并发请求数限流未收到响应的请求数"&gt;基于并发请求数限流(未收到响应的请求数)&lt;/h3&gt;</description></item><item><title/><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/affinity_router/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/affinity_router/</guid><description/></item></channel></rss>
