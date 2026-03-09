@@ -28,7 +28,7 @@ weight: 6
 | dubbo.jstack-dump.max-line | -Ddubbo.jstack-dump.max-line=20 | Dubbo supports automatic printing of the call stack. This parameter controls the number of stack lines, e.g., only the first 20 lines will be printed. |
 | dubbo.json-framework.prefer | -Ddubbo.json-framework.prefer=gson | Sets the specific implementation of JSON serialization in the framework. Currently available implementations are `fastjson2`, `fastjson`, `gson`, `jackson`. The framework automatically finds the available implementation in decreasing order of preference. |
 | dubbo.network.interface.ignored | -Ddubbo.network.interface.ignored=eth1,eth2 | In multi-network card environments, used when you need to manually control the network card address registered with the registry. It is used to exclude certain network cards. |
-| dubbo.network.interface.preferred | -Ddubbo.network.interface.ignored=eth0 | In multi-network card environments, used to specify a particular network card for registration with the registry. |
+| dubbo.network.interface.preferred | -Ddubbo.network.interface.preferred=eth0 | In multi-network card environments, used to specify a particular network card for registration with the registry. |
 | sun.rmi.transport.tcp.responseTimeout | -Dsun.rmi.transport.tcp.responseTimeout=5000 | Sets the timeout for RMI protocol, in milliseconds. |
 | env |  | Specific parameter for Apollo configuration center. |
 | app.id |  | Specific parameter for Apollo configuration center. |
