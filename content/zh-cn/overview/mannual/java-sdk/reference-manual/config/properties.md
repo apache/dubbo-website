@@ -31,7 +31,7 @@ weight: 6
 | dubbo.jstack-dump.max-line | -Ddubbo.jstack-dump.max-line=20 | Dubbo 支持自动打印调用堆栈，这个参数可以控制堆栈行数，如示例中只会打印前20行堆栈 |
 | dubbo.json-framework.prefer| -Ddubbo.json-framework.prefer=gson | 设置框架中 json 序列化的具体实现，目前可选实现有 `fastjson2`、`fastjson`、`gson`、`jackson`。默认情况，框架会自动查找可用实现，以上按顺序优先级依次降低 |
 | dubbo.network.interface.ignored | -Ddubbo.network.interface.ignored=eth1,eth2 | 在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于排除某些网卡 |
-| dubbo.network.interface.preferred | -Ddubbo.network.interface.ignored=eth0 | 在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于指定一个特定网卡 |
+| dubbo.network.interface.preferred | -Ddubbo.network.interface.preferred=eth0 | 在多网卡环境下，当需要手动控制注册到注册中心的网卡地址时使用。用于指定一个特定网卡 |
 | sun.rmi.transport.tcp.responseTimeout | -Dsun.rmi.transport.tcp.responseTimeout=5000 | 用于设置 RMI 协议下的超时时间，单位ms |
 | env |  | Apollo 配置中心特有参数 |
 | app.id |  | Apollo 配置中心特有参数 |
