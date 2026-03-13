@@ -196,3 +196,6 @@ listeners:
    - p95/p99 延迟
    - 上游实例流量分布
 
+### 相关示例
+
+地址: https://github.com/apache/dubbo-go-pixiu-samples ai/kvcache

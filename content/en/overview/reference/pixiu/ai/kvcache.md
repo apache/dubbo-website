@@ -196,3 +196,6 @@ listeners:
    - p95/p99 latency
    - upstream load distribution
 
+### Related Example
+
+URL: https://github.com/apache/dubbo-go-pixiu-samples ai/kvcache
