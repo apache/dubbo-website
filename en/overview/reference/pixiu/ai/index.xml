@@ -21,7 +21,39 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;llm_meta&lt;/span&gt;:
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;# ... other LLM-specific configuration goes here ...&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="llm_meta-configuration-fields"&gt;&lt;code&gt;llm_meta&lt;/code&gt; Configuration Fields&lt;/h3&gt;
-&lt;p&gt;The llm_meta block holds all the configuration specific to how the gateway should treat this LLM endpoint.&lt;/p&gt;</description></item><item><title>register service</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/ai/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/ai/registry/</guid><description>&lt;h2 id="llm-service-discovery-and-registration"&gt;LLM Service Discovery and Registration&lt;/h2&gt;
+&lt;p&gt;The llm_meta block holds all the configuration specific to how the gateway should treat this LLM endpoint.&lt;/p&gt;</description></item><item><title>KVCache offload</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/ai/kvcache/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/ai/kvcache/</guid><description>&lt;h2 id="ai-kvcache-filter-configuration"&gt;AI KVCache Filter Configuration&lt;/h2&gt;
+&lt;p&gt;This document explains how to configure and use the &lt;code&gt;dgp.filter.ai.kvcache&lt;/code&gt; filter in Dubbo-go-Pixiu.&lt;/p&gt;
+&lt;p&gt;The filter integrates with vLLM (&lt;code&gt;/tokenize&lt;/code&gt;) and LMCache controller APIs (&lt;code&gt;/lookup&lt;/code&gt;, &lt;code&gt;/pin&lt;/code&gt;, &lt;code&gt;/compress&lt;/code&gt;, &lt;code&gt;/evict&lt;/code&gt;) to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;provide cache-aware routing hints&lt;/li&gt;
+&lt;li&gt;trigger cache-management actions asynchronously&lt;/li&gt;
+&lt;li&gt;keep the main request path non-blocking&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id="architecture-and-request-flow"&gt;Architecture and Request Flow&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;dgp.filter.ai.kvcache&lt;/code&gt; is an HTTP decode filter. A typical request flow is:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Parse request body and extract &lt;code&gt;model&lt;/code&gt; and &lt;code&gt;prompt&lt;/code&gt; (or fallback from &lt;code&gt;messages&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;Record local hotness statistics (&lt;code&gt;model + prompt&lt;/code&gt;) in the token manager.&lt;/li&gt;
+&lt;li&gt;Try cache-aware routing:
+&lt;ul&gt;
+&lt;li&gt;read token cache for prompt&lt;/li&gt;
+&lt;li&gt;call LMCache &lt;code&gt;/lookup&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;set a preferred endpoint hint in context (&lt;code&gt;llm_preferred_endpoint_id&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Start an async cache-management goroutine (best-effort):
+&lt;ul&gt;
+&lt;li&gt;call vLLM &lt;code&gt;/tokenize&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;call LMCache &lt;code&gt;/lookup&lt;/code&gt; if needed&lt;/li&gt;
+&lt;li&gt;execute strategy decisions (&lt;code&gt;compress&lt;/code&gt; / &lt;code&gt;pin&lt;/code&gt; / &lt;code&gt;evict&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Continue the filter chain immediately (main request is not blocked by cache management).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h3 id="routing-contract-important"&gt;Routing Contract (Important)&lt;/h3&gt;
+&lt;p&gt;Current cache-aware routing uses &lt;strong&gt;instance id matching&lt;/strong&gt;:&lt;/p&gt;</description></item><item><title>register service</title><link>https://cn.dubbo.apache.org/en/overview/reference/pixiu/ai/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/en/overview/reference/pixiu/ai/registry/</guid><description>&lt;h2 id="llm-service-discovery-and-registration"&gt;LLM Service Discovery and Registration&lt;/h2&gt;
 &lt;p&gt;This document aims to guide LLM service providers on how to dynamically register their service instances with the LLM Gateway via a Nacos registry. By following these guidelines, the gateway will be able to automatically discover your service and apply appropriate routing, retry, and fallback strategies based on the metadata you provide.&lt;/p&gt;
 &lt;h3 id="registration-mechanism-overview"&gt;Registration Mechanism Overview&lt;/h3&gt;
 &lt;p&gt;The core mechanism of service discovery is that your LLM service registers as a &lt;strong&gt;Nacos instance&lt;/strong&gt; and provides a specific set of &lt;strong&gt;metadata&lt;/strong&gt; upon registration. The LLM Gateway listens for service changes in Nacos, reads this metadata, and dynamically converts it into a fully functional gateway &lt;code&gt;endpoint&lt;/code&gt; configuration.&lt;/p&gt;</description></item></channel></rss>
