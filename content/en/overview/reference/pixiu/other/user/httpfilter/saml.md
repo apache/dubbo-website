@@ -101,4 +101,4 @@ In some local HTTP browser environments, the first login may not return cleanly 
 
 ### Sample
 
-A runnable sample is maintained in `dubbo-go-pixiu-samples` under `dubbogo/simple/saml`.
+A runnable sample is maintained in `dubbo-go-pixiu-samples` under `auth/saml`.

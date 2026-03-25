@@ -102,4 +102,4 @@ SAML 的 SP-initiated 登录流程通常依赖一个“请求跟踪 cookie”，
 
 ### 示例
 
-可运行示例位于 `dubbo-go-pixiu-samples` 仓库中的 `dubbogo/simple/saml`。
+可运行示例位于 `dubbo-go-pixiu-samples` 仓库中的 `auth/saml`。
