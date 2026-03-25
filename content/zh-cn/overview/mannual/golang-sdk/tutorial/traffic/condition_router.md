@@ -63,7 +63,7 @@ ins, err := dubbo.NewInstance(
 rep, err := srv.Greet(context.Background(), &greet.GreetRequest{Name: "hello world"})
 ```
 
-> 使用condition router必须在nacos等配置中心动态设置匹配规则。
+> 上述示例使用的是动态配置方式，需要在nacos等配置中心动态设置匹配规则。
 
 Nacos配置示例:
 
@@ -85,3 +85,42 @@ conditions:
 ```
 
 完整示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/main/router/condition)。
+
+### 静态配置 API
+
+除上面的动态配置方式外，Condition router 也支持通过静态配置 API 在代码中注入路由规则。静态配置不要求配置中心参与，可以配合直连 URL 使用，也可以配合注册中心使用。
+
+下面是一个服务级静态 condition router 的示例：
+
+```go
+ins, err := dubbo.NewInstance(
+	dubbo.WithName(clientApplication),
+	dubbo.WithRouter(
+		router.WithScope("service"),
+		router.WithKey(greet.GreetServiceName),
+		router.WithPriority(100),
+		router.WithForce(true),
+		router.WithConditions([]string{
+			"method = Greet => port = 20000",
+		}),
+	),
+)
+```
+
+参数：
+
+- `router.WithScope("service")`: 按服务维度生效。
+- `router.WithKey(greet.GreetServiceName)`: 指定当前规则作用的服务键。
+- `router.WithConditions(...)`: 静态声明 condition router 的匹配表达式。
+- `router.WithForce(true)`: 控制规则命中失败时是否允许回退。
+
+`dubbo-go-samples` 中的静态示例使用直连 URL，只是为了最小化演示，不代表该 API 只能用于直连场景。
+
+静态配置示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/bdcb408a52b6cf3d4f70e5b6f2b0ab52a8f04f43/router/static_config/condition)。
+
+### 规则优先级与合并语义
+
+- 动态配置的路由规则会覆盖静态配置。
+- 多次调用 `dubbo.WithRouter(...)` 时，采用 append 语义，多条静态路由会被追加到实例配置中。
+- 对同一条静态路由多次设置 `router.WithConditions(...)` 时，采用 replace 语义，后一次设置会替换前一次设置。
+- 重复注入完全相同的静态规则时，最终路由结果通常保持一致，但实现上不会先比较新旧内容并短路跳过。

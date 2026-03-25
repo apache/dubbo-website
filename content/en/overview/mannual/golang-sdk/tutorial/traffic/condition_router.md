@@ -64,7 +64,7 @@ ins, err := dubbo.NewInstance(
 rep, err := srv.Greet(context.Background(), &greet.GreetRequest{Name: "hello world"})
 ```
 
-> A configuration in Nacos is needed if you want to use condition router.
+> The example above uses dynamic configuration and requires a config in Nacos or another config center.
 
 Example config:
 
@@ -86,3 +86,43 @@ conditions:
 
 For the complete example, please
 see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/main/router/condition).
+
+### Static configuration API
+
+Besides the dynamic approach above, condition router also supports injecting routing rules statically in code. Static configuration does not require a config center, and it can work with direct URLs or with instances discovered from a registry.
+
+The following example shows a service-scope static condition router:
+
+```go
+ins, err := dubbo.NewInstance(
+	dubbo.WithName(clientApplication),
+	dubbo.WithRouter(
+		router.WithScope("service"),
+		router.WithKey(greet.GreetServiceName),
+		router.WithPriority(100),
+		router.WithForce(true),
+		router.WithConditions([]string{
+			"method = Greet => port = 20000",
+		}),
+	),
+)
+```
+
+Parameters:
+
+- `router.WithScope("service")`: applies the rule at service scope.
+- `router.WithKey(greet.GreetServiceName)`: binds the rule to the target service key.
+- `router.WithConditions(...)`: declares the static condition expressions.
+- `router.WithForce(true)`: controls whether fallback is allowed when the rule does not match.
+
+The static sample in `dubbo-go-samples` uses direct URLs only to keep the example minimal; it does not mean the API is limited to direct-connect scenarios.
+
+For the static example, please
+see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/bdcb408a52b6cf3d4f70e5b6f2b0ab52a8f04f43/router/static_config/condition).
+
+### Priority and merge semantics
+
+- Dynamically delivered routing rules override static configuration.
+- When `dubbo.WithRouter(...)` is called multiple times, append semantics apply and multiple static router entries are appended to the instance configuration.
+- When `router.WithConditions(...)` is set multiple times on the same static router entry, replace semantics apply and the later setting replaces the earlier one.
+- Repeatedly injecting the exact same static rule usually leads to the same effective routing result, but the implementation does not compare old and new content and short-circuit as a no-op.
