@@ -329,6 +329,8 @@ func main() {
 
 启动后访问 `http://localhost:20000/dubbo/openapi/swagger-ui/` 即可查看 Swagger UI 文档界面。
 
+完整示例源码请参考 [dubbo-go-samples OpenAPI 示例](https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple/openapi)。
+
 ## 架构说明
 
 Dubbo-go OpenAPI 的核心架构由以下组件构成：

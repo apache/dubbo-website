@@ -329,6 +329,8 @@ func main() {
 
 After starting, visit `http://localhost:20000/dubbo/openapi/swagger-ui/` to view the Swagger UI documentation.
 
+For the complete example source code, see [dubbo-go-samples OpenAPI example](https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple/openapi).
+
 ## Architecture
 
 The core architecture of Dubbo-go OpenAPI consists of the following components:
