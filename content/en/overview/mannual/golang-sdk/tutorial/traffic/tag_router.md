@@ -107,7 +107,7 @@ Parameters:
 The static sample in `dubbo-go-samples` uses direct URLs only to keep the example minimal; it does not mean the API is limited to direct-connect scenarios.
 
 For the static example, please
-see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/bdcb408a52b6cf3d4f70e5b6f2b0ab52a8f04f43/router/static_config/tag).
+see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/tag).
 
 ### Priority and merge semantics
 

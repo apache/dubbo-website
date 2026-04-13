@@ -103,7 +103,7 @@ ctx := context.WithValue(context.Background(), constant.AttachmentKey, map[strin
 
 `dubbo-go-samples` 中的静态示例使用直连 URL，只是为了最小化演示，不代表静态配置 API 只能用于直连场景。
 
-静态配置示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/bdcb408a52b6cf3d4f70e5b6f2b0ab52a8f04f43/router/static_config/tag)。
+静态配置示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/tag)。
 
 ### 规则优先级与合并语义
 
