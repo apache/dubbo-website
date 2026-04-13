@@ -64,3 +64,54 @@ Parameters:
 
 For the complete example, please
 see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/main/router/tag).
+
+### Static configuration API
+
+Besides the usage above, tag router also supports injecting routing rules statically in code. Static configuration does not require a config center, and it can work with direct URLs or with instances discovered from a registry.
+
+The following example shows an application-scope static tag router:
+
+```go
+ins, err := dubbo.NewInstance(
+	dubbo.WithName(clientApplication),
+	dubbo.WithRouter(
+		router.WithScope("application"),
+		router.WithKey(clientApplication),
+		router.WithPriority(100),
+		router.WithForce(false),
+		router.WithTags([]global.Tag{
+			{
+				Name:      "gray",
+				Addresses: []string{"127.0.0.1:20002"},
+			},
+		}),
+	),
+)
+```
+
+Request tag attachment:
+
+```go
+ctx := context.WithValue(context.Background(), constant.AttachmentKey, map[string]string{
+	constant.Tagkey: "gray",
+})
+```
+
+Parameters:
+
+- `router.WithScope("application")`: applies the rule at application scope.
+- `router.WithKey(clientApplication)`: binds the rule to the consumer application.
+- `router.WithTags(...)`: declares the static mapping from tag to address list.
+- `router.WithForce(...)`: controls whether fallback is allowed when no tagged provider matches.
+
+The static sample in `dubbo-go-samples` uses direct URLs only to keep the example minimal; it does not mean the API is limited to direct-connect scenarios.
+
+For the static example, please
+see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/tag).
+
+### Priority and merge semantics
+
+- Dynamically delivered routing rules override static configuration.
+- When `dubbo.WithRouter(...)` is called multiple times, append semantics apply and multiple static router entries are appended to the instance configuration.
+- When `router.WithTags(...)` is set multiple times on the same static router entry, replace semantics apply and the later setting replaces the earlier one.
+- Repeatedly injecting the exact same static rule usually leads to the same effective routing result, but the implementation does not compare old and new content and short-circuit as a no-op.
