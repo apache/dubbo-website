@@ -363,7 +363,45 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;或者&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;svc, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; health.&lt;span style="color:#268bd2"&gt;NewHealth&lt;/span&gt;(cli)
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;svc.&lt;span style="color:#268bd2"&gt;Check&lt;/span&gt;(context.&lt;span style="color:#268bd2"&gt;Background&lt;/span&gt;(), &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;health.HealthCheckRequest{Service: &lt;span style="color:#2aa198"&gt;&amp;#34;greet.GreetService&amp;#34;&lt;/span&gt;}, client.&lt;span style="color:#268bd2"&gt;WithCheck&lt;/span&gt;(&lt;span style="color:#cb4b16"&gt;false&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>filter拦截器</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/filter/</guid><description>&lt;p&gt;Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>OpenAPI 文档生成与管理</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/openapi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/openapi/</guid><description>&lt;p&gt;Dubbo-go 提供了内置的 OpenAPI 支持，可以自动为 Triple 协议服务生成符合 OpenAPI 3.0 规范的 API 文档，并通过 Swagger UI 和 ReDoc 提供 可视化的 API 浏览与调试界面。&lt;/p&gt;
+&lt;h2 id="功能概览"&gt;功能概览&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;自动文档生成&lt;/strong&gt;：基于服务接口定义（protobuf IDL 或非 IDL 模式），自动生成 OpenAPI 3.0.1 规范的 API 文档&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Swagger UI&lt;/strong&gt;：内置 Swagger UI 界面，支持在线浏览和调试 API&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ReDoc&lt;/strong&gt;：内置 ReDoc 界面，提供美观的 API 文档展示&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多格式输出&lt;/strong&gt;：支持 JSON 和 YAML 两种格式输出&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分组管理&lt;/strong&gt;：支持按 OpenAPI Group 对服务进行分组，方便管理多个版本的 API 文档&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;静态文档生成&lt;/strong&gt;：通过 &lt;code&gt;protoc-gen-triple-openapi&lt;/code&gt; 插件，在编译期从 &lt;code&gt;.proto&lt;/code&gt; 文件生成静态 OpenAPI 文档&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="快速开始"&gt;快速开始&lt;/h2&gt;
+&lt;h3 id="1-启用-openapi"&gt;1. 启用 OpenAPI&lt;/h3&gt;
+&lt;p&gt;在创建 Server 时，通过 Triple 协议选项启用 OpenAPI：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; main
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; (
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/protocol&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; triple &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/protocol/triple&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/server&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; srv, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; server.&lt;span style="color:#268bd2"&gt;NewServer&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; server.&lt;span style="color:#268bd2"&gt;WithServerProtocol&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol.&lt;span style="color:#268bd2"&gt;WithTriple&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; triple.&lt;span style="color:#268bd2"&gt;WithOpenAPI&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; triple.&lt;span style="color:#268bd2"&gt;OpenAPIEnable&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; protocol.&lt;span style="color:#268bd2"&gt;WithPort&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; )
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// 注册服务...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; srv.&lt;span style="color:#268bd2"&gt;Serve&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;启动服务后，即可通过以下地址访问 OpenAPI 文档：&lt;/p&gt;</description></item><item><title>filter拦截器</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/filter/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/filter/</guid><description>&lt;p&gt;Filter 过滤器动态拦截请求（request）或响应（response）以转换或使用请求或响应中包含的信息。过滤器本身通常不会创建响应，而是提供可以“附加”到任何一次 RPC 请求的通用函数。Dubbo Filter 是可插拔的，我们可以在一次 RPC 请求中插入任意类型的、任意多个 Filter。&lt;/p&gt;
 &lt;p&gt;Filter 工作原理如下图所示：&lt;/p&gt;
 &lt;img style="max-width:800px;height:auto;" src="https://cn.dubbo.apache.org/imgs/v3/tasks/framework/filter.png"/&gt;
 &lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
