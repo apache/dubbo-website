@@ -191,5 +191,59 @@ fmt.Println(user.Name)
 
 Note: `InvokeWithType` currently only supports the default Map generic invocation.
 
-Related reading: [【Dubbo-go Service Proxy Model】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
+## Cross-language RPC contract guidance
 
+In generic invocation or cross-language scenarios, Go variadic method signatures such as `args ...string` can introduce contract ambiguity.
+Existing variadic services remain supported, but `...T` is not recommended in new RPC contracts for cross-language or generic-invocation-facing services.
+
+The reason is that variadic parameters have special semantics in Go, while cross-language invocation, dynamic argument assembly, generic invocation, and serialization usually represent them as ordinary arrays or lists.
+This increases the risk that callers and providers interpret the argument shape differently.
+
+### Recommended patterns
+
+For new service contracts, prefer the following patterns:
+
+- Use `[]T` instead of `...T` for repeated values of the same type
+- Use request/response structs when the input shape may evolve over time
+- Use Triple + Protobuf IDL for new cross-language services, and model repeated inputs with `repeated` fields
+
+### Migration examples
+
+Avoid introducing new cross-language contracts like this:
+
+```go
+func MultiArgs(ctx context.Context, args ...string) error
+```
+
+Prefer a slice parameter instead:
+
+```go
+func MultiArgs(ctx context.Context, args []string) error
+```
+
+If the contract may evolve further, prefer a request object:
+
+```go
+type MultiArgsRequest struct {
+    Args []string
+}
+
+func MultiArgs(ctx context.Context, req *MultiArgsRequest) error
+```
+
+For new Triple + Protobuf services, use a `repeated` field to model repeated inputs:
+
+```proto
+message MultiArgsRequest {
+  repeated string args = 1;
+}
+```
+
+### Compatibility note
+
+Existing variadic services remain supported. This guidance is mainly intended for new service contract design.
+If a service is expected to support cross-language consumers, gateway forwarding, or generic invocation, it is better not to expose variadic parameters as part of the public RPC contract.
+
+In general, business inputs should be modeled explicitly as structured fields. Non-business context should be passed through attachments or IDL metadata instead of variadic parameters.
+
+Related reading: [【Dubbo-go Service Proxy Model】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
