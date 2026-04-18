@@ -191,4 +191,59 @@ fmt.Println(user.Name)
 
 注意：`InvokeWithType` 目前仅支持默认的 Map 泛化方式。
 
+## 跨语言 RPC 接口定义建议
+
+在泛化调用或跨语言调用场景下，Go 的 variadic 方法签名（例如 `args ...string`）容易引入额外的接口定义歧义。
+现有 variadic 服务仍保持兼容，但对于新的跨语言服务或需要面向泛化调用的服务，不建议继续将 `...T` 作为 RPC 接口定义的一部分。
+
+这是因为 variadic 参数在 Go 中具有特殊语义，而在跨语言调用、动态参数组装、泛化调用和序列化过程中，通常只能被表示为普通数组或列表。
+这会增加调用侧与服务侧对参数形态理解不一致的风险。
+
+### 推荐模式
+
+对于新的服务接口定义，建议优先采用以下方式：
+
+- 对于“多个同类型参数”的场景，使用 `[]T` 替代 `...T`
+- 对于参数可能继续演进的场景，使用 request/response struct
+- 对于新的跨语言服务，优先使用 Triple + Protobuf IDL，并通过 `repeated` 字段表达重复参数
+
+### 迁移示例
+
+不建议在新的跨语言接口定义中继续使用：
+
+```go
+func MultiArgs(ctx context.Context, args ...string) error
+```
+
+更推荐使用切片参数：
+
+```go
+func MultiArgs(ctx context.Context, args []string) error
+```
+
+如果接口后续还可能继续扩展，建议使用请求对象：
+
+```go
+type MultiArgsRequest struct {
+    Args []string
+}
+
+func MultiArgs(ctx context.Context, req *MultiArgsRequest) error
+```
+
+对于新的 Triple + Protobuf 服务，可以使用 `repeated` 字段表达同类输入：
+
+```proto
+message MultiArgsRequest {
+  repeated string args = 1;
+}
+```
+
+### 边界说明
+
+现有 variadic 服务仍保持兼容，这里的建议主要面向新的服务接口定义设计。
+如果服务需要面向跨语言消费者、网关转发或泛化调用，建议尽量避免将 variadic 参数作为公开 RPC 接口定义的一部分。
+
+通常情况下，业务输入应尽量显式建模为结构化字段；非业务上下文信息应通过 attachments 或 IDL metadata 传递，而不是依赖 variadic 参数表达。
+
 相关阅读：[【Dubbo-go 服务代理模型】](https://blog.csdn.net/weixin_39860915/article/details/122738548)
