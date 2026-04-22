@@ -29,14 +29,7 @@
 &lt;p&gt;dubbo-getty 是一个Go语言异步网络 io 库，支持 tcp/udp/websocket 协议。&lt;/p&gt;
 &lt;h3 id="dubbo-go-hessian2"&gt;Dubbo-go-hessian2&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://github.com/apache/dubbo-go-hessian2"&gt;github.com/apache/dubbo-go-hessian2&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Dubbo-go-hessian2 是一个Go语言 hessian2 序列化协议库&lt;/p&gt;</description></item><item><title>泛化调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/generic/</guid><description>&lt;div class="alert alert-warning" role="alert"&gt;
-&lt;h4 class="alert-heading"&gt;废弃警告&lt;/h4&gt;
-
- dubbo-go 泛化调用仅适用于 dubbo2 协议，不适用 triple 协议
-
-&lt;/div&gt;
-
-&lt;p&gt;泛化调用是一种 Dubbo-Go 的特殊调用方式，它允许中间节点在没有接口信息的情况下传递调用信息，常被用于测试、网关的场景下。泛化调用支持 Dubbo 和 Triple 协议，但是目前序列化方案只支持 Hessian。&lt;/p&gt;
+&lt;p&gt;Dubbo-go-hessian2 是一个Go语言 hessian2 序列化协议库&lt;/p&gt;</description></item><item><title>泛化调用</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/refer/generic/</guid><description>&lt;p&gt;泛化调用是一种 Dubbo-Go 的特殊调用方式，它允许中间节点在没有接口信息的情况下传递调用信息，常被用于测试、网关的场景下。泛化调用支持 Dubbo 和 Triple 协议。通过 &lt;code&gt;client.NewGenericService&lt;/code&gt; 创建泛化服务时，默认使用 Hessian2 作为传输序列化方案。&lt;/p&gt;
 &lt;h2 id="背景"&gt;背景&lt;/h2&gt;
 &lt;p&gt;为了便于理解，这篇文档中以网关使用场景介绍泛化调用。我们先来考虑普通调用（非泛化调用）。下图包含了 consumer 和 provider 两个关键角色（后文中用 endpoint 代表一个 consumer 或一个 provider），各自都有一份关于 org.apache.dubbo.sample.User 接口的定义。假定在调用行为中需要使用 org.apache.dubbo.sample.User 接口。&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1631941941270-86ce9845-5a88-4cb5-8c8a-da8ae7eeb4d5.png" alt="img"&gt;&lt;/p&gt;
@@ -45,7 +38,7 @@
 &lt;h2 id="原理"&gt;原理&lt;/h2&gt;
 &lt;p&gt;泛化调用本质上就是把复杂结构转化为通用结构，这里说的通用结构是指 map、string 等，网关是可以顺利解析并传递这些通用结构的。&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://dubbo.apache.org/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1632207075184-25939db4-f384-452e-a0b8-e1deff7971de.png" alt="img"&gt;&lt;/p&gt;
-&lt;p&gt;目前，Dubbo-go v3 只支持 Map 泛化方式（default）。我们以 User 接口为例，其定义如下所示。&lt;/p&gt;
+&lt;p&gt;Dubbo-go v3 支持多种泛化方式，包括 Map（默认）、Gson、Protobuf-JSON 和 Bean。其中 Map 泛化方式最为常用，下面以此为例进行说明。以 User 接口为例，其定义如下所示。&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#586e75"&gt;// definition&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; User &lt;span style="color:#268bd2"&gt;struct&lt;/span&gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	ID &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;
