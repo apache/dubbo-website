@@ -9,11 +9,8 @@ title: Generic Invocation
 type: docs
 weight: 2
 ---
-{{% alert title="Deprecation Warning" color="warning" %}}
-dubbo-go generic invocation is only applicable to the dubbo2 protocol, not the triple protocol
-{{% /alert %}}
 
-Generic invocation is a special way of calling in Dubbo-Go that allows intermediary nodes to pass call information without interface information, commonly used in testing and gateway scenarios. Generic invocation supports both Dubbo and Triple protocols, but currently, the serialization scheme only supports Hessian.
+Generic invocation is a special way of calling in Dubbo-Go that allows intermediary nodes to pass call information without interface information, commonly used in testing and gateway scenarios. Generic invocation supports both Dubbo and Triple protocols. When creating a generic service via `client.NewGenericService`, Hessian2 is used as the default transport serialization.
 
 ## Background
 
@@ -31,7 +28,7 @@ Generic invocation essentially transforms a complex structure into a generic str
 
 ![img](/imgs/docs3-v2/golang-sdk/concept/rpc/generic/1632207075184-25939db4-f384-452e-a0b8-e1deff7971de.png)
 
-Currently, Dubbo-go v3 only supports Map generic invocation (default). Taking the User interface as an example, its definition is as follows:
+Dubbo-go v3 supports multiple generic invocation modes, including Map (default), Gson, Protobuf-JSON, and Bean. Among these, Map is the most commonly used. The following uses it as an example. Taking the User interface as an example, its definition is as follows:
 
 ```go
 // definition
@@ -71,11 +68,52 @@ usermap := map[interface{}]interface{} {
 Note that:
 
 - The Map generic invocation will automatically convert the first letter to lowercase, so ID will become iD. If you need to align with Dubbo-Java, consider changing ID to Id;
-- A class field will be automatically inserted into the Map to identify the original interface class.
+- To precisely control the key names in the Map, you can use the `m` struct tag. For example, `` Name string `m:"userName"` `` will set the key to `userName` instead of the default `name`;
+- When the struct implements the `hessian.POJO` interface, a `class` field will be automatically inserted into the generalized result to identify the original interface class. This behavior can be disabled by setting `generic.include.class=false`, which is suitable for generic invocation between pure Go services.
 
 ## Usage
 
 Generic invocation is transparent to the provider side, meaning the provider does not need any explicit configuration to handle generic requests correctly.
+
+### Generic Invocation over Triple Protocol
+
+The Triple protocol (dubbo3) supports generic invocation. `NewGenericService` uses a unified dial flow internally, supporting both service discovery via a registry and direct connection via `client.WithURL`. For a complete example, see [dubbo-go-samples/generic](https://github.com/apache/dubbo-go-samples/tree/main/generic). The following uses direct connection as an example.
+
+First, create a dubbo instance and a client, then create a generic service via `cli.NewGenericService`, as shown below.
+
+```go
+ins, err := dubbo.NewInstance(dubbo.WithName("generic-client"))
+
+cli, err := ins.NewClient(
+	client.WithClientProtocolTriple(),
+	client.WithClientSerialization(constant.Hessian2Serialization),
+)
+
+genericService, err := cli.NewGenericService(
+	"org.apache.dubbo.samples.UserProvider",
+	client.WithURL("tri://127.0.0.1:50052"),
+	client.WithVersion("1.0.0"),
+	client.WithGroup("triple"),
+)
+```
+
+The `NewGenericService` method accepts the following parameters:
+
+- Service interface name;
+- `client.WithURL`: direct connection address, using the `tri://` protocol prefix;
+- `client.WithVersion`: service version;
+- `client.WithGroup`: service group.
+
+Then you can make a generic invocation on the service:
+
+```go
+resp, err := genericService.Invoke(
+	context.Background(),
+	"GetUser1",
+	[]string{"java.lang.String"},
+	[]hessian.Object{"A003"},
+)
+```
 
 ### Based on Dubbo URL Generic Invocation
 
@@ -91,11 +129,13 @@ The semantics expressed by this Dubbo URL are:
 - The org.apache.dubbo.sample.UserProvider interface is located at 127.0.0.1:20000;
 - Using generic invocation (generic=true).
 
-The consumer's Filter will automatically convert normal calls to generic calls based on the configuration carried by the Dubbo URL, but note that in this method, response results will return in generic format and will not automatically convert to the corresponding object. For example, in map generic invocation, if a User class needs to be returned, the consumer will receive a map corresponding to the User class.
+The consumer's Filter will automatically convert normal calls to generic calls based on the configuration carried by the Dubbo URL. When `inv.Reply()` is set to a target struct pointer, the consumer-side Filter will automatically deserialize the map result into the corresponding object during the `OnResponse` phase; if not set, the response will still be returned in generic format (e.g., map).
 
-### Manual Generic Invocation
+### Manual Generic Invocation (Legacy)
 
-Manual generic invocation requests are not processed through a filter; thus, the consumer must explicitly initiate a generic invocation, a typical application scenario for testing. In [dubbo-go-samples](https://github.com/apache/dubbo-go-samples/tree/f7febed9d686cb940ea55d34b5baa567d7574a44/generic), manual invocation is used for ease of testing.
+> It is recommended to use `client.NewGenericService` as described above. The following is the legacy approach based on `config.ReferenceConfig`, provided for reference only.
+
+Manual generic invocation constructs a reference via `config.ReferenceConfig` and explicitly initiates a generic invocation, a typical application scenario for testing.
 
 Generic invocation does not require creating a configuration file (dubbogo.yaml), but requires manual configuration of the registry, reference, and other information in the code. The initialization method is encapsulated in the newRefConf method, as follows.
 
@@ -157,11 +197,11 @@ The Invoke method of GenericService takes four parameters:
 - parameter types: GetUser method accepts a string type parameter. If the target method accepts multiple parameters, you can write it as `[]string{"type1", "type2", ...}`. If the method is parameterless, you need to fill in an empty array `[]string{}`;
 - actual parameters: written the same way as parameter types. If it is a parameterless function, you still need to fill in an empty array `[]hessian.Object{}` as a placeholder.
 
-Note: In the current version, parameterless calls may cause crashing issues.
-
 ### Automatic Deserialization with InvokeWithType
 
 In the `Invoke` method, the return value `resp` is a `map` type (for `MapGeneralizer`), requiring users to manually perform type conversion. To simplify this process, dubbo-go provides the `InvokeWithType` method, which can automatically deserialize the result into a user-specified struct.
+
+The following example uses the `client.NewGenericService` approach:
 
 ```go
 // Define the result struct
@@ -173,6 +213,24 @@ type User struct {
 
 var user User
 // Deserialize the result directly into the user struct
+err := genericService.InvokeWithType(
+    context.Background(),
+    "GetUser1",
+    []string{"java.lang.String"},
+    []hessian.Object{"A003"},
+    &user,
+)
+
+if err != nil {
+    // Handle error
+}
+fmt.Println(user.Name)
+```
+
+When using the legacy `config.ReferenceConfig` approach, the calling method is as follows:
+
+```go
+var user User
 err := refConf.
     GetRPCService().(*generic.GenericService).
     InvokeWithType(
@@ -190,6 +248,21 @@ fmt.Println(user.Name)
 ```
 
 Note: `InvokeWithType` currently only supports the default Map generic invocation.
+
+## Generic Mode Selection
+
+Dubbo-go supports the following four generic invocation modes, distinguished by the `generic` parameter value:
+
+| Mode | Parameter Value | Generalized Format | Use Case |
+|------|----------------|-------------------|----------|
+| Map (default) | `true` | `map[string]any` | General purpose, Go and Java interoperability |
+| Gson | `gson` | JSON string | Scenarios requiring JSON format interaction |
+| Protobuf-JSON | `protobuf-json` | JSON string | Generic invocation of Protobuf messages |
+| Bean | `bean` | `JavaBeanDescriptor` | Alignment with Java Bean serialization |
+
+When using `client.NewGenericService`, the Map mode is used by default. To use other modes, set the `Generic` field in `ReferenceConfig` to the corresponding parameter value.
+
+In most scenarios, the default Map generic mode is recommended.
 
 ## Cross-language RPC contract guidance
 
