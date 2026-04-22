@@ -141,4 +141,45 @@
 &lt;li&gt;否则（空结果或值≠&lt;code&gt;true&lt;/code&gt;），请求被拒绝。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="策略输入input"&gt;策略输入（&lt;code&gt;input&lt;/code&gt;）&lt;/h3&gt;
-&lt;p&gt;过滤器将 HTTP 请求转换为以下键值对（与当前实现一致，策略编写时请进行空值检查）：&lt;/p&gt;</description></item><item><title>RateLimiter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/ratelimit/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/ratelimit/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item><item><title>断路器介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/hystrix/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/hystrix/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;过滤器将 HTTP 请求转换为以下键值对（与当前实现一致，策略编写时请进行空值检查）：&lt;/p&gt;</description></item><item><title>RateLimiter 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/ratelimit/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/ratelimit/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item><item><title>SAML 介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/saml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/saml/</guid><description>&lt;h1 id="saml-认证过滤器-dgpfilterhttpauthsaml"&gt;SAML 认证过滤器 (dgp.filter.http.auth.saml)&lt;/h1&gt;
+&lt;hr&gt;
+&lt;h2 id="中文"&gt;中文&lt;/h2&gt;
+&lt;h3 id="概述"&gt;概述&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;dgp.filter.http.auth.saml&lt;/code&gt; 过滤器允许 Pixiu 作为一个 SAML Service Provider（SP，服务提供方）运行。&lt;/p&gt;
+&lt;p&gt;启用后，Pixiu 可以：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;暴露 SP metadata 端点，供 IdP 注册使用&lt;/li&gt;
+&lt;li&gt;将未认证的浏览器请求重定向到 IdP 登录页&lt;/li&gt;
+&lt;li&gt;在 ACS 端点接收并处理 &lt;code&gt;SAMLResponse&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;在用户登录成功后创建 session cookie&lt;/li&gt;
+&lt;li&gt;将选定的 SAML assertion 属性转发为上游 HTTP 请求头&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;常见的 IdP 包括 Keycloak、Okta 和 Microsoft Entra ID。&lt;/p&gt;
+&lt;h3 id="请求流程"&gt;请求流程&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;浏览器访问受保护的 Pixiu 路径，例如 &lt;code&gt;/app&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;Pixiu 检查当前请求是否携带有效的 SAML session cookie。&lt;/li&gt;
+&lt;li&gt;如果 session 不存在，Pixiu 会将浏览器重定向到 IdP 登录页。&lt;/li&gt;
+&lt;li&gt;用户完成登录后，IdP 会向 Pixiu 的 ACS 端点 POST 一个 &lt;code&gt;SAMLResponse&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;Pixiu 校验 assertion，创建 session cookie，并将浏览器重定向回最初访问的路径。&lt;/li&gt;
+&lt;li&gt;之后的请求会继续转发到上游服务，同时将配置好的 SAML 属性映射到 HTTP 头中。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="最小配置"&gt;最小配置&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;http_filters&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;dgp.filter.http.auth.saml&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;config&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;entity_id&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;pixiu-saml-sp&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;acs_url&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;https://pixiu.example.com/saml/acs&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;metadata_url&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;https://pixiu.example.com/saml/metadata&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;idp_metadata_url&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;https://idp.example.com/app/metadata&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;cert_file&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;/etc/pixiu/saml/sp.crt&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;key_file&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;/etc/pixiu/saml/sp.key&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;rules&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;match&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;prefix&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;/app&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;forward_attributes&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;saml_attribute&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;email&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;header&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;X-User-Email&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; - &lt;span style="color:#268bd2"&gt;saml_attribute&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;displayName&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;header&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;&amp;#34;X-User-Name&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果不想通过 &lt;code&gt;idp_metadata_url&lt;/code&gt; 拉取，也可以从本地文件加载 IdP metadata：&lt;/p&gt;</description></item><item><title>断路器介绍</title><link>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/hystrix/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/pixiu/other/user/httpfilter/hystrix/</guid><description>&lt;p&gt;欢迎认领补充此文档。&lt;/p&gt;</description></item></channel></rss>
