@@ -10,22 +10,20 @@ weight: 2
 
 # Dubbo-Go Metrics Monitoring
 
-Dubbo-Go supports runtime metrics collection and integration with **Prometheus + Grafana** to enable full observability for microservices.
+Dubbo-Go supports runtime metrics collection and integration with **Prometheus + Grafana** to build observability for microservices.
 
-This example supports two monitoring modes:
+This example covers two monitoring modes:
 
-* ✅ **Pull Mode (Recommended for production)**
-* ✅ **Push Mode (Based on Prometheus Pushgateway)**
+* **Pull Mode**: Prometheus scrapes metrics from Dubbo-Go applications. Recommended for long-running services.
+* **Push Mode**: Dubbo-Go applications push metrics to Pushgateway. Recommended only for short-lived jobs.
 
 Example source code:
 
 > [https://github.com/apache/dubbo-go-samples/tree/main/metrics](https://github.com/apache/dubbo-go-samples/tree/main/metrics)
 
----
+## 1. Monitoring Architecture
 
-# 1. Monitoring Architecture
-
-## 1️⃣ Pull Mode (Recommended)
+### 1.1 Pull Mode (Recommended for production)
 
 ```
 Dubbo-Go Application  --->  Prometheus  --->  Grafana
@@ -34,9 +32,7 @@ Dubbo-Go Application  --->  Prometheus  --->  Grafana
 
 Prometheus actively scrapes metrics from Dubbo-Go applications.
 
----
-
-## 2️⃣ Push Mode (For short-lived jobs)
+### 1.2 Push Mode (For short-lived jobs)
 
 ```
 Dubbo-Go Application  --->  Pushgateway  --->  Prometheus  --->  Grafana
@@ -44,30 +40,23 @@ Dubbo-Go Application  --->  Pushgateway  --->  Prometheus  --->  Grafana
 
 Applications push metrics to Pushgateway. Prometheus scrapes Pushgateway.
 
-⚠️ Note:
+Pushgateway is designed for **short-lived jobs (batch / cron)** and is not recommended for long-running services.
 
-Pushgateway is designed for **short-lived jobs (batch / cron)**.
-It is not recommended for long-running services.
-
----
-
-# 2. Components Overview
+## 2. Components Overview
 
 | Component   | Port | Description                      |
 | ----------- | ---- | -------------------------------- |
 | Grafana     | 3000 | Metrics visualization dashboard  |
 | Prometheus  | 9090 | Metrics storage and query engine |
 | Pushgateway | 9091 | Receives pushed metrics          |
-| go-server   | —    | Dubbo-Go Provider example        |
-| go-client   | —    | Dubbo-Go Consumer example        |
+| go-server metrics endpoint | 9099 in this sample | Provider metrics in Pull mode |
+| go-client metrics endpoint | 9097 in this sample | Consumer metrics in Pull mode |
 
----
+If you use Dubbo-Go defaults instead of this sample, the default metrics endpoint is `http://localhost:9090/metrics`. This sample overrides the metrics path to `/prometheus`.
 
-# 3. Quick Start (Recommended)
+## 3. Quick Start
 
----
-
-## Step 1: Start the Monitoring Stack
+### 3.1 Start the Monitoring Stack
 
 Navigate to:
 
@@ -87,9 +76,7 @@ Access:
 * Prometheus: [http://localhost:9090](http://localhost:9090)
 * Pushgateway: [http://localhost:9091](http://localhost:9091)
 
----
-
-## Step 2: Configure Environment Variables
+### 3.2 Configure Environment Variables
 
 Both client and server share the same configuration:
 
@@ -105,36 +92,30 @@ export PUSHGATEWAY_USER="username"
 export PUSHGATEWAY_PASS="1234"
 ```
 
----
-
-## Step 3: Start Dubbo-Go Server
+### 3.3 Start Dubbo-Go Server
 
 ```bash
 go run ./go-server/cmd/main.go
 ```
 
----
+### 3.4 Start Dubbo-Go Client
 
-## Step 4: Start Dubbo-Go Client
-
-### Default (Push Mode)
+#### Default (Push Mode)
 
 ```bash
 go run ./go-client/cmd/main.go
 ```
 
-### Pull Mode
+#### Pull Mode
 
 ```bash
 go run ./go-client/cmd/main.go --push=false
 go run ./go-server/cmd/main.go --push=false
 ```
 
----
+### 3.5 Verify Metrics
 
-## Step 5: Verify Metrics
-
-### Push Mode
+#### Push Mode
 
 Open:
 
@@ -142,21 +123,22 @@ Open:
 http://localhost:9091/metrics
 ```
 
-### Pull Mode
+#### Pull Mode
 
-Open:
+`<app_port>` means the HTTP metrics port exposed by the Dubbo-Go application itself, not the Prometheus or Pushgateway port.
 
-```
-http://localhost:<app_port>/prometheus
-```
+In this sample:
 
----
+* Provider: `http://localhost:9099/prometheus`
+* Consumer: `http://localhost:9097/prometheus`
 
-# 4. Grafana Configuration
+These ports are defined in [`metrics/prometheus_grafana/prometheus_pull.yml`](https://github.com/apache/dubbo-go-samples/blob/main/metrics/prometheus_grafana/prometheus_pull.yml).
 
----
+If you use your own Dubbo-Go application instead of this sample, replace the port with your application's metrics port.
 
-## 4.1 Add Prometheus Data Source
+## 4. Grafana Configuration
+
+### 4.1 Add Prometheus Data Source
 
 1. Open [http://localhost:3000](http://localhost:3000)
 2. Default credentials: `admin / admin`
@@ -178,9 +160,7 @@ http://host.docker.internal:9090
 
 7. Click **Save & Test**
 
----
-
-## 4.2 Import Dubbo Dashboard
+### 4.2 Import Dubbo Dashboard
 
 1. Navigate to:
 
@@ -188,16 +168,19 @@ http://host.docker.internal:9090
 Home → Dashboards → New → Import
 ```
 
-2. Upload `grafana.json`
-   OR paste the JSON content
+2. Import the dashboard with one of these methods:
 
-3. Select the Prometheus data source
+* Upload [`grafana.json`](https://github.com/apache/dubbo-go-samples/blob/main/metrics/prometheus_grafana/grafana.json) from the sample directory
+* Enter Grafana dashboard ID `19294` (`Dubbo Observability`) and click **Load**
+* Or download the JSON from [Grafana Labs](https://grafana.com/grafana/dashboards/19294-dubbo-observability/) and upload it
 
-4. Click **Import**
+3. The sample repository already includes the dashboard file at `metrics/prometheus_grafana/grafana.json`, so uploading that file is the most direct option.
 
----
+4. Select the Prometheus data source
 
-## 4.3 View Dashboard
+5. Click **Import**
+
+### 4.3 View Dashboard
 
 You will see:
 
@@ -209,11 +192,9 @@ You will see:
 
 Metrics update dynamically as the client continuously calls the server.
 
----
+## 5. Pushgateway Zombie Metrics Problem
 
-# 5. Pushgateway Zombie Metrics Problem
-
-## Problem Description
+### 5.1 Problem Description
 
 Pushgateway **does not automatically delete old metrics**.
 
@@ -222,9 +203,7 @@ If a job stops:
 * Its metrics remain stored
 * This may pollute monitoring data
 
----
-
-## Solution 1: Application-side Cleanup (Implemented)
+### 5.2 Solution 1: Application-side Cleanup (Implemented)
 
 Mechanism:
 
@@ -232,28 +211,26 @@ Mechanism:
 * Periodically update timestamp
 * Automatically call DELETE API on graceful shutdown
 
----
+### 5.3 Solution 2: Production-grade Cleaner (Recommended)
 
-## Solution 2: Production-grade Cleaner (Recommended)
+Tool repository:
 
-Tool:
+> [apache/dubbo-go-samples/tree/main/tools/pgw-cleaner](https://github.com/apache/dubbo-go-samples/tree/main/tools/pgw-cleaner)
 
-```
-tools/pgw-cleaner
-```
+Detailed documentation:
+
+* [README.md](https://github.com/apache/dubbo-go-samples/blob/main/tools/pgw-cleaner/README.md)
+
+This tool lives in the `apache/dubbo-go-samples` repository, not in the `apache/dubbo-go` core repository.
 
 Purpose:
 
 * Detect expired jobs
 * Automatically clean zombie metrics
 
----
+## 6. Troubleshooting
 
-# 6. Troubleshooting
-
----
-
-## Grafana shows "No Data"
+### 6.1 Grafana Shows "No Data"
 
 Check:
 
@@ -267,27 +244,21 @@ dubbo_consumer_requests_succeed_total
 
 returns results
 
----
-
-## host.docker.internal not reachable
+### 6.2 host.docker.internal Not Reachable
 
 Replace it with your actual host IP:
 
-* Update `prometheus_pull.yml`
+* Update `metrics/prometheus_grafana/prometheus_pull.yml`
 * Update Grafana data source URL
 
----
-
-# 7. Kubernetes Deployment
+## 7. Kubernetes Deployment
 
 Recommended:
 
 > kube-prometheus
 > [https://github.com/prometheus-operator/kube-prometheus](https://github.com/prometheus-operator/kube-prometheus)
 
----
-
-## Step 1: Create PodMonitor
+### 7.1 Create PodMonitor
 
 Create `dubboPodMonitor.yaml`:
 
@@ -309,17 +280,45 @@ spec:
       path: /prometheus
 ```
 
----
+### 7.2 Optional: Add RBAC Permissions When RBAC Is Enabled
 
-## Step 2: Deploy Application
+If your cluster enforces RBAC, grant Prometheus permission to read Pods in `dubbo-system`:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dubbo-system
+  name: pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: dubbo-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-reader
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-k8s
+    namespace: monitoring
+```
+
+If your Prometheus installation uses a different service account, replace the `subjects` section accordingly.
+
+### 7.3 Deploy Application
 
 ```bash
 kubectl apply -f Deployment.yaml
 ```
 
----
-
-## Step 3: Verify
+### 7.4 Verify
 
 Visit:
 
@@ -333,9 +332,7 @@ Ensure your pods show:
 UP
 ```
 
----
-
-# 8. Production Recommendations
+## 8. Production Recommendations
 
 | Scenario              | Recommended Mode  |
 | --------------------- | ----------------- |
@@ -344,9 +341,7 @@ UP
 | Kubernetes            | Pull + PodMonitor |
 | Pushgateway usage     | Use pgw-cleaner   |
 
----
-
-# 9. Summary
+## 9. Summary
 
 Dubbo-Go provides:
 
