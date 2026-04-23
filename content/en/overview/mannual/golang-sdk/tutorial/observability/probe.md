@@ -72,7 +72,7 @@ Dubbo-Go supports both **New API (recommended)** and **Old API (YAML)** configur
 
 ---
 
-# 1️⃣ New API Configuration (Recommended)
+## 3.1 New API Configuration (Recommended)
 
 ```go
 ins, err := dubbo.NewInstance(
@@ -102,13 +102,13 @@ ins, err := dubbo.NewInstance(
 
 ---
 
-# 2️⃣ Old API YAML Configuration
+## 3.2 Old API YAML Configuration
 
 ```yaml
 metrics:
   probe:
     enabled: true
-    port: "22222"
+    port: 22222
     liveness-path: "/live"
     readiness-path: "/ready"
     startup-path: "/startup"
@@ -259,8 +259,10 @@ livenessProbe:
   httpGet:
     path: /live
     port: 22222
-  initialDelaySeconds: 5
-  periodSeconds: 5
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
 
 readinessProbe:
   httpGet:
@@ -268,13 +270,16 @@ readinessProbe:
     port: 22222
   initialDelaySeconds: 5
   periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 2
 
 startupProbe:
   httpGet:
     path: /startup
     port: 22222
-  failureThreshold: 30
-  periodSeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 25 # 120s startup budget => ceil(120 / 5) + 1
 ```
 
 ---
@@ -326,9 +331,23 @@ done
 
 # 9. Production Best Practices
 
-| Scenario                  | Recommendation                        |
-| ------------------------- | ------------------------------------- |
-| High availability systems | Keep liveness simple                  |
-| Complex dependencies      | Bind readiness to downstream services |
-| Long startup time         | Always use startup probe              |
-| Microservice clusters     | Enable internal-state                 |
+## Recommended Starting Values
+
+| Probe Type | Recommended Values                                                                                       | Notes                                                                 |
+| ---------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| liveness   | `initialDelaySeconds: 10-30`, `periodSeconds: 10`, `timeoutSeconds: 1-3`, `failureThreshold: 3`        | Use only for process survival and unrecoverable failures, not for databases, registries, or Redis |
+| readiness  | `initialDelaySeconds: 2-5`, `periodSeconds: 5`, `timeoutSeconds: 1-3`, `failureThreshold: 2-3`         | Remove traffic quickly when dependencies fail, and recover quickly after they return |
+| startup    | `periodSeconds: 5-10`, `timeoutSeconds: 1-3`, `failureThreshold = ceil(maxStartupSeconds / periodSeconds) + 1` | Budget for the longest cold-start, warm-up, and config-loading path |
+
+For example, if the application may need up to `120s` to start and `periodSeconds: 5` is used:
+
+```text
+failureThreshold = ceil(120 / 5) + 1 = 25
+```
+
+## Operational Guidance
+
+* Keep `liveness` simple and reserve it for failures that require a restart
+* Put service registry, database, Redis, and downstream RPC checks in `readiness`
+* Let `startup` absorb slow initialization instead of inflating `liveness.initialDelaySeconds`
+* In microservice clusters, enable `use-internal-state: true` and combine it with `probe.SetReady(...)` for proactive traffic draining
