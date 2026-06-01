@@ -14,6 +14,11 @@ weight: 1
 
 本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。
 
+## 可选：使用 Agent Skills
+如果你使用支持 Agent Skills 的 AI 编码工具，可以在开始前安装 dubbo-go 的 [Agent Skills](https://github.com/apache/dubbo-go/blob/main/.agents/.codex/INSTALL.md)。之后可以让 Agent 按照本快速开始生成 Triple provider 和 consumer，或者在运行示例遇到问题时辅助排查。
+
+这个步骤是可选的，不是运行 dubbo-go 应用的必要条件。
+
 ## 前置条件
 
 因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `protoc`、`protoc-gen-go`、`protoc-gen-go-triple`。
@@ -242,7 +247,6 @@ func main() {
 <hr>
 </div>
 {{< /blocks/section >}}
-
 
 
 

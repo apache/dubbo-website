@@ -109,3 +109,7 @@ The traffic governance rules implemented by dubbo-go fully comply with Dubbo fra
 * [Dubbo Traffic Governance Rule Design](/en/overview/core-features/traffic/)
 * [Dubbo Traffic Governance Example Task](/en/overview/tasks/traffic-management/)
 
+## Agent Skills
+Apache dubbo-go also maintains [Agent Skills](https://github.com/apache/dubbo-go/tree/main/.agents) for AI coding agents that support skill loading, such as Codex, Claude Code, Gemini CLI, and OpenCode. These skills package dubbo-go-specific context for scaffolding v3 providers and consumers, writing extensions, debugging runtime issues, Java interoperability, migration, conceptual guidance, and contributor workflows.
+
+The skills are optional development assistance only. They are not runtime dependencies of dubbo-go applications. Codex users can follow the [installation guide](https://github.com/apache/dubbo-go/blob/main/.agents/.codex/INSTALL.md) to install the skills globally.

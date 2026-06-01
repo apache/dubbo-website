@@ -116,7 +116,10 @@ dubbo-go 实现的流量治理规则完全遵循 Dubbo 框架设计的流量治�
 * [Dubbo 流量治理规则设计](/zh-cn/overview/core-features/traffic/)
 * [Dubbo 流量治理示例任务](/zh-cn/overview/tasks/traffic-management/)
 
+## Agent Skills
+Apache dubbo-go 同时在 [Agent Skills](https://github.com/apache/dubbo-go/tree/main/.agents) 中维护了一组面向 AI 编码 Agent 的项目上下文，适用于 Codex、Claude Code、Gemini CLI、OpenCode 等支持加载 skills 的工具。这些 skills 覆盖 dubbo-go v3 provider/consumer 脚手架、扩展点开发、运行时问题排查、Java 互通、迁移、概念说明以及仓库贡献流程。
 
+这些 skills 只是可选的开发辅助信息，不是 dubbo-go 应用的运行时依赖。Codex 用户可以参考 [安装说明](https://github.com/apache/dubbo-go/blob/main/.agents/.codex/INSTALL.md) 将 skills 安装到全局环境。
 
 
 

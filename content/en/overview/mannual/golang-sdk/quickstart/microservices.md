@@ -14,6 +14,11 @@ This example demonstrates how to develop microservice applications using dubbo-g
 ## Prerequisites
 In this example, we will continue to use Protobuf to develop the microservice application. Please refer to [Develop RPC Server and RPC Client](../rpc) to learn how to install necessary plugins like protoc and protoc-gen-go-triple.
 
+## Optional: Use Agent Skills
+If you have installed dubbo-go's [Agent Skills](https://github.com/apache/dubbo-go/blob/main/.agents/.codex/INSTALL.md), you can ask the agent to scaffold a registry-backed provider and consumer, or to help diagnose service discovery, routing, and connection issues while running this example.
+
+This step is optional and is not required to run dubbo-go applications.
+
 ## Quick Run Example
 ### Download Example Source Code
 We maintain a series of dubbo-go usage examples in the [apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples/) repository to help users quickly learn how to use dubbo-go.
@@ -187,4 +192,3 @@ If you want to add more service governance capabilities to the application, plea
 <hr>
 </div>
 {{< /blocks/section >}}
-

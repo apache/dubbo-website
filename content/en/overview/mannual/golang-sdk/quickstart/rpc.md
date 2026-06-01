@@ -14,6 +14,11 @@ Based on the Triple protocol defined by Dubbo, you can easily write browser and 
 
 This example demonstrates the RPC communication pattern based on the Triple protocol. The example uses Protocol Buffer to define the RPC service and demonstrates the processes of code generation, service publishing, and service access.
 
+## Optional: Use Agent Skills
+If you use an AI coding agent that supports Agent Skills, you can install dubbo-go's [Agent Skills](https://github.com/apache/dubbo-go/blob/main/.agents/.codex/INSTALL.md) before starting. Then ask the agent to scaffold a Triple provider and consumer that follow this quick start, or to help debug issues when running the sample.
+
+This step is optional and is not required to run dubbo-go applications.
+
 ## Prerequisites
 
 Since we are using Protocol Buffer, we first need to install the relevant code generation tools, including `protoc`, `protoc-gen-go`, and `protoc-gen-go-triple`.
@@ -243,4 +248,3 @@ This is the basic working principle of dubbo-go RPC!
 <hr>
 </div>
 {{< /blocks/section >}}
-

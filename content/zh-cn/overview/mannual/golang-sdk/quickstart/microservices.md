@@ -14,6 +14,11 @@ weight: 2
 ## 前置条件
 本示例我们继续使用 Protobuf 开发微服务应用，请参考 [开发 rpc server 和 rpc client](../rpc) 了解如何安装 protoc、protoc-gen-go-triple 等必须插件。
 
+## 可选：使用 Agent Skills
+如果已经安装 dubbo-go 的 [Agent Skills](https://github.com/apache/dubbo-go/blob/main/.agents/.codex/INSTALL.md)，可以让 Agent 生成带注册中心的 provider 和 consumer，或者在运行本示例时辅助排查服务发现、路由和连接问题。
+
+这个步骤是可选的，不是运行 dubbo-go 应用的必要条件。
+
 ## 快速运行示例
 ### 下载示例源码
 我们在 [apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples/) 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
@@ -187,7 +192,6 @@ ins, err := dubbo.NewInstance(
 <hr>
 </div>
 {{< /blocks/section >}}
-
 
 
 
