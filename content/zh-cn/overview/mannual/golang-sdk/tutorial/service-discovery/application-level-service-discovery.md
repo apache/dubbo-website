@@ -7,6 +7,8 @@ weight: 20
 
 dubbo-go 支持接口级注册和应用级服务发现。接口级注册会把可调用的 provider URL 直接写入注册中心；应用级服务发现会把应用实例写入注册中心，再通过服务映射和 metadata 还原 consumer 调用所需的 provider URL。
 
+应用级服务发现是当前默认模型。接口级注册和应用级服务发现使用不同的注册与订阅路径，二者不会自动互通。使用接口级发现的 consumer 无法发现只注册应用级实例的 provider；使用应用级服务发现的 consumer 也无法发现只注册接口级 URL 的 provider。如果迁移阶段需要同时支持两类 consumer，可以使用 `all`。
+
 ## 注册模式
 
 可以通过 registry type 选择 provider 的注册方式：
@@ -124,7 +126,7 @@ remote metadata 模式下，provider 和 consumer 都需要能够访问同一个
 | `metadata-type` | `local` |
 | `metadata-service-protocol` | `dubbo` |
 | registry `use-as-meta-report` | `true` |
-| 应用级注册配置 | `registry.WithRegisterService()` 或 `registry-type: service` |
+| 默认注册和发现模型 | 应用级服务发现，`registry.WithRegisterService()` 或 `registry-type: service` |
 
 ## 使用建议
 

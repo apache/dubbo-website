@@ -7,6 +7,8 @@ weight: 20
 
 Dubbo-go supports both interface-level registration and application-level service discovery. Interface-level registration stores callable provider URLs directly in the registry. Application-level service discovery stores application instances in the registry, and uses service mapping plus metadata to recover the provider URLs required by consumers.
 
+Application-level service discovery is the current default model. Interface-level registration and application-level service discovery use different registration and subscription paths, and they are not automatically interoperable. A consumer using interface-level discovery cannot discover providers that only register application-level instances; a consumer using application-level discovery cannot discover providers that only register interface-level URLs. Use `all` during migration if both consumer types must be supported.
+
 ## Registration Modes
 
 Use the registry type to choose how a provider registers itself:
@@ -124,7 +126,7 @@ In remote metadata mode, both providers and consumers must be able to access the
 | `metadata-type` | `local` |
 | `metadata-service-protocol` | `dubbo` |
 | registry `use-as-meta-report` | `true` |
-| application-level registration option | `registry.WithRegisterService()` or `registry-type: service` |
+| default registration and discovery model | application-level service discovery, `registry.WithRegisterService()` or `registry-type: service` |
 
 ## Recommendations
 
