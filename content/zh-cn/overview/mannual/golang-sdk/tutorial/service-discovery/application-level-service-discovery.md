@@ -126,7 +126,20 @@ remote metadata 模式下，provider 和 consumer 都需要能够访问同一个
 | `metadata-type` | `local` |
 | `metadata-service-protocol` | `dubbo` |
 | registry `use-as-meta-report` | `true` |
+| registry `use-as-config-center` | `true` |
 | 默认注册和发现模型 | 应用级服务发现，`registry.WithRegisterService()` 或 `registry-type: service` |
+
+## 隐式默认值与行为
+
+有一些行为在配置未显式填写时会自动推导，比较容易被忽略：
+
+- 如果没有配置 `registry-type`，dubbo-go 会回退到应用级注册与发现。
+- 应用级 consumer 在 reference 没有显式指定业务协议时，会默认按 `tri` 订阅。
+- `metadata-type` 默认是 `local`，因此如果没有显式开启 remote metadata，consumer 会通过 provider 的 metadata service 拉取 metadata。
+- 在 local metadata 模式下，`metadata-service-protocol` 默认是 `dubbo`。
+- 如果没有配置 `metadata-service-port`，metadata service 会优先复用默认协议端口；如果拿不到可用端口，则回退为随机端口。
+- registry 默认 `use-as-meta-report=true`，所以只要不显式设置 `registry.WithoutUseAsMetaReport()`，registry 可以直接复用为 metadata report center。
+- registry 还默认 `use-as-config-center=true`，所以只要不显式设置 `registry.WithoutUseAsConfigCenter()`，同一个 registry 也可能被复用为 config center。
 
 ## 使用建议
 

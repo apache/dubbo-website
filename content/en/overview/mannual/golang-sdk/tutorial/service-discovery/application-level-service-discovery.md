@@ -126,7 +126,20 @@ In remote metadata mode, both providers and consumers must be able to access the
 | `metadata-type` | `local` |
 | `metadata-service-protocol` | `dubbo` |
 | registry `use-as-meta-report` | `true` |
+| registry `use-as-config-center` | `true` |
 | default registration and discovery model | application-level service discovery, `registry.WithRegisterService()` or `registry-type: service` |
+
+## Implicit Defaults and Behaviors
+
+Several behaviors are easy to miss because they are derived implicitly when a field is left unset:
+
+- If `registry-type` is not configured, dubbo-go falls back to application-level registration and discovery.
+- Application-level consumers subscribe with `tri` by default if the reference does not explicitly set a business protocol.
+- `metadata-type` defaults to `local`, so consumers fetch metadata from the provider metadata service unless remote metadata is explicitly enabled.
+- In local metadata mode, `metadata-service-protocol` defaults to `dubbo`.
+- If `metadata-service-port` is not configured, the metadata service first tries to reuse the default protocol port; if no usable port is available, dubbo-go falls back to a random port.
+- Registries default to `use-as-meta-report=true`, so a registry can be reused as the metadata report center unless `registry.WithoutUseAsMetaReport()` is set.
+- Registries also default to `use-as-config-center=true`, so the same registry may be reused as the config center unless `registry.WithoutUseAsConfigCenter()` is set.
 
 ## Recommendations
 
