@@ -43,5 +43,40 @@ script: |
   })(invokers, invocation, context);
 ```
 
+> The `Data Id` of the dynamic config must be `{provider_application}.script-router`.
+
+### Static configuration
+
+Script router also supports local static router configuration. Static configuration is useful when you want script routing without a config center, or when you need a bootstrap rule before dynamic configuration is available.
+
+The following example adds an application-scope static script rule when creating a reference:
+
+```go
+conn, err := cli.NewService(&svc,
+	client.WithRouter(&global.RouterConfig{
+		Scope:      constant.RouterScopeApplication,
+		Key:        "script-server",
+		ScriptType: "javascript",
+		Script: `
+(function(invokers, invocation, context) {
+  if (!invokers || invokers.length === 0) return [];
+  return invokers.filter(function(invoker) {
+    var url = invoker.GetURL();
+    return url && url.Port === "20000";
+  });
+})(invokers, invocation, context);`,
+	}),
+)
+```
+
+`Key` must be the target provider application name. Static script rules are stored by `{provider_application}.script-router`, so multiple static entries can coexist when their provider application names are different.
+
+### Priority and merge semantics
+
+- Dynamically delivered script rules override static configuration for the same provider application.
+- Script router only supports application-scope static rules.
+- A static rule with an empty `key`, empty `type`, empty `script`, `enabled: false`, an unsupported script type, or an invalid script is ignored.
+- If no dynamic script rule is active for the provider application, Dubbo uses the matching static script rule.
+
 For the complete example, please
 see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/main/router/script).
