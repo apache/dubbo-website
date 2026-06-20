@@ -82,7 +82,7 @@ gRPC 是谷歌开源的基于 HTTP/2 的通信协议，如同我们在 [产品�
 以上协议的配置和使用方式，包括如何配置 `单端口多协议` 支持等，请参照以下 sdk 示例文档：
 
 * [Java](../../mannual/java-sdk/reference-manual/protocol/)
-* [Golang](../../mannual/golang-sdk/refer/sourcecode/protocol.md)
+* [Golang](../../mannual/golang-sdk/sourcecode/protocol/)
 * [Rust](../../mannual/rust-sdk/)
 
 ## 自定义扩展
