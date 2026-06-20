@@ -2,64 +2,80 @@
 aliases:
     - /en/docs3-v2/golang-sdk/refer/ecology/
     - /en/docs3-v2/golang-sdk/refer/ecology/
-description: Dubbo-go ecosystem components
+description: Current Dubbo Go ecosystem repositories and tooling
 title: Ecosystem Components
 type: docs
 weight: 1
 ---
 
-### Dubbo-go
+Related repositories and samples:
 
-[github.com/apache/dubbo-go](https://github.com/apache/dubbo-go) 
+* Main runtime: [apache/dubbo-go](https://github.com/apache/dubbo-go)
+* Samples: [apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples)
+* Generic invocation sample: [dubbo-go-samples/generic](https://github.com/apache/dubbo-go-samples/tree/main/generic)
+* Nacos registry sample: [dubbo-go-samples/registry/nacos](https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos)
+* Triple sample: [dubbo-go-samples/rpc/triple](https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple)
 
-The main repository for Apache Dubbo Go language implementation
+This page gives a current map of the main Dubbo Go ecosystem repositories. Some older documents still refer to repositories or tools under `dubbogo/*`; for daily development, use the Apache repositories below as the primary entry points.
 
-### Dubbo-go-samples
+## dubbo-go
+
+[github.com/apache/dubbo-go](https://github.com/apache/dubbo-go)
+
+The main Dubbo Go runtime repository. It includes:
+
+* core runtime code
+* built-in protocols, registries, filters, routers, and load balancers
+* tools such as `tools/protoc-gen-go-triple`
+* tools such as `tools/dubbogo-cli`
+
+## dubbo-go-samples
 
 [github.com/apache/dubbo-go-samples](https://github.com/apache/dubbo-go-samples)
 
-Usage examples of dubbo-go:
-* config-api: Configuration initialization using APIs
-* configcenter: Using different configuration centers, currently supporting three: zookeeper, apollo, and nacos
-* context: How to use context to pass attachment
-* direct: Direct connection mode
-* game: Game service example
-* generic: Generic invocation
-* rpc: RPC invocation examples, including Triple, Dubbo, and cross-language/gRPC communication examples
-* helloworld: Introduction to RPC invocation example
-* logger: Logging example
-* registry: Demonstrates integration with different registration centers, including zk, nacos, etcd
-* metrics: Data reporting
-* filter: Examples using provided filters and custom filters
-* registry/servicediscovery: Application-level service discovery example
-* router: Routing example
-* tracing: Link tracing example
+This is the best place to look for runnable examples. Useful directories include:
 
-### Dubbo-go-pixiu
+* `helloworld`
+* `config_yaml`
+* `generic`
+* `registry/nacos`, `registry/zookeeper`, `registry/etcd`, `registry/polaris`
+* `rpc/triple`, `rpc/multi-protocols`, `rpc/grpc`
+* `filter/custom`, `filter/token`, `filter/sentinel`
+* `router/condition`, `router/tag`, `router/script`, `router/static_config`
+* `mesh`
+* `java_interop/*`
+* `triple_header_trailer`
 
-[github.com/apache/dubbo-go-pixiu](https://github.com/apache/dubbo-go-pixiu)
+## protoc-gen-go-triple
 
-The dubbo-go-pixiu gateway supports invoking dubbo/dubbo-go clusters using both dubbo and http protocols
+[apache/dubbo-go/tools/protoc-gen-go-triple](https://github.com/apache/dubbo-go/tree/main/tools/protoc-gen-go-triple)
 
-### Dubbo-getty
+The protobuf code generation plugin for Dubbo Go Triple services. New documentation should point to this location instead of the older standalone tool repositories.
 
-[github.com/apache/dubbo-getty](https://github.com/apache/dubbo-getty)
+## dubbogo-cli
 
-dubbo-getty is an asynchronous network IO library in Go language, supporting tcp/udp/websocket protocols.
+[apache/dubbo-go/tools/dubbogo-cli](https://github.com/apache/dubbo-go/tree/main/tools/dubbogo-cli)
 
-### Dubbo-go-hessian2
+Command-line helper tool for Dubbo/Dubbo Go debugging and interoperability scenarios. It now lives inside the main `apache/dubbo-go` repository.
+
+## dubbo-go-hessian2
 
 [github.com/apache/dubbo-go-hessian2](https://github.com/apache/dubbo-go-hessian2)
 
-Dubbo-go-hessian2 is a Go language hessian2 serialization protocol library
+The Hessian2 serialization library used by Dubbo Go, especially in Dubbo protocol and generic invocation interoperability scenarios.
 
-### Dubbogo-tools
+## dubbo-getty
 
-[github.com/dubbogo/tools](https://github.com/dubbogo/tools)
+[github.com/apache/dubbo-getty](https://github.com/apache/dubbo-getty)
 
-Includes
-- dubbo-cli tool (deprecated)
-- imports-formatter Go language imports block formatting tool
-- protoc-gen-triple PB compilation plugin
-- protoc-gen-dubbo3grpc PB compilation plugin
+An asynchronous network IO library used in parts of the Dubbo Go ecosystem.
 
+## Notes on Older Repositories
+
+Older articles may still mention:
+
+* non-Apache historical tool repositories
+* older standalone Triple codegen tool repos
+* older CLI installation instructions
+
+For current Dubbo Go development, prefer the Apache repositories and the `tools/` directories inside `apache/dubbo-go`.
