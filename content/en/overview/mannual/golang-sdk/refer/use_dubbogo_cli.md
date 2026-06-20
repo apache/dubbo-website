@@ -7,19 +7,29 @@ title: Using the dubbogo-cli Tool
 type: docs
 weight: 3
 ---
-{{% alert title="Deprecation Warning" color="warning" %}}
-Starting from version 3.1.0 of dubbo-go, this tool is no longer applicable. This tool has been discontinued and will be replaced by dubboctl in the future. Please stay updated with community news to learn about the latest developments of dubboctl.
-{{% /alert %}}
 
 ## 1. Installation
 
-dubbogo-cli is a subproject of the Apache/dubbo-go ecosystem, providing convenient application template creation, tool installation, interface debugging, and other functions to improve developer efficiency.
+dubbogo-cli is maintained inside the Apache dubbo-go repository under
+[`tools/dubbogo-cli`](https://github.com/apache/dubbo-go/tree/main/tools/dubbogo-cli). It provides convenient
+application template creation, tool installation, interface debugging, and other functions to improve developer
+efficiency.
 
-To install dubbogo-cli to $GOPATH/bin, run the following command:
+Install `protoc-gen-go` first:
 
 ```
-go install github.com/dubbogo/dubbogo-cli@latest
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ```
+
+Then install `dubbogo-cli` from the dubbo-go repository:
+
+```bash
+git clone --depth 1 https://github.com/apache/dubbo-go.git
+cd dubbo-go/tools/dubbogo-cli
+go install .
+```
+
+Make sure your `GOBIN` or `GOPATH/bin` is in `PATH` so that `dubbogo-cli` can be executed directly.
 
 ## 2. Feature Overview
 
@@ -47,11 +57,11 @@ dubbogo-cli supports the following capabilities:
   dubbogo-cli install all
   ```
 
-  Installs the following tools to $GOPATH/bin with one click:
+  Installs the following tools to `$GOPATH/bin` with one command:
 
     - protoc-gen-go-triple
 
-      For compiling triple protocol interfaces.
+      For compiling Triple protocol interfaces.
 
     - imports-formatter
 
@@ -76,6 +86,11 @@ dubbogo-cli supports the following capabilities:
 - Debug Dubbo protocol interfaces
 
 - Debug Triple protocol interfaces
+
+{{% alert title="Note" color="primary" %}}
+`dubbogo-cli install all` manages companion tools such as `protoc-gen-go-triple`, but the CLI itself should be installed
+from `tools/dubbogo-cli` as shown above.
+{{% /alert %}}
 
 ## 3. Feature Details
 
@@ -235,11 +250,12 @@ image:
 
 The grpc_cli tool is used in the gRPC ecosystem for debugging services. When the server enables [reflection service](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md), you can obtain the service's proto file, service name, method name, parameter list, and initiate gRPC calls.
 
-The Triple protocol is compatible with the gRPC ecosystem, and gRPC reflection service is enabled by default, so you can directly use grpc_cli to debug triple services.
+The Triple protocol is compatible with the gRPC ecosystem. When you use the standard Dubbo Go SDK Triple provider
+setup, the framework auto-registers the reflection service, so you can directly use grpc_cli to debug Triple services.
 
 #### 3.3.2 Installing grpc_cli
 
-> It will be installed by dubbogo-cli in the future, but currently, users need to install it manually.
+> `grpc_cli` is not installed by `dubbogo-cli`; install it manually when you need gRPC/Triple debugging.
 
 Refer to the [grpc_cli documentation](https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md).
 
@@ -429,4 +445,3 @@ req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001"
 ```
 
 You can see that the CLI data was received.
-

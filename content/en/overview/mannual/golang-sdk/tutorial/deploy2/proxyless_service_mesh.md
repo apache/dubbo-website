@@ -8,10 +8,7 @@ title: Proxyless Service Mesh
 type: docs
 ---
 
-
-
-
-
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh" target="_blank">dubbo-go-samples/mesh</a>.
 
 ## 1. What is Proxyless Service-Mesh?
 
@@ -82,7 +79,9 @@ Dubbo-go has routing capabilities; through the xds protocol, clients subscribe t
 
 #### Cloud-Native Scaffolding
 
-dubbogo-cli is a sub-project of the Apache/dubbo-go ecosystem, providing developers with convenient functions like application template creation, tool installation, and interface debugging to enhance user development efficiency.
+dubbogo-cli is maintained inside the Apache dubbo-go repository under `tools/dubbogo-cli`. It provides convenient
+functions such as application template creation, tool installation, and interface debugging to improve developer
+efficiency.
 
 For details, please refer to [【dubbogo-cli tool】](/en/overview/mannual/golang-sdk/refer/use_dubbogo_cli/)
 
@@ -114,4 +113,3 @@ Dubbo-go is a service framework that spans multiple ecosystems.
   - Multi-language advantages enable interoperability between go-java applications.
   - Compatible with Pixiu gateway, facilitating service exposure and protocol conversion.
   - Utilizes components from the Dubbo-go ecosystem.
-

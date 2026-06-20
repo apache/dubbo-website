@@ -8,11 +8,12 @@ type: docs
 weight: 10
 ---
 
-
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>.
 
 ## 1. Preparation
 
-- The dubbo-go CLI tool and dependencies are installed
+- `dubbogo-cli` and related dependency tools are installed. Install `dubbogo-cli` from
+  [`tools/dubbogo-cli`](./use_dubbogo_cli/) in the dubbo-go repository.
 - Create a new demo application
 
 ## 2. Using grpc_cli Tool for Dubbo Service Debugging
@@ -145,4 +146,3 @@ req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001"
 =======================
 ```
 It shows that data from CLI has been received.
-

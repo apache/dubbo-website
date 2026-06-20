@@ -5,6 +5,11 @@ type: docs
 weight: 1
 ---
 
+Related samples:
+
+- Dynamic condition router: <a href="https://github.com/apache/dubbo-go-samples/tree/main/router/condition" target="_blank">dubbo-go-samples/router/condition</a>
+- Static condition router: <a href="https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/condition" target="_blank">dubbo-go-samples/router/static_config/condition</a>
+
 ## How to use
 
 ### Prerequisites

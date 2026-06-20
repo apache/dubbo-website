@@ -5,6 +5,11 @@ type: docs
 weight: 1
 ---
 
+相关示例：
+
+- 动态 tag router：<a href="https://github.com/apache/dubbo-go-samples/tree/main/router/tag" target="_blank">dubbo-go-samples/router/tag</a>
+- 静态 tag router：<a href="https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/tag" target="_blank">dubbo-go-samples/router/static_config/tag</a>
+
 ## 使用方法
 
 ### 前置准备

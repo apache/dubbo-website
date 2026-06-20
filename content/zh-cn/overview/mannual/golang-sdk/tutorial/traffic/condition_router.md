@@ -5,6 +5,11 @@ type: docs
 weight: 1
 ---
 
+相关示例：
+
+- 动态 condition router：<a href="https://github.com/apache/dubbo-go-samples/tree/main/router/condition" target="_blank">dubbo-go-samples/router/condition</a>
+- 静态 condition router：<a href="https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/condition" target="_blank">dubbo-go-samples/router/static_config/condition</a>
+
 ## 使用方法
 
 ### 前置准备

@@ -7,19 +7,28 @@ title: 使用 dubbogo-cli 工具
 type: docs
 weight: 3
 ---
-{{% alert title="废弃警告" color="warning" %}}
-自 dubbo-go 3.1.0 版本开始，本工具不再适用。本工具已经停止维护，未来将由 dubboctl 代替，请关注社区动态了解 dubboctl 最新进展。
-{{% /alert %}}
 
 ## 1. 安装
 
-dubbogo-cli 是 Apach/dubbo-go 生态的子项目，为开发者提供便利的应用模板创建、工具安装、接口调试等功能，以提高用户的研发效率。
+dubbogo-cli 现在维护在 Apache dubbo-go 主仓库的
+[`tools/dubbogo-cli`](https://github.com/apache/dubbo-go/tree/main/tools/dubbogo-cli) 目录下，用于提供应用模板
+创建、工具安装、接口调试等能力，帮助提升研发效率。
 
-执行以下指令安装dubbogo-cli 至 $GOPATH/bin
+先安装 `protoc-gen-go`：
 
 ```
-go install github.com/dubbogo/dubbogo-cli@latest
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ```
+
+然后从 dubbo-go 仓库安装 `dubbogo-cli`：
+
+```bash
+git clone --depth 1 https://github.com/apache/dubbo-go.git
+cd dubbo-go/tools/dubbogo-cli
+go install .
+```
+
+请确保 `GOBIN` 或 `GOPATH/bin` 已加入 `PATH`，这样才能直接执行 `dubbogo-cli`。
 
 ## 2. 功能概览
 
@@ -47,11 +56,11 @@ dubbogo-cli 支持以下能力
   dubbogo-cli install all
   ```
 
-  一键安装以下等工具至 $GOPATH/bin
+  一键安装以下工具到 `$GOPATH/bin`
 
     - protoc-gen-go-triple
 
-      用于 triple 协议接口编译
+    用于 Triple 协议接口编译
 
     - imports-formatter
 
@@ -78,6 +87,11 @@ dubbogo-cli 支持以下能力
 - 调试 Dubbo 协议接口
 
 - 调试 Triple 协议接口
+
+{{% alert title="说明" color="primary" %}}
+`dubbogo-cli install all` 用于安装 `protoc-gen-go-triple` 等配套工具；`dubbogo-cli` 本身请按上面的方式从
+`tools/dubbogo-cli` 目录安装。
+{{% /alert %}}
 
 ## 3. 功能详解
 
@@ -238,11 +252,12 @@ image:
 
 grpc_cli 工具是 gRPC 生态用于调试服务的工具，在 server 开启[反射服务](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md)的前提下，可以获取到服务的 proto 文件、服务名、方法名、参数列表，以及发起 gRPC 调用。
 
-Triple 协议兼容 gRPC 生态，并默认开启 gRPC 反射服务，因此可以直接使用 grpc_cli 调试 triple 服务。
+Triple 协议兼容 gRPC 生态。在使用标准 Dubbo Go SDK Triple provider 配置时，框架会自动注册 reflection
+service，因此可以直接使用 grpc_cli 调试 Triple 服务。
 
 #### 3.3.2 安装grpc_cli
 
-> 后续将由 dubbogo-cli 安装，目前需要用户手动安装
+> `grpc_cli` 不由 `dubbogo-cli` 安装；在需要调试 gRPC / Triple 服务时请手动安装。
 
 参考[grpc_cli 文档](https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md)
 

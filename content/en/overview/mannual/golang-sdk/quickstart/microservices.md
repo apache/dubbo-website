@@ -11,6 +11,8 @@ weight: 2
 
 This example demonstrates how to develop microservice applications using dubbo-go, adding core microservice capabilities such as service discovery, load balancing, and traffic control to the application.
 
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>.
+
 ## Prerequisites
 In this example, we will continue to use Protobuf to develop the microservice application. Please refer to [Develop RPC Server and RPC Client](../rpc) to learn how to install necessary plugins like protoc and protoc-gen-go-triple.
 
@@ -187,4 +189,3 @@ If you want to add more service governance capabilities to the application, plea
 <hr>
 </div>
 {{< /blocks/section >}}
-

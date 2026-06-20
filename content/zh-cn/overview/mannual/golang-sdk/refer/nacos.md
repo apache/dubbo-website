@@ -8,11 +8,12 @@ type: docs
 weight: 10
 ---
 
-
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>。
 
 ## 1. 准备工作
 
-- dubbo-go cli 工具和依赖工具已安装
+- 已安装 `dubbogo-cli` 及相关依赖工具。`dubbogo-cli` 请从 dubbo-go 主仓库
+  [`tools/dubbogo-cli`](./use_dubbogo_cli/) 安装。
 - 创建一个新的 demo 应用
 
 ## 2. 使用 grpc_cli 工具进行 Dubbo 服务调试

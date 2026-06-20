@@ -4,6 +4,8 @@ title: 流式通信
 type: docs
 weight: 1
 ---
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/streaming" target="_blank">dubbo-go-samples/streaming</a>。
+
 Streaming 流式通信是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:
 
 - 接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送
@@ -17,11 +19,12 @@ Streaming 流式通信类型分为以下三种:
 
 ## 1.介绍
 
-本文档演示如何在 Dubbo-go 中使用流式通信，可在此查看 <a href="https://github.com/apache/dubbo-go-samples/tree/main/streaming" target="_blank">完整示例源码地址</a>。
+本文档演示如何在 Dubbo-go 中使用流式通信。
 
 ## 2.如何使用Dubbo-go流式通信
 
-在proto文件中需要流式通信的方法的参数前面添加stream，使用proto-gen-triple生成相应文件
+在 proto 文件中，为需要流式通信的方法请求类型或响应类型添加 `stream`，然后使用 `protoc-gen-go-triple`
+生成对应代码。
 
 ```protobuf
 service GreetService {
@@ -195,6 +198,42 @@ func testServerStream(cli greet.GreetService) error {
 }
 ```
 
+流式调用也可以通过生成的 stream API 读写 Triple metadata：
+
+| 位置 | API | 用途 |
+| ---- | --- | ---- |
+| 客户端流和双向流 client | `RequestHeader()` | 在发送第一条消息前写入请求 metadata |
+| 服务端流和双向流 client | `ResponseHeader()` | 读取服务端返回的响应 header |
+| 服务端流和双向流 client | `ResponseTrailer()` | 响应结束后读取服务端返回的 trailer |
+| Provider 侧 stream handler | `RequestHeader()` | 读取客户端发送的请求 metadata |
+| Provider 侧 stream handler | `ResponseHeader()` / `ResponseTrailer()` | 设置响应 header 和 trailer |
+
+这些 metadata 使用 `http.Header` 表示，可以用 `Set`、`Add`、`Get`、`Values` 等标准方法读写。
+
+例如，在 client 侧可以在发送第一条消息前写入请求 metadata：
+
+```go
+stream, err := cli.GreetStream(context.Background())
+if err != nil {
+	return err
+}
+stream.RequestHeader().Set("x-sample-token", "demo-token")
+```
+
+在服务端 stream handler 中，也可以返回响应 metadata：
+
+```go
+func (srv *GreetTripleServer) GreetServerStream(
+	ctx context.Context,
+	req *greet.GreetServerStreamRequest,
+	stream greet.GreetService_GreetServerStreamServer,
+) error {
+	stream.ResponseHeader().Set("x-stream-header", "ready")
+	stream.ResponseTrailer().Set("x-stream-trailer", "done")
+	return nil
+}
+```
+
 ## 3.运行效果
 
 运行服务端和客户端，可以看到请求正常返回
@@ -213,4 +252,3 @@ TRIPLE server stream resp: [triple]
 TRIPLE server stream resp: [triple]
 TRIPLE server stream resp: [triple]
 ```
-

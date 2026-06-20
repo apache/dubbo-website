@@ -10,6 +10,8 @@ type: docs
 weight: 2
 ---
 
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/generic" target="_blank">dubbo-go-samples/generic</a>。
+
 泛化调用是一种 Dubbo-Go 的特殊调用方式，它允许中间节点在没有接口信息的情况下传递调用信息，常被用于测试、网关的场景下。泛化调用支持 Dubbo 和 Triple 协议。通过 `client.NewGenericService` 创建泛化服务时，默认使用 Hessian2 作为传输序列化方案。
 
 ## 背景
@@ -77,7 +79,7 @@ usermap := map[interface{}]interface{} {
 
 ### 基于 Triple 协议泛化调用
 
-Triple 协议（dubbo3）已支持泛化调用。`NewGenericService` 内部走统一的 dial 流程，既支持通过注册中心发现服务，也支持通过 `client.WithURL` 进行直连调用。完整示例请参见 [dubbo-go-samples/generic](https://github.com/apache/dubbo-go-samples/tree/main/generic)。以下以直连调用为例。
+Triple 协议（dubbo3）已支持泛化调用。`NewGenericService` 内部走统一的 dial 流程，既支持通过注册中心发现服务，也支持通过 `client.WithURL` 进行直连调用。以下以直连调用为例。
 
 首先创建 dubbo 实例和客户端，然后通过 `cli.NewGenericService` 创建泛化服务，如下所示。
 

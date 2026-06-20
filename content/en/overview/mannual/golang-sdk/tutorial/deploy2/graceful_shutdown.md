@@ -10,6 +10,8 @@ type: docs
 
 # Graceful Shutdown
 
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/graceful_shutdown" target="_blank">dubbo-go-samples/graceful_shutdown</a>.
+
 ## Background
 
 In a stable production environment, container scheduling is fully managed by k8s, and microservice governance is maintained and managed by the service framework or operations personnel. In scenarios like releasing a new version or scaling up/down, old container instances will be terminated and replaced with new ones. If this replacement process is not handled properly in high-traffic online production environments, it can lead to a large number of erroneous requests in a short time, triggering alarms and even affecting normal business operations. For larger organizations, the losses from issues during the release process can be enormous. Hence, the need for graceful shutdown has arisen. This requires the service framework to provide stable guarantees during the service offline process on top of stable service invocation and traditional service governance capabilities, thus reducing operational costs and improving application stability.
@@ -63,4 +65,3 @@ extension.AddCustomShutdownCallback(func() {
 ## References
 
 [【Dubbo-go Elegant Up and Down Design and Practice】](https://developer.aliyun.com/article/860775)
-

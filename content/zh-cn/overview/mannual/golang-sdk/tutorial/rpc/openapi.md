@@ -8,6 +8,8 @@ weight: 5
 
 Dubbo-go 提供了内置的 OpenAPI 支持，可以自动为 Triple 协议服务生成符合 OpenAPI 3.0 规范的 API 文档，并通过 Swagger UI 和 ReDoc 提供 可视化的 API 浏览与调试界面。
 
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple/openapi" target="_blank">dubbo-go-samples/rpc/triple/openapi</a>。
+
 ## 功能概览
 
 - **自动文档生成**：基于服务接口定义（protobuf IDL 或非 IDL 模式），自动生成 OpenAPI 3.0.1 规范的 API 文档
@@ -329,7 +331,6 @@ func main() {
 
 启动后访问 `http://localhost:20000/dubbo/openapi/swagger-ui/` 即可查看 Swagger UI 文档界面。
 
-完整示例源码请参考 [dubbo-go-samples OpenAPI 示例](https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple/openapi)。
 
 ## 架构说明
 

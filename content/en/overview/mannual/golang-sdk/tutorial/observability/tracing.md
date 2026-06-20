@@ -19,7 +19,7 @@ Dubbo-go supports end-to-end tracing based on the [OpenTelemetry](https://opente
 Please note that tracing functionality is only enabled when creating the Dubbo application via `dubbo.NewInstance`, which is the `microservice application mode` mentioned in our quick start. The `lightweight RPC API` does not currently support enabling tracing.
 
 ## Example Explanation
-You can view the full example source code [here](https://github.com/apache/dubbo-go-samples/tree/main/otel).
+You can view the full example source code [here](https://github.com/apache/dubbo-go-samples/tree/main/otel/tracing).
 
 Enable tracing using `dubbo.WithTracing()`, and you can control tracing behavior with multiple parameters:
 
@@ -81,4 +81,3 @@ sample-ratio: 0.5
   - `trace.WithRatioMode()`
 - sample-ratio: sample ratio, only used when sample-mode is ratio, range between 0 and 1
   - `trace.WithRatio(float64)`
-

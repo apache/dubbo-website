@@ -14,6 +14,8 @@ Based on the Triple protocol defined by Dubbo, you can easily write browser and 
 
 This example demonstrates the RPC communication pattern based on the Triple protocol. The example uses Protocol Buffer to define the RPC service and demonstrates the processes of code generation, service publishing, and service access.
 
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/helloworld" target="_blank">dubbo-go-samples/helloworld</a>.
+
 ## Prerequisites
 
 Since we are using Protocol Buffer, we first need to install the relevant code generation tools, including `protoc`, `protoc-gen-go`, and `protoc-gen-go-triple`.
@@ -28,7 +30,10 @@ Since we are using Protocol Buffer, we first need to install the relevant code g
 
     ```shell
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-    go install github.com/dubbogo/protoc-gen-go-triple/v3@v3.0.3
+
+    git clone --depth 1 https://github.com/apache/dubbo-go.git
+    cd dubbo-go/tools/protoc-gen-go-triple
+    go install .
     ```
 
     Make sure `protoc-gen-go` and `protoc-gen-go-triple` are in your `PATH`. You can verify this with `which protoc-gen-go`. If that command does not work, please execute the following commands:
@@ -38,11 +43,16 @@ Since we are using Protocol Buffer, we first need to install the relevant code g
     [ -n "$(go env GOPATH)" ] && export PATH="$(go env GOPATH)/bin:${PATH}"
     ```
 
+    `protoc-gen-go-triple` is now maintained in the dubbo-go repository under
+    <a href="https://github.com/apache/dubbo-go/tree/main/tools/protoc-gen-go-triple" target="_blank">tools/protoc-gen-go-triple</a>.
+    Install it from that directory, and keep the generated `*.triple.go` files in sync when you change the `.proto`
+    service definition.
+
 ## Quick Run Example
 ### Download Example Source Code
 We maintain a series of dubbo-go usage examples in the <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> repository to help users quickly learn how to use dubbo-go.
 
-You can <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">download the example zip file and unzip it</a>, or clone the repository:
+You can <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/main.zip" target="_blank">download the example zip file and unzip it</a>, or clone the repository:
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples
@@ -214,6 +224,10 @@ func main() {
 
 This is the basic working principle of dubbo-go RPC!
 
+After the basic unary call is working, the same generated Triple client and server also support server streaming,
+client streaming, bidirectional streaming, request metadata, response headers and trailers, filters, health checks,
+timeouts, retries, and OpenAPI exposure. Continue with the RPC framework guides for these capabilities.
+
 ## More Content
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -243,4 +257,3 @@ This is the basic working principle of dubbo-go RPC!
 <hr>
 </div>
 {{< /blocks/section >}}
-

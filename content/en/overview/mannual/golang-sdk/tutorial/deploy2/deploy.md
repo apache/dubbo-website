@@ -10,9 +10,14 @@ weight: 2
 
 In this chapter, we will quickly create a set of Dubbo-go Server and Client applications using the application template and deploy them in an Istio cluster; observe, debug, and verify service discovery and successful calls.
 
+The matching mesh sample is available at
+<a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh" target="_blank">dubbo-go-samples/mesh</a>.
+
 ## 1. Preparation
 
-- The dubbo-go CLI tool and dependency tools are installed, grpc_cli (for local debugging if needed).
+- `dubbogo-cli` and related dependency tools are installed. Install `dubbogo-cli` from
+  [`tools/dubbogo-cli`](../../refer/use_dubbogo_cli/) in the dubbo-go repository. `grpc_cli` is optional for local
+  debugging.
 - The docker, helm, and kubectl environments are installed. (Arm machines must support docker buildx)
 - The task [Deployment of Istio Environment](../istio/) is complete.
 
@@ -58,6 +63,9 @@ $  tree .
         └── service.go
 ```
 
+`dubbogo-cli` is maintained in the dubbo-go repository under `tools/dubbogo-cli`, and the generated template is the
+starting point for the rest of this guide.
+
 The generated project includes several directories:
 
 - api: stores interface files: proto files and generated pb.go files
@@ -101,7 +109,7 @@ The generated project includes several directories:
 - Pull dependencies
 
   ```bash
-  $ go get dubbo.apache.org/dubbo-go/v3@3.0
+  $ go get dubbo.apache.org/dubbo-go/v3@v3.3.1
   $ make tidy
   go mod tidy
   ```
@@ -425,4 +433,3 @@ Verify the call was successful.
 The application templates provided by dubbogo-cli conveniently support developers in image building, pushing, and deployment.
 
 In the Istio environment, server applications register their service information on Istio, while clients listen to xds resources, querying the Istio debug port for interface-level service discovery. Developers do not need to worry about concepts like service names, hostnames, and cluster names; they only need to import interfaces and initiate calls.
-

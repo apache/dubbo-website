@@ -10,6 +10,8 @@ type: docs
 weight: 2
 ---
 
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/generic" target="_blank">dubbo-go-samples/generic</a>.
+
 Generic invocation is a special way of calling in Dubbo-Go that allows intermediary nodes to pass call information without interface information, commonly used in testing and gateway scenarios. Generic invocation supports both Dubbo and Triple protocols. When creating a generic service via `client.NewGenericService`, Hessian2 is used as the default transport serialization.
 
 ## Background
@@ -77,7 +79,7 @@ Generic invocation is transparent to the provider side, meaning the provider doe
 
 ### Generic Invocation over Triple Protocol
 
-The Triple protocol (dubbo3) supports generic invocation. `NewGenericService` uses a unified dial flow internally, supporting both service discovery via a registry and direct connection via `client.WithURL`. For a complete example, see [dubbo-go-samples/generic](https://github.com/apache/dubbo-go-samples/tree/main/generic). The following uses direct connection as an example.
+The Triple protocol (dubbo3) supports generic invocation. `NewGenericService` uses a unified dial flow internally, supporting both service discovery via a registry and direct connection via `client.WithURL`. The following uses direct connection as an example.
 
 First, create a dubbo instance and a client, then create a generic service via `cli.NewGenericService`, as shown below.
 

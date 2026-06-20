@@ -8,18 +8,17 @@ type: docs
 weight: 3
 ---
 
-
-
-
-
-
 在本节中，我们将延续上一个任务[【在 Istio 环境部署 Dubbo-go 应用】](../deploy/)。
 
 在之前的任务中，我们在集群中部署了一组 Dubbo-go Server和 Client 端应用，验证了服务发现和调用成功。在本节中，我们将创建新版本的 Server 端应用。通过配置 VirtualService 和 DestinationRule ，实现路由管理，和流量转移能力
 
+对应的流量治理部署清单见
+<a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh/deploy/traffic" target="_blank">dubbo-go-samples/mesh/deploy/traffic</a>。
+
 ## 1. 准备工作
 
-- dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。
+- 已安装 `dubbogo-cli` 及相关依赖工具。`dubbogo-cli` 请从 dubbo-go 主仓库
+  [`tools/dubbogo-cli`](../../refer/use_dubbogo_cli/) 安装；`grpc_cli` 仅在本地调试时需要。
 - docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）
 - 任务[【在 Istio 环境部署 Dubbo-go 应用】](../deploy/)已完成
 

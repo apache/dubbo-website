@@ -5,6 +5,8 @@ type: docs
 weight: 1
 ---
 
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/router/script" target="_blank">dubbo-go-samples/router/script</a>。
+
 ## 使用方法
 
 ### 前置准备
@@ -45,5 +47,3 @@ script: |
 |--------|--------------------|
 | type   | script的类型，目前仅可使用js |
 | script | script实际内容         |
-
-完整示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/main/router/script)。

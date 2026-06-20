@@ -10,9 +10,13 @@ weight: 2
 
 在本章节中，我们将使用应用模板快速创建一组 Dubbo-go Server和 Client 端应用，部署在 Istio 集群中；观察、调试和验证服务发现和调用成功。
 
+对应的 mesh 示例见
+<a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh" target="_blank">dubbo-go-samples/mesh</a>。
+
 ## 1. 准备工作
 
-- dubbo-go cli 工具和依赖工具已安装、grpc_cli (如需本地调试)。
+- 已安装 `dubbogo-cli` 及相关依赖工具。`dubbogo-cli` 请从 dubbo-go 主仓库
+  [`tools/dubbogo-cli`](../../refer/use_dubbogo_cli/) 安装；`grpc_cli` 仅在本地调试时需要。
 - docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）
 - [任务【istio 环境部署】](../istio/) 已完成
 
@@ -58,6 +62,8 @@ $  tree .
         └── service.go
 ```
 
+`dubbogo-cli` 现在维护在 dubbo-go 主仓库的 `tools/dubbogo-cli` 目录下，本文后续步骤都基于它生成的模板展开。
+
 生成项目包括几个目录：
 
 - api：放置接口文件：proto文件和生成的pb.go文件
@@ -101,7 +107,7 @@ $  tree .
 - 拉取依赖
 
   ```bash
-  $ go get dubbo.apache.org/dubbo-go/v3@3.0
+  $ go get dubbo.apache.org/dubbo-go/v3@v3.3.1
   $ make tidy
   go mod tidy
   ```

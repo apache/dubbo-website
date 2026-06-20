@@ -11,6 +11,8 @@ weight: 2
 
 本示例演示了使用 dubbo-go 开发微服务应用，为应用增加包括服务发现、负载均衡、流量管控等微服务核心能力。
 
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>。
+
 ## 前置条件
 本示例我们继续使用 Protobuf 开发微服务应用，请参考 [开发 rpc server 和 rpc client](../rpc) 了解如何安装 protoc、protoc-gen-go-triple 等必须插件。
 
@@ -187,7 +189,6 @@ ins, err := dubbo.NewInstance(
 <hr>
 </div>
 {{< /blocks/section >}}
-
 
 
 

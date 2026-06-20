@@ -8,18 +8,18 @@ type: docs
 weight: 3
 ---
 
-
-
-
-
-
 In this section, we will continue from the previous task [【Deploying Dubbo-go Applications in Istio Environment】](../deploy/).
 
 In the previous task, we deployed a set of Dubbo-go Server and Client applications in the cluster and verified that service discovery and invocation were successful. In this section, we will create a new version of the server application. By configuring VirtualService and DestinationRule, we will achieve routing management and traffic shifting capabilities.
 
+The matching traffic-management manifests are available at
+<a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh/deploy/traffic" target="_blank">dubbo-go-samples/mesh/deploy/traffic</a>.
+
 ## 1. Preparation
 
-- The dubbo-go CLI tool and dependencies have been installed, as well as grpc_cli (for local debugging if needed).
+- `dubbogo-cli` and related dependency tools are installed. Install `dubbogo-cli` from
+  [`tools/dubbogo-cli`](../../refer/use_dubbogo_cli/) in the dubbo-go repository. `grpc_cli` is optional for local
+  debugging.
 - Docker, Helm, and kubectl environments have been installed. (Arm machines need to support docker buildx)
 - The task [【Deploying Dubbo-go Applications in Istio Environment】](../deploy/) has been completed.
 
@@ -418,4 +418,3 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 2022-04-07T05:56:02.053Z        INFO    cmd/app.go:35   call server response = name:"Hello laurence"  id:"v1.0.0"
 2022-04-07T05:56:03.055Z        INFO    cmd/app.go:35   call server response = name:"Hello laurence"  id:"v1.0.0"
 ```
-

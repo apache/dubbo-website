@@ -10,6 +10,8 @@ type: docs
 
 # 优雅下线
 
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/graceful_shutdown" target="_blank">dubbo-go-samples/graceful_shutdown</a>。
+
 ## 背景
 
 在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者扩缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。

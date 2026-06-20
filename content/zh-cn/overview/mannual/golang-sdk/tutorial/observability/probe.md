@@ -23,7 +23,7 @@ Dubbo-Go 提供内置的 **Kubernetes HTTP Probe 服务**，用于支持：
 * 可选内部生命周期对齐
 * 可控的重启风险
 
-以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/metrics)。
+以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/metrics/probe)。
 
 ---
 

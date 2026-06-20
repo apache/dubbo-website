@@ -8,15 +8,13 @@ type: docs
 weight: 1
 ---
 
-
-
-
-
+相关示例：<a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh" target="_blank">dubbo-go-samples/mesh</a>。
 
 ## 1. 准备工作
 
 - docker、helm、kubectl 环境已安装。
-- dubbo-go cli 工具和依赖工具已安装
+- 已安装 `dubbogo-cli` 及相关依赖工具。`dubbogo-cli` 请从 dubbo-go 主仓库
+  [`tools/dubbogo-cli`](../../refer/use_dubbogo_cli/) 安装。
 
 ## 2. 部署 Istio 环境
 

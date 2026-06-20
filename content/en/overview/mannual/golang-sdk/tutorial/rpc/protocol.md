@@ -11,6 +11,11 @@ The Dubbo-go framework provides two built-in protocols: triple and dubbo. In add
  * dubbo, a high-performance private communication protocol based on TCP, with the disadvantage of poor universality, more suitable for use between Dubbo SDKs;
  * Any protocol extension, by extending the protocol, it can support any RPC protocol. The official ecosystem provides support for JsonRPC, thrift, etc.
 
+Related samples:
+
+* Triple protocol: <a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank">dubbo-go-samples/rpc/triple</a>
+* Multi-protocol publishing: <a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols" target="_blank">dubbo-go-samples/rpc/multi-protocols</a>
+
 In this document, we will introduce the usage of the triple protocol, how to achieve mutual calls with existing dubbo2 systems, and extend support for more protocols. For more principled introductions, please refer to [Protocol Specification](/en/overview/reference/protocols/triple-spec/) or [related documents in dubbo java](/en/overview/mannual/java-sdk/tasks/protocols/protocol/) .
 
 ## triple Protocol
@@ -138,4 +143,3 @@ The Dubbo framework supports protocol extensions. Currently, the officially supp
 * jsonrpc
 
 In some scenarios, you can publish services of multiple protocols simultaneously within one application or call services with different protocols simultaneously. Here is a [usage example for multi-protocol publishing](https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols) for reference.
-
