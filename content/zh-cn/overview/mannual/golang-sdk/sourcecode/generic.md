@@ -1,8 +1,9 @@
 ---
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/features/generic/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/generic/
     - /zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic/
+    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/generic/
+    - /zh-cn/overview/mannual/golang-sdk/tutorial/develop/features/generic/
 description: 当前 Dubbo Go 的泛化调用
 title: 泛化调用
 type: docs

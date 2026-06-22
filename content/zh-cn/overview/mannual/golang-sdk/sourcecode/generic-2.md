@@ -1,10 +1,7 @@
 ---
 aliases:
-    - /zh/docs3-v2/golang-sdk/tutorial/develop/features/generic/
-    - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/generic/
     - /zh/docs3-v2/golang-sdk/tutorial/develop/features/generic-2/
     - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/features/generic-2/
-    - /zh-cn/overview/mannual/golang-sdk/tutorial/develop/features/generic/
     - /zh-cn/overview/mannual/golang-sdk/refer/sourcecode/generic-2/
 description: 泛化调用文档的兼容说明
 title: 泛化调用兼容说明

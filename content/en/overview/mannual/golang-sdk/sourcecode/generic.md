@@ -2,6 +2,7 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/features/generic/
     - /en/overview/mannual/golang-sdk/refer/sourcecode/generic/
+    - /en/overview/mannual/golang-sdk/tutorial/develop/features/generic/
 description: Generic invocation in current Dubbo Go
 title: Generic Call
 type: docs
