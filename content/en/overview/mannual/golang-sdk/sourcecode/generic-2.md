@@ -1,6 +1,5 @@
 ---
 aliases:
-    - /en/docs3-v2/golang-sdk/tutorial/develop/features/generic/
     - /en/docs3-v2/golang-sdk/tutorial/develop/features/generic-2/
     - /en/overview/mannual/golang-sdk/tutorial/develop/features/generic/
     - /en/overview/mannual/golang-sdk/refer/sourcecode/generic-2/
