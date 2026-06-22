@@ -15,7 +15,7 @@ weight: 1
 
 - docker、helm、kubectl 环境已安装。
 - 已安装 `dubbogo-cli` 及相关依赖工具。`dubbogo-cli` 请从 dubbo-go 主仓库
-  [`tools/dubbogo-cli`](../../tools/dubbogo-cli/) 安装。
+  [`tools/dubbogo-cli`](../../../tools/dubbogo-cli/) 安装。
 
 ## 2. 部署 Istio 环境
 

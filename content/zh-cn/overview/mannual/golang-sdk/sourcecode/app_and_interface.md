@@ -3,6 +3,7 @@ aliases:
     - /zh/docs3-v2/golang-sdk/preface/design/app_and_interface/
     - /zh-cn/docs3-v2/golang-sdk/preface/design/app_and_interface/
     - /zh-cn/overview/mannual/golang-sdk/preface/design/app_and_interface/
+    - /zh-cn/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/
 description: 当前 Dubbo Go 中的应用级与接口级概念
 keywords: 基本概念
 title: 应用和接口

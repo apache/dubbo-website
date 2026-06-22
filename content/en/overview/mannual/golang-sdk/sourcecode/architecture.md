@@ -1,8 +1,8 @@
 ---
 aliases:
     - /en/docs3-v2/golang-sdk/preface/design/architecture/
-    - /en/docs3-v2/golang-sdk/preface/design/architecture/
     - /en/overview/mannual/golang-sdk/preface/design/architecture/
+    - /en/overview/mannual/golang-sdk/refer/sourcecode/architecture/
 description: Current Dubbo Go architecture
 keywords: Architecture
 title: Architecture
@@ -63,4 +63,3 @@ import _ "dubbo.apache.org/dubbo-go/v3/imports"
 ```
 
 loads common built-in protocols, registries, filters, routers, metadata reports, tracing exporters, metrics, load balancers, and cluster strategies. Users can also import only the specific implementation packages they need.
-

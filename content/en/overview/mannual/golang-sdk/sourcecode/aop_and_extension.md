@@ -1,8 +1,8 @@
 ---
 aliases:
     - /en/docs3-v2/golang-sdk/preface/design/aop_and_extension/
-    - /en/docs3-v2/golang-sdk/preface/design/aop_and_extension/
     - /en/overview/mannual/golang-sdk/preface/design/aop_and_extension/
+    - /en/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/
 description: AOP and extension mechanism in current Dubbo Go
 keywords: AOP, extension
 title: AOP and Extension Mechanism

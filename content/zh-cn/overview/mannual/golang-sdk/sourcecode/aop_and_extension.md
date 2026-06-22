@@ -3,6 +3,7 @@ aliases:
     - /zh/docs3-v2/golang-sdk/preface/design/aop_and_extension/
     - /zh-cn/docs3-v2/golang-sdk/preface/design/aop_and_extension/
     - /zh-cn/overview/mannual/golang-sdk/preface/design/aop_and_extension/
+    - /zh-cn/overview/mannual/golang-sdk/refer/sourcecode/aop_and_extension/
 description: 当前 Dubbo Go 的 AOP 与扩展机制
 keywords: AOP, extension
 title: AOP 与可扩展机制

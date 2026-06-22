@@ -17,7 +17,7 @@ The matching mesh sample is available at
 ## 1. Preparation
 
 - `dubbogo-cli` and related dependency tools are installed. Install `dubbogo-cli` from
-  [`tools/dubbogo-cli`](../../tools/dubbogo-cli/) in the dubbo-go repository. `grpc_cli` is optional for local
+  [`tools/dubbogo-cli`](../../../tools/dubbogo-cli/) in the dubbo-go repository. `grpc_cli` is optional for local
   debugging.
 - The docker, helm, and kubectl environments are installed. (Arm machines must support docker buildx)
 - The task [Deployment of Istio Environment](../istio/) is complete.

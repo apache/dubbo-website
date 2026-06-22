@@ -1,7 +1,7 @@
 ---
 aliases:
     - /en/docs3-v2/golang-sdk/sourcecode/protocol/
-    - /en/docs3-v2/golang-sdk/sourcecode/protocol/
+    - /en/overview/mannual/golang-sdk/refer/sourcecode/protocol/
 description: Current network protocol source code overview
 title: Network Protocol
 type: docs

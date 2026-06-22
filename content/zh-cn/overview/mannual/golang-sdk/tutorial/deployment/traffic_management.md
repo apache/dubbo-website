@@ -19,7 +19,7 @@ weight: 3
 ## 1. 准备工作
 
 - 已安装 `dubbogo-cli` 及相关依赖工具。`dubbogo-cli` 请从 dubbo-go 主仓库
-  [`tools/dubbogo-cli`](../../tools/dubbogo-cli/) 安装；`grpc_cli` 仅在本地调试时需要。
+  [`tools/dubbogo-cli`](../../../tools/dubbogo-cli/) 安装；`grpc_cli` 仅在本地调试时需要。
 - docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）
 - 任务[【在 Istio 环境部署 Dubbo-go 应用】](../deploy/)已完成
 

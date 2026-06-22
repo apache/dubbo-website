@@ -1,7 +1,7 @@
 ---
 aliases:
     - /en/docs3-v2/golang-sdk/sourcecode/registry/
-    - /en/docs3-v2/golang-sdk/sourcecode/registry/
+    - /en/overview/mannual/golang-sdk/refer/sourcecode/registry/
 description: Current registry and service discovery source code overview
 title: Registry
 type: docs

@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/sourcecode/registry/
     - /zh-cn/docs3-v2/golang-sdk/sourcecode/registry/
+    - /zh-cn/overview/mannual/golang-sdk/refer/sourcecode/registry/
 description: 当前注册中心与服务发现源码概览
 title: 注册中心
 type: docs

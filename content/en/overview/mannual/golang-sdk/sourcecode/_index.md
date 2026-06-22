@@ -1,7 +1,6 @@
 ---
 aliases:
     - /en/docs3-v2/golang-sdk/sourcecode/
-    - /en/docs3-v2/golang-sdk/sourcecode/
     - /en/overview/mannual/golang-sdk/sourcecode/
     - /en/overview/mannual/golang-sdk/refer/sourcecode/
 description: Source code guide for current Dubbo Go runtime architecture and extension points

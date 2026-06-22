@@ -3,6 +3,7 @@ aliases:
     - /zh/docs3-v2/golang-sdk/preface/design/architecture/
     - /zh-cn/docs3-v2/golang-sdk/preface/design/architecture/
     - /zh-cn/overview/mannual/golang-sdk/preface/design/architecture/
+    - /zh-cn/overview/mannual/golang-sdk/refer/sourcecode/architecture/
 description: 当前 Dubbo Go 架构
 keywords: 架构
 title: 架构
@@ -63,4 +64,3 @@ import _ "dubbo.apache.org/dubbo-go/v3/imports"
 ```
 
 会加载常用内置 protocol、registry、filter、router、metadata report、tracing exporter、metrics、load balance 和 cluster 策略。用户也可以只按需导入具体实现包。
-

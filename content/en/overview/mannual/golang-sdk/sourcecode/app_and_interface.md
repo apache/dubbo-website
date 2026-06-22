@@ -1,8 +1,8 @@
 ---
 aliases:
     - /en/docs3-v2/golang-sdk/preface/design/app_and_interface/
-    - /en/docs3-v2/golang-sdk/preface/design/app_and_interface/
     - /en/overview/mannual/golang-sdk/preface/design/app_and_interface/
+    - /en/overview/mannual/golang-sdk/refer/sourcecode/app_and_interface/
 description: Application-level and interface-level concepts in current Dubbo Go
 keywords: Basic concepts
 title: Application and Interface

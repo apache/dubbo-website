@@ -17,7 +17,7 @@ weight: 2
 ## 1. 准备工作
 
 - 已安装 `dubbogo-cli` 及相关依赖工具。`dubbogo-cli` 请从 dubbo-go 主仓库
-  [`tools/dubbogo-cli`](../../tools/dubbogo-cli/) 安装；`grpc_cli` 仅在本地调试时需要。
+  [`tools/dubbogo-cli`](../../../tools/dubbogo-cli/) 安装；`grpc_cli` 仅在本地调试时需要。
 - docker、helm、kubectl 环境已安装。（arm 机器需支持 docker buildx）
 - [任务【istio 环境部署】](../istio/) 已完成
 
@@ -434,4 +434,4 @@ $ kubectl get pods  | grep client | awk '{print $1}' | xargs kubectl logs
 
 dubbogo-cli 提供的应用模板可以方便地支持开发者进行镜像的构建、推送、部署。
 
-在 Istio 环境中，server 应用将自身服务信息注册在 Isito 上，由客户端监听 xds 资源，查询 istio debug 端口进行接口级别的服务发现。开发人员无需关心 service名、主机名、集群名等概念，只需要引入接口，发起调用即可。
+在 Istio 环境中，server 应用将自身服务信息注册在 Istio 上，由客户端监听 xds 资源，查询 istio debug 端口进行接口级别的服务发现。开发人员无需关心 service名、主机名、集群名等概念，只需要引入接口，发起调用即可。

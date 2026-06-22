@@ -2,6 +2,7 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/sourcecode/protocol/
     - /zh-cn/docs3-v2/golang-sdk/sourcecode/protocol/
+    - /zh-cn/overview/mannual/golang-sdk/refer/sourcecode/protocol/
 description: 当前网络协议源码概览
 title: 网络协议
 type: docs

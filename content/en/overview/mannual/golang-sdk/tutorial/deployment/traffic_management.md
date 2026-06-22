@@ -19,7 +19,7 @@ The matching traffic-management manifests are available at
 ## 1. Preparation
 
 - `dubbogo-cli` and related dependency tools are installed. Install `dubbogo-cli` from
-  [`tools/dubbogo-cli`](../../tools/dubbogo-cli/) in the dubbo-go repository. `grpc_cli` is optional for local
+  [`tools/dubbogo-cli`](../../../tools/dubbogo-cli/) in the dubbo-go repository. `grpc_cli` is optional for local
   debugging.
 - Docker, Helm, and kubectl environments have been installed. (Arm machines need to support docker buildx)
 - The task [【Deploying Dubbo-go Applications in Istio Environment】](../deploy/) has been completed.
