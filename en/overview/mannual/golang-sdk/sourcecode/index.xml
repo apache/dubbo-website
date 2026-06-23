@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Source Code Guide on Apache Dubbo</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/</link><description>Recent content in Source Code Guide on Apache Dubbo</description><generator>Hugo</generator><language>en</language><atom:link href="https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/index.xml" rel="self" type="application/rss+xml"/><item><title>Architecture</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/architecture/</guid><description>&lt;p&gt;Related samples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Quick start RPC application: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/helloworld" target="_blank"&gt;dubbo-go-samples/helloworld&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Registry-based microservice application: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Multi-protocol application: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols" target="_blank"&gt;dubbo-go-samples/rpc/multi-protocols&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo Go is organized around a small set of runtime concepts: an application instance, providers, consumers, protocols, registries, metadata, and governance extensions. Current applications are usually built with the API entry points in &lt;code&gt;dubbo.go&lt;/code&gt;, &lt;code&gt;server&lt;/code&gt;, and &lt;code&gt;client&lt;/code&gt;, while configuration-file users still go through &lt;code&gt;config.RootConfig&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="main-runtime-layers"&gt;Main Runtime Layers&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Layer&lt;/th&gt;
+ &lt;th&gt;Important packages&lt;/th&gt;
+ &lt;th&gt;Responsibility&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Application instance&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;dubbo.go&lt;/code&gt;, &lt;code&gt;options.go&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Holds application, protocol, registry, metadata, metrics, tracing, router, and shutdown options.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Provider API&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;server&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Registers service handlers, builds service options, creates invokers, and exports services.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Consumer API&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;client&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Creates clients, dials service references, creates generated or generic services, and invokes remote methods.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Protocol&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;protocol/base&lt;/code&gt;, &lt;code&gt;protocol/triple&lt;/code&gt;, &lt;code&gt;protocol/dubbo&lt;/code&gt;, &lt;code&gt;protocol/rest&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Converts invokers into network servers on provider side and network clients on consumer side.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Registry and discovery&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;registry&lt;/code&gt;, &lt;code&gt;registry/protocol&lt;/code&gt;, &lt;code&gt;registry/servicediscovery&lt;/code&gt;, &lt;code&gt;registry/directory&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Handles registration, subscription, service discovery, and registry-backed invocation.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Metadata&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;metadata&lt;/code&gt;, &lt;code&gt;metadata/report&lt;/code&gt;, &lt;code&gt;metadata/mapping&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Stores service definitions, service-to-application mapping, and metadata reports.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Governance extensions&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;filter&lt;/code&gt;, &lt;code&gt;cluster&lt;/code&gt;, &lt;code&gt;cluster/router&lt;/code&gt;, &lt;code&gt;cluster/loadbalance&lt;/code&gt;, &lt;code&gt;common/extension&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Provides filters, routing, load balancing, cluster strategies, and extension registration.&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="provider-flow"&gt;Provider Flow&lt;/h2&gt;
+&lt;p&gt;For the current server API, a provider normally follows this path:&lt;/p&gt;</description></item><item><title>Network Protocol</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/protocol/</guid><description>&lt;p&gt;Related samples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Triple RPC: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank"&gt;dubbo-go-samples/rpc/triple&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Multi-protocol service: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols" target="_blank"&gt;dubbo-go-samples/rpc/multi-protocols&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;gRPC interoperability: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/grpc" target="_blank"&gt;dubbo-go-samples/rpc/grpc&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In current Dubbo Go, the protocol layer is the bridge between the invocation model and the wire protocol. It is responsible for exposing providers as network services and turning consumer-side references into callable remote invokers.&lt;/p&gt;
+&lt;h2 id="core-protocol-abstraction"&gt;Core Protocol Abstraction&lt;/h2&gt;
+&lt;p&gt;The current protocol interface is defined in &lt;code&gt;protocol/base/base_protocol.go&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; Protocol &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Export&lt;/span&gt;(invoker Invoker) Exporter
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Refer&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) Invoker
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Destroy&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Its responsibilities are straightforward:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Export&lt;/code&gt;: expose a provider-side invoker as a network service&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Refer&lt;/code&gt;: create a consumer-side invoker for a target URL&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Destroy&lt;/code&gt;: destroy protocol-owned invokers and exporters&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There is also an optional capability:&lt;/p&gt;</description></item><item><title>Registry</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/registry/</guid><description>&lt;p&gt;Related samples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Nacos registry: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Zookeeper registry: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/zookeeper" target="_blank"&gt;dubbo-go-samples/registry/zookeeper&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Application-level service discovery: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Related documentation:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://dubbo.apache.org/en/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/"&gt;Application-level Service Discovery&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In current Dubbo Go, the registry layer is not only about interface-level address registration. It also participates in application-level service discovery, metadata bootstrap, subscription refresh, and registry-backed protocol export.&lt;/p&gt;
+&lt;h2 id="core-registry-interface"&gt;Core Registry Interface&lt;/h2&gt;
+&lt;p&gt;The main interface is defined in &lt;code&gt;registry/registry.go&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; Registry &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	common.Node
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Register&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;UnRegister&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Subscribe&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;UnSubscribe&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;LoadSubscribeInstances&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Compared with older explanations, &lt;code&gt;LoadSubscribeInstances(...)&lt;/code&gt; is now part of the contract. It exists because subscription is asynchronous, and Dubbo Go may need an initial synchronous load before the normal subscription stream catches up.&lt;/p&gt;</description></item><item><title>Core 3.x Capabilities</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/3.0_feature/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/3.0_feature/</guid><description>&lt;p&gt;Related samples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Triple protocol: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank"&gt;dubbo-go-samples/rpc/triple&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Application-level discovery with Nacos: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Service Mesh deployment: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh" target="_blank"&gt;dubbo-go-samples/mesh&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo Go 3.x is centered on the Triple protocol, application-level service discovery, metadata-driven service introspection, and SDK-side governance capabilities. These capabilities are no longer just &amp;ldquo;new features&amp;rdquo; from the 3.0 release; they are the normal development model for current Dubbo Go applications.&lt;/p&gt;
+&lt;h2 id="triple-protocol"&gt;Triple Protocol&lt;/h2&gt;
+&lt;p&gt;Triple is the recommended RPC protocol in Dubbo Go 3.x. Its implementation lives mainly under:&lt;/p&gt;</description></item><item><title>Generic Call</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/generic/</guid><description>&lt;p&gt;Related samples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Generic invocation sample: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/generic" target="_blank"&gt;dubbo-go-samples/generic&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Triple sample: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank"&gt;dubbo-go-samples/rpc/triple&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Generic invocation in current Dubbo Go is centered on &lt;code&gt;client.NewGenericService(...)&lt;/code&gt; and &lt;code&gt;filter/generic.GenericService&lt;/code&gt;. Older examples based on &lt;code&gt;ReferenceConfigBuilder&lt;/code&gt;, &lt;code&gt;GenericLoad()&lt;/code&gt;, and &lt;code&gt;GetRPCService()&lt;/code&gt; describe the legacy compatibility API and are no longer the recommended entry point.&lt;/p&gt;
+&lt;h2 id="core-api"&gt;Core API&lt;/h2&gt;
+&lt;p&gt;The main runtime entry is in &lt;code&gt;client/client.go&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;genericService, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; cli.&lt;span style="color:#268bd2"&gt;NewGenericService&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.samples.UserProvider&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithProtocolTriple&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithSerialization&lt;/span&gt;(constant.Hessian2Serialization),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithURL&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;tri://127.0.0.1:20000&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;NewGenericService(...)&lt;/code&gt; does three important things by default:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;sets &lt;code&gt;NONIDL&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;enables generic invocation&lt;/li&gt;
+&lt;li&gt;uses &lt;code&gt;hessian2&lt;/code&gt; serialization&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Internally it creates &lt;code&gt;filter/generic.GenericService&lt;/code&gt;, then wires it into the normal reference and invocation path.&lt;/p&gt;</description></item><item><title>Generic Invocation Compatibility Notes</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/generic-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/generic-2/</guid><description>&lt;p&gt;Related sample:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Generic invocation sample: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/generic" target="_blank"&gt;dubbo-go-samples/generic&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This page is kept mainly for compatibility with older links.&lt;/p&gt;
+&lt;p&gt;For current Dubbo Go, please read &lt;a href="https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/generic/"&gt;Generic Call&lt;/a&gt;. The old examples that use:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;config.NewReferenceConfigBuilder()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GenericLoad()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GetRPCService()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;describe the legacy configuration-centric API path. The recommended runtime entry today is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;client.NewGenericService(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filter/generic.GenericService.Invoke(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filter/generic.GenericService.InvokeWithType(...)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If you need a working example, use the &lt;code&gt;dubbo-go-samples/generic&lt;/code&gt; sample first.&lt;/p&gt;</description></item><item><title>AOP and Extension Mechanism</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/aop_and_extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/aop_and_extension/</guid><description>&lt;p&gt;Related samples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Custom filter: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/filter/custom" target="_blank"&gt;dubbo-go-samples/filter/custom&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Condition router: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/router/condition" target="_blank"&gt;dubbo-go-samples/router/condition&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Tag router: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/router/tag" target="_blank"&gt;dubbo-go-samples/router/tag&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo Go uses Go package initialization plus a centralized extension registry to provide most pluggable capabilities. Filters, routers, protocols, registries, load balancers, cluster strategies, tracing exporters, and metadata reporters are all loaded in this way.&lt;/p&gt;
+&lt;h2 id="extension-registry"&gt;Extension Registry&lt;/h2&gt;
+&lt;p&gt;The current implementation lives under &lt;code&gt;common/extension&lt;/code&gt;. It no longer relies on ad hoc package-level maps for each type. Instead, each extension category uses the shared generic registry helper:&lt;/p&gt;</description></item><item><title>Application and Interface</title><link>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/app_and_interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/en/overview/mannual/golang-sdk/sourcecode/app_and_interface/</guid><description>&lt;p&gt;Related samples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Hello world application: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/helloworld" target="_blank"&gt;dubbo-go-samples/helloworld&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;YAML-based configuration: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/config_yaml" target="_blank"&gt;dubbo-go-samples/config_yaml&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Registry-based application: &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Current Dubbo Go still separates concepts into application-level configuration and interface-level service references, but the runtime model is broader than the older &amp;ldquo;application vs interface&amp;rdquo; explanation. The real source of truth is now the application instance options in &lt;code&gt;options.go&lt;/code&gt; and the compatibility configuration model in &lt;code&gt;config/root_config.go&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="application-level-configuration"&gt;Application-Level Configuration&lt;/h2&gt;
+&lt;p&gt;Application-level configuration is shared by all services and references inside one Dubbo Go process.&lt;/p&gt;</description></item></channel></rss>
