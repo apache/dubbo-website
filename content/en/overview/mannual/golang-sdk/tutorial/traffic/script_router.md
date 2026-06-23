@@ -5,6 +5,8 @@ type: docs
 weight: 1
 ---
 
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/router/script" target="_blank">dubbo-go-samples/router/script</a>.
+
 ## How to use
 
 ### Prerequisites
@@ -42,6 +44,3 @@ script: |
     });
   })(invokers, invocation, context);
 ```
-
-For the complete example, please
-see: [Full Example Code](https://github.com/apache/dubbo-go-samples/tree/main/router/script).

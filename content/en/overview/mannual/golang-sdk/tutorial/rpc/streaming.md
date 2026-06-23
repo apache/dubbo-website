@@ -4,6 +4,9 @@ title: Streaming Communication
 type: docs
 weight: 1
 ---
+
+Sample source: <a href="https://github.com/apache/dubbo-go-samples/tree/main/streaming" target="_blank">dubbo-go-samples/streaming</a>.
+
 Streaming communication is a new RPC data transfer mode offered by Dubbo3, suitable for the following scenarios:
 
 - Interfaces that need to send large amounts of data that cannot be placed in a single RPC request or response, requiring batch sending. However, traditional multiple RPC calls cannot resolve issues of order and performance, and if order is to be guaranteed, they must be sent serially.
@@ -17,11 +20,12 @@ There are three types of Streaming communication:
 
 ## 1. Introduction
 
-This document demonstrates how to use streaming communication in Dubbo-go. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/streaming" target="_blank">complete example source code here</a>.
+This document demonstrates how to use streaming communication in Dubbo-go.
 
 ## 2. How to use Dubbo-go streaming communication
 
-In the proto file, add `stream` before the parameters of the methods that require streaming communication and generate the corresponding files using `proto-gen-triple`.
+In the proto file, add `stream` before the request or response type of the methods that require streaming communication,
+and generate the corresponding files using `protoc-gen-go-triple`.
 
 ```protobuf
 service GreetService {
@@ -195,6 +199,42 @@ func testServerStream(cli greet.GreetService) error {
 }
 ```
 
+Streaming calls also expose Triple metadata through the generated stream APIs:
+
+| Side | API | Purpose |
+| ---- | --- | ------- |
+| Client stream and bidirectional client | `RequestHeader()` | Add request metadata before the first message is sent |
+| Server stream and bidirectional client | `ResponseHeader()` | Read response headers returned by the server |
+| Server stream and bidirectional client | `ResponseTrailer()` | Read response trailers after the response is completed |
+| Provider stream handlers | `RequestHeader()` | Read request metadata sent by the client |
+| Provider stream handlers | `ResponseHeader()` / `ResponseTrailer()` | Set response headers and trailers |
+
+Use standard `http.Header` methods such as `Set`, `Add`, `Get`, and `Values` when working with these metadata values.
+
+For example, on the client side you can write request metadata before sending the first message:
+
+```go
+stream, err := cli.GreetStream(context.Background())
+if err != nil {
+	return err
+}
+stream.RequestHeader().Set("x-sample-token", "demo-token")
+```
+
+And on the server side you can return response metadata from a stream handler:
+
+```go
+func (srv *GreetTripleServer) GreetServerStream(
+	ctx context.Context,
+	req *greet.GreetServerStreamRequest,
+	stream greet.GreetService_GreetServerStreamServer,
+) error {
+	stream.ResponseHeader().Set("x-stream-header", "ready")
+	stream.ResponseTrailer().Set("x-stream-trailer", "done")
+	return nil
+}
+```
+
 ## 3. Running Effect
 
 Run the server and client, and you will see the requests return normally.
@@ -213,4 +253,3 @@ TRIPLE server stream resp: [triple]
 TRIPLE server stream resp: [triple]
 TRIPLE server stream resp: [triple]
 ```
-

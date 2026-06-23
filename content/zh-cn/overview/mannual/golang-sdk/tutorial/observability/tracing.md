@@ -19,7 +19,7 @@ Dubbo-go 支持基于 [OpenTelemetry](https://opentelemetry.io/) 标准的全链
 请注意，仅支持通过 `dubbo.NewInstance` 方式创建 dubbo 应用时开启 tracing 功能，也就是我们快速开始中提到的`微服务应用模式`，对于`轻量 RPC API`暂时不支持开启 tracing。
 
 ## 示例详解
-可在此查看完整示例[源码](https://github.com/apache/dubbo-go-samples/tree/main/otel)地址。
+可在此查看[完整示例源码](https://github.com/apache/dubbo-go-samples/tree/main/otel/tracing)。
 
 使用 `dubbo.WithTracing()` 开启 tracing，可以通过多个参数控制 tracing 行为：
 
@@ -81,5 +81,4 @@ sample-ratio: 0.5
   - `trace.WithRatioMode()`
 - sample-ratio: sample ratio, only used when sample-mode is ratio, range between 0 and 1
   - `trace.WithRatio(float64)`
-
 

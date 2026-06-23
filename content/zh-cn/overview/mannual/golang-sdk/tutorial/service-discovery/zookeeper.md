@@ -9,7 +9,9 @@ weight: 11
 ---
 
 
-This example shows dubbo-go's service discovery feature with Zookeeper as registry.
+本文演示 dubbo-go 使用 Zookeeper 作为注册中心的服务发现能力，可在
+<a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/zookeeper" target="_blank">dubbo-go-samples/registry/zookeeper</a>
+查看完整示例源码。
 
 ## 使用方式
 
@@ -65,4 +67,3 @@ $ ./zkCli.sh
 $ go run ./go-client/cmd/client.go
 hello world
 ```
-

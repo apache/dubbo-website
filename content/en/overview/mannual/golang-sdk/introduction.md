@@ -51,9 +51,9 @@ Based on the Dubbo-defined [triple protocol](/en/overview/reference/protocols/tr
 ![dubbo multi-language implementation](/imgs/golang/architecture/language.png)
 
 For more details on cross-language or cross-product interoperability of dubbo-go, please refer to the following links:
-* [Interoperability with other Dubbo multi-language systems - based on triple+protobuf](../tutorial/interop-dubbo/)
-* [Interoperability with Dubbo2 Java - based on dubbo2+hessian2](../tutorial/interop-dubbo)
-* [Interoperability with gRPC systems](../tutorial/interop-grpc)
+* [Interoperability with other Dubbo multi-language systems - based on triple+protobuf](../tutorial/interoperability/dubbo-java/)
+* [Interoperability with Dubbo2 Java - based on dubbo2+hessian2](../tutorial/interoperability/dubbo-java/)
+* [Interoperability with gRPC systems](../tutorial/interoperability/grpc/)
 
 #### Multi-Protocol Support
 In addition to the triple protocol, dubbo-go supports more RPC protocols and serialization methods:
@@ -108,4 +108,3 @@ For specific enabling methods, please refer to the usage manual [Tracing](./tuto
 The traffic governance rules implemented by dubbo-go fully comply with Dubbo framework-designed traffic governance capabilities. More details can be found through the following links:
 * [Dubbo Traffic Governance Rule Design](/en/overview/core-features/traffic/)
 * [Dubbo Traffic Governance Example Task](/en/overview/tasks/traffic-management/)
-

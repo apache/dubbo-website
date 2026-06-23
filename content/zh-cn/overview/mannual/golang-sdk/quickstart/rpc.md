@@ -14,6 +14,8 @@ weight: 1
 
 本示例演示了基于 Triple 协议的 RPC 通信模式，示例使用 Protocol Buffer 定义 RPC 服务，并演示了代码生成、服务发布和服务访问等过程。
 
+示例源码：<a href="https://github.com/apache/dubbo-go-samples/tree/main/helloworld" target="_blank">dubbo-go-samples/helloworld</a>。
+
 ## 前置条件
 
 因为使用 Protocol Buffer 的原因，我们首先需要安装相关的代码生成工具，这包括 `protoc`、`protoc-gen-go`、`protoc-gen-go-triple`。
@@ -28,7 +30,10 @@ weight: 1
 
     ```shell
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-    go install github.com/dubbogo/protoc-gen-go-triple/v3@v3.0.3
+
+    git clone --depth 1 https://github.com/apache/dubbo-go.git
+    cd dubbo-go/tools/protoc-gen-go-triple
+    go install .
     ```
 
     确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 验证，如果该命令不能正常工作的话，请执行以下命令：
@@ -38,11 +43,15 @@ weight: 1
     [ -n "$(go env GOPATH)" ] && export PATH="$(go env GOPATH)/bin:${PATH}"
     ```
 
+    `protoc-gen-go-triple` 现在维护在 dubbo-go 仓库的
+    <a href="https://github.com/apache/dubbo-go/tree/main/tools/protoc-gen-go-triple" target="_blank">tools/protoc-gen-go-triple</a>
+    目录下。请从该目录安装；修改 `.proto` 服务定义后，请同步重新生成 `*.triple.go` 文件。
+
 ## 快速运行示例
 ### 下载示例源码
 我们在 <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
 
-你可以 <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/master.zip" target="_blank">下载示例zip包并解压</a>，或者克隆仓库：
+你可以 <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/main.zip" target="_blank">下载示例 zip 包并解压</a>，或者克隆仓库：
 
 ```shell
 $ git clone --depth 1 https://github.com/apache/dubbo-go-samples
@@ -213,6 +222,10 @@ func main() {
 
 以上即是 dubbo-go rpc 的基本工作原理！
 
+完成基础 unary 调用后，同一套生成的 Triple client 和 server 还支持服务端流、客户端流、双向流、请求
+metadata、响应 header/trailer、filter、健康检查、超时、重试和 OpenAPI 暴露等能力。可以继续阅读 RPC
+框架部分的专题文档。
+
 ## 更多内容
 {{< blocks/section color="white" height="auto">}}
 <div class="td-content list-page">
@@ -242,7 +255,3 @@ func main() {
 <hr>
 </div>
 {{< /blocks/section >}}
-
-
-
-

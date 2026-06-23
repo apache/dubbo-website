@@ -79,7 +79,7 @@ In addition to the protocols introduced above, you can also run the following pr
 For the configuration and usage methods of the above protocols, including how to configure `single-port multi-protocol` support, please refer to the following SDK example documents:
 
 * [Java](../../mannual/java-sdk/reference-manual/protocol/)
-* [Golang](../../mannual/golang-sdk/refer/sourcecode/protocol.md)
+* [Golang](../../mannual/golang-sdk/sourcecode/protocol/)
 * [Rust](../../mannual/rust-sdk/)
 
 ## Custom Extensions

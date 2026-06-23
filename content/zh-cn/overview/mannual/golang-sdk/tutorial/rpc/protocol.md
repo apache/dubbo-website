@@ -11,6 +11,11 @@ Dubbo-go 框架内置提供了两款协议：triple、dubbo，除此之外，框
  * dubbo，基于 TCP 的高性能私有通信协议，缺点是通用性较差，更适合在 Dubbo SDK 间使用；
  * 任意协议扩展，通过扩展 protocol 可以之前任意 RPC 协议，官方生态库提供 JsonRPC、thrift 等支持。
 
+相关示例：
+
+* Triple 协议：<a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank">dubbo-go-samples/rpc/triple</a>
+* 多协议发布：<a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols" target="_blank">dubbo-go-samples/rpc/multi-protocols</a>
+
 本篇文档中，我们将介绍关于 triple 协议的使用方式、如何实现与已有 dubbo2 系统的互相调用、扩展更多协议支持等。更多原理性介绍请参考 [协议规范](/zh-cn/overview/reference/protocols/triple-spec/) 或者 [dubbo java 中相关描述文档](/zh-cn/overview/mannual/java-sdk/tasks/protocols/protocol/)。
 
 ## triple 协议
@@ -139,5 +144,4 @@ Dubbo 框架支持协议扩展，目前官方生态支持的协议包括：
 
 
 在一些场景下，你可以在一个应用内同时发布多个协议的服务，或者同时以不同的协议调用服务，这里有一个 [多协议发布的使用示例](https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols) 供参考。
-
 

@@ -24,7 +24,7 @@ The probe service runs on an independent HTTP port and supports:
 
 For a complete runnable example, see:
 
-> [https://github.com/apache/dubbo-go-samples/tree/main/metrics](https://github.com/apache/dubbo-go-samples/tree/main/metrics)
+> [https://github.com/apache/dubbo-go-samples/tree/main/metrics/probe](https://github.com/apache/dubbo-go-samples/tree/main/metrics/probe)
 
 ---
 

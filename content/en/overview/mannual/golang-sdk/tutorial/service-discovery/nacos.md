@@ -9,7 +9,9 @@ weight: 10
 ---
 
 
-This example shows dubbo-go's service discovery feature with Nacos as the registry.
+This example shows dubbo-go's service discovery feature with Nacos as the registry. You can view the
+<a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">complete example source code</a>
+in dubbo-go-samples.
 
 ## Usage
 

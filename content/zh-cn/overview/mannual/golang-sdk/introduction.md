@@ -55,9 +55,9 @@ dubbo-go 总体上遵循 `框架内核+插件` 的的设计理念，左侧的 `�
 ![dubbo多语言实现](/imgs/golang/architecture/language.png)
 
 请参考以下链接了解更多 dubbo-go 跨语言或跨产品的互通细节：
-* [与 Dubbo 其他多语言体系互通 - 基于 triple+protobuf](../tutorial/interop-dubbo/)
-* [与 Dubbo2 Java互通 - 基于 dubbo2+hessian2](../tutorial/interop-dubbo)
-* [与 gRPC 体系互通](../tutorial/interop-grpc)
+* [与 Dubbo 其他多语言体系互通 - 基于 triple+protobuf](../tutorial/interoperability/dubbo-java/)
+* [与 Dubbo2 Java互通 - 基于 dubbo2+hessian2](../tutorial/interoperability/dubbo-java/)
+* [与 gRPC 体系互通](../tutorial/interoperability/grpc/)
 
 #### 多协议支持
 除了 triple 协议之外，dubbo-go 支持更多的 RPC 协议和序列化方式：
@@ -115,7 +115,6 @@ dubbo-go 支持通过 Open Telemetry 接入 Zipkin、Jaeger、Skywalking 等全�
 dubbo-go 实现的流量治理规则完全遵循 Dubbo 框架设计的流量治理能力，可以通过以下链接了解更多详情：
 * [Dubbo 流量治理规则设计](/zh-cn/overview/core-features/traffic/)
 * [Dubbo 流量治理示例任务](/zh-cn/overview/tasks/traffic-management/)
-
 
 
 

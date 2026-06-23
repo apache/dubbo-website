@@ -2,146 +2,105 @@
 aliases:
     - /zh/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/
     - /zh-cn/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/
-description: 使用 Nacos 作为注册中心
+description: 当前 Dubbo Go 中使用 Nacos 作为注册中心
 title: 使用 Nacos 作为注册中心
 type: docs
 weight: 10
 ---
 
+相关示例：
 
+* Nacos 注册中心示例：<a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>
+* 应用级服务发现参考：<a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>
 
-## 1. 准备工作
+另见：
 
-- dubbo-go cli 工具和依赖工具已安装
-- 创建一个新的 demo 应用
+* [应用级服务发现](/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/)
+* [工具：dubbogo-cli](/zh-cn/overview/mannual/golang-sdk/tools/dubbogo-cli/)
 
-## 2. 使用 grpc_cli 工具进行 Dubbo 服务调试
+这个页面用于说明当前 Dubbo Go 中如何把 Nacos 作为注册中心来使用。它的旧版本主要在讲 CLI 调试流程，但那已经不是现在 Nacos 集成页的核心内容了。
 
-### 2.1 开启服务端
-示例：user.go:
-```go
-func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) (*User, error) {
-	fmt.Printf("=======================\nreq:%#v\n", userStruct)
-	rsp := User{"A002", "Alex Stocks", 18, userStruct.SubInfo}
-	fmt.Printf("=======================\nrsp:%#v\n", rsp)
-	return &rsp, nil
-}
+## 这个示例展示了什么
 
-```
-服务端开启一个服务，名为GetUser，传入一个CallUserStruct的参数，返回一个User参数\
-CallUserStruct参数定义：
-```go
-type CallUserStruct struct {
-	ID      string
-	Male    bool
-	SubInfo SubInfo // 嵌套子结构
-}
-func (cs CallUserStruct) JavaClassName() string {
-	return "com.ikurento.user.CallUserStruct"
-}
+当前 `registry/nacos` sample 主要展示：
 
-type SubInfo struct {
-	SubID   string
-	SubMale bool
-	SubAge  int
-}
+* provider 注册到 Nacos
+* consumer 通过 Nacos 发现服务
+* 基于 Triple 的 RPC 调用链路
+* Go 应用中基于注册中心的服务发现
 
-func (s SubInfo) JavaClassName() string {
-	return "com.ikurento.user.SubInfo"
-}
+示例目录主要包括：
 
-```
-User结构定义：
-```go
-type User struct {
-	Id      string
-	Name    string
-	Age     int32
-	SubInfo SubInfo // 嵌套上述子结构SubInfo
-}
+* `go-server/cmd/server.go`
+* `go-client/cmd/client.go`
+* `proto/greet.proto`
 
-func (u *User) JavaClassName() string {
-	return "com.ikurento.user.User"
-}
+## 启动 Nacos
+
+首先启动一个可用的 Nacos 服务，并确保 Dubbo Go 应用能够访问它。sample README 使用的是标准 Nacos 服务和默认控制台。
+
+## 启动 Provider
+
+在 sample 目录下运行：
+
+```bash
+go run ./go-server/cmd/server.go
 ```
 
-开启服务：
+provider 启动后会暴露服务，并把实例注册到 Nacos。
 
-`cd server `\
-`source builddev.sh`\
-`go run .`
+你也可以用一个 HTTP 请求先验证服务已经起来：
 
-### 2.2 定义请求体(打解包协议)
-
-请求体定义为json文件，约定键值均为string\
-键对应go语言struct字段名例如"ID"、"Name" ，值对应"type@val"\
-其中type支持string int bool time，val使用string 来初始化，如果只填写type则初始化为零值。
-约定每个struct必须有JavaClassName字段，务必与server端严格对应
-
-见userCall.json:
-```json
-{
-  "ID": "string@A000",
-  "Male": "bool@true",
-  "SubInfo": {
-    "SubID": "string@A001",
-    "SubMale": "bool@false",
-    "SubAge": "int@18",
-    "JavaClassName":"string@com.ikurento.user.SubInfo"
-  },
-  "JavaClassName": "string@com.ikurento.user.CallUserStruct"
-}
-```
-userCall.json将参数CallUserStruct的结构及子结构SubInfo都定义了出来，并且给请求参数赋值。
-
-user.json 同理，作为返回值不需要赋初始值，但JavaClassName字段一定与server端严格对应
-```go
-{
-  "ID": "string",
-  "Name": "string",
-  "Age": "int",
-  "JavaClassName":  "string@com.ikurento.user.User",
-  "SubInfo": {
-    "SubID": "string",
-    "SubMale": "bool",
-    "SubAge": "int",
-    "JavaClassName":"string@com.ikurento.user.SubInfo"
-  }
-}
+```bash
+curl \
+  --header "Content-Type: application/json" \
+  --data '{"name": "Dubbo"}' \
+  http://localhost:20000/greet.GreetService/Greet
 ```
 
-### 2.3 执行请求
-`dubbogo-cli call --h=localhost --p 20001 --proto=dubbo --i=com.ikurento.user.UserProvider --method=GetUser --sendObj="./userCall.json" --recvObj="./user.json"`
+## 启动 Consumer
 
-cli端打印结果：
-```log
-2020/10/26 20:47:45 Created pkg:
-2020/10/26 20:47:45 &{ID:A000 Male:true SubInfo:0xc00006ea20 JavaClassName:com.ikurento.user.CallUserStruct}
-2020/10/26 20:47:45 SubInfo:
-2020/10/26 20:47:45 &{SubID:A001 SubMale:false SubAge:18 JavaClassName:com.ikurento.user.SubInfo}
+然后运行：
 
-
-2020/10/26 20:47:45 Created pkg:
-2020/10/26 20:47:45 &{ID: Name: Age:0 JavaClassName:com.ikurento.user.User SubInfo:0xc00006ec90}
-2020/10/26 20:47:45 SubInfo:
-2020/10/26 20:47:45 &{SubID: SubMale:false SubAge:0 JavaClassName:com.ikurento.user.SubInfo}
-
-
-2020/10/26 20:47:45 connected to localhost:20001!
-2020/10/26 20:47:45 try calling interface:com.ikurento.user.UserProvider.GetUser
-2020/10/26 20:47:45 with protocol:dubbo
-
-2020/10/26 20:47:45 After 3ms , Got Rsp:
-2020/10/26 20:47:45 &{ID:A002 Name:Alex Stocks Age:18 JavaClassName: SubInfo:0xc0001241b0}
-2020/10/26 20:47:45 SubInfo:
-2020/10/26 20:47:45 &{SubID:A001 SubMale:false SubAge:18 JavaClassName:}```
+```bash
+go run ./go-client/cmd/client.go
 ```
-可看到详细的请求体赋值情况，以及返回结果和耗时。支持嵌套结构
 
-server端打印结果
-```
-=======================
-req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001", SubMale:false, SubAge:18}}
-=======================
-```
-可见接收到了来自cli的数据
+consumer 会先通过 Nacos 解析目标服务，再发起 RPC 调用。
+
+## 配置形态
+
+在当前 Dubbo Go 中，Nacos 可能出现在几个不同层次的配置里：
+
+* 实例级：`dubbo.WithRegistry(registry.WithNacos(), ...)`
+* 引用级：`client.WithRegistry(...)` 或 `client.WithRegistryIDs(...)`
+* 服务级：`server.WithRegistry(...)` 或 `server.WithRegistryIDs(...)`
+* 配置文件模式：`registries` 节点
+
+常用 registry 选项来自 `registry/options.go`，包括：
+
+* `registry.WithNacos()`
+* `registry.WithAddress(...)`
+* `registry.WithGroup(...)`
+* `registry.WithNamespace(...)`
+* `registry.WithRegisterService()`
+* `registry.WithRegisterInterface()`
+* `registry.WithRegisterServiceAndInterface()`
+
+## 应用级服务发现
+
+在当前 Dubbo Go 部署里，Nacos 很常和应用级服务发现一起使用。在这个模型下：
+
+* provider 注册应用实例和 metadata；
+* consumer 先解析 service 到 application 的映射；
+* 再通过 metadata 还原出可调用的服务端点。
+
+如果你正在判断要不要继续用旧的接口级注册模型，建议先从上面链接的“应用级服务发现”页面看起。
+
+## 关于 dubbogo-cli
+
+`dubbogo-cli` 依然可以用于调试和互通场景，但它不再是 Nacos 注册中心页面的主体内容。如果你需要 CLI，请从下面的位置安装：
+
+* [apache/dubbo-go/tools/dubbogo-cli](https://github.com/apache/dubbo-go/tree/main/tools/dubbogo-cli)
+
+然后参考独立的 tools 页面。

@@ -5,41 +5,111 @@ type: docs
 weight: 4
 ---
 
-**The most straightforward way to understand implicit parameter passing is through the HTTP header, which works exactly like an HTTP header, allowing any number of header parameters to be passed outside of the GET or POST request body.** For RPC calls, the context provides the ability to pass additional parameters outside of the method signature's parameters. The implementation varies slightly between different protocols:
-* For the triple protocol, the attachment is converted into standard HTTP headers for transmission.
-* For the Dubbo protocol, the attachment is encoded in a fixed location within the protocol body; please refer to the Dubbo protocol specification.
+Dubbo-go provides two related ways to pass metadata outside the RPC request and response body:
 
-![/user-guide/images/context.png](/imgs/user/context.png)
+* **Attachments** are Dubbo RPC implicit parameters. They are stored in `context` under `constant.AttachmentKey` and are commonly used by filters, routing, tracing, or business code that needs request-scoped key-value data. For Triple calls, request attachments are carried as HTTP metadata headers. For Dubbo protocol calls, attachments are encoded in a fixed location in the protocol body.
+* **Triple metadata headers and trailers** are Triple protocol metadata APIs exposed as `http.Header`. They are useful when application code needs direct access to request metadata or response header/trailer data.
+
+Sample source code:
+
+* Attachment sample: <a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">dubbo-go-samples/context</a>
+* Triple header/trailer sample: <a href="https://github.com/apache/dubbo-go-samples/tree/main/triple_header_trailer" target="_blank">dubbo-go-samples/triple_header_trailer</a>
+
+Attachment flow:
+
+```text
+┌───── Consumer side ──────────┐
+│                              │
+│  ┌──────────────────────┐    │
+│  │ context.Context      │    │
+│  │ AttachmentKey        │    │
+│  │ map[string]any       │    │
+│  └──────────┬───────────┘    │
+│             │                │
+│             ▼                │
+│  ┌──────────────────────┐    │
+│  │ RPCInvocation        │    │
+│  │ Attachments()        │    │
+│  └──────────┬───────────┘    │
+│             │                │
+└─────────────┼────────────────┘
+              │
+              ▼
+       ┌────────────────┐
+       │ Protocol       │
+       │ metadata       │
+       │                │
+       │ Triple: header │
+       │ Dubbo : body   │
+       └───────┬────────┘
+               │
+               │ network
+               ▼
+┌──────────────┼─── Provider side ────┐
+│              ▼                      │
+│       ┌────────────────┐            │
+│       │ Protocol       │            │
+│       │ metadata       │            │
+│       └───────┬────────┘            │
+│               │                     │
+│               ▼                     │
+│  ┌──────────────────────┐           │
+│  │ RPCInvocation        │           │
+│  │ Attachments()        │           │
+│  └──────────┬───────────┘           │
+│             │                       │
+│             ▼                       │
+│  ┌──────────────────────┐           │
+│  │ context.Context      │           │
+│  │ AttachmentKey        │           │
+│  │ map[string]any       │           │
+│  └──────────┬───────────┘           │
+│             │                       │
+│             ▼                       │
+│  ┌──────────────────────┐           │
+│  │ Filter / Service     │           │
+│  │ implementation       │           │
+│  └──────────────────────┘           │
+│                                     │
+└─────────────────────────────────────┘
+```
 
 {{% alert title="Note" color="primary" %}}
-* When using the triple protocol, only lowercase ASCII characters are supported due to the limitations of HTTP headers.
-* Keys such as path, group, version, dubbo, token, timeout, etc., are reserved fields and should be avoided when passing attachments. It is advisable to ensure key uniqueness through business prefixes.
+* For Triple calls, attachment keys are normalized to lowercase HTTP metadata keys. Use lowercase ASCII business keys when passing attachments.
+* Attachment values should be `string` or `[]string` for Triple calls.
+* Triple metadata keys are case-insensitive. Use standard `http.Header` accessors such as `Get` and `Values` when reading headers or trailers.
+* Keys such as path, group, version, dubbo, token, timeout, etc., are reserved fields. Use a business prefix to keep custom keys unique.
 {{% /alert %}}
 
 ## 1. Introduction
 
-This document demonstrates how to use the context in the Dubbo-go framework to pass and read additional parameters, enabling context information transmission. You can view the <a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">complete sample source code here</a>.
+This document first shows how to pass request attachments through `context`, and then shows how to use Triple request metadata, response headers, and response trailers.
 
-## 2. Usage Instructions
+## 2. Attachment Usage Instructions
 ### 2.1 Client Usage Instructions
 
-In the client, fields can be passed using the following method, where the key is `constant.AttachmentKey`, i.e., "attachment":
+In the client, fields can be passed through `constant.AttachmentKey`, i.e. `"attachment"`:
 
 ```go
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, constant.AttachmentKey, map[string]interface{}{
-        "key1": "user defined value 1",
-        "key2": "user defined value 2"
-	})
+ctx := context.Background()
+ctx = context.WithValue(ctx, constant.AttachmentKey, map[string]interface{}{
+    "key1": "user defined value 1",
+    "key2": "user defined value 2",
+})
 ```
 
 ### 2.2 Server Usage Instructions
 
-In the server, fields can be retrieved using the following method, where the value type is map[string]interface{}:
+In the server, fields can be retrieved from `constant.AttachmentKey`. For Triple requests, header values are stored as `[]string`:
+
 ```go
-    attachments := ctx.Value(constant.AttachmentKey).(map[string]interface{})
+attachments := ctx.Value(constant.AttachmentKey).(map[string]interface{})
+if value1, ok := attachments["key1"]; ok {
     logger.Infof("Dubbo attachment key1 = %s", value1.([]string)[0])
+}
+if value2, ok := attachments["key2"]; ok {
     logger.Infof("Dubbo attachment key2 = %s", value2.([]string)[0])
+}
 ```
 
 ## 3. Example Analysis
@@ -179,3 +249,117 @@ Start the server first, then start the client, and you can observe that the serv
 2024-02-26 11:13:14     INFO    logger/logging.go:42    Dubbo attachment key1 = [user defined value 1]
 2024-02-26 11:13:14     INFO    logger/logging.go:42    Dubbo attachment key2 = [user defined value 2]
 ```
+
+## 4. Triple Header and Trailer
+
+For Triple calls, Dubbo-go also exposes request and response metadata through `http.Header`. Metadata keys are case-insensitive, so application code can use the standard `http.Header` accessors such as `Get` and `Values`.
+
+### 4.1 Request Metadata
+
+The client can attach request metadata before initiating a call:
+
+```go
+import (
+    "context"
+    "net/http"
+
+    triple "dubbo.apache.org/dubbo-go/v3/protocol/triple/triple_protocol"
+)
+
+ctx := triple.NewOutgoingContext(context.Background(), http.Header{
+    "X-Sample-Token": []string{"token"},
+})
+ctx = triple.AppendToOutgoingContext(ctx, "X-Sample-Mode", "metadata")
+
+resp, err := svc.Greet(ctx, &greet.GreetRequest{Name: "hello"})
+```
+
+The server can read the incoming metadata from the request context:
+
+```go
+headers, ok := triple.FromIncomingContext(ctx)
+if ok {
+    token := headers.Get("X-Sample-Token")
+    mode := headers.Get("X-Sample-Mode")
+    _ = token
+    _ = mode
+}
+```
+
+Generated streaming handlers can also read request metadata from the generated stream object:
+
+```go
+token := stream.RequestHeader().Get("X-Sample-Token")
+```
+
+### 4.2 Unary Response Header and Trailer
+
+For generated unary calls, the server can write response metadata with `triple.SetHeader` and `triple.SetTrailer`:
+
+```go
+func (srv *GreetTripleServer) Greet(ctx context.Context, req *greet.GreetRequest) (*greet.GreetResponse, error) {
+    if err := triple.SetHeader(ctx, http.Header{
+        "X-Response-Token": []string{"value"},
+    }); err != nil {
+        return nil, err
+    }
+    if err := triple.SetTrailer(ctx, http.Header{
+        "X-Response-Trailer": []string{"done"},
+    }); err != nil {
+        return nil, err
+    }
+    return &greet.GreetResponse{Greeting: req.Name}, nil
+}
+```
+
+The client can capture the response header and trailer for this call with call options:
+
+```go
+var responseHeader http.Header
+var responseTrailer http.Header
+
+resp, err := svc.Greet(
+    ctx,
+    &greet.GreetRequest{Name: "hello"},
+    client.WithResponseHeader(&responseHeader),
+    client.WithResponseTrailer(&responseTrailer),
+)
+if err != nil {
+    return err
+}
+
+headerValue := responseHeader.Get("X-Response-Token")
+trailerValue := responseTrailer.Get("X-Response-Trailer")
+_ = resp
+_ = headerValue
+_ = trailerValue
+```
+
+### 4.3 Streaming Response Header and Trailer
+
+For generated streaming handlers, response metadata is available on the stream object. The server writes response header and trailer through `ResponseHeader` and `ResponseTrailer`:
+
+```go
+func (srv *GreetTripleServer) GreetStream(stream greet.GreetService_GreetStreamServer) error {
+    stream.ResponseHeader().Set("X-Stream-Response", "value")
+    stream.ResponseTrailer().Set("X-Stream-Trailer", "done")
+    // handle stream messages
+    return nil
+}
+```
+
+The client reads the response metadata from the generated stream object:
+
+```go
+stream, err := svc.GreetStream(ctx)
+if err != nil {
+    return err
+}
+
+headerValue := stream.ResponseHeader().Get("X-Stream-Response")
+trailerValue := stream.ResponseTrailer().Get("X-Stream-Trailer")
+_ = headerValue
+_ = trailerValue
+```
+
+A complete runnable example is available in <a href="https://github.com/apache/dubbo-go-samples/tree/main/triple_header_trailer" target="_blank">dubbo-go-samples/triple_header_trailer</a>.

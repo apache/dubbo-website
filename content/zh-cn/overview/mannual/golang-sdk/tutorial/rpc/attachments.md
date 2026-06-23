@@ -5,41 +5,111 @@ type: docs
 weight: 4
 ---
 
-**理解隐式参数传递的最直接方式 http header，它的工作方式与 http header 完全一致，在 GET 或 POST 请求体之外可以传递任意多个 header 参数**。而对于 RPC 调用而言，context就是在方法签名的参数之外提供附加参数传递能力，在实现原理上，对于不同的协议，attachment 的实现方式略有不同：
-* 对于 triple 协议，attachment 会转换为标准的 http header 进行传输。
-* 对于 dubbo 协议，attachment 是编码在协议体的固定位置进行传输，具体请参见 dubbo 协议规范。、
+Dubbo-go 提供了两种在 RPC 请求和响应 body 之外传递 metadata 的方式：
 
-![/user-guide/images/context.png](/imgs/user/context.png)
+* **Attachment** 是 Dubbo RPC 的隐式参数，存放在 `context` 的 `constant.AttachmentKey` 下，常用于 filter、路由、链路追踪或业务代码传递请求级 key-value 数据。对于 Triple 调用，请求 attachment 会以 HTTP metadata header 的形式传输；对于 Dubbo 协议，attachment 会编码在协议体的固定位置。
+* **Triple metadata header 和 trailer** 是 Triple 协议直接暴露给应用层的 metadata API，以 `http.Header` 的形式读写，适合应用代码直接处理请求 metadata 或响应 header/trailer。
+
+示例源码：
+
+* Attachment 示例：<a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">dubbo-go-samples/context</a>
+* Triple header/trailer 示例：<a href="https://github.com/apache/dubbo-go-samples/tree/main/triple_header_trailer" target="_blank">dubbo-go-samples/triple_header_trailer</a>
+
+Attachment 传递流程：
+
+```text
+┌───── Consumer side ──────────┐
+│                              │
+│  ┌──────────────────────┐    │
+│  │ context.Context      │    │
+│  │ AttachmentKey        │    │
+│  │ map[string]any       │    │
+│  └──────────┬───────────┘    │
+│             │                │
+│             ▼                │
+│  ┌──────────────────────┐    │
+│  │ RPCInvocation        │    │
+│  │ Attachments()        │    │
+│  └──────────┬───────────┘    │
+│             │                │
+└─────────────┼────────────────┘
+              │
+              ▼
+       ┌────────────────┐
+       │ Protocol       │
+       │ metadata       │
+       │                │
+       │ Triple: header │
+       │ Dubbo : body   │
+       └───────┬────────┘
+               │
+               │ network
+               ▼
+┌──────────────┼─── Provider side ────┐
+│              ▼                      │
+│       ┌────────────────┐            │
+│       │ Protocol       │            │
+│       │ metadata       │            │
+│       └───────┬────────┘            │
+│               │                     │
+│               ▼                     │
+│  ┌──────────────────────┐           │
+│  │ RPCInvocation        │           │
+│  │ Attachments()        │           │
+│  └──────────┬───────────┘           │
+│             │                       │
+│             ▼                       │
+│  ┌──────────────────────┐           │
+│  │ context.Context      │           │
+│  │ AttachmentKey        │           │
+│  │ map[string]any       │           │
+│  └──────────┬───────────┘           │
+│             │                       │
+│             ▼                       │
+│  ┌──────────────────────┐           │
+│  │ Filter / Service     │           │
+│  │ implementation       │           │
+│  └──────────────────────┘           │
+│                                     │
+└─────────────────────────────────────┘
+```
 
 {{% alert title="注意" color="primary" %}}
-* 在使用 triple 协议时，由于 http header 的限制，仅支持小写的 ascii 字符
-* path, group, version, dubbo, token, timeout 等一些 key 是保留字段，传递 attachment 时应避免使用，尽量通过业务前缀等确保 key 的唯一性。
+* 对于 Triple 调用，attachment key 会归一化为小写 HTTP metadata key。传递 attachment 时建议使用小写 ASCII 业务 key。
+* Triple attachment 的 value 建议使用 `string` 或 `[]string`。
+* Triple metadata key 语义上大小写不敏感。读取 header 或 trailer 时，可以按标准 `http.Header` 方式使用 `Get` 和 `Values`。
+* path, group, version, dubbo, token, timeout 等 key 是保留字段。自定义 key 可以通过业务前缀保持唯一性。
 {{% /alert %}}
 
 ## 1.介绍
 
-本文档演示如何在 Dubbo-go 框架中使用 context 上下文传递和读取附加参数，来实现上下文信息传递，可在此查看  <a href="https://github.com/apache/dubbo-go-samples/tree/main/context" target="_blank">完整示例源码地址</a>
+本文档先介绍如何通过 `context` 传递请求 attachment，然后介绍如何使用 Triple 请求 metadata、响应 header 和响应 trailer。
 
-## 2.使用说明
+## 2.Attachment 使用说明
 ### 2.1客户端使用说明
 
-在客户端中，使用下述方式传递字段, 示例中 key 为 `constant.AttachmentKey` 即 "attachment":
+在客户端中，可以通过 `constant.AttachmentKey` 传递字段，即 `"attachment"`：
 
 ```go
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, constant.AttachmentKey, map[string]interface{}{
-        "key1": "user defined value 1",
-        "key2": "user defined value 2"
-	})
+ctx := context.Background()
+ctx = context.WithValue(ctx, constant.AttachmentKey, map[string]interface{}{
+    "key1": "user defined value 1",
+    "key2": "user defined value 2",
+})
 ```
 
 ### 2.2服务端使用说明
 
-在服务端中，使用下述方式获取字段, value的类型为 map[string]interface{}：
+在服务端中，可以从 `constant.AttachmentKey` 读取字段。对于 Triple 请求，header value 会以 `[]string` 的形式保存：
+
 ```go
-    attachments := ctx.Value(constant.AttachmentKey).(map[string]interface{})
+attachments := ctx.Value(constant.AttachmentKey).(map[string]interface{})
+if value1, ok := attachments["key1"]; ok {
     logger.Infof("Dubbo attachment key1 = %s", value1.([]string)[0])
+}
+if value2, ok := attachments["key2"]; ok {
     logger.Infof("Dubbo attachment key2 = %s", value2.([]string)[0])
+}
 ```
 
 ## 3.示例详解
@@ -179,3 +249,117 @@ func main() {
 2024-02-26 11:13:14     INFO    logger/logging.go:42    Dubbo attachment key1 = [user defined value 1]
 2024-02-26 11:13:14     INFO    logger/logging.go:42    Dubbo attachment key2 = [user defined value 2]
 ```
+
+## 4. Triple Header 和 Trailer
+
+对于 Triple 调用，Dubbo-go 也会通过 `http.Header` 向应用层暴露请求和响应 metadata。metadata key 语义上大小写不敏感，应用代码可以按标准 `http.Header` 方式使用 `Get` 和 `Values` 读取。
+
+### 4.1 请求 Metadata
+
+客户端可以在发起调用前写入请求 metadata：
+
+```go
+import (
+    "context"
+    "net/http"
+
+    triple "dubbo.apache.org/dubbo-go/v3/protocol/triple/triple_protocol"
+)
+
+ctx := triple.NewOutgoingContext(context.Background(), http.Header{
+    "X-Sample-Token": []string{"token"},
+})
+ctx = triple.AppendToOutgoingContext(ctx, "X-Sample-Mode", "metadata")
+
+resp, err := svc.Greet(ctx, &greet.GreetRequest{Name: "hello"})
+```
+
+服务端可以从请求 context 中读取这些 metadata：
+
+```go
+headers, ok := triple.FromIncomingContext(ctx)
+if ok {
+    token := headers.Get("X-Sample-Token")
+    mode := headers.Get("X-Sample-Mode")
+    _ = token
+    _ = mode
+}
+```
+
+生成的流式接口也可以通过 stream 对象读取请求 metadata：
+
+```go
+token := stream.RequestHeader().Get("X-Sample-Token")
+```
+
+### 4.2 Unary 响应 Header 和 Trailer
+
+对于生成的 Unary 调用，服务端可以通过 `triple.SetHeader` 和 `triple.SetTrailer` 写入响应 metadata：
+
+```go
+func (srv *GreetTripleServer) Greet(ctx context.Context, req *greet.GreetRequest) (*greet.GreetResponse, error) {
+    if err := triple.SetHeader(ctx, http.Header{
+        "X-Response-Token": []string{"value"},
+    }); err != nil {
+        return nil, err
+    }
+    if err := triple.SetTrailer(ctx, http.Header{
+        "X-Response-Trailer": []string{"done"},
+    }); err != nil {
+        return nil, err
+    }
+    return &greet.GreetResponse{Greeting: req.Name}, nil
+}
+```
+
+客户端可以通过 call option 捕获本次调用的响应 header 和 trailer：
+
+```go
+var responseHeader http.Header
+var responseTrailer http.Header
+
+resp, err := svc.Greet(
+    ctx,
+    &greet.GreetRequest{Name: "hello"},
+    client.WithResponseHeader(&responseHeader),
+    client.WithResponseTrailer(&responseTrailer),
+)
+if err != nil {
+    return err
+}
+
+headerValue := responseHeader.Get("X-Response-Token")
+trailerValue := responseTrailer.Get("X-Response-Trailer")
+_ = resp
+_ = headerValue
+_ = trailerValue
+```
+
+### 4.3 Streaming 响应 Header 和 Trailer
+
+对于生成的流式接口，响应 metadata 暴露在 stream 对象上。服务端通过 `ResponseHeader` 和 `ResponseTrailer` 写入响应 header 和 trailer：
+
+```go
+func (srv *GreetTripleServer) GreetStream(stream greet.GreetService_GreetStreamServer) error {
+    stream.ResponseHeader().Set("X-Stream-Response", "value")
+    stream.ResponseTrailer().Set("X-Stream-Trailer", "done")
+    // 处理 stream 消息
+    return nil
+}
+```
+
+客户端可以从生成的 stream 对象读取响应 metadata：
+
+```go
+stream, err := svc.GreetStream(ctx)
+if err != nil {
+    return err
+}
+
+headerValue := stream.ResponseHeader().Get("X-Stream-Response")
+trailerValue := stream.ResponseTrailer().Get("X-Stream-Trailer")
+_ = headerValue
+_ = trailerValue
+```
+
+完整可运行示例可参考 <a href="https://github.com/apache/dubbo-go-samples/tree/main/triple_header_trailer" target="_blank">dubbo-go-samples/triple_header_trailer</a>。

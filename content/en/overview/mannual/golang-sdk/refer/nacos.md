@@ -2,147 +2,105 @@
 aliases:
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/
     - /en/docs3-v2/golang-sdk/tutorial/develop/registry/nacos/
-description: Using Nacos as a Registry
+description: Using Nacos as a registry in current Dubbo Go
 title: Using Nacos as a Registry
 type: docs
 weight: 10
 ---
 
+Related samples:
 
+* Nacos registry sample: <a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>
+* Application-level discovery reference: <a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank">dubbo-go-samples/registry/nacos</a>
 
-## 1. Preparation
+See also:
 
-- The dubbo-go CLI tool and dependencies are installed
-- Create a new demo application
+* [Application-level Service Discovery](/en/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/)
+* [Tools: dubbogo-cli](/en/overview/mannual/golang-sdk/tools/dubbogo-cli/)
 
-## 2. Using grpc_cli Tool for Dubbo Service Debugging
+This page is a current reference for using Nacos as a registry with Dubbo Go. Older versions of this page described a CLI debugging flow; that content is no longer the main Nacos integration path.
 
-### 2.1 Start the Server
-Example: user.go:
-```go
-func (u *UserProvider) GetUser(ctx context.Context, userStruct *CallUserStruct) (*User, error) {
-	fmt.Printf("=======================\nreq:%#v\n", userStruct)
-	rsp := User{"A002", "Alex Stocks", 18, userStruct.SubInfo}
-	fmt.Printf("=======================\nrsp:%#v\n", rsp)
-	return &rsp, nil
-}
+## What the Nacos Sample Demonstrates
 
-```
-The server exposes a service named GetUser, taking a CallUserStruct parameter and returning a User parameter.\
-Definition of CallUserStruct parameter:
-```go
-type CallUserStruct struct {
-	ID      string
-	Male    bool
-	SubInfo SubInfo // Nested substructure
-}
-func (cs CallUserStruct) JavaClassName() string {
-	return "com.ikurento.user.CallUserStruct"
-}
+The current `registry/nacos` sample shows:
 
-type SubInfo struct {
-	SubID   string
-	SubMale bool
-	SubAge  int
-}
+* provider registration into Nacos
+* consumer lookup through Nacos
+* Triple-based RPC call flow
+* registry-backed service discovery for Go applications
 
-func (s SubInfo) JavaClassName() string {
-	return "com.ikurento.user.SubInfo"
-}
+The sample includes:
 
-```
-Definition of User structure:
-```go
-type User struct {
-	Id      string
-	Name    string
-	Age     int32
-	SubInfo SubInfo // Nesting the above substructure SubInfo
-}
+* `go-server/cmd/server.go`
+* `go-client/cmd/client.go`
+* `proto/greet.proto`
 
-func (u *User) JavaClassName() string {
-	return "com.ikurento.user.User"
-}
+## Start Nacos
+
+First start a Nacos server and make sure it is reachable from your Dubbo Go applications. The sample README uses the standard Nacos server and default web console.
+
+## Run the Provider
+
+From the sample:
+
+```bash
+go run ./go-server/cmd/server.go
 ```
 
-Start the service:
+The provider exports the service and registers it into Nacos.
 
-`cd server `\
-`source builddev.sh`\
-`go run .`
+You can verify the service is up by sending an HTTP request to the sample service endpoint:
 
-### 2.2 Define the Request Body (Packing/Unpacking Protocol)
-
-The request body is defined as a JSON file, with the convention that all keys are strings.\
-Keys correspond to Go struct field names such as "ID", "Name", and values correspond to "type@val".\
-The types supported are string, int, bool, time, with val initialized as a string. If only the type is provided, it is initialized to zero value.\
-It is required for each struct to have a JavaClassName field, which must strictly correspond with the server side.
-
-See userCall.json:
-```json
-{
-  "ID": "string@A000",
-  "Male": "bool@true",
-  "SubInfo": {
-    "SubID": "string@A001",
-    "SubMale": "bool@false",
-    "SubAge": "int@18",
-    "JavaClassName":"string@com.ikurento.user.SubInfo"
-  },
-  "JavaClassName": "string@com.ikurento.user.CallUserStruct"
-}
-```
-userCall.json defines the structure of CallUserStruct and its substructure SubInfo, and assigns values to the request parameters.
-
-Similarly for user.json, no initial values are needed for return values, but the JavaClassName field must strictly correspond to the server side.
-```go
-{
-  "ID": "string",
-  "Name": "string",
-  "Age": "int",
-  "JavaClassName":  "string@com.ikurento.user.User",
-  "SubInfo": {
-    "SubID": "string",
-    "SubMale": "bool",
-    "SubAge": "int",
-    "JavaClassName":"string@com.ikurento.user.SubInfo"
-  }
-}
+```bash
+curl \
+  --header "Content-Type: application/json" \
+  --data '{"name": "Dubbo"}' \
+  http://localhost:20000/greet.GreetService/Greet
 ```
 
-### 2.3 Execute Request
-`dubbogo-cli call --h=localhost --p 20001 --proto=dubbo --i=com.ikurento.user.UserProvider --method=GetUser --sendObj="./userCall.json" --recvObj="./user.json"`
+## Run the Consumer
 
-CLI prints the result:
-```log
-2020/10/26 20:47:45 Created pkg:
-2020/10/26 20:47:45 &{ID:A000 Male:true SubInfo:0xc00006ea20 JavaClassName:com.ikurento.user.CallUserStruct}
-2020/10/26 20:47:45 SubInfo:
-2020/10/26 20:47:45 &{SubID:A001 SubMale:false SubAge:18 JavaClassName:com.ikurento.user.SubInfo}
+Then run:
 
-
-2020/10/26 20:47:45 Created pkg:
-2020/10/26 20:47:45 &{ID: Name: Age:0 JavaClassName:com.ikurento.user.User SubInfo:0xc00006ec90}
-2020/10/26 20:47:45 SubInfo:
-2020/10/26 20:47:45 &{SubID: SubMale:false SubAge:0 JavaClassName:com.ikurento.user.SubInfo}
-
-
-2020/10/26 20:47:45 connected to localhost:20001!
-2020/10/26 20:47:45 try calling interface:com.ikurento.user.UserProvider.GetUser
-2020/10/26 20:47:45 with protocol:dubbo
-
-2020/10/26 20:47:45 After 3ms , Got Rsp:
-2020/10/26 20:47:45 &{ID:A002 Name:Alex Stocks Age:18 JavaClassName: SubInfo:0xc0001241b0}
-2020/10/26 20:47:45 SubInfo:
-2020/10/26 20:47:45 &{SubID:A001 SubMale:false SubAge:18 JavaClassName:}```
+```bash
+go run ./go-client/cmd/client.go
 ```
-You can see detailed request body assignment, return results, and elapsed time. Nested structures are supported.
 
-Server logs:
-```
-=======================
-req:&main.CallUserStruct{ID:"A000", Male:true, SubInfo:main.SubInfo{SubID:"A001", SubMale:false, SubAge:18}}
-=======================
-```
-It shows that data from CLI has been received.
+The consumer resolves the target service through Nacos and performs the RPC call.
 
+## Configuration Shape
+
+In current Dubbo Go, Nacos can appear in several related places:
+
+* instance-level setup with `dubbo.WithRegistry(registry.WithNacos(), ...)`
+* reference-level setup with `client.WithRegistry(...)` or `client.WithRegistryIDs(...)`
+* service-level setup with `server.WithRegistry(...)` or `server.WithRegistryIDs(...)`
+* configuration-file setup under `registries`
+
+Useful registry options come from `registry/options.go`, including:
+
+* `registry.WithNacos()`
+* `registry.WithAddress(...)`
+* `registry.WithGroup(...)`
+* `registry.WithNamespace(...)`
+* `registry.WithRegisterService()`
+* `registry.WithRegisterInterface()`
+* `registry.WithRegisterServiceAndInterface()`
+
+## Application-Level Discovery
+
+For current Dubbo Go deployments, Nacos is commonly used together with application-level service discovery. In that model:
+
+* providers register application instances and metadata;
+* consumers resolve service-to-application mapping;
+* metadata is used to recover callable service endpoints.
+
+If you are deciding between old interface-level registration and current defaults, start from the application-level service discovery page linked above.
+
+## About dubbogo-cli
+
+`dubbogo-cli` can still be useful for debugging and interoperability workflows, but it is no longer the primary content of the Nacos registry page. If you need the CLI, install it from:
+
+* [apache/dubbo-go/tools/dubbogo-cli](https://github.com/apache/dubbo-go/tree/main/tools/dubbogo-cli)
+
+and read the dedicated tools page.
