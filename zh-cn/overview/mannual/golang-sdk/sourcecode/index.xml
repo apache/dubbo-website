@@ -1,54 +1,299 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apache Dubbo – 源码解读</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/</link><description>Recent content in 源码解读 on Apache Dubbo</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/index.xml" rel="self" type="application/rss+xml"/><item><title>Overview: 网络协议</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/protocol/</guid><description>
-&lt;p>对于 Dubbogo 微服务框架，网络协议为远程过程调用中负责网络通信的模块，负责应用层到网络层的数据序列化、打包、请求发起、网络端口监听等功能。Dubbogo 为协议抽象了一套接口如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#268bd2">type&lt;/span> Protocol &lt;span style="color:#268bd2">interface&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Export service for remote invocation
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Export&lt;/span>(invoker Invoker) Exporter
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Refer a remote service
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Refer&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) Invoker
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Destroy will destroy all invoker and exporter, so it only is called once.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Destroy&lt;/span>()
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该接口包含三个方法。其中 Export 方法负责服务的暴露过程。入参 invoker 为dubbo 的概念，其封装了一个可以被调用的实例。在具体网络协议（例如Triple）实现的 Export 方法中，会针对特定的协议，将封装有一定逻辑的可调用实例 Invoker 以网络端口监听的形式暴露给外部服务，来自外部针对该网络端口的请求将会被 Export 方法开启的监听协程获取，进而根据网络协议进行拆解包和反序列化，得到解析后的请求数据。&lt;/p>
-&lt;p>Refer 方法负责服务的引用过程，其入参 url 为 dubbo 框架通用的结构，可以描述一个希望引用的服务，url 参数中包含了多个希望引用服务的参数，例如对应服务的接口名(interface)，版本号(version)，使用协议(protocol) 等等。在具体网络协议（例如Triple）实现的 Refer 方法中，会将特定的网络协议封装到 Invoker 可调用实例的方法中，用户层发起的 RPC 调用即可直接通过返回的 Invoker 对象，发起特定协议的网络请求。&lt;/p>
-&lt;p>Destroy 方法作用为销毁当前暴露的服务，用于服务下线场景。Dubbogo 框架有优雅下线机制，可以在服务进程终止前以监听信号的形式，下线所有已启动的服务。&lt;/p></description></item><item><title>Overview: 注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/registry/</guid><description>
-&lt;p>Dubbogo 为注册中心抽象了一套接口如下：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">// Registry Extension - Registry
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span>&lt;span style="color:#268bd2">type&lt;/span> Registry &lt;span style="color:#268bd2">interface&lt;/span> {
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> common.Node
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Register is used for service provider calling, register services
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// to registry. And it is also used for service consumer calling, register
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// services cared about, for dubbo&amp;#39;s admin monitoring.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Register&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// UnRegister is required to support the contract:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. If it is the persistent stored data of dynamic=false, the
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// registration data can not be found, then the IllegalStateException
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// is thrown, otherwise it is ignored.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 2. Unregister according to the full url match.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// url Registration information, is not allowed to be empty, e.g:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// dubbo://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">UnRegister&lt;/span>(url &lt;span style="color:#719e07">*&lt;/span>common.URL) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// Subscribe is required to support the contract:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// When creating new registry extension, pls select one of the
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// following modes.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Will remove in dubbogo version v1.1.0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// mode1: return Listener with Next function which can return
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// subscribe service event from registry
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Deprecated!
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// subscribe(event.URL) (Listener, error)
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// Will replace mode1 in dubbogo version v1.1.0
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// mode2: callback mode, subscribe with notify(notify listener).
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">Subscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#586e75">// UnSubscribe is required to support the contract:
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 1. If don&amp;#39;t subscribe, ignore it directly.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// 2. Unsubscribe by full URL match.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// url Subscription condition, not allowed to be empty, e.g.
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// consumer://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&amp;amp;application=kylin
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#586e75">// listener A listener of the change event, not allowed to be empty
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#586e75">&lt;/span> &lt;span style="color:#268bd2">UnSubscribe&lt;/span>(&lt;span style="color:#719e07">*&lt;/span>common.URL, NotifyListener) &lt;span style="color:#dc322f">error&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>该接口主要包含四个方法，分别是注册、反注册、订阅、取消订阅。顾名思义，概括了客户端和服务端与注册中心交互的动作。针对普通接口级服务注册发现场景，在Provider 服务启动时，会将自身服务接口信息抽象为一个 url，该 url 包含了客户端发起调用所需的所有信息（ip、端口、协议等），服务端的注册中心组件会将该 url 写入注册中心（例如zk）。客户端启动后，在服务引用 Refer 步骤会通过注册中心组件订阅（Subscribe）需要的服务信息，获取到的服务信息以异步事件更新的形式写入客户端缓存，从而在服务发现成功后，可以根据拿到的服务 url 参数，向对应服务提供者发起调用。&lt;/p>
-&lt;h2 id="heading">&lt;/h2></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>源码指南 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/</link><description>Recent content in 源码指南 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/index.xml" rel="self" type="application/rss+xml"/><item><title>架构</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/architecture/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;快速开始 RPC 应用：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/helloworld" target="_blank"&gt;dubbo-go-samples/helloworld&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;基于注册中心的微服务应用：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;多协议应用：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols" target="_blank"&gt;dubbo-go-samples/rpc/multi-protocols&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo Go 当前围绕几个运行时概念组织：应用实例、provider、consumer、protocol、registry、metadata 和治理扩展。现在的应用通常通过 &lt;code&gt;dubbo.go&lt;/code&gt;、&lt;code&gt;server&lt;/code&gt;、&lt;code&gt;client&lt;/code&gt; 中的 API 入口构建；使用配置文件的场景仍然会走 &lt;code&gt;config.RootConfig&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="主要运行层次"&gt;主要运行层次&lt;/h2&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;层次&lt;/th&gt;
+ &lt;th&gt;主要包&lt;/th&gt;
+ &lt;th&gt;职责&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;应用实例&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;dubbo.go&lt;/code&gt;, &lt;code&gt;options.go&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;持有 application、protocol、registry、metadata、metrics、tracing、router、shutdown 等选项。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Provider API&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;server&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;注册 service handler，构造 service options，创建 invoker 并暴露服务。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Consumer API&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;client&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;创建 client，引用服务，创建生成代码服务或泛化服务，并发起远程调用。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Protocol&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;protocol/base&lt;/code&gt;, &lt;code&gt;protocol/triple&lt;/code&gt;, &lt;code&gt;protocol/dubbo&lt;/code&gt;, &lt;code&gt;protocol/rest&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;Provider 侧将 invoker 转为网络服务，consumer 侧将 invoker 转为网络调用。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Registry 与发现&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;registry&lt;/code&gt;, &lt;code&gt;registry/protocol&lt;/code&gt;, &lt;code&gt;registry/servicediscovery&lt;/code&gt;, &lt;code&gt;registry/directory&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;负责注册、订阅、服务发现和注册中心驱动的调用。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;Metadata&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;metadata&lt;/code&gt;, &lt;code&gt;metadata/report&lt;/code&gt;, &lt;code&gt;metadata/mapping&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;负责服务定义、service-to-application 映射和 metadata 上报。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;治理扩展&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;filter&lt;/code&gt;, &lt;code&gt;cluster&lt;/code&gt;, &lt;code&gt;cluster/router&lt;/code&gt;, &lt;code&gt;cluster/loadbalance&lt;/code&gt;, &lt;code&gt;common/extension&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;提供 filter、router、load balance、cluster 策略和扩展注册。&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="provider-流程"&gt;Provider 流程&lt;/h2&gt;
+&lt;p&gt;当前 server API 下，provider 通常会经历以下流程：&lt;/p&gt;</description></item><item><title>网络协议</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/protocol/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/protocol/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Triple RPC：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank"&gt;dubbo-go-samples/rpc/triple&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;多协议服务：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/multi-protocols" target="_blank"&gt;dubbo-go-samples/rpc/multi-protocols&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;gRPC 互通：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/grpc" target="_blank"&gt;dubbo-go-samples/rpc/grpc&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在当前 Dubbo Go 中，protocol 层是 invocation 模型和底层网络协议之间的桥梁。它一方面负责把 provider 暴露成网络服务，另一方面负责把 consumer 侧的引用转换成可调用的远程 invoker。&lt;/p&gt;
+&lt;h2 id="核心协议抽象"&gt;核心协议抽象&lt;/h2&gt;
+&lt;p&gt;当前协议接口定义在 &lt;code&gt;protocol/base/base_protocol.go&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; Protocol &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Export&lt;/span&gt;(invoker Invoker) Exporter
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Refer&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) Invoker
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Destroy&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;它的职责很直接：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Export&lt;/code&gt;：把 provider 侧 invoker 暴露成网络服务&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Refer&lt;/code&gt;：为目标 URL 创建 consumer 侧 invoker&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Destroy&lt;/code&gt;：销毁该协议持有的 invoker 和 exporter&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外还有一个可选能力：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; RegistryUnregisterer &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;UnregisterRegistries&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;它主要用于优雅停机阶段，让协议在完整 teardown 之前，先把已经暴露出去的服务从注册中心摘除。&lt;/p&gt;
+&lt;h2 id="provider-侧流程"&gt;Provider 侧流程&lt;/h2&gt;
+&lt;p&gt;在 provider 侧，Dubbo Go 通常会经过下面这条链路：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;server.Register(...)&lt;/code&gt; 或 &lt;code&gt;server.RegisterService(...)&lt;/code&gt; 创建 service metadata 和 invoker。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ServiceOptions.Export()&lt;/code&gt; 选择 protocol 和 registry 行为。&lt;/li&gt;
+&lt;li&gt;具体协议实现调用 &lt;code&gt;Export(invoker)&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;暴露后的服务开始监听配置好的网络端点。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;不同协议提供不同的传输层和编解码方式，但都会遵循同一个 &lt;code&gt;Export&lt;/code&gt; 契约。&lt;/p&gt;</description></item><item><title>注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/registry/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Nacos 注册中心：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Zookeeper 注册中心：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/zookeeper" target="_blank"&gt;dubbo-go-samples/registry/zookeeper&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;应用级服务发现：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;相关文档：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/"&gt;应用级服务发现&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在当前 Dubbo Go 中，registry 层已经不只是“接口级地址注册”这么简单。它同时参与应用级服务发现、metadata 初始化、订阅刷新，以及基于注册中心的协议暴露流程。&lt;/p&gt;
+&lt;h2 id="核心-registry-接口"&gt;核心 Registry 接口&lt;/h2&gt;
+&lt;p&gt;主接口定义在 &lt;code&gt;registry/registry.go&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; Registry &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	common.Node
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Register&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;UnRegister&lt;/span&gt;(url &lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;Subscribe&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;UnSubscribe&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;LoadSubscribeInstances&lt;/span&gt;(&lt;span style="color:#719e07"&gt;*&lt;/span&gt;common.URL, NotifyListener) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;和旧版说明相比，一个明显变化是 &lt;code&gt;LoadSubscribeInstances(...)&lt;/code&gt; 已经进入接口契约。原因是订阅本身是异步的，Dubbo Go 在正式进入异步通知流之前，可能需要先同步加载一次初始实例列表。&lt;/p&gt;
+&lt;h2 id="当前职责范围"&gt;当前职责范围&lt;/h2&gt;
+&lt;p&gt;现在 registry 层覆盖了几类紧密相关的职责：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;provider 注册与反注册&lt;/li&gt;
+&lt;li&gt;consumer 订阅与取消订阅&lt;/li&gt;
+&lt;li&gt;异步更新前的初始实例加载&lt;/li&gt;
+&lt;li&gt;应用级服务发现&lt;/li&gt;
+&lt;li&gt;与 registry 绑定的 metadata 上报&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;从源码目录看，相关主包包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;registry&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;registry/protocol&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;registry/servicediscovery&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;registry/directory&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="注册模式"&gt;注册模式&lt;/h2&gt;
+&lt;p&gt;当前 Dubbo Go 通过 &lt;code&gt;registry/options.go&lt;/code&gt; 支持多种注册模型：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;registry.WithRegisterService()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;registry.WithRegisterInterface()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;registry.WithRegisterServiceAndInterface()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;它们分别对应：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;service&lt;/code&gt;：注册应用级实例&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;interface&lt;/code&gt;：注册接口级 provider URL&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;all&lt;/code&gt;：迁移阶段同时注册两种模型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这也是它和早期文档的一个关键差异。旧文档大多只讲了接口级注册。&lt;/p&gt;</description></item><item><title>3.x 核心能力</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/3.0_feature/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/3.0_feature/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Triple 协议：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank"&gt;dubbo-go-samples/rpc/triple&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;基于 Nacos 的应用级服务发现：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Service Mesh 部署：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/mesh" target="_blank"&gt;dubbo-go-samples/mesh&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo Go 3.x 的核心能力已经围绕 Triple 协议、应用级服务发现、metadata 驱动的服务自省，以及 SDK 侧治理能力展开。这些内容不再只是 3.0 版本的新特性，而是当前 Dubbo Go 应用的常规开发模型。&lt;/p&gt;
+&lt;h2 id="triple-协议"&gt;Triple 协议&lt;/h2&gt;
+&lt;p&gt;Triple 是 Dubbo Go 3.x 推荐使用的 RPC 协议，主要实现位于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;protocol/triple&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;protocol/triple/triple_protocol&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;tools/protoc-gen-go-triple&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Triple 基于 HTTP/1.1 和 HTTP/2 语义，并在线路协议上兼容 gRPC。对于 protobuf 服务，用户先定义 &lt;code&gt;.proto&lt;/code&gt; 文件，再通过 &lt;code&gt;protoc-gen-go&lt;/code&gt; 和 &lt;code&gt;protoc-gen-go-triple&lt;/code&gt; 生成 Go 代码，最后将生成的 handler 注册到 Dubbo Go server。&lt;/p&gt;
+&lt;p&gt;运行时链路遵循 Dubbo 通用协议抽象：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;provider 侧：&lt;code&gt;server.Register(...)&lt;/code&gt; 构造 service options 和 invoker，再通过协议 &lt;code&gt;Export&lt;/code&gt; 暴露服务；&lt;/li&gt;
+&lt;li&gt;consumer 侧：生成的 client 调用 &lt;code&gt;client.Connection&lt;/code&gt;，由它构造 invocation 并委托给协议 &lt;code&gt;Refer&lt;/code&gt; 返回的 invoker；&lt;/li&gt;
+&lt;li&gt;request header、response header、trailer 等 metadata 通过 Triple metadata API 暴露。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="应用级服务发现"&gt;应用级服务发现&lt;/h2&gt;
+&lt;p&gt;应用级服务发现是当前 Dubbo Go 默认的服务发现模型。provider 注册应用实例和 metadata；consumer 解析 service 到 application 的映射，再通过 metadata 还原可调用的服务 URL。&lt;/p&gt;</description></item><item><title>泛化调用</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/generic/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/generic/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;泛化调用示例：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/generic" target="_blank"&gt;dubbo-go-samples/generic&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Triple 示例：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/rpc/triple" target="_blank"&gt;dubbo-go-samples/rpc/triple&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当前 Dubbo Go 的泛化调用主要围绕 &lt;code&gt;client.NewGenericService(...)&lt;/code&gt; 和 &lt;code&gt;filter/generic.GenericService&lt;/code&gt; 展开。早期基于 &lt;code&gt;ReferenceConfigBuilder&lt;/code&gt;、&lt;code&gt;GenericLoad()&lt;/code&gt;、&lt;code&gt;GetRPCService()&lt;/code&gt; 的示例属于兼容旧 API 的写法，已经不是推荐入口。&lt;/p&gt;
+&lt;h2 id="核心-api"&gt;核心 API&lt;/h2&gt;
+&lt;p&gt;主要运行时入口在 &lt;code&gt;client/client.go&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;genericService, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; cli.&lt;span style="color:#268bd2"&gt;NewGenericService&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#2aa198"&gt;&amp;#34;org.apache.dubbo.samples.UserProvider&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithProtocolTriple&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithSerialization&lt;/span&gt;(constant.Hessian2Serialization),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	client.&lt;span style="color:#268bd2"&gt;WithURL&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;tri://127.0.0.1:20000&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;NewGenericService(...)&lt;/code&gt; 默认会做三件事：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;设置 &lt;code&gt;NONIDL&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;打开 generic invocation&lt;/li&gt;
+&lt;li&gt;使用 &lt;code&gt;hessian2&lt;/code&gt; 序列化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;它内部会创建 &lt;code&gt;filter/generic.GenericService&lt;/code&gt;，然后接入 Dubbo Go 正常的 reference 和 invocation 流程。&lt;/p&gt;
+&lt;h2 id="genericservice"&gt;GenericService&lt;/h2&gt;
+&lt;p&gt;核心类型如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; GenericService &lt;span style="color:#268bd2"&gt;struct&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	Invoke &lt;span style="color:#268bd2"&gt;func&lt;/span&gt;(ctx context.Context, methodName &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;, types []&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;, args []hessian.Object) (&lt;span style="color:#dc322f"&gt;any&lt;/span&gt;, &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;) &lt;span style="color:#2aa198"&gt;`dubbo:&amp;#34;$invoke&amp;#34;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;它和 Dubbo 的泛化调用模型保持一致：调用方提供：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;方法名&lt;/li&gt;
+&lt;li&gt;参数类型名列表&lt;/li&gt;
+&lt;li&gt;参数值列表&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;框架再把这些内容编码成对远端服务的 &lt;code&gt;$invoke&lt;/code&gt; 请求。&lt;/p&gt;</description></item><item><title>泛化调用兼容说明</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/generic-2/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/generic-2/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;泛化调用示例：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/generic" target="_blank"&gt;dubbo-go-samples/generic&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这个页面主要保留给旧链接兼容使用。&lt;/p&gt;
+&lt;p&gt;当前 Dubbo Go 请优先阅读&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/generic/"&gt;泛化调用&lt;/a&gt;。旧示例里使用的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;config.NewReferenceConfigBuilder()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GenericLoad()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GetRPCService()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;属于早期以配置对象为中心的 API 路径。现在更推荐的运行时入口是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;client.NewGenericService(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filter/generic.GenericService.Invoke(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filter/generic.GenericService.InvokeWithType(...)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果你要找一个可以直接参考的完整示例，优先看 &lt;code&gt;dubbo-go-samples/generic&lt;/code&gt;。&lt;/p&gt;</description></item><item><title>AOP 与可扩展机制</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/aop_and_extension/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/aop_and_extension/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自定义 filter：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/filter/custom" target="_blank"&gt;dubbo-go-samples/filter/custom&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;条件路由：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/router/condition" target="_blank"&gt;dubbo-go-samples/router/condition&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;标签路由：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/router/tag" target="_blank"&gt;dubbo-go-samples/router/tag&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dubbo Go 通过 Go 包初始化和统一的扩展注册中心，来承载大部分可插拔能力。filter、router、protocol、registry、load balance、cluster 策略、tracing exporter、metadata report 等能力，都是按这个模型加载的。&lt;/p&gt;
+&lt;h2 id="extension-注册中心"&gt;extension 注册中心&lt;/h2&gt;
+&lt;p&gt;当前实现位于 &lt;code&gt;common/extension&lt;/code&gt;。它已经不再依赖每个类型单独维护的原始 map，而是统一使用泛型注册中心：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;var&lt;/span&gt; loadbalances = NewRegistry[&lt;span style="color:#268bd2"&gt;func&lt;/span&gt;() loadbalance.LoadBalance](&lt;span style="color:#2aa198"&gt;&amp;#34;loadbalance&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;SetLoadbalance&lt;/span&gt;(name &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;, fcn &lt;span style="color:#268bd2"&gt;func&lt;/span&gt;() loadbalance.LoadBalance) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	loadbalances.&lt;span style="color:#268bd2"&gt;Register&lt;/span&gt;(name, fcn)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;GetLoadbalance&lt;/span&gt;(name &lt;span style="color:#dc322f"&gt;string&lt;/span&gt;) loadbalance.LoadBalance {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; loadbalances.&lt;span style="color:#268bd2"&gt;MustGet&lt;/span&gt;(name)()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;同样的模式也用在：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;common/extension/filter.go&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;common/extension/protocol.go&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;common/extension/registry.go&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;common/extension/router_factory.go&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这样做之后，Dubbo Go 的扩展注册模型更统一，也支持某些类别上的注销、列举已注册名称等辅助能力。&lt;/p&gt;
+&lt;h2 id="init-的作用"&gt;&lt;code&gt;init()&lt;/code&gt; 的作用&lt;/h2&gt;
+&lt;p&gt;内置实现通常都会在自己的包里通过 &lt;code&gt;init()&lt;/code&gt; 完成注册：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;init&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	extension.&lt;span style="color:#268bd2"&gt;SetLoadbalance&lt;/span&gt;(constant.LoadBalanceKeyRandom, NewRandomLoadBalance)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;运行时里很多能力都遵循这个模式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;protocol/triple/triple.go&lt;/code&gt; 注册 Triple&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;protocol/dubbo/dubbo_protocol.go&lt;/code&gt; 注册 Dubbo&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;protocol/rest/rest_protocol.go&lt;/code&gt; 注册 REST&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;registry/nacos/registry.go&lt;/code&gt;、&lt;code&gt;registry/zookeeper/registry.go&lt;/code&gt;、&lt;code&gt;registry/etcdv3/registry.go&lt;/code&gt; 注册 registry&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filter/generic/filter.go&lt;/code&gt;、&lt;code&gt;filter/metrics/filter.go&lt;/code&gt;、&lt;code&gt;filter/graceful_shutdown/...&lt;/code&gt; 注册 filter&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cluster/router/condition/factory.go&lt;/code&gt;、&lt;code&gt;cluster/router/tag/factory.go&lt;/code&gt;、&lt;code&gt;cluster/router/script/factory.go&lt;/code&gt; 注册 router factory&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;只要这些包被导入，框架后续就能按名称查找到对应实现。&lt;/p&gt;</description></item><item><title>应用和接口</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/app_and_interface/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/sourcecode/app_and_interface/</guid><description>&lt;p&gt;相关示例：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Hello world 应用：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/helloworld" target="_blank"&gt;dubbo-go-samples/helloworld&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;基于 YAML 的配置：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/config_yaml" target="_blank"&gt;dubbo-go-samples/config_yaml&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;基于注册中心的应用：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/nacos" target="_blank"&gt;dubbo-go-samples/registry/nacos&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当前 Dubbo Go 依然保留“应用级配置”和“接口级服务引用”这两个层次，但它的运行时模型已经比早期版本里那种简单的“application vs interface”说明更完整。现在真正的源码入口，是 &lt;code&gt;options.go&lt;/code&gt; 里的应用实例选项，以及兼容配置文件模式的 &lt;code&gt;config/root_config.go&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="应用级配置"&gt;应用级配置&lt;/h2&gt;
+&lt;p&gt;应用级配置会被同一个 Dubbo Go 进程里的所有服务和引用共享。&lt;/p&gt;
+&lt;p&gt;在配置文件模式下，这套模型由 &lt;code&gt;config.RootConfig&lt;/code&gt; 表达，主要字段包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Application&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Protocols&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Registries&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ConfigCenter&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MetadataReport&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Provider&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Consumer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Otel&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Metrics&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Tracing&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Logger&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Shutdown&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Router&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;TLSConfig&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在 API 模式下，对应的是 &lt;code&gt;options.go&lt;/code&gt; 里的 &lt;code&gt;InstanceOptions&lt;/code&gt;，它通常通过下面这些 helper 填充：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithProtocol(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithRegistry(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithConfigCenter(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithMetadataReport(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithMetrics(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithTracing(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithShutdown(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithRouter(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithRemoteMetadata()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dubbo.WithMetadataServiceProtocol(...)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些选项描述的是整个应用实例的运行环境，而不是某一个单独服务。&lt;/p&gt;
+&lt;h2 id="接口级配置"&gt;接口级配置&lt;/h2&gt;
+&lt;p&gt;接口级配置则绑定在单个暴露服务或单个远程引用上。&lt;/p&gt;
+&lt;p&gt;在 provider 侧，核心单位是注册出来的 service：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;server.Register(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;server.RegisterService(...)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;server.ServiceOptions&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这一层承载接口名、实现 handler、protocol ID、registry ID、序列化方式，以及服务 metadata 等信息。&lt;/p&gt;</description></item></channel></rss>
