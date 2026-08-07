@@ -32,11 +32,10 @@ weight: 1
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
     git clone --depth 1 https://github.com/apache/dubbo-go.git
-    cd dubbo-go/tools/protoc-gen-go-triple
-    go install .
+    (cd dubbo-go/tools/protoc-gen-go-triple && go install .)
     ```
 
-    确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 验证，如果该命令不能正常工作的话，请执行以下命令：
+    确保 `protoc-gen-go`、`protoc-gen-go-triple` 在你的 `PATH` 中。这可以通过 `which protoc-gen-go` 和 `which protoc-gen-go-triple` 验证。如果命令不能正常工作，请执行以下命令：
 
     ```shell
     [ -n "$(go env GOBIN)" ] && export PATH="$(go env GOBIN):${PATH}"
@@ -48,49 +47,53 @@ weight: 1
     目录下。请从该目录安装；修改 `.proto` 服务定义后，请同步重新生成 `*.triple.go` 文件。
 
 ## 快速运行示例
+
 ### 下载示例源码
 我们在 <a href="https://github.com/apache/dubbo-go-samples/" target="_blank">apache/dubbo-go-samples</a> 仓库维护了一系列 dubbo-go 使用示例，用来帮助用户快速学习 dubbo-go 使用方式。
 
 你可以 <a href="https://github.com/apache/dubbo-go-samples/archive/refs/heads/main.zip" target="_blank">下载示例 zip 包并解压</a>，或者克隆仓库：
 
 ```shell
-$ git clone --depth 1 https://github.com/apache/dubbo-go-samples
-```
-
-切换到快速开始示例目录：
-
-```shell
-$ cd dubbo-go-samples/helloworld
+git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
+cd dubbo-go-samples/helloworld
 ```
 
 ### 运行 server
-在 `go-server/cmd` 目录：
 
-运行以下命令，启动 server：
+以下命令均从 `helloworld` 根目录运行。启动 server：
 
 ```shell
-$ go run server.go
+go run ./go-server/cmd/main.go
 ```
 
 使用 `cURL` 验证 server 已经正常启动：
 
 ```shell
-$ curl \
-      --header "Content-Type: application/json" \
-      --data '{"name": "Dubbo"}' \
-      http://localhost:20000/greet.GreetService/Greet
+curl \
+  --header "Content-Type: application/json" \
+  --data '{"name":"Dubbo"}' \
+  http://localhost:20000/greet.GreetService/Greet
+```
 
-Greeting: Hello world
+响应为：
+
+```json
+{"greeting":"Dubbo"}
 ```
 
 ### 运行 client
 
-打开一个新的 terminal，运行以下命令，在 `go-client/cmd` 目录运行以下命令，启动 client
+打开一个新的终端，重新进入 `helloworld` 根目录并启动 client：
 
 ```shell
-$ go run client.go
+cd dubbo-go-samples/helloworld
+go run ./go-client/cmd/main.go
+```
 
-Greeting: Hello world
+日志中包含以下响应（时间、日志级别和调用位置等前缀会因运行环境而异）：
+
+```text
+Greet response: hello world
 ```
 
 以上就是一个完整的 dubbo-go RPC 通信服务开发过程。
@@ -120,39 +123,43 @@ service GreetService {
 }
 ```
 
-这个文件声明了一个叫做 `GreetService` 的服务，为这个服务定义了 Greet 方法以及它的请求参数 GreetRequest 和返回值 GreetResponse。
+`proto/greet.proto` 声明了名为 `GreetService` 的服务，并定义了 RPC 方法 `Greet`、请求 `GreetRequest` 和响应 `GreetResponse`。
 
 ### 生成代码
 
-在运行 server 或者 client 之前，我们需要使用 `protoc-gen-go`、`protoc-gen-go-triple` 生成相关的代码
+在运行 server 或 client 之前，需要在 `helloworld` 根目录使用 `protoc-gen-go` 和 `protoc-gen-go-triple` 生成相关代码：
 
 ```bash
-protoc --go_out=. --go_opt=paths=source_relative \
-    --go-triple_out=. --go-triple_opt=paths=source_relative \
-    ./greet.proto
+protoc \
+  --go_out=. \
+  --go_opt=paths=source_relative \
+  --go-triple_out=. \
+  --go-triple_opt=paths=source_relative \
+  ./proto/greet.proto
 ```
 
-运行以上命令后，在目标目录中看到以下生成的文件：
+运行后，`proto` 目录结构如下：
 
+```text
+proto/
+├── greet.proto
+├── greet.pb.go
+└── greet.triple.go
 ```
- proto
-    ├── greet.pb.go
-    ├── greet.proto
-    └── greet.triple.go
-```
 
-在 proto/greet/v1 包下有两部分内容：
+其中：
 
-- `greet.pb.go` 是由谷歌标准的 `protoc-gen-go`生成，它包含 `GreetRequest`、`GreetResponse` 结构体和响应的编解码规则。
-- `greet.triple.go` 是由 Dubbo 自定义的插件`protoc-gen-go-triple`成，其中关键的信息包括生成的接口 `GreetService`、构造器等。
+- `greet.pb.go` 由标准的 `protoc-gen-go` 生成，主要包含 `GreetRequest`、`GreetResponse` 等 Protobuf 消息及编解码代码。
+- `greet.triple.go` 由 `protoc-gen-go-triple` 生成，主要包含 Triple 服务端注册、客户端代理和 RPC 调用相关代码，例如 `RegisterGreetServiceHandler` 和 `NewGreetService`。
+
+修改 `proto/greet.proto` 后，需要重新运行上述命令，同时更新这两个生成文件。
 
 ### 实现服务
 
-接下来我们就需要添加业务逻辑了，实现 `greet.GreetService` 接口即可。
+接下来添加业务逻辑。`GreetTripleServer` 实现生成代码中的 `greet.GreetServiceHandler` 接口：
 
 ```go
-type GreetTripleServer struct {
-}
+type GreetTripleServer struct{}
 
 func (srv *GreetTripleServer) Greet(ctx context.Context, req *greet.GreetRequest) (*greet.GreetResponse, error) {
 	resp := &greet.GreetResponse{Greeting: req.Name}
@@ -162,9 +169,29 @@ func (srv *GreetTripleServer) Greet(ctx context.Context, req *greet.GreetRequest
 
 ### 启动 Server
 
-创建一个新的 Server，把我们上一步中实现的 `GreeterServer`注册给它，接下来就可以直接初始化和启动 Server 了，它将在指定的端口接收请求。
+创建 Server，并通过 `RegisterGreetServiceHandler` 注册上一步实现的 `GreetTripleServer`。Server 在 `20000` 端口接收请求：
 
 ```go
+package main
+
+import (
+	"context"
+
+	_ "dubbo.apache.org/dubbo-go/v3/imports"
+	"dubbo.apache.org/dubbo-go/v3/protocol"
+	"dubbo.apache.org/dubbo-go/v3/server"
+	"github.com/dubbogo/gost/log/logger"
+
+	greet "github.com/apache/dubbo-go-samples/helloworld/proto"
+)
+
+type GreetTripleServer struct{}
+
+func (srv *GreetTripleServer) Greet(ctx context.Context, req *greet.GreetRequest) (*greet.GreetResponse, error) {
+	resp := &greet.GreetResponse{Greeting: req.Name}
+	return resp, nil
+}
+
 func main() {
 	srv, err := server.NewServer(
 		server.WithServerProtocol(
@@ -173,15 +200,18 @@ func main() {
 		),
 	)
 	if err != nil {
-		panic(err)
+		logger.Errorf("failed to create server: %v", err)
+		return
 	}
 
 	if err := greet.RegisterGreetServiceHandler(srv, &GreetTripleServer{}); err != nil {
-		panic(err)
+		logger.Errorf("failed to register greet service handler: %v", err)
+		return
 	}
 
 	if err := srv.Serve(); err != nil {
-		logger.Error(err)
+		logger.Errorf("failed to serve: %v", err)
+		return
 	}
 }
 ```
@@ -199,22 +229,41 @@ curl \
 也可以使用 Dubbo client 请求服务，我们首先需要从生成代码即 `greet` 包中获取服务代理，为它指定 server 地址并初始化，之后就可以发起 RPC 调用了。
 
 ```go
+package main
+
+import (
+	"context"
+	"time"
+
+	"dubbo.apache.org/dubbo-go/v3/client"
+	_ "dubbo.apache.org/dubbo-go/v3/imports"
+	"github.com/dubbogo/gost/log/logger"
+
+	greet "github.com/apache/dubbo-go-samples/helloworld/proto"
+)
+
 func main() {
 	cli, err := client.NewClient(
 		client.WithClientURL("127.0.0.1:20000"),
 	)
 	if err != nil {
-		panic(err)
+		logger.Errorf("failed to create client: %v", err)
+		return
 	}
 
 	svc, err := greet.NewGreetService(cli)
 	if err != nil {
-		panic(err)
+		logger.Errorf("failed to create greet service: %v", err)
+		return
 	}
 
-	resp, err := svc.Greet(context.Background(), &greet.GreetRequest{Name: "hello world"})
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	resp, err := svc.Greet(ctx, &greet.GreetRequest{Name: "hello world"})
 	if err != nil {
-		logger.Error(err)
+		logger.Errorf("failed to greet: %v", err)
+		return
 	}
 	logger.Infof("Greet response: %s", resp.Greeting)
 }
