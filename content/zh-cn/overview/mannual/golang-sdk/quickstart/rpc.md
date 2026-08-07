@@ -200,15 +200,18 @@ func main() {
 		),
 	)
 	if err != nil {
-		logger.Fatalf("failed to create server: %v", err)
+		logger.Errorf("failed to create server: %v", err)
+		return
 	}
 
 	if err := greet.RegisterGreetServiceHandler(srv, &GreetTripleServer{}); err != nil {
-		logger.Fatalf("failed to register greet service handler: %v", err)
+		logger.Errorf("failed to register greet service handler: %v", err)
+		return
 	}
 
 	if err := srv.Serve(); err != nil {
-		logger.Fatalf("failed to serve: %v", err)
+		logger.Errorf("failed to serve: %v", err)
+		return
 	}
 }
 ```
@@ -244,12 +247,14 @@ func main() {
 		client.WithClientURL("127.0.0.1:20000"),
 	)
 	if err != nil {
-		logger.Fatalf("failed to create client: %v", err)
+		logger.Errorf("failed to create client: %v", err)
+		return
 	}
 
 	svc, err := greet.NewGreetService(cli)
 	if err != nil {
-		logger.Fatalf("failed to create greet service: %v", err)
+		logger.Errorf("failed to create greet service: %v", err)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -257,7 +262,8 @@ func main() {
 
 	resp, err := svc.Greet(ctx, &greet.GreetRequest{Name: "hello world"})
 	if err != nil {
-		logger.Fatalf("failed to greet: %v", err)
+		logger.Errorf("failed to greet: %v", err)
+		return
 	}
 	logger.Infof("Greet response: %s", resp.Greeting)
 }
