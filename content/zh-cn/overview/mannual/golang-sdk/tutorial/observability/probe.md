@@ -253,32 +253,52 @@ probe.RegisterStartup("warmup", func(ctx context.Context) error {
 
 # 七、Kubernetes 配置示例
 
+以下是一个完整的 Deployment 示例，将 liveness、readiness、startup 三类探针配置在容器上：
+
 ```yaml
-livenessProbe:
-  httpGet:
-    path: /live
-    port: 22222
-  initialDelaySeconds: 15
-  periodSeconds: 10
-  timeoutSeconds: 2
-  failureThreshold: 3
-
-readinessProbe:
-  httpGet:
-    path: /ready
-    port: 22222
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 2
-
-startupProbe:
-  httpGet:
-    path: /startup
-    port: 22222
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 25 # 120 秒启动预算 => ceil(120 / 5) + 1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-go-probe-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dubbo-go-probe-demo
+  template:
+    metadata:
+      labels:
+        app: dubbo-go-probe-demo
+    spec:
+      containers:
+        - name: dubbo-go-probe-demo
+          image: your-registry/dubbo-go-probe-demo:latest
+          ports:
+            - containerPort: 22222
+              name: probe
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 22222
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 22222
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          startupProbe:
+            httpGet:
+              path: /startup
+              port: 22222
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 25 # 120 秒启动预算 => ceil(120 / 5) + 1
 ```
 
 ---
@@ -297,6 +317,31 @@ metrics/probe/
 
 ```bash
 go run ./metrics/probe/go-server/cmd/main.go
+```
+
+---
+
+## 使用 curl 验证探针
+
+服务启动后，可以分别请求三个探针端点：
+
+```bash
+# liveness，预期 200
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/live
+
+# readiness，未就绪时预期 503
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/ready
+
+# startup，未启动完成时预期 503
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/startup
+```
+
+也可以直接查看响应体：
+
+```bash
+curl -i http://127.0.0.1:22222/live
+curl -i http://127.0.0.1:22222/ready
+curl -i http://127.0.0.1:22222/startup
 ```
 
 ---

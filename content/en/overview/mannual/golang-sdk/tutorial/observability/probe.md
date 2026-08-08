@@ -254,32 +254,52 @@ Prevents premature restart during slow initialization.
 
 # 7. Kubernetes Configuration Example
 
+The following complete Deployment configures liveness, readiness, and startup probes on the container:
+
 ```yaml
-livenessProbe:
-  httpGet:
-    path: /live
-    port: 22222
-  initialDelaySeconds: 15
-  periodSeconds: 10
-  timeoutSeconds: 2
-  failureThreshold: 3
-
-readinessProbe:
-  httpGet:
-    path: /ready
-    port: 22222
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 2
-
-startupProbe:
-  httpGet:
-    path: /startup
-    port: 22222
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 25 # 120s startup budget => ceil(120 / 5) + 1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-go-probe-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dubbo-go-probe-demo
+  template:
+    metadata:
+      labels:
+        app: dubbo-go-probe-demo
+    spec:
+      containers:
+        - name: dubbo-go-probe-demo
+          image: your-registry/dubbo-go-probe-demo:latest
+          ports:
+            - containerPort: 22222
+              name: probe
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 22222
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 22222
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          startupProbe:
+            httpGet:
+              path: /startup
+              port: 22222
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 25 # 120s startup budget => ceil(120 / 5) + 1
 ```
 
 ---
@@ -298,6 +318,31 @@ metrics/probe/
 
 ```bash
 go run ./metrics/probe/go-server/cmd/main.go
+```
+
+---
+
+## Verify Probes with curl
+
+After the service starts, you can request the three probe endpoints separately:
+
+```bash
+# liveness, expected 200
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/live
+
+# readiness, expected 503 before the service is ready
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/ready
+
+# startup, expected 503 before startup is complete
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/startup
+```
+
+You can also inspect the response body:
+
+```bash
+curl -i http://127.0.0.1:22222/live
+curl -i http://127.0.0.1:22222/ready
+curl -i http://127.0.0.1:22222/startup
 ```
 
 ---
