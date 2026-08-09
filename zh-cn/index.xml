@@ -13428,63 +13428,51 @@ Dubbo 可支持集群规模步入百万实例层次。&lt;/li&gt;
 &lt;li&gt;基于 HTTP 的通信模式，加上相对比较完善的入门文档和演示 demo 和 starters，让开发者在第一感觉上更易于上手&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Spring Cloud 的问题有：&lt;/p&gt;</description></item><item><title>指标监控 (Metrics)</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/rpc_metrics/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/rpc_metrics/</guid><description>&lt;h1 id="dubbo-go-指标监控"&gt;Dubbo-Go 指标监控&lt;/h1&gt;
-&lt;p&gt;Dubbo-Go 支持采集运行态 Metrics 指标，并接入 &lt;strong&gt;Prometheus + Grafana&lt;/strong&gt; 实现微服务可观测性。&lt;/p&gt;
-&lt;p&gt;当前示例支持两种监控模式：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Pull 模式&lt;/strong&gt;：Prometheus 主动抓取 Dubbo-Go 应用暴露的指标，适合长期运行的服务。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Push 模式&lt;/strong&gt;：Dubbo-Go 应用主动将指标推送到 Pushgateway，仅建议用于短生命周期任务。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;示例源码：&lt;/p&gt;
+&lt;p&gt;Dubbo-Go 可以采集 RPC、元数据、注册中心、配置中心等运行态指标，并通过 Prometheus 与 Grafana 构建可观测性看板。本文以 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/observability/prometheus_grafana" target="_blank"&gt;dubbo-go-samples/observability/prometheus_grafana&lt;/a&gt; 为例，说明 Pull 与 Pushgateway 两种运行方式。&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/metrics"&gt;https://github.com/apache/dubbo-go-samples/tree/main/metrics&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;说明：部分旧文档或任务描述可能仍写作 &lt;code&gt;metrics/prometheus_grafana&lt;/code&gt;，当前 sample 仓库中的实际目录是 &lt;code&gt;observability/prometheus_grafana&lt;/code&gt;。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id="1-监控架构说明"&gt;1. 监控架构说明&lt;/h2&gt;
-&lt;h3 id="11-pull-模式推荐生产模式"&gt;1.1 Pull 模式（推荐生产模式）&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Dubbo-Go 应用 ---&amp;gt; Prometheus ---&amp;gt; Grafana
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; (暴露 /metrics 或 /prometheus 接口)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Prometheus 主动抓取 Dubbo-Go 应用指标。&lt;/p&gt;
-&lt;h3 id="12-push-模式适用于短生命周期任务"&gt;1.2 Push 模式（适用于短生命周期任务）&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Dubbo-Go 应用 ---&amp;gt; Pushgateway ---&amp;gt; Prometheus ---&amp;gt; Grafana
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;应用主动推送指标到 Pushgateway，Prometheus 再拉取。&lt;/p&gt;
-&lt;p&gt;Pushgateway 适用于 &lt;strong&gt;短生命周期任务（如 batch / cron job）&lt;/strong&gt;，不推荐用于长期运行的服务。&lt;/p&gt;
-&lt;h2 id="2-示例组件说明"&gt;2. 示例组件说明&lt;/h2&gt;
+&lt;h2 id="1-工作模式"&gt;1. 工作模式&lt;/h2&gt;
+&lt;h3 id="11-pull-模式"&gt;1.1 Pull 模式&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Dubbo-Go 应用暴露 /prometheus 或 /metrics
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Prometheus 定时拉取
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Grafana 查询 Prometheus 并展示大盘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Pull 模式是 Prometheus 的标准模式，适合长期运行的 Dubbo-Go Provider 与 Consumer。当前 sample 中：&lt;/p&gt;
 &lt;table&gt;
  &lt;thead&gt;
  &lt;tr&gt;
- &lt;th&gt;组件&lt;/th&gt;
- &lt;th&gt;端口&lt;/th&gt;
- &lt;th&gt;说明&lt;/th&gt;
+ &lt;th&gt;应用&lt;/th&gt;
+ &lt;th&gt;指标地址&lt;/th&gt;
  &lt;/tr&gt;
  &lt;/thead&gt;
  &lt;tbody&gt;
  &lt;tr&gt;
- &lt;td&gt;Grafana&lt;/td&gt;
- &lt;td&gt;3000&lt;/td&gt;
- &lt;td&gt;指标可视化&lt;/td&gt;
+ &lt;td&gt;go-server&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;http://localhost:9099/prometheus&lt;/code&gt;&lt;/td&gt;
  &lt;/tr&gt;
  &lt;tr&gt;
- &lt;td&gt;Prometheus&lt;/td&gt;
- &lt;td&gt;9090&lt;/td&gt;
- &lt;td&gt;指标存储与查询&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td&gt;Pushgateway&lt;/td&gt;
- &lt;td&gt;9091&lt;/td&gt;
- &lt;td&gt;接收应用推送指标&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td&gt;go-server 指标端口&lt;/td&gt;
- &lt;td&gt;本示例中为 9099&lt;/td&gt;
- &lt;td&gt;Pull 模式下 Provider 指标暴露端口&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td&gt;go-client 指标端口&lt;/td&gt;
- &lt;td&gt;本示例中为 9097&lt;/td&gt;
- &lt;td&gt;Pull 模式下 Consumer 指标暴露端口&lt;/td&gt;
+ &lt;td&gt;go-client&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;http://localhost:9097/prometheus&lt;/code&gt;&lt;/td&gt;
  &lt;/tr&gt;
  &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;如果不使用本示例，而是直接使用 Dubbo-Go 默认配置，则默认指标端点为 &lt;code&gt;http://localhost:9090/metrics&lt;/code&gt;。当前 sample 将指标路径改成了 &lt;code&gt;/prometheus&lt;/code&gt;。&lt;/p&gt;</description></item><item><title>注册中心、配置中心和元数据中心</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/registry-config-meta/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/registry-config-meta/</guid><description>&lt;h2 id="三中心逻辑架构"&gt;三中心逻辑架构&lt;/h2&gt;
+&lt;p&gt;Dubbo-Go 默认指标地址是 &lt;code&gt;http://localhost:9090/metrics&lt;/code&gt;。sample 通过 &lt;code&gt;metrics.WithPort(9099)&lt;/code&gt;、&lt;code&gt;metrics.WithPort(9097)&lt;/code&gt; 和 &lt;code&gt;metrics.WithPath(&amp;quot;/prometheus&amp;quot;)&lt;/code&gt; 改成了上面的端口与路径。&lt;/p&gt;
+&lt;h3 id="12-pushgateway-模式"&gt;1.2 Pushgateway 模式&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Dubbo-Go 应用推送指标
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Pushgateway 暂存指标
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Prometheus 拉取 Pushgateway
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; |
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; v
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Grafana 查询 Prometheus 并展示大盘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Pushgateway 更适合 batch、cron job 等短生命周期任务。长期运行的服务优先使用 Pull 模式；如果必须使用 Pushgateway，请配合清理机制，避免停止后的旧指标继续留在 Pushgateway 中。&lt;/p&gt;</description></item><item><title>注册中心、配置中心和元数据中心</title><link>https://dubbo.apache.org/zh-cn/overview/reference/proposals/registry-config-meta/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/reference/proposals/registry-config-meta/</guid><description>&lt;h2 id="三中心逻辑架构"&gt;三中心逻辑架构&lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;本节侧重描述传统模式下的 Dubbo 部署架构，在云原生背景下的部署架构会有些变化，主要体现在基础设施（Kubernetes、Service Mesh等）会承担更多的职责，
 中心化组件如注册中心、元数据中心、配置中心等的职责被集成、运维变得更加简单，但通过强调这些中心化的组件能让我们更容易理解 Dubbo 的工作原理。&lt;/p&gt;
