@@ -26,13 +26,34 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; --header &lt;span style="color:#2aa198"&gt;&amp;#34;Content-Type: application/json&amp;#34;&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; --data &lt;span style="color:#2aa198"&gt;&amp;#39;{&amp;#34;name&amp;#34;: &amp;#34;Dubbo&amp;#34;}&amp;#39;&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;\
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#cb4b16"&gt;&lt;/span&gt; http://localhost:20000/greet.GreetService/Greet
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Open &lt;code&gt;https://localhost:8848/nacos/&lt;/code&gt; with browser, check url address successfully registered into Nacos.&lt;/p&gt;</description></item><item><title>使用 Zookeeper 作为注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/zookeeper/</guid><description>&lt;p&gt;本文演示 dubbo-go 使用 Zookeeper 作为注册中心的服务发现能力，可在
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Open &lt;code&gt;https://localhost:8848/nacos/&lt;/code&gt; with browser, check url address successfully registered into Nacos.&lt;/p&gt;</description></item><item><title>使用 ZooKeeper 作为注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/zookeeper/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/zookeeper/</guid><description>&lt;p&gt;本文介绍如何在 Dubbo-Go 中使用 ZooKeeper 作为注册中心。完整示例位于
 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/registry/zookeeper" target="_blank"&gt;dubbo-go-samples/registry/zookeeper&lt;/a&gt;
-查看完整示例源码。&lt;/p&gt;
-&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
-&lt;p&gt;通过以下方式指定注册中心地址：&lt;/p&gt;
+目录。&lt;/p&gt;
+&lt;h2 id="启动-zookeeper"&gt;启动 ZooKeeper&lt;/h2&gt;
+&lt;h3 id="使用-docker-启动"&gt;使用 Docker 启动&lt;/h3&gt;
+&lt;p&gt;使用 Docker 启动一个本地 ZooKeeper 实例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker run --name dubbo-go-zookeeper --rm -d -p 2181:2181 zookeeper:3.9.5
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;确认容器已经启动：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker ps --filter &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;&lt;span style="color:#719e07"&gt;=&lt;/span&gt;dubbo-go-zookeeper
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="使用发行包启动"&gt;使用发行包启动&lt;/h3&gt;
+&lt;p&gt;从 &lt;a href="https://zookeeper.apache.org/releases.html#download"&gt;ZooKeeper 下载页面&lt;/a&gt;
+下载二进制发行包。解压后，复制示例配置并启动服务：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;tar -xzf apache-zookeeper-3.9.5-bin.tar.gz
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#b58900"&gt;cd&lt;/span&gt; apache-zookeeper-3.9.5-bin
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cp conf/zoo_sample.cfg conf/zoo.cfg
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;bin/zkServer.sh start
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过以下命令检查运行状态：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;bin/zkServer.sh status
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;看到 &lt;code&gt;Mode: standalone&lt;/code&gt; 表示单机 ZooKeeper 已经启动。以上两种方式使用的注册中心
+地址均为 &lt;code&gt;127.0.0.1:2181&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;ZooKeeper 默认还会使用 &lt;code&gt;8080&lt;/code&gt; 端口启动管理服务。如果该端口已被占用，可在
+&lt;code&gt;conf/zoo.cfg&lt;/code&gt; 中设置其他端口后重新启动：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-properties" data-lang="properties"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;admin.serverPort&lt;span style="color:#719e07"&gt;=&lt;/span&gt;&lt;span style="color:#2aa198"&gt;18080&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="配置服务提供者"&gt;配置服务提供者&lt;/h2&gt;
+&lt;p&gt;服务提供者通过 &lt;code&gt;registry.WithZookeeper()&lt;/code&gt; 选择 ZooKeeper，并通过
+&lt;code&gt;registry.WithAddress()&lt;/code&gt; 指定地址：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ins, _ &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithName&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo_registry_nacos_server&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithName&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo_registry_zookeeper_server&amp;#34;&lt;/span&gt;),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithZookeeper&lt;/span&gt;(),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span&gt;),
@@ -42,18 +63,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		protocol.&lt;span style="color:#268bd2"&gt;WithPort&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;srv, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; ins.&lt;span style="color:#268bd2"&gt;NewServer&lt;/span&gt;()
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="how-to-run"&gt;How to run&lt;/h2&gt;
-&lt;h3 id="start-zookeeper-server"&gt;Start Zookeeper server&lt;/h3&gt;
-&lt;p&gt;This example relies on zookeeper as registry, follow the steps below to start a zookeeper server first.&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Start zookeeper with docker, run &lt;code&gt;docker run --rm -p 2181:2181 zookeeper&lt;/code&gt; or &lt;code&gt;make -f $DUBBO_GO_SAMPLES_ROOT_PATH/build/Makefile docker-up&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://zookeeper.apache.org/releases.html#download"&gt;Download and start zookeeper&lt;/a&gt; locally on your machine.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="run-server"&gt;Run server&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;$ go run ./go-server/cmd/server.go
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;test rpc server work as expected:&lt;/p&gt;</description></item><item><title>应用级服务发现</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/</guid><description>&lt;p&gt;dubbo-go 支持接口级注册和应用级服务发现。接口级注册会把可调用的 provider URL 直接写入注册中心；应用级服务发现会把应用实例写入注册中心，再通过服务映射和 metadata 还原 consumer 调用所需的 provider URL。&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;各配置项的作用如下：&lt;/p&gt;</description></item><item><title>应用级服务发现</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/</guid><description>&lt;p&gt;dubbo-go 支持接口级注册和应用级服务发现。接口级注册会把可调用的 provider URL 直接写入注册中心；应用级服务发现会把应用实例写入注册中心，再通过服务映射和 metadata 还原 consumer 调用所需的 provider URL。&lt;/p&gt;
 &lt;p&gt;应用级服务发现是当前默认模型。接口级注册和应用级服务发现使用不同的注册与订阅路径，二者不会自动互通。使用接口级发现的 consumer 无法发现只注册应用级实例的 provider；使用应用级服务发现的 consumer 也无法发现只注册接口级 URL 的 provider。如果迁移阶段需要同时支持两类 consumer，可以使用 &lt;code&gt;all&lt;/code&gt;。&lt;/p&gt;
 &lt;h2 id="注册模式"&gt;注册模式&lt;/h2&gt;
 &lt;p&gt;可以通过 registry type 选择 provider 的注册方式：&lt;/p&gt;
