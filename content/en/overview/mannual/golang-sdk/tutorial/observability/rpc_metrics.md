@@ -10,346 +10,291 @@ weight: 2
 
 # Dubbo-Go Metrics Monitoring
 
-Dubbo-Go supports runtime metrics collection and integration with **Prometheus + Grafana** to build observability for microservices.
+Dubbo-Go can collect runtime metrics for RPC calls, metadata, registries, config centers, and other components. This guide uses <a href="https://github.com/apache/dubbo-go-samples/tree/main/observability/prometheus_grafana" target="_blank">dubbo-go-samples/observability/prometheus_grafana</a> to show both Prometheus Pull mode and Pushgateway mode.
 
-This example covers two monitoring modes:
+> Note: some older descriptions may still mention `metrics/prometheus_grafana`. The current sample directory is `observability/prometheus_grafana`.
 
-* **Pull Mode**: Prometheus scrapes metrics from Dubbo-Go applications. Recommended for long-running services.
-* **Push Mode**: Dubbo-Go applications push metrics to Pushgateway. Recommended only for short-lived jobs.
+## 1. Monitoring Modes
 
-Example source code:
+### 1.1 Pull Mode
 
-> [https://github.com/apache/dubbo-go-samples/tree/main/metrics](https://github.com/apache/dubbo-go-samples/tree/main/metrics)
-
-## 1. Monitoring Architecture
-
-### 1.1 Pull Mode (Recommended for production)
-
-```
-Dubbo-Go Application  --->  Prometheus  --->  Grafana
-        (exposes /metrics or /prometheus endpoint)
+```text
+Dubbo-Go application exposes /prometheus or /metrics
+        |
+        v
+Prometheus scrapes the application
+        |
+        v
+Grafana queries Prometheus and renders dashboards
 ```
 
-Prometheus actively scrapes metrics from Dubbo-Go applications.
+Pull mode is the standard Prometheus model and is recommended for long-running Dubbo-Go providers and consumers. In this sample:
 
-### 1.2 Push Mode (For short-lived jobs)
+| Application | Metrics endpoint |
+| --- | --- |
+| go-server | `http://localhost:9099/prometheus` |
+| go-client | `http://localhost:9097/prometheus` |
 
+The Dubbo-Go default metrics endpoint is `http://localhost:9090/metrics`. This sample changes it with `metrics.WithPort(9099)`, `metrics.WithPort(9097)`, and `metrics.WithPath("/prometheus")`.
+
+### 1.2 Pushgateway Mode
+
+```text
+Dubbo-Go application pushes metrics
+        |
+        v
+Pushgateway stores the metrics temporarily
+        |
+        v
+Prometheus scrapes Pushgateway
+        |
+        v
+Grafana queries Prometheus and renders dashboards
 ```
-Dubbo-Go Application  --->  Pushgateway  --->  Prometheus  --->  Grafana
-```
 
-Applications push metrics to Pushgateway. Prometheus scrapes Pushgateway.
+Pushgateway is better suited to short-lived jobs such as batch or cron jobs. Prefer Pull mode for long-running services. If you use Pushgateway, configure cleanup so stale metrics do not remain after a job exits.
 
-Pushgateway is designed for **short-lived jobs (batch / cron)** and is not recommended for long-running services.
+## 2. Prepare the Sample
 
-## 2. Components Overview
-
-| Component   | Port | Description                      |
-| ----------- | ---- | -------------------------------- |
-| Grafana     | 3000 | Metrics visualization dashboard  |
-| Prometheus  | 9090 | Metrics storage and query engine |
-| Pushgateway | 9091 | Receives pushed metrics          |
-| go-server metrics endpoint | 9099 in this sample | Provider metrics in Pull mode |
-| go-client metrics endpoint | 9097 in this sample | Consumer metrics in Pull mode |
-
-If you use Dubbo-Go defaults instead of this sample, the default metrics endpoint is `http://localhost:9090/metrics`. This sample overrides the metrics path to `/prometheus`.
-
-## 3. Quick Start
-
-### 3.1 Start the Monitoring Stack
-
-Navigate to:
+Clone the samples repository and enter the sample directory:
 
 ```bash
-cd metrics/prometheus_grafana
+git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
+cd dubbo-go-samples/observability/prometheus_grafana
 ```
 
-Start services:
+The directory contains:
+
+| File or directory | Description |
+| --- | --- |
+| `docker-compose.yml` | Starts ZooKeeper, Prometheus, Pushgateway, and Grafana |
+| `prometheus_pull.yml` | Prometheus configuration for Pull mode |
+| `prometheus_push.yml` | Prometheus configuration for Pushgateway mode |
+| `go-server/cmd/main.go` | Provider sample, RPC port `20000`, metrics port `9099` |
+| `go-client/cmd/main.go` | Consumer sample, continuously calls the provider, metrics port `9097` |
+| `grafana.json` | Dubbo Grafana dashboard JSON |
+
+Start the Docker stack:
+
+```bash
+docker compose up -d
+```
+
+If your environment still uses Docker Compose v1, run:
 
 ```bash
 docker-compose up -d
 ```
 
-Access:
+After startup, visit:
 
-* Grafana: [http://localhost:3000](http://localhost:3000)
-* Prometheus: [http://localhost:9090](http://localhost:9090)
-* Pushgateway: [http://localhost:9091](http://localhost:9091)
+| Component | URL |
+| --- | --- |
+| Grafana | `http://localhost:3000` |
+| Prometheus | `http://localhost:9090` |
+| Pushgateway | `http://localhost:9091` |
+| ZooKeeper | `127.0.0.1:2181` |
 
-### 3.2 Configure Environment Variables
+## 3. Pull Mode Workflow
 
-Both client and server share the same configuration:
+`docker-compose.yml` mounts `prometheus_pull.yml` by default, so the stack is ready for Pull mode after startup.
+
+1. Set the registry address:
 
 ```bash
 export ZK_ADDRESS="127.0.0.1:2181"
+```
 
-# Required for Push mode
+For Windows PowerShell:
+
+```powershell
+$env:ZK_ADDRESS="127.0.0.1:2181"
+```
+
+2. Start the provider:
+
+```bash
+go run ./go-server/cmd/main.go --push=false
+```
+
+3. Open another terminal, enter the same directory, and start the consumer:
+
+```bash
+cd dubbo-go-samples/observability/prometheus_grafana
+export ZK_ADDRESS="127.0.0.1:2181"
+go run ./go-client/cmd/main.go --push=false
+```
+
+4. Visit the metrics endpoints exposed by the applications:
+
+```bash
+curl http://localhost:9099/prometheus
+curl http://localhost:9097/prometheus
+```
+
+The output includes metrics such as `dubbo_provider_`, `dubbo_consumer_`, and `dubbo_application_`. For example:
+
+```text
+dubbo_provider_requests_total
+dubbo_consumer_requests_succeed_total
+```
+
+5. Open `http://localhost:9090/targets` and verify that `dubbo-provider` and `dubbo-consumer` are `UP`.
+
+## 4. Pushgateway Mode Workflow
+
+In Pushgateway mode, Prometheus scrapes Pushgateway instead of scraping the Dubbo-Go applications directly.
+
+1. Change the Prometheus volume in `docker-compose.yml` from the Pull configuration to the Pushgateway configuration:
+
+```yaml
+volumes:
+  - ./prometheus_push.yml:/etc/prometheus/prometheus.yml
+```
+
+2. Restart the monitoring stack:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+3. Set environment variables:
+
+```bash
+export ZK_ADDRESS="127.0.0.1:2181"
 export PUSHGATEWAY_URL="127.0.0.1:9091"
 export JOB_NAME="dubbo-service"
 
-# Optional
+# Set these only when Pushgateway uses Basic Auth
 export PUSHGATEWAY_USER="username"
 export PUSHGATEWAY_PASS="1234"
 ```
 
-### 3.3 Start Dubbo-Go Server
+4. Start the provider and consumer:
 
 ```bash
 go run ./go-server/cmd/main.go
 ```
 
-### 3.4 Start Dubbo-Go Client
-
-#### Default (Push Mode)
+In another terminal:
 
 ```bash
+cd dubbo-go-samples/observability/prometheus_grafana
+export ZK_ADDRESS="127.0.0.1:2181"
+export PUSHGATEWAY_URL="127.0.0.1:9091"
+export JOB_NAME="dubbo-service"
 go run ./go-client/cmd/main.go
 ```
 
-#### Pull Mode
+5. Visit the Pushgateway metrics endpoint:
 
 ```bash
-go run ./go-client/cmd/main.go --push=false
-go run ./go-server/cmd/main.go --push=false
+curl http://localhost:9091/metrics
 ```
 
-### 3.5 Verify Metrics
+6. Open `http://localhost:9090/targets` and verify that the `pushgateway` target is `UP`.
 
-#### Push Mode
+The sample registers `job_pushed_at_seconds` and calls the Pushgateway DELETE API on graceful shutdown. If the process is killed forcefully, cleanup may not run. For production, use <a href="https://github.com/apache/dubbo-go-samples/tree/main/tools/pgw-cleaner" target="_blank">pgw-cleaner</a> or another cleanup process.
 
-Open:
+## 5. Prometheus Configuration
 
-```
-http://localhost:9091/metrics
-```
+### 5.1 Pull Configuration
 
-#### Pull Mode
-
-`<app_port>` means the HTTP metrics port exposed by the Dubbo-Go application itself, not the Prometheus or Pushgateway port.
-
-In this sample:
-
-* Provider: `http://localhost:9099/prometheus`
-* Consumer: `http://localhost:9097/prometheus`
-
-These ports are defined in [`metrics/prometheus_grafana/prometheus_pull.yml`](https://github.com/apache/dubbo-go-samples/blob/main/metrics/prometheus_grafana/prometheus_pull.yml).
-
-If you use your own Dubbo-Go application instead of this sample, replace the port with your application's metrics port.
-
-## 4. Grafana Configuration
-
-### 4.1 Add Prometheus Data Source
-
-1. Open [http://localhost:3000](http://localhost:3000)
-2. Default credentials: `admin / admin`
-3. Navigate to:
-
-```
-Home → Connections → Data sources
-```
-
-4. Click **Add new data source**
-5. Select **Prometheus**
-6. Enter:
-
-```
-http://host.docker.internal:9090
-```
-
-> Note: `host.docker.internal` allows Docker containers to access the host network. Replace with your actual IP if necessary.
-
-7. Click **Save & Test**
-
-### 4.2 Import Dubbo Dashboard
-
-1. Navigate to:
-
-```
-Home → Dashboards → New → Import
-```
-
-2. Import the dashboard with one of these methods:
-
-* Upload [`grafana.json`](https://github.com/apache/dubbo-go-samples/blob/main/metrics/prometheus_grafana/grafana.json) from the sample directory
-* Enter Grafana dashboard ID `19294` (`Dubbo Observability`) and click **Load**
-* Or download the JSON from [Grafana Labs](https://grafana.com/grafana/dashboards/19294-dubbo-observability/) and upload it
-
-3. The sample repository already includes the dashboard file at `metrics/prometheus_grafana/grafana.json`, so uploading that file is the most direct option.
-
-4. Select the Prometheus data source
-
-5. Click **Import**
-
-### 4.3 View Dashboard
-
-You will see:
-
-* QPS
-* Success rate
-* Latency (P99)
-* Consumer / Provider request statistics
-* Error rate
-
-Metrics update dynamically as the client continuously calls the server.
-
-## 5. Pushgateway Zombie Metrics Problem
-
-### 5.1 Problem Description
-
-Pushgateway **does not automatically delete old metrics**.
-
-If a job stops:
-
-* Its metrics remain stored
-* This may pollute monitoring data
-
-### 5.2 Solution 1: Application-side Cleanup (Implemented)
-
-Mechanism:
-
-* Register `job_pushed_at_seconds`
-* Periodically update timestamp
-* Automatically call DELETE API on graceful shutdown
-
-### 5.3 Solution 2: Production-grade Cleaner (Recommended)
-
-Tool repository:
-
-> [apache/dubbo-go-samples/tree/main/tools/pgw-cleaner](https://github.com/apache/dubbo-go-samples/tree/main/tools/pgw-cleaner)
-
-Detailed documentation:
-
-* [README.md](https://github.com/apache/dubbo-go-samples/blob/main/tools/pgw-cleaner/README.md)
-
-This tool lives in the `apache/dubbo-go-samples` repository, not in the `apache/dubbo-go` core repository.
-
-Purpose:
-
-* Detect expired jobs
-* Automatically clean zombie metrics
-
-## 6. Troubleshooting
-
-### 6.1 Grafana Shows "No Data"
-
-Check:
-
-* Prometheus data source connection is successful
-* Prometheus → Status → Targets → pushgateway is **UP**
-* Query:
-
-```
-dubbo_consumer_requests_succeed_total
-```
-
-returns results
-
-### 6.2 host.docker.internal Not Reachable
-
-Replace it with your actual host IP:
-
-* Update `metrics/prometheus_grafana/prometheus_pull.yml`
-* Update Grafana data source URL
-
-## 7. Kubernetes Deployment
-
-Recommended:
-
-> kube-prometheus
-> [https://github.com/prometheus-operator/kube-prometheus](https://github.com/prometheus-operator/kube-prometheus)
-
-### 7.1 Create PodMonitor
-
-Create `dubboPodMonitor.yaml`:
+`prometheus_pull.yml` scrapes `/prometheus` from both the provider and consumer:
 
 ```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
-  name: dubbo-pod-monitor
-  namespace: monitoring
-spec:
-  namespaceSelector:
-    matchNames:
-      - dubbo-system
-  selector:
-    matchLabels:
-      app-type: dubbo
-  podMetricsEndpoints:
-    - port: metrics
-      path: /prometheus
+global:
+  evaluation_interval: 15s
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: dubbo-provider
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: /prometheus
+    static_configs:
+      - targets: ['host.docker.internal:9099']
+  - job_name: dubbo-consumer
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: /prometheus
+    static_configs:
+      - targets: ['host.docker.internal:9097']
 ```
 
-### 7.2 Optional: Add RBAC Permissions When RBAC Is Enabled
+`host.docker.internal` lets the Prometheus container reach Dubbo-Go processes running on the host. If Prometheus and the applications run in the same Docker network, replace it with the container name. On Linux, if this hostname is unavailable, use the host IP or add a `host-gateway` mapping in Docker Compose.
 
-If your cluster enforces RBAC, grant Prometheus permission to read Pods in `dubbo-system`:
+### 5.2 Pushgateway Configuration
+
+`prometheus_push.yml` scrapes only Pushgateway:
 
 ```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  namespace: dubbo-system
-  name: pod-reader
-rules:
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["get", "list", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: pod-reader-binding
-  namespace: dubbo-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: pod-reader
-subjects:
-  - kind: ServiceAccount
-    name: prometheus-k8s
-    namespace: monitoring
+global:
+  evaluation_interval: 15s
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: 'pushgateway'
+    static_configs:
+      - targets: ['host.docker.internal:9091']
+    honor_labels: true
 ```
 
-If your Prometheus installation uses a different service account, replace the `subjects` section accordingly.
+`honor_labels: true` keeps labels such as `job` and `instance` that were pushed by the application, which helps Grafana display data by service dimension.
 
-### 7.3 Deploy Application
+## 6. Import the Grafana Dashboard
+
+1. Open `http://localhost:3000`. The default credentials are `admin` / `admin`.
+2. Go to `Home -> Connections -> Data sources` and click `Add new data source`.
+3. Select `Prometheus` and set the URL to `http://host.docker.internal:9090`. If Grafana cannot reach this address, use the actual host IP or another address reachable from the Grafana container.
+4. Click `Save & test`.
+5. Go to `Home -> Dashboards -> New -> Import`.
+6. Upload `grafana.json` from the sample directory, or paste the file content into the import box. You can also import Grafana dashboard ID `19294` for `Dubbo Observability`.
+7. Select the Prometheus data source and click `Import`.
+
+Once the consumer starts calling the provider, the dashboard panels for QPS, success rate, P99 latency, consumer/provider request counts, and error rate will keep updating.
+
+## 7. Troubleshooting
+
+### 7.1 Port Conflicts
+
+If `3000`, `9090`, `9091`, or `2181` is already in use, update the port mappings in `docker-compose.yml`. If `9099` or `9097` is already in use, update `metrics.WithPort(...)` in `go-server/cmd/main.go` or `go-client/cmd/main.go`, and update the targets in `prometheus_pull.yml` accordingly.
+
+### 7.2 Prometheus Targets Are DOWN
+
+First verify the endpoints from the host:
 
 ```bash
-kubectl apply -f Deployment.yaml
+curl http://localhost:9099/prometheus
+curl http://localhost:9097/prometheus
+curl http://localhost:9091/metrics
 ```
 
-### 7.4 Verify
+If the host can access them but the Prometheus container cannot, the issue is usually Docker networking. Replace `host.docker.internal` with the real host IP, or add this to the Prometheus service on Linux:
 
-Visit:
+```yaml
+extra_hosts:
+  - "host.docker.internal:host-gateway"
+```
 
-```
-http://<prometheus-nodeport>/targets
-```
+### 7.3 Grafana Shows No Data
 
-Ensure your pods show:
+Confirm that the Prometheus data source passes `Save & test`; check `http://localhost:9090/targets` for `UP` targets; then query `dubbo_consumer_requests_succeed_total` or `dubbo_provider_requests_total` in Prometheus. If the query is empty, make sure the client is continuously calling the server and wait for one scrape interval.
 
-```
-UP
-```
+### 7.4 Pushgateway Has Stale Jobs
+
+Pushgateway does not automatically remove old metrics. Graceful shutdown of the sample process triggers cleanup; production deployments should use `pgw-cleaner` or call the Pushgateway DELETE API for expired jobs.
+
+### 7.5 Should I Visit `/metrics` or `/prometheus`?
+
+Dubbo-Go defaults to port `9090` and path `/metrics`. This sample explicitly uses `/prometheus`; the server listens on `9099`, and the client listens on `9097`. Always use the actual values configured by `metrics.WithPort(...)` and `metrics.WithPath(...)` in your application.
 
 ## 8. Production Recommendations
 
-| Scenario              | Recommended Mode  |
-| --------------------- | ----------------- |
-| Long-running services | Pull              |
-| Short-lived jobs      | Push              |
-| Kubernetes            | Pull + PodMonitor |
-| Pushgateway usage     | Use pgw-cleaner   |
+| Scenario | Recommended setup |
+| --- | --- |
+| Long-running providers/consumers | Pull mode |
+| Short-lived jobs | Pushgateway mode |
+| Kubernetes | Pull mode + PodMonitor |
+| Pushgateway usage | Cleanup process or DELETE API |
 
-## 9. Summary
-
-Dubbo-Go provides:
-
-* Pull-based Prometheus integration
-* Push-based Pushgateway integration
-* Docker quick-start stack
-* Kubernetes PodMonitor support
-* Grafana dashboards
-* Zombie metric cleanup support
-
-With this setup, you can build a complete Dubbo-Go observability system.
+In Kubernetes, use Prometheus Operator's PodMonitor to scrape the application metrics port, and set `path` to the application's actual `/prometheus` or `/metrics` path.
