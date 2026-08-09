@@ -24,7 +24,7 @@ The probe service runs on an independent HTTP port and supports:
 
 For a complete runnable example, see:
 
-> [https://github.com/apache/dubbo-go-samples/tree/main/metrics/probe](https://github.com/apache/dubbo-go-samples/tree/main/metrics/probe)
+> [https://github.com/apache/dubbo-go-samples/tree/main/observability/probe](https://github.com/apache/dubbo-go-samples/tree/main/observability/probe)
 
 ---
 
@@ -68,7 +68,7 @@ The following paths are available:
 
 # 3. Configuration
 
-Dubbo-Go supports both **New API (recommended)** and **Old API (YAML)** configuration styles.
+Dubbo-Go supports both **New API (recommended)** and **configuration file (YAML)** styles.
 
 ---
 
@@ -102,7 +102,7 @@ ins, err := dubbo.NewInstance(
 
 ---
 
-## 3.2 Old API YAML Configuration
+## 3.2 YAML Configuration File
 
 ```yaml
 metrics:
@@ -254,42 +254,125 @@ Prevents premature restart during slow initialization.
 
 # 7. Kubernetes Configuration Example
 
+Before deploying, build the sample into a container image. In the [dubbo-go-samples](https://github.com/apache/dubbo-go-samples) repository root, use its [build.sh](https://github.com/apache/dubbo-go-samples/blob/main/observability/probe/go-server/build.sh):
+
+```bash
+./observability/probe/go-server/build.sh
+```
+
+The script contents are:
+
+```bash
+#!/bin/bash
+
+#
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+set -e
+
+echo "Building probe server image..."
+
+# Build from repository root.
+cd "$(dirname "$0")/../../.."
+
+# Build linux binary first. This uses local `replace => ../dubbo-go` if present.
+TARGET_OS=${TARGET_OS:-linux}
+TARGET_ARCH=${TARGET_ARCH:-amd64}
+
+CGO_ENABLED=0 GOOS="$TARGET_OS" GOARCH="$TARGET_ARCH" go build -o observability/probe/go-server/probeApp ./observability/probe/go-server/cmd/main.go
+docker build -f observability/probe/go-server/Dockerfile -t dubbo-go-probe-server:latest .
+
+echo "Build completed successfully."
+```
+
+If you use a local Minikube cluster, you can also load the image:
+
+```bash
+minikube image load dubbo-go-probe-server:latest
+```
+
+The following complete Deployment is based on [server-deployment.yml](https://github.com/apache/dubbo-go-samples/blob/main/observability/probe/deploy/server-deployment.yml) in dubbo-go-samples and configures liveness, readiness, and startup probes on the container:
+
 ```yaml
-livenessProbe:
-  httpGet:
-    path: /live
-    port: 22222
-  initialDelaySeconds: 15
-  periodSeconds: 10
-  timeoutSeconds: 2
-  failureThreshold: 3
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-go-probe-server
+  labels:
+    app: dubbo-go-probe-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dubbo-go-probe-server
+  template:
+    metadata:
+      labels:
+        app: dubbo-go-probe-server
+    spec:
+      containers:
+        - name: server
+          image: dubbo-go-probe-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 20000
+              name: triple
+            - containerPort: 22222
+              name: probe
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: probe
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: probe
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /startup
+              port: probe
+            failureThreshold: 30
+            periodSeconds: 1
+```
 
-readinessProbe:
-  httpGet:
-    path: /ready
-    port: 22222
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 2
+---
 
-startupProbe:
-  httpGet:
-    path: /startup
-    port: 22222
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 25 # 120s startup budget => ceil(120 / 5) + 1
+Deploy to Kubernetes:
+
+Run the following commands from the dubbo-go-samples repository root:
+
+```bash
+kubectl apply -f observability/probe/deploy/server-deployment.yml
+kubectl rollout status deploy/dubbo-go-probe-server
 ```
 
 ---
 
 # 8. Example Usage
 
+The example path and run commands below use the dubbo-go-samples repository root as their working directory.
+
 Example path:
 
 ```
-metrics/probe/
+observability/probe/
 ```
 
 ---
@@ -297,7 +380,32 @@ metrics/probe/
 ## Run Locally
 
 ```bash
-go run ./metrics/probe/go-server/cmd/main.go
+go run ./observability/probe/go-server/cmd/main.go
+```
+
+---
+
+## Verify Probes with curl
+
+After the service starts, you can request the three probe endpoints separately:
+
+```bash
+# liveness, expected 200
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/live
+
+# readiness, expected 503 before the service is ready
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/ready
+
+# startup, expected 503 before startup is complete
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/startup
+```
+
+You can also inspect the response body:
+
+```bash
+curl -i http://127.0.0.1:22222/live
+curl -i http://127.0.0.1:22222/ready
+curl -i http://127.0.0.1:22222/startup
 ```
 
 ---

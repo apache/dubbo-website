@@ -23,7 +23,7 @@ Dubbo-Go 提供内置的 **Kubernetes HTTP Probe 服务**，用于支持：
 * 可选内部生命周期对齐
 * 可控的重启风险
 
-以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/metrics/probe)。
+以下是一个具体的使用示例，可查看 [示例完整源码](https://github.com/apache/dubbo-go-samples/tree/main/observability/probe)。
 
 ---
 
@@ -67,7 +67,7 @@ Dubbo-Go 提供内置的 **Kubernetes HTTP Probe 服务**，用于支持：
 
 # 三、配置方式
 
-Dubbo-Go 支持 **New API（推荐）** 与 **Old API（YAML）** 两种配置方式。
+Dubbo-Go 支持 **New API（推荐）** 与 **配置文件方式（YAML）** 两种配置方式。
 
 ---
 
@@ -101,7 +101,7 @@ ins, err := dubbo.NewInstance(
 
 ---
 
-## 3.2 Old API YAML 配置方式
+## 3.2 YAML 配置文件方式
 
 ```yaml
 metrics:
@@ -253,42 +253,125 @@ probe.RegisterStartup("warmup", func(ctx context.Context) error {
 
 # 七、Kubernetes 配置示例
 
+在部署前，需要先将示例构建为容器镜像。以 [dubbo-go-samples](https://github.com/apache/dubbo-go-samples) 仓库中的 [build.sh](https://github.com/apache/dubbo-go-samples/blob/main/observability/probe/go-server/build.sh) 为例，在仓库根目录执行：
+
+```bash
+./observability/probe/go-server/build.sh
+```
+
+脚本内容如下：
+
+```bash
+#!/bin/bash
+
+#
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+set -e
+
+echo "Building probe server image..."
+
+# Build from repository root.
+cd "$(dirname "$0")/../../.."
+
+# Build linux binary first. This uses local `replace => ../dubbo-go` if present.
+TARGET_OS=${TARGET_OS:-linux}
+TARGET_ARCH=${TARGET_ARCH:-amd64}
+
+CGO_ENABLED=0 GOOS="$TARGET_OS" GOARCH="$TARGET_ARCH" go build -o observability/probe/go-server/probeApp ./observability/probe/go-server/cmd/main.go
+docker build -f observability/probe/go-server/Dockerfile -t dubbo-go-probe-server:latest .
+
+echo "Build completed successfully."
+```
+
+如果使用 Minikube 本地集群，可以再执行：
+
+```bash
+minikube image load dubbo-go-probe-server:latest
+```
+
+以下是一个完整的 Deployment 示例，参考自 [dubbo-go-samples 的 server-deployment.yml](https://github.com/apache/dubbo-go-samples/blob/main/observability/probe/deploy/server-deployment.yml)，将 liveness、readiness、startup 三类探针配置在容器上：
+
 ```yaml
-livenessProbe:
-  httpGet:
-    path: /live
-    port: 22222
-  initialDelaySeconds: 15
-  periodSeconds: 10
-  timeoutSeconds: 2
-  failureThreshold: 3
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-go-probe-server
+  labels:
+    app: dubbo-go-probe-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dubbo-go-probe-server
+  template:
+    metadata:
+      labels:
+        app: dubbo-go-probe-server
+    spec:
+      containers:
+        - name: server
+          image: dubbo-go-probe-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 20000
+              name: triple
+            - containerPort: 22222
+              name: probe
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: probe
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: probe
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /startup
+              port: probe
+            failureThreshold: 30
+            periodSeconds: 1
+```
 
-readinessProbe:
-  httpGet:
-    path: /ready
-    port: 22222
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 2
+---
 
-startupProbe:
-  httpGet:
-    path: /startup
-    port: 22222
-  periodSeconds: 5
-  timeoutSeconds: 2
-  failureThreshold: 25 # 120 秒启动预算 => ceil(120 / 5) + 1
+部署到 Kubernetes：
+
+在 dubbo-go-samples 仓库根目录执行：
+
+```bash
+kubectl apply -f observability/probe/deploy/server-deployment.yml
+kubectl rollout status deploy/dubbo-go-probe-server
 ```
 
 ---
 
 # 八、示例运行说明
 
+示例路径和运行命令均以 dubbo-go-samples 仓库根目录为基准。
+
 示例路径：
 
 ```
-metrics/probe/
+observability/probe/
 ```
 
 ---
@@ -296,7 +379,32 @@ metrics/probe/
 ## 本地运行
 
 ```bash
-go run ./metrics/probe/go-server/cmd/main.go
+go run ./observability/probe/go-server/cmd/main.go
+```
+
+---
+
+## 使用 curl 验证探针
+
+服务启动后，可以分别请求三个探针端点：
+
+```bash
+# liveness，预期 200
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/live
+
+# readiness，未就绪时预期 503
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/ready
+
+# startup，未启动完成时预期 503
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:22222/startup
+```
+
+也可以直接查看响应体：
+
+```bash
+curl -i http://127.0.0.1:22222/live
+curl -i http://127.0.0.1:22222/ready
+curl -i http://127.0.0.1:22222/startup
 ```
 
 ---
