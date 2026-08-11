@@ -24,28 +24,28 @@ weight: 1
 
 ### Tag router 介绍
 
-Tag router可以通过标签对流量进行管控，以下为示例代码。
+Tag router可以通过标签对流量进行管控，常用于灰度发布（新版本实例打上灰度标签，只有携带该标签的请求会路由过去）、环境隔离（不同泳道的实例用标签区分，避免流量串环境）等场景。以下为示例代码。
 
 服务端部分：
 
 ```go
 ins, err := dubbo.NewInstance(
 		dubbo.WithName("tag-server"),
-		dubbo.WithTag("test-Tag"), // set application's tag
+		dubbo.WithTag("test-tag"), // set application's tag
 		dubbo.WithRegistry(
 			registry.WithNacos(),
 			registry.WithAddress(RegistryAddress),
 		),
 		dubbo.WithProtocol(
 			protocol.WithTriple(),
-			protocol.WithPort(20000),
+			protocol.WithPort(20001),
 		),
 	)
 ```
 
 参数：
 
-- dubbo.WithTag: 设置该实例携带的tag，用于标记该实例（例如为灰度环境等）。
+- dubbo.WithTag: 设置该实例携带的tag，用于标记该实例（例如为灰度环境等）。标签会写入注册中心的实例元数据（`dubbo.tag`）。标签匹配区分大小写，需与客户端携带的标签写法完全一致。
 
 客户端部分：
 
@@ -60,12 +60,82 @@ resp, err := svc.Greet(ctx, &greet.GreetRequest{Name: name})
 
 参数:
 
-- `constant.TagKey`: 设置客户端发送请求时所携带的tag标签。
-- `constant.ForceUseTag`: 设置是否强制匹配标签。
+- `constant.Tagkey`: 设置客户端发送请求时所携带的tag标签。
+- `constant.ForceUseTag`: 设置是否强制匹配标签。`"true"`时标签匹配不到实例直接失败；`"false"`时允许回退到未打标签的实例。
 
 > 未携带标签的流量只能打到未携带标签的服务，携带标签的流量则可以打到携带相应标签的服务以及不具有标签的服务（取决于是否配置force参数）。
 
+运行示例:
+
+```shell
+$ go run ./go-server/cmd/server.go           # 无标签server，20000端口
+$ go run ./go-tag-server/cmd/server_tag.go   # 携带test-tag标签的server，20001端口
+$ go run ./go-client/cmd/client.go
+```
+
+客户端依次发起四次调用，预期结果:
+
+```
+✔ invoke successfully : receive: tag with force, response from: server-with-tag
+❌ invoke failed: Failed to invoke the method Greet.
+✔ invoke successfully : receive: tag with no-force, response from: server-without-tag
+✔ invoke successfully : receive: non-tag, response from: server-without-tag
+```
+
+四次调用分别对应：标签匹配成功、标签不存在且force为true（不回退，调用失败）、标签不存在但force为false（回退到无标签实例）、无标签流量（只路由到无标签实例）。
+
 完整示例请见: [本示例完整代码](https://github.com/apache/dubbo-go-samples/tree/main/router/tag)。
+
+### 动态规则配置
+
+除请求级标签外，还可以从配置中心动态下发标签规则，把"标签 → 实例分组"的映射交给规则维护。
+
+动态标签规则依赖配置中心，客户端必须通过`dubbo.WithConfigCenter`接入 Nacos，否则日志会提示`Config center does not start, Tag router will not be enabled`：
+
+```go
+ins, err := dubbo.NewInstance(
+	dubbo.WithName("tag-client"),
+	dubbo.WithRegistry(
+		registry.WithNacos(),
+		registry.WithAddress(RegistryAddress),
+	),
+	dubbo.WithConfigCenter(
+		config_center.WithNacos(),
+		config_center.WithAddress(RegistryAddress),
+	),
+)
+```
+
+在 Nacos 新建配置，`Data ID`为`{application_name}.tag-router`（这里的应用名是**服务端**的应用名，例如`tag-server.tag-router`），Group 使用默认的`DEFAULT_GROUP`，配置格式选择`YAML`。
+
+配置内容示例——把携带`gray`标签的请求路由到`dubbo.tag=test-tag`的实例：
+
+```yaml
+configVersion: V3.3.2
+scope: application
+key: tag-server
+force: false
+enabled: true
+priority: 1
+tags:
+  - name: gray
+    match:
+      - key: dubbo.tag
+        value:
+          exact: test-tag
+```
+
+关键字段说明:
+
+- `tags[].name`: 标签名，与请求 attachment 中携带的标签值对应。
+- `tags[].match`: 按实例 URL 参数匹配实例分组，`value`支持`exact`、`prefix`、`regex`等匹配方式。
+- `tags[].addresses`: 直接按`ip:port`圈定实例分组，与`match`二选一。
+- `force`: 标签匹配不到实例时是否回退。`true`不回退、直接失败；`false`回退到未打标签的实例。
+- `enabled`: 是否启用本条规则。
+
+规则下发后，运行中的客户端无需重启即可生效，日志中可以看到`Parse tag router config success`字样。
+
+> 停用动态规则时，推荐将`enabled`置为`false`后重新发布配置，运行中的客户端会立即回到未启用规则的行为；直接删除配置项时，运行中的客户端可能收不到删除事件，导致旧规则继续生效。
 
 ### 静态配置 API
 
