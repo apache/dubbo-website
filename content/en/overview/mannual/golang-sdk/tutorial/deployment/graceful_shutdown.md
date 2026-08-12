@@ -39,10 +39,10 @@ When the application receives an exit signal such as `SIGTERM` or `SIGINT`, Dubb
 The provider-side goal is to remove the instance from traffic first, then wait for in-flight requests.
 
 1. Unregister the current instance from the registry so consumers can refresh their provider list.
-2. Continue accepting requests during `consumer-update-wait-time` to allow registry events and client caches to converge.
-3. Send closing notices to Triple long-connection consumers so they can avoid the closing invoker earlier.
-4. Enter the reject-new-request phase. New requests are rejected or handled by the custom `reject-handler`.
-5. Wait for provider active requests to reach zero within `step-timeout` and `offline-request-window-timeout`.
+2. Send closing notices to Triple long-connection consumers so they can avoid the closing invoker earlier.
+3. Continue accepting requests during `consumer-update-wait-time` to allow registry events and client caches to converge.
+4. Before turning on request rejection, wait for provider active requests to reach zero within `step-timeout` and `offline-request-window-timeout`.
+5. Enter the reject-new-request phase. New requests are rejected or handled by the custom `reject-handler`.
 6. Destroy protocols, close listening ports, and release resources.
 
 `offline-request-window-timeout` is useful for high-traffic services. After active requests temporarily reach zero, Dubbo-go observes a short window. If no new request arrives during that window, it is safer to continue destroying resources.
@@ -208,21 +208,21 @@ After pressing `Ctrl+C` in the server terminal, watch for:
 - Newer requests fail earlier than with the default configuration.
 - Client logs show the Triple long-connection active notice path.
 
-### 4.6 Tight Overall Timeout
+### 4.6 Short Request Draining Window
 
-Use a tighter overall budget to compare server log behavior:
-
-```bash
-go run ./graceful_shutdown/go-server/cmd -timeout=10s -step-timeout=1s
-```
-
-Keep the client running with default settings:
+Use a draining budget shorter than the request delay to compare server log behavior:
 
 ```bash
-go run ./graceful_shutdown/go-client/cmd -addr=tri://127.0.0.1:20000
+go run ./graceful_shutdown/go-server/cmd -delay=2s -step-timeout=1s -consumer-update-wait=0s
 ```
 
-This scenario is mainly for observing how the graceful shutdown flow continues within a small overall `timeout` budget.
+Keep the client sending concurrent requests:
+
+```bash
+go run ./graceful_shutdown/go-client/cmd -addr=tri://127.0.0.1:20000 -concurrency=2 -interval=200ms -request-timeout=4s
+```
+
+This scenario is mainly for observing how the graceful shutdown flow continues when `step-timeout` is shorter than the in-flight request processing time. The overall `timeout` has a lower bound in Dubbo-go, so use `step-timeout` for local short-budget draining verification.
 
 ### 4.7 Integration Test
 

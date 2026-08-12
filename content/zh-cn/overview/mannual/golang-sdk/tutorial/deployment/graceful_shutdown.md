@@ -39,10 +39,10 @@ Dubbo-go 的优雅停机用于在进程退出前完成摘流和请求排空，�
 Provider 侧目标是先摘流，再等待正在执行的请求完成。
 
 1. 从注册中心反注册当前实例，触发 Consumer 端服务列表更新。
-2. 在 `consumer-update-wait-time` 时间内继续接收请求，给客户端和注册中心事件传播留出窗口。
-3. 对 Triple 长连接 Consumer 发送关闭通知，使 Consumer 可以尽快避开正在关闭的 Invoker。
-4. 进入拒绝新请求阶段，后续新请求会被拒绝或由自定义 `reject-handler` 处理。
-5. 在 `step-timeout` 和 `offline-request-window-timeout` 约束下等待 Provider 侧活跃请求数归零。
+2. 对 Triple 长连接 Consumer 发送关闭通知，使 Consumer 可以尽快避开正在关闭的 Invoker。
+3. 在 `consumer-update-wait-time` 时间内继续接收请求，给客户端和注册中心事件传播留出窗口。
+4. 在开启拒绝新请求前，在 `step-timeout` 和 `offline-request-window-timeout` 约束下等待 Provider 侧活跃请求数归零。
+5. 进入拒绝新请求阶段，后续新请求会被拒绝或由自定义 `reject-handler` 处理。
 6. 销毁协议、关闭监听端口并释放资源。
 
 `offline-request-window-timeout` 主要用于高流量场景：当活跃请求暂时归零后，再观察一个短窗口。如果窗口内没有新的请求进入，就可以更安全地继续销毁资源。
@@ -208,21 +208,21 @@ go run ./graceful_shutdown/go-client/cmd -addr=tri://127.0.0.1:20000 -concurrenc
 - 新进入的请求会比默认配置更早失败。
 - 客户端日志会体现 Triple 长连接主动通知路径。
 
-### 4.6 收紧整体超时预算
+### 4.6 缩短请求排空窗口
 
-可以用较小的整体超时预算对比服务端日志行为：
-
-```bash
-go run ./graceful_shutdown/go-server/cmd -timeout=10s -step-timeout=1s
-```
-
-客户端保持默认调用即可：
+可以让请求排空预算短于请求处理耗时，用于对比服务端日志行为：
 
 ```bash
-go run ./graceful_shutdown/go-client/cmd -addr=tri://127.0.0.1:20000
+go run ./graceful_shutdown/go-server/cmd -delay=2s -step-timeout=1s -consumer-update-wait=0s
 ```
 
-该场景主要用于观察整体 `timeout` 较紧时，优雅停机流程如何在等待预算内继续推进。
+客户端保持并发调用：
+
+```bash
+go run ./graceful_shutdown/go-client/cmd -addr=tri://127.0.0.1:20000 -concurrency=2 -interval=200ms -request-timeout=4s
+```
+
+该场景主要用于观察 `step-timeout` 短于在途请求处理耗时时，优雅停机流程如何继续推进。Dubbo-go 的整体 `timeout` 存在下限，本地验证短等待预算时建议调整 `step-timeout`。
 
 ### 4.7 集成测试
 
