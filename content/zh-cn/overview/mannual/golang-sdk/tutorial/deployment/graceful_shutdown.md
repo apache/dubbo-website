@@ -77,6 +77,39 @@ dubbo:
     internal-signal: true
 ```
 
+如果使用 new API 初始化 Dubbo 实例，也可以通过 `dubbo.WithShutdown(...)` 搭配 `graceful_shutdown.WithXXX(...)` 配置常用停机参数：
+
+```go
+package main
+
+import (
+	"time"
+
+	dubbo "dubbo.apache.org/dubbo-go/v3"
+	"dubbo.apache.org/dubbo-go/v3/graceful_shutdown"
+)
+
+func main() {
+	ins, err := dubbo.NewInstance(
+		dubbo.WithShutdown(
+			graceful_shutdown.WithTimeout(60*time.Second),
+			graceful_shutdown.WithStepTimeout(3*time.Second),
+			graceful_shutdown.WithNotifyTimeout(5*time.Second),
+			graceful_shutdown.WithConsumerUpdateWaitTime(3*time.Second),
+			graceful_shutdown.WithOfflineRequestWindowTimeout(3*time.Second),
+			// 默认启用 Dubbo-go 内置信号监听；如需应用自行处理信号，可取消下一行注释。
+			// graceful_shutdown.WithoutInternalSignal(),
+		),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_ = ins
+}
+```
+
+`internal-signal` 默认启用，new API 中需要关闭时使用 `graceful_shutdown.WithoutInternalSignal()`；没有专用 `WithXXX` 的字段可以继续保留在 `dubbogo.yaml` 中配置。
+
 | 字段 | 默认值 | 说明 |
 | --- | --- | --- |
 | `timeout` | `60s` | 整个优雅停机流程的最大耗时。超过后应用会继续退出，避免进程长期卡住。 |

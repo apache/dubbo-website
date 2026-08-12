@@ -77,6 +77,40 @@ dubbo:
     internal-signal: true
 ```
 
+If you initialize a Dubbo instance with the new API, you can also configure common graceful shutdown parameters with `dubbo.WithShutdown(...)` and `graceful_shutdown.WithXXX(...)` options:
+
+```go
+package main
+
+import (
+	"time"
+
+	dubbo "dubbo.apache.org/dubbo-go/v3"
+	"dubbo.apache.org/dubbo-go/v3/graceful_shutdown"
+)
+
+func main() {
+	ins, err := dubbo.NewInstance(
+		dubbo.WithShutdown(
+			graceful_shutdown.WithTimeout(60*time.Second),
+			graceful_shutdown.WithStepTimeout(3*time.Second),
+			graceful_shutdown.WithNotifyTimeout(5*time.Second),
+			graceful_shutdown.WithConsumerUpdateWaitTime(3*time.Second),
+			graceful_shutdown.WithOfflineRequestWindowTimeout(3*time.Second),
+			// Dubbo-go listens for shutdown signals internally by default.
+			// Uncomment the next line if the application handles signals itself.
+			// graceful_shutdown.WithoutInternalSignal(),
+		),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_ = ins
+}
+```
+
+`internal-signal` is enabled by default. Use `graceful_shutdown.WithoutInternalSignal()` in the new API when you need to disable it. Fields without dedicated `WithXXX` options can still be configured in `dubbogo.yaml`.
+
 | Field | Default | Description |
 | --- | --- | --- |
 | `timeout` | `60s` | Maximum duration of the whole graceful shutdown flow. The application continues exiting after this budget to avoid hanging forever. |
