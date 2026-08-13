@@ -46299,48 +46299,35 @@ Dubbo 中，SPI 主要有两种用法，一种是加载固定的扩展类，另�
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;services&lt;/span&gt;:
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;GreeterProvider&lt;/span&gt;:
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;interface&lt;/span&gt;: com.apache.dubbo.sample.basic.IGreeter 
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;相比于常规配置，定义好registry-type: service, 并且定义好元数据中心后，将会使用应用级服务注册/服务发现。&lt;/p&gt;</description></item><item><title>优雅下线</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deployment/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deployment/graceful_shutdown/</guid><description>&lt;h1 id="优雅下线"&gt;优雅下线&lt;/h1&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;相比于常规配置，定义好registry-type: service, 并且定义好元数据中心后，将会使用应用级服务注册/服务发现。&lt;/p&gt;</description></item><item><title>优雅停机</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deployment/graceful_shutdown/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/deployment/graceful_shutdown/</guid><description>&lt;h1 id="优雅停机"&gt;优雅停机&lt;/h1&gt;
 &lt;p&gt;示例源码：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/graceful_shutdown" target="_blank"&gt;dubbo-go-samples/graceful_shutdown&lt;/a&gt;。&lt;/p&gt;
-&lt;h2 id="背景"&gt;背景&lt;/h2&gt;
-&lt;p&gt;在稳定生产的过程中，容器调度完全由 k8s 管控，微服务治理完全由服务框架或者运维人员进行维护和管理。而在发布新版本，或者扩缩容的场景下，会终止旧的容器实例，并使用新的容器实例进行替换，对于承载高流量的线上生产环境，这个替换过程的衔接如果不合理，将在短时间内造成大量的错误请求，触发报警甚至影响正常业务。对于体量较大的厂家，发布过程出现问题所造成的损失会是巨大的。
-因此，优雅下线的诉求被提出。这要求服务框架在拥有稳定服务调用能力、传统服务治理能力的基础之上，应当提供服务下线过程中稳定的保障，从而减少运维成本，提高应用稳定性。&lt;/p&gt;
-&lt;h2 id="特性说明"&gt;特性说明&lt;/h2&gt;
-&lt;p&gt;在一次完整的RPC调用过程中，中间服务往往充当服务提供者和服务消费者两个角色。中间服务在接收到来自上游服务的请求之后，处理请求得到结果返回给上游服务，然后根据需要调用下游服务提供的接口使用下游服务。因此优雅下线功能需要兼顾服务作为服务提供者和服务消费者两侧的稳定性，具体可以分为以下几步：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;向注册中心进行反注册，销毁在注册中心注册的服务信息&lt;/li&gt;
-&lt;li&gt;作为服务提供者，要等待一段时间，保证客户端成功更新服务信息以及上游任务请求处理完毕，然后拒绝接收新的请求&lt;/li&gt;
-&lt;li&gt;作为服务消费者，要等待一段时间，保证使用下游服务的请求得到响应，然后取消对注册中心的订阅&lt;/li&gt;
-&lt;li&gt;销毁对下游任务的引用，销毁对外提供服务暴露的端口&lt;/li&gt;
-&lt;li&gt;执行用户的自定义回调操作&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;通过以上步骤，可以保证dubbo-go服务实例安全平稳停止，不对进行中的业务产生影响。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;注意：取消对注册中心的订阅不能在步骤1中执行，这是因为中间服务对下游服务发送请求的时候可能存在下游服务信息的变动&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id="使用场景"&gt;使用场景&lt;/h2&gt;
-&lt;p&gt;对dubbo-go实例使用&lt;code&gt;kill pid&lt;/code&gt;命令停止实例&lt;/p&gt;
-&lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
-&lt;p&gt;以下是在yaml配置文件中，用户可以自定义的配置&lt;/p&gt;
+&lt;h2 id="1-背景"&gt;1. 背景&lt;/h2&gt;
+&lt;p&gt;在发布新版本、扩缩容或迁移节点时，Kubernetes、systemd 或运维平台会终止旧实例并启动新实例。如果旧实例直接退出，注册中心、客户端连接池和上游流量之间会出现短暂的不一致：注册中心可能还没有推送摘除事件，上游请求也可能仍在处理中。对于高流量服务，这会带来连接断开、请求失败、超时重试和告警放大。&lt;/p&gt;
+&lt;p&gt;Dubbo-go 的优雅停机用于在进程退出前完成摘流和请求排空，尽量保证：&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;作为服务提供者，dubbo-go实例下线时需要等待客户端成功更新服务信息，这段时间在配置中对应的字段为consumer-update-wait-time，默认3s&lt;/li&gt;
-&lt;li&gt;作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求暂未处理完毕，需要等待上游任务请求处理完毕。作为服务消费者，dubbo-go实例需要等待对下游的请求收到回复。这段时间在配置中对应的字段为step-timeout，默认3s&lt;/li&gt;
-&lt;li&gt;作为服务提供者，dubbo-go实例下线时如果来自上游任务的请求已经处理完毕，需要等待一段窗口时间，如果在窗口时间内没有接收到新的请求，再执行后续步骤。这段时间在配置中对应的字段为offline-request-window-timeout，默认0s&lt;/li&gt;
-&lt;li&gt;用户可以自定义是否开启优雅下线功能，在配置中对应的字段为internal-signal，默认开启。&lt;/li&gt;
-&lt;li&gt;dubbo-go实例在优雅下线过程中可能因为异常导致卡死，在配置中可以配置超时时间，实例在超时之后强制关闭。这在配置中对应的字段为timeout，默认60s&lt;/li&gt;
+&lt;li&gt;Provider 不再接收新的业务请求之前，先从注册中心反注册并通知长连接 Consumer。&lt;/li&gt;
+&lt;li&gt;已经进入 Provider 的请求可以在超时时间内完成。&lt;/li&gt;
+&lt;li&gt;Consumer 本身正在发出的下游调用可以在退出前拿到响应。&lt;/li&gt;
+&lt;li&gt;资源销毁、端口释放和用户自定义回调按顺序执行。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;shutdown&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; timeout:60
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; step-timeout:3
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; consumer-update-wait-time:3
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; internal-signal:true
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; offline-request-window-timeout:0
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;此外，如果用户希望在下线逻辑彻底结束后，执行一些自定义的回调操作，可以使用如下代码&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;extension.&lt;span style="color:#268bd2"&gt;AddCustomShutdownCallback&lt;/span&gt;(&lt;span style="color:#268bd2"&gt;func&lt;/span&gt;() {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#586e75"&gt;// 用户自定义操作&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;})
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="参考资料"&gt;参考资料&lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://developer.aliyun.com/article/860775"&gt;【Dubbo-go 优雅上下线的设计与实践】&lt;/a&gt;&lt;/p&gt;</description></item><item><title>Dubbo-go 的注册中心</title><link>https://dubbo.apache.org/zh-cn/docs/languages/golang/dubbo-go-3.0/concept/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docs/languages/golang/dubbo-go-3.0/concept/registry/</guid><description>&lt;div class="pageinfo pageinfo-primary"&gt;
+&lt;h2 id="2-工作机制"&gt;2. 工作机制&lt;/h2&gt;
+&lt;p&gt;一次 Dubbo-go 调用链路中，某个服务实例通常既是 Provider，也是 Consumer。因此优雅停机会同时处理服务提供端和服务消费端。&lt;/p&gt;
+&lt;h3 id="21-触发停机"&gt;2.1 触发停机&lt;/h3&gt;
+&lt;p&gt;当应用收到 &lt;code&gt;SIGTERM&lt;/code&gt;、&lt;code&gt;SIGINT&lt;/code&gt; 等退出信号时，如果 &lt;code&gt;dubbo.shutdown.internal-signal&lt;/code&gt; 为 &lt;code&gt;true&lt;/code&gt;，Dubbo-go 会进入内置优雅停机流程。Kubernetes 删除 Pod、滚动发布、&lt;code&gt;kubectl delete pod&lt;/code&gt;、&lt;code&gt;kill -TERM &amp;lt;pid&amp;gt;&lt;/code&gt; 和终端 &lt;code&gt;Ctrl+C&lt;/code&gt; 都属于典型触发方式。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不要使用 &lt;code&gt;kill -9&lt;/code&gt; 触发停机。&lt;code&gt;SIGKILL&lt;/code&gt; 无法被进程捕获，Dubbo-go 没有机会执行优雅停机流程。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="22-provider-侧流程"&gt;2.2 Provider 侧流程&lt;/h3&gt;
+&lt;p&gt;Provider 侧目标是先摘流，再等待正在执行的请求完成。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;从注册中心反注册当前实例，触发 Consumer 端服务列表更新。&lt;/li&gt;
+&lt;li&gt;对 Triple 长连接 Consumer 发送关闭通知，使 Consumer 可以尽快避开正在关闭的 Invoker。&lt;/li&gt;
+&lt;li&gt;在 &lt;code&gt;consumer-update-wait-time&lt;/code&gt; 时间内继续接收请求，给客户端和注册中心事件传播留出窗口。&lt;/li&gt;
+&lt;li&gt;在开启拒绝新请求前，在 &lt;code&gt;step-timeout&lt;/code&gt; 和 &lt;code&gt;offline-request-window-timeout&lt;/code&gt; 约束下等待 Provider 侧活跃请求数归零。&lt;/li&gt;
+&lt;li&gt;进入拒绝新请求阶段，后续新请求会被拒绝或由自定义 &lt;code&gt;reject-handler&lt;/code&gt; 处理。&lt;/li&gt;
+&lt;li&gt;销毁协议、关闭监听端口并释放资源。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;offline-request-window-timeout&lt;/code&gt; 主要用于高流量场景：当活跃请求暂时归零后，再观察一个短窗口。如果窗口内没有新的请求进入，就可以更安全地继续销毁资源。&lt;/p&gt;</description></item><item><title>Dubbo-go 的注册中心</title><link>https://dubbo.apache.org/zh-cn/docs/languages/golang/dubbo-go-3.0/concept/registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/docs/languages/golang/dubbo-go-3.0/concept/registry/</guid><description>&lt;div class="pageinfo pageinfo-primary"&gt;
 &lt;p&gt;此文档已经不再维护。您当前查看的是快照版本。如果想要查看最新版本的文档，请参阅&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/develop/registry/"&gt;最新版本&lt;/a&gt;。&lt;/p&gt;
 
 &lt;/div&gt;
