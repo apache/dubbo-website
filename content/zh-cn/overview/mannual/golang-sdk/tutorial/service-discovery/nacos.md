@@ -52,6 +52,7 @@ ins, _ := dubbo.NewInstance(
 
 ### YAML 配置方式
 
+如果使用配置文件方式传入配置，而不是 API 的方式，请参考以下 YAML 配置。
 ```yaml
 dubbo:
   registries:
