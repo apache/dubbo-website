@@ -32,12 +32,12 @@ weight: 100
 ins, _ := dubbo.NewInstance(
 	dubbo.WithName("dubbo_multi_registry_server"),
 	dubbo.WithRegistry(
-	  registry.WithID("nacos"),
+		registry.WithID("nacos"),
 		registry.WithNacos(),
 		registry.WithAddress("127.0.0.1:8848"),
 	),
 	dubbo.WithRegistry(
-	  registry.WithID("zookeeper"),
+		registry.WithID("zookeeper"),
 		registry.WithZookeeper(),
 		registry.WithAddress("127.0.0.1:2181"),
 	),
@@ -93,7 +93,9 @@ cli2, _ := ins.NewClient(client.WithClientRegistryIDs([]string{"zookeeper"}))
 
 ## YAML配置方式
 
-### 服务端
+## YAML配置方式
+
+如果使用配置文件方式传入配置，而不是 API 的方式，请参考以下 YAML 配置。
 
 修改服务端配置 go-server/conf/dubbogo.yaml， 同时将服务注册在两个注册中心上。
 
