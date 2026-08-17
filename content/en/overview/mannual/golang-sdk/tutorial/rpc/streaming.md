@@ -233,6 +233,8 @@ If the server sends more data after reading the final request, call `CloseReques
 
 Stream metadata is represented by `http.Header`. Request metadata is written to the request header. A server can use the response header for information available near the start of a call and the trailer for its final status.
 
+For a complete header and trailer example, see [`triple_header_trailer`](https://github.com/apache/dubbo-go-samples/tree/main/triple_header_trailer).
+
 For example, the following excerpt adds metadata to the bidirectional handler and shows only the metadata-related code:
 
 ```go

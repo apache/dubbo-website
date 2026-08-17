@@ -233,6 +233,8 @@ if err := stream.Close(); err != nil {
 
 流上的 metadata 使用 `http.Header` 表示。请求信息写入 request header；服务端可在 response header 中返回调用开始阶段的信息，在 trailer 中返回最终状态。
 
+完整的 header 和 trailer 使用示例请参考 [`triple_header_trailer`](https://github.com/apache/dubbo-go-samples/tree/main/triple_header_trailer)。
+
 下面在双向流处理函数中加入一个简单示例，只展示与 metadata 有关的代码：
 
 ```go
