@@ -1,77 +1,53 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>RPC框架 on Apache Dubbo</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/</link><description>Recent content in RPC框架 on Apache Dubbo</description><generator>Hugo</generator><language>zh-cn</language><atom:link href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/index.xml" rel="self" type="application/rss+xml"/><item><title>流式通信</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/streaming/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/streaming/</guid><description>&lt;p&gt;示例源码：&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/streaming" target="_blank"&gt;dubbo-go-samples/streaming&lt;/a&gt;。&lt;/p&gt;
-&lt;p&gt;Streaming 流式通信是 Dubbo3 新提供的一种 RPC 数据传输模式，适用于以下场景:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;接口需要发送大量数据，这些数据无法被放在一个 RPC 的请求或响应中，需要分批发送，但应用层如果按照传统的多次 RPC 方式无法解决顺序和性能的问题，如果需要保证有序，则只能串行发送&lt;/li&gt;
-&lt;li&gt;流式场景，数据需要按照发送顺序处理, 数据本身是没有确定边界的&lt;/li&gt;
-&lt;li&gt;推送类场景，多个消息在同一个调用的上下文中被发送和处理&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Streaming 流式通信类型分为以下三种:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;SERVER_STREAM(服务端流)&lt;/li&gt;
-&lt;li&gt;CLIENT_STREAM(客户端流)&lt;/li&gt;
-&lt;li&gt;BIDIRECTIONAL_STREAM(双向流)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id="1介绍"&gt;1.介绍&lt;/h2&gt;
-&lt;p&gt;本文档演示如何在 Dubbo-go 中使用流式通信。&lt;/p&gt;
-&lt;h2 id="2如何使用dubbo-go流式通信"&gt;2.如何使用Dubbo-go流式通信&lt;/h2&gt;
-&lt;p&gt;在 proto 文件中，为需要流式通信的方法请求类型或响应类型添加 &lt;code&gt;stream&lt;/code&gt;，然后使用 &lt;code&gt;protoc-gen-go-triple&lt;/code&gt;
-生成对应代码。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-protobuf" data-lang="protobuf"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;service&lt;/span&gt; GreetService {
+&lt;p&gt;普通 RPC 只有一个请求和一个响应。Triple 流式调用允许在一次 RPC 中连续收发多条消息，适合文件分片、消息推送和实时交互等场景。&lt;/p&gt;
+&lt;h2 id="流式调用的类型"&gt;流式调用的类型&lt;/h2&gt;
+&lt;p&gt;在 &lt;code&gt;.proto&lt;/code&gt; 中，&lt;code&gt;stream&lt;/code&gt; 写在哪一侧，就表示哪一侧可以发送多条消息：&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;类型&lt;/th&gt;
+ &lt;th style="text-align: right"&gt;请求数&lt;/th&gt;
+ &lt;th style="text-align: right"&gt;响应数&lt;/th&gt;
+ &lt;th&gt;定义形式&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;服务端流（server streaming）&lt;/td&gt;
+ &lt;td style="text-align: right"&gt;1&lt;/td&gt;
+ &lt;td style="text-align: right"&gt;N&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;rpc Method(Request) returns (stream Response)&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;客户端流（client streaming）&lt;/td&gt;
+ &lt;td style="text-align: right"&gt;N&lt;/td&gt;
+ &lt;td style="text-align: right"&gt;1&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;rpc Method(stream Request) returns (Response)&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;双向流（bidirectional streaming）&lt;/td&gt;
+ &lt;td style="text-align: right"&gt;N&lt;/td&gt;
+ &lt;td style="text-align: right"&gt;N&lt;/td&gt;
+ &lt;td&gt;&lt;code&gt;rpc Method(stream Request) returns (stream Response)&lt;/code&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;服务端流常用于消息推送和大文件下载；客户端流适合分片上传或批量汇总；双向流的发送和接收彼此独立，适合聊天、实时控制等长连接场景。示例中的双向流采用 echo 方式逐条返回消息，这只是业务实现，并不是协议限制。&lt;/p&gt;
+&lt;h2 id="定义接口"&gt;定义接口&lt;/h2&gt;
+&lt;p&gt;示例在 &lt;a href="https://github.com/apache/dubbo-go-samples/blob/main/streaming/proto/greet.proto"&gt;&lt;code&gt;streaming/proto/greet.proto&lt;/code&gt;&lt;/a&gt; 中同时定义了三种流式方法：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-protobuf" data-lang="protobuf"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;syntax &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;proto3&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; greet;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;option&lt;/span&gt; go_package &lt;span style="color:#719e07"&gt;=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;github.com/apache/dubbo-go-samples/streaming/proto;greet&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;service&lt;/span&gt; GreetService {
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; Greet(GreetRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (GreetResponse) {}
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; GreetStream(stream GreetStreamRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (stream GreetStreamResponse) {}
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; GreetClientStream(stream GreetClientStreamRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (GreetClientStreamResponse) {}
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#719e07"&gt;rpc&lt;/span&gt; GreetServerStream(GreetServerStreamRequest) &lt;span style="color:#719e07"&gt;returns&lt;/span&gt; (stream GreetServerStreamResponse) {}
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;编写服务端handler文件&lt;/p&gt;
-&lt;p&gt;源文件路径: dubbo-go-sample/streaming/go-server/cmd/server.go&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;type&lt;/span&gt; GreetTripleServer &lt;span style="color:#268bd2"&gt;struct&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (srv &lt;span style="color:#719e07"&gt;*&lt;/span&gt;GreetTripleServer) &lt;span style="color:#268bd2"&gt;Greet&lt;/span&gt;(ctx context.Context, req &lt;span style="color:#719e07"&gt;*&lt;/span&gt;greet.GreetRequest) (&lt;span style="color:#719e07"&gt;*&lt;/span&gt;greet.GreetResponse, &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	resp &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;greet.GreetResponse{Greeting: req.Name}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; resp, &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (srv &lt;span style="color:#719e07"&gt;*&lt;/span&gt;GreetTripleServer) &lt;span style="color:#268bd2"&gt;GreetStream&lt;/span&gt;(ctx context.Context, stream greet.GreetService_GreetStreamServer) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;for&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		req, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; stream.&lt;span style="color:#268bd2"&gt;Recv&lt;/span&gt;()
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			&lt;span style="color:#719e07"&gt;if&lt;/span&gt; triple.&lt;span style="color:#268bd2"&gt;IsEnded&lt;/span&gt;(err) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;				&lt;span style="color:#719e07"&gt;break&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			&lt;span style="color:#719e07"&gt;return&lt;/span&gt; fmt.&lt;span style="color:#268bd2"&gt;Errorf&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;triple BidiStream recv error: %s&amp;#34;&lt;/span&gt;, err)
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; stream.&lt;span style="color:#268bd2"&gt;Send&lt;/span&gt;(&lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;greet.GreetStreamResponse{Greeting: req.Name}); err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			&lt;span style="color:#719e07"&gt;return&lt;/span&gt; fmt.&lt;span style="color:#268bd2"&gt;Errorf&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;triple BidiStream send error: %s&amp;#34;&lt;/span&gt;, err)
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (srv &lt;span style="color:#719e07"&gt;*&lt;/span&gt;GreetTripleServer) &lt;span style="color:#268bd2"&gt;GreetClientStream&lt;/span&gt;(ctx context.Context, stream greet.GreetService_GreetClientStreamServer) (&lt;span style="color:#719e07"&gt;*&lt;/span&gt;greet.GreetClientStreamResponse, &lt;span style="color:#dc322f"&gt;error&lt;/span&gt;) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#268bd2"&gt;var&lt;/span&gt; reqs []&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;for&lt;/span&gt; stream.&lt;span style="color:#268bd2"&gt;Recv&lt;/span&gt;() {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		reqs = &lt;span style="color:#b58900"&gt;append&lt;/span&gt;(reqs, stream.&lt;span style="color:#268bd2"&gt;Msg&lt;/span&gt;().Name)
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;if&lt;/span&gt; stream.&lt;span style="color:#268bd2"&gt;Err&lt;/span&gt;() &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&amp;amp;&lt;/span&gt; !triple.&lt;span style="color:#268bd2"&gt;IsEnded&lt;/span&gt;(stream.&lt;span style="color:#268bd2"&gt;Err&lt;/span&gt;()) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;, fmt.&lt;span style="color:#268bd2"&gt;Errorf&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;triple ClientStream recv err: %s&amp;#34;&lt;/span&gt;, stream.&lt;span style="color:#268bd2"&gt;Err&lt;/span&gt;())
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	resp &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;greet.GreetClientStreamResponse{
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		Greeting: strings.&lt;span style="color:#268bd2"&gt;Join&lt;/span&gt;(reqs, &lt;span style="color:#2aa198"&gt;&amp;#34;,&amp;#34;&lt;/span&gt;),
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; resp, &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; (srv &lt;span style="color:#719e07"&gt;*&lt;/span&gt;GreetTripleServer) &lt;span style="color:#268bd2"&gt;GreetServerStream&lt;/span&gt;(ctx context.Context, req &lt;span style="color:#719e07"&gt;*&lt;/span&gt;greet.GreetServerStreamRequest, stream greet.GreetService_GreetServerStreamServer) &lt;span style="color:#dc322f"&gt;error&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;for&lt;/span&gt; i &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; &lt;span style="color:#2aa198"&gt;0&lt;/span&gt;; i &amp;lt; &lt;span style="color:#2aa198"&gt;5&lt;/span&gt;; i&lt;span style="color:#719e07"&gt;++&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; stream.&lt;span style="color:#268bd2"&gt;Send&lt;/span&gt;(&lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;greet.GreetServerStreamResponse{Greeting: req.Name}); err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			&lt;span style="color:#719e07"&gt;return&lt;/span&gt; fmt.&lt;span style="color:#268bd2"&gt;Errorf&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;triple ServerStream send err: %s&amp;#34;&lt;/span&gt;, err)
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;return&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;编写客户端client文件&lt;/p&gt;</description></item><item><title>超时时间</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/timeout/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/timeout/</guid><description>&lt;h2 id="1介绍"&gt;1.介绍&lt;/h2&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;消息类型的写法与普通 RPC 相同，流式语义由方法签名中的 &lt;code&gt;stream&lt;/code&gt; 决定。安装 &lt;code&gt;protoc-gen-go&lt;/code&gt; 和 &lt;code&gt;protoc-gen-go-triple&lt;/code&gt; 后，可以在 &lt;code&gt;streaming&lt;/code&gt; 目录生成 Go 代码：&lt;/p&gt;</description></item><item><title>超时时间</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/timeout/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/rpc/timeout/</guid><description>&lt;h2 id="1介绍"&gt;1.介绍&lt;/h2&gt;
 &lt;p&gt;本示例演示如何在 Dubbo-go 客户端发起调用时设置请求超时时间。可在此查看 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/timeout" target="_blank"&gt;完整示例源码地址&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="2如何设置请求超时时间"&gt;2.如何设置请求超时时间&lt;/h2&gt;
 &lt;p&gt;在创建客户端时，可以使用 &lt;code&gt;client.WithRequestTimeout()&lt;/code&gt; 方法设置全局超时时间（所有使用改 client 的服务代理共享）。&lt;/p&gt;
