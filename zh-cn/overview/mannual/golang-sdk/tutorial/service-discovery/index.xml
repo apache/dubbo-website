@@ -103,15 +103,24 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果使用配置文件，可以将 &lt;code&gt;registry-type&lt;/code&gt; 设置为 &lt;code&gt;service&lt;/code&gt;、&lt;code&gt;interface&lt;/code&gt; 或 &lt;code&gt;all&lt;/code&gt;。如果对注册方式有明确要求，建议显式配置。&lt;/p&gt;</description></item><item><title>多注册中心</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/multi_registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/multi_registry/</guid><description>&lt;p&gt;一个 Dubbo 应用可以配置的多个接口维度的注册中心，多注册中心可用于集群隔离、迁移等多种场景，关于这部分更详细的说明可参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/multiple-registry/" target="_blank"&gt;Dubbo Java 多注册中心说明&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="应用场景"&gt;应用场景&lt;/h2&gt;
+&lt;h3 id="迁移场景"&gt;迁移场景&lt;/h3&gt;
+&lt;p&gt;在不同注册中心之间实现平滑迁移，不进行服务的中断。例如从 ZooKeeper 迁移到 Nacos，双注册保证过渡期间业务连续。&lt;/p&gt;
+&lt;h3 id="灰度发布场景"&gt;灰度发布场景&lt;/h3&gt;
+&lt;p&gt;部署独立的灰度注册中心，仅特定流量可访问测试。新版本先注册到灰度中心，验证通过后再全量发布，降低上线风险。&lt;/p&gt;
+&lt;h3 id="集群环境隔离场景"&gt;集群/环境隔离场景&lt;/h3&gt;
+&lt;p&gt;将不同的服务环境使用完全独立的注册中心隔离，互不干扰。开发、测试、生产各自独立，避免调试服务影响线上业务。&lt;/p&gt;
 &lt;h2 id="api配置方式"&gt;API配置方式&lt;/h2&gt;
+&lt;h3 id="服务端"&gt;服务端&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ins, _ &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithName&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo_multi_registry_server&amp;#34;&lt;/span&gt;),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	 &lt;span style="color:#268bd2"&gt;registryWithID&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;nacos&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithID&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;nacos&amp;#34;&lt;/span&gt;),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithNacos&lt;/span&gt;(),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;127.0.0.1:8848&amp;#34;&lt;/span&gt;),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	 &lt;span style="color:#268bd2"&gt;registryWithID&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithID&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithZookeeper&lt;/span&gt;(),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span&gt;),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	),
@@ -126,26 +135,18 @@
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;srv, _ &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; ins.&lt;span style="color:#268bd2"&gt;NewServer&lt;/span&gt;()
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;greet.&lt;span style="color:#268bd2"&gt;RegisterGreetServiceHandler&lt;/span&gt;(srv, &lt;span style="color:#719e07"&gt;&amp;amp;&lt;/span&gt;GreetTripleServer{}, server.&lt;span style="color:#268bd2"&gt;WithRegistryIDs&lt;/span&gt;([]&lt;span style="color:#dc322f"&gt;string&lt;/span&gt;{&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;}))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;以上使用方式对 client 侧类似。&lt;/p&gt;
-&lt;h2 id="yaml配置方式"&gt;YAML配置方式&lt;/h2&gt;
-&lt;p&gt;修改服务端配置 go-server/conf/dubbogo.yaml， 同时将服务注册在两个注册中心上。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;dubbo&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;registries&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;zookeeper&lt;/span&gt;: &lt;span style="color:#586e75"&gt;# 指定 zookeeper 注册中心&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: zookeeper
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;127.0.0.1&lt;/span&gt;:&lt;span style="color:#2aa198"&gt;2181&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;nacos&lt;/span&gt;: &lt;span style="color:#586e75"&gt;# 指定 nacos 注册中心&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocol&lt;/span&gt;: nacos
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;address&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;127.0.0.1&lt;/span&gt;:&lt;span style="color:#2aa198"&gt;8848&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;protocols&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;triple&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;name&lt;/span&gt;: tri
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#268bd2"&gt;port&lt;/span&gt;: &lt;span style="color:#2aa198"&gt;20000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="支持的注册中心"&gt;支持的注册中心&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Nacos&lt;/li&gt;
-&lt;li&gt;Zookeeper&lt;/li&gt;
-&lt;li&gt;Polaris&lt;/li&gt;
-&lt;li&gt;Kubernetes&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;比如使用 Polaris 作为注册中心时，你需要指定以下内容，使用 API 或 YAML 配置文件均可以：&lt;/p&gt;</description></item></channel></rss>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="客户端"&gt;客户端&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;ins, _ &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithName&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo_multi_registry_client&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithID&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;nacos&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithNacos&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;127.0.0.1:8848&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	dubbo.&lt;span style="color:#268bd2"&gt;WithRegistry&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithID&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;zookeeper&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithZookeeper&lt;/span&gt;(),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithAddress&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;&amp;#34;127.0.0.1:2181&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;指定从哪个注册中心订阅服务：&lt;/p&gt;</description></item></channel></rss>
