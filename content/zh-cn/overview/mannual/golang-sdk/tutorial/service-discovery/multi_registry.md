@@ -67,17 +67,17 @@ greet.RegisterGreetServiceHandler(srv, &GreetTripleServer{}, server.WithRegistry
 
 ```go
 ins, _ := dubbo.NewInstance(
-    dubbo.WithName("dubbo_multi_registry_client"),
-    dubbo.WithRegistry(
-        registry.WithID("nacos"),
-        registry.WithNacos(),
-        registry.WithAddress("127.0.0.1:8848"),
-    ),
-    dubbo.WithRegistry(
-        registry.WithID("zookeeper"),
-        registry.WithZookeeper(),
-        registry.WithAddress("127.0.0.1:2181"),
-    ),
+	dubbo.WithName("dubbo_multi_registry_client"),
+	dubbo.WithRegistry(
+		registry.WithID("nacos"),
+		registry.WithNacos(),
+		registry.WithAddress("127.0.0.1:8848"),
+	),
+	dubbo.WithRegistry(
+		registry.WithID("zookeeper"),
+		registry.WithZookeeper(),
+		registry.WithAddress("127.0.0.1:2181"),
+	),
 )
 ```
 
