@@ -236,10 +236,10 @@ DEBUG .d.r.h.AbstractServerHttpChannelObserver :  [DUBBO] Http response headers 
 
 具体的匹配处理代码：[DefaultRequestMappingRegistry.java](https://github.com/apache/dubbo/blob/dubbo-3.3.0-beta.5/dubbo-rpc/dubbo-rpc-triple/src/main/java/org/apache/dubbo/rpc/protocol/tri/rest/mapping/DefaultRequestMappingRegistry.java#L196) [RequestMapping.java](https://github.com/apache/dubbo/blob/dubbo-3.3.0-beta.5/dubbo-rpc/dubbo-rpc-triple/src/main/java/org/apache/dubbo/rpc/protocol/tri/rest/mapping/RequestMapping.java#L127)
 
-1. 使用 `PathUtils.normalize` 对路径进行清洗，去掉诸如 `/one/../` `/one/./` 之类间接路径，保证一定已 `/` 开头
+1. 使用 `PathUtils.normalize` 对路径进行清洗，去掉诸如 `/one/../` `/one/./` 之类间接路径，保证一定以 `/` 开头
 2. 检查 `http method` 是否匹配
 3. 检查 `path` 是否匹配
-4. 检查 `paramter` 是否匹配（JAX-RS不支持）
+4. 检查 `parameter` 是否匹配（JAX-RS不支持）
 5. 检查 `header` 是否匹配
 6. 检查 `content-type` 是否匹配（Consumes）
 7. 检查 `accept` 是否匹配 （Produces）
@@ -249,7 +249,7 @@ DEBUG .d.r.h.AbstractServerHttpChannelObserver :  [DUBBO] Http response headers 
 11. 未找到任何匹配项，如果扩展名匹配开启并且扩展名被支持，则去掉扩展名尝试从第2步开始匹配
 12. 如果最后一段路径包含 `~` 表示开启 method 首字母签名匹配，尝试从第2步开始匹配
 13. 如果候选项为0，匹配结束，返回null
-14. 如果候选项为0，匹配结束，返回命中项
+14. 如果候选项为1，匹配结束，返回命中项
 15. 如果不止一个候选项，对候选项进行排序
 16. 对第一项和第二项进行顺序比较
 17. 结果为0表示无法确认最终匹配项，抛异常失败
