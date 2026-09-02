@@ -102,7 +102,6 @@ The stdout exporter requires no external components, which makes it ideal for ve
 ### Get the example
 
 ```bash
-git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
 cd dubbo-go-samples/otel/tracing/stdout
 ```
 
@@ -213,7 +212,6 @@ docker run -d --name jaeger \
 ### Get and run the example
 
 ```bash
-git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
 cd dubbo-go-samples/otel/tracing/jaeger
 ```
 
@@ -260,7 +258,6 @@ The `otel/tracing/otlp_http_exporter` example covers the dubbo, triple, and json
 ### Get and run the example
 
 ```bash
-git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
 cd dubbo-go-samples/otel/tracing/otlp_http_exporter
 ```
 
