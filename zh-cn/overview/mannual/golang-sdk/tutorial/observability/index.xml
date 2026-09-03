@@ -182,38 +182,43 @@
 &lt;/table&gt;
 &lt;hr&gt;
 &lt;h1 id="三配置方式"&gt;三、配置方式&lt;/h1&gt;
-&lt;p&gt;Dubbo-Go 支持 &lt;strong&gt;New API（推荐）&lt;/strong&gt; 与 &lt;strong&gt;配置文件方式（YAML）&lt;/strong&gt; 两种配置方式。&lt;/p&gt;</description></item><item><title>链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/tracing/</guid><description>&lt;p&gt;Dubbo-go 支持基于 &lt;a href="https://opentelemetry.io/"&gt;OpenTelemetry&lt;/a&gt; 标准的全链路追踪埋点，同时支持通过以下 exporter 导出到不同的 tracing 后端系统。&lt;/p&gt;
+&lt;p&gt;Dubbo-Go 支持 &lt;strong&gt;New API（推荐）&lt;/strong&gt; 与 &lt;strong&gt;配置文件方式（YAML）&lt;/strong&gt; 两种配置方式。&lt;/p&gt;</description></item><item><title>链路追踪</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/tracing/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/tracing/</guid><description>&lt;p&gt;Dubbo-go 基于 &lt;a href="https://opentelemetry.io/"&gt;OpenTelemetry&lt;/a&gt; 标准提供全链路追踪能力。开启 tracing 后，Dubbo-go 会在 RPC 调用过程中自动创建 Span，并通过配置的 exporter 将 Span 导出到不同的后端系统。&lt;/p&gt;
+&lt;p&gt;当前支持的 exporter 包括：&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://opentelemetry.io/docs/specs/otel/logs/sdk_exporters/stdout/"&gt;Stdout exporter&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://opentelemetry.io/docs/languages/js/exporters/#jaeger"&gt;Jaeger exporter&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://opentelemetry.io/docs/languages/js/exporters/#zipkin"&gt;Zipkin exporter&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://opentelemetry.io/docs/languages/js/exporters/#use-otlp-exporter-with-httpjson-or-httpprotobuf"&gt;OTLP-HTTP exporter&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/"&gt;OTLP-gRPC exporter&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;stdout&lt;/code&gt;：以 JSON 形式把 Span 打印到进程标准输出，适合本地开发与调试。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;jaeger&lt;/code&gt;：上报到 &lt;a href="https://www.jaegertracing.io/"&gt;Jaeger&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;zipkin&lt;/code&gt;：上报到 &lt;a href="https://zipkin.io/"&gt;Zipkin&lt;/a&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;otlp-http&lt;/code&gt;：通过 OTLP/HTTP 上报到 OpenTelemetry Collector 等后端。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;otlp-grpc&lt;/code&gt;：通过 OTLP/gRPC 上报到 OpenTelemetry Collector 等后端。&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;其中 stdout、jaeger、otlp-http 在 &lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/otel/tracing"&gt;dubbo-go-samples/otel/tracing&lt;/a&gt; 下有可直接运行的示例，下文分别介绍其运行方式。&lt;/p&gt;
 &lt;h2 id="使用方式"&gt;使用方式&lt;/h2&gt;
-&lt;p&gt;请注意，仅支持通过 &lt;code&gt;dubbo.NewInstance&lt;/code&gt; 方式创建 dubbo 应用时开启 tracing 功能，也就是我们快速开始中提到的&lt;code&gt;微服务应用模式&lt;/code&gt;，对于&lt;code&gt;轻量 RPC API&lt;/code&gt;暂时不支持开启 tracing。&lt;/p&gt;
-&lt;h2 id="示例详解"&gt;示例详解&lt;/h2&gt;
-&lt;p&gt;可在此查看&lt;a href="https://github.com/apache/dubbo-go-samples/tree/main/otel/tracing"&gt;完整示例源码&lt;/a&gt;。&lt;/p&gt;
-&lt;p&gt;使用 &lt;code&gt;dubbo.WithTracing()&lt;/code&gt; 开启 tracing，可以通过多个参数控制 tracing 行为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;目前仅支持通过 &lt;code&gt;dubbo.NewInstance&lt;/code&gt; 创建 dubbo 应用（即快速开始中介绍的微服务应用模式）时开启 tracing；轻量 RPC API 暂不支持。&lt;/li&gt;
+&lt;li&gt;使用 tracing 前需要导入 &lt;code&gt;dubbo.apache.org/dubbo-go/v3/imports&lt;/code&gt; 空包，用于注册各 exporter 的实现。&lt;/li&gt;
+&lt;li&gt;通过 &lt;code&gt;dubbo.WithTracing(...)&lt;/code&gt; 配置 tracing，内部使用 &lt;code&gt;trace.WithXXX&lt;/code&gt; 子选项控制 exporter、endpoint、传播器和采样策略。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面是一段最简配置：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;package&lt;/span&gt; main
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#719e07"&gt;import&lt;/span&gt; (
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; _ &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/otel/trace&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	_ &lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/imports&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#2aa198"&gt;&amp;#34;dubbo.apache.org/dubbo-go/v3/otel/trace&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#268bd2"&gt;func&lt;/span&gt; &lt;span style="color:#268bd2"&gt;main&lt;/span&gt;() {
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; instance, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; dubbo.&lt;span style="color:#268bd2"&gt;WithTracing&lt;/span&gt;(
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#586e75"&gt;// add tracing options here&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; trace.&lt;span style="color:#268bd2"&gt;WithEnabled&lt;/span&gt;(), &lt;span style="color:#586e75"&gt;// enable tracing feature&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; trace.&lt;span style="color:#268bd2"&gt;WithStdoutExporter&lt;/span&gt;(),
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; trace.&lt;span style="color:#268bd2"&gt;WithW3cPropagator&lt;/span&gt;(),
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; trace.&lt;span style="color:#268bd2"&gt;WithAlwaysMode&lt;/span&gt;(),
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; trace.&lt;span style="color:#268bd2"&gt;WithRatioMode&lt;/span&gt;(), &lt;span style="color:#586e75"&gt;// use ratio mode&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; trace.&lt;span style="color:#268bd2"&gt;WithRatio&lt;/span&gt;(&lt;span style="color:#2aa198"&gt;0.5&lt;/span&gt;), &lt;span style="color:#586e75"&gt;// sample ratio, only active when use ratio mode&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ),
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; )
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	ins, err &lt;span style="color:#719e07"&gt;:=&lt;/span&gt; dubbo.&lt;span style="color:#268bd2"&gt;NewInstance&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		dubbo.&lt;span style="color:#268bd2"&gt;WithTracing&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			trace.&lt;span style="color:#268bd2"&gt;WithEnabled&lt;/span&gt;(), &lt;span style="color:#586e75"&gt;// 开启 tracing&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			trace.&lt;span style="color:#268bd2"&gt;WithStdoutExporter&lt;/span&gt;(), &lt;span style="color:#586e75"&gt;// 使用 stdout exporter&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			trace.&lt;span style="color:#268bd2"&gt;WithW3cPropagator&lt;/span&gt;(), &lt;span style="color:#586e75"&gt;// 使用 W3C trace context 传播&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;			trace.&lt;span style="color:#268bd2"&gt;WithAlwaysMode&lt;/span&gt;(), &lt;span style="color:#586e75"&gt;// 全量采样，便于本地验证&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		),
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#719e07"&gt;if&lt;/span&gt; err &lt;span style="color:#719e07"&gt;!=&lt;/span&gt; &lt;span style="color:#cb4b16"&gt;nil&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		&lt;span style="color:#b58900"&gt;panic&lt;/span&gt;(err)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	_ = ins
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果你在 &lt;code&gt;dubbo.WithTracing()&lt;/code&gt; 调用中不指定任何 option 参数，则会使用默认行为：&lt;/p&gt;</description></item></channel></rss>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;dubbo.WithTracing()&lt;/code&gt; 不传任何参数时，使用默认配置：&lt;/p&gt;</description></item></channel></rss>
