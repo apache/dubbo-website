@@ -102,7 +102,6 @@ stdout exporter 不需要启动任何外部组件，适合在本地快速验证 
 ### 获取示例
 
 ```bash
-git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
 cd dubbo-go-samples/otel/tracing/stdout
 ```
 
@@ -213,7 +212,6 @@ docker run -d --name jaeger \
 ### 获取并运行示例
 
 ```bash
-git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
 cd dubbo-go-samples/otel/tracing/jaeger
 ```
 
@@ -260,7 +258,6 @@ dubbo.WithTracing(
 ### 获取并运行示例
 
 ```bash
-git clone --depth 1 https://github.com/apache/dubbo-go-samples.git
 cd dubbo-go-samples/otel/tracing/otlp_http_exporter
 ```
 
