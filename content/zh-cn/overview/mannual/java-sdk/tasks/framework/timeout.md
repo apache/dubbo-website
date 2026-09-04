@@ -54,17 +54,23 @@ public class DemoServiceImpl implements DemoService{}
 <img style="max-width:600px;height:auto;" src="/imgs/v3/tasks/framework/timeout.png"/>
 
 我们来分析一下以上调用链路以及可能出现的超时情况：
+
 * A 调用 B 设置了超时时间 5s，因此 `B -> C -> D` 总计耗时不应该超过 5s，否则 A 就会收到超时异常
-* 在任何情形下，只要 A 等待 5s 没有收到响应，整个调用链路就可以被终止了（如果此时 C 正在运行，则 `C -> D` 就没有发起的意义了）
-* 理论上 `B -> C`、`C -> D` 都有自己独立的超时时间设置，超时计时也是独立计算的，它们不知道 A 作为调用发起方是否超时
+* 理论上 `B -> C`、`C -> D` 都有配置了独立的超时时间，且超时计时是独立计算的，它们并不知道调用发起方 A 是否已经超时
+* 在任何情形下，只要 A 等待 5s 没有收到响应，整个调用链路就可以被终止了。如果此时 C 正在运行，则发起 `C -> D` 就没有意义了，会造成不必要的资源消耗，这在长链路场景中尤为明显
 
-在 Dubbo 框架中，`A -> B` 的调用就像一个开关，一旦启动，在任何情形下整个 `A -> B -> C -> D` 调用链路都会被完整执行下去，即便调用方 A 已经超时，后续的调用动作仍会继续。这在一些场景下是没有意义的，尤其是链路较长的情况下会带来不必要的资源消耗，deadline 就是设计用来解决这个问题，通过在调用链路中传递 deadline（deadline初始值等于超时时间，随着时间流逝而减少）可以确保调用链路只在有效期内执行，deadline 消耗殆尽之后，调用链路中其他尚未执行的任务将被取消。
+为了解决上述问题，Dubbo 引入了 Deadline 机制，通过在调用链路中透传 deadline（初始值等于超时时间），使得整个调用链能在统一的时间窗口内执行。随着调用深入，deadline 不断被扣减，后续服务的超时时间等于 deadline 剩余时间。如果 deadline 消耗殆尽，调用链路中其他尚未执行的任务将被取消。
 
-因此 deadline 机制就是将 ` B -> C -> D` 当作一个整体看待，这一系列动作必须在 5s 之内完成。随着时间流逝 deadline 会从 5s 逐步扣减，后续每一次调用实际可用的超时时间即是当前 deadline 值，比如 `C` 收到请求时已经过去了 3s，则 `C -> D` 的超时时间只剩下 2s。
+例如：
+
+- A 发起调用时设置 timeout = 5000ms，则 deadline 初始值为 5000ms
+
+- 当 C 发起请求时，整个链路已消耗 3000ms，则 `C -> D` 最多只能再用 2000ms
 
 <img style="max-width:600px;height:auto;" src="/imgs/v3/tasks/framework/timeout-deadline.png"/>
 
-deadline 机制默认是关闭的，如果要启用 deadline 机制，需要配置以下参数：
+Deadline 机制默认是关闭的，需显式开启，应用级别的配置如下：
+
 ```yaml
 dubbo:
   provider:
@@ -72,8 +78,17 @@ dubbo:
     parameters.enable-timeout-countdown: true
 ```
 
-也可以指定某个服务调用开启 deadline 机制：
+也可以为某个服务单独配置：
+
 ```java
 @DubboReference(timeout=5000, parameters={"enable-timeout-countdown", "true"})
-private DemoService demoService;
+private DemoService demoService; 
+```
+
+在 Dubbo 链路中，只要链路上游开启 `enable-timeout-countdown=true`，后续所有节点**默认继承并透传** deadline（无需额外开启），除非显式设为 `false` 才会中断。该约束覆盖所有 Dubbo 线程发起的同步/异步调用，但**非 Dubbo 线程**（如自定义线程池、CompletableFuture 等）发起的调用无法自动透传。示例：
+
+```java
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+  return service.invoke("hello");
+});
 ```
