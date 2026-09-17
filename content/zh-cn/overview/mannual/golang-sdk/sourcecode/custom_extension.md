@@ -106,6 +106,8 @@ type CommandConfig struct {
 }
 ```
 
+`RegisterConfig` 和 `MustRegisterConfig` 注册的是同一种 `Config` 原型。前者遇到非法前缀、重复注册或无效原型时返回错误；后者遇错会 panic，因此适合扩展包在 `init()` 中通过导入副作用完成注册。
+
 ### 步骤四：实现 `extension.Config`
 
 ```go
@@ -171,7 +173,20 @@ func WithTimeout(timeout int) extension.Option {
 }
 ```
 
-本例支持全部三个作用域。如果扩展不支持某个作用域，应在 `Init(scope)` 中返回错误。使用 YAML 时，先导入 `customext` 包（不调用 Go 选项时可以空白导入），再加载：
+应用中按所需作用域选择入口，并按[配置教程](../../tutorial/configuration/extension/)处理返回的错误：
+
+```go
+// InstanceScope（应用实例级）
+dubbo.NewInstance(dubbo.WithExtension(customext.WithTimeout(1000)))
+
+// ClientScope（客户端 / consumer 级）
+ins.NewClient(client.WithExtension(customext.WithTimeout(800)))
+
+// ServerScope（服务端 / provider 级）
+ins.NewServer(server.WithExtension(customext.WithTimeout(1200)))
+```
+
+同一个扩展是否支持上述入口由其 `Init(scope)` 的实现决定。如果扩展不支持某个作用域，应在 `Init(scope)` 中返回错误，框架在初始化时会中断并报错。本例支持全部三个作用域。使用 YAML 时，先导入 `customext` 包（不调用 Go 选项时可以空白导入），再加载：
 
 ```yaml
 dubbo:

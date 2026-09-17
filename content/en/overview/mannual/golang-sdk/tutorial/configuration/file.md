@@ -129,7 +129,7 @@ func main() {
 
 ### 2.4 Extension Configuration
 
-Registered external extensions can use `consumer`, `provider`, or `instance` settings under `dubbo.extensions`, according to the scopes they support. This Hystrix YAML shows the planned format for [migration #3730](https://github.com/apache/dubbo-go/issues/3730):
+Registered external extensions can use `consumer`, `provider`, or `instance` settings under `dubbo.extensions`, according to the scopes they support. For example, configuring the Hystrix circuit breaker extension:
 
 ```yaml
 dubbo:
@@ -142,7 +142,7 @@ dubbo:
 ```
 
 {{% alert title="Note" color="primary" %}}
-YAML configuration still requires importing a package that registers an extension Config. The current Hystrix package has not added that Config, so this example is not yet runnable. See [Extension Configuration and Usage](../extension/) for import and version details.
+YAML configuration requires importing the extension package to register its Config. Use a blank import when the application does not call that package's Go API. See [Extension Configuration and Usage](../extension/) for details.
 {{% /alert %}}
 
 ## 3. Example Details

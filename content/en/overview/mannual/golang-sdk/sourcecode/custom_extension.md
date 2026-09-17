@@ -106,6 +106,8 @@ type CommandConfig struct {
 }
 ```
 
+`RegisterConfig` and `MustRegisterConfig` register the same `Config` prototype. `RegisterConfig` returns an error for invalid prefixes, duplicate registrations, or invalid prototypes. `MustRegisterConfig` panics on that error, which makes it suitable for side-effect registration in an extension package's `init()`.
+
 ### Step 4: Implement `extension.Config`
 
 ```go
@@ -171,7 +173,20 @@ func WithTimeout(timeout int) extension.Option {
 }
 ```
 
-This example supports all three scopes. For an unsupported scope, return an error from `Init(scope)`. To use YAML, import the `customext` package (a blank import is enough when no Go options are called) and load:
+In application code, pass options to the entry point for the intended scope. Handle the returned errors as in the [configuration guide](../../tutorial/configuration/extension/):
+
+```go
+// InstanceScope (Application instance level)
+dubbo.NewInstance(dubbo.WithExtension(customext.WithTimeout(1000)))
+
+// ClientScope (Client / consumer level)
+ins.NewClient(client.WithExtension(customext.WithTimeout(800)))
+
+// ServerScope (Server / provider level)
+ins.NewServer(server.WithExtension(customext.WithTimeout(1200)))
+```
+
+Whether an extension supports these entry points is determined by its `Init(scope)` implementation. If an extension does not support a given scope, it should return an error in `Init(scope)`, causing initialization to abort. This example supports all three scopes. To use YAML, import the `customext` package (a blank import is enough when no Go options are called) and load:
 
 ```yaml
 dubbo:

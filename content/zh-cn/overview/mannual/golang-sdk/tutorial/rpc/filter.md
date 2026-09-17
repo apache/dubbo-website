@@ -88,7 +88,7 @@ import _ "dubbo.apache.org/dubbo-go/v3/filter/filter_impl"
 - tps
 - tracing: Tracing Filter
 
-统一 Extension API 会将扩展返回的 Filter 加入客户端或服务端调用链。当前 Hystrix 包仍需手动选择 Filter；迁移任务见 [#3730](https://github.com/apache/dubbo-go/issues/3730)。当前与计划中的示例见[扩展配置与使用](../../configuration/extension/)。
+统一 Extension API 会将扩展返回的 Filter 自动加入客户端或服务端调用链。相关配置与使用示例见[扩展配置与使用](../../configuration/extension/)。
 
 
 ### 4. 默认 Filter 链

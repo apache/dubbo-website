@@ -9,7 +9,7 @@ weight: 2
 An extension can read settings from Go options or `dubbogo.yaml` and add filters to an RPC call chain. Use the Instance, Client, or Server entry point according to where the extension should run.
 
 {{% alert title="Version notice" color="primary" %}}
-The core Extension API was added in [dubbo-go#3687](https://github.com/apache/dubbo-go/pull/3687) and is targeted for Dubbo-Go 3.3.3. The current Hystrix package has not adopted it ([#3730](https://github.com/apache/dubbo-go/issues/3730)). Hystrix `WithConfig` and YAML examples below show the planned API; use the [current sample](https://github.com/apache/dubbo-go-samples/tree/main/filter/hystrix) for a working application.
+The unified Extension API was added in [dubbo-go#3687](https://github.com/apache/dubbo-go/pull/3687) and is targeted for Dubbo-Go 3.3.3.
 {{% /alert %}}
 
 ## 1. Choose an Extension Scope
@@ -35,7 +35,7 @@ Importing the package runs its `init()` function, which registers the extension 
 
 ### 2.1 Use Go Options
 
-Use a named import when calling option functions from the extension package. This is the import for the planned Hystrix API:
+Use a named import when calling option functions from the extension package. For example, using Hystrix:
 
 ```go
 import (
@@ -45,7 +45,7 @@ import (
 
 ### 2.2 Use YAML Only
 
-Use a blank import if the application configures an extension only in YAML and does not call its Go functions. After Hystrix adopts the unified API, its import would be:
+Use a blank import if the application configures an extension only in YAML and does not call its Go functions:
 
 ```go
 import (
@@ -57,7 +57,7 @@ The extension's `Config.Prefix()` is the key under `dubbo.extensions`. It may di
 
 ## 3. Configure with Go Options
 
-Each extension defines its own typed options. Pass them to the Client, Server, or Instance entry point. See [Developing a Custom Extension](../../../sourcecode/custom_extension/) for an option implementation. The planned Hystrix client option looks like this:
+Each extension defines its own typed options. Pass them to the Client, Server, or Instance entry point. See [Developing a Custom Extension](../../../sourcecode/custom_extension/) for an option implementation. For example, configuring Hystrix on the client:
 
 ```go
 client.WithExtension(
@@ -73,7 +73,7 @@ If you pass several options for the same extension, they apply in the order writ
 
 ## 4. Configure with YAML
 
-Add the extension below `dubbo.extensions` and load the file with `dubbo.Load()`. This example shows the planned Hystrix configuration for consumers and providers:
+Add the extension below `dubbo.extensions` and load the file with `dubbo.Load()`. This example shows the Hystrix configuration for consumers and providers:
 
 ```yaml
 dubbo:
@@ -107,63 +107,9 @@ For the same setting, later sources take precedence:
 
 ## 5. Hystrix Example
 
-The current Hystrix package uses manual filter selection and `hystrix-go` command configuration. The planned API will configure these through the extension entry points.
+The following example shows how to configure and use the Hystrix circuit breaker extension using the unified Extension API. The client and server snippets import the generated `greet` package from the [Hystrix sample's proto directory](https://github.com/apache/dubbo-go-samples/tree/main/filter/hystrix/proto). In a separate Go module, fetch that package with `go get github.com/apache/dubbo-go-samples@main`.
 
-### 5.1 Current and Planned Usage
-
-| Item | Current Hystrix Package | Proposed Migration in #3730 |
-| :--- | :--- | :--- |
-| **API Invocation** | Call `hystrix.ConfigureCommand(...)` directly | Use `client.WithExtension(hystrix.WithConfig(...))` |
-| **Filter Configuration** | Manually configure `client.WithFilter("hystrix_consumer")` or `server.WithFilter("hystrix_provider")` | **Auto-injected**: Extension automatically merges registered filter names into the chain upon successful initialization |
-| **Resource Naming** | Required `dubbo:consumer:` or `dubbo:provider:` prefix | Use clean service and method keys (e.g. `"greet.GreetService:::Greet"`); prefixing is handled internally |
-| **YAML Configuration** | No native support under `dubbogo.yaml` | Declared natively under `dubbo.extensions.hystrix.consumer/provider` |
-
-### 5.2 Current Example
-
-The [Hystrix sample](https://github.com/apache/dubbo-go-samples/tree/main/filter/hystrix) contains the current client, server, proto, and run instructions. Its [client](https://github.com/apache/dubbo-go-samples/blob/main/filter/hystrix/go-client/cmd/main.go) calls `hystrix.ConfigureCommand("dubbo:consumer:greet.GreetService:::Greet", ...)` and enables `client.WithFilter("hystrix_consumer")` on the generated service. This is the current package's legacy API, not the unified Extension API.
-
-The code snippets below use the proto package from the sample repository's `main` branch. In a separate Go module, fetch that branch with `go get github.com/apache/dubbo-go-samples@main`; the older `@latest` tagged module does not contain this proto path. With the sample's [server](https://github.com/apache/dubbo-go-samples/blob/main/filter/hystrix/go-server/cmd/main.go) running on port 20000, the current client setup is:
-
-```go
-package main
-
-import (
-	"context"
-
-	"dubbo.apache.org/dubbo-go/v3/client"
-	_ "dubbo.apache.org/dubbo-go/v3/imports"
-	hystrixgo "github.com/afex/hystrix-go/hystrix"
-	_ "github.com/apache/dubbo-go-extensions/filter/hystrix"
-	greet "github.com/apache/dubbo-go-samples/filter/hystrix/proto"
-)
-
-func main() {
-	hystrixgo.ConfigureCommand("dubbo:consumer:greet.GreetService:::Greet", hystrixgo.CommandConfig{
-		Timeout:                1000,
-		MaxConcurrentRequests:  10,
-		RequestVolumeThreshold: 5,
-		SleepWindow:            5000,
-		ErrorPercentThreshold:  50,
-	})
-	cli, err := client.NewClient(client.WithClientURL("127.0.0.1:20000"))
-	if err != nil {
-		panic(err)
-	}
-	svc, err := greet.NewGreetService(cli, client.WithFilter("hystrix_consumer"))
-	if err != nil {
-		panic(err)
-	}
-	if _, err := svc.Greet(context.Background(), &greet.GreetRequest{Name: "test"}); err != nil {
-		panic(err)
-	}
-}
-```
-
-### 5.3 Planned API Example
-
-The following client and server code illustrates the intended API using the generated `greet` package from the linked sample. **It does not compile with the current Hystrix package.** Confirm the final API in the extension package after #3730 lands.
-
-#### Client
+### 5.1 Client
 
 ```go
 package main
@@ -173,6 +119,7 @@ import (
 
 	"dubbo.apache.org/dubbo-go/v3"
 	"dubbo.apache.org/dubbo-go/v3/client"
+	_ "dubbo.apache.org/dubbo-go/v3/imports"
 	"github.com/apache/dubbo-go-extensions/filter/hystrix"
 	greet "github.com/apache/dubbo-go-samples/filter/hystrix/proto"
 )
@@ -207,7 +154,7 @@ func main() {
 }
 ```
 
-#### Server
+### 5.2 Server
 
 ```go
 package main
@@ -215,6 +162,7 @@ package main
 import (
 	"context"
 
+	_ "dubbo.apache.org/dubbo-go/v3/imports"
 	"dubbo.apache.org/dubbo-go/v3/protocol"
 	"dubbo.apache.org/dubbo-go/v3/server"
 	"github.com/apache/dubbo-go-extensions/filter/hystrix"
@@ -248,15 +196,22 @@ func main() {
 }
 ```
 
-#### YAML
+### 5.3 YAML
 
-Once the extension registers a unified `Config`, an application can blank-import it and call `dubbo.Load()` with service definitions as in the linked sample. The following YAML has no `instance` block because Hystrix does not support `InstanceScope`:
+When configuring extensions with YAML, the application can blank-import the extension package (`_ "github.com/apache/dubbo-go-extensions/filter/hystrix"`) to register the configuration and filters, then call `dubbo.Load()`. The following YAML has no `instance` block because Hystrix does not support `InstanceScope`:
 
 ```yaml
 dubbo:
   extensions:
     hystrix:
       consumer:
+        "greet.GreetService:::Greet":
+          timeout: 1000
+          max-concurrent-requests: 10
+          request-volume-threshold: 5
+          sleep-window: 5000
+          error-percent-threshold: 50
+      provider:
         "greet.GreetService:::Greet":
           timeout: 1000
           max-concurrent-requests: 10

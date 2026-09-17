@@ -87,7 +87,7 @@ the [filter](https://github.com/apache/dubbo-go/tree/main/filter) directory.
 - tps
 - tracing: tracing filter
 
-The unified Extension API adds filters returned by an extension to the Client or Server chain. The current Hystrix package still requires manual filter selection; its planned migration is tracked in [#3730](https://github.com/apache/dubbo-go/issues/3730). See [Extension Configuration and Usage](../../configuration/extension/) for both examples.
+The unified Extension API automatically adds filters returned by an extension to the Client or Server call chain. See [Extension Configuration and Usage](../../configuration/extension/) for configuration details and examples.
 
 
 ### 4. Default Filter Chains

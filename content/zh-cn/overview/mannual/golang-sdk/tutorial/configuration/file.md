@@ -131,7 +131,7 @@ func main() {
 
 ### 2.4 扩展配置
 
-已注册的外部扩展可以在 `dubbo.extensions` 下配置其支持的 `consumer`、`provider` 或 `instance` 作用域。以下 YAML 展示 [Hystrix 迁移任务 #3730](https://github.com/apache/dubbo-go/issues/3730)计划采用的格式：
+已注册的外部扩展可以在 `dubbo.extensions` 下配置其支持的 `consumer`、`provider` 或 `instance` 作用域。以 Hystrix 熔断扩展为例：
 
 ```yaml
 dubbo:
@@ -144,7 +144,7 @@ dubbo:
 ```
 
 {{% alert title="提示" color="primary" %}}
-使用 YAML 配置时，仍需导入会注册扩展 Config 的包。当前 Hystrix 包尚未提供该 Config，因此上述示例暂时无法运行。导入方式和版本说明见[扩展配置与使用](../extension/)。
+使用 YAML 配置时，需确保已通过空白导入等方式引入对应的扩展包以注册 Config。完整配置说明与使用方式见[扩展配置与使用](../extension/)。
 {{% /alert %}}
 
 ## 3.示例详解
