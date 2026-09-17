@@ -88,8 +88,8 @@ import _ "dubbo.apache.org/dubbo-go/v3/filter/filter_impl"
 - tps
 - tracing: Tracing Filter
 
-`hystrix_consumer` 和 `hystrix_provider` 属于更早版本中的能力。当前 3.3.x 文档重点展示主仓库和
-`imports` 包里仍然存在的内置 filter。
+统一 Extension API 会将扩展返回的 Filter 加入客户端或服务端调用链。当前 Hystrix 包仍需手动选择 Filter；迁移任务见 [#3730](https://github.com/apache/dubbo-go/issues/3730)。当前与计划中的示例见[扩展配置与使用](../../configuration/extension/)。
+
 
 ### 4. 默认 Filter 链
 

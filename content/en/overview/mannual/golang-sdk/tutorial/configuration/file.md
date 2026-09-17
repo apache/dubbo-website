@@ -126,7 +126,27 @@ func main() {
 	//...
 }
 ```
+
+### 2.4 Extension Configuration
+
+Registered external extensions can use `consumer`, `provider`, or `instance` settings under `dubbo.extensions`, according to the scopes they support. This Hystrix YAML shows the planned format for [migration #3730](https://github.com/apache/dubbo-go/issues/3730):
+
+```yaml
+dubbo:
+  extensions:
+    hystrix:
+      consumer:
+        "greet.GreetService:::Greet":
+          timeout: 1000
+          max-concurrent-requests: 10
+```
+
+{{% alert title="Note" color="primary" %}}
+YAML configuration still requires importing a package that registers an extension Config. The current Hystrix package has not added that Config, so this example is not yet runnable. See [Extension Configuration and Usage](../extension/) for import and version details.
+{{% /alert %}}
+
 ## 3. Example Details
+
 
 ### 3.1 Server Introduction
 
@@ -270,4 +290,3 @@ If you want to specify multiple filters, you can separate them with ','.
         GreeterProvider:
           filter: myCustomFilter,echo,tps
   ```
-

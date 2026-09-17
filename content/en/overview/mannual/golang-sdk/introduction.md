@@ -40,6 +40,8 @@ The `plugin` system greatly enriches dubbo-go's functionality and ecosystem, wit
 * Metrics: Offers rich built-in metrics for RPC calls.
 * Logging: Provides a general logging collection interface definition.
 * Tracing: Offers distributed tracing capabilities, integrating with tracing systems like Zipkin, Jaeger, Skywalking.
+* Extension: Configures external components through Go options or YAML. See [Extension Configuration and Usage](../tutorial/configuration/extension/) and [AOP and Extension Mechanism](../sourcecode/aop_and_extension/) for supported versions and examples.
+
 
 Below is the core components and their relationships from the perspective of the kernel source:
 ![img](/imgs/docs3-v2/golang-sdk/concept/more/app_and_interface/dubbogo-concept.png)

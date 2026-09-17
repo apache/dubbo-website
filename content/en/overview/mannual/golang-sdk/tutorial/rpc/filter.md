@@ -87,8 +87,8 @@ the [filter](https://github.com/apache/dubbo-go/tree/main/filter) directory.
 - tps
 - tracing: tracing filter
 
-`hystrix_consumer` and `hystrix_provider` were available in earlier releases. In current 3.3.x documentation, focus on
-the built-in filters that still exist in the main repository and `imports` package.
+The unified Extension API adds filters returned by an extension to the Client or Server chain. The current Hystrix package still requires manual filter selection; its planned migration is tracked in [#3730](https://github.com/apache/dubbo-go/issues/3730). See [Extension Configuration and Usage](../../configuration/extension/) for both examples.
+
 
 ### 4. Default Filter Chains
 

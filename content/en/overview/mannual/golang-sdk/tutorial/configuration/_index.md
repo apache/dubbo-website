@@ -38,6 +38,11 @@ Developers can build configurations using APIs to start the framework. This meth
 
 Developers can place the configuration in a configuration center for easier management and modification.
 
+## 4. Extension Configuration
+
+External extensions can be configured with Go options or under `dubbo.extensions` in YAML. See [Extension Configuration and Usage](extension/) for examples and supported versions.
+
+
 ## Root Configuration
 
 ## Client Configuration
@@ -153,4 +158,3 @@ rc := config.NewRootConfigBuilder().
 ```
 
 ###
-
