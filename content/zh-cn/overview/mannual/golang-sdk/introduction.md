@@ -40,6 +40,8 @@ dubbo-go 总体上遵循 `框架内核+插件` 的的设计理念，左侧的 `�
 * Metrics：提供 RPC 调用（RT、QPS、调用量、请求成功数、请求失败数、并发请求数等）、注册中心、元数据中心、配置中心交互统计等丰富的内置采集埋点，支持多维度的指标聚合
 * Logging：提供通用的日志采集接口定义，内置 Zap、Logrus 支持
 * Tracing：提供分布式链路追踪能力，通过此插件扩展可接入 Zipkin、Jaeger、Skywalking 等链路追踪系统。
+* 扩展：通过 Go 选项或 YAML 配置外部组件。支持版本和示例见[扩展配置与使用](../tutorial/configuration/extension/)及 [AOP 与可扩展机制](../sourcecode/aop_and_extension/)。
+
 
 下图是从内核源码视角，给出的框架核心组件以及组件之间的关联关系：
 
@@ -115,7 +117,6 @@ dubbo-go 支持通过 Open Telemetry 接入 Zipkin、Jaeger、Skywalking 等全�
 dubbo-go 实现的流量治理规则完全遵循 Dubbo 框架设计的流量治理能力，可以通过以下链接了解更多详情：
 * [Dubbo 流量治理规则设计](/zh-cn/overview/core-features/traffic/)
 * [Dubbo 流量治理示例任务](/zh-cn/overview/tasks/traffic-management/)
-
 
 
 
