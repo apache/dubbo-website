@@ -55,16 +55,21 @@ The priority of the above configuration forms from high to low is: `method-level
 
 Let's analyze the above calling chain and the possible timeout situations:
 * A calls B and sets a timeout of 5 seconds, therefore the total time for `B -> C -> D` should not exceed 5 seconds, otherwise A will receive a timeout exception.
-* In any case, as long as A waits 5 seconds without receiving a response, the entire call chain can be terminated (if C is running at this time, then `C -> D` has no meaning to initiate).
 * Theoretically, both `B -> C` and `C -> D` have their own independent timeout settings and the timeout counting is also calculated independently; they do not know whether A as the caller has timed out.
+* In any case, once A has waited for 5s without a response, the entire chain can be terminated. If C is still running at that point, initiating `C -> D` becomes meaningless and wastes resources, a problem that is particularly evident in long-chain scenarios.
 
-In the Dubbo framework, the call `A -> B` acts like a switch; once activated, the entire `A -> B -> C -> D` call chain will be executed completely, even if the caller A has already timed out, subsequent calling actions will continue. This can be meaningless in some scenarios, especially in long chains as it leads to unnecessary resource consumption. The deadline is designed to solve this problem by passing a deadline through the call chain (the initial value of the deadline equals the timeout, decreasing as time passes). This ensures the call chain only executes within its validity period; once the deadline is exhausted, other unexecuted tasks in the call chain will be canceled.
+To address this, Dubbo introduced the **Deadline mechanism**. By passing a "deadline" (initially equal to the timeout) along the invocation chain, the entire process is constrained within a unified time window. As the call deepens, the deadline is continuously decremented; subsequent services use the remaining time as their effective timeout. If the deadline is exhausted, any remaining tasks in the chain are canceled.
 
-Thus, the deadline mechanism treats `B -> C -> D` as a whole, and this series of actions must be completed within 5 seconds. As time passes, the deadline will decrease from 5 seconds. For each subsequent call, the actual available timeout is the current deadline value; for example, if `C` receives the request 3 seconds later, then the timeout for `C -> D` only has 2 seconds left.
+**Example:**
+
+- When A initiates a call with timeout = 5000ms, the initial deadline is 5000ms.
+
+- By the time C initiates its request, if the chain has already consumed 3000ms, the call C -> D is restricted to a maximum of 2000ms.
 
 <img style="max-width:600px;height:auto;" src="/imgs/v3/tasks/framework/timeout-deadline.png"/>
 
-The deadline mechanism is off by default. To enable the deadline mechanism, configure the following parameters:
+The Deadline mechanism is disabled by default and must be explicitly enabled. Use the following application-level configuration:
+
 ```yaml
 dubbo:
   provider:
@@ -72,8 +77,15 @@ dubbo:
     parameters.enable-timeout-countdown: true
 ```
 
-You can also enable the deadline mechanism for a specific service call:
+Alternatively, you can configure it for a specific service:
 ```java
 @DubboReference(timeout=5000, parameters={"enable-timeout-countdown", "true"})
 private DemoService demoService;
+```
+
+In a Dubbo chain, once an upstream service enables enable-timeout-countdown=true, all subsequent nodes **inherit and propagate** the deadline by default (no additional configuration needed), unless a node explicitly sets it to false to break the chain. This constraint covers all synchronous and asynchronous calls initiated by **Dubbo threads**. However, it cannot be automatically propagated by non-Dubbo threads (e.g., custom thread pools, CompletableFuture.supplyAsync),example:
+```Java
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+    return service.invoke("hello");
+});
 ```
