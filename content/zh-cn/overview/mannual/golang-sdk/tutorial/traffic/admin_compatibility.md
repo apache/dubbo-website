@@ -276,6 +276,32 @@ curl -b cookie.txt -H 'Content-Type: application/json' \
 
 在界面中关闭「立即启用」或删除规则后，调用恢复随机分布。在 v3.3.x 上禁用规则时，需要同时关闭「容错保护」。
 
+### 6. 在 Admin 中禁用实例流量
+
+在实例的配置页中打开「流量禁用」开关，或调用对应的接口：
+
+```shell
+curl -b cookie.txt -X PUT \
+  "$A/instance/config/trafficDisable?appName=router-demo-server&instanceIP=<实例 IP>&trafficDisable=true&mesh=$MESH"
+```
+
+Admin 不单独下发禁流规则，而是在 provider 应用的条件路由 `router-demo-server.condition-router` 中追加一条 `=>host!=<实例 IP>`。规则不存在时会新建：
+
+```yaml
+conditions:
+- =>host!=192.168.1.10
+configVersion: v3.0
+enabled: true
+force: true
+key: router-demo-server
+runtime: true
+scope: application
+```
+
+规则生效后，consumer 不再调用该 IP 上的实例。禁流按 IP 生效：本示例的两个 provider 运行在同一台机器上，禁用后两者都不再接收调用，consumer 报 `No provider available`。需要单独禁用一个实例时，请把实例部署在不同的 IP 上。
+
+关闭开关后，Admin 从规则中删除这条条件，但保留规则本身，调用随即恢复。以上行为在 `develop` 分支上验证。
+
 ## 配置中心对齐
 
 Dubbo Admin 和 Dubbo-go 需要读写同一个位置，仅连接同一个配置中心是不够的。
@@ -320,3 +346,5 @@ dubbo:
 ## 参考
 
 相关回归测试与验证记录见 [dubbo-go #3799](https://github.com/apache/dubbo-go/pull/3799)。
+
+在 Admin 中查看 Dubbo-go 的应用、实例、服务和方法，见[在 Dubbo Admin 中查看 Dubbo-go 服务]({{< relref "../service-discovery/admin_compatibility.md" >}})；接入 Admin 的指标、链路和日志入口，见[在 Dubbo Admin 中观测 Dubbo-go 服务]({{< relref "../observability/admin_compatibility.md" >}})。

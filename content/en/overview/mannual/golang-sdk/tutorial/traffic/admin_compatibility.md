@@ -276,6 +276,32 @@ Once the rule is in effect, calls from `router-demo-client` go only to 20001. Bo
 
 Turning off "立即启用" in the UI, or deleting the rule, spreads the calls randomly again. To disable the rule on v3.3.x, turn off "容错保护" as well.
 
+### 6. Disable an instance's traffic from Admin
+
+Turn on the "Flow disabled" switch on the instance's configuration page, or call the corresponding API:
+
+```shell
+curl -b cookie.txt -X PUT \
+  "$A/instance/config/trafficDisable?appName=router-demo-server&instanceIP=<instance IP>&trafficDisable=true&mesh=$MESH"
+```
+
+Admin does not push a separate rule. It appends `=>host!=<instance IP>` to the provider application's condition rule `router-demo-server.condition-router`, creating the rule if it does not exist:
+
+```yaml
+conditions:
+- =>host!=192.168.1.10
+configVersion: v3.0
+enabled: true
+force: true
+key: router-demo-server
+runtime: true
+scope: application
+```
+
+Once the rule is in effect, the consumer stops calling instances on that IP. Traffic is disabled per IP: in this example both providers run on one machine, so both stop receiving calls and the consumer reports `No provider available`. To disable a single instance, deploy instances on different IPs.
+
+Turning the switch off removes the condition from the rule but keeps the rule itself, and calls resume. This behavior was verified on the `develop` branch.
+
 ## Aligning the config center
 
 Dubbo Admin and Dubbo-go have to read and write the same location. Connecting to the same config center is not enough.
@@ -320,3 +346,5 @@ Editing and disabling a tag rule in the UI currently clears the rule's `addresse
 ## References
 
 The related regression tests and verification records are in [dubbo-go #3799](https://github.com/apache/dubbo-go/pull/3799).
+
+To view Dubbo-go applications, instances, services and methods in Admin, see [Viewing Dubbo-go Services in Dubbo Admin]({{< relref "../service-discovery/admin_compatibility.md" >}}). To connect Admin's metric, trace and log views, see [Observing Dubbo-go Services in Dubbo Admin]({{< relref "../observability/admin_compatibility.md" >}}).
