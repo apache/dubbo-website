@@ -13,7 +13,7 @@ Dubbo Admin always writes condition rules as `configVersion: v3.0` (conditions a
 
 | Dubbo-go version | Condition rules (v3.0 format) | Tag rules |
 |---|---|---|
-| v3.3.0, v3.3.1 | `enabled` and `force` are swapped; omitting `enabled` panics | The rule is not found on the first uncached lookup |
+| v3.3.0, v3.3.1 | enabled and force are swapped; omitting enabled panics | The rule is not found on the first uncached lookup |
 | v3.3.2 | Same as above | Fixed |
 | Releases after v3.3.2 | Fixed | Fixed |
 

@@ -18,15 +18,13 @@ To view applications, instances and services in Admin, see [Viewing Dubbo-go Ser
 
 Admin correlates the metrics, traces and logs of one call on these fields:
 
-| Meaning | Metric label | Trace attribute | Log field |
-|---|---|---|---|
-| Application | `application_name` | `service.name` (resource) | — |
-| Service | `interface` | `rpc.service` | — |
-| Method | `method` | `rpc.method` | — |
-| Side | metric name prefix `dubbo_provider_` / `dubbo_consumer_` | span kind `server` / `client` | — |
-| Instance | `ip` | — | — |
-| Group, version | `group`, `version` | `dubbo.group`, `dubbo.version` | — |
-| Trace | — | trace ID, span ID | `trace_id`, `span_id` |
+- **Application**: metric label `application_name`, trace resource attribute `service.name`.
+- **Service**: metric label `interface`, trace attribute `rpc.service`.
+- **Method**: metric label `method`, trace attribute `rpc.method`.
+- **Side**: metric name prefixes `dubbo_provider_` and `dubbo_consumer_`, matching span kinds `server` and `client`.
+- **Instance**: metric label `ip`.
+- **Group and version**: metric labels `group` and `version`, trace attributes `dubbo.group` and `dubbo.version`.
+- **Trace**: log fields `trace_id` and `span_id`, the trace ID and span ID of the span.
 
 `rpc.service` contains only the fully qualified interface name, the same as the metric's `interface`. Dubbo-go v3.3.2 and earlier write `rpc.service` as `group/interface:version`; the Collector configuration shipped with Admin normalizes it before correlating it with metrics.
 
@@ -128,12 +126,10 @@ The dashboard definitions and Collector configuration are in [release/kubernetes
 
 In Admin's application, instance and service metric dashboards, Dubbo-go supports the panels for requests, QPS, successes and failures, failure causes, and RT (average, max, min, P50 to P99). These panels need extra configuration or have no data yet:
 
-| Panels | Notes |
-|---|---|
-| Latency heatmap | Requires `metrics.WithHistogramEnabled()` |
-| Registry and metadata center panels | Require `metrics.WithRegistryEnabled()` and `metrics.WithMetadataEnabled()` |
-| Instance registrations, instance registration time | No data yet with application-level discovery |
-| Thread pool | Dubbo Java only |
+- **Latency heatmap**: requires `metrics.WithHistogramEnabled()`.
+- **Registry and metadata center panels**: require `metrics.WithRegistryEnabled()` and `metrics.WithMetadataEnabled()`.
+- **Instance registrations, instance registration time**: no data yet with application-level discovery.
+- **Thread pool**: Dubbo Java only.
 
 Also:
 

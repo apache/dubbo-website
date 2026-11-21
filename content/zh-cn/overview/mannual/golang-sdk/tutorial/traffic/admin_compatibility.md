@@ -13,7 +13,7 @@ Dubbo Admin 写出的条件路由固定为 `configVersion: v3.0` 格式（条件
 
 | Dubbo-go 版本 | 条件路由（v3.0 格式） | 标签路由 |
 |---|---|---|
-| v3.3.0、v3.3.1 | `enabled` 与 `force` 被互换解析；省略 `enabled` 时 panic | 首次未命中缓存时找不到规则 |
+| v3.3.0、v3.3.1 | enabled 与 force 被互换解析；省略 enabled 时 panic | 首次未命中缓存时找不到规则 |
 | v3.3.2 | 同上 | 已修复 |
 | v3.3.2 之后的版本 | 已修复 | 已修复 |
 

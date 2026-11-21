@@ -18,15 +18,13 @@ Dubbo Admin 的指标、链路和日志入口打开的是 Grafana 面板，数�
 
 Admin 通过下列字段把同一次调用的指标、链路和日志关联起来：
 
-| 含义 | 指标 label | 链路属性 | 日志字段 |
-|---|---|---|---|
-| 应用 | `application_name` | `service.name`（resource） | — |
-| 服务 | `interface` | `rpc.service` | — |
-| 方法 | `method` | `rpc.method` | — |
-| 调用侧 | 指标名前缀 `dubbo_provider_` / `dubbo_consumer_` | span kind `server` / `client` | — |
-| 实例 | `ip` | — | — |
-| 分组、版本 | `group`、`version` | `dubbo.group`、`dubbo.version` | — |
-| 链路 | — | trace ID、span ID | `trace_id`、`span_id` |
+- **应用**：指标 label `application_name`，链路的 resource 属性 `service.name`。
+- **服务**：指标 label `interface`，链路属性 `rpc.service`。
+- **方法**：指标 label `method`，链路属性 `rpc.method`。
+- **调用侧**：指标名前缀 `dubbo_provider_` 和 `dubbo_consumer_`，分别对应 span kind `server` 和 `client`。
+- **实例**：指标 label `ip`。
+- **分组和版本**：指标 label `group`、`version`，链路属性 `dubbo.group`、`dubbo.version`。
+- **链路**：日志字段 `trace_id`、`span_id`，即 span 的 trace ID 和 span ID。
 
 `rpc.service` 只包含接口全限定名，与指标的 `interface` 相同。Dubbo-go v3.3.2 及更早版本会把 `rpc.service` 写成 `group/interface:version`，Admin 自带的 Collector 配置会先把它规范化再关联指标。
 
@@ -128,12 +126,10 @@ console:
 
 Admin 的应用、实例、服务三个指标面板中，Dubbo-go 支持请求量、QPS、成功和失败数、各类失败原因、RT（平均、最大、最小、P50 至 P99）等面板。以下面板需要额外配置，或暂时没有数据：
 
-| 面板 | 说明 |
-|---|---|
-| 响应时延热点图 | 需要开启 `metrics.WithHistogramEnabled()` |
-| 注册中心、元数据中心相关面板 | 需要开启 `metrics.WithRegistryEnabled()`、`metrics.WithMetadataEnabled()` |
-| 注册实例次数、实例注册时长 | 使用应用级服务发现时暂无数据 |
-| 线程池 | 仅 Dubbo Java 提供 |
+- **响应时延热点图**：需要开启 `metrics.WithHistogramEnabled()`。
+- **注册中心、元数据中心相关面板**：需要开启 `metrics.WithRegistryEnabled()` 和 `metrics.WithMetadataEnabled()`。
+- **注册实例次数、实例注册时长**：使用应用级服务发现时暂无数据。
+- **线程池**：仅 Dubbo Java 提供。
 
 此外：
 
