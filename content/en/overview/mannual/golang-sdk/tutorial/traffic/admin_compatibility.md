@@ -7,8 +7,6 @@ weight: 2
 
 This page builds a complete setup from scratch: start Nacos or ZooKeeper, start Dubbo Admin, start two Dubbo-go providers and one consumer, then push a condition rule and a tag rule from Admin and watch how the consumer's calls change. The last sections cover the versions and settings that decide whether a rule takes effect.
 
-The steps were verified with the Dubbo Admin `develop` branch ([0db71b0](https://github.com/apache/dubbo-admin/commit/0db71b07b9d94b2f57e3ffd22af5e55e6083e63f)), Dubbo-go v3.3.2 and the Dubbo-go `develop` branch.
-
 ## Choosing a version
 
 Dubbo Admin always writes condition rules as `configVersion: v3.0` (conditions are stored as strings, and both the form and the YAML view hard-code `v3.0`). The condition routing issues below therefore affect every condition rule created in Admin.
@@ -17,10 +15,10 @@ Dubbo Admin always writes condition rules as `configVersion: v3.0` (conditions a
 |---|---|---|
 | v3.3.0, v3.3.1 | `enabled` and `force` are swapped; omitting `enabled` panics | The rule is not found on the first uncached lookup |
 | v3.3.2 | Same as above | Fixed |
-| `develop` | Fixed ([#3773](https://github.com/apache/dubbo-go/pull/3773)) | Fixed |
+| Releases after v3.3.2 | Fixed | Fixed |
 
 - Tag rules: use v3.3.2 or later.
-- Condition rules: until a release includes #3773, set "立即启用" (enabled) and "容错保护" (force) in Admin to the same value when you run v3.3.x. When they differ, the effect is the opposite of what the UI shows: the default "enabled, no force" has no effect, and "disabled, force" does not disable the rule.
+- Condition rules: with v3.3.x, set "立即启用" (enabled) and "容错保护" (force) in Admin to the same value. When they differ, the effect is the opposite of what the UI shows: the default "enabled, no force" has no effect, and "disabled, force" does not disable the rule.
 
 ## End-to-end example
 
@@ -257,7 +255,7 @@ The rule applies to the provider, so `key` is the provider's application name. U
 
 ### 5. Push a condition rule from Admin
 
-The Admin UI on the current `develop` branch cannot create condition rules: the form submits a rule name without the `.condition-router` suffix, and the YAML view asks for a version and group even for application-scoped rules. Existing rules can still be edited, disabled and deleted in the UI. To create one, call the Admin API, which is the same API the UI uses:
+The current Admin UI cannot create condition rules: the form submits a rule name without the `.condition-router` suffix, and the YAML view asks for a version and group even for application-scoped rules. Existing rules can still be edited, disabled and deleted in the UI. To create one, call the Admin API, which is the same API the UI uses:
 
 ```shell
 A=http://127.0.0.1:8888/api/v1
@@ -272,7 +270,7 @@ curl -b cookie.txt -H 'Content-Type: application/json' \
        "conditions":["application=router-demo-client => port=20001"]}'
 ```
 
-Once the rule is in effect, calls from `router-demo-client` go only to 20001. Both `enabled` and `force` are `true` here for the reason given in [Choosing a version](#choosing-a-version). With a version that includes #3773, set `force` as needed.
+Once the rule is in effect, calls from `router-demo-client` go only to 20001. Both `enabled` and `force` are `true` here for the reason given in [Choosing a version](#choosing-a-version). With a release after v3.3.2, set `force` as needed.
 
 Turning off "立即启用" in the UI, or deleting the rule, spreads the calls randomly again. To disable the rule on v3.3.x, turn off "容错保护" as well.
 
@@ -308,9 +306,9 @@ Dubbo Admin and Dubbo-go have to read and write the same location. Connecting to
 
 **Nacos**: Admin uses the rule name as the data ID and writes to group `dubbo`. Set the Dubbo-go config center group to `dubbo` (`config-center.group` in YAML, or `config_center.WithGroup("dubbo")` in code). The default `DEFAULT_GROUP` does not see the rules.
 
-**ZooKeeper**: since [dubbo-admin #1553](https://github.com/apache/dubbo-admin/pull/1553), the Admin `develop` branch writes rules to `/dubbo/config/dubbo/<rule name>`. That is Dubbo-go's default read path, so Dubbo-go needs no extra settings.
+**ZooKeeper**: the current Admin writes rules to `/dubbo/config/dubbo/<rule name>`. That is Dubbo-go's default read path, so Dubbo-go needs no extra settings.
 
-Older Admin builds such as 0.7.0-pre write rules to `/dubbo/config/<rule name>` (see [dubbo-admin #1625](https://github.com/apache/dubbo-admin/issues/1625)). Only with such a build does Dubbo-go need to read that path:
+Older Admin versions write rules to `/dubbo/config/<rule name>`. Only with such a version does Dubbo-go need to read that path:
 
 ```yaml
 dubbo:
@@ -322,7 +320,7 @@ dubbo:
       dubbo.config-center.root-path: /dubbo
 ```
 
-With the `develop` Admin, this config makes Dubbo-go miss the rules.
+With the current Admin, this config makes Dubbo-go miss the rules.
 
 Rule name formats:
 
@@ -334,17 +332,15 @@ Rule name formats:
 
 Rule updates, disabling and deletion depend on config center watch events.
 
-- `develop`: with `nacos-sdk-go/v2` v2.3.5 and `dubbogo/gost` v1.15.0, updates, disabling and deletion all work on Nacos and ZooKeeper. See [dubbo-go #3771](https://github.com/apache/dubbo-go/pull/3771) and [gost #155](https://github.com/dubbogo/gost/pull/155).
+- Releases after v3.3.2: with `nacos-sdk-go/v2` v2.3.5 and `dubbogo/gost` v1.15.0, updates, disabling and deletion all work on Nacos and ZooKeeper.
 - v3.3.2: with Nacos, upgrade `nacos-sdk-go/v2` to v2.3.5, or delete events are missed. Keep `gost` at v1.14.3; v1.15.0 does not compile with v3.3.2. Even then, a deleted tag rule on Nacos stays in effect, so disable a tag rule instead when you need to turn it off. On ZooKeeper, updates, disabling and deletion all work.
 
 ## Disabling tag rules
 
-Older Admin versions did not write the `enabled: false` field when a tag rule was disabled, and Dubbo-go treats a missing `enabled` as `true`, so the rule could not be disabled. [dubbo-admin #1595](https://github.com/apache/dubbo-admin/pull/1595) writes the field explicitly, and the `develop` branch includes it.
+Older Admin versions did not write the `enabled: false` field when a tag rule was disabled, and Dubbo-go treats a missing `enabled` as `true`, so the rule could not be disabled. The current Admin writes the field explicitly.
 
 Editing and disabling a tag rule in the UI currently clears the rule's `addresses`. Add `addresses` back in the YAML view before enabling the rule again.
 
 ## References
-
-The related regression tests and verification records are in [dubbo-go #3799](https://github.com/apache/dubbo-go/pull/3799).
 
 To view Dubbo-go applications, instances, services and methods in Admin, see [Viewing Dubbo-go Services in Dubbo Admin]({{< relref "../service-discovery/admin_compatibility.md" >}}). To connect Admin's metric, trace and log views, see [Observing Dubbo-go Services in Dubbo Admin]({{< relref "../observability/admin_compatibility.md" >}}).
