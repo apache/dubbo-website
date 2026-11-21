@@ -300,7 +300,7 @@ scope: application
 
 规则生效后，consumer 不再调用该 IP 上的实例。禁流按 IP 生效：本示例的两个 provider 运行在同一台机器上，禁用后两者都不再接收调用，consumer 报 `No provider available`。需要单独禁用一个实例时，请把实例部署在不同的 IP 上。
 
-关闭开关后，Admin 从规则中删除这条条件，但保留规则本身，调用随即恢复。以上行为在 `develop` 分支上验证。
+关闭开关后，Admin 从规则中删除这条条件，但保留规则本身，调用随即恢复。
 
 ## 配置中心对齐
 

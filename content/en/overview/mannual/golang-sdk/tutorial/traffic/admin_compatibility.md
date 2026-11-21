@@ -300,7 +300,7 @@ scope: application
 
 Once the rule is in effect, the consumer stops calling instances on that IP. Traffic is disabled per IP: in this example both providers run on one machine, so both stop receiving calls and the consumer reports `No provider available`. To disable a single instance, deploy instances on different IPs.
 
-Turning the switch off removes the condition from the rule but keeps the rule itself, and calls resume. This behavior was verified on the `develop` branch.
+Turning the switch off removes the condition from the rule but keeps the rule itself, and calls resume.
 
 ## Aligning the config center
 
