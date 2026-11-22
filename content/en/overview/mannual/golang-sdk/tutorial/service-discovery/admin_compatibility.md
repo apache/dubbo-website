@@ -1,7 +1,7 @@
 ---
 title: Viewing Dubbo-go Services in Dubbo Admin
 linkTitle: Dubbo Admin integration
-description: View Dubbo-go applications, instances, services and methods in Dubbo Admin
+description: View Dubbo-go applications, instances, services and methods in Dubbo Admin, and debug services
 type: docs
 weight: 13
 ---
@@ -13,6 +13,7 @@ Dubbo-go uses [application-level service discovery]({{< relref "./application-le
 | Application list, instance list, instance detail | Application-level instances in the registry |
 | Service list, service detail | Service definitions published by the provider to the metadata center |
 | Method list, method detail | Same as above, including parameter and return types |
+| Debug | Calls the chosen instance directly; for Triple IDL services, message definitions come from server reflection |
 
 The service list and method information depend on the provider publishing service definitions, which requires a Dubbo-go release after v3.3.2. With earlier versions, Admin shows applications and instances, but no services or methods.
 
@@ -46,6 +47,24 @@ Take a provider application `admin-demo-server` that registers `greet.GreetServi
 - **Service detail**: language `golang`, and both instances in the provider list.
 - **Method detail**: signature `greet.GreetRequest->greet.GreetResponse`, with the fields of the request and response types.
 
+## Debugging services in Admin
+
+On the **Debug** tab of a service, choose a method and an instance to call the provider directly; the result appears in the response area. The call goes to the chosen instance, with the service's group and version.
+
+Dubbo-go Triple services are usually defined with Protobuf IDL. To call such a service, Admin requires that:
+
+- The provider serves server reflection. With `dubbo.apache.org/dubbo-go/v3/imports` imported, the Triple server exports the reflection service `grpc.reflection.v1alpha.ServerReflection` by default, with no extra configuration.
+- The method is unary. Admin does not support streaming methods yet.
+- The provider does not enable TLS or authentication.
+
+The request is a JSON array with a single element: the request message in Protobuf JSON format, with field names as defined in the `.proto` file and 64-bit integers as strings. For the `Greet` method of `greet.GreetService`:
+
+```json
+[{"name": "Ada"}]
+```
+
+The response is shown in Protobuf JSON format as well. For a non-IDL service, each element of the request array is one argument of the method.
+
 ## FAQ
 
 ### 1. The application list is correct, but the service list is empty
@@ -69,7 +88,7 @@ curl -b cookie.txt "$A/service/methods?serviceName=greet.GreetService&group=gray
 
 ### 2. Parameter types are shown as Java types
 
-Admin shows types with their Java names, for example `string` as `java.lang.String` and `time.Time` as `java.util.Date`. This matches Dubbo Java and Admin's generic invocation, and does not affect calls.
+Admin shows types with their Java names, for example `string` as `java.lang.String` and `time.Time` as `java.util.Date`. This matches Dubbo Java and Admin's generic invocation, and does not affect calls. Debug requests for Triple IDL services are written in Protobuf JSON, see [Debugging services in Admin](#debugging-services-in-admin).
 
 ### 3. An application that only calls other services is not in the application list
 

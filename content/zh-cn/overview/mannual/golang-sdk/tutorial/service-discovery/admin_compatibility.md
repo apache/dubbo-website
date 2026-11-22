@@ -1,7 +1,7 @@
 ---
 title: 在 Dubbo Admin 中查看 Dubbo-go 服务
 linkTitle: 接入 Dubbo Admin
-description: 在 Dubbo Admin 中查看 Dubbo-go 的应用、实例、服务和方法
+description: 在 Dubbo Admin 中查看 Dubbo-go 的应用、实例、服务和方法，并调试服务
 type: docs
 weight: 13
 ---
@@ -13,6 +13,7 @@ Dubbo-go 默认使用[应用级服务发现]({{< relref "./application-level-ser
 | 应用列表、实例列表、实例详情 | 注册中心中的应用级实例 |
 | 服务列表、服务详情 | provider 发布到元数据中心的服务定义 |
 | 方法列表、方法详情 | 同上，包含参数和返回值类型 |
+| 调试 | 直接调用选中的实例，Triple IDL 服务的消息定义通过服务端反射获取 |
 
 服务列表和方法信息依赖 provider 发布服务定义，需要使用 v3.3.2 之后发布的 Dubbo-go 版本。更早的版本中，Admin 只能看到应用和实例，看不到服务和方法。
 
@@ -46,6 +47,24 @@ Dubbo-go 默认使用[应用级服务发现]({{< relref "./application-level-ser
 - **服务详情**：语言为 `golang`，提供者列表中有两个实例。
 - **方法详情**：签名为 `greet.GreetRequest->greet.GreetResponse`，并列出请求和响应类型的字段。
 
+## 在 Admin 中调试服务
+
+在服务详情的「调试」页选择方法和实例后，可以直接调用 provider，结果显示在响应区。调用会发往选中的实例，并带上服务的 group 和 version。
+
+Dubbo-go 的 Triple 服务通常基于 Protobuf IDL 定义，Admin 调用这类服务需要满足：
+
+- provider 提供服务端反射。导入 `dubbo.apache.org/dubbo-go/v3/imports` 后，Triple 服务端默认导出反射服务 `grpc.reflection.v1alpha.ServerReflection`，无需额外配置。
+- 方法为 unary 调用，Admin 暂不支持流式方法。
+- provider 没有开启 TLS 或鉴权。
+
+请求是一个只含一个元素的 JSON 数组，元素是按 Protobuf JSON 格式编写的请求消息，字段名与 `.proto` 中的定义一致，64 位整数以字符串表示。以 `greet.GreetService` 的 `Greet` 方法为例：
+
+```json
+[{"name": "Ada"}]
+```
+
+响应同样以 Protobuf JSON 格式显示。非 IDL 服务的请求数组中，每个元素对应方法的一个参数。
+
 ## 常见问题
 
 ### 1. 应用列表正常，但服务列表为空
@@ -69,7 +88,7 @@ curl -b cookie.txt "$A/service/methods?serviceName=greet.GreetService&group=gray
 
 ### 2. 参数类型显示为 Java 类型
 
-Admin 中的类型以 Java 的写法展示，例如 `string` 显示为 `java.lang.String`，`time.Time` 显示为 `java.util.Date`。这与 Dubbo Java 以及 Admin 的泛化调用保持一致，不影响调用。
+Admin 中的类型以 Java 的写法展示，例如 `string` 显示为 `java.lang.String`，`time.Time` 显示为 `java.util.Date`。这与 Dubbo Java 以及 Admin 的泛化调用保持一致，不影响调用。Triple IDL 服务的调试请求按 Protobuf JSON 编写，见[在 Admin 中调试服务](#在-admin-中调试服务)。
 
 ### 3. 只调用其他服务的应用不在应用列表中
 
