@@ -221,4 +221,22 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	}
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	_ = ins
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;dubbo.WithTracing()&lt;/code&gt; 不传任何参数时，使用默认配置：&lt;/p&gt;</description></item></channel></rss>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;dubbo.WithTracing()&lt;/code&gt; 不传任何参数时，使用默认配置：&lt;/p&gt;</description></item><item><title>在 Dubbo Admin 中观测 Dubbo-go 服务</title><link>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/admin_compatibility/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/observability/admin_compatibility/</guid><description>&lt;p&gt;Dubbo Admin 的指标、链路和日志入口打开的是 Grafana 面板，数据分别来自 Prometheus、Jaeger 和 Loki/Elasticsearch。Admin 对 Dubbo Java 和 Dubbo-go 使用同一套面板，Dubbo-go 应用只需要按约定导出数据：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;指标：通过 Prometheus exporter 暴露，由 Prometheus 抓取；&lt;/li&gt;
+&lt;li&gt;链路：通过 OTLP 上报到 OpenTelemetry Collector 或 Jaeger；&lt;/li&gt;
+&lt;li&gt;日志：在日志中输出 &lt;code&gt;trace_id&lt;/code&gt;，由日志采集链路写入 Loki 或 Elasticsearch。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在 Admin 中查看应用、实例和服务，见&lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/admin_compatibility/"&gt;在 Dubbo Admin 中查看 Dubbo-go 服务&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id="字段约定"&gt;字段约定&lt;/h2&gt;
+&lt;p&gt;Admin 通过下列字段把同一次调用的指标、链路和日志关联起来：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;应用&lt;/strong&gt;：指标 label &lt;code&gt;application_name&lt;/code&gt;，链路的 resource 属性 &lt;code&gt;service.name&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;服务&lt;/strong&gt;：指标 label &lt;code&gt;interface&lt;/code&gt;，链路属性 &lt;code&gt;rpc.service&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;方法&lt;/strong&gt;：指标 label &lt;code&gt;method&lt;/code&gt;，链路属性 &lt;code&gt;rpc.method&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;调用侧&lt;/strong&gt;：指标名前缀 &lt;code&gt;dubbo_provider_&lt;/code&gt; 和 &lt;code&gt;dubbo_consumer_&lt;/code&gt;，分别对应 span kind &lt;code&gt;server&lt;/code&gt; 和 &lt;code&gt;client&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;实例&lt;/strong&gt;：指标 label &lt;code&gt;ip&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分组和版本&lt;/strong&gt;：指标 label &lt;code&gt;group&lt;/code&gt;、&lt;code&gt;version&lt;/code&gt;，链路属性 &lt;code&gt;dubbo.group&lt;/code&gt;、&lt;code&gt;dubbo.version&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;链路&lt;/strong&gt;：日志字段 &lt;code&gt;trace_id&lt;/code&gt;、&lt;code&gt;span_id&lt;/code&gt;，即 span 的 trace ID 和 span ID。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;rpc.service&lt;/code&gt; 只包含接口全限定名，与指标的 &lt;code&gt;interface&lt;/code&gt; 相同。Dubbo-go v3.3.2 及更早版本会把 &lt;code&gt;rpc.service&lt;/code&gt; 写成 &lt;code&gt;group/interface:version&lt;/code&gt;，Admin 自带的 Collector 配置会先把它规范化再关联指标。&lt;/p&gt;</description></item></channel></rss>
