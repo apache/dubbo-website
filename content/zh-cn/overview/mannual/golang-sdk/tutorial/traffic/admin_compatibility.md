@@ -7,20 +7,18 @@ weight: 2
 
 本文从零搭建一套环境：启动 Nacos 或 ZooKeeper，启动 Dubbo Admin，启动两个 Dubbo-go provider 和一个 consumer，然后在 Admin 中下发条件路由和标签路由，观察 consumer 的调用变化。最后说明规则能否生效所依赖的版本和配置。
 
-以下步骤基于 Dubbo Admin `develop` 分支（[0db71b0](https://github.com/apache/dubbo-admin/commit/0db71b07b9d94b2f57e3ffd22af5e55e6083e63f)）、Dubbo-go v3.3.2 与 `develop` 分支验证。
-
 ## 版本选择
 
 Dubbo Admin 写出的条件路由固定为 `configVersion: v3.0` 格式（条件以字符串存储，界面和 YAML 视图都写死了 `v3.0`），因此下表中的条件路由问题会影响所有通过 Admin 创建的条件规则。
 
 | Dubbo-go 版本 | 条件路由（v3.0 格式） | 标签路由 |
 |---|---|---|
-| v3.3.0、v3.3.1 | `enabled` 与 `force` 被互换解析；省略 `enabled` 时 panic | 首次未命中缓存时找不到规则 |
+| v3.3.0、v3.3.1 | enabled 与 force 被互换解析；省略 enabled 时 panic | 首次未命中缓存时找不到规则 |
 | v3.3.2 | 同上 | 已修复 |
-| `develop` | 已修复（[#3773](https://github.com/apache/dubbo-go/pull/3773)） | 已修复 |
+| v3.3.2 之后的版本 | 已修复 | 已修复 |
 
 - 标签路由：使用 v3.3.2 及以上版本。
-- 条件路由：在包含 #3773 的版本发布之前，若使用 v3.3.x，请把 Admin 中的「立即启用」和「容错保护」设为相同的值。两者不同时，效果与界面所示相反：默认的「启用、不容错」不生效，「禁用、容错」则不会禁用规则。
+- 条件路由：使用 v3.3.x 时，请把 Admin 中的「立即启用」和「容错保护」设为相同的值。两者不同时，效果与界面所示相反：默认的「启用、不容错」不生效，「禁用、容错」则不会禁用规则。
 
 ## 端到端示例
 
@@ -257,7 +255,7 @@ tags:
 
 ### 5. 在 Admin 中下发条件路由
 
-当前 `develop` 分支的 Admin 界面无法新建条件路由（表单提交的规则名缺少 `.condition-router` 后缀；YAML 视图要求应用级规则也填写版本和分组），但已有规则可以在界面中编辑、禁用和删除。新建规则可以调用 Admin 的接口，这也是界面使用的接口：
+当前 Admin 界面无法新建条件路由（表单提交的规则名缺少 `.condition-router` 后缀；YAML 视图要求应用级规则也填写版本和分组），但已有规则可以在界面中编辑、禁用和删除。新建规则可以调用 Admin 的接口，这也是界面使用的接口：
 
 ```shell
 A=http://127.0.0.1:8888/api/v1
@@ -272,9 +270,35 @@ curl -b cookie.txt -H 'Content-Type: application/json' \
        "conditions":["application=router-demo-client => port=20001"]}'
 ```
 
-规则生效后，`router-demo-client` 的调用只落到 20001。这里 `enabled` 和 `force` 都设为 `true`，原因见[版本选择](#版本选择)；使用包含 #3773 的版本时，`force` 可以按需设置。
+规则生效后，`router-demo-client` 的调用只落到 20001。这里 `enabled` 和 `force` 都设为 `true`，原因见[版本选择](#版本选择)；使用 v3.3.2 之后的版本时，`force` 可以按需设置。
 
 在界面中关闭「立即启用」或删除规则后，调用恢复随机分布。在 v3.3.x 上禁用规则时，需要同时关闭「容错保护」。
+
+### 6. 在 Admin 中禁用实例流量
+
+在实例的配置页中打开「流量禁用」开关，或调用对应的接口：
+
+```shell
+curl -b cookie.txt -X PUT \
+  "$A/instance/config/trafficDisable?appName=router-demo-server&instanceIP=<实例 IP>&trafficDisable=true&mesh=$MESH"
+```
+
+Admin 不单独下发禁流规则，而是在 provider 应用的条件路由 `router-demo-server.condition-router` 中追加一条 `=>host!=<实例 IP>`。规则不存在时会新建：
+
+```yaml
+conditions:
+- =>host!=192.168.1.10
+configVersion: v3.0
+enabled: true
+force: true
+key: router-demo-server
+runtime: true
+scope: application
+```
+
+规则生效后，consumer 不再调用该 IP 上的实例。禁流按 IP 生效：本示例的两个 provider 运行在同一台机器上，禁用后两者都不再接收调用，consumer 报 `No provider available`。需要单独禁用一个实例时，请把实例部署在不同的 IP 上。
+
+关闭开关后，Admin 从规则中删除这条条件，但保留规则本身，调用随即恢复。
 
 ## 配置中心对齐
 
@@ -282,9 +306,9 @@ Dubbo Admin 和 Dubbo-go 需要读写同一个位置，仅连接同一个配置�
 
 **Nacos**：Admin 以规则名作为 data ID，写入 group `dubbo`。Dubbo-go 需要将配置中心的 group 设为 `dubbo`（YAML 中的 `config-center.group`，或代码中的 `config_center.WithGroup("dubbo")`），默认的 `DEFAULT_GROUP` 读不到规则。
 
-**ZooKeeper**：Admin `develop` 分支自 [dubbo-admin #1553](https://github.com/apache/dubbo-admin/pull/1553) 起将规则写入 `/dubbo/config/dubbo/<规则名>`，与 Dubbo-go 的默认读取路径一致，Dubbo-go 无需额外配置。
+**ZooKeeper**：当前版本的 Admin 将规则写入 `/dubbo/config/dubbo/<规则名>`，与 Dubbo-go 的默认读取路径一致，Dubbo-go 无需额外配置。
 
-更早的 Admin（如 0.7.0-pre）将规则写入 `/dubbo/config/<规则名>`（见 [dubbo-admin #1625](https://github.com/apache/dubbo-admin/issues/1625)）。只有配合这类 Admin 时，才需要让 Dubbo-go 改为读取该路径：
+较早版本的 Admin 将规则写入 `/dubbo/config/<规则名>`。只有配合这类 Admin 时，才需要让 Dubbo-go 改为读取该路径：
 
 ```yaml
 dubbo:
@@ -296,7 +320,7 @@ dubbo:
       dubbo.config-center.root-path: /dubbo
 ```
 
-配合 `develop` 分支的 Admin 使用上述配置，反而会读不到规则。
+配合当前版本的 Admin 使用上述配置，反而会读不到规则。
 
 规则名的格式：
 
@@ -308,15 +332,15 @@ dubbo:
 
 规则的更新、禁用和删除依赖配置中心的监听事件。
 
-- `develop` 分支：使用 `nacos-sdk-go/v2` v2.3.5 和 `dubbogo/gost` v1.15.0，Nacos 和 ZooKeeper 上的更新、禁用、删除均正常。相关修复见 [dubbo-go #3771](https://github.com/apache/dubbo-go/pull/3771) 和 [gost #155](https://github.com/dubbogo/gost/pull/155)。
+- v3.3.2 之后的版本：依赖 `nacos-sdk-go/v2` v2.3.5 和 `dubbogo/gost` v1.15.0，Nacos 和 ZooKeeper 上的更新、禁用、删除均正常。
 - v3.3.2：使用 Nacos 时，请将 `nacos-sdk-go/v2` 升级到 v2.3.5，否则收不到删除事件；`gost` 保持 v1.14.3，升级到 v1.15.0 会编译失败。即便如此，Nacos 上删除标签规则后旧规则仍会生效，需要停用标签规则时请改为禁用。ZooKeeper 上的更新、禁用和删除均正常。
 
 ## 禁用标签路由
 
-较早版本的 Admin 在禁用标签规则时不写 `enabled: false` 字段，而 Dubbo-go 会把缺省的 `enabled` 当作 `true`，导致规则无法禁用。[dubbo-admin #1595](https://github.com/apache/dubbo-admin/pull/1595) 已改为显式写出该字段，`develop` 分支包含此修复。
+较早版本的 Admin 在禁用标签规则时不写 `enabled: false` 字段，而 Dubbo-go 会把缺省的 `enabled` 当作 `true`，导致规则无法禁用。当前版本的 Admin 已改为显式写出该字段。
 
 当前在界面中编辑并禁用标签规则时，规则中的 `addresses` 会被清空。重新启用前，请在 YAML 视图中补回 `addresses`。
 
 ## 参考
 
-相关回归测试与验证记录见 [dubbo-go #3799](https://github.com/apache/dubbo-go/pull/3799)。
+在 Admin 中查看 Dubbo-go 的应用、实例、服务和方法，见[在 Dubbo Admin 中查看 Dubbo-go 服务]({{< relref "../service-discovery/admin_compatibility.md" >}})；接入 Admin 的指标、链路和日志入口，见[在 Dubbo Admin 中观测 Dubbo-go 服务]({{< relref "../observability/admin_compatibility.md" >}})。
