@@ -113,7 +113,50 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;		registry.&lt;span style="color:#268bd2"&gt;WithRegisterService&lt;/span&gt;(),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	),
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果使用配置文件，可以将 &lt;code&gt;registry-type&lt;/code&gt; 设置为 &lt;code&gt;service&lt;/code&gt;、&lt;code&gt;interface&lt;/code&gt; 或 &lt;code&gt;all&lt;/code&gt;。如果对注册方式有明确要求，建议显式配置。&lt;/p&gt;</description></item><item><title>多注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/multi_registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/multi_registry/</guid><description>&lt;p&gt;一个 Dubbo 应用可以配置的多个接口维度的注册中心，多注册中心可用于集群隔离、迁移等多种场景，关于这部分更详细的说明可参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/multiple-registry/" target="_blank"&gt;Dubbo Java 多注册中心说明&lt;/a&gt;。&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果使用配置文件，可以将 &lt;code&gt;registry-type&lt;/code&gt; 设置为 &lt;code&gt;service&lt;/code&gt;、&lt;code&gt;interface&lt;/code&gt; 或 &lt;code&gt;all&lt;/code&gt;。如果对注册方式有明确要求，建议显式配置。&lt;/p&gt;</description></item><item><title>在 Dubbo Admin 中查看 Dubbo-go 服务</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/admin_compatibility/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/admin_compatibility/</guid><description>&lt;p&gt;Dubbo-go 默认使用&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/application-level-service-discovery/"&gt;应用级服务发现&lt;/a&gt;，接入 Dubbo Admin 时不需要切换回接口级注册。Admin 中各页面的数据来源如下：&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Admin 页面&lt;/th&gt;
+ &lt;th&gt;数据来源&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;应用列表、实例列表、实例详情&lt;/td&gt;
+ &lt;td&gt;注册中心中的应用级实例&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;服务列表、服务详情&lt;/td&gt;
+ &lt;td&gt;provider 发布到元数据中心的服务定义&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;方法列表、方法详情&lt;/td&gt;
+ &lt;td&gt;同上，包含参数和返回值类型&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;调试&lt;/td&gt;
+ &lt;td&gt;直接调用选中的实例，Triple IDL 服务的消息定义通过服务端反射获取&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;服务列表和方法信息依赖 provider 发布服务定义，需要使用 v3.3.2 之后发布的 Dubbo-go 版本。更早的版本中，Admin 只能看到应用和实例，看不到服务和方法。&lt;/p&gt;
+&lt;h2 id="前置准备"&gt;前置准备&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;启动 Nacos 或 ZooKeeper，作为注册中心和元数据中心。&lt;/li&gt;
+&lt;li&gt;启动 Dubbo Admin，&lt;code&gt;discovery&lt;/code&gt; 指向同一个注册中心，见&lt;a href="https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/traffic/admin_compatibility/#2-启动-dubbo-admin"&gt;与 Dubbo Admin 配合使用路由规则&lt;/a&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;目前只有 Nacos 和 ZooKeeper 元数据中心支持发布服务定义。&lt;/p&gt;
+&lt;h2 id="配置"&gt;配置&lt;/h2&gt;
+&lt;p&gt;使用默认配置即可：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;注册中心默认同时作为元数据中心，服务定义会写入同一个 Nacos 或 ZooKeeper。&lt;/li&gt;
+&lt;li&gt;服务定义默认发布，与 &lt;code&gt;metadata-type&lt;/code&gt; 是 &lt;code&gt;local&lt;/code&gt; 还是 &lt;code&gt;remote&lt;/code&gt; 无关。如需关闭，在元数据中心配置中使用 &lt;code&gt;metadata.WithReportDefinition(false)&lt;/code&gt;，此时 Admin 中将看不到该应用的服务和方法。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;服务定义在实例注册之后异步发布，失败时会自动重试。provider 日志中出现下面一行即表示发布成功：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#93a1a1;background-color:#002b36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[Metadata][Definition] published definition for greet.GreetService, methods=1 types=2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="在-admin-中查看"&gt;在 Admin 中查看&lt;/h2&gt;
+&lt;p&gt;以一个注册了 &lt;code&gt;greet.GreetService&lt;/code&gt;（group 为 &lt;code&gt;gray&lt;/code&gt;，version 为 &lt;code&gt;1.0.0&lt;/code&gt;）、启动了两个实例的 provider 应用 &lt;code&gt;admin-demo-server&lt;/code&gt; 为例：&lt;/p&gt;</description></item><item><title>多注册中心</title><link>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/multi_registry/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://cn.dubbo.apache.org/zh-cn/overview/mannual/golang-sdk/tutorial/service-discovery/multi_registry/</guid><description>&lt;p&gt;一个 Dubbo 应用可以配置的多个接口维度的注册中心，多注册中心可用于集群隔离、迁移等多种场景，关于这部分更详细的说明可参考 &lt;a href="https://dubbo.apache.org/zh-cn/overview/mannual/java-sdk/reference-manual/registry/multiple-registry/" target="_blank"&gt;Dubbo Java 多注册中心说明&lt;/a&gt;。&lt;/p&gt;
 &lt;h2 id="应用场景"&gt;应用场景&lt;/h2&gt;
 &lt;h3 id="迁移场景"&gt;迁移场景&lt;/h3&gt;
 &lt;p&gt;在不同注册中心之间实现平滑迁移，不进行服务的中断。例如从 ZooKeeper 迁移到 Nacos，双注册保证过渡期间业务连续。&lt;/p&gt;
