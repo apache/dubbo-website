@@ -193,6 +193,8 @@ Every client invocation produces a similar span on the server. See the [stdout e
 
 ## Running the Jaeger exporter
 
+This example uses a [deprecated OpenTelemetry exporter](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger). For new applications and migrations, see [Sending traces to Jaeger over OTLP HTTP](#jaeger-otlp-http).
+
 ### Start Jaeger
 
 The example starts Jaeger all-in-one with Docker:
@@ -251,6 +253,37 @@ Open `http://localhost:16686` in a browser:
 
 The client example calls `TracerProvider.Shutdown` after the invocation so pending spans are flushed to Jaeger before the process exits.
 
+## Sending traces to Jaeger over OTLP HTTP {#jaeger-otlp-http}
+
+Dubbo-go can send traces directly to Jaeger over OTLP HTTP. Enable the OTLP HTTP receiver in Jaeger and make its port reachable from both the Dubbo-go client and server. The default port is `4318`. For a local instance, follow the [Jaeger quickstart](https://www.jaegertracing.io/docs/latest/getting-started/#all-in-one).
+
+In each application's `dubbo.WithTracing(...)` configuration, replace `trace.WithJaegerExporter()` with `trace.WithOtlpHttpExporter()`. Replace the legacy collector URL (such as `http://localhost:14268/api/traces`) with the OTLP receiver's `host:port`. The exporter adds the `/v1/traces` path. Keep your existing propagator and sampling options.
+
+```go
+dubbo.WithTracing(
+	trace.WithEnabled(),
+	trace.WithOtlpHttpExporter(),
+	trace.WithEndpoint("127.0.0.1:4318"),
+	trace.WithInsecure(),
+)
+```
+
+For applications configured with YAML, merge these settings into `dubbo.otel.tracing`.
+
+```yaml
+dubbo:
+  otel:
+    tracing:
+      enable: true
+      exporter: otlp-http
+      endpoint: "127.0.0.1:4318"
+      insecure: true
+```
+
+Use `trace.WithInsecure()` or `insecure: true` for a local plain HTTP receiver. When connecting to a receiver with TLS, omit `trace.WithInsecure()` or set `insecure: false`.
+
+Restart the client and server, make an RPC call, and find the trace by application name in the Jaeger UI (typically `http://localhost:16686` for a local instance). To sample every request during local verification, temporarily use `trace.WithAlwaysMode()` or set `sample-mode: always` under `dubbo.otel.tracing`.
+
 ## Running the OTLP HTTP exporter
 
 The `otel/tracing/otlp_http_exporter` example covers the dubbo, triple, and jsonrpc protocols. It starts a mock OTLP receiver (listening on `127.0.0.1:4318`) inside the server process to verify that spans produced by the three protocols are exported correctly.
@@ -300,7 +333,7 @@ In a real environment, point `endpoint` at an OpenTelemetry Collector or an OTLP
 
 - **stdout exporter**: Spans are printed as JSON on the application standard output. Inspect `TraceID`, `SpanID`, `Parent`, and `Attributes`; `Attributes` contains Dubbo RPC information such as `rpc.system`, `rpc.service`, and `rpc.method`.
 - **Jaeger exporter**: Query by service name in the Jaeger UI to see the full trace timeline.
-- **OTLP HTTP/gRPC exporter**: Spans are sent to a Collector, which forwards them to backends such as Jaeger, Zipkin, or Grafana Tempo; query the traces in that backend's UI.
+- With the **OTLP HTTP/gRPC exporter**, send spans directly to an OTLP-compatible backend such as Jaeger or through an OpenTelemetry Collector. Query the traces in the backend's UI.
 
 With tracing enabled, the client and server on the call chain share the same TraceID automatically. When troubleshooting, first use the stdout exporter to confirm spans are generated, then switch to a remote backend to verify network and endpoint configuration.
 
@@ -316,8 +349,8 @@ Possible causes:
 
 ### 2. The Jaeger UI shows no data / the endpoint is wrong
 
-- Verify that the endpoint matches the Jaeger instance. The example uses `http://localhost:14268/api/traces`.
-- Verify that the Docker port mappings for `16686` (UI) and `14268` (collector HTTP) are correct.
+- Match the endpoint to the exporter. The legacy exporter uses `http://localhost:14268/api/traces`. The OTLP HTTP exporter uses the address of Jaeger's OTLP receiver, for example `127.0.0.1:4318`.
+- For a containerized Jaeger instance, check the port mappings for `16686` (UI) and the port used by your exporter.
 - Restart the application after changing the endpoint, and check the application logs for `failed to create ... exporter` or connection errors.
 - The service name selected in the Jaeger UI must match `dubbo.WithName(...)`, for example `dubbo_otel_jaeger_server` or `dubbo_otel_jaeger_client`.
 
