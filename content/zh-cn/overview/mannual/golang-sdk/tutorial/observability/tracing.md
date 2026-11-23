@@ -193,6 +193,8 @@ Span 以 JSON 形式打印，关键字段如下：
 
 ## Jaeger exporter 运行方式
 
+本示例使用的 [OpenTelemetry exporter 已弃用](https://pkg.go.dev/go.opentelemetry.io/otel/exporters/jaeger)。新应用和迁移场景可参考[通过 OTLP HTTP 向 Jaeger 上报链路数据](#jaeger-otlp-http)。
+
 ### 启动 Jaeger
 
 示例使用 Docker 启动 Jaeger all-in-one：
@@ -251,6 +253,37 @@ dubbo.WithTracing(
 
 客户端示例在调用结束后会调用 `TracerProvider.Shutdown`，确保 Span 在进程退出前被刷新到 Jaeger。
 
+## 通过 OTLP HTTP 向 Jaeger 上报链路数据 {#jaeger-otlp-http}
+
+Dubbo-go 可以通过 OTLP HTTP 直接向 Jaeger 上报链路数据。在 Jaeger 中启用 OTLP HTTP 接收器，并确保 Dubbo-go 客户端和服务端均可访问其端口。默认端口为 `4318`。在本地启动 Jaeger 可参考 [Jaeger 快速入门](https://www.jaegertracing.io/docs/latest/getting-started/#all-in-one)。
+
+在各应用的 `dubbo.WithTracing(...)` 配置中，将 `trace.WithJaegerExporter()` 替换为 `trace.WithOtlpHttpExporter()`。将旧版采集端地址（例如 `http://localhost:14268/api/traces`）改为 OTLP 接收器的 `host:port`。Exporter 会自动添加 `/v1/traces` 路径。保留原有的上下文传播和采样配置。
+
+```go
+dubbo.WithTracing(
+	trace.WithEnabled(),
+	trace.WithOtlpHttpExporter(),
+	trace.WithEndpoint("127.0.0.1:4318"),
+	trace.WithInsecure(),
+)
+```
+
+使用 YAML 配置的应用可将以下设置合并到 `dubbo.otel.tracing`。
+
+```yaml
+dubbo:
+  otel:
+    tracing:
+      enable: true
+      exporter: otlp-http
+      endpoint: "127.0.0.1:4318"
+      insecure: true
+```
+
+本地接收器使用纯 HTTP 时，设置 `trace.WithInsecure()` 或 `insecure: true`。连接启用 TLS 的接收器时，移除 `trace.WithInsecure()` 或设置 `insecure: false`。
+
+重启客户端和服务端，发起一次 RPC 调用，然后在 Jaeger UI（本地通常为 `http://localhost:16686`）中按应用名称查找链路。若要在本地验证时采样每次请求，可临时使用 `trace.WithAlwaysMode()`，或在 `dubbo.otel.tracing` 下设置 `sample-mode: always`。
+
 ## OTLP HTTP exporter 运行方式
 
 `otel/tracing/otlp_http_exporter` 示例覆盖 dubbo、triple、jsonrpc 三种协议，并在服务端进程内启动一个 mock OTLP receiver（监听 `127.0.0.1:4318`），用于校验三种协议产生的 Span 是否正确上报。
@@ -300,7 +333,7 @@ dubbo.WithTracing(
 
 - **stdout exporter**：Span 以 JSON 打印在应用标准输出中。关注 `TraceID`、`SpanID`、`Parent` 和 `Attributes`，其中 `Attributes` 会携带 `rpc.system`、`rpc.service`、`rpc.method` 等 Dubbo RPC 信息。
 - **Jaeger exporter**：在 Jaeger UI 中按服务名查询，可看到完整调用链时间线。
-- **OTLP HTTP/gRPC exporter**：Span 上报到 Collector 后，由 Collector 转发到 Jaeger、Zipkin、Grafana Tempo 等后端，在这些后端的 UI 中查询。
+- 使用 **OTLP HTTP/gRPC exporter** 时，可将 Span 直接上报到 Jaeger 等兼容 OTLP 的后端，也可通过 OpenTelemetry Collector 转发。在对应后端的 UI 中查询链路。
 
 开启 tracing 后，调用链上服务端和客户端会自动共享 TraceID。排查时可以先用 stdout exporter 确认 Span 能正常生成，再切换到远程后端验证网络与 endpoint 配置。
 
@@ -316,8 +349,8 @@ dubbo.WithTracing(
 
 ### 2. Jaeger 页面没有数据 / endpoint 配错
 
-- 确认 endpoint 与 Jaeger 实例一致。示例默认使用 `http://localhost:14268/api/traces`。
-- 确认 Docker 端口映射正常，`16686`（UI）和 `14268`（collector HTTP）都已暴露。
+- 确认 endpoint 与 exporter 匹配。旧版 exporter 使用 `http://localhost:14268/api/traces`。OTLP HTTP exporter 使用 Jaeger 的 OTLP 接收器地址，例如 `127.0.0.1:4318`。
+- 使用容器运行 Jaeger 时，检查 `16686`（UI）及 exporter 所用端口的映射。
 - 修改 endpoint 后需要重启应用；同时观察应用日志中是否有 `failed to create ... exporter` 或连接失败错误。
 - Jaeger UI 中查询的服务名要与应用 `dubbo.WithName(...)` 配置一致，例如 `dubbo_otel_jaeger_server`、`dubbo_otel_jaeger_client`。
 
