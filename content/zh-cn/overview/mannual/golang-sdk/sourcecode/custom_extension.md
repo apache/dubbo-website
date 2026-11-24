@@ -230,7 +230,7 @@ Config.New() 获取独立实例
 
 ## 初始化失败回滚
 
-如果 `Init(scope)` 会申请资源，扩展可以实现 `extension.Rollbacker`，以便在初始化失败后释放资源：
+如果 `Init(scope)` 在申请资源后失败，必须在返回错误之前释放这些资源。`extension.Rollbacker` 是可选的初始化回滚接口，不能替代 `Init(scope)` 自身的清理：
 
 ```go
 type Rollbacker interface {
@@ -238,6 +238,6 @@ type Rollbacker interface {
 }
 ```
 
-如果某个扩展在 `Init(scope)` 中失败，框架会对该扩展及之前已初始化的扩展逆序调用 `Rollback(scope)`。
+某个 `Init(scope)` 调用失败时，框架会逆序对失败的扩展及此前已初始化的扩展触发回滚（仅对实现了 `extension.Rollbacker` 的扩展调用）。`Rollback(scope)` 应当保持幂等，即使 `Init(scope)` 已清理过资源也能安全执行。
 
 应用中通过 YAML 或 Go 选项配置扩展的方法，见[扩展配置与使用](../../tutorial/configuration/extension/)。

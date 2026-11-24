@@ -69,7 +69,7 @@ client.WithExtension(
 )
 ```
 
-If you pass several options for the same extension, they apply in the order written. Each Instance, Client, and Server receives its own configuration; changing one does not change the others.
+If you pass several options for the same extension, they apply in the order written. Each initialization gets a fresh `Config` from `Config.New()`. The configuration objects are independent; runtime state is managed by the extension and may be shared.
 
 ## 4. Configure with YAML
 
@@ -108,6 +108,8 @@ For the same setting, later sources take precedence:
 ## 5. Hystrix Example
 
 The following example shows how to configure and use the Hystrix circuit breaker extension using the unified Extension API. The client and server snippets import the generated `greet` package from the [Hystrix sample's proto directory](https://github.com/apache/dubbo-go-samples/tree/main/filter/hystrix/proto). In a separate Go module, fetch that package with `go get github.com/apache/dubbo-go-samples@main`.
+
+Hystrix keeps command settings and circuit state process-wide. Clients using the same command name share a circuit, as do servers using the same command name. Consumer and provider circuits are separate. The latest initialization sets the parameters for commands it configures and sets that scope's default policy.
 
 ### 5.1 Client
 
@@ -205,12 +207,14 @@ dubbo:
   extensions:
     hystrix:
       consumer:
-        "greet.GreetService:::Greet":
+        default:
           timeout: 1000
           max-concurrent-requests: 10
           request-volume-threshold: 5
           sleep-window: 5000
           error-percent-threshold: 50
+        "greet.GreetService:::Greet":
+          timeout: 600
       provider:
         "greet.GreetService:::Greet":
           timeout: 1000
@@ -219,6 +223,10 @@ dubbo:
           sleep-window: 5000
           error-percent-threshold: 50
 ```
+
+The reserved `default` configuration entry applies to methods without a command entry in that scope. An explicit method entry overrides the fields it sets and inherits omitted or zero-valued fields from `default`. Here the consumer's `Greet` method uses a 600 ms timeout and inherits the concurrency limit of 10. An undeclared method passes through without Hystrix if its scope has no `default`, as on the provider side in this example.
+
+Calling the old `hystrix.ConfigureCommand` alone no longer enables a command in this filter. Migrate those settings to `hystrix.WithConfig(...)` or to YAML. If the scope has a `default`, the first call to an undeclared method registers it with the scope's default values and replaces any legacy settings configured via `hystrix.ConfigureCommand`.
 
 ## 6. Configuration Changes
 

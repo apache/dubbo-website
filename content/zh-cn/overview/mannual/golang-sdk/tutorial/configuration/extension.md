@@ -69,7 +69,7 @@ client.WithExtension(
 )
 ```
 
-同一扩展传入多个选项时，框架按书写顺序应用。每个实例、客户端和服务端使用独立配置，相互之间不会覆盖。
+同一扩展传入多个选项时，框架按书写顺序应用。每次初始化都通过 `Config.New()` 创建新的 `Config`。各配置对象相互独立；运行时状态由扩展管理，可能在不同实例之间共享。
 
 ## 4. 使用 YAML 配置
 
@@ -108,6 +108,8 @@ dubbo:
 ## 5. Hystrix 示例
 
 以下展示如何使用统一 Extension API 配置和使用 Hystrix 熔断扩展。客户端和服务端代码导入了 [Hystrix 示例的 proto 目录](https://github.com/apache/dubbo-go-samples/tree/main/filter/hystrix/proto)中生成的 `greet` 包。在独立 Go 模块中，可执行 `go get github.com/apache/dubbo-go-samples@main` 获取该包。
+
+Hystrix 的命令参数和熔断状态是进程级的。使用同名命令的客户端共享熔断状态，服务端也是如此；consumer 和 provider 的熔断状态彼此独立。最近一次初始化会设置本次配置的命令参数和该作用域的默认策略。
 
 ### 5.1 客户端
 
@@ -205,12 +207,14 @@ dubbo:
   extensions:
     hystrix:
       consumer:
-        "greet.GreetService:::Greet":
+        default:
           timeout: 1000
           max-concurrent-requests: 10
           request-volume-threshold: 5
           sleep-window: 5000
           error-percent-threshold: 50
+        "greet.GreetService:::Greet":
+          timeout: 600
       provider:
         "greet.GreetService:::Greet":
           timeout: 1000
@@ -219,6 +223,10 @@ dubbo:
           sleep-window: 5000
           error-percent-threshold: 50
 ```
+
+保留配置项 `default` 适用于同一作用域下未单独配置的方法。显式的方法配置会覆盖其中已设置的字段，省略或为零的字段继承 `default`。例如，consumer 的 `Greet` 方法超时为 600 毫秒，并发上限继承默认值 10。若该作用域没有配置 `default`，未单独配置的方法会直接转发，不经过 Hystrix 熔断处理，例如本例的 provider 侧。
+
+仅调用旧的 `hystrix.ConfigureCommand` 不再能在此 Filter 中启用命令。请将这些设置迁移到 `hystrix.WithConfig(...)` 或 YAML。若该作用域配置了 `default`，未单独配置的方法在首次调用时，会以默认参数自动注册，并覆盖此前通过 `hystrix.ConfigureCommand` 设置的历史参数。
 
 ## 6. 配置更新
 

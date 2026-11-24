@@ -230,7 +230,7 @@ If configuration decoding fails or a filter is unregistered, initialization stop
 
 ## Initialization Failure Rollback
 
-If `Init(scope)` acquires resources, the extension can implement `extension.Rollbacker` to release them after an initialization failure:
+If `Init(scope)` fails after acquiring resources, it must release those resources before returning the error. `extension.Rollbacker` is an optional hook for rolling back initialization and does not replace that cleanup:
 
 ```go
 type Rollbacker interface {
@@ -238,6 +238,6 @@ type Rollbacker interface {
 }
 ```
 
-If an extension fails during `Init(scope)`, the framework calls `Rollback(scope)` on that extension and previously initialized extensions in reverse order.
+If an `Init(scope)` call fails, the framework calls `Rollback(scope)` in reverse order on the failing extension and previously initialized extensions (for those that implement `extension.Rollbacker`). Make `Rollback(scope)` idempotent so it is safe even if `Init(scope)` has already cleaned up.
 
 For instructions on configuring extensions via YAML or APIs in application code, see the [Extension Configuration and Usage Guide](../../tutorial/configuration/extension/).
