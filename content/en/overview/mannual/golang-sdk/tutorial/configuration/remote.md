@@ -78,3 +78,9 @@ $ go run ./go-client/cmd/main.go
 ```
 Greet response: greeting:"hello world"
 ```
+
+### Extension Configuration in the Config Center
+
+At startup, remote `dubbo.extensions` settings override matching local settings. Later changes to extension settings in the config center require an application restart; push events do not reinitialize extensions.
+
+For scopes and examples, see [Extension Configuration and Usage](../extension/).

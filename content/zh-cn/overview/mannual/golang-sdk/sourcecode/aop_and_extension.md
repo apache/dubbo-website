@@ -8,6 +8,7 @@ description: 当前 Dubbo Go 的 AOP 与扩展机制
 keywords: AOP, extension
 title: AOP 与可扩展机制
 type: docs
+weight: 9
 ---
 
 相关示例：
@@ -86,22 +87,31 @@ import _ "dubbo.apache.org/dubbo-go/v3/imports"
 
 如果你希望更精细地控制依赖面，也可以只按需导入具体实现包。
 
-## 自定义扩展
+## 自定义扩展与外部 Extension 机制
 
-自定义扩展一般遵循下面几步：
+Dubbo-Go 提供两种扩展方式：
 
-1. 实现目标接口；
+1. 实现并注册 Filter、Router 或 Protocol 等组件接口。
+2. 对需要独立配置和初始化的模块，使用统一 Extension API，例如熔断器和限流器。该 API 目标版本为 3.3.3。
+
+### 1. 基础组件扩展
+
+组件扩展通常遵循下面几步：
+
+1. 实现目标接口（如 `filter.Filter`）；
 2. 在 `init()` 中通过 `common/extension` 注册工厂；
 3. 确保应用最终导入了这个包。
 
 例如：
 
-* 自定义 filter：使用 `extension.SetFilter(...)`
-* 自定义 router factory：使用 `extension.SetRouterFactory(...)`
-* 自定义 protocol：使用 `extension.SetProtocol(...)`
-* 自定义 registry：使用 `extension.SetRegistry(...)`
+* 自定义 filter：使用 `extension.SetFilter(name, factory)`
+* 自定义 router factory：使用 `extension.SetRouterFactory(name, factory)`
+* 自定义 protocol：使用 `extension.SetProtocol(name, factory)`
+* 自定义 registry：使用 `extension.SetRegistry(name, factory)`
 
-后续框架就可以根据配置或运行时选项里的名称来解析这些实现。
+### 2. 统一扩展机制
+
+需要独立配置和生命周期的扩展可以实现 `extension.Config`。框架随后可以读取 YAML 配置、应用强类型选项，并将扩展的 Filter 加入调用链。完整示例见[开发自定义扩展](../custom_extension/)；在应用中使用扩展的方法见[扩展配置与使用](../../tutorial/configuration/extension/)。
 
 ## 面向切面的调用链
 
@@ -112,4 +122,4 @@ Dubbo Go 在多个核心抽象上采用了 AOP 风格的调用链设计：
 * `cluster/loadbalance.LoadBalance`
 * `protocol/base.Invoker`
 
-每个实现只关注自己的一层职责，然后组合进更大的调用链里。这也是 metrics、tracing、token 校验、泛化调用、优雅停机等能力可以在不侵入所有 protocol 或业务 handler 的前提下接入的原因。
+每个实现只关注自己的一层职责，然后组合进更大的调用链里。这也是 metrics、tracing、token 校验、泛化调用、优雅停机等能力可以在不侵入所有 protocol 或业务 handler 的前提下接入的原因。通过统一 Extension 机制，外部插件可以在保持自身完整性的同时，声明式地挂载至调用链中。

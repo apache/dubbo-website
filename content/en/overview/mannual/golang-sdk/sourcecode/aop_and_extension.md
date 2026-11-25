@@ -7,6 +7,7 @@ description: AOP and extension mechanism in current Dubbo Go
 keywords: AOP, extension
 title: AOP and Extension Mechanism
 type: docs
+weight: 9
 ---
 
 Related samples:
@@ -85,22 +86,31 @@ import _ "dubbo.apache.org/dubbo-go/v3/imports"
 
 If you want a smaller runtime surface, you can also import only the concrete implementation packages you need.
 
-## Custom Extensions
+## Custom Extensions and the External Extension Mechanism
 
-A custom extension usually follows the same steps:
+Dubbo-Go supports two ways to add an extension:
 
-1. implement the target interface;
-2. register a factory in `init()` with `common/extension`;
-3. make sure the package is imported by your application.
+1. Implement and register a component interface, such as Filter, Router, or Protocol.
+2. Use the unified Extension API for modules that need their own configuration and initialization, such as circuit breakers and rate limiters. This API is targeted for version 3.3.3.
+
+### 1. Basic Component Extensions
+
+A component extension follows these steps:
+
+1. Implement the target interface (e.g. `filter.Filter`);
+2. Register a factory in `init()` with `common/extension`;
+3. Ensure the package is imported by your application.
 
 For example:
 
-* custom filter: register with `extension.SetFilter(...)`
-* custom router factory: register with `extension.SetRouterFactory(...)`
-* custom protocol: register with `extension.SetProtocol(...)`
-* custom registry: register with `extension.SetRegistry(...)`
+* Custom filter: register with `extension.SetFilter(name, factory)`
+* Custom router factory: register with `extension.SetRouterFactory(name, factory)`
+* Custom protocol: register with `extension.SetProtocol(name, factory)`
+* Custom registry: register with `extension.SetRegistry(name, factory)`
 
-The framework then resolves the implementation from configuration or runtime options by name.
+### 2. Unified External Extensions
+
+Extensions that need their own configuration and lifecycle implement `extension.Config`. The framework can then load their YAML settings, apply typed options, and add their filters to the call chain. See [Developing a Custom Extension](../custom_extension/) for a complete example, or [Extension Configuration and Usage](../../tutorial/configuration/extension/) to use an extension in an application.
 
 ## AOP-Style Call Chains
 
@@ -111,4 +121,4 @@ Dubbo Go uses AOP-style chaining in several core abstractions:
 * `cluster/loadbalance.LoadBalance`
 * `protocol/base.Invoker`
 
-Each implementation focuses on one concern, then participates in a larger invocation chain. This is why features such as metrics, tracing, token verification, generic invocation, and graceful shutdown can be added without changing every protocol or business handler.
+Each implementation focuses on one concern, then participates in a larger invocation chain. This is why features such as metrics, tracing, token verification, generic invocation, and graceful shutdown can be added without changing every protocol or business handler. With the unified Extension mechanism, external plugins can be declaratively mounted into the invocation chain while maintaining their internal modularity.

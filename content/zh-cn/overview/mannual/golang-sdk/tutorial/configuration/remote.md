@@ -78,3 +78,9 @@ $ go run ./go-client/cmd/main.go
 ```
 Greet response: greeting:"hello world"
 ```
+
+### 配置中心中的扩展配置
+
+启动时，配置中心的 `dubbo.extensions` 配置会覆盖本地同名配置。之后修改配置中心的扩展配置需要重启应用；推送事件不会重新初始化扩展。
+
+作用域与示例见[扩展配置与使用](../extension/)。
