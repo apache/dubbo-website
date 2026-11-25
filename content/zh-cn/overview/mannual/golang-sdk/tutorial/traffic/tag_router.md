@@ -10,6 +10,8 @@ weight: 1
 - 动态 tag router：<a href="https://github.com/apache/dubbo-go-samples/tree/main/router/tag" target="_blank">dubbo-go-samples/router/tag</a>
 - 静态 tag router：<a href="https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/tag" target="_blank">dubbo-go-samples/router/static_config/tag</a>
 
+通过 Dubbo Admin 下发规则时，请先阅读[与 Dubbo Admin 配合使用路由规则](../admin_compatibility/)，确认 SDK 版本和配置中心设置。
+
 ## 使用方法
 
 ### 前置准备

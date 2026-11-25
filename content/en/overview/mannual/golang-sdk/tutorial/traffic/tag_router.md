@@ -10,6 +10,8 @@ Related samples:
 - Dynamic tag router: <a href="https://github.com/apache/dubbo-go-samples/tree/main/router/tag" target="_blank">dubbo-go-samples/router/tag</a>
 - Static tag router: <a href="https://github.com/apache/dubbo-go-samples/tree/main/router/static_config/tag" target="_blank">dubbo-go-samples/router/static_config/tag</a>
 
+If you publish rules from Dubbo Admin, read [Using Routing Rules with Dubbo Admin](../admin_compatibility/) first to check your SDK version and config center settings.
+
 ## How to use
 
 ### Prerequisites

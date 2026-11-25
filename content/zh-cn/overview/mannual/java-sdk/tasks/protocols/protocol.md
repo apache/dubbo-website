@@ -9,7 +9,7 @@ weight: 1
 Dubbo 作为一款 RPC 框架内置了高效的 RPC 通信协议，帮助解决服务间的编码与通信问题，目前支持的协议包括：
  * triple，基于 HTTP/1、HTTP/2 的高性能通信协议，100% 兼容 gRPC，支持 Unary、Streming 等通信模式；支持发布 REST 风格的 HTTP 服务。
  * dubbo，基于 TCP 的高性能私有通信协议，缺点是通用性较差，更适合在 Dubbo SDK 间使用；
- * 任意协议扩展，通过扩展 protocol 可以之前任意 RPC 协议，官方生态库提供 JsonRPC、thrift 等支持。
+* 协议扩展：Dubbo 提供灵活的协议扩展机制，开发者可以通过扩展 `Protocol` SPI 接口，接入其他 RPC 通信协议。此外，Dubbo 官方生态还提供了 JSON-RPC、Thrift 等协议的扩展支持。
 
 ## 协议概览
 
